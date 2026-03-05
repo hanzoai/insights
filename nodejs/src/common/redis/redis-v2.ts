@@ -4,7 +4,7 @@ import { Pipeline, Redis } from 'ioredis'
 import { RedisPoolConfig, createRedisFromConfig } from '../../utils/db/redis'
 import { timeoutGuard } from '../../utils/db/utils'
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { defineLuaTokenBucket } from './redis-token-bucket.lua'
 
 type WithCheckRateLimit<T, TV2> = {

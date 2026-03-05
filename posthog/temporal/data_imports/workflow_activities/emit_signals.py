@@ -19,7 +19,7 @@ from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.data_imports.signals import SignalEmitter, SignalSourceTableConfig, get_signal_config
 from posthog.temporal.data_imports.signals.registry import SignalEmitterOutput
@@ -501,7 +501,7 @@ async def _emit_signals(
 
 
 @workflow.defn(name="emit-data-import-signals")
-class EmitDataImportSignalsWorkflow(PostHogWorkflow):
+class EmitDataImportSignalsWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> EmitSignalsActivityInputs:
         loaded = json.loads(inputs[0])

@@ -5,7 +5,7 @@ export { Component } from './Component'
 export { TrendsVisualizer } from './TrendsVisualizer'
 export { FunnelVisualizer } from './FunnelVisualizer'
 export { TableVisualizer } from './TableVisualizer'
-export { PostHogLink } from './PostHogLink'
+export { InsightsLink } from './InsightsLink'
 
 // Dumb chart components - receive pre-processed data
 export * from './charts'

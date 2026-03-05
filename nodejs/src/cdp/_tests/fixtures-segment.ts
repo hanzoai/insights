@@ -1,12 +1,12 @@
 import { UUIDT } from '../../utils/utils'
-import { CyclotronJobInvocationHogFunction, HogFunctionType } from '../types'
-import { SAMPLE_GLOBALS, createHogFunction } from './fixtures'
+import { CyclotronJobInvocationCustomFunction, CustomFunctionType } from '../types'
+import { SAMPLE_GLOBALS, createCustomFunction } from './fixtures'
 
 export const createExampleSegmentInvocation = (
-    hogFunctionOverrides: Partial<HogFunctionType> = {},
+    customFunctionOverrides: Partial<CustomFunctionType> = {},
     inputs: Record<string, any> = {}
-): CyclotronJobInvocationHogFunction => {
-    const hogFunction = createHogFunction(hogFunctionOverrides)
+): CyclotronJobInvocationCustomFunction => {
+    const customFunction = createCustomFunction(customFunctionOverrides)
 
     return {
         id: new UUIDT().toString(),
@@ -18,10 +18,10 @@ export const createExampleSegmentInvocation = (
             timings: [],
             attempts: 0,
         },
-        teamId: hogFunction.team_id,
-        functionId: hogFunction.id,
-        hogFunction,
-        queue: 'hog',
+        teamId: customFunction.team_id,
+        functionId: customFunction.id,
+        customFunction,
+        queue: 'custom_script',
         queuePriority: 0,
     }
 }
@@ -39,7 +39,7 @@ export const amplitudeInputs = {
         test: 'abcdefge',
         $host: 'localhost:8010',
         dclid: null,
-        email: 'max@posthog.com',
+        email: 'max@hanzo.ai',
         gclid: null,
         qclid: null,
         realm: 'hosted-clickhouse',
@@ -59,7 +59,7 @@ export const amplitudeInputs = {
         utm_term: null,
         $pathname: '/project/1/activity/explore',
         $referrer:
-            'http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta',
+            'http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta',
         joined_at: '2025-04-04T11:33:18.022897+00:00',
         li_fat_id: null,
         strapi_id: null,
@@ -196,7 +196,7 @@ export const amplitudeInputs = {
         utm_campaign: null,
     },
     referrer:
-        'http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta',
+        'http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta',
     library: 'web',
     userAgentData: {
         model: '',
@@ -213,7 +213,7 @@ export const pipedriveResponse = {
         owner_id: {
             id: 1234,
             name: 'Max',
-            email: 'max@posthog.com',
+            email: 'max@hanzo.ai',
             has_pic: 0,
             pic_hash: null,
             active_flag: true,
@@ -242,7 +242,7 @@ export const pipedriveResponse = {
         related_lost_deals_count: 0,
         active_flag: true,
         phone: [{ value: '', primary: true }],
-        email: [{ label: 'work', value: 'max@posthog.com', primary: true }],
+        email: [{ label: 'work', value: 'max@hanzo.ai', primary: true }],
         first_char: 'm',
         update_time: '2025-05-22 11:45:51',
         delete_time: null,
@@ -276,8 +276,8 @@ export const pipedriveResponse = {
         birthday: null,
         job_title: null,
         org_name: null,
-        cc_email: 'posthog-sandbox@pipedrivemail.com',
-        primary_email: 'max@posthog.com',
+        cc_email: 'insights-sandbox@pipedrivemail.com',
+        primary_email: 'max@hanzo.ai',
         owner_name: 'Max',
         company_id: 1234,
     },
@@ -287,7 +287,7 @@ export const pipedriveResponse = {
             '1234': {
                 id: 1234,
                 name: 'Max',
-                email: 'max@posthog.com',
+                email: 'max@hanzo.ai',
                 has_pic: 0,
                 pic_hash: null,
                 active_flag: true,

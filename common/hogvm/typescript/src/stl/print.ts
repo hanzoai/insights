@@ -88,7 +88,7 @@ export function printHogValue(obj: any, marked: Set<any> | undefined = undefined
                 return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printHogValue(obj.argCount)})>`
             }
             if (isHogAST(obj)) {
-                return `sql(${new HogQLPrinter(false, marked).print(obj)})`
+                return `sql(${new InsightsQLPrinter(false, marked).print(obj)})`
             }
             if (obj instanceof Map) {
                 return `{${Array.from(obj.entries())
@@ -122,7 +122,7 @@ type ASTNode = Map<string, any> | null
 
 // Note: this printer currently is experimental and used for debugging/printing SQL only.
 // When making queries via run(query), we send the AST nodes directly to the server.
-export class HogQLPrinter {
+export class InsightsQLPrinter {
     private stack: ASTNode[] = []
     private indentLevel: number = -1
     private tabSize: number = 4
@@ -234,8 +234,8 @@ export class HogQLPrinter {
             case 'RatioExpr':
                 result = this.visitRatioExpr(node)
                 break
-            case 'HogQLXTag':
-                result = this.visitHogQLXTag(node)
+            case 'InsightsQLXTag':
+                result = this.visitInsightsQLXTag(node)
                 break
             default:
                 throw new Error(`Unknown AST node type: ${nodeType}`)
@@ -711,17 +711,17 @@ export class HogQLPrinter {
         return `SAMPLE ${sampleValue}${offsetClause}`
     }
 
-    private visitHogQLXTag(node: ASTNode): string {
+    private visitInsightsQLXTag(node: ASTNode): string {
         if (!node) {
             return ''
         }
         const tagName = node.get('kind') as string
         const args = (node.get('attributes') || []) as ASTNode[]
-        const argsString = args.length > 0 ? ` ${args.map((a) => this.visitHogQLXAttribute(a)).join(' ')}` : ''
+        const argsString = args.length > 0 ? ` ${args.map((a) => this.visitInsightsQLXAttribute(a)).join(' ')}` : ''
         return `<${tagName}${argsString} />`
     }
 
-    private visitHogQLXAttribute(node: ASTNode): string {
+    private visitInsightsQLXAttribute(node: ASTNode): string {
         if (!node) {
             return ''
         }

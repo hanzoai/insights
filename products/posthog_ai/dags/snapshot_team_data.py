@@ -17,15 +17,15 @@ from posthog.schema import (
     TeamTaxonomyQuery,
 )
 
-from posthog.hogql.constants import HogQLGlobalSettings
+from posthog.insightsql.constants import InsightsQLGlobalSettings
 
 from posthog.clickhouse.client.connection import Workload
 from posthog.dags.common import JobOwners
 from posthog.errors import InternalCHQueryError
-from posthog.hogql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
-from posthog.hogql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
-from posthog.hogql_queries.ai.team_taxonomy_query_runner import TeamTaxonomyQueryRunner
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
+from posthog.insightsql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
+from posthog.insightsql_queries.ai.team_taxonomy_query_runner import TeamTaxonomyQueryRunner
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import GroupTypeMapping, Team
 from posthog.models.property_definition import PropertyDefinition
 
@@ -155,7 +155,7 @@ def snapshot_properties_taxonomy(
         response = EventTaxonomyQueryRunner(
             query=EventTaxonomyQuery(event=item.event),
             team=team,
-            settings=HogQLGlobalSettings(
+            settings=InsightsQLGlobalSettings(
                 max_execution_time=60 * 5  # 5 minutes
             ),
             workload=Workload.OFFLINE,
@@ -195,7 +195,7 @@ def snapshot_events_taxonomy(
         response = TeamTaxonomyQueryRunner(
             query=TeamTaxonomyQuery(),
             team=team,
-            settings=HogQLGlobalSettings(
+            settings=InsightsQLGlobalSettings(
                 max_execution_time=60 * 5  # 5 minutes
             ),
             workload=Workload.OFFLINE,
@@ -273,7 +273,7 @@ def snapshot_actors_property_taxonomy(
                 response = ActorsPropertyTaxonomyQueryRunner(
                     query=ActorsPropertyTaxonomyQuery(groupTypeIndex=index, properties=batch, maxPropertyValues=25),
                     team=team,
-                    settings=HogQLGlobalSettings(
+                    settings=InsightsQLGlobalSettings(
                         max_execution_time=60 * 5  # 5 minutes
                     ),
                     workload=Workload.OFFLINE,

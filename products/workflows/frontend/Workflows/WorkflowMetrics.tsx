@@ -9,7 +9,7 @@ import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
 
-import { getHogFlowStep } from './hogflows/steps/HogFlowSteps'
+import { getCustomFlowStep } from './customflows/steps/CustomFlowSteps'
 import { workflowLogic } from './workflowLogic'
 
 export const WORKFLOW_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
@@ -51,20 +51,20 @@ export type WorkflowMetricsProps = {
 }
 
 export function WorkflowMetrics({ id }: WorkflowMetricsProps): JSX.Element {
-    const logicKey = `hog-flow-metrics-${id}`
+    const logicKey = `custom-flow-metrics-${id}`
 
     const logic = appMetricsLogic({
         logicKey,
         loadOnChanges: true,
         loadOnMount: true,
         forceParams: {
-            appSource: 'hog_flow',
+            appSource: 'custom_flow',
             appSourceId: id,
             breakdownBy: 'metric_name',
         },
     })
 
-    const { workflow, hogFunctionTemplatesById } = useValues(workflowLogic({ id }))
+    const { workflow, customFunctionTemplatesById } = useValues(workflowLogic({ id }))
 
     const { appMetricsTrendsLoading, getSingleTrendSeries, appMetricsTrends, params } = useValues(logic)
     const { setParams } = useActions(logic)
@@ -102,7 +102,7 @@ export function WorkflowMetrics({ id }: WorkflowMetricsProps): JSX.Element {
                             {
                                 title: 'Workflow steps',
                                 options: workflow.actions.map((action) => {
-                                    const Step = getHogFlowStep(action, hogFunctionTemplatesById)
+                                    const Step = getCustomFlowStep(action, customFunctionTemplatesById)
                                     return {
                                         label: (
                                             <span className="flex items-center gap-1">

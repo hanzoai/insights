@@ -113,7 +113,7 @@ const getItemTypeDisplayName = (type: string | null | undefined): string | null 
             paths: 'Paths',
             lifecycle: 'Lifecycle',
             stickiness: 'Stickiness',
-            hog: 'SQL insight',
+            script: 'SQL insight',
         }
         return insightDisplayNames[subtype] ?? null
     }
@@ -142,7 +142,7 @@ const getItemTypeDisplayName = (type: string | null | undefined): string | null 
         logs: 'Logs',
         alert: 'Alert',
         folder: 'Folder',
-        hog_flow: 'Workflow',
+        custom_flow: 'Workflow',
     }
     return fallbackDisplayNames[type] ?? null
 }
@@ -155,7 +155,7 @@ const getIconForItem = (item: SearchItem): ReactNode => {
     // Normalize types for icon lookup
     if (itemType === 'person') {
         itemType = 'persons'
-    } else if (itemType === 'hog_flow') {
+    } else if (itemType === 'custom_flow') {
         itemType = 'workflows'
     }
     if (itemType) {
@@ -283,12 +283,12 @@ function SearchRoot({
             items = allItems.filter((item) => item.category === 'recents' || item.category === 'apps')
         }
 
-        // Prepend "Ask PostHog AI" as the first result when there's a search query
+        // Prepend "Ask Insights AI" as the first result when there's a search query
         if (showAskAiLink && searchValue.trim()) {
             const askAiItem: SearchItem = {
                 id: ASK_AI_ITEM_ID,
-                name: `Ask PostHog AI: "${searchValue.trim()}"`,
-                displayName: `Ask PostHog AI: "${searchValue.trim()}"`,
+                name: `Ask Insights AI: "${searchValue.trim()}"`,
+                displayName: `Ask Insights AI: "${searchValue.trim()}"`,
                 category: 'ai',
                 href: urls.ai(undefined, searchValue.trim()),
                 icon: <IconSparkles className="text-ai" />,
@@ -536,7 +536,7 @@ function SearchInput({ autoFocus, className }: SearchInputProps): JSX.Element {
                 />
                 {searchValue ? null : (
                     <span className="text-tertiary pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 ">
-                        <span className="text-tertiary">Ask PostHog AI or search </span>
+                        <span className="text-tertiary">Ask Insights AI or search </span>
                         <TextMorph as="span">{placeholderText}</TextMorph>
                     </span>
                 )}

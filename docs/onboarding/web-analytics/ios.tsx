@@ -20,7 +20,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     <>
                         {MobileFinalSteps && <MobileFinalSteps />}
                         <Markdown>
-                            To automatically track screen views, configure PostHog to capture screen views:
+                            To automatically track screen views, configure Insights to capture screen views:
                         </Markdown>
                         <CodeBlock
                             blocks={[
@@ -28,9 +28,9 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     language: 'swift',
                                     file: 'AppDelegate.swift',
                                     code: dedent`
-                                        let config = PostHogConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                        let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
                                         config.captureScreenViews = true
-                                        PostHogSDK.shared.setup(config)
+                                        InsightsSDK.shared.setup(config)
                                     `,
                                 },
                             ]}

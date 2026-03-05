@@ -8,7 +8,7 @@ import {
     InspectorListItemEvent,
 } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
 
-const PostHogMobileEvents = [
+const InsightsMobileEvents = [
     'Deep Link Opened',
     'Application Opened',
     'Application Backgrounded',
@@ -17,12 +17,12 @@ const PostHogMobileEvents = [
     'Application Became Active',
 ]
 
-function isPostHogMobileEvent(item: InspectorListItem): boolean {
-    return isEvent(item) && PostHogMobileEvents.includes(item.data.event)
+function isInsightsMobileEvent(item: InspectorListItem): boolean {
+    return isEvent(item) && InsightsMobileEvents.includes(item.data.event)
 }
 
-function isPostHogEvent(item: InspectorListItem): boolean {
-    return (isEvent(item) && item.data.event.startsWith('$')) || isPostHogMobileEvent(item)
+function isInsightsEvent(item: InspectorListItem): boolean {
+    return (isEvent(item) && item.data.event.startsWith('$')) || isInsightsMobileEvent(item)
 }
 
 function isNetworkEvent(item: InspectorListItem): item is InspectorListItemPerformance {
@@ -81,9 +81,9 @@ const eventsMatch = (
         return miniFiltersByKey['events-autocapture']
     } else if (isPageviewOrScreen(item)) {
         return miniFiltersByKey['events-pageview']
-    } else if (isPostHogEvent(item)) {
+    } else if (isInsightsEvent(item)) {
         return miniFiltersByKey['events-posthog']
-    } else if (!isPostHogEvent(item)) {
+    } else if (!isInsightsEvent(item)) {
         return miniFiltersByKey['events-custom']
     }
     return null

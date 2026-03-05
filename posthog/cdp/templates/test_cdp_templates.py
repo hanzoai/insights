@@ -4,7 +4,7 @@ from posthog.test.base import BaseTest
 
 from posthog.cdp.templates import CUSTOM_FUNCTION_TEMPLATES
 from posthog.cdp.templates.custom_function_template import sync_template_to_db
-from posthog.cdp.validation import InputsSchemaItemSerializer, compile_hog
+from posthog.cdp.validation import InputsSchemaItemSerializer, compile_script
 from posthog.models.custom_function_template import CustomFunctionTemplate
 from posthog.models.custom_functions.custom_function import TYPES_WITH_TRANSPILED_FILTERS
 
@@ -20,7 +20,7 @@ class TestTemplatesGeneral(BaseTest):
                 assert serializer.is_valid()
 
             if template.type not in TYPES_WITH_TRANSPILED_FILTERS:
-                bytecode = compile_hog(template.code, template.type)
+                bytecode = compile_script(template.code, template.type)
                 assert bytecode[0] == "_H"
 
     def test_sync_template_to_db(self):

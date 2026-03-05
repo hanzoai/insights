@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
-import { isHogQLQuery } from '~/queries/utils'
+import { isInsightsQLQuery } from '~/queries/utils'
 
 import { useSortableColumns } from './hooks/useSortableColumns'
 import { llmAnalyticsColumnRenderers } from './llmAnalyticsColumnRenderers'
@@ -25,7 +25,7 @@ export function LLMAnalyticsUsers(): JSX.Element {
                 showSavedFilters: true,
             }}
             setQuery={(query) => {
-                if (!isHogQLQuery(query.source)) {
+                if (!isInsightsQLQuery(query.source)) {
                     console.warn('LLMAnalyticsUsers received a non-events query:', query.source)
                     return
                 }

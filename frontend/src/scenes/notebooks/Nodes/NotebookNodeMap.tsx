@@ -4,7 +4,7 @@ import { Marker } from 'maplibre-gl'
 import { LemonSkeleton } from '@posthog/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { personLogic } from 'scenes/persons/personLogic'
 
 import { Map } from '../../../lib/components/Map/Map'
@@ -52,7 +52,7 @@ type NotebookNodeMapAttributes = {
     distinctId: string
 }
 
-export const NotebookNodeMap = createPostHogWidgetNode<NotebookNodeMapAttributes>({
+export const NotebookNodeMap = createInsightsWidgetNode<NotebookNodeMapAttributes>({
     nodeType: NotebookNodeType.Map,
     titlePlaceholder: 'Location',
     Component,

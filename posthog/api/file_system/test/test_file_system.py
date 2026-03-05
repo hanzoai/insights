@@ -1030,7 +1030,7 @@ class TestFileSystemAPI(APIBaseTest):
         Plain-text searches such as 'go/revenue', 'banana/go', or the full
         'banana/go/revenue' must still find the item.
         """
-        # This is the path PostHog generates for   Banana   /   go/revenue
+        # This is the path Insights generates for   Banana   /   go/revenue
         FileSystem.objects.create(
             team=self.team,
             path="Banana/go\\/revenue",  # ← stored form, depth = 2
@@ -1571,7 +1571,7 @@ class TestDestroyRepairsLeftoverCustomFunctions(APIBaseTest):
             created_by=self.user,
         )
 
-        # Hog-function file for *team 2*  (stays behind; no parent folder yet)
+        # Custom function file for *team 2*  (stays behind; no parent folder yet)
         self.hog_t2 = FileSystem.objects.create(
             team=self.team2,
             path="Shared/Hog-func.js",
@@ -1882,7 +1882,7 @@ class TestDestroyRepairsLeftoverCustomFunctions(APIBaseTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="hog.gg",
+            short_link_domain="link.hanzo.ai",
             short_code="abc123",
             created_by=self.user,
         )

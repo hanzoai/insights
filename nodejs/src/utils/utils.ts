@@ -7,7 +7,7 @@ import { Properties } from '@posthog/plugin-scaffold'
 
 import { ClickHouseTimestamp, ClickHouseTimestampSecondPrecision, ISOTimestamp, TimestampFormat } from '../types'
 import { logger } from './logger'
-import { captureException } from './posthog'
+import { captureException } from './insights'
 
 /** Time until autoexit (due to error) gives up on graceful exit and kills the process right away. */
 const GRACEFUL_EXIT_PERIOD_SECONDS = 5
@@ -200,7 +200,7 @@ export class UUID {
  *
  * Loosely based on [Segment's KSUID](https://github.com/segmentio/ksuid) and
  * on [Twitter's snowflake ID](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake.html).
- * Ported from the PostHog Django app.
+ * Ported from the Insights Django app.
  */
 export class UUIDT extends UUID {
     static currentSeriesPerMs: Map<number, number> = new Map()
@@ -574,23 +574,23 @@ export async function sleep(ms: number): Promise<void> {
 // Values of the $lib property that have been seen in the wild
 export const KNOWN_LIB_VALUES = new Set([
     'web',
-    'posthog-python',
+    'insights-python',
     '',
     'js',
     'posthog-node',
-    'posthog-react-native',
-    'posthog-ruby',
-    'posthog-ios',
-    'posthog-android',
+    'insights-react-native',
+    'insights-ruby',
+    'insights-ios',
+    'insights-android',
     'Segment',
-    'posthog-go',
+    'insights-go',
     'analytics-node',
     'RudderLabs JavaScript SDK',
     'mobile',
-    'posthog-php',
+    'insights-php',
     'zapier',
     'Webflow',
-    'posthog-flutter',
+    'insights-flutter',
     'com.rudderstack.android.sdk.core',
     'rudder-analytics-python',
     'rudder-ios-library',
@@ -612,15 +612,15 @@ export const KNOWN_LIB_VALUES = new Set([
     'Product',
     'com.rudderstack.android.sdk',
     'net-gibraltar',
-    'posthog-java',
+    'insights-java',
     'rudderanalytics-ruby',
     'GSHEETS_AIRBYTE',
-    'posthog-plugin-server',
-    'DotPostHog',
+    'insights-plugin-server',
+    'DotInsights',
     'analytics-go',
     'serverless',
     'wordpress',
-    'hog_function',
+    'custom_function',
     'http',
     'desktop',
     'elixir',

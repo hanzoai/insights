@@ -4,7 +4,7 @@ import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 
 import { LLMTrace, LLMTraceEvent } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import { EVALUATION_SUMMARY_MAX_RUNS } from './evaluations/constants'
 import type { EvaluationRun } from './evaluations/types'
@@ -547,7 +547,7 @@ export function normalizeRole(rawRole: unknown, fallback: string): string {
 }
 
 /**
- * Normalizes a message from an LLM provider into a format that is compatible with the PostHog LLM Analytics schema.
+ * Normalizes a message from an LLM provider into a format that is compatible with the Insights LLM Analytics schema.
  *
  * @param rawMessage - Original message from an LLM provider.
  * @param defaultRole - The default role to use if the message doesn't have one.
@@ -923,7 +923,7 @@ export function mapEvaluationRunRow(row: RawEvaluationRunRow): EvaluationRun {
     const applicable = row[8]
 
     // N/A only when backend explicitly sets applicable=false
-    // Otherwise, convert result to boolean (handle string 'false' from HogQL)
+    // Otherwise, convert result to boolean (handle string 'false' from InsightsQL)
     let result: boolean | null
     if (applicable === false || applicable === 'false') {
         result = null
@@ -959,7 +959,7 @@ export async function queryEvaluationRuns(params: {
     const propertyName = evaluationId ? '$ai_evaluation_id' : '$ai_target_event_id'
     const propertyValue = evaluationId || generationEventId
 
-    const query = hogql`
+    const query = insightsql`
         SELECT
             uuid,
             timestamp,
@@ -973,12 +973,12 @@ export async function queryEvaluationRuns(params: {
         FROM events
         WHERE
             event = '$ai_evaluation'
-            AND ${hogql.raw(`properties.${propertyName}`)} = ${propertyValue}
+            AND ${insightsql.raw(`properties.${propertyName}`)} = ${propertyValue}
         ORDER BY timestamp DESC
         LIMIT ${EVALUATION_SUMMARY_MAX_RUNS}
     `
 
-    const response = await api.queryHogQL(
+    const response = await api.queryInsightsQL(
         query,
         { scene: 'LLMAnalytics', productKey: 'llm_analytics' },
         { ...(forceRefresh && { refresh: 'force_blocking' }) }

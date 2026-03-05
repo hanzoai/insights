@@ -11,7 +11,7 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ParentClosePolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 from products.tasks.backend.temporal.create_snapshot.workflow import CreateSnapshotForRepositoryInput
 
@@ -53,7 +53,7 @@ SANDBOX_SESSION_TIMEOUT_MINUTES = 60
 
 
 @temporalio.workflow.defn(name="process-task")
-class ProcessTaskWorkflow(PostHogWorkflow):
+class ProcessTaskWorkflow(InsightsWorkflow):
     def __init__(self) -> None:
         self._context: Optional[TaskProcessingContext] = None
         self._slack_thread_context: Optional[dict[str, Any]] = None

@@ -7,7 +7,7 @@ import React from 'react'
 import { IconPin, IconPinFilled } from '@posthog/icons'
 import { LemonTable, LemonTableColumn, Tooltip } from '@posthog/lemon-ui'
 
-import { execHog } from 'lib/hog'
+import { execScript } from 'lib/script'
 import { lightenDarkenColor } from 'lib/utils'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
 

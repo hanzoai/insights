@@ -18,7 +18,7 @@ TEMPLATE_FILES = [
 _TEMPLATE_CACHE: Optional[list[dict]] = None
 
 
-class SimpleHogFlowTemplateActionSerializer(serializers.Serializer):
+class SimpleCustomFlowTemplateActionSerializer(serializers.Serializer):
     """
     Simplified action serializer for validating templates without requiring context.
     Used only for loading templates from code files.
@@ -53,7 +53,7 @@ class SimpleHogFlowTemplateActionSerializer(serializers.Serializer):
         return data
 
 
-class SimpleHogFlowTemplateSerializer(serializers.Serializer):
+class SimpleCustomFlowTemplateSerializer(serializers.Serializer):
     """
     Simplified serializer for validating templates without requiring Django context.
     Used only for loading templates from code files.
@@ -73,7 +73,7 @@ class SimpleHogFlowTemplateSerializer(serializers.Serializer):
     conversion = serializers.JSONField(required=False, allow_null=True)
     exit_condition = serializers.JSONField(required=False, allow_null=True)
     edges = serializers.JSONField(required=False, allow_null=True)
-    actions = SimpleHogFlowTemplateActionSerializer(many=True, required=True)
+    actions = SimpleCustomFlowTemplateActionSerializer(many=True, required=True)
     abort_action = serializers.JSONField(required=False, allow_null=True)
     variables = serializers.JSONField(required=False, allow_null=True)
 
@@ -130,7 +130,7 @@ def load_global_templates() -> list[dict]:
 
             # Validate the template using the simplified serializer
             try:
-                serializer = SimpleHogFlowTemplateSerializer(data=data)
+                serializer = SimpleCustomFlowTemplateSerializer(data=data)
                 if serializer.is_valid():
                     templates.append({**data, "tags": data.get("tags") or []})
                 else:

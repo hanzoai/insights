@@ -80,7 +80,7 @@ class TestSlackSubscriptionsTasks(APIBaseTest):
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "View in PostHog"},
+                        "text": {"type": "plain_text", "text": "View in Insights"},
                         "url": "http://localhost:8010/insights/123456?utm_source=posthog&utm_campaign=subscription_report&utm_medium=slack",
                     },
                     {
@@ -105,7 +105,7 @@ class TestSlackSubscriptionsTasks(APIBaseTest):
 
         assert (
             first_call["text"]
-            == "This channel has been subscribed to the Insight *My Test subscription* on PostHog! 🎉\nThis subscription is sent every day. The next one will be sent on Wednesday February 02, 2022"
+            == "This channel has been subscribed to the Insight *My Test subscription* on Insights! 🎉\nThis subscription is sent every day. The next one will be sent on Wednesday February 02, 2022"
         )
 
     def test_subscription_dashboard_delivery(self, MockSlackIntegration: MagicMock) -> None:
@@ -153,7 +153,7 @@ class TestSlackSubscriptionsTasks(APIBaseTest):
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "View in PostHog"},
+                        "text": {"type": "plain_text", "text": "View in Insights"},
                         "url": f"http://localhost:8010/dashboard/{self.dashboard.id}?utm_source=posthog&utm_campaign=subscription_report&utm_medium=slack",
                     },
                     {
@@ -194,7 +194,7 @@ class TestSlackSubscriptionsTasks(APIBaseTest):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Showing 3 of 10 Insights. <http://localhost:8010/dashboard/{self.dashboard.id}?utm_source=posthog&utm_campaign=subscription_report&utm_medium=slack|View the rest in PostHog>",
+                    "text": f"Showing 3 of 10 Insights. <http://localhost:8010/dashboard/{self.dashboard.id}?utm_source=posthog&utm_campaign=subscription_report&utm_medium=slack|View the rest in Insights>",
                 },
             }
         ]

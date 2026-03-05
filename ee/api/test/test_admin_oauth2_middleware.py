@@ -156,7 +156,7 @@ class TestGetEmailFromIdToken(BaseTest):
         self.assertEqual(token_payload, {})
 
     def test_email_normalized_to_lowercase(self):
-        payload = {**self.base_payload, "email": "Test@PostHog.COM"}
+        payload = {**self.base_payload, "email": "Test@Insights.COM"}
         token = self.jwt_helper.create_id_token(payload)
 
         email, _ = self._get_email_with_mocked_jwks(token)

@@ -78,7 +78,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                             const properties = event.dataTransfer.getData('properties')
 
                             if (text.indexOf(window.location.origin) === 0 || node) {
-                                // PostHog link - ensure this gets input as a proper link
+                                // Insights link - ensure this gets input as a proper link
                                 const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
 
                                 if (!coordinates) {

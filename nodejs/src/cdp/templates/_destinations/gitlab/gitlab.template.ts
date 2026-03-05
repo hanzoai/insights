@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     status: 'alpha',
     free: false,
     type: 'destination',
@@ -9,8 +9,8 @@ export const template: HogFunctionTemplate = {
     description: 'Creates an issue in a GitLab project',
     icon_url: '/static/services/gitlab.png',
     category: ['Error tracking'],
-    code_language: 'hog',
-    code: `let posthog_issue_url := f'{project.url}/error_tracking/{inputs.posthog_issue_id}'
+    code_language: 'custom_script',
+    code: `let insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
 let payload := {
     'method': 'POST',
     'headers': {
@@ -18,7 +18,7 @@ let payload := {
     },
     'body': {
         'title': inputs.title,
-        'body': f'{inputs.description}\n\n[View in PostHog]({posthog_issue_url})'
+        'body': f'{inputs.description}\n\n[View in Insights]({insights_issue_url})'
     }
 }
 
@@ -55,9 +55,9 @@ if (res.status < 200 or res.status >= 300) {
             default: '{event.properties.$exception_values[1]}',
         },
         {
-            key: 'posthog_issue_id',
+            key: 'insights_issue_id',
             type: 'string',
-            label: 'PostHog issue ID',
+            label: 'Insights issue ID',
             secret: false,
             hidden: true,
             required: true,

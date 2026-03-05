@@ -31,11 +31,11 @@ BASE_APP_METRICS2_COLUMNS = """
     app_source LowCardinality(String),
     -- An id for the app source.
     -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.
-    -- Examples: A plugin id, a hog application id
+    -- Examples: A plugin id, a custom application id
     app_source_id String,
     -- A secondary id e.g. for the instance of app_source that generated this metric.
     -- This may be ommitted if app_source is a singleton.
-    -- Examples: A plugin config id, a hog application config id
+    -- Examples: A plugin config id, a custom application config id
     instance_id String,
     metric_kind LowCardinality(String),
     metric_name LowCardinality(String),

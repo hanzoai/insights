@@ -606,7 +606,7 @@ class ErrorResponsesMixin:
         }
 
 
-class PostHogTestCase(SimpleTestCase):
+class InsightsTestCase(SimpleTestCase):
     CONFIG_ORGANIZATION_NAME: str = "Test"
     CONFIG_EMAIL: Optional[str] = "user1@posthog.com"
     CONFIG_PASSWORD: Optional[str] = "testpassword12345"
@@ -792,7 +792,7 @@ class MemoryLeakTestMixin:
         )
 
 
-class BaseTest(PostHogTestCase, ErrorResponsesMixin, TestCase):
+class BaseTest(InsightsTestCase, ErrorResponsesMixin, TestCase):
     """
     Base class for performing Postgres-based backend unit tests on.
     Each class and each test is wrapped inside an atomic block to rollback DB commits after each test.
@@ -802,7 +802,7 @@ class BaseTest(PostHogTestCase, ErrorResponsesMixin, TestCase):
     pass
 
 
-class NonAtomicBaseTest(PostHogTestCase, ErrorResponsesMixin, TransactionTestCase):
+class NonAtomicBaseTest(InsightsTestCase, ErrorResponsesMixin, TransactionTestCase):
     """
     Django wraps tests in TestCase inside atomic transactions to speed up the run time. TransactionTestCase is the base
     class for TestCase that doesn't implement this atomic wrapper.
@@ -838,7 +838,7 @@ class NonAtomicBaseTest(PostHogTestCase, ErrorResponsesMixin, TransactionTestCas
                 call_command("flush", verbosity=0, interactive=False, database=db_name, allow_cascade=True)
 
 
-class APIBaseTest(PostHogTestCase, ErrorResponsesMixin, DRFTestCase):
+class APIBaseTest(InsightsTestCase, ErrorResponsesMixin, DRFTestCase):
     """
     Functional API tests using Django REST Framework test suite.
     """

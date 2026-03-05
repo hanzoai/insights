@@ -2,7 +2,7 @@ import { Message } from 'node-rdkafka'
 
 import { PluginEvent } from '@posthog/plugin-scaffold'
 
-import { HogTransformerService } from '../../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
 import { KafkaProducerWrapper } from '../../kafka/producer'
 import { EventHeaders, Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
@@ -14,7 +14,7 @@ import { createCreateEventStep } from '../event-processing/create-event-step'
 import { createEmitEventStep } from '../event-processing/emit-event-step'
 import { createEventPipelineRunnerV1Step } from '../event-processing/event-pipeline-runner-v1-step'
 import { createExtractHeatmapDataStep } from '../event-processing/extract-heatmap-data-step'
-import { createHogTransformEventStep } from '../event-processing/hog-transform-event-step'
+import { createScriptTransformEventStep } from '../event-processing/script-transform-event-step'
 import { createNormalizeEventStep } from '../event-processing/normalize-event-step'
 import { createNormalizeProcessPersonFlagStep } from '../event-processing/normalize-process-person-flag-step'
 import { createProcessPersonlessStep } from '../event-processing/process-personless-step'
@@ -34,7 +34,7 @@ export interface EventSubpipelineConfig {
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
-    hogTransformer: HogTransformerService
+    scriptTransformer: ScriptTransformerService
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
     kafkaProducer: KafkaProducerWrapper
@@ -45,12 +45,12 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput, TCo
     builder: StartPipelineBuilder<TInput, TContext>,
     config: EventSubpipelineConfig
 ): PipelineBuilder<TInput, void, TContext> {
-    const { options, teamManager, groupTypeManager, hogTransformer, personsStore, groupStore, kafkaProducer, groupId } =
+    const { options, teamManager, groupTypeManager, scriptTransformer, personsStore, groupStore, kafkaProducer, groupId } =
         config
 
     return builder
         .pipe(createNormalizeProcessPersonFlagStep())
-        .pipe(createHogTransformEventStep(hogTransformer))
+        .pipe(createScriptTransformEventStep(scriptTransformer))
         .pipe(createNormalizeEventStep())
         .pipe(createProcessPersonlessStep(personsStore))
         .pipe(

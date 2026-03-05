@@ -63,7 +63,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Apps]: {
         projectBased: true,
         name: 'Site apps',
-        description: 'Apps allow you to add custom functionality to your website using PostHog.',
+        description: 'Apps allow you to add custom functionality to your website using Insights.',
         activityScope: ActivityScope.CUSTOM_FUNCTION,
         defaultDocsPath: '/docs/cdp/apps',
         iconType: 'data_pipeline',
@@ -106,7 +106,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Comments]: {
         projectBased: true,
         name: 'Comments',
-        description: 'Comments allow you to provide context and discussions on various elements in PostHog.',
+        description: 'Comments allow you to provide context and discussions on various elements in Insights.',
         iconType: 'comment',
     },
     [Scene.CustomerAnalytics]: { projectBased: true, name: 'Customer analytics' },
@@ -262,7 +262,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         defaultDocsPath: '/docs/feature-flags',
         activityScope: ActivityScope.FEATURE_FLAG,
     },
-    [Scene.Game368]: { name: '368 Hedgehogs', projectBased: true },
+    [Scene.Game368]: { name: '368 Mascots', projectBased: true },
     [Scene.Group]: {
         projectBased: true,
         name: 'People & groups',
@@ -341,7 +341,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         defaultDocsPath: '/docs/data-warehouse/views/materialize',
         iconType: 'sql_editor',
     },
-    [Scene.MoveToPostHogCloud]: { name: 'Move to PostHog Cloud', hideProjectNotice: true },
+    [Scene.MoveToInsightsCloud]: { name: 'Move to Insights Cloud', hideProjectNotice: true },
     [Scene.NewTab]: {
         projectBased: true,
         name: 'Search',
@@ -507,7 +507,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Health]: {
         projectBased: true,
         name: 'Health',
-        description: 'Monitor the health of your PostHog integrations.',
+        description: 'Monitor the health of your Insights integrations.',
         iconType: 'health',
     },
     [Scene.PipelineStatus]: {
@@ -521,7 +521,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'SDK doctor',
         iconType: 'sdk_doctor',
         description:
-            'Monitor and maintain your PostHog SDK integrations by automatically detecting version issues, configuration problems, and implementation patterns across your applications.',
+            'Monitor and maintain your Insights SDK integrations by automatically detecting version issues, configuration problems, and implementation patterns across your applications.',
         defaultDocsPath: '/docs/sdk-doctor',
     },
     [Scene.Exports]: {
@@ -536,7 +536,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Settings]: { projectBased: true, name: 'Settings' },
     [Scene.Signup]: { onlyUnauthenticated: true },
     [Scene.Site]: { projectBased: true, hideProjectNotice: true, layout: 'app-raw' },
-    [Scene.StartupProgram]: { name: 'PostHog for Startups', organizationBased: true, layout: 'app-container' },
+    [Scene.StartupProgram]: { name: 'Insights for Startups', organizationBased: true, layout: 'app-container' },
     [Scene.SurveyTemplates]: {
         projectBased: true,
         name: 'New survey',
@@ -578,7 +578,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         projectBased: true,
         name: 'Sources',
         description:
-            'Import data into PostHog from external sources including webhooks, application connectors, and self-managed databases.',
+            'Import data into Insights from external sources including webhooks, application connectors, and self-managed databases.',
         activityScope: ActivityScope.CUSTOM_FUNCTION,
         defaultDocsPath: '/docs/data-warehouse',
         iconType: 'data_pipeline',
@@ -646,8 +646,8 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
 
 const redirectPipeline = (id: string, fallbackUrl: string): string => {
     // Custom functions (destinations & transformations)
-    if (id.startsWith('hog-')) {
-        return urls.customFunction(id.replace('hog-', ''))
+    if (id.startsWith('fn-')) {
+        return urls.customFunction(id.replace('fn-', ''))
     }
     // Batch exports (destinations)
     if (id.startsWith('batch-export-')) {
@@ -918,7 +918,7 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.notebooks()]: [Scene.Notebooks, 'notebooks'],
     [urls.canvas()]: [Scene.Canvas, 'canvas'],
     [urls.settings(':section' as any)]: [Scene.Settings, 'settings'],
-    [urls.moveToPostHogCloud()]: [Scene.MoveToPostHogCloud, 'moveToPostHogCloud'],
+    [urls.moveToInsightsCloud()]: [Scene.MoveToInsightsCloud, 'moveToInsightsCloud'],
     [urls.advancedActivityLogs()]: [Scene.AdvancedActivityLogs, 'advancedActivityLogs'],
     [urls.heatmaps()]: [Scene.Heatmaps, 'heatmaps'],
     [urls.heatmapNew()]: [Scene.HeatmapNew, 'heatmapNew'],

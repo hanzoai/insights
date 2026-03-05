@@ -5,8 +5,8 @@ import { ProcessingStep } from '../pipelines/steps'
 import { isValidClickHouseDateTime } from './clickhouse-datetime-parser'
 
 /**
- * Checks if a value can be coerced to the given PostHog property type.
- * See: PropertySwapper._field_type_to_property_call in posthog/hogql/transforms/property_types.py
+ * Checks if a value can be coerced to the given Insights property type.
+ * See: PropertySwapper._field_type_to_property_call in insights/insightsql/transforms/property_types.py
  */
 function canCoerceToType(value: unknown, propertyType: string): boolean {
     if (value === null || value === undefined) {

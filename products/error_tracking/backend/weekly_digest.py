@@ -47,12 +47,12 @@ def get_exception_counts(team_ids: list[int] | None = None) -> list:
 
 def get_crash_free_sessions(team: Team) -> dict:
     """Calculate crash free sessions rate for the last 7 days with previous week comparison."""
-    from posthog.hogql.query import execute_hogql_query
+    from posthog.insightsql.query import execute_insightsql_query
 
     tag_queries(product=ProductKey.ERROR_TRACKING, team_id=team.pk, name="weekly_digest:crash_free_sessions")
 
     try:
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             query="""
                 SELECT
                     uniqIf($session_id, timestamp >= toStartOfDay(now()) - INTERVAL 7 DAY) as total_sessions,
@@ -172,14 +172,14 @@ def get_daily_exception_counts(team_id: int) -> list[dict]:
 
 def get_top_issues_for_team(team: Team) -> list[dict]:
     """Query top 5 issues by occurrence count for the last 7 days with sparkline data"""
-    from posthog.hogql.query import execute_hogql_query
+    from posthog.insightsql.query import execute_insightsql_query
 
     from products.error_tracking.backend.models import ErrorTrackingIssue
 
     tag_queries(product=ProductKey.ERROR_TRACKING, team_id=team.pk, name="weekly_digest:top_issues")
 
     try:
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             query="""
                 SELECT
                     issue_id,
@@ -216,8 +216,8 @@ def get_top_issues_for_team(team: Team) -> list[dict]:
 
 def get_new_issues_for_team(team: Team) -> list[dict]:
     """Query top 5 issues first seen in the last 7 days ranked by occurrence count with sparkline data"""
-    from posthog.hogql import ast
-    from posthog.hogql.query import execute_hogql_query
+    from posthog.insightsql import ast
+    from posthog.insightsql.query import execute_insightsql_query
 
     from products.error_tracking.backend.models import ErrorTrackingIssue
 
@@ -234,7 +234,7 @@ def get_new_issues_for_team(team: Team) -> list[dict]:
     new_issue_ids = [str(i) for i in new_issue_objects]
 
     try:
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             query="""
                 SELECT
                     issue_id,

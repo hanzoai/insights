@@ -94,7 +94,7 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
             closeable: true,
         },
         invite_teammates: {
-            message: 'Get more out of PostHog by inviting your team for free',
+            message: 'Get more out of Insights by inviting your team for free',
             action: {
                 'data-attr': 'invite-warning-cta',
                 onClick: showInviteModal,
@@ -113,7 +113,7 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
             type: 'warning',
         },
         internet_connection_issue: {
-            message: 'PostHog is having trouble connecting to the server. Please check your connection.',
+            message: 'Insights is having trouble connecting to the server. Please check your connection.',
             type: 'warning',
             action: {
                 'data-attr': 'reload-page',

@@ -19,7 +19,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                 content: (
                     <>
                         <Markdown>
-                            Start your Docusaurus site and visit a few pages. PostHog will automatically capture
+                            Start your Docusaurus site and visit a few pages. Insights will automatically capture
                             pageviews and other events.
                         </Markdown>
                         {WebFinalSteps && <WebFinalSteps />}

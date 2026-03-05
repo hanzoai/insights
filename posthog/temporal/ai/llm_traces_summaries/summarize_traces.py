@@ -14,7 +14,7 @@ from posthog.schema import DateRange
 from posthog.models.team.team import Team
 from posthog.settings.temporal import MAX_AI_TASK_QUEUE
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import async_connect
 
 from ee.hogai.llm_traces_summaries.summarize_traces import LLMTracesSummarizer
@@ -42,7 +42,7 @@ async def summarize_llm_traces_activity(
 
 
 @temporalio.workflow.defn(name="summarize-llm-traces")
-class SummarizeLLMTracesWorkflow(PostHogWorkflow):
+class SummarizeLLMTracesWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> SummarizeLLMTracesInputs:
         """Parse inputs from the management command CLI."""

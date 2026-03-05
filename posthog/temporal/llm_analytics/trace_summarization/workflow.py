@@ -18,7 +18,7 @@ from typing import Any
 import structlog
 import temporalio
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.llm_analytics.trace_summarization import constants
 from posthog.temporal.llm_analytics.trace_summarization.constants import (
     DEFAULT_BATCH_SIZE,
@@ -68,7 +68,7 @@ logger = structlog.get_logger(__name__)
 
 
 @temporalio.workflow.defn(name=WORKFLOW_NAME)
-class BatchTraceSummarizationWorkflow(PostHogWorkflow):
+class BatchTraceSummarizationWorkflow(InsightsWorkflow):
     """
     Workflow for batch summarization of traces.
 

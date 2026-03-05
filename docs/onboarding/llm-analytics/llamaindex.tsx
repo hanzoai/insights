@@ -9,13 +9,13 @@ export const getLlamaIndexSteps = (ctx: OnboardingComponentsContext): StepDefini
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The LlamaIndex integration uses
-                        PostHog's OpenAI wrapper.
+                        Setting up analytics starts with installing the Insights SDK. The LlamaIndex integration uses
+                        Insights's OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getLlamaIndexSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Install LlamaIndex with the OpenAI integration. PostHog instruments your LLM calls by wrapping
+                        Install LlamaIndex with the OpenAI integration. Insights instruments your LLM calls by wrapping
                         the OpenAI client that LlamaIndex uses.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getLlamaIndexSteps = (ctx: OnboardingComponentsContext): StepDefini
             ),
         },
         {
-            title: 'Initialize PostHog and LlamaIndex',
+            title: 'Initialize Insights and LlamaIndex',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog OpenAI wrapper and
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
                         pass it to LlamaIndex's `OpenAI` LLM class.
                     </Markdown>
 
@@ -84,8 +84,8 @@ export const getLlamaIndexSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            PostHog's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it can replace the
-                            internal client used by LlamaIndex's OpenAI LLM. PostHog captures `$ai_generation` events
+                            Insights's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it can replace the
+                            internal client used by LlamaIndex's OpenAI LLM. Insights captures `$ai_generation` events
                             automatically without proxying your calls.
 
                             **Note:** This approach accesses an internal attribute (`_client`) which may change in future
@@ -101,7 +101,7 @@ export const getLlamaIndexSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Use LlamaIndex as normal. PostHog automatically captures an `$ai_generation` event for each LLM
+                        Use LlamaIndex as normal. Insights automatically captures an `$ai_generation` event for each LLM
                         call made through the wrapped client.
                     </Markdown>
 

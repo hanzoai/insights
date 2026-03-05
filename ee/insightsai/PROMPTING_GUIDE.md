@@ -1,6 +1,6 @@
-# LLM prompting guide for PostHog
+# LLM prompting guide for Insights
 
-You know code, now meet prompts. This guide explains how we make effective LLM prompts in PostHog's AI features.
+You know code, now meet prompts. This guide explains how we make effective LLM prompts in Insights's AI features.
 
 ## Standard building blocks
 
@@ -12,7 +12,7 @@ from ee.insightsai.llm import MaxChatOpenAI
 # ✅ Correct - auto-injects user/project/org context
 llm = MaxChatOpenAI(user=user, team=team, model="gpt-4.1")
 
-# ❌ Wrong - missing PostHog context
+# ❌ Wrong - missing Insights context
 llm = ChatOpenAI(model="gpt-4.1")
 ```
 
@@ -25,14 +25,14 @@ llm = ChatOpenAI(model="gpt-4.1")
 
 This context appears at the end of system messages.
 
-## The anatomy of a PostHog prompt
+## The anatomy of a Insights prompt
 
-PostHog prompts typically follow a structure like this:
+Insights prompts typically follow a structure like this:
 
 ```python
 SYSTEM_PROMPT = """
 <agent_info>
-You are PostHog's AI agent...
+You are Insights's AI agent...
 Your role and personality description.
 </agent_info>
 
@@ -56,7 +56,7 @@ As you see, we use non-nested XML tags to clearly delineate sections.
 
 ### Variable templating with Mustache
 
-PostHog uses Mustache templating for dynamic content:
+Insights uses Mustache templating for dynamic content:
 
 ```python
 # Basic variable substitution
@@ -136,10 +136,10 @@ For specialized tasks (query generation, summarization, etc.):
 
 ```python
 QUERY_GENERATOR_PROMPT = """
-Act as an expert product analyst. Your task is to generate JSON schemas for PostHog insights.
+Act as an expert product analyst. Your task is to generate JSON schemas for Insights insights.
 
 <role_context>
-You understand PostHog's event tracking, user properties, and analytics concepts.
+You understand Insights's event tracking, user properties, and analytics concepts.
 You know the difference between trends, funnels, and retention queries.
 </role_context>
 
@@ -158,7 +158,7 @@ You know the difference between trends, funnels, and retention queries.
 
 ```python
 SUMMARIZER_PROMPT = """
-Summarize this PostHog action in maximum three sentences.
+Summarize this Insights action in maximum three sentences.
 
 Actions contain filters that users create to track specific behaviors:
 - Multiple match groups combined with OR
@@ -228,7 +228,7 @@ You are an expert analyst...
 
 ## Evaluation
 
-PostHog uses Braintrust to test AI effectiveness. See `ee/insightsai/eval/` for examples, and implement new ones for the use case you're working on.
+Insights uses Braintrust to test AI effectiveness. See `ee/insightsai/eval/` for examples, and implement new ones for the use case you're working on.
 
 For expert feedback, tag `@team-posthog-ai` on LLM-related PRs! Before doing that, test your feature with various user prompts, especially tricky ones.
 

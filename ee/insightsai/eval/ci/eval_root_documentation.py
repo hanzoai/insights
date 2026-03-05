@@ -52,9 +52,9 @@ async def eval_root_documentation(call_root, pytestconfig):
                     id="call_oejkj9HpAcIVAqTjxaXaofyA",
                 ),
             ),
-            # Basic PostHog product questions
+            # Basic Insights product questions
             EvalCase(
-                input="How do I set up event tracking in PostHog?",
+                input="How do I set up event tracking in Insights?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "set up event tracking"},
@@ -62,7 +62,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="What is a cohort in PostHog and how do I create one?",
+                input="What is a cohort in Insights and how do I create one?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "cohort creation"},
@@ -70,7 +70,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="How does PostHog's session recording work?",
+                input="How does Insights's session recording work?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "session recording"},
@@ -78,7 +78,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="Can you explain PostHog's feature flags functionality?",
+                input="Can you explain Insights's feature flags functionality?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "feature flags functionality"},
@@ -87,10 +87,10 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # SDK and integration questions
             EvalCase(
-                input="How do I install the PostHog SDK for Python?",
+                input="How do I install the Insights SDK for Python?",
                 expected=AssistantToolCall(
                     name="search",
-                    args={"kind": "docs", "query": "install PostHog SDK for Python"},
+                    args={"kind": "docs", "query": "install Insights SDK for Python"},
                     id="call_doc_search_5",
                 ),
             ),
@@ -120,7 +120,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # Feature-specific questions
             EvalCase(
-                input="How do I create a funnel analysis in PostHog?",
+                input="How do I create a funnel analysis in Insights?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "create funnel analysis"},
@@ -128,7 +128,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="What's the difference between trends and insights in PostHog?",
+                input="What's the difference between trends and insights in Insights?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "difference between trends and insights"},
@@ -136,7 +136,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="How do I set up A/B testing with PostHog feature flags?",
+                input="How do I set up A/B testing with Insights feature flags?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "A/B testing with feature flags"},
@@ -186,7 +186,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # Troubleshooting and debugging
             EvalCase(
-                input="My PostHog events aren't showing up in the dashboard, what could be wrong?",
+                input="My Insights events aren't showing up in the dashboard, what could be wrong?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "events not showing up in dashboard troubleshooting"},
@@ -202,7 +202,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="PostHog feature flags not working in production environment",
+                input="Insights feature flags not working in production environment",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "feature flags not working in production"},
@@ -210,7 +210,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="Why are my PostHog cohorts not updating automatically?",
+                input="Why are my Insights cohorts not updating automatically?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "cohorts not updating automatically"},
@@ -219,7 +219,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # Configuration and setup questions
             EvalCase(
-                input="How do I configure PostHog for GDPR compliance?",
+                input="How do I configure Insights for GDPR compliance?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "GDPR compliance configuration"},
@@ -227,7 +227,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="What are the different PostHog deployment options?",
+                input="What are the different Insights deployment options?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "deployment options"},
@@ -244,7 +244,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # API and integration questions
             EvalCase(
-                input="How do I use PostHog's REST API to query events?",
+                input="How do I use Insights's REST API to query events?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "REST API query events"},
@@ -252,7 +252,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="PostHog webhook integration with Slack how to set up",
+                input="Insights webhook integration with Slack how to set up",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "webhook Slack integration setup"},
@@ -269,7 +269,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # Performance and limits
             EvalCase(
-                input="What are PostHog's rate limits for event ingestion?",
+                input="What are Insights's rate limits for event ingestion?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "rate limits event ingestion"},
@@ -286,7 +286,7 @@ async def eval_root_documentation(call_root, pytestconfig):
             ),
             # Mobile and platform-specific
             EvalCase(
-                input="PostHog iOS SDK setup guide",
+                input="Insights iOS SDK setup guide",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "iOS SDK setup"},
@@ -319,7 +319,7 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="What geographic information does PostHog automatically capture about my users?",
+                input="What geographic information does Insights automatically capture about my users?",
                 expected=AssistantToolCall(
                     name="search",
                     args={"kind": "docs", "query": "automatic geographic information capture"},
@@ -327,10 +327,10 @@ async def eval_root_documentation(call_root, pytestconfig):
                 ),
             ),
             EvalCase(
-                input="How do I delete events from PostHog?",
+                input="How do I delete events from Insights?",
                 expected=AssistantToolCall(
                     name="search",
-                    args={"kind": "docs", "query": "delete events from PostHog"},
+                    args={"kind": "docs", "query": "delete events from Insights"},
                     id="call_doc_search_36",
                 ),
             ),

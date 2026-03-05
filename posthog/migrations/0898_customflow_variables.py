@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogflow",
+            model_name="customflow",
             name="variables",
             field=models.JSONField(default=list, null=True, blank=True),
         ),

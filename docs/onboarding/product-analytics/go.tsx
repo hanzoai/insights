@@ -11,7 +11,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog Go library:</Markdown>
+                    <Markdown>Install the Insights Go library:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -27,11 +27,11 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the PostHog client with your API key and host:</Markdown>
+                    <Markdown>Initialize the Insights client with your API key and host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {

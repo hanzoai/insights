@@ -7,7 +7,7 @@ from rest_framework.response import Response
 class VercelErrorResponseMixin:
     """Mixin to format DRF exceptions into Vercel's required error schema.
 
-    Delegates to the global exception handler (drf-exceptions-hog) for reporting
+    Delegates to the global exception handler (drf-exceptions) for reporting
     and capture_exception, then reformats the response for Vercel's API contract.
     """
 

@@ -5,7 +5,7 @@ Provides dynamic team discovery that combines a guaranteed allowlist
 with a configurable random sample of teams that have AI events.
 
 Config is read from the `llm-analytics-clustering-workflows` feature flag
-payload so it can be changed from the PostHog UI without a deploy.
+payload so it can be changed from the Insights UI without a deploy.
 Falls back to hardcoded defaults when the payload is missing or invalid.
 """
 
@@ -29,7 +29,7 @@ FEATURE_FLAG_KEY = "llm-analytics-clustering-workflows"
 # Default fallbacks — used when the feature flag payload is missing or invalid.
 DEFAULT_GUARANTEED_TEAM_IDS: list[int] = [
     1,  # Local development
-    2,  # Internal PostHog project
+    2,  # Internal Insights project
     # Dogfooding projects
     112495,
     148051,
@@ -150,7 +150,7 @@ async def get_team_ids_for_llm_analytics(inputs: TeamDiscoveryInput) -> list[int
         skip = set(config.skip_team_ids)
 
         # FF payload is the source of truth, intentionally overriding
-        # TeamDiscoveryInput so config can be tuned from the PostHog UI
+        # TeamDiscoveryInput so config can be tuned from the Insights UI
         # without a deploy. TeamDiscoveryInput is kept for Temporal's
         # serialization contract but its values are not used at runtime.
         sample_percentage = config.sample_percentage

@@ -68,8 +68,8 @@ function processArrayChanges<T extends ArrayChangeItem>(
 }
 
 export function workflowActivityDescriber(logItem: ActivityLogItem, asNotification?: boolean): HumanizedChange {
-    if (logItem.scope != 'HogFlow') {
-        console.error('Workflow describer received a non-HogFlow activity')
+    if (logItem.scope != 'CustomFlow') {
+        console.error('Workflow describer received a non-CustomFlow activity')
         return { description: null }
     }
 

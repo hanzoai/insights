@@ -7,7 +7,7 @@ import { IconTrash } from '@posthog/icons'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ReadingHog } from 'lib/components/hedgehogs'
+import { ReadingHog } from 'lib/components/mascots'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
 import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'

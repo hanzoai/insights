@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
@@ -60,23 +60,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
       }
     : DistributeReadOnlyOverUnions<T>
 
-export const getFixHogqlRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/fix_hogql/`
+export const getFixInsightsQLRetrieveUrl = (projectId: string) => {
+    return `/api/environments/${projectId}/fix_insightsql/`
 }
 
-export const fixHogqlRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlRetrieveUrl(projectId), {
+export const fixInsightsQLRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsQLRetrieveUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getFixHogqlCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/fix_hogql/`
+export const getFixInsightsQLCreateUrl = (projectId: string) => {
+    return `/api/environments/${projectId}/fix_insightsql/`
 }
 
-export const fixHogqlCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlCreateUrl(projectId), {
+export const fixInsightsQLCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsQLCreateUrl(projectId), {
         ...options,
         method: 'POST',
     })

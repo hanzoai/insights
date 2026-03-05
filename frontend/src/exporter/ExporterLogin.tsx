@@ -141,7 +141,7 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
             message={
                 <>
                     Welcome to
-                    <br /> PostHog!
+                    <br /> Insights!
                 </>
             }
             footer={<SupportModalButton />}

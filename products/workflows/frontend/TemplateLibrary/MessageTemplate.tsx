@@ -7,7 +7,7 @@ import { LemonButton, LemonDivider, LemonInput, LemonTextArea, Spinner, Tooltip 
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { EmailTemplater } from 'scenes/hog-functions/email-templater/EmailTemplater'
+import { EmailTemplater } from 'scenes/custom-functions/email-templater/EmailTemplater'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'

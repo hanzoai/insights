@@ -90,7 +90,7 @@ function PlainTextEditor(): JSX.Element {
                     </span>
                     <CodeEditorResizeable
                         className="flex-1"
-                        language={templatingEngine === 'hog' ? 'hogTemplate' : 'liquid'}
+                        language={templatingEngine === 'custom_script' ? 'scriptTemplate' : 'liquid'}
                         value={value}
                         onChange={onChange}
                         globals={logicProps.variables}
@@ -297,7 +297,7 @@ function LiquidSupportedText({
     const { templatingEngine } = useValues(emailTemplaterLogic)
     const { setTemplatingEngine } = useActions(emailTemplaterLogic)
 
-    const templating = templatingEngine ?? 'hog'
+    const templating = templatingEngine ?? 'custom_script'
 
     return (
         <span className="flex grow group relative justify-between">
@@ -316,7 +316,7 @@ function LiquidSupportedText({
                 className="flex-1"
                 globals={globals}
                 value={value}
-                language={templating === 'hog' ? 'hogTemplate' : 'liquid'}
+                language={templating === 'custom_script' ? 'scriptTemplate' : 'liquid'}
                 onChange={onChange}
             />
         </span>

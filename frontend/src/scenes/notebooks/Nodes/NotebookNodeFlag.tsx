@@ -11,7 +11,7 @@ import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { IconRecording, IconSurveys } from 'lib/lemon-ui/icons'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
@@ -144,7 +144,7 @@ type NotebookNodeFlagAttributes = {
     id: FeatureFlagLogicProps['id']
 }
 
-export const NotebookNodeFlag = createPostHogWidgetNode<NotebookNodeFlagAttributes>({
+export const NotebookNodeFlag = createInsightsWidgetNode<NotebookNodeFlagAttributes>({
     nodeType: NotebookNodeType.FeatureFlag,
     titlePlaceholder: 'Feature flag',
     Component,

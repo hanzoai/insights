@@ -102,7 +102,7 @@ export const SpanEvent = (): JSX.Element => {
                                 language="json"
                                 code={dedent`
                                     {
-                                      "query": "search for documents about hedgehogs"
+                                      "query": "search for documents about mascots"
                                     }
                                 `}
                             />

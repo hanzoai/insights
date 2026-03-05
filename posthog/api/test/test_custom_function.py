@@ -75,7 +75,7 @@ EXAMPLE_FULL = {
 
 def get_db_field_value(field, model_id):
     cursor = connection.cursor()
-    cursor.execute(f"select {field} from posthog_hogfunction where id='{model_id}';")
+    cursor.execute(f"select {field} from posthog_customfunction where id='{model_id}';")
     return cursor.fetchone()[0]
 
 
@@ -108,7 +108,7 @@ class TestCustomFunctionAPIWithoutAvailableFeature(ClickhouseTestMixin, APIBaseT
         response = self._create_slack_function()
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         assert response.json()["created_by"]["id"] == self.user.id
-        assert response.json()["hog"] == template_slack.code
+        assert response.json()["custom_script"] == template_slack.code
         assert response.json()["inputs_schema"] == template_slack.inputs_schema
 
     def test_sers_can_update_non_free_templates(self):
@@ -300,7 +300,7 @@ class TestCustomFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest)
         )
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 
-        assert response.json()["hog"] == "fetch(inputs.url);"
+        assert response.json()["custom_script"] == "fetch(inputs.url);"
         assert response.json()["template"] == {
             "type": "destination",
             "free": False,
@@ -336,7 +336,7 @@ class TestCustomFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest)
 
         response = self.client.post(f"/api/projects/{self.team.id}/custom_functions/", data=payload)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
-        assert response.json()["hog"] == webhook_template["code"].strip()
+        assert response.json()["custom_script"] == webhook_template["code"].strip()
         assert response.json()["inputs_schema"] == webhook_template["inputs_schema"]
         assert response.json()["name"] == webhook_template["name"]
         assert response.json()["description"] == webhook_template["description"]
@@ -1766,7 +1766,7 @@ class TestCustomFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest)
         large_hog_code = "return " + "x" * (MAX_HOG_CODE_SIZE_BYTES + 1000)
 
         # Try to create a function with HOG code exceeding the size limit
-        # No need to mock compile_hog as we're checking the string size directly
+        # No need to mock compile_script as we're checking the string size directly
         response = self.client.post(
             f"/api/projects/{self.team.id}/custom_functions/",
             data={

@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
 
-interface PostHogLinkProps {
+interface InsightsLinkProps {
     url: string
     onOpen?: ((url: string) => void) | undefined
 }
 
-const PostHogIcon = (): ReactElement => (
+const InsightsIcon = (): ReactElement => (
     <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M8.35523 16.1353C8.14021 16.5654 7.52647 16.5654 7.31142 16.1353L6.79714 15.1068C6.715 14.9425 6.715 14.7491 6.79714 14.5849L7.31142 13.5563C7.52647 13.1262 8.14021 13.1262 8.35523 13.5563L8.86953 14.5849C8.95163 14.7491 8.95163 14.9425 8.86953 15.1068L8.35523 16.1353ZM8.35523 21.9687C8.14021 22.3988 7.52647 22.3988 7.31142 21.9687L6.79714 20.9401C6.715 20.7758 6.715 20.5825 6.79714 20.4182L7.31142 19.3897C7.52647 18.9596 8.14021 18.9596 8.35523 19.3897L8.86953 20.4182C8.95163 20.5825 8.95163 20.7758 8.86953 20.9401L8.35523 21.9687Z"
@@ -30,7 +30,7 @@ const PostHogIcon = (): ReactElement => (
     </svg>
 )
 
-export function PostHogLink({ url, onOpen }: PostHogLinkProps): ReactElement {
+export function InsightsLink({ url, onOpen }: InsightsLinkProps): ReactElement {
     const handleClick = (): void => {
         if (onOpen) {
             onOpen(url)
@@ -64,8 +64,8 @@ export function PostHogLink({ url, onOpen }: PostHogLinkProps): ReactElement {
                 e.currentTarget.style.backgroundColor = 'var(--color-background-secondary, #f9fafb)'
             }}
         >
-            <PostHogIcon />
-            View in PostHog
+            <InsightsIcon />
+            View in Insights
         </button>
     )
 }

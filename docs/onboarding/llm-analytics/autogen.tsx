@@ -9,13 +9,13 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The AutoGen integration uses
-                        PostHog's OpenAI wrapper since AutoGen uses OpenAI under the hood.
+                        Setting up analytics starts with installing the Insights SDK. The AutoGen integration uses
+                        Insights's OpenAI wrapper since AutoGen uses OpenAI under the hood.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Install AutoGen with the OpenAI extension. PostHog instruments your LLM calls by wrapping the
+                        Install AutoGen with the OpenAI extension. Insights instruments your LLM calls by wrapping the
                         OpenAI client that AutoGen uses internally.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Initialize PostHog and AutoGen',
+            title: 'Initialize Insights and AutoGen',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog OpenAI wrapper and
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
                         pass it to AutoGen's `OpenAIChatCompletionClient`.
                     </Markdown>
 
@@ -86,8 +86,8 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
                             AutoGen's `OpenAIChatCompletionClient` accepts a custom OpenAI client via the
-                            `openai_client` parameter. PostHog's `OpenAI` wrapper is a proper subclass of
-                            `openai.OpenAI`, so it works directly. PostHog captures `$ai_generation` events
+                            `openai_client` parameter. Insights's `OpenAI` wrapper is a proper subclass of
+                            `openai.OpenAI`, so it works directly. Insights captures `$ai_generation` events
                             automatically without proxying your calls.
                         </Markdown>
                     </CalloutBox>
@@ -100,7 +100,7 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Use AutoGen as normal. PostHog automatically captures an `$ai_generation` event for each LLM
+                        Use AutoGen as normal. Insights automatically captures an `$ai_generation` event for each LLM
                         call made through the wrapped OpenAI client.
                     </Markdown>
 

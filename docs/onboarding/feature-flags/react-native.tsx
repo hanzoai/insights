@@ -18,7 +18,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <>
                     <Markdown>
                         {dedent`
-                            PostHog provides hooks to make it easy to use feature flags in your React Native app. Use \`useFeatureFlagEnabled\` for boolean flags:
+                            Insights provides hooks to make it easy to use feature flags in your React Native app. Use \`useFeatureFlagEnabled\` for boolean flags:
                         `}
                     </Markdown>
                     <CodeBlock
@@ -27,10 +27,10 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { usePostHog } from 'posthog-react-native'
+                                    import { useInsights } from 'posthog-react-native'
 
                                     function MyComponent() {
-                                        const posthog = usePostHog()
+                                        const posthog = useInsights()
                                         const isMyFlagEnabled = posthog.isFeatureEnabled('flag-key')
 
                                         if (isMyFlagEnabled) {
@@ -58,10 +58,10 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { usePostHog } from 'posthog-react-native'
+                                    import { useInsights } from 'posthog-react-native'
 
                                     function MyComponent() {
-                                        const posthog = usePostHog()
+                                        const posthog = useInsights()
                                         const enabledVariant = posthog.getFeatureFlag('flag-key')
 
                                         if (enabledVariant === 'variant-key') { // replace 'variant-key' with the key of your variant
@@ -85,7 +85,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <Markdown>
                     {dedent`
-                        Experiments run on top of our feature flags. Once you've implemented the flag in your code, you run an experiment by creating a new experiment in the PostHog dashboard.
+                        Experiments run on top of our feature flags. Once you've implemented the flag in your code, you run an experiment by creating a new experiment in the Insights dashboard.
                     `}
                 </Markdown>
             ),

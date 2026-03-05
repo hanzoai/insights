@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * Action schemas for the PostHog MCP server.
+ * Action schemas for the Insights MCP server.
  *
  * Actions are reusable event definitions that combine multiple trigger conditions
  * (page views, clicks, form submissions, etc.) into a single trackable event.
@@ -79,7 +79,7 @@ export const UpdateActionInputSchema = z.object({
 })
 
 // List actions input schema
-// Note: The PostHog Actions API does not support search filtering natively.
+// Note: The Insights Actions API does not support search filtering natively.
 // Search is available via the global /api/projects/{project_id}/search/?q=&entities=action endpoint
 export const ListActionsInputSchema = z.object({
     limit: z.number().int().positive().optional().describe('Maximum number of actions to return'),

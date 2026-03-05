@@ -10,7 +10,7 @@ export type CyclotronJobInputsValidationResult = {
 }
 
 const validateInput = (input: CyclotronJobInputType, inputSchema: CyclotronJobInputSchemaType): string | undefined => {
-    const language = input?.templating ?? 'hog'
+    const language = input?.templating ?? 'custom_script'
     const value = input?.value
     if (input?.secret) {
         // We leave unmodified secret values alone

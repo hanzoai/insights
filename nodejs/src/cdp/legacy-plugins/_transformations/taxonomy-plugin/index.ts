@@ -48,10 +48,10 @@ const configSelectionMap: Record<string, number> = {
     'spaces in between': 4,
 }
 
-const skippedPostHogEvents = ['survey shown', 'survey sent', 'survey dismissed']
+const skippedInsightsEvents = ['survey shown', 'survey sent', 'survey dismissed']
 
 export function processEvent(event: PluginEvent, { config }: LegacyTransformationPluginMeta) {
-    if (!event.event.startsWith('$') && !skippedPostHogEvents.includes(event.event)) {
+    if (!event.event.startsWith('$') && !skippedInsightsEvents.includes(event.event)) {
         const defaultTransformation = configSelectionMap[config.defaultNamingConvention]
         event.event = standardizeName(event.event, transformations[defaultTransformation])
     }

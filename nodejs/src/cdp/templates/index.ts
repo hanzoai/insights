@@ -1,6 +1,6 @@
 import { DESTINATION_PLUGINS, TRANSFORMATION_PLUGINS } from '../legacy-plugins'
 import { SEGMENT_DESTINATIONS } from '../segment/segment-templates'
-import { HogFunctionTemplate, NativeTemplate } from '../types'
+import { CustomFunctionTemplate, NativeTemplate } from '../types'
 import { template as accoilTemplate } from './_destinations/accoil/accoil.template'
 import { template as clickupTemplate } from './_destinations/clickup/clickup.template'
 import { allComingSoonTemplates } from './_destinations/coming-soon/coming-soon-destinations.template'
@@ -15,12 +15,12 @@ import { template as hubspotCompanyTemplate } from './_destinations/hubspot/hubs
 import { template as linearTemplate } from './_destinations/linear/linear.template'
 import { template as linkedinAdsTemplate } from './_destinations/linkedin_ads/linkedin.template'
 import { template as nativeWebhookTemplate } from './_destinations/native_webhook/webhook.template'
-import { template as posthogCaptureTemplate } from './_destinations/posthog_capture/posthog-capture.template'
-import { template as posthogGroupIdentifyTemplate } from './_destinations/posthog_capture/posthog-group-identify.template'
-import { template as posthogUpdatePersonPropertiesTemplate } from './_destinations/posthog_capture/posthog-update-person-properties.template'
-import { template as posthogGetTicketTemplate } from './_destinations/posthog_conversations/posthog-get-ticket.template'
-import { template as posthogUpdateTicketTemplate } from './_destinations/posthog_conversations/posthog-update-ticket.template'
-import { template as posthogSetHogflowVariableTemplate } from './_destinations/posthog_workflows/posthog-set-variable.template'
+import { template as insightsCaptureTemplate } from './_destinations/insights_capture/insights-capture.template'
+import { template as insightsGroupIdentifyTemplate } from './_destinations/insights_capture/insights-group-identify.template'
+import { template as insightsUpdatePersonPropertiesTemplate } from './_destinations/insights_capture/insights-update-person-properties.template'
+import { template as insightsGetTicketTemplate } from './_destinations/insights_conversations/insights-get-ticket.template'
+import { template as insightsUpdateTicketTemplate } from './_destinations/insights_conversations/insights-update-ticket.template'
+import { template as insightsSetCustomflowVariableTemplate } from './_destinations/insights_workflows/insights-set-variable.template'
 import { template as redditAdsTemplate } from './_destinations/reddit_ads/reddit.template'
 import { template as snapchatAdsTemplate } from './_destinations/snapchat_ads/snapchat.template'
 import { template as tiktokAdsTemplate } from './_destinations/tiktok_ads/tiktok.template'
@@ -42,9 +42,9 @@ import { template as removeNullPropertiesTemplate } from './_transformations/rem
 import { template as urlMaskingTemplate } from './_transformations/url-masking/url-masking.template'
 import { template as urlNormalizationTemplate } from './_transformations/url-normalization/url-normalization.template'
 
-export const HOG_FUNCTION_TEMPLATES_COMING_SOON: HogFunctionTemplate[] = allComingSoonTemplates
+export const CUSTOM_FUNCTION_TEMPLATES_COMING_SOON: CustomFunctionTemplate[] = allComingSoonTemplates
 
-export const HOG_FUNCTION_TEMPLATES_DESTINATIONS: HogFunctionTemplate[] = [
+export const CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS: CustomFunctionTemplate[] = [
     webhookTemplate,
     tiktokAdsTemplate,
     snapchatAdsTemplate,
@@ -60,17 +60,17 @@ export const HOG_FUNCTION_TEMPLATES_DESTINATIONS: HogFunctionTemplate[] = [
     emailTemplate,
     firebasePushTemplate,
     clickupTemplate,
-    posthogCaptureTemplate,
-    posthogGroupIdentifyTemplate,
-    posthogUpdatePersonPropertiesTemplate,
-    posthogSetHogflowVariableTemplate,
-    posthogGetTicketTemplate,
-    posthogUpdateTicketTemplate,
+    insightsCaptureTemplate,
+    insightsGroupIdentifyTemplate,
+    insightsUpdatePersonPropertiesTemplate,
+    insightsSetCustomflowVariableTemplate,
+    insightsGetTicketTemplate,
+    insightsUpdateTicketTemplate,
     hubspotCompanyTemplate,
     accoilTemplate,
 ]
 
-export const HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS: HogFunctionTemplate[] = [
+export const CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS: CustomFunctionTemplate[] = [
     defaultTransformationTemplate,
     geoipTemplate,
     ipAnonymizationTemplate,
@@ -84,7 +84,7 @@ export const HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS: HogFunctionTemplate[] = [
     urlNormalizationTemplate,
 ]
 
-export const NATIVE_HOG_FUNCTIONS: (HogFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
+export const NATIVE_CUSTOM_FUNCTIONS: (CustomFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
     ...plugin,
     code_language: 'javascript',
     code: 'return event;',
@@ -100,26 +100,26 @@ export const NATIVE_HOG_FUNCTIONS: (HogFunctionTemplate & NativeTemplate)[] = [n
     ],
 }))
 
-export const HOG_FUNCTION_TEMPLATES_SOURCES: HogFunctionTemplate[] = [
+export const CUSTOM_FUNCTION_TEMPLATES_SOURCES: CustomFunctionTemplate[] = [
     incomingWebhookTemplate,
     stripeWebhookTemplate,
     vercelLogDrainTemplate,
     pixelTemplate,
 ]
 
-export const HOG_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: HogFunctionTemplate[] = DESTINATION_PLUGINS.map(
+export const CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: CustomFunctionTemplate[] = DESTINATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const HOG_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: HogFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
+export const CUSTOM_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: CustomFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
     (x) => x.template
 )
 
-export const HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: HogFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
+export const CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: CustomFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const NATIVE_HOG_FUNCTIONS_BY_ID = NATIVE_HOG_FUNCTIONS.reduce(
+export const NATIVE_CUSTOM_FUNCTIONS_BY_ID = NATIVE_CUSTOM_FUNCTIONS.reduce(
     (acc, plugin) => {
         acc[plugin.id] = plugin
         return acc
@@ -127,13 +127,13 @@ export const NATIVE_HOG_FUNCTIONS_BY_ID = NATIVE_HOG_FUNCTIONS.reduce(
     {} as Record<string, NativeTemplate>
 )
 
-export const HOG_FUNCTION_TEMPLATES: HogFunctionTemplate[] = [
-    ...HOG_FUNCTION_TEMPLATES_DESTINATIONS,
-    ...HOG_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
-    ...HOG_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
-    ...HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-    ...HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
-    ...HOG_FUNCTION_TEMPLATES_SOURCES,
-    ...HOG_FUNCTION_TEMPLATES_COMING_SOON,
-    ...NATIVE_HOG_FUNCTIONS,
+export const CUSTOM_FUNCTION_TEMPLATES: CustomFunctionTemplate[] = [
+    ...CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS,
+    ...CUSTOM_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
+    ...CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
+    ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+    ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    ...CUSTOM_FUNCTION_TEMPLATES_SOURCES,
+    ...CUSTOM_FUNCTION_TEMPLATES_COMING_SOON,
+    ...NATIVE_CUSTOM_FUNCTIONS,
 ]

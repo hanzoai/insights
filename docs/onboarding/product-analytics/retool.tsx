@@ -17,7 +17,7 @@ export const getRetoolSteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Add the PostHog snippet',
+            title: 'Add the Insights snippet',
             badge: 'required',
             content: (
                 <>
@@ -48,7 +48,7 @@ export const getRetoolSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Save and refresh your app. PostHog will now automatically capture pageviews, clicks, and other
+                        Save and refresh your app. Insights will now automatically capture pageviews, clicks, and other
                         events as your app is used.
                     </Markdown>
                     <CalloutBox type="fyi" title="Learn more">

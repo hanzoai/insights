@@ -3,9 +3,9 @@ import { TextSerializer, getText } from '@tiptap/core'
 
 import { JSONContent, RichContentNode, TTEditor } from 'lib/components/RichContentEditor/types'
 
-import { CreatePostHogWidgetNodeOptions, NotebookNodeType } from './types'
+import { CreateInsightsWidgetNodeOptions, NotebookNodeType } from './types'
 
-export const KNOWN_NODES: Record<string, CreatePostHogWidgetNodeOptions<any>> = {}
+export const KNOWN_NODES: Record<string, CreateInsightsWidgetNodeOptions<any>> = {}
 
 // Loosely based on https://github.com/ueberdosis/tiptap/blob/develop/packages/extension-floating-menu/src/floating-menu-plugin.ts#LL38C3-L55C4
 export const isCurrentNodeEmpty = (editor: TTEditor): boolean => {

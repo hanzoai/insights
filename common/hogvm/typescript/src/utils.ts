@@ -53,7 +53,7 @@ export function getNestedValue(obj: any, chain: any[], nullish = false): any {
                 obj = obj.get(key) ?? null
             } else if (typeof key === 'number') {
                 if (key == 0) {
-                    throw new Error(`Hog arrays start from index 1`)
+                    throw new Error(`Script arrays start from index 1`)
                 } else if (key > 0) {
                     obj = obj[key - 1] ?? null
                 } else {
@@ -77,7 +77,7 @@ export function setNestedValue(obj: any, chain: any[], value: any): void {
             obj = obj.get(key) ?? null
         } else if (Array.isArray(obj) && typeof key === 'number') {
             if (key <= 0) {
-                throw new Error(`Hog arrays start from index 1`)
+                throw new Error(`Script arrays start from index 1`)
             }
             obj = obj[key - 1]
         } else {
@@ -89,7 +89,7 @@ export function setNestedValue(obj: any, chain: any[], value: any): void {
         obj.set(lastKey, value)
     } else if (Array.isArray(obj) && typeof lastKey === 'number') {
         if (lastKey <= 0) {
-            throw new Error(`Hog arrays start from index 1`)
+            throw new Error(`Script arrays start from index 1`)
         }
         obj[lastKey - 1] = value
     } else {

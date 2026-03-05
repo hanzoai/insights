@@ -5,7 +5,7 @@ import { IconDownload, IconPlus } from '@posthog/icons'
 import { LemonButton, LemonCollapse, LemonDialog, LemonSkeleton, LemonTag } from '@posthog/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { BuilderHog3 } from 'lib/components/hedgehogs'
+import { BuilderHog3 } from 'lib/components/mascots'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 

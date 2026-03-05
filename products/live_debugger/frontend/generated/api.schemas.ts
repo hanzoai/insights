@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 export interface LiveDebuggerBreakpointApi {
@@ -40,7 +40,7 @@ export interface ActiveBreakpointApi {
     /** Unique identifier for the breakpoint */
     id: string
     /**
-     * Repository identifier (e.g., 'PostHog/posthog')
+     * Repository identifier (e.g., 'Insights/posthog')
      * @nullable
      */
     repository?: string | null
@@ -127,7 +127,7 @@ export type LiveDebuggerBreakpointsActiveRetrieveParams = {
      */
     filename?: string
     /**
-     * Filter breakpoints for a specific repository (e.g., 'PostHog/posthog')
+     * Filter breakpoints for a specific repository (e.g., 'Insights/posthog')
      */
     repository?: string
 }

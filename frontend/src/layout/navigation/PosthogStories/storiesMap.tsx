@@ -185,7 +185,7 @@ export const storiesMap: storyGroup[] = [
             {
                 id: 'changelog-hog-templating',
                 title: 'Changelog',
-                description: 'In-app Hog templating',
+                description: 'In-app templating',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_phone_9f7523e1a8.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/video/upload/changelog_hog_templating_e21396dadf.mp4',
                 type: StoryType.Video,

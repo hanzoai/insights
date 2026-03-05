@@ -155,7 +155,7 @@ class TestVercelIntegration(TestCase):
 
     def test_get_installation_billing_plan(self):
         result = VercelIntegration.get_installation_billing_plan(self.installation_id)
-        # Returns empty dict - billing handled through PostHog, not Vercel
+        # Returns empty dict - billing handled through Insights, not Vercel
         assert result == {}
 
     def test_update_installation_not_found(self):
@@ -297,7 +297,7 @@ class TestVercelIntegration(TestCase):
         """Security test: External users (no Vercel mapping) must prove ownership via login."""
         from ee.vercel.integration import RequiresExistingUserLogin
 
-        # Create an existing PostHog user (not through Vercel)
+        # Create an existing Insights user (not through Vercel)
         existing_user = User.objects.create_user(
             email="external@example.com", password="external", first_name="External"
         )
@@ -862,9 +862,9 @@ class TestVercelInstallationRegressions(TestCase):
     @patch("ee.vercel.integration.report_user_signed_up")
     def test_regression_existing_user_without_vercel_mapping_added_to_org(self, mock_report):
         """
-        Regression test for: https://github.com/PostHog/posthog/pull/46107
+        Regression test for: https://github.com/Insights/posthog/pull/46107
 
-        Bug: When an existing PostHog user (without any prior Vercel mappings) installed
+        Bug: When an existing Insights user (without any prior Vercel mappings) installed
         the Vercel integration, they were NOT added to the newly created organization.
         This caused the installation to fail from Vercel's perspective.
 
@@ -875,7 +875,7 @@ class TestVercelInstallationRegressions(TestCase):
         Security note: User mapping is still only created for trusted users (those with
         existing Vercel mappings). External users must prove ownership via SSO login.
         """
-        # Create a PostHog user who has never used Vercel before
+        # Create a Insights user who has never used Vercel before
         existing_user = User.objects.create_user(
             email=self.payload["account"]["contact"]["email"],
             password="existing_password",

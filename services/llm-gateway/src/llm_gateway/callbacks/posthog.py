@@ -14,7 +14,7 @@ logger = structlog.get_logger(__name__)
 
 def _replace_binary_content(data: Any) -> Any:
     """
-    Replace binary content with metadata before storing in PostHog.
+    Replace binary content with metadata before storing in Insights.
     Handles both raw bytes/tuples and their stringified repr() forms.
     """
     match data:
@@ -63,8 +63,8 @@ def _truncate_for_capture(properties: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-class PostHogCallback(InstrumentedCallback):
-    """Custom PostHog callback for LLM analytics."""
+class InsightsCallback(InstrumentedCallback):
+    """Custom Insights callback for LLM analytics."""
 
     callback_name = "posthog"
 
@@ -93,7 +93,7 @@ class PostHogCallback(InstrumentedCallback):
         team_id = auth_user.team_id if auth_user and auth_user.team_id else None
 
         logger.debug(
-            "PostHog callback _on_success",
+            "Insights callback _on_success",
             end_user_id=end_user_id,
             distinct_id=distinct_id,
             team_id=team_id,
@@ -143,7 +143,7 @@ class PostHogCallback(InstrumentedCallback):
             capture_kwargs["groups"] = {"project": team_id}
 
         logger.debug(
-            "PostHog capturing event",
+            "Insights capturing event",
             distinct_id=distinct_id,
             posthog_event="$ai_generation",
             properties=properties,
@@ -169,7 +169,7 @@ class PostHogCallback(InstrumentedCallback):
         team_id = auth_user.team_id if auth_user and auth_user.team_id else None
 
         logger.debug(
-            "PostHog callback _on_failure",
+            "Insights callback _on_failure",
             end_user_id=end_user_id,
             distinct_id=distinct_id,
             team_id=team_id,
@@ -197,7 +197,7 @@ class PostHogCallback(InstrumentedCallback):
             capture_kwargs["groups"] = {"project": team_id}
 
         logger.debug(
-            "PostHog capturing error event",
+            "Insights capturing error event",
             distinct_id=distinct_id,
             posthog_event="$ai_generation",
             properties=properties,

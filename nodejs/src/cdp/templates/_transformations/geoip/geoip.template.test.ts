@@ -1,10 +1,10 @@
-import { HogFunctionInvocationGlobals } from '../../../types'
+import { CustomFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './geoip.template'
 
 describe('geoip.template', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: HogFunctionInvocationGlobals
+    let mockGlobals: CustomFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()
@@ -80,7 +80,7 @@ describe('geoip.template', () => {
                 },
               },
               "timestamp": "2024-01-01T00:00:00Z",
-              "url": "https://us.posthog.com/projects/1/events/1234",
+              "url": "https://us.hanzo.ai/projects/1/events/1234",
               "uuid": "event-id",
             }
         `)

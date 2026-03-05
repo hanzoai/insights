@@ -6,7 +6,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from posthoganalytics.client import Client as PostHogClient
+from posthoganalytics.client import Client as InsightsClient
 from retry import retry
 
 from posthog.schema import AIEventType
@@ -26,9 +26,9 @@ logger = structlog.get_logger(__name__)
 
 
 @cached(cache={})
-def get_ph_client() -> PostHogClient:
-    """Get a PostHog client instance for capturing events."""
-    return PostHogClient("sTMFPsFhdP1Ssg", sync_mode=True)
+def get_ph_client() -> InsightsClient:
+    """Get a Insights client instance for capturing events."""
+    return InsightsClient("sTMFPsFhdP1Ssg", sync_mode=True)
 
 
 # AI events dynamically generated from AIEventType enum
@@ -797,7 +797,7 @@ def capture_llm_analytics_report(
         logger.info(f"Captured LLM Analytics usage report for organization {organization_id}")
     except Exception as err:
         logger.exception(
-            f"LLM Analytics usage report sent to PostHog for organization {organization_id} failed: {str(err)}",
+            f"LLM Analytics usage report sent to Insights for organization {organization_id} failed: {str(err)}",
         )
 
         try:

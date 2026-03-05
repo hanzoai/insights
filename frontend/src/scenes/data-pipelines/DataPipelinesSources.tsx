@@ -23,14 +23,14 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
                     productName="Data Warehouse Source"
                     productKey={ProductKey.DATA_WAREHOUSE}
                     thingName="data source"
-                    description="Use data warehouse sources to import data from your external data into PostHog."
+                    description="Use data warehouse sources to import data from your external data into Insights."
                     isEmpty={dataWarehouseSources.results.length === 0 && !dataWarehouseSourcesLoading}
                     docsURL="https://posthog.com/docs/data-warehouse"
                     actionElementOverride={action}
                 />
             ) : null}
 
-            <FlaggedFeature flag="cdp-hog-sources">
+            <FlaggedFeature flag="cdp-script-sources">
                 <>
                     <SceneSection
                         title={
@@ -41,7 +41,7 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
                                 </LemonTag>
                             </span>
                         }
-                        description="PostHog can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"
+                        description="Insights can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"
                     >
                         <CustomFunctionList logicKey="data-pipelines-custom-functions-source-webhook" type="source_webhook" />
                     </SceneSection>
@@ -51,14 +51,14 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
 
             <SceneSection
                 title="Managed data warehouse sources"
-                description="PostHog can connect to external sources and automatically import data from them into the PostHog data warehouse"
+                description="Insights can connect to external sources and automatically import data from them into the Insights data warehouse"
             >
                 <DataWarehouseManagedSourcesTable />
             </SceneSection>
             <SceneDivider />
             <SceneSection
                 title="Self-managed data warehouse sources"
-                description="Connect to your own data sources, making them queryable in PostHog"
+                description="Connect to your own data sources, making them queryable in Insights"
             >
                 <DataWarehouseSelfManagedSourcesTable />
             </SceneSection>

@@ -1446,7 +1446,7 @@ When set, the specified dashboard's filters and date range override will be appl
 
             response = HttpResponse(export)
             response["Content-Disposition"] = (
-                'attachment; filename="{name} ({date_from} {date_to}) from PostHog.csv"'.format(
+                'attachment; filename="{name} ({date_from} {date_to}) from Insights.csv"'.format(
                     name=slugify(request.GET.get("export_name", "export")),
                     date_from=filter.date_from.strftime("%Y-%m-%d -") if filter.date_from else "up until",
                     date_to=filter.date_to.strftime("%Y-%m-%d"),

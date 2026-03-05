@@ -14,7 +14,7 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 
 from posthog.models import ProxyRecord
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.proxy_service.cloudflare import (
     CloudflareAPIError,
@@ -169,7 +169,7 @@ async def delete_cloudflare_proxy(inputs: DeleteManagedProxyInputs):
 
 
 @workflow.defn(name="delete-proxy")
-class DeleteManagedProxyWorkflow(PostHogWorkflow):
+class DeleteManagedProxyWorkflow(InsightsWorkflow):
     """A Temporal Workflow to delete a Managed reverse Proxy."""
 
     @staticmethod

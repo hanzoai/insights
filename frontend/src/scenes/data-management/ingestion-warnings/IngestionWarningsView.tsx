@@ -6,7 +6,7 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { ReadingHog } from 'lib/components/hedgehogs'
+import { ReadingHog } from 'lib/components/mascots'
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { Link } from 'lib/lemon-ui/Link'
 import { Scene } from 'scenes/sceneTypes'
@@ -118,7 +118,7 @@ const WARNING_TYPE_RENDERER = {
                     {details.timestamp ? <li>Client provided timestamp: {details.timestamp}</li> : ''}
                     {details.sentAt ? <li>Client provided sent_at: {details.sentAt}</li> : ''}
                     {details.offset ? <li>Client provided time offset: {details.offset}</li> : ''}
-                    <li>PostHog server capture time: {details.now}</li>
+                    <li>Insights server capture time: {details.now}</li>
                 </ul>
             </>
         )

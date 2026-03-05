@@ -26,7 +26,7 @@ export function ConfirmOrganization(): JSX.Element {
     const { setShowNewOrgWarning } = useActions(confirmOrganizationLogic)
 
     return (
-        <BridgePage view="org-creation-confirmation" hedgehog>
+        <BridgePage view="org-creation-confirmation" mascot>
             <h2>Create a new organization</h2>
             <div className="flex-1">
                 <p className="text-center">
@@ -51,7 +51,7 @@ export function ConfirmOrganization(): JSX.Element {
                         </p>
                         <ul className="list-disc pl-4">
                             <li>You're logging in with the wrong email address</li>
-                            <li>Your PostHog account is at a different URL</li>
+                            <li>Your Insights account is at a different URL</li>
                             <li>You need an invitation from a colleague</li>
                         </ul>
                     </div>

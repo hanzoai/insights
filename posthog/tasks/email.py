@@ -203,7 +203,7 @@ def send_invite(invite_id: str) -> None:
     message = EmailMessage(
         use_http=True,
         campaign_key=campaign_key,
-        subject=f"{invite.created_by.first_name} invited you to join {invite.organization.name} on PostHog",
+        subject=f"{invite.created_by.first_name} invited you to join {invite.organization.name} on Insights",
         template_name="invite",
         template_context={
             "invite": invite,
@@ -229,7 +229,7 @@ def send_member_join(invitee_uuid: str, organization_id: str) -> None:
     message = EmailMessage(
         use_http=True,
         campaign_key=campaign_key,
-        subject=f"{invitee.first_name} joined you on PostHog",
+        subject=f"{invitee.first_name} joined you on Insights",
         template_name="member_join",
         template_context={
             "invitee": invitee,
@@ -252,7 +252,7 @@ def send_password_reset(user_id: int, token: str) -> None:
     message = EmailMessage(
         use_http=True,
         campaign_key=f"password-reset-{user.uuid}-{timezone.now().timestamp()}",
-        subject=f"Reset your PostHog password",
+        subject=f"Reset your Insights password",
         template_name="password_reset",
         template_context={
             "preheader": "Please follow the link inside to reset your password.",
@@ -319,7 +319,7 @@ def send_email_mfa_link(user_id: int, token: str) -> None:
     message = EmailMessage(
         use_http=True,
         campaign_key=f"email_mfa_{user.uuid}-{timezone.now().timestamp()}",
-        subject="Verify your PostHog login",
+        subject="Verify your Insights login",
         template_name="email_mfa_link",
         template_context={
             "preheader": "Please follow the link inside to verify your login.",
@@ -425,7 +425,7 @@ def send_batch_export_run_failure(
 
     message = EmailMessage(
         campaign_key=campaign_key,
-        subject=f"PostHog: {batch_export_run.batch_export.name} batch export run failure",
+        subject=f"Insights: {batch_export_run.batch_export.name} batch export run failure",
         template_name="batch_export_run_failure",
         template_context={
             "time": batch_export_run.last_updated_at.strftime("%I:%M%p %Z on %B %d"),
@@ -468,7 +468,7 @@ def send_saved_query_materialization_failure(saved_query_id: str) -> None:
 
     message = EmailMessage(
         campaign_key=campaign_key,
-        subject=f"PostHog: Materialized view '{saved_query.name}' sync failed",
+        subject=f"Insights: Materialized view '{saved_query.name}' sync failed",
         template_name="saved_query_materialization_failure",
         template_context={
             "team": team,
@@ -486,7 +486,7 @@ def send_saved_query_materialization_failure(saved_query_id: str) -> None:
 def send_canary_email(user_email: str) -> None:
     message = EmailMessage(
         campaign_key=f"canary_email_{uuid.uuid4()}",
-        subject="This is a test email of your PostHog instance",
+        subject="This is a test email of your Insights instance",
         template_name="canary_email",
         template_context={"site_url": settings.SITE_URL},
     )
@@ -499,7 +499,7 @@ def send_email_change_emails(now_iso: str, user_name: str, old_address: str, new
     message_old_address = EmailMessage(
         use_http=True,
         campaign_key=f"email_change_old_address_{now_iso}",
-        subject="This is no longer your PostHog account email",
+        subject="This is no longer your Insights account email",
         template_name="email_change_old_address",
         template_context={
             "user_name": user_name,
@@ -510,7 +510,7 @@ def send_email_change_emails(now_iso: str, user_name: str, old_address: str, new
     message_new_address = EmailMessage(
         use_http=True,
         campaign_key=f"email_change_new_address_{now_iso}",
-        subject="This is your new PostHog account email",
+        subject="This is your new Insights account email",
         template_name="email_change_new_address",
         template_context={
             "user_name": user_name,

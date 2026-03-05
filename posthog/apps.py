@@ -15,9 +15,9 @@ from posthog.utils import get_instance_region, get_machine_id, initialize_self_c
 logger = structlog.get_logger(__name__)
 
 
-class PostHogConfig(AppConfig):
+class InsightsConfig(AppConfig):
     name = "posthog"
-    verbose_name = "PostHog"
+    verbose_name = "Insights"
 
     def ready(self):
         self._setup_lazy_admin()
@@ -43,7 +43,7 @@ class PostHogConfig(AppConfig):
         elif settings.TEST or os.environ.get("OPT_OUT_CAPTURE", False):
             posthoganalytics.disabled = True
         elif settings.DEBUG:
-            # In dev, analytics is by default turned to self-capture, i.e. data going into this very instance of PostHog
+            # In dev, analytics is by default turned to self-capture, i.e. data going into this very instance of Insights
             # Due to ASGI's workings, we can't query for the right project API key in this `ready()` method
             # Instead, we configure self-capture with `self_capture_wrapper()` in posthog/asgi.py - see that file
             # Self-capture for WSGI is initialized here

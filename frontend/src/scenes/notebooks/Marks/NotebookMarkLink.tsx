@@ -22,7 +22,7 @@ export const NotebookMarkLink = Mark.create({
 
     renderHTML({ HTMLAttributes }) {
         const href = HTMLAttributes.href || ''
-        const target = isPostHogLink(href) ? undefined : '_blank'
+        const target = isInsightsLink(href) ? undefined : '_blank'
         if (!isSafeProtocol(href)) {
             HTMLAttributes.href = ''
         }
@@ -80,7 +80,7 @@ export const isSafeProtocol = (href: string): boolean => {
     return SAFE_LINK_PROTOCOLS.test(href)
 }
 
-const isPostHogLink = (href: string): boolean => {
+const isInsightsLink = (href: string): boolean => {
     try {
         const url = new URL(href, window.location.origin)
         return url.origin === window.location.origin

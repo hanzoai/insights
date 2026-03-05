@@ -29,8 +29,8 @@ import { BASE_REDIS_KEY } from './services/logs-rate-limiter.service'
 const DEFAULT_TEST_TIMEOUT = 5000
 jest.setTimeout(DEFAULT_TEST_TIMEOUT)
 
-jest.mock('../utils/posthog', () => {
-    const original = jest.requireActual('../utils/posthog')
+jest.mock('../utils/insights', () => {
+    const original = jest.requireActual('../utils/insights')
     return {
         ...original,
         captureException: jest.fn(),
@@ -383,7 +383,7 @@ describe('LogsIngestionConsumer', () => {
             // Update team with custom logs settings
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team
+                `UPDATE insights_team
                  SET logs_settings = $1
                  WHERE id = $2`,
                 [JSON.stringify({ json_parse_logs: false, retention_days: 30 }), team.id],

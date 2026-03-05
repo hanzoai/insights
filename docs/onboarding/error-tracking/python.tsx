@@ -9,7 +9,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
     const installSteps = getPythonStepsPA(ctx)
 
     const verifyInitStep: StepDefinition = {
-        title: 'Verify PostHog is initialized',
+        title: 'Verify Insights is initialized',
         badge: 'recommended',
         checkpoint: true,
         content: (
@@ -28,7 +28,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        Exception autocapture can be enabled during initialization of the PostHog client to automatically capture any unhandled exceptions thrown by your Python application. It works by setting Python's built-in exception hooks, such as \`sys.excepthook\` and \`threading.excepthook\`.
+                        Exception autocapture can be enabled during initialization of the Insights client to automatically capture any unhandled exceptions thrown by your Python application. It works by setting Python's built-in exception hooks, such as \`sys.excepthook\` and \`threading.excepthook\`.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -61,7 +61,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        For exceptions handled by your application that you would still like sent to PostHog, you can manually call the capture method:
+                        For exceptions handled by your application that you would still like sent to Insights, you can manually call the capture method:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -91,9 +91,9 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    Confirm exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),
@@ -106,7 +106,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        Python frameworks often have built-in error handlers. This means PostHog's default exception autocapture won't work and we need to manually capture errors instead. The exact process depends on the framework:
+                        Python frameworks often have built-in error handlers. This means Insights's default exception autocapture won't work and we need to manually capture errors instead. The exact process depends on the framework:
                     `}
                 </Markdown>
                 <Tab.Group tabs={['Django', 'Flask', 'FastAPI']}>
@@ -139,7 +139,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             />
                             <Markdown>
                                 {dedent`
-                                    By default, the middleware captures exceptions and sends them to PostHog. Disable with \`POSTHOG_MW_CAPTURE_EXCEPTIONS = False\`. Use \`POSTHOG_MW_EXTRA_TAGS\`, \`POSTHOG_MW_REQUEST_FILTER\`, and \`POSTHOG_MW_TAG_MAP\` to customize. See the [Django integration docs](/docs/libraries/django) for full configuration.
+                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`POSTHOG_MW_CAPTURE_EXCEPTIONS = False\`. Use \`POSTHOG_MW_EXTRA_TAGS\`, \`POSTHOG_MW_REQUEST_FILTER\`, and \`POSTHOG_MW_TAG_MAP\` to customize. See the [Django integration docs](/docs/libraries/django) for full configuration.
                                 `}
                             </Markdown>
                         </Tab.Panel>

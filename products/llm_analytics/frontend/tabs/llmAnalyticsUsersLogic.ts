@@ -50,7 +50,7 @@ export const llmAnalyticsUsersLogic = kea<llmAnalyticsUsersLogicType>([
             ): DataTableNode => ({
                 kind: NodeKind.DataTableNode,
                 source: {
-                    kind: NodeKind.HogQLQuery,
+                    kind: NodeKind.InsightsQLQuery,
                     query: `
                 SELECT
                     argMax(user_tuple, timestamp) as __llm_person,
@@ -98,7 +98,7 @@ export const llmAnalyticsUsersLogic = kea<llmAnalyticsUsersLogicType>([
                     TaxonomicFilterGroupType.PersonProperties,
                     ...groupsTaxonomicTypes,
                     TaxonomicFilterGroupType.Cohorts,
-                    TaxonomicFilterGroupType.HogQLExpression,
+                    TaxonomicFilterGroupType.InsightsQLExpression,
                 ],
                 showTestAccountFilters: true,
                 showExport: true,

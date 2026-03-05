@@ -9,7 +9,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
 
     return [
         {
-            title: 'Create the PostHog component',
+            title: 'Create the Insights component',
             badge: 'required',
             content: (
                 <>
@@ -28,7 +28,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                         ]}
                     />
                     <Markdown>
-                        In this file, add your PostHog web snippet. Be sure to include the `is:inline` directive to
+                        In this file, add your Insights web snippet. Be sure to include the `is:inline` directive to
                         prevent Astro from processing it:
                     </Markdown>
                     <CodeBlock
@@ -60,7 +60,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Create a layout where we will use `posthog.astro`. Create a new file `PostHogLayout.astro` in
+                        Create a layout where we will use `posthog.astro`. Create a new file `InsightsLayout.astro` in
                         your `src/layouts` folder:
                     </Markdown>
                     <CodeBlock
@@ -71,23 +71,23 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     cd ./src/layouts
                                     # or 'cd ./src && mkdir layouts && cd ./layouts' if your layouts folder doesn't exist
-                                    touch PostHogLayout.astro
+                                    touch InsightsLayout.astro
                                 `,
                             },
                         ]}
                     />
-                    <Markdown>Add the following code to `PostHogLayout.astro`:</Markdown>
+                    <Markdown>Add the following code to `InsightsLayout.astro`:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'html',
-                                file: 'src/layouts/PostHogLayout.astro',
+                                file: 'src/layouts/InsightsLayout.astro',
                                 code: dedent`
                                     ---
-                                    import PostHog from '../components/posthog.astro'
+                                    import Insights from '../components/posthog.astro'
                                     ---
                                     <head>
-                                        <PostHog />
+                                        <Insights />
                                     </head>
                                 `,
                             },
@@ -109,11 +109,11 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 file: 'src/pages/index.astro',
                                 code: dedent`
                                     ---
-                                    import PostHogLayout from '../layouts/PostHogLayout.astro';
+                                    import InsightsLayout from '../layouts/InsightsLayout.astro';
                                     ---
-                                    <PostHogLayout>
+                                    <InsightsLayout>
                                       <!-- your existing app components -->
-                                    </PostHogLayout>
+                                    </InsightsLayout>
                                 `,
                             },
                         ]}

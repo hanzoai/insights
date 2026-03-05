@@ -1,6 +1,6 @@
 import api from 'lib/api'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import { ClusteringLevel, TraceSummary } from './types'
 
@@ -24,8 +24,8 @@ export async function loadTraceSummaries(
     const eventName = level === 'generation' ? '$ai_generation_summary' : '$ai_trace_summary'
     const idProperty = level === 'generation' ? '$ai_generation_id' : '$ai_trace_id'
 
-    const response = await api.queryHogQL(
-        hogql`
+    const response = await api.queryInsightsQL(
+        insightsql`
             SELECT
                 JSONExtractString(properties, ${idProperty}) as item_id,
                 argMax(JSONExtractString(properties, '$ai_summary_title'), timestamp) as title,

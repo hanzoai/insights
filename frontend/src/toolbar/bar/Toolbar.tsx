@@ -2,7 +2,7 @@ import './Toolbar.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { PostHog } from 'posthog-js'
+import { Insights } from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 
 import {
@@ -64,7 +64,7 @@ function EnabledStatusItem({ label, value }: { label: string; value: boolean }):
 }
 
 function postHogDebugInfoMenuItem(
-    posthog: PostHog | null,
+    posthog: Insights | null,
     loadingSurveys: boolean,
     surveysCount: number
 ): LemonMenuItem {
@@ -422,8 +422,8 @@ export function Toolbar(): JSX.Element | null {
             >
                 <ToolbarButton
                     onClick={isAuthenticated ? toggleMinimized : authenticate}
-                    title={isAuthenticated ? 'Minimize' : 'Authenticate the PostHog Toolbar'}
-                    titleMinimized={isAuthenticated ? 'Expand the toolbar' : 'Authenticate the PostHog Toolbar'}
+                    title={isAuthenticated ? 'Minimize' : 'Authenticate the Insights Toolbar'}
+                    titleMinimized={isAuthenticated ? 'Expand the toolbar' : 'Authenticate the Insights Toolbar'}
                 >
                     <AnimatedLogomark
                         animate={isLoading}

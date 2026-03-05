@@ -1,10 +1,10 @@
 import { BuiltLogic, useActions, useValues } from 'kea'
-import { PostHogErrorBoundary } from 'posthog-js/react'
+import { InsightsErrorBoundary } from 'posthog-js/react'
 import { useEffect, useMemo } from 'react'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { RecordingsUniversalFiltersEmbed } from 'scenes/session-recordings/filters/RecordingsUniversalFiltersEmbed'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { sessionRecordingPlayerLogicType } from 'scenes/session-recordings/player/sessionRecordingPlayerLogicType'
@@ -118,9 +118,9 @@ export const Settings = ({
     }
 
     return (
-        <PostHogErrorBoundary>
+        <InsightsErrorBoundary>
             <RecordingsUniversalFiltersEmbed filters={filters} setFilters={setFilters} />
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }
 
@@ -129,7 +129,7 @@ export type NotebookNodePlaylistAttributes = {
     pinned?: string[]
 }
 
-export const NotebookNodePlaylist = createPostHogWidgetNode<NotebookNodePlaylistAttributes>({
+export const NotebookNodePlaylist = createInsightsWidgetNode<NotebookNodePlaylistAttributes>({
     nodeType: NotebookNodeType.RecordingPlaylist,
     titlePlaceholder: 'Session replays',
     Component,

@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client'
 import { Exporter } from '~/exporter/Exporter'
 import { ExportedData } from '~/exporter/types'
 import { initKea } from '~/initKea'
-import { loadPostHogJS } from '~/loadPostHogJS'
+import { loadInsightsJS } from '~/loadInsightsJS'
 
 import { ErrorBoundary } from '../layout/ErrorBoundary'
 
@@ -17,7 +17,7 @@ import { ErrorBoundary } from '../layout/ErrorBoundary'
 // Without it, embeds of self-hosted iframes will log metrics to app.posthog.com.
 window.JS_POSTHOG_API_KEY = undefined
 
-loadPostHogJS()
+loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })
 
 // On Chrome + Windows, the country flag emojis don't render correctly. This is a polyfill for that.
@@ -38,7 +38,7 @@ function renderApp(): void {
             </ErrorBoundary>
         )
     } else {
-        console.error('Attempted, but could not render PostHog app because <div id="root" /> is not found.')
+        console.error('Attempted, but could not render Insights app because <div id="root" /> is not found.')
     }
 }
 

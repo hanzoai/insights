@@ -9,9 +9,9 @@ from rest_framework.viewsets import GenericViewSet
 
 from posthog.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql import ast
-from posthog.hogql.database.database import Database
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.models.team.team import Team
@@ -61,7 +61,7 @@ def find_values_for_revenue_analytics_property(key: str, team: Team) -> list[str
 
     values = []
     try:
-        result = execute_hogql_query(query, team=team)
+        result = execute_insightsql_query(query, team=team)
         values = [row[0] for row in result.results]
     except Exception as e:
         capture_exception(e)

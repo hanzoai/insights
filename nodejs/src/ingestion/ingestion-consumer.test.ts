@@ -5,16 +5,16 @@ import { DecodedKafkaMessage } from '~/tests/helpers/mocks/producer.spy'
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
-import { insertHogFunction as _insertHogFunction } from '~/cdp/_tests/fixtures'
+import { insertCustomFunction as _insertCustomFunction } from '~/cdp/_tests/fixtures'
 import { template as geoipTemplate } from '~/cdp/templates/_transformations/geoip/geoip.template'
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 import { COOKIELESS_MODE_FLAG_PROPERTY, COOKIELESS_SENTINEL_VALUE } from '~/ingestion/cookieless/cookieless-manager'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { createTeam, getFirstTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { CookielessServerHashMode, Hub, PipelineEvent, Team } from '../../src/types'
 import { closeHub, createHub } from '../../src/utils/db/hub'
-import { HogFunctionType } from '../cdp/types'
+import { CustomFunctionType } from '../cdp/types'
 import { PostgresUse } from '../utils/db/postgres'
 import { parseJSON } from '../utils/json-parse'
 import { logger } from '../utils/logger'
@@ -25,8 +25,8 @@ import { IngestionConsumer } from './ingestion-consumer'
 const DEFAULT_TEST_TIMEOUT = 5000
 jest.setTimeout(DEFAULT_TEST_TIMEOUT)
 
-jest.mock('../utils/posthog', () => {
-    const original = jest.requireActual('../utils/posthog')
+jest.mock('../utils/insights', () => {
+    const original = jest.requireActual('../utils/insights')
     return {
         ...original,
         captureException: jest.fn(),
@@ -115,7 +115,7 @@ describe('IngestionConsumer', () => {
         distinct_id: 'user-1',
         uuid: new UUIDT().toString(),
         ip: '127.0.0.1',
-        site_url: 'us.posthog.com',
+        site_url: 'us.hanzo.ai',
         now: fixedTime.toISO()!,
         event: '$pageview',
         ...event,
@@ -129,7 +129,7 @@ describe('IngestionConsumer', () => {
         distinct_id: COOKIELESS_SENTINEL_VALUE,
         uuid: new UUIDT().toString(),
         ip: '127.0.0.1',
-        site_url: 'us.posthog.com',
+        site_url: 'us.hanzo.ai',
         now: fixedTime.toISO()!,
         event: '$pageview',
         ...event,
@@ -197,7 +197,7 @@ describe('IngestionConsumer', () => {
         it('should process a cookieless event', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Stateful, team.id],
                 'set cookieless to stateful'
             )
@@ -209,7 +209,7 @@ describe('IngestionConsumer', () => {
         it('should drop a cookieless event if the team has cookieless disabled', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Disabled, team.id],
                 'set cookieless to disabled'
             )
@@ -1151,7 +1151,7 @@ describe('IngestionConsumer', () => {
     })
 
     describe('transformations', () => {
-        let transformationFunction: HogFunctionType
+        let transformationFunction: CustomFunctionType
         const TRANSFORMATION_TEST_TIMEOUT = 30000
 
         beforeAll(() => {
@@ -1162,10 +1162,10 @@ describe('IngestionConsumer', () => {
             jest.setTimeout(DEFAULT_TEST_TIMEOUT)
         })
 
-        const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-            const { hog, bytecode, name } = hogFunction
-            const item = await _insertHogFunction(hub.postgres, team.id, {
-                hog,
+        const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+            const { script, bytecode, name } = customFunction
+            const item = await _insertCustomFunction(hub.postgres, team.id, {
+                script,
                 bytecode,
                 name: name || 'Test Function',
                 type: 'transformation',
@@ -1175,29 +1175,29 @@ describe('IngestionConsumer', () => {
 
         beforeEach(async () => {
             // Create a transformation function using the geoip template as an example
-            const hogByteCode = await compileHog(geoipTemplate.code)
-            transformationFunction = await insertHogFunction({
+            const scriptByteCode = await compileScript(geoipTemplate.code)
+            transformationFunction = await insertCustomFunction({
                 name: 'GeoIP Transformation',
-                hog: geoipTemplate.code,
-                bytecode: hogByteCode,
+                script: geoipTemplate.code,
+                bytecode: scriptByteCode,
             })
 
             ingester = await createIngestionConsumer(hub)
         })
 
         it(
-            'should call hogwatcher state caching methods and observe results when hogwatcher is enabled (sample rate = 1)',
+            'should call scriptwatcher state caching methods and observe results when scriptwatcher is enabled (sample rate = 1)',
             async () => {
                 // Create a new ingester with the sample rate we want to test
                 hub.CDP_HOG_WATCHER_SAMPLE_RATE = 1
                 const localIngester = await createIngestionConsumer(hub)
 
                 // Create spies for methods after the service is configured
-                const fetchAndCacheSpy = jest.spyOn(localIngester.hogTransformer, 'fetchAndCacheHogFunctionStates')
-                const clearStatesSpy = jest.spyOn(localIngester.hogTransformer, 'clearHogFunctionStates')
-                const observeResultsSpy = jest.spyOn(localIngester.hogTransformer['hogWatcher'], 'observeResults')
+                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheCustomFunctionStates')
+                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearCustomFunctionStates')
+                const observeResultsSpy = jest.spyOn(localIngester.scriptTransformer['scriptWatcher'], 'observeResults')
 
-                // Process batch with hogwatcher enabled
+                // Process batch with scriptwatcher enabled
                 // in this stage we do not have the teamId on the event but the token is in kafka headers
                 const event = createEvent({
                     ip: '89.160.20.129',
@@ -1207,7 +1207,7 @@ describe('IngestionConsumer', () => {
 
                 await localIngester.handleKafkaBatch(messages)
 
-                // Verify that fetchAndCacheHogFunctionStates and clearHogFunctionStates were called
+                // Verify that fetchAndCacheCustomFunctionStates and clearCustomFunctionStates were called
                 expect(fetchAndCacheSpy).toHaveBeenCalled()
                 expect(clearStatesSpy).toHaveBeenCalled()
 
@@ -1230,17 +1230,17 @@ describe('IngestionConsumer', () => {
         )
 
         it(
-            'should not call hogwatcher state caching methods when hogwatcher is disabled (sample rate = 0)',
+            'should not call scriptwatcher state caching methods when scriptwatcher is disabled (sample rate = 0)',
             async () => {
                 // Create a new ingester with the sample rate we want to test
                 hub.CDP_HOG_WATCHER_SAMPLE_RATE = 0
                 const localIngester = await createIngestionConsumer(hub)
 
                 // Create spies for methods after the service is configured
-                const fetchAndCacheSpy = jest.spyOn(localIngester.hogTransformer, 'fetchAndCacheHogFunctionStates')
-                const clearStatesSpy = jest.spyOn(localIngester.hogTransformer, 'clearHogFunctionStates')
+                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheCustomFunctionStates')
+                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearCustomFunctionStates')
 
-                // Process batch with hogwatcher disabled
+                // Process batch with scriptwatcher disabled
                 const event = createEvent({
                     ip: '89.160.20.129',
                     properties: { $ip: '89.160.20.129' },
@@ -1249,7 +1249,7 @@ describe('IngestionConsumer', () => {
 
                 await localIngester.handleKafkaBatch(messages)
 
-                // Verify that fetchAndCacheHogFunctionStates and clearHogFunctionStates were NOT called
+                // Verify that fetchAndCacheCustomFunctionStates and clearCustomFunctionStates were NOT called
                 expect(fetchAndCacheSpy).not.toHaveBeenCalled()
                 expect(clearStatesSpy).not.toHaveBeenCalled()
 
@@ -1279,7 +1279,7 @@ describe('IngestionConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: transformationFunction.id,
                             count: 1,
                             metric_kind: 'success',
@@ -1299,7 +1299,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'info',
-                            log_source: 'hog_function',
+                            log_source: 'custom_function',
                             log_source_id: transformationFunction.id,
                             message: 'geoip lookup failed for ip, 256.256.256.256',
                             team_id: team.id,
@@ -1312,7 +1312,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'debug',
-                            log_source: 'hog_function',
+                            log_source: 'custom_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringMatching(/^Function completed in/),
                             team_id: team.id,
@@ -1344,7 +1344,7 @@ describe('IngestionConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: transformationFunction.id,
                             count: 1,
                             metric_kind: 'success',
@@ -1364,7 +1364,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'info',
-                            log_source: 'hog_function',
+                            log_source: 'custom_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringContaining('geoip location data for ip:'),
                             team_id: team.id,
@@ -1377,7 +1377,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'debug',
-                            log_source: 'hog_function',
+                            log_source: 'custom_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringMatching(/^Function completed in/),
                             team_id: team.id,

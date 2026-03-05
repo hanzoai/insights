@@ -1199,7 +1199,7 @@ describe('ClickHousePersonRepository', () => {
 async function getFirstTeam(hub: Hub): Promise<Team> {
     const teams = await hub.postgres.query(
         PostgresUse.COMMON_WRITE,
-        'SELECT * FROM posthog_team LIMIT 1',
+        'SELECT * FROM insights_team LIMIT 1',
         [],
         'getFirstTeam'
     )

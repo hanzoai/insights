@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Capture an event via a custom incoming webhook',
     icon_url: '/static/services/webhook.svg',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.body)
@@ -56,7 +56,7 @@ if(empty(inputs.distinct_id)) {
   }
 }
 
-postHogCapture({
+insightsCapture({
   'event': inputs.event,
   'distinct_id': inputs.distinct_id,
   'properties': inputs.properties
@@ -84,10 +84,10 @@ postHogCapture({
             key: 'properties',
             type: 'json',
             label: 'Event properties',
-            description: 'A mapping of the incoming webhook body to the PostHog event properties',
+            description: 'A mapping of the incoming webhook body to the Insights event properties',
             default: {
                 $ip: '{request.ip}',
-                $lib: 'posthog-webhook',
+                $lib: 'insights-webhook',
                 $source_url: '{source.url}',
             },
             secret: false,

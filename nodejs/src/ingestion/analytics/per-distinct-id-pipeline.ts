@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { HogTransformerService } from '../../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
 import { KafkaProducerWrapper } from '../../kafka/producer'
 import { Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
@@ -27,7 +27,7 @@ export interface PerDistinctIdPipelineConfig {
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
-    hogTransformer: HogTransformerService
+    scriptTransformer: ScriptTransformerService
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
     kafkaProducer: KafkaProducerWrapper
@@ -56,7 +56,7 @@ export function createPerDistinctIdPipeline<TInput extends PerDistinctIdPipeline
     builder: StartPipelineBuilder<TInput, TContext>,
     config: PerDistinctIdPipelineConfig
 ): PipelineBuilder<TInput, void, TContext> {
-    const { options, teamManager, groupTypeManager, hogTransformer, personsStore, groupStore, kafkaProducer, groupId } =
+    const { options, teamManager, groupTypeManager, scriptTransformer, personsStore, groupStore, kafkaProducer, groupId } =
         config
 
     return builder.retry(
@@ -79,7 +79,7 @@ export function createPerDistinctIdPipeline<TInput extends PerDistinctIdPipeline
                             options,
                             teamManager,
                             groupTypeManager,
-                            hogTransformer,
+                            scriptTransformer,
                             personsStore,
                             groupStore,
                             kafkaProducer,

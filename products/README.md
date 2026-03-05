@@ -1,12 +1,12 @@
 # Products
 
-Each product in PostHog is a **vertical slice**: it contains its backend (Django app), frontend (React/TypeScript), and optionally shared code.
+Each product in Insights is a **vertical slice**: it contains its backend (Django app), frontend (React/TypeScript), and optionally shared code.
 This structure ensures product features are self-contained and can evolve independently.
 
 The **entire product folder** (`products/<product_name>/`) is treated as a **Turborepo package**.
 Backend and frontend are sub-parts of that package.
 
-This is the (future) home for all PostHog products ([RFC](https://github.com/PostHog/product-internal/pull/703)).
+This is the (future) home for all Insights products ([RFC](https://github.com/Insights/product-internal/pull/703)).
 
 For the detailed architecture rationale (frozen dataclasses, facades, isolated testing), see [architecture.md](./architecture.md).
 

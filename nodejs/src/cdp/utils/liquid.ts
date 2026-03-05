@@ -1,6 +1,6 @@
 import { Liquid } from 'liquidjs'
 
-import { HogFunctionInvocationGlobalsWithInputs } from '../types'
+import { CustomFunctionInvocationGlobalsWithInputs } from '../types'
 
 const LIQUID_REGEX = /\{\{(.*?)\}\}|{%(.*?)%}/g
 
@@ -16,7 +16,7 @@ export class LiquidRenderer {
         return this._liquid
     }
 
-    static renderWithHogFunctionGlobals(template: string, globals: HogFunctionInvocationGlobalsWithInputs): string {
+    static renderWithCustomFunctionGlobals(template: string, globals: CustomFunctionInvocationGlobalsWithInputs): string {
         const context = {
             ...globals,
             now: new Date(),

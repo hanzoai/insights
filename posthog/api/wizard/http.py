@@ -117,10 +117,10 @@ class SetupWizardViewSet(viewsets.ViewSet):
         This endpoint is used to get the data for the setup wizard to use.
         """
 
-        hash = request.headers.get("X-PostHog-Wizard-Hash")
+        hash = request.headers.get("X-Insights-Wizard-Hash")
 
         if not hash:
-            raise AuthenticationFailed("X-PostHog-Wizard-Hash header is required.")
+            raise AuthenticationFailed("X-Insights-Wizard-Hash header is required.")
 
         key = f"{SETUP_WIZARD_CACHE_PREFIX}{hash}"
 
@@ -151,8 +151,8 @@ class SetupWizardViewSet(viewsets.ViewSet):
         json_schema = validated_data["json_schema"]
         model = validated_data["model"]
 
-        hash = request.headers.get("X-PostHog-Wizard-Hash")
-        fixture_generation = request.headers.get("X-PostHog-Wizard-Fixture-Generation")
+        hash = request.headers.get("X-Insights-Wizard-Hash")
+        fixture_generation = request.headers.get("X-Insights-Wizard-Fixture-Generation")
         trace_id = None
 
         if hash:
@@ -193,15 +193,15 @@ class SetupWizardViewSet(viewsets.ViewSet):
 
             distinct_id = user.distinct_id
 
-            trace_id = request.headers.get("X-PostHog-Trace-Id") or hashlib.sha256(distinct_id.encode()).hexdigest()
+            trace_id = request.headers.get("X-Insights-Trace-Id") or hashlib.sha256(distinct_id.encode()).hexdigest()
 
         posthog_client = posthoganalytics.default_client
 
         if not posthog_client:
-            raise exceptions.ValidationError("PostHog client not found")
+            raise exceptions.ValidationError("Insights client not found")
 
         system_prompt = (
-            "You are a PostHog setup wizard. Only answer messages about setting up PostHog and nothing else."
+            "You are a Insights setup wizard. Only answer messages about setting up Insights and nothing else."
         )
 
         if model in GEMINI_SUPPORTED_MODELS:

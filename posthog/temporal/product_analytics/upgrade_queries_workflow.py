@@ -6,7 +6,7 @@ from typing import Optional
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.product_analytics.upgrade_queries_activities import (
     GetInsightsToMigrateActivityInputs,
     MigrateInsightsBatchActivityInputs,
@@ -33,7 +33,7 @@ class UpgradeQueriesWorkflowInputs:
 
 
 @workflow.defn(name="upgrade-queries")
-class UpgradeQueriesWorkflow(PostHogWorkflow):
+class UpgradeQueriesWorkflow(InsightsWorkflow):
     @workflow.init
     def __init__(self, input: UpgradeQueriesWorkflowInputs) -> None:
         if input.state:

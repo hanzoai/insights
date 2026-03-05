@@ -31,7 +31,7 @@ export interface InsightExportResult extends HclExportResult {
 }
 
 /**
- * @see https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/insight
+ * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/insight
  */
 const INSIGHT_FIELD_MAPPINGS: FieldMapping<Partial<InsightModel>, InsightHclExportOptions>[] = [
     {

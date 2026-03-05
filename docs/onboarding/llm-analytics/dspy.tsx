@@ -9,12 +9,12 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The DSPy integration uses PostHog's
+                        Setting up analytics starts with installing the Insights SDK. The DSPy integration uses Insights's
                         LLM callback.
                     </Markdown>
 
@@ -33,7 +33,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             content: (
                 <>
                     <Markdown>
-                        Install DSPy and LLM. DSPy uses LLM natively for provider access, and PostHog integrates
+                        Install DSPy and LLM. DSPy uses LLM natively for provider access, and Insights integrates
                         with LLM's callback system.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             ),
         },
         {
-            title: 'Configure PostHog with LLM',
+            title: 'Configure Insights with LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Set your PostHog project API key and host as environment variables, then configure LLM to
-                        use PostHog as a callback handler. You can find your API key in [your project
+                        Set your Insights project API key and host as environment variables, then configure LLM to
+                        use Insights as a callback handler. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
 
@@ -64,11 +64,11 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             import dspy
                             import llm
 
-                            # Set PostHog environment variables
+                            # Set Insights environment variables
                             os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                             os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"
 
-                            # Enable PostHog callbacks in LLM
+                            # Enable Insights callbacks in LLM
                             llm.success_callback = ["posthog"]
                             llm.failure_callback = ["posthog"]
 
@@ -80,7 +80,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            DSPy uses LLM under the hood for LLM provider access. By configuring PostHog as a
+                            DSPy uses LLM under the hood for LLM provider access. By configuring Insights as a
                             LLM callback, all LLM calls made through DSPy are automatically captured as
                             `$ai_generation` events.
                         </Markdown>
@@ -94,7 +94,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             content: (
                 <>
                     <Markdown>
-                        Use DSPy as normal. PostHog automatically captures an `$ai_generation` event for each LLM call
+                        Use DSPy as normal. Insights automatically captures an `$ai_generation` event for each LLM call
                         made through LLM.
                     </Markdown>
 
@@ -110,7 +110,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             # Create and run a module
                             predictor = dspy.Predict(QA)
                             result = predictor(
-                                question="What is a fun fact about hedgehogs?"
+                                question="What is a fun fact about mascots?"
                             )
 
                             print(result.answer)

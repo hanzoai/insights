@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-js'
+import { Insights } from 'posthog-js'
 
 const SHIMMER_EFFECT_CSS = `
     @keyframes shimmer {
@@ -92,7 +92,7 @@ const generatePiiMaskingCSSForSelector = (
     `
 }
 
-export const generatePiiMaskingCSS = (baseColor: string, posthog: PostHog | null): string => {
+export const generatePiiMaskingCSS = (baseColor: string, posthog: Insights | null): string => {
     const [color1, color2, color3, color4, color5] = getColorPalette(baseColor).map(colorToHex)
 
     // There's some checks that can be a regexp or even done via JS which means we can't do it CSS based

@@ -12,7 +12,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add the PostHog Android SDK to your `build.gradle` dependencies:</Markdown>
+                    <Markdown>Add the Insights Android SDK to your `build.gradle` dependencies:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -28,7 +28,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     />
                     <CalloutBox type="fyi" title="SDK version">
                         <Markdown>
-                            Session replay requires PostHog Android SDK version 3.4.0 or higher. We recommend always
+                            Session replay requires Insights Android SDK version 3.4.0 or higher. We recommend always
                             using the latest version.
                         </Markdown>
                     </CalloutBox>
@@ -41,19 +41,19 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your PostHog [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
             ),
         },
         {
-            title: 'Configure PostHog with session replay',
+            title: 'Configure Insights with session replay',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Add `sessionReplay = true` to your PostHog configuration. Here are all the available options:
+                        Add `sessionReplay = true` to your Insights configuration. Here are all the available options:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -71,7 +71,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                         override fun onCreate() {
                                             super.onCreate()
 
-                                            val config = PostHogAndroidConfig(
+                                            val config = InsightsAndroidConfig(
                                                 apiKey = POSTHOG_API_KEY,
                                                 host = POSTHOG_HOST
                                             )
@@ -98,7 +98,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             // Throttle delay used to reduce the number of snapshots captured. Default is 1000ms
                                             config.sessionReplayConfig.throttleDelayMs = 1000
 
-                                            PostHogAndroid.setup(this, config)
+                                            InsightsAndroid.setup(this, config)
                                         }
                                     }
                                 `,

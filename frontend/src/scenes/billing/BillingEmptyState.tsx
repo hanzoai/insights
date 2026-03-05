@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { WarningHog } from 'lib/components/hedgehogs'
+import { WarningHog } from 'lib/components/mascots'
 
 export interface BillingEmptyStateProps {
     heading?: string

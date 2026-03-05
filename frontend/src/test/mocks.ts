@@ -219,7 +219,7 @@ export const mockIntegration: IntegrationType = {
     config: {
         team: {
             id: '123',
-            name: 'PostHog',
+            name: 'Insights',
         },
     },
     icon_url: '',

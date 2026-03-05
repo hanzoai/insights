@@ -1,4 +1,4 @@
-There are many ways to contribute to PostHog. We want to help developers know exactly how users are interacting with their stuff, in a way that doesn't send data to 3rd parties.
+There are many ways to contribute to Insights. We want to help developers know exactly how users are interacting with their stuff, in a way that doesn't send data to 3rd parties.
 
 # Creating a PR
 
@@ -46,6 +46,6 @@ Raise an issue for these and tag it as an Enhancement. We love every idea. Pleas
 
 We strive to keep our [roadmap](https://posthog.com/roadmap) up-to-date, while our [WIP page](https://posthog.com/wip) lists the features we're actively working on. We aren't generally expecting contributions towards these fronts since we've already decided who's going to be working on it and have allocated enough resources towards it.
 
-As a rule of thumb - if you wanna work on a specific feature that fits with helping developers understand product usage and/or extending PostHog to ingest more of their customer's data, we'll generally like it.
+As a rule of thumb - if you wanna work on a specific feature that fits with helping developers understand product usage and/or extending Insights to ingest more of their customer's data, we'll generally like it.
 
 If you are at all unsure, just raise it as an enhancement issue first, and we'll attempt to respond very quickly.

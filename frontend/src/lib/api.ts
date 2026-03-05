@@ -218,13 +218,13 @@ import type {
 import { Task, TaskRun, TaskUpsertProps } from 'products/tasks/frontend/types'
 import { OptOutEntry } from 'products/workflows/frontend/OptOuts/optOutListLogic'
 import { MessageTemplate } from 'products/workflows/frontend/TemplateLibrary/messageTemplatesLogic'
-import { HogflowTestResult } from 'products/workflows/frontend/Workflows/hogflows/steps/types'
+import { CustomFlowTestResult } from 'products/workflows/frontend/Workflows/customflows/steps/types'
 import {
-    HogFlow,
-    HogFlowAction,
-    HogFlowBatchJob,
-    HogFlowTemplate,
-} from 'products/workflows/frontend/Workflows/hogflows/types'
+    CustomFlow,
+    CustomFlowAction,
+    CustomFlowBatchJob,
+    CustomFlowTemplate,
+} from 'products/workflows/frontend/Workflows/customflows/types'
 
 import { AgentMode } from '../queries/schema'
 import { MaxUIContext } from '../scenes/max/maxTypes'
@@ -638,8 +638,8 @@ export class ApiRequest {
         return this.pluginConfigs(teamId).addPathComponent(id)
     }
 
-    public hog(teamId?: TeamType['id']): ApiRequest {
-        return this.projectsDetail(teamId).addPathComponent('hog')
+    public customScript(teamId?: TeamType['id']): ApiRequest {
+        return this.projectsDetail(teamId).addPathComponent('custom_script')
     }
 
     public customFunctions(teamId?: TeamType['id']): ApiRequest {
@@ -1794,20 +1794,20 @@ export class ApiRequest {
         return this.addPathComponent('oauth_application').addPathComponent('metadata').addPathComponent(clientId)
     }
 
-    public hogFlows(): ApiRequest {
-        return this.environments().current().addPathComponent('hog_flows')
+    public customFlows(): ApiRequest {
+        return this.environments().current().addPathComponent('custom_flows')
     }
 
-    public hogFlow(hogFlowId: HogFlow['id']): ApiRequest {
-        return this.hogFlows().addPathComponent(hogFlowId)
+    public customFlow(customFlowId: CustomFlow['id']): ApiRequest {
+        return this.customFlows().addPathComponent(customFlowId)
     }
 
-    public hogFlowTemplates(): ApiRequest {
-        return this.environments().current().addPathComponent('hog_flow_templates')
+    public customFlowTemplates(): ApiRequest {
+        return this.environments().current().addPathComponent('custom_flow_templates')
     }
 
-    public hogFlowTemplate(hogFlowTemplateId: HogFlowTemplate['id']): ApiRequest {
-        return this.hogFlowTemplates().addPathComponent(hogFlowTemplateId)
+    public customFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): ApiRequest {
+        return this.customFlowTemplates().addPathComponent(customFlowTemplateId)
     }
 
     public wizard(): ApiRequest {
@@ -2368,7 +2368,7 @@ const api = {
                 [
                     ActivityScope.PLUGIN,
                     ActivityScope.CUSTOM_FUNCTION,
-                    ActivityScope.HOG_FLOW,
+                    ActivityScope.CUSTOM_FLOW,
                     ActivityScope.EXPERIMENT,
                     ActivityScope.TAG,
                     ActivityScope.ENDPOINT,
@@ -3330,9 +3330,9 @@ const api = {
             return results
         },
     },
-    hog: {
-        async create(hog: string, locals?: any[], inRepl?: boolean): Promise<HogCompileResponse> {
-            return await new ApiRequest().hog().create({ data: { hog, locals, in_repl: inRepl || false } })
+    customScript: {
+        async create(code: string, locals?: any[], inRepl?: boolean): Promise<HogCompileResponse> {
+            return await new ApiRequest().customScript().create({ data: { code, locals, in_repl: inRepl || false } })
         },
     },
     customFunctions: {
@@ -5147,24 +5147,24 @@ const api = {
             return await new ApiRequest().oauthApplicationPublicMetadata(clientId).get()
         },
     },
-    hogFlows: {
-        async getHogFlows(): Promise<PaginatedResponse<HogFlow>> {
-            return await new ApiRequest().hogFlows().get()
+    customFlows: {
+        async getCustomFlows(): Promise<PaginatedResponse<CustomFlow>> {
+            return await new ApiRequest().customFlows().get()
         },
-        async getHogFlow(hogFlowId: HogFlow['id']): Promise<HogFlow> {
-            return await new ApiRequest().hogFlow(hogFlowId).get()
+        async getCustomFlow(customFlowId: CustomFlow['id']): Promise<CustomFlow> {
+            return await new ApiRequest().customFlow(customFlowId).get()
         },
-        async createHogFlow(data: Partial<HogFlow>): Promise<HogFlow> {
-            return await new ApiRequest().hogFlows().create({ data })
+        async createCustomFlow(data: Partial<CustomFlow>): Promise<CustomFlow> {
+            return await new ApiRequest().customFlows().create({ data })
         },
-        async updateHogFlow(hogFlowId: HogFlow['id'], data: Partial<HogFlow>): Promise<HogFlow> {
-            return await new ApiRequest().hogFlow(hogFlowId).update({ data })
+        async updateCustomFlow(customFlowId: CustomFlow['id'], data: Partial<CustomFlow>): Promise<CustomFlow> {
+            return await new ApiRequest().customFlow(customFlowId).update({ data })
         },
-        async deleteHogFlow(hogFlowId: HogFlow['id']): Promise<void> {
-            return await new ApiRequest().hogFlow(hogFlowId).delete()
+        async deleteCustomFlow(customFlowId: CustomFlow['id']): Promise<void> {
+            return await new ApiRequest().customFlow(customFlowId).delete()
         },
         async createTestInvocation(
-            hogFlowId: HogFlow['id'],
+            customFlowId: CustomFlow['id'],
             data: {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
@@ -5173,49 +5173,49 @@ const api = {
                 invocation_id?: string
                 current_action_id?: string
             }
-        ): Promise<HogflowTestResult> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('invocations').create({ data })
+        ): Promise<CustomFlowTestResult> {
+            return await new ApiRequest().customFlow(customFlowId).withAction('invocations').create({ data })
         },
         async getBatchTriggerBlastRadius(
-            filters: Extract<HogFlowAction['config'], { type: 'batch' }>['filters']
+            filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters']
         ): Promise<{
             users_affected: number
             total_users: number
         }> {
-            return await new ApiRequest().hogFlows().withAction('user_blast_radius').create({ data: { filters } })
+            return await new ApiRequest().customFlows().withAction('user_blast_radius').create({ data: { filters } })
         },
-        async createHogFlowBatchJob(
-            hogFlowId: HogFlow['id'],
+        async createCustomFlowBatchJob(
+            customFlowId: CustomFlow['id'],
             data: {
                 variables: Record<string, InsightsQLVariable>
-                filters: Extract<HogFlowAction['config'], { type: 'batch' }>['filters']
+                filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters']
                 scheduled_at?: string | null
             }
         ): Promise<void> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('batch_jobs').create({ data })
+            return await new ApiRequest().customFlow(customFlowId).withAction('batch_jobs').create({ data })
         },
-        async getHogFlowBatchJobs(hogFlowId: HogFlow['id']): Promise<HogFlowBatchJob[]> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('batch_jobs').get()
+        async getCustomFlowBatchJobs(customFlowId: CustomFlow['id']): Promise<CustomFlowBatchJob[]> {
+            return await new ApiRequest().customFlow(customFlowId).withAction('batch_jobs').get()
         },
     },
-    hogFlowTemplates: {
-        async getHogFlowTemplates(): Promise<PaginatedResponse<HogFlowTemplate>> {
-            return await new ApiRequest().hogFlowTemplates().get()
+    customFlowTemplates: {
+        async getCustomFlowTemplates(): Promise<PaginatedResponse<CustomFlowTemplate>> {
+            return await new ApiRequest().customFlowTemplates().get()
         },
-        async getHogFlowTemplate(hogFlowTemplateId: HogFlowTemplate['id']): Promise<HogFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).get()
+        async getCustomFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): Promise<CustomFlowTemplate> {
+            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).get()
         },
-        async createHogFlowTemplate(data: Partial<HogFlowTemplate>): Promise<HogFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplates().create({ data })
+        async createCustomFlowTemplate(data: Partial<CustomFlowTemplate>): Promise<CustomFlowTemplate> {
+            return await new ApiRequest().customFlowTemplates().create({ data })
         },
-        async updateHogFlowTemplate(
-            hogFlowTemplateId: HogFlowTemplate['id'],
-            data: Partial<HogFlowTemplate>
-        ): Promise<HogFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).update({ data })
+        async updateCustomFlowTemplate(
+            customFlowTemplateId: CustomFlowTemplate['id'],
+            data: Partial<CustomFlowTemplate>
+        ): Promise<CustomFlowTemplate> {
+            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).update({ data })
         },
-        async deleteHogFlowTemplate(hogFlowTemplateId: HogFlowTemplate['id']): Promise<void> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).delete()
+        async deleteCustomFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): Promise<void> {
+            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).delete()
         },
     },
 

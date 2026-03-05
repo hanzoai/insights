@@ -1,6 +1,6 @@
-# Adding Tools to the PostHog MCP
+# Adding Tools to the Insights MCP
 
-This guide explains how to add new tools to the PostHog MCP server. Tools are the interface between MCP clients (like Claude Desktop) and PostHog.
+This guide explains how to add new tools to the Insights MCP server. Tools are the interface between MCP clients (like Claude Desktop) and Insights.
 
 ## Quick Start
 
@@ -103,7 +103,7 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
     "category": "Feature flags", // This will be displayed in the docs, but not readable by the MCP client
     "feature": "flags",
     "summary": "Creates a new feature flag in the project.", // This will be displayed in the docs, but not readable by the MCP client.
-    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/PostHog/posthog/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
+    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/Insights/posthog/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
     "annotations": {
       "destructiveHint": false, // Does the tool delete or destructively modify data?
       "idempotentHint": false, // Can the tool be safely called multiple times with same result?
@@ -123,7 +123,7 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
 - `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
 - `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
 - `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
-- `docs` - PostHog documentation search
+- `docs` - Insights documentation search
 
 If your tool doesn't fit any of these features, you can create a new feature category yourself.
 If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/posthog/wizard/` so it shows up during feature selection when running `wizard mcp add`.

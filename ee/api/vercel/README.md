@@ -9,7 +9,7 @@ This guide documents the complete setup process for testing Vercel SSO integrati
 
 ## Step 1: Configure ngrok Tunnels
 
-Follow the [PostHog ngrok setup guide](https://posthog.com/handbook/engineering/setup-ssl-locally) to configure ngrok.
+Follow the [Insights ngrok setup guide](https://posthog.com/handbook/engineering/setup-ssl-locally) to configure ngrok.
 
 **Quick version:**
 
@@ -21,9 +21,9 @@ This will give you an HTTPS URL for port 8000, e.g., `https://abc123.ngrok-free.
 
 **Note**: You only need the Django tunnel. Vite will serve assets locally on port 8234, and the Django tunnel will proxy requests to it.
 
-## Step 2: Configure PostHog Environment Variables
+## Step 2: Configure Insights Environment Variables
 
-Create a `.env.vercel` file in the PostHog root directory with your ngrok URL (copy from `.env.vercel.example` in this directory)
+Create a `.env.vercel` file in the Insights root directory with your ngrok URL (copy from `.env.vercel.example` in this directory)
 
 ```bash
 # Enable HTTPS mode for local development
@@ -58,7 +58,7 @@ In your Vercel integration settings:
 
 ## Step 4: Start Development Servers
 
-Run PostHog with 1Password to load the Vercel credentials:
+Run Insights with 1Password to load the Vercel credentials:
 
 ```bash
 op run --env-file=.env.vercel -- bin/start
@@ -78,19 +78,19 @@ Vercel marketplace integrations have two separate flows:
 
 1. **Installation Flow** (API-based):
    - Endpoint: `/api/vercel/v1/installations/{id}`
-   - Triggered by API calls from Vercel to PostHog
+   - Triggered by API calls from Vercel to Insights
    - No user-facing web page
-   - Creates the integration record in PostHog
+   - Creates the integration record in Insights
 
 2. **SSO Flow** (web-based):
    - Endpoint: `/login/vercel/`
    - Triggered when user clicks "Connect Account" in Vercel
-   - Authenticates the user and links their PostHog account
+   - Authenticates the user and links their Insights account
    - Returns user back to Vercel using the `url` parameter
 
 ### Why No Redirect URL?
 
-The "Redirect URL" field in Vercel integration settings is for OAuth-style integrations. PostHog's Vercel marketplace integration doesn't need it because:
+The "Redirect URL" field in Vercel integration settings is for OAuth-style integrations. Insights's Vercel marketplace integration doesn't need it because:
 
 - Installation happens via direct API calls
 - SSO flow receives the return URL in the `url` query parameter from Vercel
@@ -153,7 +153,7 @@ Before releasing changes to the Vercel integration, manually verify the followin
 
 #### Scenario 1: Brand New User Installation
 
-**Setup**: Use an email that doesn't exist in PostHog
+**Setup**: Use an email that doesn't exist in Insights
 
 1. Start ngrok, Django, and Vite as described above
 2. In Vercel, navigate to your integration and click "Install"
@@ -162,16 +162,16 @@ Before releasing changes to the Vercel integration, manually verify the followin
 **Expected**:
 
 - [ ] Installation completes without errors
-- [ ] New organization is created in PostHog
+- [ ] New organization is created in Insights
 - [ ] New user is created with the email from Vercel
 - [ ] User is added as Owner of the organization
 - [ ] Click "Connect Account" → SSO works immediately (no login required)
 
-#### Scenario 2: Existing PostHog User (No Prior Vercel)
+#### Scenario 2: Existing Insights User (No Prior Vercel)
 
-**Setup**: Create a PostHog account manually with an email, then use that email in Vercel
+**Setup**: Create a Insights account manually with an email, then use that email in Vercel
 
-1. Create a user in PostHog: `User.objects.create_user(email="test@example.com", password="test")`
+1. Create a user in Insights: `User.objects.create_user(email="test@example.com", password="test")`
 2. In Vercel, install with the same email
 
 **Expected**:
@@ -238,7 +238,7 @@ for oi in OrganizationIntegration.objects.filter(kind="vercel"):
 2. In Vercel, navigate to your integration and click "Install"
 3. Follow the installation flow
 4. Click "Connect Account" to test SSO
-5. You should be redirected to PostHog, authenticate, and return to Vercel
+5. You should be redirected to Insights, authenticate, and return to Vercel
 
 ## Clean Up
 
@@ -257,6 +257,6 @@ direnv deny
 
 ## References
 
-- [PostHog SSL Setup Documentation](../contents/handbook/engineering/setup-ssl-locally.md)
+- [Insights SSL Setup Documentation](../contents/handbook/engineering/setup-ssl-locally.md)
 - [Vercel Marketplace API Docs](https://vercel.com/docs/integrations/create-integration/marketplace-api)
 - [ngrok Documentation](https://ngrok.com/docs)

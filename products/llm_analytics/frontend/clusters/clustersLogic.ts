@@ -10,7 +10,7 @@ import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
 import { urls } from 'scenes/urls'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { Breadcrumb } from '~/types'
 
 import { loadClusterMetrics } from './clusterMetricsLoader'
@@ -153,8 +153,8 @@ export const clustersLogic = kea<clustersLogicType>([
                     const eventName =
                         values.clusteringLevel === 'generation' ? '$ai_generation_clusters' : '$ai_trace_clusters'
 
-                    const response = await api.queryHogQL(
-                        hogql`
+                    const response = await api.queryInsightsQL(
+                        insightsql`
                             SELECT
                                 JSONExtractString(properties, '$ai_clustering_run_id') as run_id,
                                 JSONExtractString(properties, '$ai_window_end') as window_end,
@@ -191,8 +191,8 @@ export const clustersLogic = kea<clustersLogicType>([
                     const level = getLevelFromRunId(runId)
                     const eventName = level === 'generation' ? '$ai_generation_clusters' : '$ai_trace_clusters'
 
-                    const response = await api.queryHogQL(
-                        hogql`
+                    const response = await api.queryInsightsQL(
+                        insightsql`
                             SELECT
                                 JSONExtractString(properties, '$ai_clustering_run_id') as run_id,
                                 JSONExtractString(properties, '$ai_window_start') as window_start,

@@ -11,7 +11,7 @@ import { urls } from 'scenes/urls'
 import { DataTableNode, DataVisualizationNode } from '~/queries/schema/schema-general'
 import { LLMTrace } from '~/queries/schema/schema-general'
 import { QueryContextColumn } from '~/queries/types'
-import { hogql, isDataTableNode, isEventsQuery } from '~/queries/utils'
+import { insightsql, isDataTableNode, isEventsQuery } from '~/queries/utils'
 import { AnyPropertyFilter, PropertyFilterType, PropertyOperator } from '~/types'
 
 import { LLMMessageDisplay } from './ConversationDisplay/ConversationMessagesDisplay'
@@ -67,8 +67,8 @@ export function getFilterIdentifier(person: PersonData | null | undefined): Filt
 export function createPersonFilter(filterIdentifier: FilterIdentifier): AnyPropertyFilter {
     if (filterIdentifier.type === 'distinct_id') {
         return {
-            type: PropertyFilterType.HogQL,
-            key: hogql`distinct_id == ${filterIdentifier.value}`,
+            type: PropertyFilterType.InsightsQL,
+            key: insightsql`distinct_id == ${filterIdentifier.value}`,
         }
     }
 
@@ -108,7 +108,7 @@ function PersonColumnCell({ person }: { person: PersonData | null | undefined })
         const newFilter = createPersonFilter(filterIdentifier)
         const filterExists = propertyFilters.some((f) => {
             if (filterIdentifier.type === 'distinct_id') {
-                return f.type === PropertyFilterType.HogQL && f.key === newFilter.key
+                return f.type === PropertyFilterType.InsightsQL && f.key === newFilter.key
             }
             return (
                 f.type === PropertyFilterType.Person &&
@@ -371,7 +371,7 @@ export const llmAnalyticsColumnRenderers: Record<string, QueryContextColumn> = {
     __llm_person: {
         title: 'Person',
         render: ({ value }) => {
-            // User data from HogQL query comes as a tuple [distinct_id, created_at, properties_json]
+            // User data from InsightsQL query comes as a tuple [distinct_id, created_at, properties_json]
             if (Array.isArray(value) && value.length >= 3) {
                 const [distinctId, , propertiesJson] = value
                 let properties: Record<string, unknown> = {}

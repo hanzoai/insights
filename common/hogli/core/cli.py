@@ -1,4 +1,4 @@
-"""hogli - Unified developer CLI for PostHog monorepo.
+"""hogli - Unified developer CLI for Insights monorepo.
 
 All commands are defined in scripts_manifest.yaml and auto-discovered.
 Help output is dynamically generated from the manifest with category grouping.
@@ -97,12 +97,12 @@ def _auto_update_manifest() -> None:
 
 @click.group(
     cls=CategorizedGroup,
-    help="Unified developer experience for the PostHog monorepo.",
+    help="Unified developer experience for the Insights monorepo.",
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.pass_context
 def cli(ctx: click.Context) -> None:
-    """hogli - Developer CLI for PostHog."""
+    """hogli - Developer CLI for Insights."""
     # Auto-update manifest on every invocation (but skip for meta:check and git hooks)
     # Skip during git hooks to prevent manifest modifications during lint-staged execution
     in_git_hook = os.environ.get("GIT_DIR") is not None or os.environ.get("HUSKY") is not None
@@ -110,13 +110,13 @@ def cli(ctx: click.Context) -> None:
         _auto_update_manifest()
 
 
-@cli.command(name="quickstart", help="Show getting started with PostHog development")
+@cli.command(name="quickstart", help="Show getting started with Insights development")
 def quickstart() -> None:
     """Display essential commands for getting up and running."""
     click.echo("")
-    click.echo(click.style("🚀 PostHog Development Quickstart", fg="green", bold=True))
+    click.echo(click.style("🚀 Insights Development Quickstart", fg="green", bold=True))
     click.echo("")
-    click.echo("Get PostHog running locally:")
+    click.echo("Get Insights running locally:")
     click.echo("")
     click.echo("  hogli start")
     click.echo("")

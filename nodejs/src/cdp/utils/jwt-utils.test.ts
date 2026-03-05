@@ -1,6 +1,6 @@
 import jwtLib from 'jsonwebtoken'
 
-import { JWT, PosthogJwtAudience } from './jwt-utils'
+import { JWT, InsightsJwtAudience } from './jwt-utils'
 
 describe('JWT', () => {
     jest.setTimeout(1000)
@@ -13,28 +13,28 @@ describe('JWT', () => {
     describe('sign and verify', () => {
         it('should sign and verify a payload', () => {
             const payload = { foo: 'bar', n: 42 }
-            const token = jwtUtil.sign(payload, PosthogJwtAudience.SUBSCRIPTION_PREFERENCES)
+            const token = jwtUtil.sign(payload, InsightsJwtAudience.SUBSCRIPTION_PREFERENCES)
             expect(typeof token).toBe('string')
-            const verified = jwtUtil.verify(token, PosthogJwtAudience.SUBSCRIPTION_PREFERENCES)
+            const verified = jwtUtil.verify(token, InsightsJwtAudience.SUBSCRIPTION_PREFERENCES)
             // jwt.verify returns the payload with extra fields (iat, etc)
             expect((verified as any).foo).toBe('bar')
             expect((verified as any).n).toBe(42)
         })
 
         it('should throw if token is invalid', () => {
-            expect(() => jwtUtil.verify('not.a.valid.token', PosthogJwtAudience.SUBSCRIPTION_PREFERENCES)).toThrow(
+            expect(() => jwtUtil.verify('not.a.valid.token', InsightsJwtAudience.SUBSCRIPTION_PREFERENCES)).toThrow(
                 'jwt malformed'
             )
         })
 
         it('should not throw if ignoreVerificationErrors is true', () => {
             expect(() =>
-                jwtUtil.verify('not.a.valid.token', PosthogJwtAudience.SUBSCRIPTION_PREFERENCES, {
+                jwtUtil.verify('not.a.valid.token', InsightsJwtAudience.SUBSCRIPTION_PREFERENCES, {
                     ignoreVerificationErrors: true,
                 })
             ).not.toThrow()
             expect(
-                jwtUtil.verify('not.a.valid.token', PosthogJwtAudience.SUBSCRIPTION_PREFERENCES, {
+                jwtUtil.verify('not.a.valid.token', InsightsJwtAudience.SUBSCRIPTION_PREFERENCES, {
                     ignoreVerificationErrors: true,
                 })
             ).toBeUndefined()
@@ -49,7 +49,7 @@ describe('JWT', () => {
     it('should try all secrets for verification', () => {
         const payload = { foo: 'bar' }
         // nosemgrep: javascript.jsonwebtoken.security.jwt-hardcode.hardcoded-jwt-secret
-        const token = jwtLib.sign(payload, 'testsecret2', { audience: PosthogJwtAudience.SUBSCRIPTION_PREFERENCES })
-        expect((jwtUtil.verify(token, PosthogJwtAudience.SUBSCRIPTION_PREFERENCES) as any).foo).toBe('bar')
+        const token = jwtLib.sign(payload, 'testsecret2', { audience: InsightsJwtAudience.SUBSCRIPTION_PREFERENCES })
+        expect((jwtUtil.verify(token, InsightsJwtAudience.SUBSCRIPTION_PREFERENCES) as any).foo).toBe('bar')
     })
 })

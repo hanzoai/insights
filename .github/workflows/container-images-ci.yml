@@ -12,7 +12,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'PostHog/posthog' && github.event_name != 'merge_group'
+        if: github.repository == 'Insights/posthog' && github.event_name != 'merge_group'
         name: Determine need to run Docker checks
         permissions:
             contents: read
@@ -39,7 +39,7 @@ jobs:
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow at least reading the repo contents, add other permissions if necessary
-        # Only on PostHog/posthog, as there's no docker login on forks
+        # Only on Insights/posthog, as there's no docker login on forks
         if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name  == github.repository && needs.changes.outputs.docker_files == 'true') || github.event_name == 'merge_group' }}
 
         outputs:
@@ -54,7 +54,7 @@ jobs:
               uses: ./.github/actions/build-n-cache-image
               with:
                   actions-id-token-request-url: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
-                  push-image: ${{ github.repository == 'PostHog/posthog' }} # Don't push on forks due to lack of credentials
+                  push-image: ${{ github.repository == 'Insights/posthog' }} # Don't push on forks due to lack of credentials
                   aws-role-to-assume: ${{ secrets.AWS_ECR_PUBLISH_IAM_ROLE }}
                   dockerhub-username: ${{ secrets.DOCKERHUB_USER }}
                   dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}

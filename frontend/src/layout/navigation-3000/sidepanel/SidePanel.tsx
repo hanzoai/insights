@@ -51,7 +51,7 @@ export const SIDE_PANEL_TABS: Record<
     { label: string; Icon: any; Content: any; noModalSupport?: boolean }
 > = {
     [SidePanelTab.Max]: {
-        label: 'PostHog AI',
+        label: 'Insights AI',
         Icon: IconLogomark,
         Content: SidePanelMax,
     },
@@ -322,7 +322,7 @@ export function SidePanel({
                                                 name={`SidePanel-${tab}`}
                                                 keybind={keybind}
                                                 intent={`Open ${label}`}
-                                                priority={label === 'PostHog AI' ? 10 : 0}
+                                                priority={label === 'Insights AI' ? 10 : 0}
                                                 interaction="click"
                                             >
                                                 {button}

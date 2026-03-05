@@ -2,7 +2,7 @@
 
 ## External Data Source (`system.data_warehouse_sources`)
 
-External data sources represent connections to third-party data providers (Stripe, Hubspot, Postgres, etc.) that sync data into PostHog.
+External data sources represent connections to third-party data providers (Stripe, Hubspot, Postgres, etc.) that sync data into Insights.
 
 ### Columns
 

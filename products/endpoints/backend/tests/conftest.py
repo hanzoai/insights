@@ -40,7 +40,7 @@ async def endpoint(ateam, auser):  # noqa: F811
         name="test_temporal_endpoint",
         team=ateam,
         query={
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT event, distinct_id FROM events WHERE event = '$pageview' LIMIT 10",
         },
         created_by=auser,

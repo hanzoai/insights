@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
-import { createHogExecutionGlobals, createHogFunction } from '../_tests/fixtures'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { createScriptExecutionGlobals, createCustomFunction } from '../_tests/fixtures'
 import { cloneInvocation, createInvocation } from './invocation-utils'
 
 describe('Invocation utils', () => {
@@ -17,13 +17,13 @@ describe('Invocation utils', () => {
 
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals(),
+                ...createScriptExecutionGlobals(),
                 inputs: { foo: 'bar' },
             },
-            createHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.elements_href_filter,
+            createCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.elements_href_filter,
             })
         )
 
@@ -31,15 +31,15 @@ describe('Invocation utils', () => {
 
         it('should clone an invocation', () => {
             const cloned = cloneInvocation(invocation)
-            const { id, state, hogFunction, functionId, ...rest } = cloned
+            const { id, state, customFunction, functionId, ...rest } = cloned
             expect(id).toBe(invocation.id)
             expect(functionId).toBe(invocation.functionId)
             expect(state).toBe(invocation.state)
-            expect(hogFunction).toBe(invocation.hogFunction)
+            expect(customFunction).toBe(invocation.customFunction)
 
             expect(rest).toMatchInlineSnapshot(`
                 {
-                  "queue": "hog",
+                  "queue": "custom_script",
                   "queueMetadata": undefined,
                   "queueParameters": undefined,
                   "queuePriority": 0,
@@ -62,15 +62,15 @@ describe('Invocation utils', () => {
                 },
             })
 
-            const { id, state, hogFunction, functionId, ...rest } = cloned
+            const { id, state, customFunction, functionId, ...rest } = cloned
             expect(id).toBe(invocation.id)
             expect(functionId).toBe(invocation.functionId)
             expect(state).toBe(invocation.state)
-            expect(hogFunction).toBe(invocation.hogFunction)
+            expect(customFunction).toBe(invocation.customFunction)
 
             expect(rest).toMatchInlineSnapshot(`
                 {
-                  "queue": "hog",
+                  "queue": "custom_script",
                   "queueMetadata": {
                     "foo": "bar",
                   },
