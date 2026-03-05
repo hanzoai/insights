@@ -51,6 +51,7 @@ from insights.temporal.ai.session_summary.types.group import (
     SessionSummaryStreamUpdate,
 )
 from insights.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
+from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.client import async_connect
 

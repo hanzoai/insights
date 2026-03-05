@@ -25,6 +25,7 @@ from insights.temporal.ai.session_summary.types.group import (
     SessionGroupSummaryOfSummariesInputs,
     SessionGroupSummaryPatternsExtractionChunksInputs,
 )
+from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 from insights.temporal.common.client import async_connect
 
 
