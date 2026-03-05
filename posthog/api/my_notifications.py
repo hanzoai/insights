@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.shared import UserBasicSerializer
 from posthog.api.utils import ServerTimingsGathered, action
-from posthog.models import ActivityLog, Cohort, FeatureFlag, CustomFunction, Insight, NotificationViewed, User
+from posthog.models import ActivityLog, Cohort, FeatureFlag, InsightsFunction, Insight, NotificationViewed, User
 from posthog.models.comment import Comment
 
 from products.notebooks.backend.models import Notebook
@@ -88,8 +88,8 @@ class MyNotificationsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                     "id", flat=True
                 )
             )
-            my_custom_functions = list(
-                CustomFunction.objects.filter(created_by=user, team_id=self.team.pk).values_list("id", flat=True)
+            my_insights_functions = list(
+                InsightsFunction.objects.filter(created_by=user, team_id=self.team.pk).values_list("id", flat=True)
             )
 
             # then things they edited
@@ -156,14 +156,14 @@ class MyNotificationsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                 .values_list("item_id", flat=True)
             )
 
-            my_changed_custom_functions = list(
+            my_changed_insights_functions = list(
                 ActivityLog.objects.filter(
                     team_id=self.team.id,
                     activity__in=interesting_changes,
                     user_id=user.pk,
-                    scope="CustomFunction",
+                    scope="InsightsFunction",
                 )
-                .exclude(item_id__in=my_custom_functions)
+                .exclude(item_id__in=my_insights_functions)
                 .values_list("item_id", flat=True)
             )
 
@@ -219,7 +219,7 @@ class MyNotificationsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                         )
                         | Q(Q(scope="Comment") & Q(item_id__in=my_comments))
                         | Q(Q(scope="Cohort") & Q(item_id__in=my_cohorts))
-                        | Q(Q(scope="CustomFunction") & Q(item_id__in=my_custom_functions))
+                        | Q(Q(scope="InsightsFunction") & Q(item_id__in=my_insights_functions))
                     )
                     | Q(
                         # don't want to see creation of these things since that was before the user edited these things
@@ -234,7 +234,7 @@ class MyNotificationsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                             )
                             | Q(Q(scope="Comment") & Q(item_id__in=my_changed_comments))
                             | Q(Q(scope="Cohort") & Q(item_id__in=my_changed_cohorts))
-                            | Q(Q(scope="CustomFunction") & Q(item_id__in=my_changed_custom_functions))
+                            | Q(Q(scope="InsightsFunction") & Q(item_id__in=my_changed_insights_functions))
                         )
                     )
                 )

@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Set a variable value in the workflow',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom', 'Analytics'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 return inputs.variable_value
 `,

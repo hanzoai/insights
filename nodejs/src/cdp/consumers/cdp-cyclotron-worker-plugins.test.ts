@@ -11,12 +11,12 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import {
-    insertCustomFunction as _insertCustomFunction,
+    insertInsightsFunction as _insertInsightsFunction,
     createExampleInvocation,
     createScriptExecutionGlobals,
 } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
-import { CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
+import { InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
 
 jest.setTimeout(1000)
@@ -28,15 +28,15 @@ describe('CdpCyclotronWorkerPlugins', () => {
     let processor: CdpCyclotronWorker
     let hub: Hub
     let team: Team
-    let fn: CustomFunctionType
-    let globals: CustomFunctionInvocationGlobalsWithInputs
-    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
-        const item = await _insertCustomFunction(hub.postgres, team.id, {
-            ...customFunction,
+    let fn: InsightsFunctionType
+    let globals: InsightsFunctionInvocationGlobalsWithInputs
+    const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
+        const item = await _insertInsightsFunction(hub.postgres, team.id, {
+            ...insightsFunction,
             type: 'destination',
         })
         // Trigger the reload that django would do
-        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -66,7 +66,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
         const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
         jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
 
-        fn = await insertCustomFunction({
+        fn = await insertInsightsFunction({
             name: 'Plugin test',
             template_id: 'plugin-insights-intercom-plugin',
         })

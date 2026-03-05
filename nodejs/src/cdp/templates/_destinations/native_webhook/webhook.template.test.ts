@@ -1,10 +1,10 @@
 import '~/tests/helpers/mocks/date.mock'
 import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
-import { NATIVE_CUSTOM_FUNCTIONS_BY_ID } from '../../index'
+import { NATIVE_INSIGHTS_FUNCTIONS_BY_ID } from '../../index'
 import { TemplateTester, generateTestData } from '../../test/test-helpers'
 
-const template = NATIVE_CUSTOM_FUNCTIONS_BY_ID['native-webhook']
+const template = NATIVE_INSIGHTS_FUNCTIONS_BY_ID['native-webhook']
 describe(`${template.name} template`, () => {
     const tester = new TemplateTester({ ...template, code: '', code_language: 'javascript' })
     beforeEach(async () => {

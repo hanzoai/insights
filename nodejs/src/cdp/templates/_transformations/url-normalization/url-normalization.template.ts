@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: CustomFunctionTemplate = {
     name: 'URL Normalization',
     description:
         'Normalizes URLs by replacing dynamic path segments (containing numbers or capital letters) with :id placeholders. This helps group similar URLs together for analysis.',
-    icon_url: '/static/mascot/reading-mascot.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 
 // Function to normalize a path segment

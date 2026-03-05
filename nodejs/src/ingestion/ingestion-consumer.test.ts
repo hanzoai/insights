@@ -5,16 +5,16 @@ import { DecodedKafkaMessage } from '~/tests/helpers/mocks/producer.spy'
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
-import { insertCustomFunction as _insertCustomFunction } from '~/cdp/_tests/fixtures'
+import { insertInsightsFunction as _insertInsightsFunction } from '~/cdp/_tests/fixtures'
 import { template as geoipTemplate } from '~/cdp/templates/_transformations/geoip/geoip.template'
-import { compileScript } from '~/cdp/templates/compiler'
+import { compileFn } from '~/cdp/templates/compiler'
 import { COOKIELESS_MODE_FLAG_PROPERTY, COOKIELESS_SENTINEL_VALUE } from '~/ingestion/cookieless/cookieless-manager'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { createTeam, getFirstTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { CookielessServerHashMode, Hub, PipelineEvent, Team } from '../../src/types'
 import { closeHub, createHub } from '../../src/utils/db/hub'
-import { CustomFunctionType } from '../cdp/types'
+import { InsightsFunctionType } from '../cdp/types'
 import { PostgresUse } from '../utils/db/postgres'
 import { parseJSON } from '../utils/json-parse'
 import { logger } from '../utils/logger'
@@ -1151,7 +1151,7 @@ describe('IngestionConsumer', () => {
     })
 
     describe('transformations', () => {
-        let transformationFunction: CustomFunctionType
+        let transformationFunction: InsightsFunctionType
         const TRANSFORMATION_TEST_TIMEOUT = 30000
 
         beforeAll(() => {
@@ -1162,9 +1162,9 @@ describe('IngestionConsumer', () => {
             jest.setTimeout(DEFAULT_TEST_TIMEOUT)
         })
 
-        const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
-            const { script, bytecode, name } = customFunction
-            const item = await _insertCustomFunction(hub.postgres, team.id, {
+        const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
+            const { script, bytecode, name } = insightsFunction
+            const item = await _insertInsightsFunction(hub.postgres, team.id, {
                 script,
                 bytecode,
                 name: name || 'Test Function',
@@ -1175,8 +1175,8 @@ describe('IngestionConsumer', () => {
 
         beforeEach(async () => {
             // Create a transformation function using the geoip template as an example
-            const scriptByteCode = await compileScript(geoipTemplate.code)
-            transformationFunction = await insertCustomFunction({
+            const scriptByteCode = await compileFn(geoipTemplate.code)
+            transformationFunction = await insertInsightsFunction({
                 name: 'GeoIP Transformation',
                 script: geoipTemplate.code,
                 bytecode: scriptByteCode,
@@ -1193,8 +1193,8 @@ describe('IngestionConsumer', () => {
                 const localIngester = await createIngestionConsumer(hub)
 
                 // Create spies for methods after the service is configured
-                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheCustomFunctionStates')
-                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearCustomFunctionStates')
+                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheInsightsFunctionStates')
+                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearInsightsFunctionStates')
                 const observeResultsSpy = jest.spyOn(localIngester.scriptTransformer['scriptWatcher'], 'observeResults')
 
                 // Process batch with scriptwatcher enabled
@@ -1207,7 +1207,7 @@ describe('IngestionConsumer', () => {
 
                 await localIngester.handleKafkaBatch(messages)
 
-                // Verify that fetchAndCacheCustomFunctionStates and clearCustomFunctionStates were called
+                // Verify that fetchAndCacheInsightsFunctionStates and clearInsightsFunctionStates were called
                 expect(fetchAndCacheSpy).toHaveBeenCalled()
                 expect(clearStatesSpy).toHaveBeenCalled()
 
@@ -1237,8 +1237,8 @@ describe('IngestionConsumer', () => {
                 const localIngester = await createIngestionConsumer(hub)
 
                 // Create spies for methods after the service is configured
-                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheCustomFunctionStates')
-                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearCustomFunctionStates')
+                const fetchAndCacheSpy = jest.spyOn(localIngester.scriptTransformer, 'fetchAndCacheInsightsFunctionStates')
+                const clearStatesSpy = jest.spyOn(localIngester.scriptTransformer, 'clearInsightsFunctionStates')
 
                 // Process batch with scriptwatcher disabled
                 const event = createEvent({
@@ -1249,7 +1249,7 @@ describe('IngestionConsumer', () => {
 
                 await localIngester.handleKafkaBatch(messages)
 
-                // Verify that fetchAndCacheCustomFunctionStates and clearCustomFunctionStates were NOT called
+                // Verify that fetchAndCacheInsightsFunctionStates and clearInsightsFunctionStates were NOT called
                 expect(fetchAndCacheSpy).not.toHaveBeenCalled()
                 expect(clearStatesSpy).not.toHaveBeenCalled()
 
@@ -1279,7 +1279,7 @@ describe('IngestionConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: transformationFunction.id,
                             count: 1,
                             metric_kind: 'success',
@@ -1299,7 +1299,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'info',
-                            log_source: 'custom_function',
+                            log_source: 'insights_function',
                             log_source_id: transformationFunction.id,
                             message: 'geoip lookup failed for ip, 256.256.256.256',
                             team_id: team.id,
@@ -1312,7 +1312,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'debug',
-                            log_source: 'custom_function',
+                            log_source: 'insights_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringMatching(/^Function completed in/),
                             team_id: team.id,
@@ -1344,7 +1344,7 @@ describe('IngestionConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: transformationFunction.id,
                             count: 1,
                             metric_kind: 'success',
@@ -1364,7 +1364,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'info',
-                            log_source: 'custom_function',
+                            log_source: 'insights_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringContaining('geoip location data for ip:'),
                             team_id: team.id,
@@ -1377,7 +1377,7 @@ describe('IngestionConsumer', () => {
                         value: {
                             instance_id: expect.any(String),
                             level: 'debug',
-                            log_source: 'custom_function',
+                            log_source: 'insights_function',
                             log_source_id: transformationFunction.id,
                             message: expect.stringMatching(/^Function completed in/),
                             team_id: team.id,

@@ -22,7 +22,6 @@ describe('experimentLogic', () => {
     // Transform null to undefined where needed
     const experiment = {
         ...experimentJson,
-        created_by: { ...experimentJson.created_by, mascot_config: undefined },
         holdout: undefined,
         primary_metrics_ordered_uuids: null,
         secondary_metrics_ordered_uuids: null,

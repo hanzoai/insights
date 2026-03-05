@@ -4,8 +4,8 @@ from django.core.management import call_command
 from django.db import migrations
 
 
-def resave_custom_functions(apps, schema_editor):
-    call_command("resave_custom_functions", silent=True)
+def resave_insights_functions(apps, schema_editor):
+    call_command("resave_insights_functions", silent=True)
 
 
 def reverse_migration(apps, schema_editor):
@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(resave_custom_functions, reverse_migration),
+        migrations.RunPython(resave_insights_functions, reverse_migration),
     ]

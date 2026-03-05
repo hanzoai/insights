@@ -15,7 +15,7 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { ActivityScope } from '~/types'
 
-import { DataPipelinesCustomFunctions } from './DataPipelinesCustomFunctions'
+import { DataPipelinesInsightsFunctions } from './DataPipelinesInsightsFunctions'
 import { destinationsSceneLogic } from './destinationsSceneLogic'
 
 export const scene: SceneExport = {
@@ -54,7 +54,7 @@ export function DestinationsScene(): JSX.Element {
             key: 'all',
             label: 'All destinations',
             content: (
-                <DataPipelinesCustomFunctions
+                <DataPipelinesInsightsFunctions
                     kind="destination"
                     additionalKinds={['site_destination', 'internal_destination']}
                     action={action}
@@ -64,7 +64,7 @@ export function DestinationsScene(): JSX.Element {
         {
             key: 'history',
             label: 'History',
-            content: <ActivityLog scope={[ActivityScope.CUSTOM_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
+            content: <ActivityLog scope={[ActivityScope.INSIGHTS_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
         },
     ]
 

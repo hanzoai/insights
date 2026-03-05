@@ -2,16 +2,16 @@
 import { UUIDT } from '../../utils/utils'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionInvocationGlobalsWithInputs,
 } from '../types'
-import { CustomFunctionType } from '../types'
+import { InsightsFunctionType } from '../types'
 
 export function createInvocation(
-    globals: CustomFunctionInvocationGlobalsWithInputs,
-    customFunction: CustomFunctionType
-): CyclotronJobInvocationCustomFunction {
+    globals: InsightsFunctionInvocationGlobalsWithInputs,
+    insightsFunction: InsightsFunctionType
+): CyclotronJobInvocationInsightsFunction {
     return {
         id: new UUIDT().toString(),
         state: {
@@ -19,10 +19,10 @@ export function createInvocation(
             timings: [],
             attempts: 0,
         },
-        teamId: customFunction.team_id,
-        functionId: customFunction.id,
-        customFunction,
-        queue: 'custom_script',
+        teamId: insightsFunction.team_id,
+        functionId: insightsFunction.id,
+        insightsFunction,
+        queue: 'fn',
         queuePriority: 0,
     }
 }

@@ -22,7 +22,7 @@ from posthog.models import (
     PropertyDefinition,
     Survey,
 )
-from posthog.models.custom_flow.custom_flow import CustomFlow
+from posthog.models.insights_flow.insights_flow import InsightsFlow
 
 from products.early_access_features.backend.models import EarlyAccessFeature
 from products.notebooks.backend.models import Notebook
@@ -89,8 +89,8 @@ ENTITY_MAP: dict[str, EntityConfig] = {
         "search_fields": {"name": "A", "description": "C"},
         "extra_fields": ["name", "description"],
     },
-    "custom_flow": {
-        "klass": CustomFlow,
+    "insights_flow": {
+        "klass": InsightsFlow,
         "search_fields": {"name": "A", "description": "C"},
         "extra_fields": ["name", "description"],
     },

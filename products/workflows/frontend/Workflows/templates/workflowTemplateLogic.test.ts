@@ -7,19 +7,19 @@ import api from 'lib/api'
 import { userLogic } from 'scenes/userLogic'
 
 import { initKeaTests } from '~/test/init'
-import { CustomFunctionTemplateType } from '~/types'
+import { InsightsFunctionTemplateType } from '~/types'
 
-import { CustomFlow, CustomFlowAction } from '../customflows/types'
+import { InsightsFlow, InsightsFlowAction } from '../insightsflows/types'
 import { workflowLogic } from '../workflowLogic'
 import { workflowTemplateLogic } from './workflowTemplateLogic'
 import { workflowTemplatesLogic } from './workflowTemplatesLogic'
 
 jest.mock('lib/api', () => ({
     ...jest.requireActual('lib/api'),
-    customFlowTemplates: {
-        createCustomFlowTemplate: jest.fn(),
-        updateCustomFlowTemplate: jest.fn(),
-        getCustomFlowTemplate: jest.fn(),
+    insightsFlowTemplates: {
+        createInsightsFlowTemplate: jest.fn(),
+        updateInsightsFlowTemplate: jest.fn(),
+        getInsightsFlowTemplate: jest.fn(),
     },
 }))
 
@@ -30,7 +30,7 @@ jest.mock('lib/lemon-ui/LemonToast', () => ({
     },
 }))
 
-const mockApi = api.customFlowTemplates as jest.Mocked<typeof api.customFlowTemplates>
+const mockApi = api.insightsFlowTemplates as jest.Mocked<typeof api.insightsFlowTemplates>
 const mockToast = require('lib/lemon-ui/LemonToast').lemonToast
 
 describe('workflowTemplateLogic', () => {
@@ -91,7 +91,7 @@ describe('workflowTemplateLogic', () => {
             logic.mount()
 
             // Set up workflow in workflowLogic
-            const mockWorkflow: CustomFlow = {
+            const mockWorkflow: InsightsFlow = {
                 id: 'test-workflow-id',
                 team_id: 123,
                 name: 'Test Workflow',
@@ -111,7 +111,7 @@ describe('workflowTemplateLogic', () => {
             })
 
             await expectLogic(workflowLogicInstance, () => {
-                workflowLogicInstance.actions.loadCustomFunctionTemplatesByIdSuccess({})
+                workflowLogicInstance.actions.loadInsightsFunctionTemplatesByIdSuccess({})
             })
 
             await expectLogic(logic, () => {
@@ -120,7 +120,7 @@ describe('workflowTemplateLogic', () => {
                 saveAsTemplateModalVisible: true,
             })
 
-            mockApi.createCustomFlowTemplate.mockResolvedValue({ id: 'created-template-id' } as any)
+            mockApi.createInsightsFlowTemplate.mockResolvedValue({ id: 'created-template-id' } as any)
 
             await expectLogic(logic, () => {
                 logic.actions.setTemplateFormValue('name', 'Template Name')
@@ -136,7 +136,7 @@ describe('workflowTemplateLogic', () => {
             const workflowLogicInstance = workflowLogic({ id: 'test-workflow-id', editTemplateId: 'template-id' })
             workflowLogicInstance.mount()
 
-            const mockWorkflow: CustomFlow = {
+            const mockWorkflow: InsightsFlow = {
                 id: 'test-workflow-id',
                 team_id: 123,
                 name: 'Test Workflow',
@@ -158,8 +158,8 @@ describe('workflowTemplateLogic', () => {
             const logic = workflowTemplateLogic({ id: 'test-workflow-id', editTemplateId: 'template-id' })
             logic.mount()
 
-            // Mock getCustomFlowTemplate to fail
-            mockApi.getCustomFlowTemplate.mockRejectedValue(new Error('Template not found'))
+            // Mock getInsightsFlowTemplate to fail
+            mockApi.getInsightsFlowTemplate.mockRejectedValue(new Error('Template not found'))
 
             await expectLogic(logic, () => {
                 logic.actions.showSaveAsTemplateModal()
@@ -169,18 +169,18 @@ describe('workflowTemplateLogic', () => {
                     saveAsTemplateModalVisible: false,
                 })
 
-            expect(mockApi.getCustomFlowTemplate).toHaveBeenCalledWith('template-id')
+            expect(mockApi.getInsightsFlowTemplate).toHaveBeenCalledWith('template-id')
             expect(mockToast.error).toHaveBeenCalledWith('Template not found')
         })
     })
 
     describe('template form', () => {
-        const mockCustomFunctionTemplate: CustomFunctionTemplateType = {
+        const mockInsightsFunctionTemplate: InsightsFunctionTemplateType = {
             id: 'test-template-id',
             name: 'Test Template',
             type: 'destination',
             code: '',
-            code_language: 'custom_script',
+            code_language: 'fn',
             status: 'stable',
             free: true,
             inputs_schema: [
@@ -194,7 +194,7 @@ describe('workflowTemplateLogic', () => {
             ],
         }
 
-        const createWorkflowWithFunctionAction = (): CustomFlow => {
+        const createWorkflowWithFunctionAction = (): InsightsFlow => {
             return {
                 id: 'test-workflow-id',
                 team_id: 123,
@@ -261,7 +261,7 @@ describe('workflowTemplateLogic', () => {
             const workflow = createWorkflowWithFunctionAction()
             const createdTemplate = { ...workflow, id: 'created-template-id' }
 
-            mockApi.createCustomFlowTemplate.mockResolvedValue(createdTemplate as any)
+            mockApi.createInsightsFlowTemplate.mockResolvedValue(createdTemplate as any)
 
             // Load a staff user so scope: 'global' is allowed
             userLogic.mount()
@@ -278,8 +278,8 @@ describe('workflowTemplateLogic', () => {
             })
 
             await expectLogic(workflowLogicInstance, () => {
-                workflowLogicInstance.actions.loadCustomFunctionTemplatesByIdSuccess({
-                    'test-template-id': mockCustomFunctionTemplate,
+                workflowLogicInstance.actions.loadInsightsFunctionTemplatesByIdSuccess({
+                    'test-template-id': mockInsightsFunctionTemplate,
                 })
             })
 
@@ -291,8 +291,8 @@ describe('workflowTemplateLogic', () => {
                 logic.actions.submitTemplateForm()
             }).toDispatchActions(['submitTemplateFormRequest', 'submitTemplateFormSuccess'])
 
-            expect(mockApi.createCustomFlowTemplate).toHaveBeenCalledTimes(1)
-            const callArg = mockApi.createCustomFlowTemplate.mock.calls[0][0]
+            expect(mockApi.createInsightsFlowTemplate).toHaveBeenCalledTimes(1)
+            const callArg = mockApi.createInsightsFlowTemplate.mock.calls[0][0]
 
             expect(callArg.name).toBe('My Template')
             expect(callArg.description).toBe('Template Description')
@@ -304,7 +304,7 @@ describe('workflowTemplateLogic', () => {
 
         it('should use workflow values as fallback when form values are empty', async () => {
             const workflow = createWorkflowWithFunctionAction()
-            mockApi.createCustomFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
+            mockApi.createInsightsFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
 
             const workflowLogicInstance = workflowLogic({ id: 'test-workflow-id' })
             workflowLogicInstance.mount()
@@ -317,8 +317,8 @@ describe('workflowTemplateLogic', () => {
             })
 
             await expectLogic(workflowLogicInstance, () => {
-                workflowLogicInstance.actions.loadCustomFunctionTemplatesByIdSuccess({
-                    'test-template-id': mockCustomFunctionTemplate,
+                workflowLogicInstance.actions.loadInsightsFunctionTemplatesByIdSuccess({
+                    'test-template-id': mockInsightsFunctionTemplate,
                 })
             })
 
@@ -329,14 +329,14 @@ describe('workflowTemplateLogic', () => {
                 logic.actions.submitTemplateForm()
             })
 
-            const callArg = mockApi.createCustomFlowTemplate.mock.calls[0][0]
+            const callArg = mockApi.createInsightsFlowTemplate.mock.calls[0][0]
             expect(callArg.name).toBe('Template Name')
             expect(callArg.description).toBe('Test Description') // Falls back to workflow description
         })
 
         it('should preserve function action inputs when creating template', async () => {
             const workflow = createWorkflowWithFunctionAction()
-            mockApi.createCustomFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
+            mockApi.createInsightsFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
 
             const workflowLogicInstance = workflowLogic({ id: 'test-workflow-id' })
             workflowLogicInstance.mount()
@@ -349,8 +349,8 @@ describe('workflowTemplateLogic', () => {
             })
 
             await expectLogic(workflowLogicInstance, () => {
-                workflowLogicInstance.actions.loadCustomFunctionTemplatesByIdSuccess({
-                    'test-template-id': mockCustomFunctionTemplate,
+                workflowLogicInstance.actions.loadInsightsFunctionTemplatesByIdSuccess({
+                    'test-template-id': mockInsightsFunctionTemplate,
                 })
             })
 
@@ -359,9 +359,9 @@ describe('workflowTemplateLogic', () => {
                 logic.actions.submitTemplateForm()
             })
 
-            const callArg = mockApi.createCustomFlowTemplate.mock.calls[0][0]
+            const callArg = mockApi.createInsightsFlowTemplate.mock.calls[0][0]
             const functionAction = callArg.actions?.find(
-                (a: CustomFlowAction) => a.id === 'function-action-1' && a.type === 'function'
+                (a: InsightsFlowAction) => a.id === 'function-action-1' && a.type === 'function'
             )
             if (functionAction && 'inputs' in functionAction.config) {
                 expect(functionAction.config.inputs).toEqual({
@@ -372,7 +372,7 @@ describe('workflowTemplateLogic', () => {
 
         it('should default scope to team when not provided', async () => {
             const workflow = createWorkflowWithFunctionAction()
-            mockApi.createCustomFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
+            mockApi.createInsightsFlowTemplate.mockResolvedValue({ ...workflow, id: 'created-id' } as any)
 
             const workflowLogicInstance = workflowLogic({ id: 'test-workflow-id' })
             workflowLogicInstance.mount()
@@ -385,8 +385,8 @@ describe('workflowTemplateLogic', () => {
             })
 
             await expectLogic(workflowLogicInstance, () => {
-                workflowLogicInstance.actions.loadCustomFunctionTemplatesByIdSuccess({
-                    'test-template-id': mockCustomFunctionTemplate,
+                workflowLogicInstance.actions.loadInsightsFunctionTemplatesByIdSuccess({
+                    'test-template-id': mockInsightsFunctionTemplate,
                 })
             })
 
@@ -396,13 +396,13 @@ describe('workflowTemplateLogic', () => {
                 logic.actions.submitTemplateForm()
             })
 
-            const callArg = mockApi.createCustomFlowTemplate.mock.calls[0][0]
+            const callArg = mockApi.createInsightsFlowTemplate.mock.calls[0][0]
             expect(callArg.scope).toBe('team')
         })
     })
 
     describe('update template', () => {
-        const createWorkflow = (): CustomFlow => ({
+        const createWorkflow = (): InsightsFlow => ({
             id: 'test-workflow-id',
             team_id: 123,
             name: 'Updated Workflow',
@@ -433,10 +433,10 @@ describe('workflowTemplateLogic', () => {
         it('should update template, reload workflow, and reload template list', async () => {
             const workflow = createWorkflow()
             const updatedTemplate = { ...workflow, id: 'template-id', scope: 'team' as const, tags: [] }
-            mockApi.updateCustomFlowTemplate.mockResolvedValue(updatedTemplate)
-            mockApi.getCustomFlowTemplate.mockResolvedValue(updatedTemplate)
+            mockApi.updateInsightsFlowTemplate.mockResolvedValue(updatedTemplate)
+            mockApi.getInsightsFlowTemplate.mockResolvedValue(updatedTemplate)
 
-            // Use id: 'new' so loadWorkflow calls getCustomFlowTemplate when editTemplateId is set
+            // Use id: 'new' so loadWorkflow calls getInsightsFlowTemplate when editTemplateId is set
             const workflowLogicInstance = workflowLogic({ id: 'new', editTemplateId: 'template-id' })
             workflowLogicInstance.mount()
             await expectLogic(workflowLogicInstance, () => {
@@ -455,7 +455,7 @@ describe('workflowTemplateLogic', () => {
             }).toDispatchActions(['loadWorkflow', 'loadWorkflowSuccess'])
 
             // Verify API call with correct data
-            expect(mockApi.updateCustomFlowTemplate).toHaveBeenCalledWith(
+            expect(mockApi.updateInsightsFlowTemplate).toHaveBeenCalledWith(
                 'template-id',
                 expect.objectContaining({
                     name: 'Updated Workflow',
@@ -468,7 +468,7 @@ describe('workflowTemplateLogic', () => {
             )
 
             // Verify workflow reload
-            expect(mockApi.getCustomFlowTemplate).toHaveBeenCalledWith('template-id')
+            expect(mockApi.getInsightsFlowTemplate).toHaveBeenCalledWith('template-id')
 
             // Verify template list reload
             await expectLogic(templatesLogic).toDispatchActions(['loadWorkflowTemplates'])

@@ -11,7 +11,7 @@ import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { ProductKey } from '~/queries/schema/schema-general'
 
-import { DataPipelinesCustomFunctions } from './DataPipelinesCustomFunctions'
+import { DataPipelinesInsightsFunctions } from './DataPipelinesInsightsFunctions'
 import { transformationsSceneLogic } from './transformationsSceneLogic'
 
 export const scene: SceneExport = {
@@ -52,7 +52,7 @@ export function TransformationsScene(): JSX.Element {
                 }}
                 actions={action}
             />
-            <DataPipelinesCustomFunctions kind="transformation" action={action} />
+            <DataPipelinesInsightsFunctions kind="transformation" action={action} />
         </SceneContent>
     )
 }

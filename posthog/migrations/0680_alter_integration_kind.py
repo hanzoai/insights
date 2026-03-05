@@ -4,13 +4,13 @@ from django.db import migrations, models
 
 
 def update_intercom_template_id(apps, schema_editor):
-    CustomFunction = apps.get_model("posthog", "CustomFunction")
-    CustomFunction.objects.filter(template_id="template-Intercom").update(template_id="template-intercom")
+    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
+    InsightsFunction.objects.filter(template_id="template-Intercom").update(template_id="template-intercom")
 
 
 def reverse_intercom_template_id(apps, schema_editor):
-    CustomFunction = apps.get_model("posthog", "CustomFunction")
-    CustomFunction.objects.filter(template_id="template-intercom").update(template_id="template-Intercom")
+    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
+    InsightsFunction.objects.filter(template_id="template-intercom").update(template_id="template-Intercom")
 
 
 class Migration(migrations.Migration):

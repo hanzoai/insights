@@ -8,9 +8,9 @@ import supertest from 'supertest'
 import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
-import { insertCustomFunction, insertCustomFunctionTemplate } from '~/cdp/_tests/fixtures'
+import { insertInsightsFunction, insertInsightsFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { CustomFunctionType } from '~/cdp/types'
+import { InsightsFunctionType } from '~/cdp/types'
 import { KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
@@ -132,7 +132,7 @@ describe('DWH source webhooks', () => {
         let api: CdpApi
         let app: express.Application
         let server: Server
-        let customFunction: CustomFunctionType
+        let insightsFunction: InsightsFunctionType
 
         const schemaId = 'test-schema-id-123'
         const signingSecret = 'whsec_testsecret'
@@ -148,7 +148,7 @@ describe('DWH source webhooks', () => {
             jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
 
             // Insert the warehouse source templates into the DB
-            await insertCustomFunctionTemplate(hub.postgres, {
+            await insertInsightsFunctionTemplate(hub.postgres, {
                 id: STRIPE_TEMPLATE_ID,
                 name: 'Stripe warehouse source webhook',
                 type: 'warehouse_source_webhook',
@@ -156,7 +156,7 @@ describe('DWH source webhooks', () => {
                 inputs_schema: STRIPE_INPUTS_SCHEMA,
             })
 
-            await insertCustomFunctionTemplate(hub.postgres, {
+            await insertInsightsFunctionTemplate(hub.postgres, {
                 id: 'template-warehouse-source-default',
                 name: 'Default warehouse source webhook',
                 type: 'warehouse_source_webhook',
@@ -164,7 +164,7 @@ describe('DWH source webhooks', () => {
                 inputs_schema: [],
             })
 
-            customFunction = await insertCustomFunction(hub.postgres, team.id, {
+            insightsFunction = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],
@@ -207,7 +207,7 @@ describe('DWH source webhooks', () => {
             body?: Record<string, any>
         }) => {
             return supertest(app)
-                .post(`/public/webhooks/dwh/${options.webhookId ?? customFunction.id}`)
+                .post(`/public/webhooks/dwh/${options.webhookId ?? insightsFunction.id}`)
                 .set('Content-Type', 'application/json')
                 .set(options.headers ?? {})
                 .send(options.body)
@@ -273,7 +273,7 @@ describe('DWH source webhooks', () => {
         })
 
         it('should bypass signature check when configured', async () => {
-            const bypassFunction = await insertCustomFunction(hub.postgres, team.id, {
+            const bypassFunction = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],
@@ -303,7 +303,7 @@ describe('DWH source webhooks', () => {
         })
 
         it('should return 500 when schema_id is missing from custom function inputs', async () => {
-            const noSchemaFunction = await insertCustomFunction(hub.postgres, team.id, {
+            const noSchemaFunction = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],

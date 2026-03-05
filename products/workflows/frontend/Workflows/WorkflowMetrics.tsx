@@ -9,7 +9,7 @@ import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
 
-import { getCustomFlowStep } from './customflows/steps/CustomFlowSteps'
+import { getInsightsFlowStep } from './insightsflows/steps/InsightsFlowSteps'
 import { workflowLogic } from './workflowLogic'
 
 export const WORKFLOW_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
@@ -51,20 +51,20 @@ export type WorkflowMetricsProps = {
 }
 
 export function WorkflowMetrics({ id }: WorkflowMetricsProps): JSX.Element {
-    const logicKey = `custom-flow-metrics-${id}`
+    const logicKey = `insights-flow-metrics-${id}`
 
     const logic = appMetricsLogic({
         logicKey,
         loadOnChanges: true,
         loadOnMount: true,
         forceParams: {
-            appSource: 'custom_flow',
+            appSource: 'insights_flow',
             appSourceId: id,
             breakdownBy: 'metric_name',
         },
     })
 
-    const { workflow, customFunctionTemplatesById } = useValues(workflowLogic({ id }))
+    const { workflow, insightsFunctionTemplatesById } = useValues(workflowLogic({ id }))
 
     const { appMetricsTrendsLoading, getSingleTrendSeries, appMetricsTrends, params } = useValues(logic)
     const { setParams } = useActions(logic)
@@ -102,7 +102,7 @@ export function WorkflowMetrics({ id }: WorkflowMetricsProps): JSX.Element {
                             {
                                 title: 'Workflow steps',
                                 options: workflow.actions.map((action) => {
-                                    const Step = getCustomFlowStep(action, customFunctionTemplatesById)
+                                    const Step = getInsightsFlowStep(action, insightsFunctionTemplatesById)
                                     return {
                                         label: (
                                             <span className="flex items-center gap-1">

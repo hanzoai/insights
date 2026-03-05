@@ -12,7 +12,7 @@ def backfill_notified_first_sync(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0731_backfill_custom_function_template_fk"),
+        ("posthog", "0731_backfill_insights_function_template_fk"),
     ]
 
     operations = [

@@ -13,7 +13,6 @@ const esmModules = [
     '@react-hook',
     '@medv',
     'monaco-editor',
-    '@posthog/mascot-mode',
     'mdast-util-find-and-replace',
     'escape-string-regexp',
     'unist-util-visit-parents',

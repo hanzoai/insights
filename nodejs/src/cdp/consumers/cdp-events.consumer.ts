@@ -2,27 +2,27 @@ import { Message } from 'node-rdkafka'
 
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 
-import { convertToCustomFunctionInvocationGlobals } from '../../cdp/utils'
+import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
 import { KAFKA_EVENTS_JSON } from '../../config/kafka-topics'
 import { KafkaConsumer } from '../../kafka/consumer'
 import { HealthCheckResult, Hub, PluginsServerConfig, RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { captureException } from '../../utils/insights'
-import { shouldBlockCustomFlowDueToQuota } from '../services/customflows/customflow-quota-limiting'
+import { shouldBlockInsightsFlowDueToQuota } from '../services/insightsflows/customflow-quota-limiting'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import { ScriptRateLimiterService, ScriptRateLimiterServiceHub } from '../services/monitoring/script-rate-limiter.service'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFunction,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionType,
-    CustomFunctionTypeType,
+    CyclotronJobInvocationInsightsFunction,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
+    InsightsFunctionTypeType,
     MinimalAppMetric,
 } from '../types'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
-import { counterCustomFunctionStateOnEvent, counterParseError, counterRateLimited } from './metrics'
+import { counterInsightsFunctionStateOnEvent, counterParseError, counterRateLimited } from './metrics'
 import { shouldBlockInvocationDueToQuota } from './quota-limiting-helper'
 
 /**
@@ -36,7 +36,7 @@ export type CdpEventsConsumerHub = CdpConsumerBaseHub &
 
 export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsConsumerHub> extends CdpConsumerBase<THub> {
     protected name = 'CdpEventsConsumer'
-    protected scriptTypes: CustomFunctionTypeType[] = ['destination']
+    protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
     private cyclotronJobQueue: CyclotronJobQueue
     protected kafkaConsumer: KafkaConsumer
 
@@ -44,28 +44,28 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
 
     constructor(hub: THub, topic: string = KAFKA_EVENTS_JSON, groupId: string = 'cdp-processed-events-consumer') {
         super(hub)
-        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'custom_script')
+        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'fn')
         this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
         this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
     }
 
     public async processBatch(
-        invocationGlobals: CustomFunctionInvocationGlobals[]
+        invocationGlobals: InsightsFunctionInvocationGlobals[]
     ): Promise<{ backgroundTask: Promise<any>; invocations: CyclotronJobInvocation[] }> {
         if (!invocationGlobals.length) {
             return { backgroundTask: Promise.resolve(), invocations: [] }
         }
 
         const invocationsToBeQueued = [
-            ...(await this.createCustomFunctionInvocations(invocationGlobals)),
-            ...(await this.createCustomFlowInvocations(invocationGlobals)),
+            ...(await this.createInsightsFunctionInvocations(invocationGlobals)),
+            ...(await this.createInsightsFlowInvocations(invocationGlobals)),
         ]
 
         return {
             // This is all IO so we can set them off in the background and start processing the next batch
             backgroundTask: Promise.all([
                 this.cyclotronJobQueue.queueInvocations(invocationsToBeQueued),
-                this.customFunctionMonitoringService.flush().catch((err) => {
+                this.insightsFunctionMonitoringService.flush().catch((err) => {
                     captureException(err)
                     logger.error('🔴', 'Error producing queued messages for monitoring', { err })
                 }),
@@ -74,9 +74,9 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         }
     }
 
-    protected filterCustomFunction(customFunction: CustomFunctionType): boolean {
+    protected filterInsightsFunction(insightsFunction: InsightsFunctionType): boolean {
         // By default we filter for those with no filters or filters specifically for events
-        return (customFunction.filters?.source ?? 'events') === 'events'
+        return (insightsFunction.filters?.source ?? 'events') === 'events'
     }
 
     /**
@@ -84,31 +84,31 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
      * Filters them for their disabled state as well as masking configs
      */
     @instrumented('cdpConsumer.handleEachBatch.queueMatchingFunctions')
-    protected async createCustomFunctionInvocations(
-        invocationGlobals: CustomFunctionInvocationGlobals[]
+    protected async createInsightsFunctionInvocations(
+        invocationGlobals: InsightsFunctionInvocationGlobals[]
     ): Promise<CyclotronJobInvocation[]> {
         // TODO: Add a helper to custom functions to determine if they require groups or not and then only load those
         await this.groupsManager.enrichGroups(invocationGlobals)
 
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const customFunctionsByTeam = await this.customFunctionManager.getCustomFunctionsForTeams(
+        const insightsFunctionsByTeam = await this.insightsFunctionManager.getInsightsFunctionsForTeams(
             teamsToLoad,
             this.scriptTypes,
-            this.filterCustomFunction
+            this.filterInsightsFunction
         )
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamCustomFunctions = customFunctionsByTeam[globals.project.id]
+                    const teamInsightsFunctions = insightsFunctionsByTeam[globals.project.id]
 
-                    const { invocations, metrics, logs } = await this.scriptExecutor.buildCustomFunctionInvocations(
-                        teamCustomFunctions,
+                    const { invocations, metrics, logs } = await this.scriptExecutor.buildInsightsFunctionInvocations(
+                        teamInsightsFunctions,
                         globals
                     )
 
-                    this.customFunctionMonitoringService.queueAppMetrics(metrics, 'custom_function')
-                    this.customFunctionMonitoringService.queueLogs(logs, 'custom_function')
+                    this.insightsFunctionMonitoringService.queueAppMetrics(metrics, 'insights_function')
+                    this.insightsFunctionMonitoringService.queueLogs(logs, 'insights_function')
                     this.heartbeat()
 
                     return invocations
@@ -117,13 +117,13 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         ).flat()
 
         const states = await instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
-            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.customFunction.id))
+            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.insightsFunction.id))
         })
         const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitMany', async () => {
-            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.customFunction.id, 1]))
+            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.insightsFunction.id, 1]))
         })
 
-        const validInvocations: CyclotronJobInvocationCustomFunction[] = []
+        const validInvocations: CyclotronJobInvocationInsightsFunction[] = []
 
         // Iterate over adding them to the list and updating their priority
         await Promise.all(
@@ -131,9 +131,9 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 try {
                     const rateLimit = rateLimits[index][1]
                     if (rateLimit.isRateLimited) {
-                        counterRateLimited.labels({ kind: 'custom_function' }).inc()
+                        counterRateLimited.labels({ kind: 'insights_function' }).inc()
                         // NOTE: We don't return here as we are just monitoring this feature currently
-                        // this.customFunctionMonitoringService.queueAppMetric(
+                        // this.insightsFunctionMonitoringService.queueAppMetric(
                         //     {
                         //         team_id: item.teamId,
                         //         app_source_id: item.functionId,
@@ -141,7 +141,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                         //         metric_name: 'rate_limited',
                         //         count: 1,
                         //     },
-                        //     'custom_function'
+                        //     'insights_function'
                         // )
                         // return
                     }
@@ -152,24 +152,24 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
 
                 const isQuotaLimited = await shouldBlockInvocationDueToQuota(item, {
                     hub: this.hub,
-                    customFunctionMonitoringService: this.customFunctionMonitoringService,
+                    insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
                 })
 
                 if (isQuotaLimited) {
                     return
                 }
 
-                const state = states[item.customFunction.id].state
+                const state = states[item.insightsFunction.id].state
 
-                counterCustomFunctionStateOnEvent
+                counterInsightsFunctionStateOnEvent
                     .labels({
                         state: ScriptWatcherState[state],
-                        kind: item.customFunction.type,
+                        kind: item.insightsFunction.type,
                     })
                     .inc()
 
                 if (state === ScriptWatcherState.disabled) {
-                    this.customFunctionMonitoringService.queueAppMetric(
+                    this.insightsFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
                             app_source_id: item.functionId,
@@ -177,7 +177,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                             metric_name: 'disabled_permanently',
                             count: 1,
                         },
-                        'custom_function'
+                        'insights_function'
                     )
                     return
                 }
@@ -196,7 +196,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         // Now we can filter by masking configs
         const { masked, notMasked: notMaskedInvocations } = await this.scriptMasker.filterByMasking(validInvocations)
 
-        this.customFunctionMonitoringService.queueAppMetrics(
+        this.insightsFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({
                 team_id: item.teamId,
                 app_source_id: item.functionId,
@@ -204,7 +204,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 metric_name: 'masked',
                 count: 1,
             })),
-            'custom_function'
+            'insights_function'
         )
 
         const triggeredInvocationsMetrics: MinimalAppMetric[] = []
@@ -222,7 +222,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             })
 
             // Bill once per triggering event, not per destination
-            if (item.customFunction.type === 'destination') {
+            if (item.insightsFunction.type === 'destination') {
                 const eventUuid = item.state?.globals?.event?.uuid
                 if (eventUuid && !billedEventUuids.has(eventUuid)) {
                     billedEventUuids.add(eventUuid)
@@ -238,7 +238,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             }
         })
 
-        this.customFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'custom_function')
+        this.insightsFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'insights_function')
 
         return notMaskedInvocations
     }
@@ -248,27 +248,27 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
      * Filters them for their disabled state as well as masking configs
      */
     @instrumented('cdpConsumer.handleEachBatch.queueMatchingFlows')
-    protected async createCustomFlowInvocations(
-        invocationGlobals: CustomFunctionInvocationGlobals[]
+    protected async createInsightsFlowInvocations(
+        invocationGlobals: InsightsFunctionInvocationGlobals[]
     ): Promise<CyclotronJobInvocation[]> {
         // TODO: Add back in group enrichment if necessary
         // await this.groupsManager.enrichGroups(invocationGlobals)
 
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const customFlowsByTeam = await this.customFlowManager.getCustomFlowsForTeams(teamsToLoad)
+        const insightsFlowsByTeam = await this.insightsFlowManager.getInsightsFlowsForTeams(teamsToLoad)
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamCustomFlows = customFlowsByTeam[globals.project.id]
+                    const teamInsightsFlows = insightsFlowsByTeam[globals.project.id]
 
-                    const { invocations, metrics, logs } = await this.customFlowExecutor.buildCustomFlowInvocations(
-                        teamCustomFlows,
+                    const { invocations, metrics, logs } = await this.insightsFlowExecutor.buildInsightsFlowInvocations(
+                        teamInsightsFlows,
                         globals
                     )
 
-                    this.customFunctionMonitoringService.queueAppMetrics(metrics, 'custom_flow')
-                    this.customFunctionMonitoringService.queueLogs(logs, 'custom_flow')
+                    this.insightsFunctionMonitoringService.queueAppMetrics(metrics, 'insights_flow')
+                    this.insightsFunctionMonitoringService.queueLogs(logs, 'insights_flow')
                     this.heartbeat()
 
                     return invocations
@@ -277,10 +277,10 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         ).flat()
 
         const states = await instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
-            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.customFlow.id))
+            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.insightsFlow.id))
         })
         const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitMany', async () => {
-            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.customFlow.id, 1]))
+            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.insightsFlow.id, 1]))
         })
         const validInvocations: CyclotronJobInvocation[] = []
 
@@ -290,8 +290,8 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 try {
                     const rateLimit = rateLimits[index][1]
                     if (rateLimit.isRateLimited) {
-                        counterRateLimited.labels({ kind: 'custom_flow' }).inc()
-                        this.customFunctionMonitoringService.queueAppMetric(
+                        counterRateLimited.labels({ kind: 'insights_flow' }).inc()
+                        this.insightsFunctionMonitoringService.queueAppMetric(
                             {
                                 team_id: item.teamId,
                                 app_source_id: item.functionId,
@@ -299,7 +299,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                                 metric_name: 'rate_limited',
                                 count: 1,
                             },
-                            'custom_flow'
+                            'insights_flow'
                         )
                         return
                     }
@@ -309,18 +309,18 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 }
 
                 // Check quota limits for workflow actions
-                const isQuotaLimited = await shouldBlockCustomFlowDueToQuota(item, {
+                const isQuotaLimited = await shouldBlockInsightsFlowDueToQuota(item, {
                     hub: this.hub,
-                    customFunctionMonitoringService: this.customFunctionMonitoringService,
+                    insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
                 })
 
                 if (isQuotaLimited) {
                     return
                 }
 
-                const state = states[item.customFlow.id].state
+                const state = states[item.insightsFlow.id].state
                 if (state === ScriptWatcherState.disabled) {
-                    this.customFunctionMonitoringService.queueAppMetric(
+                    this.insightsFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
                             app_source_id: item.functionId,
@@ -328,7 +328,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                             metric_name: 'disabled_permanently',
                             count: 1,
                         },
-                        'custom_flow'
+                        'insights_flow'
                     )
                     return
                 }
@@ -344,7 +344,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         // Now we can filter by masking configs
         const { masked, notMasked: notMaskedInvocations } = await this.scriptMasker.filterByMasking(validInvocations)
 
-        this.customFunctionMonitoringService.queueAppMetrics(
+        this.insightsFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({
                 team_id: item.teamId,
                 app_source_id: item.functionId,
@@ -352,7 +352,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 metric_name: 'masked',
                 count: 1,
             })),
-            'custom_flow'
+            'insights_flow'
         )
 
         const triggeredInvocationsMetrics: MinimalAppMetric[] = []
@@ -367,31 +367,31 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             })
         })
 
-        this.customFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'custom_flow')
+        this.insightsFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'insights_flow')
 
         return notMaskedInvocations
     }
 
     @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<CustomFunctionInvocationGlobals[]> {
-        const events: CustomFunctionInvocationGlobals[] = []
+    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+        const events: InsightsFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
                 try {
                     const clickHouseEvent = parseJSON(message.value!.toString()) as RawClickHouseEvent
 
-                    const [teamCustomFunctions, teamCustomFlows, team] = await Promise.all([
-                        this.customFunctionManager.getCustomFunctionsForTeam(clickHouseEvent.team_id, this.scriptTypes),
-                        this.customFlowManager.getCustomFlowsForTeam(clickHouseEvent.team_id),
+                    const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.scriptTypes),
+                        this.insightsFlowManager.getInsightsFlowsForTeam(clickHouseEvent.team_id),
                         this.hub.teamManager.getTeam(clickHouseEvent.team_id),
                     ])
 
-                    if ((!teamCustomFunctions.length && !teamCustomFlows.length) || !team) {
+                    if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToCustomFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

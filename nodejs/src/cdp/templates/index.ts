@@ -1,6 +1,6 @@
 import { DESTINATION_PLUGINS, TRANSFORMATION_PLUGINS } from '../legacy-plugins'
 import { SEGMENT_DESTINATIONS } from '../segment/segment-templates'
-import { CustomFunctionTemplate, NativeTemplate } from '../types'
+import { InsightsFunctionTemplate, NativeTemplate } from '../types'
 import { template as accoilTemplate } from './_destinations/accoil/accoil.template'
 import { template as clickupTemplate } from './_destinations/clickup/clickup.template'
 import { allComingSoonTemplates } from './_destinations/coming-soon/coming-soon-destinations.template'
@@ -42,9 +42,9 @@ import { template as removeNullPropertiesTemplate } from './_transformations/rem
 import { template as urlMaskingTemplate } from './_transformations/url-masking/url-masking.template'
 import { template as urlNormalizationTemplate } from './_transformations/url-normalization/url-normalization.template'
 
-export const CUSTOM_FUNCTION_TEMPLATES_COMING_SOON: CustomFunctionTemplate[] = allComingSoonTemplates
+export const INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON: InsightsFunctionTemplate[] = allComingSoonTemplates
 
-export const CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS: CustomFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
     webhookTemplate,
     tiktokAdsTemplate,
     snapchatAdsTemplate,
@@ -70,7 +70,7 @@ export const CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS: CustomFunctionTemplate[] = 
     accoilTemplate,
 ]
 
-export const CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS: CustomFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] = [
     defaultTransformationTemplate,
     geoipTemplate,
     ipAnonymizationTemplate,
@@ -84,7 +84,7 @@ export const CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS: CustomFunctionTemplate[]
     urlNormalizationTemplate,
 ]
 
-export const NATIVE_CUSTOM_FUNCTIONS: (CustomFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
+export const NATIVE_INSIGHTS_FUNCTIONS: (InsightsFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
     ...plugin,
     code_language: 'javascript',
     code: 'return event;',
@@ -100,26 +100,26 @@ export const NATIVE_CUSTOM_FUNCTIONS: (CustomFunctionTemplate & NativeTemplate)[
     ],
 }))
 
-export const CUSTOM_FUNCTION_TEMPLATES_SOURCES: CustomFunctionTemplate[] = [
+export const INSIGHTS_FUNCTION_TEMPLATES_SOURCES: InsightsFunctionTemplate[] = [
     incomingWebhookTemplate,
     stripeWebhookTemplate,
     vercelLogDrainTemplate,
     pixelTemplate,
 ]
 
-export const CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: CustomFunctionTemplate[] = DESTINATION_PLUGINS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: InsightsFunctionTemplate[] = DESTINATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const CUSTOM_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: CustomFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: InsightsFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
     (x) => x.template
 )
 
-export const CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: CustomFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
+export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: InsightsFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const NATIVE_CUSTOM_FUNCTIONS_BY_ID = NATIVE_CUSTOM_FUNCTIONS.reduce(
+export const NATIVE_INSIGHTS_FUNCTIONS_BY_ID = NATIVE_INSIGHTS_FUNCTIONS.reduce(
     (acc, plugin) => {
         acc[plugin.id] = plugin
         return acc
@@ -127,13 +127,13 @@ export const NATIVE_CUSTOM_FUNCTIONS_BY_ID = NATIVE_CUSTOM_FUNCTIONS.reduce(
     {} as Record<string, NativeTemplate>
 )
 
-export const CUSTOM_FUNCTION_TEMPLATES: CustomFunctionTemplate[] = [
-    ...CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS,
-    ...CUSTOM_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
-    ...CUSTOM_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
-    ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-    ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
-    ...CUSTOM_FUNCTION_TEMPLATES_SOURCES,
-    ...CUSTOM_FUNCTION_TEMPLATES_COMING_SOON,
-    ...NATIVE_CUSTOM_FUNCTIONS,
+export const INSIGHTS_FUNCTION_TEMPLATES: InsightsFunctionTemplate[] = [
+    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
+    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    ...INSIGHTS_FUNCTION_TEMPLATES_SOURCES,
+    ...INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON,
+    ...NATIVE_INSIGHTS_FUNCTIONS,
 ]

@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     status: 'stable',
     free: false,
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Creates an issue in a GitHub repository',
     icon_url: '/static/services/github.png',
     category: ['Error tracking'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `let owner := inputs.github_installation.account.name
 let repo := inputs.repository
 

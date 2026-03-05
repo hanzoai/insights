@@ -56,7 +56,7 @@ export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
                         <CodeEditor
                             queryKey={props.queryKey ?? `new/${realKey}`}
                             className="border rounded overflow-hidden h-full"
-                            language="custom_script"
+                            language="fn"
                             value={queryInput}
                             onChange={(v) => setQueryInput(v ?? '')}
                             height="100%"

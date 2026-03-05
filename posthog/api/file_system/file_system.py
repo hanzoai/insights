@@ -13,7 +13,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from posthog.api.file_system.deletion import (
-    CUSTOM_FUNCTION_TYPES,
+    INSIGHTS_FUNCTION_TYPES,
     delete_file_system_object,
     is_file_system_type_registered,
     undo_delete as undo_delete_object,
@@ -243,8 +243,8 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 elif field == "type":
                     if value.endswith("/"):
                         q = Q(type__startswith=value)
-                    elif value in CUSTOM_FUNCTION_TYPES:
-                        q = Q(type="custom_function/" + value)
+                    elif value in INSIGHTS_FUNCTION_TYPES:
+                        q = Q(type="insights_function/" + value)
                     else:
                         q = Q(type=value)
                 elif field == "ref":
@@ -289,8 +289,8 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         Show all objects belonging to the project, except for custom functions, which are scoped by team.
         """
         queryset = self._scope_by_project(queryset)
-        # type !~ 'custom_function/.*' or team = $current
-        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="custom_function/"))
+        # type !~ 'insights_function/.*' or team = $current
+        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="insights_function/"))
         return queryset
 
     def _filter_queryset_by_parents_lookups(self, queryset):

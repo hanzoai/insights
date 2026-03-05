@@ -17,7 +17,7 @@ const CONCURRENT_WORKERS = 10
 
 const semaphore = new Semaphore(CONCURRENT_WORKERS)
 
-export async function compileScript(scriptSource: string): Promise<ScriptBytecode> {
+export async function compileFn(scriptSource: string): Promise<ScriptBytecode> {
     return semaphore.run(async () => {
         if (CACHE === null) {
             mkdirSync(path.dirname(CACHE_FILE), { recursive: true })

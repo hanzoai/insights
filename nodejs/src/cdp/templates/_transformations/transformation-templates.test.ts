@@ -1,11 +1,11 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-import { CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS, CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED } from '../index'
+import { INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS, INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED } from '../index'
 
 describe('Transformation templates', () => {
-    const allTransformationTemplates: CustomFunctionTemplate[] = [
-        ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-        ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    const allTransformationTemplates: InsightsFunctionTemplate[] = [
+        ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+        ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
     ]
 
     it('should have free property set to true for all transformation templates', () => {

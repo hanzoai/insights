@@ -42,11 +42,11 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                        ALTER TABLE "posthog_customfunction" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "posthog_customfunction_batch_export_id_d64c3403_fk_posthog_b" REFERENCES "posthog_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                        SET CONSTRAINTS "posthog_customfunction_batch_export_id_d64c3403_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_function" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "insights_function_batch_export_id_d64c3403_fk_posthog_b" REFERENCES "posthog_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS "insights_function_batch_export_id_d64c3403_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_customfunction" DROP COLUMN IF EXISTS "batch_export_id";
+                        ALTER TABLE "insights_function" DROP COLUMN IF EXISTS "batch_export_id";
                     """,
                 ),
             ],

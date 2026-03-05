@@ -6,9 +6,9 @@ import supertest from 'supertest'
 import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
-import { insertCustomFunction } from '~/cdp/_tests/fixtures'
+import { insertInsightsFunction } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { CustomFunctionType } from '~/cdp/types'
+import { InsightsFunctionType } from '~/cdp/types'
 import { KAFKA_APP_METRICS_2 } from '~/config/kafka-topics'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { closeHub, createHub } from '~/utils/db/hub'
@@ -37,7 +37,7 @@ describe('EmailTrackingService', () => {
         // NOTE: These tests are done via the CdpApi router so we can get full coverage of the code
         let api: CdpApi
         let app: express.Application
-        let customFunction: CustomFunctionType
+        let insightsFunction: InsightsFunctionType
         const invocationId = 'invocation-id'
         let server: Server
 
@@ -47,7 +47,7 @@ describe('EmailTrackingService', () => {
             app.use('/', api.router())
             server = app.listen(0, () => {})
 
-            customFunction = await insertCustomFunction(hub.postgres, team.id)
+            insightsFunction = await insertInsightsFunction(hub.postgres, team.id)
         })
 
         afterEach(() => {
@@ -57,7 +57,7 @@ describe('EmailTrackingService', () => {
         describe('handleEmailTrackingRedirect', () => {
             it('should redirect to the target url and track the click metric', async () => {
                 const res = await supertest(app).get(
-                    `/public/m/redirect?ph_fn_id=${customFunction.id}&ph_inv_id=${invocationId}&target=https://example.com`
+                    `/public/m/redirect?ph_fn_id=${insightsFunction.id}&ph_inv_id=${invocationId}&target=https://example.com`
                 )
                 expect(res.status).toBe(302)
                 expect(res.headers.location).toBe('https://example.com')
@@ -65,8 +65,8 @@ describe('EmailTrackingService', () => {
                 const messages = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
                 expect(messages).toHaveLength(1)
                 expect(messages[0].value).toMatchObject({
-                    app_source: 'custom_function',
-                    app_source_id: customFunction.id,
+                    app_source: 'insights_function',
+                    app_source_id: insightsFunction.id,
                     instance_id: invocationId,
                     metric_kind: 'email',
                     metric_name: 'email_link_clicked',
@@ -77,7 +77,7 @@ describe('EmailTrackingService', () => {
 
             it('should return 404 if the target is not provided', async () => {
                 const res = await supertest(app).get(
-                    `/public/m/redirect?ph_fn_id=${customFunction.id}&ph_inv_id=${invocationId}`
+                    `/public/m/redirect?ph_fn_id=${insightsFunction.id}&ph_inv_id=${invocationId}`
                 )
                 expect(res.status).toBe(404)
             })
@@ -97,7 +97,7 @@ describe('EmailTrackingService', () => {
         describe('email tracking pixel', () => {
             it('should return a 200 and a gif image, tracking the open metric', async () => {
                 const res = await supertest(app).get(
-                    `/public/m/pixel?ph_fn_id=${customFunction.id}&ph_inv_id=${invocationId}`
+                    `/public/m/pixel?ph_fn_id=${insightsFunction.id}&ph_inv_id=${invocationId}`
                 )
                 expect(res.status).toBe(200)
                 expect(res.headers['content-type']).toBe('image/gif')
@@ -106,8 +106,8 @@ describe('EmailTrackingService', () => {
                 const messages = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
                 expect(messages).toHaveLength(1)
                 expect(messages[0].value).toMatchObject({
-                    app_source: 'custom_function',
-                    app_source_id: customFunction.id,
+                    app_source: 'insights_function',
+                    app_source_id: insightsFunction.id,
                     instance_id: invocationId,
                     metric_kind: 'email',
                     metric_name: 'email_opened',

@@ -3,9 +3,9 @@ from copy import deepcopy
 
 from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send a copy of the incoming data in realtime to another Insights instance",
     icon_url="/static/posthog-icon.svg",
     category=["Custom", "Analytics"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 let host := inputs.host
 let token := inputs.token
@@ -80,13 +80,13 @@ fetch(f'{host}/e', {
 )
 
 
-class TemplateInsightsMigrator(CustomFunctionTemplateMigrator):
+class TemplateInsightsMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/posthog-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("host", "")

@@ -16,7 +16,7 @@ describe('CyclotronJobQueue - postgres', () => {
             CDP_CYCLOTRON_INSERT_MAX_BATCH_SIZE: 1000,
             CDP_CYCLOTRON_INSERT_PARALLEL_BATCHES: false,
         }
-        const queue = new CyclotronJobQueuePostgres(config, 'custom_script' as any, () =>
+        const queue = new CyclotronJobQueuePostgres(config, 'fn' as any, () =>
             Promise.resolve({ backgroundTask: Promise.resolve() })
         )
 
@@ -33,7 +33,7 @@ describe('CyclotronJobQueue - postgres', () => {
         const baseInvocation = {
             teamId: 1,
             functionId: '0196a6b9-1104-0000-f099-9cf11985a307',
-            queue: 'custom_script',
+            queue: 'fn',
             queuePriority: 0,
             state: {
                 globals: {},
@@ -96,7 +96,7 @@ describe('CyclotronJobQueuePostgresShadow', () => {
             CDP_CYCLOTRON_INSERT_MAX_BATCH_SIZE: 1000,
             CDP_CYCLOTRON_INSERT_PARALLEL_BATCHES: false,
         }
-        const queue = new CyclotronJobQueuePostgresShadow(config, 'custom_script' as any)
+        const queue = new CyclotronJobQueuePostgresShadow(config, 'fn' as any)
 
         const bulkCreateJobs = jest.fn().mockResolvedValue(undefined)
         // Inject a fake manager so queueInvocations can run without connecting
@@ -110,7 +110,7 @@ describe('CyclotronJobQueuePostgresShadow', () => {
     const baseInvocation = {
         teamId: 1,
         functionId: '0196a6b9-1104-0000-f099-9cf11985a307',
-        queue: 'custom_script',
+        queue: 'fn',
         queuePriority: 0,
         state: {
             globals: {},
@@ -149,7 +149,7 @@ describe('CyclotronJobQueuePostgresShadow', () => {
             CYCLOTRON_DATABASE_URL: 'postgres://shadow-test',
             CDP_CYCLOTRON_INSERT_MAX_BATCH_SIZE: 1000,
         }
-        const queue = new CyclotronJobQueuePostgresShadow(config, 'custom_script' as any)
+        const queue = new CyclotronJobQueuePostgresShadow(config, 'fn' as any)
         // Don't inject the manager
 
         const invocation: any = {

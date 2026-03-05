@@ -4,7 +4,7 @@ import { VMState } from '@posthog/scriptvm'
 
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 
-import { CustomFlow } from '../schema/customflow'
+import { InsightsFlow } from '../schema/customflow'
 import {
     ClickHouseTimestamp,
     ElementPropertyFilter,
@@ -17,37 +17,37 @@ import {
 export type ScriptBytecode = any[]
 
 // subset of EntityFilter
-export interface CustomFunctionFilterBase {
+export interface InsightsFunctionFilterBase {
     id: string | null
     name?: string | null
     order?: number
     properties?: (EventPropertyFilter | PersonPropertyFilter | ElementPropertyFilter | InsightsQLPropertyFilter)[]
 }
 
-export interface CustomFunctionFilterEvent extends CustomFunctionFilterBase {
+export interface InsightsFunctionFilterEvent extends InsightsFunctionFilterBase {
     type: 'events'
     bytecode?: ScriptBytecode
 }
 
-export interface CustomFunctionFilterAction extends CustomFunctionFilterBase {
+export interface InsightsFunctionFilterAction extends InsightsFunctionFilterBase {
     type: 'actions'
     // Loaded at run time from Action model
     bytecode?: ScriptBytecode
 }
 
-export type CustomFunctionFilter = CustomFunctionFilterEvent | CustomFunctionFilterAction
+export type InsightsFunctionFilter = InsightsFunctionFilterEvent | InsightsFunctionFilterAction
 
-export type CustomFunctionMasking = {
+export type InsightsFunctionMasking = {
     ttl: number | null
     hash: string
     bytecode: ScriptBytecode
     threshold: number | null
 }
 
-export interface CustomFunctionFilters {
+export interface InsightsFunctionFilters {
     source?: 'events' | 'person-updates' | 'data-warehouse-table' // Special case to identify what kind of thing this filters on
-    events?: CustomFunctionFilterEvent[]
-    actions?: CustomFunctionFilterAction[]
+    events?: InsightsFunctionFilterEvent[]
+    actions?: InsightsFunctionFilterAction[]
     properties?: Record<string, any>[] // Global property filters that apply to all events
     filter_test_accounts?: boolean
     bytecode?: ScriptBytecode
@@ -68,7 +68,7 @@ export type CyclotronPerson = {
     url: string
 }
 
-export type CustomFunctionInvocationGlobals = {
+export type InsightsFunctionInvocationGlobals = {
     project: {
         id: number
         name: string
@@ -107,8 +107,8 @@ export type CustomFunctionInvocationGlobals = {
     unsubscribe_url?: string // For email actions, the unsubscribe URL to use
     unsubscribe_url_one_click?: string // For email actions, the one-click unsubscribe URL to use
 
-    actions?: CustomFunctionInvocationActionVariables
-    variables?: Record<string, any> // For CustomFlows, workflow-level variables
+    actions?: InsightsFunctionInvocationActionVariables
+    variables?: Record<string, any> // For InsightsFlows, workflow-level variables
 }
 
 /**
@@ -121,15 +121,15 @@ export type CustomFunctionInvocationGlobals = {
  * After execution, every action will have a corresponding entry in the map with
  * the key `$action/{actionId}` containing the result of the action.
  */
-export type CustomFunctionInvocationActionVariables = {
+export type InsightsFunctionInvocationActionVariables = {
     [key: string]: { result: any; error?: any }
 }
 
-export type CustomFunctionInvocationGlobalsWithInputs = CustomFunctionInvocationGlobals & {
+export type InsightsFunctionInvocationGlobalsWithInputs = InsightsFunctionInvocationGlobals & {
     inputs: Record<string, any>
 }
 
-export type CustomFunctionFilterGlobals = {
+export type InsightsFunctionFilterGlobals = {
     // Filter Script is built in the same way as analytics so the global object is meant to be an event
     event: string
     uuid: string
@@ -179,10 +179,10 @@ export type CustomFunctionFilterGlobals = {
         properties: Record<string, any>
     }
 
-    variables: Record<string, any> | undefined // For CustomFlows, workflow-level variables
+    variables: Record<string, any> | undefined // For InsightsFlows, workflow-level variables
 }
 
-export type MetricLogSource = 'custom_function' | 'custom_flow'
+export type MetricLogSource = 'insights_function' | 'insights_flow'
 
 export type LogEntryLevel = 'debug' | 'info' | 'warn' | 'error'
 
@@ -194,7 +194,7 @@ export type MinimalLogEntry = {
 
 export type LogEntry = MinimalLogEntry & {
     team_id: number
-    log_source: MetricLogSource // The kind of source (custom_function)
+    log_source: MetricLogSource // The kind of source (insights_function)
     log_source_id: string // The id of the custom function
     instance_id: string // The id of the specific invocation
 }
@@ -242,14 +242,14 @@ export type AppMetricType = MinimalAppMetric & {
     app_source: MetricLogSource
 }
 
-export interface CustomFunctionTiming {
-    kind: 'custom_script' | 'async_function'
+export interface InsightsFunctionTiming {
+    kind: 'fn' | 'async_function'
     duration_ms: number
 }
 
 // IMPORTANT: All queue names should be lowercase and only [A-Z0-9] characters are allowed.
 export const CYCLOTRON_INVOCATION_JOB_QUEUES = [
-    'custom_script',
+    'fn',
     'scriptoverflow',
     'customflow',
     'delay10m',
@@ -291,42 +291,42 @@ export type CyclotronJobInvocationResult<T extends CyclotronJobInvocation = Cycl
     error?: any
     logs: MinimalLogEntry[]
     metrics: MinimalAppMetric[]
-    capturedInsightsEvents: CustomFunctionCapturedEvent[]
+    capturedInsightsEvents: InsightsFunctionCapturedEvent[]
     execResult?: unknown
 }
 
-export type CyclotronJobInvocationCustomFunctionContext = {
-    globals: CustomFunctionInvocationGlobalsWithInputs
+export type CyclotronJobInvocationInsightsFunctionContext = {
+    globals: InsightsFunctionInvocationGlobalsWithInputs
     vmState?: VMState
-    timings: CustomFunctionTiming[]
+    timings: InsightsFunctionTiming[]
     attempts: number // Indicates the number of times this invocation has been attempted (for example if it gets scheduled for retries)
 }
 
-export type CyclotronJobInvocationCustomFunction = CyclotronJobInvocation & {
-    state: CyclotronJobInvocationCustomFunctionContext
-    customFunction: CustomFunctionType
+export type CyclotronJobInvocationInsightsFunction = CyclotronJobInvocation & {
+    state: CyclotronJobInvocationInsightsFunctionContext
+    insightsFunction: InsightsFunctionType
 }
 
-export type CyclotronJobInvocationCustomFlow = CyclotronJobInvocation & {
-    state?: CustomFlowInvocationContext
-    customFlow: CustomFlow
+export type CyclotronJobInvocationInsightsFlow = CyclotronJobInvocation & {
+    state?: InsightsFlowInvocationContext
+    insightsFlow: InsightsFlow
     person?: CyclotronPerson
-    filterGlobals: CustomFunctionFilterGlobals
+    filterGlobals: InsightsFunctionFilterGlobals
 }
 
-export type CustomFlowInvocationContext = {
-    event: CustomFunctionInvocationGlobals['event']
+export type InsightsFlowInvocationContext = {
+    event: InsightsFunctionInvocationGlobals['event']
     actionStepCount: number
     currentAction?: {
         id: string
         startedAtTimestamp: number
-        customFunctionState?: CyclotronJobInvocationCustomFunctionContext
+        insightsFunctionState?: CyclotronJobInvocationInsightsFunctionContext
     }
     variables?: Record<string, any>
 }
 
 // Mostly copied from frontend types
-export type CustomFunctionInputSchemaType = {
+export type InsightsFunctionInputSchemaType = {
     type:
         | 'string'
         | 'number'
@@ -353,12 +353,12 @@ export type CustomFunctionInputSchemaType = {
     requiredScopes?: string
     /**
      * templating: true indicates the field supports templating. Alternatively
-     * it can be set to 'custom_script' or 'liquid' to specify the default templating engine to use.
+     * it can be set to 'fn' or 'liquid' to specify the default templating engine to use.
      */
-    templating?: boolean | 'custom_script' | 'liquid'
+    templating?: boolean | 'fn' | 'liquid'
 }
 
-export type CustomFunctionTypeType =
+export type InsightsFunctionTypeType =
     | 'destination'
     | 'transformation'
     | 'internal_destination'
@@ -366,27 +366,27 @@ export type CustomFunctionTypeType =
     | 'warehouse_source_webhook'
     | 'site_destination'
 
-export interface CustomFunctionMappingType {
-    inputs_schema?: CustomFunctionInputSchemaType[]
+export interface InsightsFunctionMappingType {
+    inputs_schema?: InsightsFunctionInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
-    filters?: CustomFunctionFilters | null
+    filters?: InsightsFunctionFilters | null
 }
 
-export type CustomFunctionType = {
+export type InsightsFunctionType = {
     id: string
-    type: CustomFunctionTypeType
+    type: InsightsFunctionTypeType
     team_id: number
     name: string
     enabled: boolean
     deleted: boolean
     script: string
     bytecode: ScriptBytecode
-    inputs_schema?: CustomFunctionInputSchemaType[]
+    inputs_schema?: InsightsFunctionInputSchemaType[]
     inputs?: Record<string, CyclotronInputType | null>
     encrypted_inputs?: Record<string, CyclotronInputType>
-    filters?: CustomFunctionFilters | null
-    mappings?: CustomFunctionMappingType[] | null
-    masking?: CustomFunctionMasking | null
+    filters?: InsightsFunctionFilters | null
+    mappings?: InsightsFunctionMappingType[] | null
+    masking?: InsightsFunctionMasking | null
     template_id?: string
     execution_order?: number
     created_at: string
@@ -394,42 +394,42 @@ export type CustomFunctionType = {
     metadata?: Record<string, any>
 }
 
-export type CustomFunctionMappingTemplate = CustomFunctionMappingType & {
+export type InsightsFunctionMappingTemplate = InsightsFunctionMappingType & {
     name: string
     include_by_default?: boolean
 }
 
-export type CustomFunctionTemplate = {
+export type InsightsFunctionTemplate = {
     status: 'stable' | 'alpha' | 'beta' | 'deprecated' | 'coming_soon' | 'hidden'
     free: boolean
-    type: CustomFunctionTypeType
+    type: InsightsFunctionTypeType
     id: string
     name: string
     description: string
     code: string
-    inputs_schema: CustomFunctionInputSchemaType[]
+    inputs_schema: InsightsFunctionInputSchemaType[]
     category: string[]
-    filters?: CustomFunctionFilters
-    mappings?: CustomFunctionMappingType[]
-    mapping_templates?: CustomFunctionMappingTemplate[]
-    masking?: CustomFunctionMasking
+    filters?: InsightsFunctionFilters
+    mappings?: InsightsFunctionMappingType[]
+    mapping_templates?: InsightsFunctionMappingTemplate[]
+    masking?: InsightsFunctionMasking
     icon_url?: string
-    code_language: 'javascript' | 'custom_script'
+    code_language: 'javascript' | 'fn'
 }
 
-export type CustomFunctionTemplateCompiled = CustomFunctionTemplate & {
+export type InsightsFunctionTemplateCompiled = InsightsFunctionTemplate & {
     bytecode: ScriptBytecode
 }
 
 // Slightly different model from the DB
-export type DBCustomFunctionTemplate = {
+export type DBInsightsFunctionTemplate = {
     id: string
     template_id: string
     sha: string
     name: string
-    inputs_schema: CustomFunctionInputSchemaType[]
+    inputs_schema: InsightsFunctionInputSchemaType[]
     bytecode: ScriptBytecode
-    type: CustomFunctionTypeType
+    type: InsightsFunctionTypeType
     free: boolean
 }
 
@@ -441,7 +441,7 @@ export type IntegrationType = {
     sensitive_config: Record<string, any>
 }
 
-export type CustomFunctionCapturedEvent = {
+export type InsightsFunctionCapturedEvent = {
     team_id: number
     event: string
     distinct_id: string
@@ -456,7 +456,7 @@ export type Response = {
     headers: Record<string, any>
 }
 
-export type NativeTemplate = Omit<CustomFunctionTemplate, 'code' | 'code_language'> & {
+export type NativeTemplate = Omit<InsightsFunctionTemplate, 'code' | 'code_language'> & {
     perform: (
         request: (
             url: string,

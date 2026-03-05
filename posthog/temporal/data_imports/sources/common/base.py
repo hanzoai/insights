@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, Optional, TypeVar, Union
 
 if TYPE_CHECKING:
-    from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+    from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
 from posthog.schema import (
     SourceConfig,
@@ -82,7 +82,7 @@ class _BaseSource(ABC, Generic[ConfigType]):
         return self._config_class.validate_dict(job_inputs)
 
     @property
-    def webhook_template(self) -> Optional["CustomFunctionTemplateDC"]:
+    def webhook_template(self) -> Optional["InsightsFunctionTemplateDC"]:
         return None
 
     def validate_credentials(
@@ -117,7 +117,7 @@ class WebhookSource(_BaseSource[ConfigType], Generic[ConfigType]):
 
     @property
     @abstractmethod
-    def webhook_template(self) -> Optional["CustomFunctionTemplateDC"]:
+    def webhook_template(self) -> Optional["InsightsFunctionTemplateDC"]:
         raise NotImplementedError()
 
 
