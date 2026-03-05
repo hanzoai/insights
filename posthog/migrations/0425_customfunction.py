@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="CustomFunction",
+            name="InsightsFunction",
             fields=[
                 (
                     "id",

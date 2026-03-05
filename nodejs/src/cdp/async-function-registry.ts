@@ -1,14 +1,14 @@
 import { ScriptExecutorServiceHub } from './services/script-executor.service'
 import {
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionInvocationGlobalsWithInputs,
     MinimalLogEntry,
 } from './types'
 
 export type AsyncFunctionContext = {
-    invocation: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>['invocation']
-    globals: CustomFunctionInvocationGlobalsWithInputs
+    invocation: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>['invocation']
+    globals: InsightsFunctionInvocationGlobalsWithInputs
     hub: ScriptExecutorServiceHub
 }
 
@@ -16,7 +16,7 @@ export type AsyncFunctionHandler = {
     execute: (
         args: any[],
         context: AsyncFunctionContext,
-        result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
     ) => Promise<void> | void
 
     mock: (args: any[], logs: MinimalLogEntry[]) => any

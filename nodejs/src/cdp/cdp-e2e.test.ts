@@ -9,20 +9,20 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { CdpCyclotronWorker } from '../../src/cdp/consumers/cdp-cyclotron-worker.consumer'
-import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../../src/cdp/types'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../../src/cdp/types'
 import { KAFKA_APP_METRICS_2, KAFKA_LOG_ENTRIES } from '../../src/config/kafka-topics'
 import { Hub, Team } from '../../src/types'
 import { closeHub, createHub } from '../../src/utils/db/hub'
 import { logger } from '../utils/logger'
-import { CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from './_tests/examples'
+import { FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from './_tests/examples'
 import {
-    insertCustomFunction as _insertCustomFunction,
+    insertInsightsFunction as _insertInsightsFunction,
     createScriptExecutionGlobals,
     insertIntegration,
 } from './_tests/fixtures'
 import { CdpEventsConsumer } from './consumers/cdp-events.consumer'
 import { cdpSeekLatencyMs, cdpSeekResult } from './services/job-queue/job-queue-kafka'
-import { compileScript } from './templates/compiler'
+import { compileFn } from './templates/compiler'
 
 const ActualKafkaProducerWrapper = jest.requireActual('../../src/kafka/producer').KafkaProducerWrapper
 
@@ -36,12 +36,12 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
 
         let hub: Hub
         let team: Team
-        let fnFetchNoFilters: CustomFunctionType
-        let globals: CustomFunctionInvocationGlobals
+        let fnFetchNoFilters: InsightsFunctionType
+        let globals: InsightsFunctionInvocationGlobals
         let mockProducerObserver: KafkaProducerObserver
 
-        const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>): Promise<CustomFunctionType> => {
-            const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
+        const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>): Promise<InsightsFunctionType> => {
+            const item = await _insertInsightsFunction(hub.postgres, team.id, insightsFunction)
             return item
         }
 
@@ -91,21 +91,21 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
             print('Fetch response:', res);
             `
 
-            fnFetchNoFilters = await insertCustomFunction({
+            fnFetchNoFilters = await insertInsightsFunction({
                 type: 'destination',
                 script: hog,
-                bytecode: await compileScript(scriptCode),
+                bytecode: await compileFn(fnCode),
                 inputs_schema: [
-                    ...(CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
+                    ...(FN_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
                     { key: 'oauth', type: 'integration', label: 'Slack', secret: false, required: true },
                 ],
                 inputs: {
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch.inputs,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch.inputs,
                     oauth: {
                         value: 1,
                     },
                 },
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             eventsConsumer = new CdpEventsConsumer({
@@ -212,7 +212,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'custom_function',
+                        app_source: 'insights_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'other',
@@ -223,7 +223,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'custom_function',
+                        app_source: 'insights_function',
                         app_source_id: '_event_trigger',
                         count: 1,
                         metric_kind: 'billing',
@@ -234,7 +234,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'custom_function',
+                        app_source: 'insights_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'other',
@@ -245,7 +245,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'custom_function',
+                        app_source: 'insights_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'success',
@@ -260,7 +260,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     topic: 'log_entries_test',
                     value: {
                         level: 'info',
-                        log_source: 'custom_function',
+                        log_source: 'insights_function',
                         log_source_id: fnFetchNoFilters.id.toString(),
                         message: `Fetch response:, {"status":200,"body":{"success":true}}`,
                         team_id: 2,
@@ -270,7 +270,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     topic: 'log_entries_test',
                     value: {
                         level: 'debug',
-                        log_source: 'custom_function',
+                        log_source: 'insights_function',
                         log_source_id: fnFetchNoFilters.id.toString(),
                         message: expect.stringContaining('Function completed in'),
                         team_id: 2,

@@ -10,7 +10,7 @@ registerAsyncFunction('insightsGetTicket', {
         const ticketId = opts?.ticket_id
 
         if (!ticketId || typeof ticketId !== 'string') {
-            throw new Error("[CustomFunction] - insightsGetTicket call missing 'ticket_id' property")
+            throw new Error("[InsightsFunction] - insightsGetTicket call missing 'ticket_id' property")
         }
 
         const team = await context.hub.teamManager.getTeam(context.invocation.teamId)
@@ -63,7 +63,7 @@ registerAsyncFunction('insightsUpdateTicket', {
         const updates = opts?.updates || {}
 
         if (!ticketId || typeof ticketId !== 'string') {
-            throw new Error("[CustomFunction] - insightsUpdateTicket call missing 'ticket_id' property")
+            throw new Error("[InsightsFunction] - insightsUpdateTicket call missing 'ticket_id' property")
         }
 
         const updateTeam = await context.hub.teamManager.getTeam(context.invocation.teamId)

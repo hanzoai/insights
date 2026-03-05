@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_app",

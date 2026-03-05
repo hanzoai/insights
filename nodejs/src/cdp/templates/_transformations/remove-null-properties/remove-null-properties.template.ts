@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: CustomFunctionTemplate = {
     name: 'Remove Null Properties',
     description:
         'This transformation removes null properties from the event properties object. If the object nesting exceeds 3 levels, deeper levels will be returned unchanged.',
-    icon_url: '/static/mascot/builder-mascot-01.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Check if the event has properties
 if (empty(event.properties)) {

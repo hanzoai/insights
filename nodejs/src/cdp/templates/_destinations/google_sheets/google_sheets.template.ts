@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Update a Google Sheet with the incoming event data',
     icon_url: '/static/services/google-sheets.svg',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 let res := fetch(f'https://sheets.googleapis.com/v4/spreadsheets/{inputs.spreadsheet_id}/values:batchUpdate', {
     'method': 'POST',

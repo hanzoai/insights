@@ -1,10 +1,10 @@
 from parameterized import parameterized
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.temporal.data_imports.sources.common.default_webhook_template import template
 
 
-class TestDefaultWarehouseWebhookTemplate(BaseCustomFunctionTemplateTest):
+class TestDefaultWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
     def createHogGlobals(self, globals=None) -> dict:

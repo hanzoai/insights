@@ -64,7 +64,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         projectBased: true,
         name: 'Site apps',
         description: 'Apps allow you to add custom functionality to your website using Insights.',
-        activityScope: ActivityScope.CUSTOM_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         defaultDocsPath: '/docs/cdp/apps',
         iconType: 'data_pipeline',
     },
@@ -131,7 +131,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.DataPipelinesNew]: {
         projectBased: true,
         name: 'New data pipeline',
-        activityScope: ActivityScope.CUSTOM_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         defaultDocsPath: '/docs/cdp',
     },
     [Scene.DataWarehouseSource]: {
@@ -169,11 +169,11 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         projectBased: true,
         name: 'Destinations',
         description: 'Destinations allow you to send your data to external systems in real time.',
-        activityScope: ActivityScope.CUSTOM_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         defaultDocsPath: '/docs/cdp/destinations',
         iconType: 'data_pipeline',
     },
-    [Scene.DebugScript]: { projectBased: true, name: 'Script REPL' },
+    [Scene.DebugFn]: { projectBased: true, name: 'Fn REPL' },
     [Scene.DebugQuery]: { projectBased: true },
     [Scene.SignalsDebug]: { projectBased: true, name: 'Signals Debug' },
     [Scene.Error404]: { name: 'Not found', projectBased: true },
@@ -296,7 +296,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Heatmap recording',
         iconType: 'heatmap',
     },
-    [Scene.CustomFunction]: { projectBased: true, name: 'Custom function', activityScope: ActivityScope.CUSTOM_FUNCTION },
+    [Scene.InsightsFunction]: { projectBased: true, name: 'Custom function', activityScope: ActivityScope.INSIGHTS_FUNCTION },
     [Scene.Insight]: {
         projectBased: true,
         name: 'Insights',
@@ -579,7 +579,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Sources',
         description:
             'Import data into Insights from external sources including webhooks, application connectors, and self-managed databases.',
-        activityScope: ActivityScope.CUSTOM_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         defaultDocsPath: '/docs/data-warehouse',
         iconType: 'data_pipeline',
     },
@@ -588,7 +588,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Transformations',
         description:
             'Transformations let you modify, filter, and enrich event data to improve data quality, privacy, and consistency.',
-        activityScope: ActivityScope.CUSTOM_FUNCTION,
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
         defaultDocsPath: '/docs/cdp/transformations',
         iconType: 'data_pipeline',
     },
@@ -647,7 +647,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
 const redirectPipeline = (id: string, fallbackUrl: string): string => {
     // Custom functions (destinations & transformations)
     if (id.startsWith('fn-')) {
-        return urls.customFunction(id.replace('fn-', ''))
+        return urls.insightsFunction(id.replace('fn-', ''))
     }
     // Batch exports (destinations)
     if (id.startsWith('batch-export-')) {
@@ -912,7 +912,7 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.unsubscribe()]: [Scene.Unsubscribe, 'unsubscribe'],
     [urls.integrationsRedirect(':kind')]: [Scene.IntegrationsRedirect, 'integrationsRedirect'],
     [urls.debugQuery()]: [Scene.DebugQuery, 'debugQuery'],
-    [urls.debugHog()]: [Scene.DebugScript, 'debugHog'],
+    [urls.debugHog()]: [Scene.DebugFn, 'debugHog'],
     [urls.signalsDebug()]: [Scene.SignalsDebug, 'signalsDebug'],
     [urls.notebook(':shortId')]: [Scene.Notebook, 'notebook'],
     [urls.notebooks()]: [Scene.Notebooks, 'notebooks'],
@@ -946,8 +946,8 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.batchExportNew(':service')]: [Scene.BatchExportNew, 'batchExportNew'],
     [urls.batchExport(':id')]: [Scene.BatchExport, 'batchExport'],
     [urls.legacyPlugin(':id')]: [Scene.LegacyPlugin, 'legacyPlugin'],
-    [urls.customFunction(':id')]: [Scene.CustomFunction, 'customFunction'],
-    [urls.customFunctionNew(':templateId')]: [Scene.CustomFunction, 'customFunctionNew'],
+    [urls.insightsFunction(':id')]: [Scene.InsightsFunction, 'insightsFunction'],
+    [urls.insightsFunctionNew(':templateId')]: [Scene.InsightsFunction, 'insightsFunctionNew'],
     [urls.organizationDeactivated()]: [Scene.OrganizationDeactivated, 'organizationDeactivated'],
     ...productRoutes,
 }

@@ -51,8 +51,8 @@ class FileSystemShortcutViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     def _scope_by_project_and_environment(self, queryset: QuerySet) -> QuerySet:
         queryset = self._scope_by_project(queryset)
-        # type !~ 'custom_function/.*' or team = $current
-        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="custom_function/"))
+        # type !~ 'insights_function/.*' or team = $current
+        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="insights_function/"))
         return queryset
 
     def _filter_queryset_by_parents_lookups(self, queryset):

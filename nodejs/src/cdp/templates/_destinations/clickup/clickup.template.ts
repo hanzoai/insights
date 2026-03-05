@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'beta',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Create ClickUp tasks from event data',
     icon_url: '/static/services/clickup.svg',
     category: ['Productivity'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 let res := fetch(f'https://api.clickup.com/api/v2/list/{inputs.listId}/task', {
   'headers': {

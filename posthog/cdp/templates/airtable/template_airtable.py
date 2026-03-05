@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Creates Airtable records",
     icon_url="/static/services/airtable.png",
     category=["Custom"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 let url := f'https://api.airtable.com/v0/{inputs.base_id}/{inputs.table_name}'
 

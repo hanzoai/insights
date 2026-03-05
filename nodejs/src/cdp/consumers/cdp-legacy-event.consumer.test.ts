@@ -11,7 +11,7 @@ import { PostgresUse } from '../../utils/db/postgres'
 import { createScriptExecutionGlobals } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
-import { CustomFunctionInvocationGlobals } from '../types'
+import { InsightsFunctionInvocationGlobals } from '../types'
 import { CdpLegacyEventsConsumer, LightweightPluginConfig } from './cdp-legacy-event.consumer'
 
 jest.setTimeout(5000)
@@ -22,7 +22,7 @@ describe('CdpLegacyEventsConsumer', () => {
     let hub: Hub
     let team: Team
     let pluginConfig: LightweightPluginConfig
-    let invocation: CustomFunctionInvocationGlobals
+    let invocation: InsightsFunctionInvocationGlobals
     let uniquePluginId: number
 
     const customerIoPlugin = DESTINATION_PLUGINS_BY_ID['plugin-customerio-plugin']
@@ -164,7 +164,7 @@ describe('CdpLegacyEventsConsumer', () => {
         jest.useRealTimers()
     })
 
-    describe('convertPluginConfigToCustomFunction', () => {
+    describe('convertPluginConfigToInsightsFunction', () => {
         it('should convert a lightweight plugin config to a custom function', () => {
             const lightweightConfig = {
                 id: pluginConfig.id,
@@ -184,7 +184,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToInsightsFunction'](lightweightConfig)
 
             expect(result).toBeTruthy()
             expect(result?.template_id).toBe('plugin-customerio-plugin')
@@ -224,7 +224,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 customField: 'value123',
             }
 
-            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig, attachments)
+            const result = consumer['convertPluginConfigToInsightsFunction'](lightweightConfig, attachments)
 
             expect(result).toBeTruthy()
             expect(result?.inputs).toMatchObject({
@@ -262,7 +262,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig, attachments)
+            const result = consumer['convertPluginConfigToInsightsFunction'](lightweightConfig, attachments)
 
             expect(result).toBeTruthy()
             expect(result?.inputs).toMatchObject({
@@ -287,7 +287,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToInsightsFunction'](lightweightConfig)
 
             expect(result?.template_id).toBe('plugin-semver-flattener')
         })
@@ -302,20 +302,20 @@ describe('CdpLegacyEventsConsumer', () => {
                 created_at: '2025-01-01T00:00:00.000Z',
             }
 
-            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToInsightsFunction'](lightweightConfig)
 
             expect(result).toBeNull()
         })
     })
 
-    describe('getLegacyPluginCustomFunctionInvocations', () => {
+    describe('getLegacyPluginInsightsFunctionInvocations', () => {
         it('should load custom functions and create invocations', async () => {
             // This test validates the full flow
-            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
-            expect(invocations[0].customFunction.template_id).toBe('plugin-customerio-plugin')
+            expect(invocations[0].insightsFunction.template_id).toBe('plugin-customerio-plugin')
 
             // Check that the loader was called and cached
             const cachedConfigs = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
@@ -333,7 +333,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](emptyInvocation)
+            const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](emptyInvocation)
             expect(invocations).toEqual([])
         })
 
@@ -359,23 +359,23 @@ describe('CdpLegacyEventsConsumer', () => {
             consumer['pluginConfigsLoader'].clear()
 
             // Get invocations
-            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
 
             // Check that the attachment was loaded into inputs
-            const customFunction = invocations[0].customFunction
-            expect(customFunction.inputs).toBeTruthy()
-            expect(customFunction.inputs?.mappings).toBeTruthy()
-            expect(customFunction.inputs?.mappings?.value).toEqual({
+            const insightsFunction = invocations[0].insightsFunction
+            expect(insightsFunction.inputs).toBeTruthy()
+            expect(insightsFunction.inputs?.mappings).toBeTruthy()
+            expect(insightsFunction.inputs?.mappings?.value).toEqual({
                 event1: 'action1',
                 event2: 'action2',
             })
 
             // Verify other inputs are still present
-            expect(customFunction.inputs?.customerioSiteId?.value).toBe('1234567890')
-            expect(customFunction.inputs?.customerioToken?.value).toBe('cio-token')
+            expect(insightsFunction.inputs?.customerioSiteId?.value).toBe('1234567890')
+            expect(insightsFunction.inputs?.customerioToken?.value).toBe('cio-token')
         })
     })
 
@@ -403,15 +403,15 @@ describe('CdpLegacyEventsConsumer', () => {
             })
 
             // Get invocations from the consumer - these are just logged, not executed
-            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](invocation)
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
 
-            const customFunctionInvocation = invocations[0]
-            expect(customFunctionInvocation.customFunction.template_id).toBe('plugin-customerio-plugin')
+            const insightsFunctionInvocation = invocations[0]
+            expect(insightsFunctionInvocation.insightsFunction.template_id).toBe('plugin-customerio-plugin')
 
             // Verify the invocation structure is correct by executing it manually
-            const result = await legacyPluginExecutor.execute(customFunctionInvocation)
+            const result = await legacyPluginExecutor.execute(insightsFunctionInvocation)
 
             expect(result.finished).toBe(true)
             expect(result.error).toBeUndefined()
@@ -470,7 +470,7 @@ describe('CdpLegacyEventsConsumer', () => {
             consumer['pluginConfigsLoader'].clear()
 
             // Get invocations
-            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginInsightsFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
@@ -508,16 +508,16 @@ describe('CdpLegacyEventsConsumer', () => {
             expect(results[1]).toEqual(results[2])
 
             // Check cache is populated
-            const cachedCustomFunctions = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
-            expect(cachedCustomFunctions).toBeTruthy()
-            expect(cachedCustomFunctions?.length).toBeGreaterThan(0)
-            expect(cachedCustomFunctions![0].customFunction).toBeTruthy()
-            expect(cachedCustomFunctions![0].pluginConfigId).toBe(pluginConfig.id)
+            const cachedInsightsFunctions = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
+            expect(cachedInsightsFunctions).toBeTruthy()
+            expect(cachedInsightsFunctions?.length).toBeGreaterThan(0)
+            expect(cachedInsightsFunctions![0].insightsFunction).toBeTruthy()
+            expect(cachedInsightsFunctions![0].pluginConfigId).toBe(pluginConfig.id)
         })
 
         it('should return empty array for teams with no configs', async () => {
-            const customFunctions = await consumer['pluginConfigsLoader'].get('99999')
-            expect(customFunctions).toEqual([])
+            const insightsFunctions = await consumer['pluginConfigsLoader'].get('99999')
+            expect(insightsFunctions).toEqual([])
         })
     })
 

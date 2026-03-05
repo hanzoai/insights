@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { registerAsyncFunction } from '../async-function-registry'
 
 /**
- * Example of a simple async function that writes arguments to the invocation logs. Once an async function has been registered, it can be called from a CustomFunction.
+ * Example of a simple async function that writes arguments to the invocation logs. Once an async function has been registered, it can be called from a InsightsFunction.
  *
  * If you're trying to add a new realtime destination or workflow action that will use your async function, these are defined in nodejs/src/cdp/templates/_destinations.
  *

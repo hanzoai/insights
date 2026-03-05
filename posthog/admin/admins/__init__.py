@@ -15,7 +15,7 @@ from .experiment_saved_metric_admin import ExperimentSavedMetricAdmin
 from .external_data_schema_admin import ExternalDataSchemaAdmin
 from .feature_flag_admin import FeatureFlagAdmin
 from .group_type_mapping_admin import GroupTypeMappingAdmin
-from .custom_function_admin import CustomFunctionAdmin
+from .insights_function_admin import InsightsFunctionAdmin
 from .insight_admin import InsightAdmin
 from .instance_setting_admin import InstanceSettingAdmin
 from .integration_admin import IntegrationAdmin, OrganizationIntegrationAdmin
@@ -50,7 +50,7 @@ __all__ = [
     "ExperimentSavedMetricAdmin",
     "FeatureFlagAdmin",
     "GroupTypeMappingAdmin",
-    "CustomFunctionAdmin",
+    "InsightsFunctionAdmin",
     "InsightAdmin",
     "InstanceSettingAdmin",
     "IntegrationAdmin",

@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send data to RudderStack",
     icon_url="/static/services/rudderstack.png",
     category=["Custom"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 fun getPayload() {
     let rudderPayload := {
@@ -132,13 +132,13 @@ if (res.status != 200 or res.body.ok == false) {
 )
 
 
-class TemplateRudderstackMigrator(CustomFunctionTemplateMigrator):
+class TemplateRudderstackMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/rudderstack-posthog-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("dataPlaneUrl", "https://hosted.rudderlabs.com")

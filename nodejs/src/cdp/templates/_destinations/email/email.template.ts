@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'hidden',
     type: 'destination',
@@ -16,7 +16,7 @@ export const template: CustomFunctionTemplate = {
         throw Error(f'Email failed to send: {res.error}')
     }
     `,
-    code_language: 'custom_script',
+    code_language: 'fn',
 
     inputs_schema: [
         {

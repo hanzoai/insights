@@ -2627,34 +2627,6 @@ export const usersDestroy = async (uuid: string, options?: RequestInit): Promise
     })
 }
 
-export const getUsersMascotConfigRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/mascot_config/`
-}
-
-export const usersMascotConfigRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getUsersMascotConfigRetrieveUrl(uuid), {
-        ...options,
-        method: 'GET',
-    })
-}
-
-export const getUsersMascotConfigPartialUpdateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/mascot_config/`
-}
-
-export const usersMascotConfigPartialUpdate = async (
-    uuid: string,
-    patchedUserApi: NonReadonly<PatchedUserApi>,
-    options?: RequestInit
-): Promise<void> => {
-    return apiMutator<void>(getUsersMascotConfigPartialUpdateUrl(uuid), {
-        ...options,
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(patchedUserApi),
-    })
-}
-
 export const getUsersScenePersonalisationCreateUrl = (uuid: string) => {
     return `/api/users/${uuid}/scene_personalisation/`
 }

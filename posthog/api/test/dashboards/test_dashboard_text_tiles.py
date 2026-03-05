@@ -31,7 +31,6 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
             "id": user.id,
             "uuid": str(user.uuid),
             "is_email_verified": None,
-            "mascot_config": None,
             "role_at_organization": None,
         }
 

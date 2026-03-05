@@ -2,7 +2,7 @@ from posthog.insightsql.ast import ArrayType, BooleanType, DateTimeType, DateTyp
 
 from .core import InsightsQLFunctionMeta
 
-INSIGHTSQL_POSTCUSTOM_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
+INSIGHTSQL_POSTINSIGHTS_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "matchesAction": InsightsQLFunctionMeta("matchesAction", 1, 1),
     "sparkline": InsightsQLFunctionMeta("sparkline", 1, 1),
     "recordingButton": InsightsQLFunctionMeta("recordingButton", 1, 2),

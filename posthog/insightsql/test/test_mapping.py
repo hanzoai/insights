@@ -15,7 +15,7 @@ from posthog.insightsql.functions.mapping import (
     INSIGHTSQL_CLICKHOUSE_FUNCTIONS,
     find_insightsql_aggregation,
     find_insightsql_function,
-    find_insightsql_postcustom_function,
+    find_insightsql_postinsights_function,
 )
 from posthog.insightsql.parser import parse_expr
 from posthog.insightsql.printer import prepare_and_print_ast
@@ -36,8 +36,8 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
     def _get_insightsql_aggregation(self, name: str) -> InsightsQLFunctionMeta:
         return self._return_present_function(find_insightsql_aggregation(name))
 
-    def _get_insightsql_postcustom_function(self, name: str) -> InsightsQLFunctionMeta:
-        return self._return_present_function(find_insightsql_postcustom_function(name))
+    def _get_insightsql_postinsights_function(self, name: str) -> InsightsQLFunctionMeta:
+        return self._return_present_function(find_insightsql_postinsights_function(name))
 
     def test_find_case_sensitive_function(self):
         self.assertEqual(self._get_insightsql_function("toString").clickhouse_name, "toString")
@@ -47,8 +47,8 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
         self.assertEqual(self._get_insightsql_aggregation("countIf").clickhouse_name, "countIf")
         self.assertEqual(find_insightsql_aggregation("COUNTIF"), None)
 
-        self.assertEqual(self._get_insightsql_postcustom_function("sparkline").clickhouse_name, "sparkline")
-        self.assertEqual(find_insightsql_postcustom_function("SPARKLINE"), None)
+        self.assertEqual(self._get_insightsql_postinsights_function("sparkline").clickhouse_name, "sparkline")
+        self.assertEqual(find_insightsql_postinsights_function("SPARKLINE"), None)
 
     def test_find_case_insensitive_function(self):
         self.assertEqual(self._get_insightsql_function("CoAlesce").clickhouse_name, "coalesce")
@@ -58,7 +58,7 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
     def test_find_non_existent_function(self):
         self.assertEqual(find_insightsql_function("functionThatDoesntExist"), None)
         self.assertEqual(find_insightsql_aggregation("functionThatDoesntExist"), None)
-        self.assertEqual(find_insightsql_postcustom_function("functionThatDoesntExist"), None)
+        self.assertEqual(find_insightsql_postinsights_function("functionThatDoesntExist"), None)
 
     def test_compare_types(self):
         res = compare_types([IntegerType()], (IntegerType(),))

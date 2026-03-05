@@ -1,6 +1,6 @@
 import { Liquid } from 'liquidjs'
 
-import { CustomFunctionInvocationGlobalsWithInputs } from '../types'
+import { InsightsFunctionInvocationGlobalsWithInputs } from '../types'
 
 const LIQUID_REGEX = /\{\{(.*?)\}\}|{%(.*?)%}/g
 
@@ -16,7 +16,7 @@ export class LiquidRenderer {
         return this._liquid
     }
 
-    static renderWithCustomFunctionGlobals(template: string, globals: CustomFunctionInvocationGlobalsWithInputs): string {
+    static renderWithInsightsFunctionGlobals(template: string, globals: InsightsFunctionInvocationGlobalsWithInputs): string {
         const context = {
             ...globals,
             now: new Date(),

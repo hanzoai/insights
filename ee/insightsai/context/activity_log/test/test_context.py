@@ -722,7 +722,7 @@ class TestActivityLogContextHumanization(ActivityLogTestBase):
         [
             ("camel_case_split", "FeatureFlag", "Feature Flag"),
             ("single_word", "Insight", "Insight"),
-            ("override_custom_function", "CustomFunction", "Data pipeline"),
+            ("override_insights_function", "InsightsFunction", "Data pipeline"),
             ("override_batch_export", "BatchExport", "Destination"),
             ("override_external_data_source", "ExternalDataSource", "Source"),
             ("override_alert_configuration", "AlertConfiguration", "Alert"),
@@ -736,7 +736,7 @@ class TestActivityLogContextHumanization(ActivityLogTestBase):
 
     async def test_scope_displayed_with_override(self):
         await self._create_log(
-            scope="CustomFunction",
+            scope="InsightsFunction",
             activity="updated",
             item_id="1",
             detail={"name": "My Pipeline"},
@@ -746,11 +746,11 @@ class TestActivityLogContextHumanization(ActivityLogTestBase):
         result = await context.fetch_and_format()
 
         assert "Data pipeline" in result
-        assert "CustomFunction" not in result
+        assert "InsightsFunction" not in result
 
     async def test_field_name_override_applied_in_changes(self):
         await self._create_log(
-            scope="CustomFunction",
+            scope="InsightsFunction",
             activity="updated",
             item_id="1",
             detail={

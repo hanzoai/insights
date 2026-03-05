@@ -517,7 +517,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Analyzing user interviews...'
         },
     },
-    create_custom_function_filters: {
+    create_insights_function_filters: {
         name: 'Set up function filters',
         description: 'Set up function filters for quick pipeline configuration',
         product: Scene.Transformations,
@@ -541,7 +541,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Writing and tweaking Custom code...'
         },
     },
-    create_custom_function_inputs: {
+    create_insights_function_inputs: {
         name: 'Manage function variables',
         description: 'Manage function variables in Custom functions',
         product: Scene.Transformations,

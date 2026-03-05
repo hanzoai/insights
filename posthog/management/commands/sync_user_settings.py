@@ -22,7 +22,6 @@ class Command(BaseCommand):
         "partial_notification_settings",
         "anonymize_data",
         "toolbar_mode",
-        "mascot_config",
     ]
 
     def add_arguments(self, parser):

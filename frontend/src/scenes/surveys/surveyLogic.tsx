@@ -50,7 +50,7 @@ import {
     ConsolidatedSurveyResults,
     EventPropertyFilter,
     FeatureFlagFilters,
-    CustomFunctionType,
+    InsightsFunctionType,
     IntervalType,
     MultipleSurveyQuestion,
     OpenQuestionProcessedResponses,
@@ -891,13 +891,13 @@ export const surveyLogic = kea<surveyLogicType>([
             },
         ],
         surveyNotifications: [
-            [] as CustomFunctionType[],
+            [] as InsightsFunctionType[],
             {
-                loadSurveyNotifications: async (): Promise<CustomFunctionType[]> => {
+                loadSurveyNotifications: async (): Promise<InsightsFunctionType[]> => {
                     if (props.id === NEW_SURVEY.id) {
                         return []
                     }
-                    const response = await api.customFunctions.list({
+                    const response = await api.insightsFunctions.list({
                         filter_groups: [
                             {
                                 events: [
@@ -1112,7 +1112,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 actions.loadSurveyNotificationsSuccess(updatedNotifications)
 
                 try {
-                    await api.customFunctions.update(notificationId, { enabled })
+                    await api.insightsFunctions.update(notificationId, { enabled })
                 } catch (error) {
                     lemonToast.error('Failed to update notification')
                     actions.loadSurveyNotifications()

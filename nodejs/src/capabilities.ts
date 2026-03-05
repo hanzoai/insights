@@ -18,11 +18,11 @@ export const CAPABILITIES_CDP: PluginServerCapabilities = {
     cdpLegacyOnEvent: false, // most of the times not needed
 }
 
-/** CDP + Workflows - full CDP with CustomFlow workflow automation */
+/** CDP + Workflows - full CDP with InsightsFlow workflow automation */
 export const CAPABILITIES_CDP_WORKFLOWS: PluginServerCapabilities = {
     ...CAPABILITIES_CDP,
-    cdpBatchCustomFlow: true,
-    cdpCyclotronWorkerCustomFlow: true,
+    cdpBatchInsightsFlow: true,
+    cdpCyclotronWorkerInsightsFlow: true,
 }
 
 /** Realtime Cohorts - precalculated filters and cohort membership */
@@ -171,7 +171,7 @@ export function getPluginServerCapabilities(config: PluginsServerConfig): Plugin
             }
         case PluginServerMode.cdp_cyclotron_worker_customflow:
             return {
-                cdpCyclotronWorkerCustomFlow: true,
+                cdpCyclotronWorkerInsightsFlow: true,
             }
         case PluginServerMode.cdp_precalculated_filters:
             return {
@@ -201,7 +201,7 @@ export function getPluginServerCapabilities(config: PluginsServerConfig): Plugin
             }
         case PluginServerMode.cdp_batch_customflow_requests:
             return {
-                cdpBatchCustomFlow: true,
+                cdpBatchInsightsFlow: true,
             }
         case PluginServerMode.cdp_data_warehouse_events:
             return {

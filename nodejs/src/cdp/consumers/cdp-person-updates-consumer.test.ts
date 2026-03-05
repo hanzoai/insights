@@ -5,26 +5,26 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
-    insertCustomFunction as _insertCustomFunction,
+    insertInsightsFunction as _insertInsightsFunction,
     createClickhousePerson,
-    createCustomFunction,
+    createInsightsFunction,
     createKafkaMessage,
 } from '../_tests/fixtures'
-import { CustomFunctionType } from '../types'
+import { InsightsFunctionType } from '../types'
 import { CdpPersonUpdatesConsumer } from './cdp-person-updates-consumer'
 
 describe('CDP Person Updates Consumer', () => {
     let processor: CdpPersonUpdatesConsumer
     let hub: Hub
     let team: Team
-    let customFunction: CustomFunctionType
+    let insightsFunction: InsightsFunctionType
 
-    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
-        const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
+    const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
+        const item = await _insertInsightsFunction(hub.postgres, team.id, insightsFunction)
         // Trigger the reload that django would do
-        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -38,15 +38,15 @@ describe('CDP Person Updates Consumer', () => {
         processor = new CdpPersonUpdatesConsumer(hub)
         await processor.start()
 
-        customFunction = createCustomFunction({
-            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+        insightsFunction = createInsightsFunction({
+            ...FN_EXAMPLES.simple_fetch,
+            ...FN_INPUTS_EXAMPLES.simple_fetch,
+            ...FN_FILTERS_EXAMPLES.no_filters,
             type: 'destination',
         })
 
-        customFunction.filters = { ...customFunction.filters, source: 'person-updates' }
-        await insertCustomFunction(customFunction)
+        insightsFunction.filters = { ...insightsFunction.filters, source: 'person-updates' }
+        await insertInsightsFunction(insightsFunction)
     })
 
     afterEach(async () => {
@@ -108,20 +108,20 @@ describe('CDP Person Updates Consumer', () => {
 
     describe('processing', () => {
         it('should only run custom functions that are filtering for person updates', async () => {
-            const customFunctionEvents = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const insightsFunctionEvents = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
                 type: 'destination',
             })
 
-            await insertCustomFunction(customFunctionEvents)
+            await insertInsightsFunction(insightsFunctionEvents)
 
             const events = await processor._parseKafkaBatch([createKafkaMessage(createClickhousePerson(team.id, {}))])
             const result = await processor.processBatch(events)
 
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].functionId).toEqual(customFunction.id)
+            expect(result.invocations[0].functionId).toEqual(insightsFunction.id)
         })
     })
 })

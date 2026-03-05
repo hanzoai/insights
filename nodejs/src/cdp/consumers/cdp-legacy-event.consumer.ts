@@ -15,11 +15,11 @@ import { LegacyWebhookService } from '../legacy-webhooks/legacy-webhook-service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFunction,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionType,
+    CyclotronJobInvocationInsightsFunction,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
 } from '../types'
-import { convertToCustomFunctionInvocationGlobals } from '../utils'
+import { convertToInsightsFunctionInvocationGlobals } from '../utils'
 import { createInvocation } from '../utils/invocation-utils'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
 import { counterParseError } from './metrics'
@@ -38,9 +38,9 @@ export type LightweightPluginConfig = {
     }
 }
 
-type PluginConfigCustomFunction = {
+type PluginConfigInsightsFunction = {
     pluginConfigId: number
-    customFunction: CustomFunctionType
+    insightsFunction: InsightsFunctionType
 }
 
 const legacyPluginExecutionResultCounter = new Counter({
@@ -78,7 +78,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
     protected promiseScheduler = new PromiseScheduler()
     protected kafkaConsumer: KafkaConsumer
 
-    private pluginConfigsLoader: LazyLoader<PluginConfigCustomFunction[]>
+    private pluginConfigsLoader: LazyLoader<PluginConfigInsightsFunction[]>
     private legacyPluginExecutor: LegacyPluginExecutorService
     private legacyWebhookService: LegacyWebhookService
 
@@ -96,8 +96,8 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         this.legacyWebhookService = new LegacyWebhookService(hub)
 
         this.pluginConfigsLoader = new LazyLoader({
-            name: 'plugin_config_custom_functions',
-            loader: async (teamIds: string[]) => this.loadAndBuildCustomFunctions(teamIds),
+            name: 'plugin_config_insights_functions',
+            loader: async (teamIds: string[]) => this.loadAndBuildInsightsFunctions(teamIds),
             refreshAgeMs: 600000, // 10 minutes
             refreshBackgroundAgeMs: 300000, // 5 minutes
             bufferMs: 10, // 10ms buffer for batching
@@ -110,7 +110,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         )
     }
 
-    private async loadAndBuildCustomFunctions(teamIds: string[]): Promise<Record<string, PluginConfigCustomFunction[]>> {
+    private async loadAndBuildInsightsFunctions(teamIds: string[]): Promise<Record<string, PluginConfigInsightsFunction[]>> {
         const { rows } = await this.hub.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
@@ -130,7 +130,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                 AND (insights_pluginconfig.deleted IS NULL OR insights_pluginconfig.deleted != 't')
                 AND insights_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
             [teamIds.map((id) => parseInt(id))],
-            'loadPluginConfigCustomFunctions'
+            'loadPluginConfigInsightsFunctions'
         )
 
         // Load attachments for all plugin configs with non-empty config
@@ -178,7 +178,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         }
 
         // Group by team_id and build custom functions directly
-        const results: Record<string, PluginConfigCustomFunction[]> = {}
+        const results: Record<string, PluginConfigInsightsFunction[]> = {}
 
         for (const row of rows) {
             const teamId = row.team_id.toString()
@@ -187,7 +187,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             }
 
             try {
-                const customFunction = this.convertPluginConfigToCustomFunction(
+                const insightsFunction = this.convertPluginConfigToInsightsFunction(
                     {
                         id: row.id,
                         team_id: row.team_id,
@@ -206,10 +206,10 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                     attachmentsMap[row.id]
                 )
 
-                if (customFunction) {
+                if (insightsFunction) {
                     results[teamId].push({
                         pluginConfigId: row.id,
-                        customFunction,
+                        insightsFunction,
                     })
                 }
             } catch (error: any) {
@@ -230,10 +230,10 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         return results
     }
 
-    private convertPluginConfigToCustomFunction(
+    private convertPluginConfigToInsightsFunction(
         pluginConfig: LightweightPluginConfig,
         attachments?: Record<string, any>
-    ): CustomFunctionType | null {
+    ): InsightsFunctionType | null {
         if (!pluginConfig.plugin?.url) {
             return null
         }
@@ -244,7 +244,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         const templateId = `plugin-${pluginId}`
 
         // Build inputs from plugin config
-        const inputs: CustomFunctionType['inputs'] = {}
+        const inputs: InsightsFunctionType['inputs'] = {}
 
         for (const [key, value] of Object.entries(pluginConfig.config)) {
             inputs[key] = { value: value?.toString() ?? '' }
@@ -264,7 +264,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             inputs.legacy_plugin_config_id = { value: pluginConfig.id }
         }
 
-        // Create a CustomFunctionType
+        // Create a InsightsFunctionType
         return {
             id: `legacy-${pluginConfig.id}`,
             type: 'destination' as const,
@@ -283,7 +283,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
     }
 
     @instrumented('cdpLegacyEventsConsumer.processEvent')
-    public async processEvent(invocation: CustomFunctionInvocationGlobals) {
+    public async processEvent(invocation: InsightsFunctionInvocationGlobals) {
         const event: PostIngestionEvent = {
             eventUuid: invocation.event.uuid,
             event: invocation.event.event,
@@ -298,20 +298,20 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             person_id: undefined,
         }
 
-        const invocations = await this.getLegacyPluginCustomFunctionInvocations(invocation)
+        const invocations = await this.getLegacyPluginInsightsFunctionInvocations(invocation)
 
         const results = await Promise.all(
             invocations.map(async (invocation) => this.legacyPluginExecutor.execute(invocation))
         )
 
         for (const result of results) {
-            const pluginConfigId = parseInt(result.invocation.customFunction.id.replace('legacy-', ''))
+            const pluginConfigId = parseInt(result.invocation.insightsFunction.id.replace('legacy-', ''))
             const error = result.error
 
             legacyPluginExecutionResultCounter
                 .labels({
                     result: error ? 'error' : 'success',
-                    template_id: result.invocation.customFunction.template_id,
+                    template_id: result.invocation.insightsFunction.template_id,
                 })
                 .inc()
 
@@ -329,7 +329,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
 
     @instrumented('cdpLegacyEventsConsumer.processBatch')
     public async processBatch(
-        invocationGlobals: CustomFunctionInvocationGlobals[]
+        invocationGlobals: InsightsFunctionInvocationGlobals[]
     ): Promise<{ backgroundTask: Promise<any>; invocations: CyclotronJobInvocation[] }> {
         if (invocationGlobals.length) {
             await Promise.all(invocationGlobals.map((x) => this.processEvent(x)))
@@ -344,8 +344,8 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
 
     // This consumer always parses from kafka
     @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<CustomFunctionInvocationGlobals[]> {
-        const events: CustomFunctionInvocationGlobals[] = []
+    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+        const events: InsightsFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
@@ -358,13 +358,13 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                         return
                     }
 
-                    const pluginConfigCustomFunctions = await this.pluginConfigsLoader.get(team.id.toString())
+                    const pluginConfigInsightsFunctions = await this.pluginConfigsLoader.get(team.id.toString())
 
-                    if (!pluginConfigCustomFunctions?.length) {
+                    if (!pluginConfigInsightsFunctions?.length) {
                         return
                     }
 
-                    events.push(convertToCustomFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -375,18 +375,18 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         return events
     }
 
-    private async getLegacyPluginCustomFunctionInvocations(
-        invocation: CustomFunctionInvocationGlobals
-    ): Promise<CyclotronJobInvocationCustomFunction[]> {
-        const pluginConfigCustomFunctions = await this.pluginConfigsLoader.get(invocation.project.id.toString())
+    private async getLegacyPluginInsightsFunctionInvocations(
+        invocation: InsightsFunctionInvocationGlobals
+    ): Promise<CyclotronJobInvocationInsightsFunction[]> {
+        const pluginConfigInsightsFunctions = await this.pluginConfigsLoader.get(invocation.project.id.toString())
 
-        if (!pluginConfigCustomFunctions) {
+        if (!pluginConfigInsightsFunctions) {
             return []
         }
 
-        return pluginConfigCustomFunctions.map(({ customFunction }) => {
+        return pluginConfigInsightsFunctions.map(({ insightsFunction }) => {
             // Plugin configs are always static { value: any } so we can just convert to a record of strings
-            const inputs = Object.entries(customFunction.inputs || {}).reduce(
+            const inputs = Object.entries(insightsFunction.inputs || {}).reduce(
                 (acc, [key, value]) => {
                     acc[key] = value?.value
                     return acc
@@ -399,7 +399,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                     ...invocation,
                     inputs,
                 },
-                customFunction
+                insightsFunction
             )
         })
     }

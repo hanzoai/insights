@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send SMS alerts via Kudosity when Insights events or metrics cross thresholds. Ideal for operational monitoring, on-call notifications, and business metric tracking.",
     icon_url="/static/services/kudosity.png",
     category=["SMS & Push Notifications", "Monitoring & Alerts"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 // Validate required fields
 if (empty(inputs.recipient)) {

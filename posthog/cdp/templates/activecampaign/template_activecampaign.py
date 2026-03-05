@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Creates a new contact in ActiveCampaign whenever an event is triggered.",
     icon_url="/static/services/activecampaign.png",
     category=["Email Marketing"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not creating a contact.')

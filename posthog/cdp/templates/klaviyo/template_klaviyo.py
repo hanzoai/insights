@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template_user: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template_user: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template_user: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Updates a contact in Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')
@@ -135,7 +135,7 @@ print(f'{action} profile successfully: id={profileId}')
     },
 )
 
-template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -144,7 +144,7 @@ template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send events to Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')

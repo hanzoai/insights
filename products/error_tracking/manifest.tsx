@@ -40,8 +40,8 @@ export const manifest: ProductManifest = {
         '/error_tracking/configuration': ['ErrorTrackingConfiguration', 'errorTrackingConfiguration'],
         '/error_tracking/:id': ['ErrorTrackingIssue', 'errorTrackingIssue'],
         '/error_tracking/:id/fingerprints': ['ErrorTrackingIssueFingerprints', 'errorTrackingIssueFingerprints'],
-        '/error_tracking/alerts/:id': ['CustomFunction', 'errorTrackingAlert'],
-        '/error_tracking/alerts/new/:templateId': ['CustomFunction', 'errorTrackingAlertNew'],
+        '/error_tracking/alerts/:id': ['InsightsFunction', 'errorTrackingAlert'],
+        '/error_tracking/alerts/new/:templateId': ['InsightsFunction', 'errorTrackingAlertNew'],
     },
     redirects: {},
     urls: {

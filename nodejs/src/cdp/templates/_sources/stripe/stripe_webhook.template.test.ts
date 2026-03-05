@@ -59,7 +59,7 @@ describe('stripe webhook template', () => {
 
         expect(response.capturedInsightsEvents[0].properties).toMatchInlineSnapshot(`
             {
-              "$custom_function_execution_count": 1,
+              "$insights_function_execution_count": 1,
             }
         `)
     })
@@ -83,7 +83,7 @@ describe('stripe webhook template', () => {
         expect(response.finished).toEqual(true)
 
         expect(response.capturedInsightsEvents[0].properties).toMatchObject({
-            $custom_function_execution_count: 1,
+            $insights_function_execution_count: 1,
             account_country: 'US',
             account_name: 'Insights - modified',
         })

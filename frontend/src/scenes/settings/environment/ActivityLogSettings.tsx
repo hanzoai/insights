@@ -7,7 +7,7 @@ import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
-import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
+import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -88,7 +88,7 @@ export function ActivityLogNotifications(): JSX.Element {
                     </Tooltip>
                 </p>
 
-                <LinkedCustomFunctions
+                <LinkedInsightsFunctions
                     type="internal_destination"
                     subTemplateIds={['activity-log']}
                     queryParams={{

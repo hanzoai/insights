@@ -16,8 +16,8 @@ describe('Utils', () => {
     describe('fixLogDeduplication', () => {
         const commonProps: Omit<LogEntry, 'timestamp' | 'message'> = {
             team_id: 1,
-            log_source: 'custom_function',
-            log_source_id: 'custom-script-1',
+            log_source: 'insights_function',
+            log_source_id: 'fn-1',
             instance_id: 'inv-1',
             level: 'info' as const,
         }
@@ -36,8 +36,8 @@ describe('Utils', () => {
                   {
                     "instance_id": "inv-1",
                     "level": "info",
-                    "log_source": "custom_function",
-                    "log_source_id": "custom-script-1",
+                    "log_source": "insights_function",
+                    "log_source_id": "fn-1",
                     "message": "First log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.000",
@@ -45,8 +45,8 @@ describe('Utils', () => {
                   {
                     "instance_id": "inv-1",
                     "level": "info",
-                    "log_source": "custom_function",
-                    "log_source_id": "custom-script-1",
+                    "log_source": "insights_function",
+                    "log_source_id": "fn-1",
                     "message": "Second log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.001",
@@ -54,8 +54,8 @@ describe('Utils', () => {
                   {
                     "instance_id": "inv-1",
                     "level": "info",
-                    "log_source": "custom_function",
-                    "log_source_id": "custom-script-1",
+                    "log_source": "insights_function",
+                    "log_source_id": "fn-1",
                     "message": "Third log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.002",
@@ -63,8 +63,8 @@ describe('Utils', () => {
                   {
                     "instance_id": "inv-1",
                     "level": "info",
-                    "log_source": "custom_function",
-                    "log_source_id": "custom-script-1",
+                    "log_source": "insights_function",
+                    "log_source_id": "fn-1",
                     "message": "Duplicate log message",
                     "team_id": 1,
                     "timestamp": "2021-05-03 00:00:00.003",

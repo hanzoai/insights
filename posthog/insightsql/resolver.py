@@ -15,7 +15,7 @@ from posthog.insightsql.database.schema.events import EventsTable
 from posthog.insightsql.database.schema.persons import PersonsTable
 from posthog.insightsql.errors import ImpossibleASTError, QueryError, ResolutionError
 from posthog.insightsql.escape_sql import safe_identifier
-from posthog.insightsql.functions import find_insightsql_postcustom_function
+from posthog.insightsql.functions import find_insightsql_postinsights_function
 from posthog.insightsql.functions.action import matches_action
 from posthog.insightsql.functions.cohort import cohort_query_node
 from posthog.insightsql.functions.core import compare_types, validate_function_args
@@ -598,7 +598,7 @@ class Resolver(CloningVisitor):
     def visit_call(self, node: ast.Call):
         """Visit function calls."""
 
-        if func_meta := find_insightsql_postcustom_function(node.name):
+        if func_meta := find_insightsql_postinsights_function(node.name):
             validate_function_args(node.args, func_meta.min_args, func_meta.max_args, node.name)
 
             if node.name == "sparkline":
