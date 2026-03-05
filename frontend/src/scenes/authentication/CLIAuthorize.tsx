@@ -136,7 +136,7 @@ export function CLIAuthorize(): JSX.Element {
                           <>
                               Authorize
                               <br />
-                              PostHog CLI
+                              Hanzo CLI
                           </>
                       ),
                   }
@@ -164,7 +164,7 @@ export function CLIAuthorize(): JSX.Element {
                 <div className="space-y-4">
                     <h2>Authorize CLI Access</h2>
                     <p className="text-muted text-sm">
-                        The PostHog CLI should have displayed a 9-character code (e.g., ABCD-1234). Enter it below to
+                        The Hanzo CLI should have displayed a 9-character code (e.g., ABCD-1234). Enter it below to
                         authorize your CLI.
                     </p>
                     <Form logic={cliAuthorizeLogic} formKey="authorize" enableFormOnSubmit className="space-y-4">

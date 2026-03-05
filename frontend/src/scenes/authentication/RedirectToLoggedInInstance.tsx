@@ -160,7 +160,7 @@ export function RedirectIfLoggedInOtherInstance(): JSX.Element | null {
         >
             <div className="space-y-4">
                 <p className="mb-2">
-                    You're already logged into PostHog Cloud in the {regionFromSubdomain(loggedInSubdomainValue)}{' '}
+                    You're already logged into Hanzo Insights Cloud in the {regionFromSubdomain(loggedInSubdomainValue)}{' '}
                     region.
                 </p>
                 <p className="mb-2">
