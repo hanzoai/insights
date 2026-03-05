@@ -10,7 +10,7 @@ import {
     EventsQuery,
     FunnelsQuery,
     InsightsQLQuery,
-    ScriptQuery,
+    type ScriptQuery,
     InsightVizNode,
     LifecycleQuery,
     Node,
@@ -573,7 +573,7 @@ export const examples: Record<string, Node> = setLatestVersionsOnQuery({
     InsightsQLTable,
     DataVisualization,
     InsightsQLForDataVisualization,
-    ScriptQuery,
+    Script,
     FibonacciScript,
     DataWarehouse,
 })
