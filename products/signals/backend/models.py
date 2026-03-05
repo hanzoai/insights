@@ -1,7 +1,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from posthog.models.utils import UUIDModel
+from insights.models.utils import UUIDModel
 
 
 class SignalReport(UUIDModel):
@@ -13,13 +13,13 @@ class SignalReport(UUIDModel):
         READY = "ready"
         FAILED = "failed"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.POTENTIAL)
 
     total_weight = models.FloatField(default=0.0)
     signal_count = models.IntegerField(default=0)
 
-    conversation = models.ForeignKey("ee.Conversation", null=True, blank=True, on_delete=models.SET_NULL)
+    conversation_id_legacy = models.IntegerField(null=True, blank=True, db_column="conversation_id")
     signals_at_run = models.IntegerField(default=0)
 
     # LLM-generated during signal matching
@@ -55,7 +55,7 @@ class SignalReportArtefact(UUIDModel):
         SAFETY_JUDGMENT = "safety_judgment"
         ACTIONABILITY_JUDGMENT = "actionability_judgment"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     report = models.ForeignKey(SignalReport, on_delete=models.CASCADE, related_name="artefacts")
     type = models.CharField(max_length=100, choices=ArtefactType.choices)
     content = models.TextField()

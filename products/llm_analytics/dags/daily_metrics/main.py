@@ -11,10 +11,10 @@ import pandas as pd
 import dagster
 from dagster import BackfillPolicy, DailyPartitionsDefinition
 
-from posthog.clickhouse import query_tagging
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.cluster import ClickhouseCluster
-from posthog.dags.common import JobOwners, dagster_tags
+from insights.clickhouse import query_tagging
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.cluster import ClickhouseCluster
+from insights.dags.common import JobOwners, dagster_tags
 
 from products.llm_analytics.dags.daily_metrics.config import config
 from products.llm_analytics.dags.daily_metrics.utils import get_delete_query, get_insert_query

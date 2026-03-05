@@ -39,7 +39,6 @@ jobs:
                         - 'products/!(mcp)/**/*.tsx'
                         - 'products/!(mcp)/**/frontend/**'
                         - 'common/**'
-                        - 'ee/frontend/**'
                         - '.storybook/**'
                         - 'package.json'
                         - '.github/workflows/ci-storybook.yml'

@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from posthog.schema import NativeMarketingSource
+from insights.schema import NativeMarketingSource
 
 from .constants import (
     _CONFIG_MODELS,

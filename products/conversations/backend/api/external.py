@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 
-from posthog.models import Team
+from insights.models import Team
 
 from products.conversations.backend.cache import invalidate_unread_count_cache
 from products.conversations.backend.models import Ticket

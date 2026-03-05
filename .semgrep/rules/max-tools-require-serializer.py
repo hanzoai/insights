@@ -4,8 +4,8 @@
 # Note: This rule only applies to files named max_tools.py, but semgrep's test
 # framework runs tests against this .py file directly, so we test the patterns here.
 
-from posthog.api.feature_flag import FeatureFlagSerializer
-from posthog.models import Experiment, FeatureFlag, Survey, Tag, TaggedItem
+from insights.api.feature_flag import FeatureFlagSerializer
+from insights.models import Experiment, FeatureFlag, Survey, Tag, TaggedItem
 
 # ============================================================
 # max-tools-direct-model-create (WARNING - should use serializer)

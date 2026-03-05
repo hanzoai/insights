@@ -3,14 +3,14 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0958_drop_teamcoreeventsconfig_table"),
+        ("insights", "0958_drop_teamcoreeventsconfig_table"),
     ]
 
     operations = [
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="marketing_goal_mappings",
-                        to="posthog.coreevent",
+                        to="insights.coreevent",
                     ),
                 ),
                 (
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="marketing_analytics_goal_mappings",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],

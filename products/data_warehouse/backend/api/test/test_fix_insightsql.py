@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest import mock
 
 from products.data_warehouse.backend.insightsql_fixer_ai import InsightsQLQueryFixerTool

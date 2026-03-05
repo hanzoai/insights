@@ -1,10 +1,10 @@
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
-from posthog.schema import CurrencyCode
+from insights.schema import CurrencyCode
 
-from posthog.insightsql.timings import InsightsQLTimings
+from insights.insightsql.timings import InsightsQLTimings
 
-from posthog.temporal.data_imports.sources.stripe.constants import INVOICE_RESOURCE_NAME as STRIPE_INVOICE_RESOURCE_NAME
+from insights.temporal.data_imports.sources.stripe.constants import INVOICE_RESOURCE_NAME as STRIPE_INVOICE_RESOURCE_NAME
 
 from products.data_warehouse.backend.models import (
     DataWarehouseCredential,

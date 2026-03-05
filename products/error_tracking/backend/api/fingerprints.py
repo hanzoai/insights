@@ -2,10 +2,10 @@ import structlog
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, viewsets
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
 
 from products.error_tracking.backend.models import ErrorTrackingIssueFingerprintV2
 

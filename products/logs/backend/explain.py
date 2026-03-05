@@ -23,14 +23,14 @@ from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.clickhouse.client.connection import Workload
-from posthog.models import Team
-from posthog.rate_limit import (
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.clickhouse.client.connection import Workload
+from insights.models import Team
+from insights.rate_limit import (
     LLMAnalyticsSummarizationBurstThrottle,
     LLMAnalyticsSummarizationDailyThrottle,
     LLMAnalyticsSummarizationSustainedThrottle,

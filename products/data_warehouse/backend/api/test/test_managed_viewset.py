@@ -1,8 +1,8 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
-from posthog.schema import RevenueAnalyticsEventItem, RevenueCurrencyPropertyConfig
+from insights.schema import RevenueAnalyticsEventItem, RevenueCurrencyPropertyConfig
 
 from products.data_warehouse.backend.models import DataWarehouseManagedViewSet, DataWarehouseSavedQuery
 from products.data_warehouse.backend.types import DataWarehouseManagedViewSetKind

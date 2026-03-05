@@ -12,7 +12,7 @@ from django.conf import settings
 import modal
 import requests
 
-from posthog.exceptions_capture import capture_exception
+from insights.exceptions_capture import capture_exception
 
 from products.tasks.backend.models import SandboxSnapshot
 from products.tasks.backend.temporal.exceptions import (

@@ -1,7 +1,7 @@
 import socket
 from typing import Any
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import ANY, MagicMock, patch
 
 from django.test import override_settings
@@ -10,7 +10,7 @@ import boto3
 from clickhouse_driver.errors import ServerException
 from parameterized import parameterized
 
-from posthog.settings import settings
+from insights.settings import settings
 
 from products.data_warehouse.backend.models import DataWarehouseTable
 from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
@@ -144,7 +144,7 @@ class TestTable(APIBaseTest):
         "products.data_warehouse.backend.models.table.DataWarehouseTable.validate_column_type",
         return_value=True,
     )
-    @patch("posthog.tasks.warehouse.get_client")
+    @patch("insights.tasks.warehouse.get_client")
     def test_create_columns(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
             f"/api/projects/{self.team.id}/warehouse_tables/",
@@ -183,7 +183,7 @@ class TestTable(APIBaseTest):
         "products.data_warehouse.backend.models.table.DataWarehouseTable.validate_column_type",
         return_value=False,
     )
-    @patch("posthog.tasks.warehouse.get_client")
+    @patch("insights.tasks.warehouse.get_client")
     def test_create_columns_invalid_schema(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
             f"/api/projects/{self.team.id}/warehouse_tables/",
@@ -370,7 +370,7 @@ class TestTable(APIBaseTest):
         "products.data_warehouse.backend.models.table.DataWarehouseTable.validate_column_type",
         return_value=True,
     )
-    @patch("posthog.tasks.warehouse.get_client")
+    @patch("insights.tasks.warehouse.get_client")
     def test_table_name_duplicate(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
             f"/api/projects/{self.team.id}/warehouse_tables/",

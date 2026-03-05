@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 from freezegun import freeze_time
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from django.db.utils import IntegrityError
@@ -146,7 +146,7 @@ class TestErrorTracking(BaseTest):
 
         # Test that delete method calls object_storage.delete
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            with patch("posthog.storage.object_storage.delete") as mock_delete:
+            with patch("insights.storage.object_storage.delete") as mock_delete:
                 symbol_set.delete()
 
                 # Verify object storage delete was called with correct path

@@ -1,9 +1,9 @@
 import pytest
 
-from posthog.insightsql.insightsql import ast
-from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from insights.insightsql.insightsql import ast
+from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 
-from posthog.sync import database_sync_to_async
+from insights.sync import database_sync_to_async
 
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
 

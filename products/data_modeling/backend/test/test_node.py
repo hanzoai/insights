@@ -1,5 +1,5 @@
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from django.db import IntegrityError
 

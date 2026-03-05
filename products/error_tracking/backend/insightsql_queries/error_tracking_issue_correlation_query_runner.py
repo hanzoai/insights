@@ -6,19 +6,19 @@ from django.db.models import QuerySet
 
 import structlog
 
-from posthog.schema import (
+from insights.schema import (
     CachedErrorTrackingIssueCorrelationQueryResponse,
     DateRange,
     ErrorTrackingIssueCorrelationQuery,
     ErrorTrackingIssueCorrelationQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import LimitContext
-from posthog.insightsql.parser import parse_select
+from insights.insightsql import ast
+from insights.insightsql.constants import LimitContext
+from insights.insightsql.parser import parse_select
 
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 
 from products.error_tracking.backend.api.issues import ErrorTrackingIssuePreviewSerializer
 from products.error_tracking.backend.models import ErrorTrackingIssue

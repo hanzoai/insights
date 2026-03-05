@@ -1,7 +1,7 @@
 import uuid
 from datetime import timedelta
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from django.utils import timezone
@@ -327,7 +327,7 @@ class TestRestoreService(BaseTest):
         self.assertEqual(result.code, "token_already_used")
 
     def test_redeem_token_wrong_team(self):
-        from posthog.models import Organization, Team
+        from insights.models import Organization, Team
 
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Team")

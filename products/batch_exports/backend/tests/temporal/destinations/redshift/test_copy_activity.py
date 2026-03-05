@@ -7,8 +7,8 @@ import pytest
 import pytest_asyncio
 from psycopg import sql
 
-from posthog.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
 from products.batch_exports.backend.temporal.destinations.redshift_batch_export import (
     AWSCredentials,

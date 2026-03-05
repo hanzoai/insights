@@ -6,7 +6,7 @@ All events use the ticket's distinct_id so they're tied to the customer person.
 Events are sent to the customer's Insights project via their team's API token.
 """
 
-from posthog.api.capture import capture_internal
+from insights.api.capture import capture_internal
 
 from products.conversations.backend.models import Ticket
 

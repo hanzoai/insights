@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from parameterized import parameterized
 

@@ -55,7 +55,7 @@ jobs:
                     --error \
                     --metrics=off \
                     --verbose \
-                    common/ ee/ posthog/ products/
+                    common/ insights/ products/
 
     semgrep-go:
         runs-on: ubuntu-latest
@@ -153,11 +153,10 @@ jobs:
                     --verbose \
                     --exclude ./cli/ \
                     --exclude ./common/ \
-                    --exclude ./ee/ \
                     --exclude ./frontend/ \
                     --exclude ./livestream/ \
                     --exclude ./nodejs/ \
-                    --exclude ./posthog/ \
+                    --exclude ./insights/ \
                     --exclude ./products/ \
                     --exclude ./rust/ \
                     --exclude ./.semgrep/ \

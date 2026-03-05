@@ -6,10 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.event_usage import report_user_action
-from posthog.models import User
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.event_usage import report_user_action
+from insights.models import User
 
 from ..models.clustering_config import ClusteringConfig
 from .metrics import llma_track_latency

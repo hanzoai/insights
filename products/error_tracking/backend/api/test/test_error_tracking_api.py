@@ -1,7 +1,7 @@
 import os
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import ANY, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -11,8 +11,8 @@ from boto3 import resource
 from botocore.config import Config
 from rest_framework import status
 
-from posthog.models.utils import uuid7
-from posthog.settings import (
+from insights.models.utils import uuid7
+from insights.settings import (
     OBJECT_STORAGE_ACCESS_KEY_ID,
     OBJECT_STORAGE_BUCKET,
     OBJECT_STORAGE_ENDPOINT,
@@ -28,7 +28,6 @@ from products.error_tracking.backend.models import (
     ErrorTrackingSymbolSet,
 )
 
-from ee.models.rbac.role import Role
 
 TEST_BUCKET = "test_storage_bucket-TestErrorTracking"
 
@@ -199,7 +198,7 @@ class TestErrorTracking(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["code"] == "file_not_found"
 
-    @patch("posthog.storage.object_storage._client")
+    @patch("insights.storage.object_storage._client")
     def test_finish_upload_fails_if_uploaded_file_is_too_large(self, patched_s3_client):
         patched_s3_client.head_object.return_value = {"ContentLength": 1073741824}  # 1GB
         symbol_set = ErrorTrackingSymbolSet.objects.create(
@@ -214,7 +213,7 @@ class TestErrorTracking(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["code"] == "file_too_large"
 
-    @patch("posthog.storage.object_storage._client")
+    @patch("insights.storage.object_storage._client")
     def test_finish_upload_updates_the_content_hash(self, patched_s3_client):
         patched_s3_client.head_object.return_value = {"ContentLength": 1048576}  # 1MB
         symbol_set = ErrorTrackingSymbolSet.objects.create(
@@ -701,7 +700,7 @@ class TestErrorTracking(APIBaseTest):
         symbol_set.refresh_from_db()
         assert symbol_set.release_id == first_release.id
 
-    @patch("posthog.storage.object_storage.head_object")
+    @patch("insights.storage.object_storage.head_object")
     def test_can_finish_bulk_symbol_set_upload(self, patched_object_storage) -> None:
         symbol_set_one = ErrorTrackingSymbolSet.objects.create(
             team=self.team, ref=str(uuid7()), storage_ptr="file/name1"

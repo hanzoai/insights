@@ -5,13 +5,13 @@ from urllib.parse import urlparse
 import dagster
 import pydantic
 
-from posthog.dags.common import JobOwners
-from posthog.dags.common.ops import get_all_team_ids_op
-from posthog.exceptions_capture import capture_exception
-from posthog.models.file_system.user_product_list import UserProductList, get_user_product_list_count
-from posthog.models.team import Team
-from posthog.models.user import ROLE_CHOICES, User
-from posthog.products import Products
+from insights.dags.common import JobOwners
+from insights.dags.common.ops import get_all_team_ids_op
+from insights.exceptions_capture import capture_exception
+from insights.models.file_system.user_product_list import UserProductList, get_user_product_list_count
+from insights.models.team import Team
+from insights.models.user import ROLE_CHOICES, User
+from insights.products import Products
 
 
 def get_valid_product_paths() -> set[str]:

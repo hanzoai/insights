@@ -1,6 +1,6 @@
 import pytest
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     BaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -9,7 +9,7 @@ from posthog.test.base import (
     persons_cache_tests,
 )
 
-from posthog.schema import (
+from insights.schema import (
     AttributionMode,
     BaseMathType,
     ConversionGoalFilter1,
@@ -22,13 +22,13 @@ from posthog.schema import (
     PropertyOperator,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
-from posthog.insightsql.test.utils import pretty_print_in_tests
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.test.utils import pretty_print_in_tests
 
-from posthog.models import Action
-from posthog.models.event.util import bulk_create_events
-from posthog.models.person.util import bulk_create_persons
+from insights.models import Action
+from insights.models.event.util import bulk_create_events
+from insights.models.person.util import bulk_create_persons
 
 from products.marketing_analytics.backend.insightsql_queries.conversion_goal_processor import (
     ConversionGoalProcessor,

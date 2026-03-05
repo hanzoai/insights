@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.insightsql.database.models import BooleanDatabaseField, DecimalDatabaseField, FieldOrTable, StringDatabaseField
+from insights.insightsql.database.models import BooleanDatabaseField, DecimalDatabaseField, FieldOrTable, StringDatabaseField
 
 
 @dataclass

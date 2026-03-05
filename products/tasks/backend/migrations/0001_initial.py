@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0815_sharingconfiguration_settings"),
+        ("insights", "0815_sharingconfiguration_settings"),
     ]
 
     operations = [
@@ -70,10 +70,10 @@ class Migration(migrations.Migration):
                         limit_choices_to={"kind": "github"},
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.integration",
+                        to="insights.integration",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_task",
@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE, related_name="progress_logs", to="tasks.task"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_task_progress",

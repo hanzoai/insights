@@ -6,7 +6,7 @@ Tests cover title field presence, request validation, and response format.
 
 from typing import Any
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from rest_framework import status

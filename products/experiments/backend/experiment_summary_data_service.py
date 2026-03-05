@@ -9,7 +9,7 @@ from django.conf import settings
 from posthoganalytics import capture_exception
 from typing_extensions import TypeIs
 
-from posthog.schema import (
+from insights.schema import (
     CacheMissResponse,
     ExperimentExposureQuery,
     ExperimentFunnelMetric,
@@ -26,13 +26,13 @@ from posthog.schema import (
     QueryStatusResponse,
 )
 
-from posthog.clickhouse.client.connection import Workload
-from posthog.insightsql_queries.experiments.experiment_exposures_query_runner import ExperimentExposuresQueryRunner
-from posthog.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
-from posthog.insightsql_queries.experiments.utils import get_experiment_stats_method
-from posthog.insightsql_queries.query_runner import ExecutionMode
-from posthog.models import Experiment
-from posthog.sync import database_sync_to_async
+from insights.clickhouse.client.connection import Workload
+from insights.insightsql_queries.experiments.experiment_exposures_query_runner import ExperimentExposuresQueryRunner
+from insights.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
+from insights.insightsql_queries.experiments.utils import get_experiment_stats_method
+from insights.insightsql_queries.query_runner import ExecutionMode
+from insights.models import Experiment
+from insights.sync import database_sync_to_async
 
 
 @dataclass

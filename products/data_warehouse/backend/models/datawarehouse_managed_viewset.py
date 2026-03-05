@@ -6,7 +6,7 @@ from django.db import models, transaction
 
 import structlog
 
-from posthog.insightsql.database.models import (
+from insights.insightsql.database.models import (
     BooleanDatabaseField,
     DateDatabaseField,
     DateTimeDatabaseField,
@@ -17,8 +17,8 @@ from posthog.insightsql.database.models import (
     StringDatabaseField,
 )
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
+from insights.exceptions_capture import capture_exception
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
 
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 from products.data_warehouse.backend.types import DataWarehouseManagedViewSetKind
@@ -35,7 +35,7 @@ class ExpectedView:
 
 
 class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     kind = models.CharField(max_length=64, choices=DataWarehouseManagedViewSetKind.choices)
 
     class Meta:

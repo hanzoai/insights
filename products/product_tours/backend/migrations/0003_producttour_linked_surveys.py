@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
             model_name="producttour",
             name="linked_surveys",
             field=models.ManyToManyField(
-                blank=True, related_name="product_tours", related_query_name="product_tour", to="posthog.survey"
+                blank=True, related_name="product_tours", related_query_name="product_tour", to="insights.survey"
             ),
         ),
     ]

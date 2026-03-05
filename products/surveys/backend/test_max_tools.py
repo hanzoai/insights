@@ -5,13 +5,13 @@ Simple async test for the survey creation MaxTool.
 import os
 
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from asgiref.sync import sync_to_async
 from langchain_core.runnables import RunnableConfig
 
-from posthog.schema import (
+from insights.schema import (
     SurveyCreationSchema,
     SurveyDisplayConditionsSchema,
     SurveyMatchType,
@@ -20,7 +20,7 @@ from posthog.schema import (
     SurveyType,
 )
 
-from posthog.models import FeatureFlag, Insight, Survey
+from insights.models import FeatureFlag, Insight, Survey
 
 from products.surveys.backend.max_tools import SurveyUpdateSchema
 
@@ -586,7 +586,7 @@ class TestSurveyAnalysisTool(BaseTest):
 
     def test_format_responses_for_analysis(self):
         """Test _format_responses_for_analysis formats data correctly"""
-        from posthog.schema import SurveyAnalysisQuestionGroup, SurveyAnalysisResponseItem
+        from insights.schema import SurveyAnalysisQuestionGroup, SurveyAnalysisResponseItem
 
         tool = self._setup_tool()
 
@@ -615,7 +615,7 @@ class TestSurveyAnalysisTool(BaseTest):
 
     def test_format_responses_for_analysis_empty_responses(self):
         """Test _format_responses_for_analysis handles empty responses"""
-        from posthog.schema import SurveyAnalysisQuestionGroup
+        from insights.schema import SurveyAnalysisQuestionGroup
 
         tool = self._setup_tool()
 
@@ -782,7 +782,7 @@ class TestEditSurveyTool(BaseTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_edit_survey_wrong_team(self):
-        from posthog.models import Organization, Team
+        from insights.models import Organization, Team
 
         other_org = await sync_to_async(Organization.objects.create)(name="Other Org")
         other_team = await sync_to_async(Team.objects.create)(organization=other_org, name="Other Team")

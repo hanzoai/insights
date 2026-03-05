@@ -1,4 +1,4 @@
-from posthog.temporal.data_imports.sources.stripe.constants import CHARGE_RESOURCE_NAME
+from insights.temporal.data_imports.sources.stripe.constants import CHARGE_RESOURCE_NAME
 
 from products.revenue_analytics.backend.views.schemas.charge import SCHEMA as CHARGE_SCHEMA
 from products.revenue_analytics.backend.views.sources.stripe.charge import build

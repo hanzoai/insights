@@ -6,7 +6,7 @@
     },
     "listeners": {
         "*:8000": {
-            "pass": "applications/posthog"
+            "pass": "applications/insights"
         },
         "*:8001": {
             "pass": "routes/metrics"
@@ -38,12 +38,12 @@
         ]
     },
     "applications": {
-        "posthog": {
+        "insights": {
             "type": "python 3.12",
             "processes": $NGINX_UNIT_APP_PROCESSES,
             "working_directory": "/code",
             "path": ".",
-            "module": "posthog.$NGINX_UNIT_PYTHON_PROTOCOL",
+            "module": "insights.$NGINX_UNIT_PYTHON_PROTOCOL",
             "protocol": "$NGINX_UNIT_PYTHON_PROTOCOL",
             "user": "nobody",
             "limits": {

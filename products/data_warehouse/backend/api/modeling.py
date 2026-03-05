@@ -1,7 +1,7 @@
 from rest_framework import request, response, serializers, viewsets
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
 
 from products.data_warehouse.backend.models import DataWarehouseModelPath
 

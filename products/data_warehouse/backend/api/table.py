@@ -7,17 +7,17 @@ import boto3
 import posthoganalytics
 from rest_framework import filters, parsers, request, response, serializers, status, viewsets
 
-from posthog.schema import DatabaseSerializedFieldType
+from insights.schema import DatabaseSerializedFieldType
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database, SerializedField, serialize_fields
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database, SerializedField, serialize_fields
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.api.utils import action
-from posthog.exceptions_capture import capture_exception
-from posthog.models import Team
-from posthog.tasks.warehouse import validate_data_warehouse_table_columns
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import action
+from insights.exceptions_capture import capture_exception
+from insights.models import Team
+from insights.tasks.warehouse import validate_data_warehouse_table_columns
 
 from products.data_warehouse.backend.api.external_data_source import SimpleExternalDataSourceSerializers
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
@@ -397,7 +397,7 @@ class TableViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 table.save()
 
                 # Validate columns in background
-                from posthog.tasks.warehouse import validate_data_warehouse_table_columns
+                from insights.tasks.warehouse import validate_data_warehouse_table_columns
 
                 validate_data_warehouse_table_columns.delay(team_id, str(table.id))
 

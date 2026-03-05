@@ -474,7 +474,7 @@ def _setup_django() -> None:
     module requires at import time. The build script never connects to these services
     — it only needs the Django ORM metadata and model imports to work.
     """
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "posthog.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "insights.settings")
     try:
         import django
 

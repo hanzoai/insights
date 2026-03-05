@@ -17,18 +17,18 @@ import redis as redis_lib
 import structlog
 from clickhouse_driver.errors import ServerException
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import InsightsQLQuerySettings
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.printer import prepare_and_print_ast
+from insights.insightsql import ast
+from insights.insightsql.constants import InsightsQLQuerySettings
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.parser import parse_select
+from insights.insightsql.printer import prepare_and_print_ast
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
-from posthog.clickhouse.query_tagging import tags_context
-from posthog.models.team import Team
-from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
-from posthog.utils import relative_date_parse_with_delta_mapping
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.clickhouse.query_tagging import tags_context
+from insights.models.team import Team
+from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
+from insights.utils import relative_date_parse_with_delta_mapping
 
 from products.analytics_platform.backend.lazy_computation.computation_notifications import (
     has_ch_query_started,
