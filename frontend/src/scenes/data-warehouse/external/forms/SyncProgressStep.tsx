@@ -89,7 +89,7 @@ export const SyncProgressStep = (): JSX.Element => {
     }
 
     return (
-        <SceneSection title="You're all set! We'll import the data in the background, and after it's done, you will be able to query it in PostHog.">
+        <SceneSection title="You're all set! We'll import the data in the background, and after it's done, you will be able to query it in Hanzo Insights.">
             <LemonTable
                 emptyState="No schemas selected"
                 dataSource={schemas}
