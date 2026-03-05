@@ -1,6 +1,6 @@
 {
     "name": "Currency Normalization",
-    "url": "https://github.com/Insights/posthog-currency-normalization-plugin",
+    "url": "https://github.com/PostHog/posthog-currency-normalization-plugin",
     "description": "Deprecated",
     "main": "index.js",
     "config": [

@@ -365,7 +365,7 @@ if (res.status >= 400) {
 
 
 class TemplateHubspotMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/hubspot-plugin"
+    plugin_url = "https://github.com/PostHog/hubspot-plugin"
 
     @classmethod
     def migrate(cls, obj):

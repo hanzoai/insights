@@ -2,7 +2,7 @@ from .matrix import HedgeboxMatrix
 
 # This is a simulation of an online drive SaaS called Hedgebox
 # See this RFC for the reasoning behind it:
-# https://github.com/Insights/product-internal/blob/main/requests-for-comments/2022-03-23-great-demo-data.md
+# https://github.com/PostHog/product-internal/blob/main/requests-for-comments/2022-03-23-great-demo-data.md
 
 # Simulation features:
 # - the product is used by lots of personal users, but businesses bring the most revenue

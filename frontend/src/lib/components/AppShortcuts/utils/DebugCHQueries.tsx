@@ -719,7 +719,7 @@ function Timing({ item }: { item: Query }): JSX.Element | null {
 
 function LinkPosthogCommit({ commit }: { commit: string }): JSX.Element {
     return (
-        <Link to={`https://www.github.com/Insights/posthog/commit/${commit}`} target="_blank">
+        <Link to={`https://www.github.com/PostHog/posthog/commit/${commit}`} target="_blank">
             {commit}
         </Link>
     )

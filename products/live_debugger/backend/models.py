@@ -45,7 +45,7 @@ class BreakpointHit:
 
 class LiveDebuggerBreakpoint(UUIDModel):
     team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "Insights/posthog")
+    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "PostHog/posthog")
     filename = models.TextField()
     line_number = models.PositiveIntegerField()
     enabled = models.BooleanField(default=True)

@@ -5,7 +5,7 @@ This test validates that the trends query and actors query handle
 null/empty/missing property values consistently, ensuring that events
 with these property states are correctly counted and returned.
 
-Regression test for: https://github.com/Insights/posthog/issues/40577
+Regression test for: https://github.com/PostHog/posthog/issues/40577
 """
 
 from freezegun import freeze_time

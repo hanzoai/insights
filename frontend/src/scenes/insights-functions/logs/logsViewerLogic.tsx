@@ -79,7 +79,7 @@ const toKey = (log: LogEntry): string => {
 
 export const toAbsoluteClickhouseTimestamp = (timestamp: Dayjs): string => {
     // TRICKY: CH query is timezone aware so we dont send iso, and we need to convert to UTC
-    // See https://github.com/Insights/posthog/pull/45651
+    // See https://github.com/PostHog/posthog/pull/45651
     return timestamp.tz('UTC').format('YYYY-MM-DD HH:mm:ss.SSS')
 }
 

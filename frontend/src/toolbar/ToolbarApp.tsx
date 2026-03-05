@@ -56,7 +56,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
     // which conflicts with our toolbar's internal mouse down listeners
     //
     // To workaround that we simply prevent the event from bubbling further than the toolbar
-    // See https://github.com/Insights/posthog-js/issues/1425
+    // See https://github.com/PostHog/posthog-js/issues/1425
     const onMouseDown = ({ nativeEvent: event }: React.MouseEvent<HTMLDivElement>): void => {
         event.stopImmediatePropagation()
     }

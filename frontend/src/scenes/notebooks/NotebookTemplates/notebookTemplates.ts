@@ -691,7 +691,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                                 {
                                     type: 'link',
                                     attrs: {
-                                        href: 'https://github.com/Insights/posthog/issues/15680 ',
+                                        href: 'https://github.com/PostHog/posthog/issues/15680 ',
                                     },
                                 },
                                 {
