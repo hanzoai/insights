@@ -18,7 +18,7 @@ import type { maxBillingContextLogicType } from './maxBillingContextLogicType'
 export const DEFAULT_BILLING_DATE_FROM = dayjs().subtract(1, 'month').subtract(1, 'day').format('YYYY-MM-DD')
 export const DEFAULT_BILLING_DATE_TO = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 
-// Simplified addon information for Max context
+// Simplified addon information for AI assistant context
 export interface MaxAddonInfo {
     type: string
     name: string
@@ -33,7 +33,7 @@ export interface MaxAddonInfo {
     projected_amount_usd_with_limit?: string | null
 }
 
-// Simplified product information for Max context
+// Simplified product information for AI assistant context
 export interface MaxProductInfo {
     type: string
     name: string

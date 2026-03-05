@@ -64,14 +64,14 @@ export function ToolbarLaunch(): JSX.Element {
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Toolbar"
-                description="Insights toolbar launches Insights right in your app or website."
+                name="Site Inspector"
+                description="Site Inspector launches Insights right in your app or website."
                 resourceType={{
                     type: 'toolbar',
                 }}
             />
 
-            <SceneSection title="Authorized URLs for Toolbar" description="Click on the URL to launch the toolbar.">
+            <SceneSection title="Authorized URLs for Site Inspector" description="Click on the URL to launch the Site Inspector.">
                 <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} addText="Add authorized URL" />
                 <LemonBanner type="info">
                     Make sure you're using the <Link to={`${urls.settings('project')}#snippet`}>HTML snippet</Link> or

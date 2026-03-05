@@ -116,8 +116,8 @@ export function LiveEventsTable(): JSX.Element {
                 </LemonBanner>
             )}
             <SceneTitleSection
-                name={sceneConfigurations[Scene.Activity].name}
-                description={sceneConfigurations[Scene.Activity].description}
+                name={sceneConfigurations[Scene.EventExplorer].name}
+                description={sceneConfigurations[Scene.EventExplorer].description}
                 resourceType={{
                     type: sceneConfigurations[Scene.LiveEvents].iconType || 'default_icon_type',
                 }}

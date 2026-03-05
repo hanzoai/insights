@@ -60,8 +60,8 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
             <div className="p-2 max-w-160">
                 <h4>No profile associated with this ID</h4>
                 <p>
-                    Person profiles allow you to see a detailed view of a Person's user properties, track users across
-                    devices, and more. To create person profiles, see{' '}
+                    User profiles allow you to see a detailed view of a user's properties, track users across
+                    devices, and more. To create user profiles, see{' '}
                     <Link to="https://posthog.com/docs/data/persons#capturing-person-profiles">here.</Link>
                 </p>
                 <div className="flex justify-center mt-2 w-fit">

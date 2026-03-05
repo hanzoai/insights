@@ -300,7 +300,7 @@ export const errorTrackingIssueSceneLogic = kea<errorTrackingIssueSceneLogicType
                 return [
                     {
                         key: Scene.ErrorTracking,
-                        name: 'Error tracking',
+                        name: 'Error Tracking',
                         path: urls.errorTracking(urlParams),
                         iconType: 'error_tracking',
                     },

@@ -220,7 +220,7 @@ type SceneMainTitleProps = {
     isGeneratingName?: boolean
     /**
      * Props for MaxTool registration - when provided behind UX_REMOVE_SIDEPANEL flag,
-     * the AI button in the title section registers the tool with Max
+     * the AI button in the title section registers the tool with the AI assistant
      */
     maxToolProps?: Omit<UseMaxToolOptions, 'active'>
 }
