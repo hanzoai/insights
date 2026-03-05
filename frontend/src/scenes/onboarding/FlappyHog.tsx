@@ -21,8 +21,8 @@ const HIGH_SCORE_KEY = 'flappyHogHighScore'
 
 const COLORS = {
     background: '#1d1f27',
-    pipe: '#f54e00',
-    titleGlow: '#f54e00',
+    pipe: '#888888',
+    titleGlow: '#888888',
     titleMain: '#ffeb3b',
     textWhite: '#ffffff',
     textGray: '#cccccc',

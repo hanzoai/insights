@@ -29,7 +29,7 @@ export function EmailMFAVerify(): JSX.Element {
                             onClick={verifyAndLogin}
                             loading={verifyResponseLoading}
                         >
-                            Login to PostHog
+                            Login to Hanzo Insights
                         </LemonButton>
                         <p className="text-muted text-sm mt-6">This device will be remembered for 30 days</p>
                     </>
