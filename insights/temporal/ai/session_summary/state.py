@@ -8,6 +8,7 @@ import structlog
 from redis import asyncio as aioredis
 
 from insights.redis import get_async_client
+from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 
 
 logger = structlog.get_logger(__name__)
