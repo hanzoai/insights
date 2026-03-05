@@ -5,7 +5,7 @@ import { useValues } from 'kea'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
-import twigAuthBg from './twig-auth-bg.svg'
+import twigAuthBg from 'public/twig-auth-bg.png'
 import { TwigAuthLeftPanel } from './TwigAuthLeftPanel'
 
 interface AuthShellProps {
