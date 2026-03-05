@@ -5,7 +5,7 @@ packages:
     - common/plugin_transpiler
     - common/storybook
     - common/tailwind
-    - common/hogql_parser
+    - common/insightsql_parser
     - frontend
     - playwright
     - nodejs

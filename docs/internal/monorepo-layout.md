@@ -26,7 +26,7 @@ services/              # Independent backend services
 
 common/                # Shared code (exists today)
   hogli/               # Developer CLI tooling
-  hogql_parser/        # HogQL parser
+  insightsql_parser/   # InsightsQL parser
 
 platform/              # Shared platform code (aspirational - not yet created)
   integrations/        # External adapters
@@ -80,7 +80,7 @@ That destroys the "platform is foundational" property and makes boundaries britt
 
 ### Common
 
-Shared code that exists today: `hogli` (developer CLI), `hogql_parser`, and other cross-cutting utilities. Some of this may eventually move to `platform/` or `tools/` as the structure matures.
+Shared code that exists today: `hogli` (developer CLI), `insightsql_parser`, and other cross-cutting utilities. Some of this may eventually move to `platform/` or `tools/` as the structure matures.
 
 ### Tools (aspirational)
 
