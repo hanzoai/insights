@@ -45,7 +45,7 @@ function RemixPHProviderSnippet(): JSX.Element {
         <CodeSnippet language={Language.JavaScript}>
             {`import { useEffect, useState } from "react";
 import posthog from "posthog-js";
-import { InsightsProvider } from "posthog-js/react";
+import { PostHogProvider } from "posthog-js/react";
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
@@ -65,7 +65,7 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!hydrated) return <>{children}</>;
-  return <InsightsProvider client={posthog}>{children}</InsightsProvider>;
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }`}
         </CodeSnippet>
     )

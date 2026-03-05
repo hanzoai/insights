@@ -45,7 +45,7 @@ function RNSetupSnippet({ includeReplay }: RNSetupProps): JSX.Element {
     return (
         <>
             <p>
-                Insights is most easily used via the <code>InsightsProvider</code> component but if you need to
+                Insights is most easily used via the <code>PostHogProvider</code> component but if you need to
                 instantiate it directly,{' '}
                 <Link to="https://posthog.com/docs/libraries/react-native#without-the-posthogprovider">
                     check out the docs
@@ -54,12 +54,12 @@ function RNSetupSnippet({ includeReplay }: RNSetupProps): JSX.Element {
             </p>
             <CodeSnippet language={Language.JSX}>
                 {`// App.(js|ts)
-import { InsightsProvider } from 'posthog-react-native'
+import { PostHogProvider } from 'posthog-react-native'
 ...
 
 export function MyApp() {
     return (
-        <InsightsProvider apiKey="${currentTeam?.api_token}" options={{
+        <PostHogProvider apiKey="${currentTeam?.api_token}" options={{
             host: "${url}",
             ${
                 includeReplay
@@ -91,7 +91,7 @@ export function MyApp() {
             }
         }}>
             <RestOfApp />
-        </InsightsProvider>
+        </PostHogProvider>
     )
 }`}
             </CodeSnippet>
@@ -103,16 +103,16 @@ function RNSetupSurveysProvider(): JSX.Element {
     return (
         <>
             <p>
-                Add InsightsSurveyProvider to your app anywhere inside InsightsProvider. This component fetches surveys.
+                Add InsightsSurveyProvider to your app anywhere inside PostHogProvider. This component fetches surveys.
                 It also acts as the root for where popover surveys are rendered.
             </p>
             <CodeSnippet language={Language.JSX}>
-                {`<InsightsProvider>
+                {`<PostHogProvider>
     <InsightsSurveyProvider>{children}</InsightsSurveyProvider>
-</InsightsProvider>`}
+</PostHogProvider>`}
             </CodeSnippet>
             <p>
-                If you're not using the InsightsProvider, add InsightsSurveyProvider to your app anywhere inside your app
+                If you're not using the PostHogProvider, add InsightsSurveyProvider to your app anywhere inside your app
                 root component.
             </p>
             <CodeSnippet language={Language.JSX}>

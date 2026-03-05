@@ -36,7 +36,7 @@ function NextPagesRouterPageViewSnippet(): JSX.Element {
 import { useEffect } from 'react'
 import { Router } from 'next/router'
 import posthog from 'posthog-js'
-import { InsightsProvider } from 'posthog-js/react'
+import { PostHogProvider } from 'posthog-js/react'
 import type { AppProps } from 'next/app'
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -58,9 +58,9 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return (
-    <InsightsProvider client={posthog}>
+    <PostHogProvider client={posthog}>
       <Component {...pageProps} />
-    </InsightsProvider>
+    </PostHogProvider>
   )
 }`}
         </CodeSnippet>
@@ -73,15 +73,15 @@ function NextAppRouterLayoutSnippet(): JSX.Element {
             {`// app/layout.tsx
 
 import './globals.css'
-import { InsightsProvider } from './providers'
+import { PostHogProvider } from './providers'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <InsightsProvider>
+        <PostHogProvider>
           {children}
-        </InsightsProvider>
+        </PostHogProvider>
       </body>
     </html>
   )
@@ -103,9 +103,9 @@ import { useEffect } from "react"
 import { useInsights } from 'posthog-js/react'
 
 import posthog from 'posthog-js'
-import { InsightsProvider as PHProvider } from 'posthog-js/react'
+import { PostHogProvider as PHProvider } from 'posthog-js/react'
 
-export function InsightsProvider({ children }: { children: React.ReactNode }) {
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || '${apiHostOrigin()}',
@@ -212,7 +212,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                     </p>
                     <NextAppRouterPageViewProviderSnippet />
                     <p>
-                        Afterwards, import the <code>InsightsProvider</code> component in your{' '}
+                        Afterwards, import the <code>PostHogProvider</code> component in your{' '}
                         <code>app/layout.tsx</code> file and wrap your app with it.
                     </p>
                     <NextAppRouterLayoutSnippet />
