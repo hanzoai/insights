@@ -7,7 +7,12 @@ on:
       - 'Dockerfile'
       - 'frontend/**'
       - 'insights/**'
+      - 'products/**'
+      - 'common/**'
       - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
