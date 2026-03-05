@@ -10,7 +10,6 @@
 !common/tailwind
 !dags
 !docs/onboarding
-!ee
 !frontend/@posthog
 !frontend/*.*
 !frontend/.storybook

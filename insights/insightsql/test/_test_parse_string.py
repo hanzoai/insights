@@ -1,6 +1,6 @@
 from insights.test.base import BaseTest
 
-from insightsql_parser import parse_string_literal_text as parse_string_cpp
+from hogql_parser import parse_string_literal_text as parse_string_cpp
 
 from insights.insightsql.constants import InsightsQLParserBackend
 from insights.insightsql.errors import SyntaxError
