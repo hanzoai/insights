@@ -429,7 +429,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                         )}
                                                         {schema.table && (
                                                             <Tooltip
-                                                                title={`Delete this table from Hanzo Insights. ${
+                                                                title={`Delete this table from Insights. ${
                                                                     source?.source_type
                                                                         ? `This will not delete the data in ${source.source_type}`
                                                                         : ''
@@ -444,7 +444,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                     onClick={() => {
                                                                         if (
                                                                             window.confirm(
-                                                                                `Are you sure you want to delete the table ${schema?.table?.name} from Hanzo Insights?`
+                                                                                `Are you sure you want to delete the table ${schema?.table?.name} from Insights?`
                                                                             )
                                                                         ) {
                                                                             deleteTable(schema)
@@ -452,7 +452,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                     }}
                                                                     disabledReason={disabledReason}
                                                                 >
-                                                                    Delete table from Hanzo Insights
+                                                                    Delete table from Insights
                                                                 </LemonButton>
                                                             </Tooltip>
                                                         )}

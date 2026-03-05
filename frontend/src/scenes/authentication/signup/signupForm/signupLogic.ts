@@ -382,7 +382,7 @@ export const signupLogic = kea<signupLogicType>([
             (s) => [s.panel, s.passkeySignupEnabled, s.preflight],
             (panel: number, passkeySignupEnabled: boolean, preflight): string => {
                 if (preflight?.demo) {
-                    return 'Explore Hanzo Insights'
+                    return 'Explore Insights'
                 }
 
                 if (passkeySignupEnabled) {

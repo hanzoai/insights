@@ -1,11 +1,7 @@
-import { FlappyHogGame } from 'scenes/onboarding/FlappyHog'
+// Removed: FlappyHog game is no longer available
 
 const FlappyHogPage: React.FC = () => {
-    return (
-        <div className="flex flex-col items-center p-4">
-            <FlappyHogGame />
-        </div>
-    )
+    return null
 }
 
 export default FlappyHogPage

@@ -13,7 +13,7 @@ import { userLogic } from 'scenes/userLogic'
 // Modified version of https://app.slack.com/app-settings/TSS5W8YQZ/A03KWE2FJJ2/app-manifest to match current instance
 const getSlackAppManifest = (): any => ({
     display_information: {
-        name: 'Hanzo Insights',
+        name: 'Insights',
         description: 'Product insights right where you need them',
         background_color: '#111111',
     },
@@ -24,7 +24,7 @@ const getSlackAppManifest = (): any => ({
             messages_tab_read_only_enabled: true,
         },
         bot_user: {
-            display_name: 'Hanzo Insights',
+            display_name: 'Insights',
             always_online: false,
         },
         unfurl_domains: [window.location.hostname],

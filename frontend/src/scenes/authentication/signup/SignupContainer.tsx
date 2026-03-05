@@ -63,8 +63,8 @@ const productBenefits = [
         description: 'Integrate with developer-friendly APIs or a low-code web snippet.',
     },
     {
-        benefit: 'Join industry leaders that run on Hanzo Insights',
-        description: 'Thousands of teams trust Hanzo Insights as their product analytics platform.',
+        benefit: 'Join industry leaders that run on Insights',
+        description: 'Thousands of teams trust Insights as their product analytics platform.',
     },
 ]
 
@@ -98,7 +98,7 @@ export function SignupLeftContainer(): JSX.Element {
                         {' '}
                         You can use our{' '}
                         <Link to={getRegionUrl(preflight?.region === Region.EU ? Region.US : Region.EU)}>
-                            <strong>Hanzo Insights Cloud {preflight?.region === Region.EU ? 'US' : 'EU'}</strong>
+                            <strong>Insights Cloud {preflight?.region === Region.EU ? 'US' : 'EU'}</strong>
                         </Link>
                         {preflight?.region === Region.EU ? ', too' : ' for a GDPR-ready deployment'}.
                     </span>
