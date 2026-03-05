@@ -108,15 +108,15 @@ function App() {
 }
 
 // Method two: using the feature flags component
-import { InsightsFeature } from 'posthog-js/react'
+import { PostHogFeature } from 'posthog-js/react'
 
 function App() {
     return (
-        <InsightsFeature flag='${flagKey}' match='${variant}'>
+        <PostHogFeature flag='${flagKey}' match='${variant}'>
             <div>
                 {/* the component to show */}
             </div>
-        </InsightsFeature>
+        </PostHogFeature>
     )
 }
 
