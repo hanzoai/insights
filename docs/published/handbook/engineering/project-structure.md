@@ -84,7 +84,7 @@ High-performance Rust services including:
 Shared code used across the codebase:
 
 - `hogli` – Unified developer CLI for building, testing, and running Insights
-- `hogql_parser` – Insights SQL parser (C++)
+- `insightsql_parser` – InsightsQL parser (C++)
 - `hogvm` – Hog virtual machine
 - `tailwind` – Shared Tailwind configuration
 
