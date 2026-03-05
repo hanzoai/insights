@@ -25,7 +25,7 @@ export function Login2FA(): JSX.Element {
             message={
                 <>
                     Welcome to
-                    <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
+                    <br /> Insights{preflight?.cloud ? ' Cloud' : ''}!
                 </>
             }
         >
