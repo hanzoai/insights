@@ -7,7 +7,7 @@ export const manifest: ProductManifest = {
     scenes: {
         Game368Mascots: {
             name: '368Mascots',
-            import: () => import('./368Mascots/368Mascots'),
+            import: () => import('./368Hedgehogs/368Hedgehogs'),
             projectBased: true,
             activityScope: 'Games',
         },
