@@ -15,8 +15,8 @@ from aiobotocore.config import AioConfig
 from aiobotocore.httpsession import AIOHTTPSession as BaseAIOHTTPSession
 from temporalio import activity
 
-from posthog.clickhouse import query_tagging
-from posthog.clickhouse.query_tagging import Product
+from insights.clickhouse import query_tagging
+from insights.clickhouse.query_tagging import Product
 
 from products.batch_exports.backend.temporal.utils import make_retryable_with_exponential_backoff
 
@@ -25,9 +25,9 @@ if typing.TYPE_CHECKING:
 
 from structlog.contextvars import bind_contextvars
 
-from posthog.batch_exports.service import BackfillDetails, BatchExportField, BatchExportModel, BatchExportSchema
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.clickhouse import (
+from insights.batch_exports.service import BackfillDetails, BatchExportField, BatchExportModel, BatchExportSchema
+from insights.sync import database_sync_to_async
+from insights.temporal.common.clickhouse import (
     ClickHouseCheckQueryStatusError,
     ClickHouseClient,
     ClickHouseClientTimeoutError,
@@ -36,8 +36,8 @@ from posthog.temporal.common.clickhouse import (
     ClickHouseQueryStatus,
     get_client,
 )
-from posthog.temporal.common.heartbeat import Heartbeater
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.heartbeat import Heartbeater
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.batch_exports import default_fields
 from products.batch_exports.backend.temporal.record_batch_model import resolve_batch_exports_model

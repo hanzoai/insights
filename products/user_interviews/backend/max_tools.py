@@ -5,7 +5,6 @@ from django.conf import settings
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-from ee.hogai.tool import MaxTool
 
 from .models import UserInterview
 

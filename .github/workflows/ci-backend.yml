@@ -87,13 +87,8 @@ jobs:
                         # NOTE: we are at risk of missing a dependency here. We could make
                         # the dependencies more clear if we separated the backend/frontend
                         # code completely
-                        # really we should ignore ee/frontend/** but dorny doesn't support that
-                        # - '!ee/frontend/**'
-                        # including the negated rule appears to work
-                        # but makes it always match because the checked file always isn't `ee/frontend/**` 🙈
-                        - 'ee/**/*'
                         - 'common/**/*'
-                        - 'posthog/**/*'
+                        - 'insights/**/*'
                         - 'products/**/backend/**/*'
                         - 'bin/*.py'
                         - pyproject.toml
@@ -119,7 +114,7 @@ jobs:
                         - docker/clickhouse
                       migrations:
                         - docker/clickhouse
-                        - 'posthog/migrations/*.py'
+                        - 'insights/migrations/*.py'
                         - 'products/*/backend/migrations/*.py'
                         - 'products/*/migrations/*.py'  # Legacy structure
                         - 'rust/persons_migrations/*.sql'
@@ -143,8 +138,7 @@ jobs:
                       # Legacy code - triggers full Django test suite
                       # Also includes common/ as high-blast-radius code that affects everything
                       legacy:
-                        - 'ee/**/*'
-                        - 'posthog/**/*'
+                        - 'insights/**/*'
                         - 'common/**/*'
 
     detect-snapshot-mode:
@@ -214,7 +208,7 @@ jobs:
                   #
                   # Logic:
                   # - Push to master: run Django (full CI)
-                  # - Legacy (posthog/ee/common) changed: run Django
+                  # - Legacy (insights/common) changed: run Django
                   # - Any contract-check cache miss: run Django
                   # - All cache hits: skip Django (isolated impl-only changes)
                   #
@@ -339,7 +333,7 @@ jobs:
               run: |
                   export CLICKHOUSE_SERVER_IMAGE=clickhouse/clickhouse-server:25.8.12.129
                   export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/posthog-301601/mirror/"
-                  cp posthog/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
+                  cp insights/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
                   docker compose -f docker-compose.dev.yml --profile batch-exports down
                   docker compose -f docker-compose.dev.yml --profile batch-exports up -d &
 
@@ -686,8 +680,8 @@ jobs:
 
             - name: Check CH migrations
               run: |
-                  # Same as above, except now for CH looking at files that were added in posthog/clickhouse/migrations/
-                  git diff --name-status origin/master..HEAD | grep "A\sposthog/clickhouse/migrations/" | grep -v README | awk '{print $2}' | python manage.py test_ch_migrations_are_safe
+                  # Same as above, except now for CH looking at files that were added in insights/clickhouse/migrations/
+                  git diff --name-status origin/master..HEAD | grep "A\sinsights/clickhouse/migrations/" | grep -v README | awk '{print $2}' | python manage.py test_ch_migrations_are_safe
 
             - name: Install pnpm
               uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4
@@ -790,7 +784,7 @@ jobs:
     django:
         needs: [changes, turbo-discover, detect-snapshot-mode, get_clickhouse_versions]
         # Run legacy pytest if:
-        # 1. Legacy code directly changed (ee/, posthog/)
+        # 1. Legacy code directly changed (posthog/)
         # 2. OR product changes affect legacy code (turbo-discover outputs run_legacy=true)
         # 3. OR turbo-discover itself failed (conservative: run Django on detection failure)
         if: |
@@ -964,7 +958,7 @@ jobs:
               run: |
                   export CLICKHOUSE_SERVER_IMAGE=${{ needs.get_clickhouse_versions.outputs.oldest_supported_image }}
                   export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/posthog-301601/mirror/"
-                  cp posthog/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
+                  cp insights/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
 
                   # Start docker compose in background
                   (
@@ -1151,14 +1145,14 @@ jobs:
                   set +e
                   pytest -v --tb=short ${{
                       matrix.person-on-events
-                      && './posthog/clickhouse/ ./posthog/queries/ ./posthog/api/test/test_insight* ./posthog/api/test/dashboards/test_dashboard.py'
+                      && './insights/clickhouse/ ./insights/queries/ ./insights/api/test/test_insight* ./insights/api/test/dashboards/test_dashboard.py'
                       || 'posthog'
-                  }} ${{ matrix.person-on-events && 'ee/clickhouse/' || 'ee/' }} -m "not async_migrations" \
-                      --ignore=posthog/temporal \
-                      --ignore=posthog/dags \
+                  }} -m "not async_migrations" \
+                      --ignore=insights/temporal \
+                      --ignore=insights/dags \
                       --ignore=common/hogvm/python/test \
-                      ${{ matrix.person-on-events && '--ignore=posthog/hogql_queries' || '' }} \
-                      ${{ matrix.person-on-events && '--ignore=posthog/hogql' || '' }} \
+                      ${{ matrix.person-on-events && '--ignore=insights/hogql_queries' || '' }} \
+                      ${{ matrix.person-on-events && '--ignore=insights/hogql' || '' }} \
                       --splits ${{ matrix.concurrency }} --group ${{ matrix.group }} \
                       --durations=1000 --durations-min=1.0 --store-durations \
                       --splitting-algorithm=duration_based_chunks \
@@ -1212,7 +1206,7 @@ jobs:
                   MODAL_TOKEN_SECRET: ${{ needs.changes.outputs.tasks_temporal == 'true' && secrets.MODAL_TOKEN_SECRET || '' }}
               run: |
                   set +e
-                  pytest -v --tb=short --timeout=600 --timeout-method=thread posthog/temporal products/batch_exports/backend/tests/temporal products/tasks/backend/temporal -m "not async_migrations" \
+                  pytest -v --tb=short --timeout=600 --timeout-method=thread insights/temporal products/batch_exports/backend/tests/temporal products/tasks/backend/temporal -m "not async_migrations" \
                       --splits ${{ matrix.concurrency }} --group ${{ matrix.group }} \
                       --durations=100 --durations-min=1.0 --store-durations \
                       --splitting-algorithm=duration_based_chunks \
@@ -1283,7 +1277,7 @@ jobs:
               if: needs.changes.outputs.backend == 'true' && matrix.segment == 'Core' && !matrix.person-on-events
               with:
                   name: email_renders-${{ github.sha }}-${{ github.run_attempt }}-${{ matrix.segment }}-${{ matrix.person-on-events }}-${{ matrix.group }}
-                  path: posthog/tasks/test/__emails__
+                  path: insights/tasks/test/__emails__
                   retention-days: 1
             - name: Upload test results
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -1382,7 +1376,7 @@ jobs:
                   concurrency: 1
                   group: 1
                   person-on-events: false
-                  pytest-targets: 'posthog/clickhouse ee/clickhouse'
+                  pytest-targets: 'insights/clickhouse'
                   oldest_supported_clickhouse_image: ${{ needs.get_clickhouse_versions.outputs.oldest_supported_image }}
                   # Skip plugin transpiler build - these tests don't need it and it causes esbuild deadlocks
                   skip-plugin-transpiler: 'true'

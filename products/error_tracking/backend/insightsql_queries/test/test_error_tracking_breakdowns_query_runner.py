@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     APIBaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -7,7 +7,7 @@ from posthog.test.base import (
     snapshot_clickhouse_queries,
 )
 
-from posthog.schema import BreakdownValue, DateRange, ErrorTrackingBreakdownsQuery
+from insights.schema import BreakdownValue, DateRange, ErrorTrackingBreakdownsQuery
 
 from products.error_tracking.backend.insightsql_queries.error_tracking_breakdowns_query_runner import (
     ErrorTrackingBreakdownsQueryRunner,

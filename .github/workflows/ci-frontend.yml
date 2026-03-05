@@ -41,7 +41,6 @@ jobs:
                         # NOTE: we are at risk of missing a dependency here.
                         - 'bin/**'
                         - 'frontend/**'
-                        - 'ee/frontend/**'
                         - 'common/esbuilder/**'
                         - 'common/insightsql_parser/**'
                         - 'products/**/*.ts'

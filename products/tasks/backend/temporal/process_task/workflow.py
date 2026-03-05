@@ -11,7 +11,7 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ParentClosePolicy
 
-from posthog.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.base import InsightsWorkflow
 
 from products.tasks.backend.temporal.create_snapshot.workflow import CreateSnapshotForRepositoryInput
 

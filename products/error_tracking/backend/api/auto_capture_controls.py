@@ -4,7 +4,7 @@ import structlog
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
 
 from products.error_tracking.backend.models import ErrorTrackingAutoCaptureControls
 

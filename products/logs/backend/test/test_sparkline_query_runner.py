@@ -2,11 +2,11 @@ import os
 import json
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 
 from rest_framework import status
 
-from posthog.clickhouse.client import sync_execute
+from insights.clickhouse.client import sync_execute
 
 
 class TestSparklineQueryRunner(ClickhouseTestMixin, APIBaseTest):

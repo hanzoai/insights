@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
-from posthog.schema import DateRange
+from insights.schema import DateRange
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 
 from products.data_warehouse.backend.models import DataWarehouseTable
 from products.marketing_analytics.backend.insightsql_queries.adapters.base import QueryContext

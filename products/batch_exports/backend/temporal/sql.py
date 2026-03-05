@@ -1,8 +1,8 @@
 from string import Template
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import InsightsQLQuerySettings
-from posthog.insightsql.parser import parse_expr
+from insights.insightsql import ast
+from insights.insightsql.constants import InsightsQLQuerySettings
+from insights.insightsql.parser import parse_expr
 
 
 def get_s3_function_call(s3_folder: str, s3_key: str | None, s3_secret: str | None, num_partitions: int) -> str:

@@ -5,14 +5,14 @@ import django.contrib.postgres.fields
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
-import posthog.helpers.encrypted_fields
+import insights.models.utils
+import insights.helpers.encrypted_fields
 
 
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("posthog", "0925_team_business_model"),
+        ("insights", "0925_team_business_model"),
         ("tasks", "0019_remove_taskrun_log_storage_path"),
     ]
 
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_sandbox_environment",

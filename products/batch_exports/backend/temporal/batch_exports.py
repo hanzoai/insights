@@ -16,8 +16,8 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, exceptions, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.models import BatchExportBackfill, BatchExportRun
-from posthog.batch_exports.service import (
+from insights.batch_exports.models import BatchExportBackfill, BatchExportRun
+from insights.batch_exports.service import (
     BackfillDetails,
     BatchExportField,
     BatchExportInsertInputs,
@@ -30,13 +30,13 @@ from posthog.batch_exports.service import (
     update_batch_export_backfill_status,
     update_batch_export_run,
 )
-from posthog.kafka_client.topics import KAFKA_APP_METRICS2
-from posthog.models.team.team import Team
-from posthog.settings.base_variables import TEST
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.clickhouse import ClickHouseClient
-from posthog.temporal.common.client import connect
-from posthog.temporal.common.logger import get_logger, get_write_only_logger
+from insights.kafka_client.topics import KAFKA_APP_METRICS2
+from insights.models.team.team import Team
+from insights.settings.base_variables import TEST
+from insights.sync import database_sync_to_async
+from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.client import connect
+from insights.temporal.common.logger import get_logger, get_write_only_logger
 
 from products.batch_exports.backend.temporal.metrics import get_export_finished_metric, get_export_started_metric
 from products.batch_exports.backend.temporal.pipeline.types import BatchExportResult
@@ -49,7 +49,6 @@ from products.batch_exports.backend.temporal.sql import (
     SELECT_FROM_EVENTS_VIEW_UNBOUNDED,
 )
 
-from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, list_limited_team_attributes
 
 LOGGER = get_write_only_logger(__name__)
 EXTERNAL_LOGGER = get_logger("EXTERNAL")
@@ -448,17 +447,8 @@ async def start_batch_export_run(inputs: StartBatchExportRunInputs) -> BatchExpo
 async def check_is_over_limit(team_id: int) -> bool:
     """Check if team has exceeded billing limits.
 
-    If so, the batch export should not run.
+    Billing limits removed. Always returns False.
     """
-    team: Team = await Team.objects.aget(id=team_id)
-
-    limited_team_tokens_rows_synced = await asyncio.to_thread(
-        list_limited_team_attributes, QuotaResource.ROWS_EXPORTED, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY
-    )
-
-    if team.api_token in limited_team_tokens_rows_synced:
-        return True
-
     return False
 
 
@@ -554,7 +544,7 @@ async def finish_batch_export_run(inputs: FinishBatchExportRunInputs) -> None:
             batch_export_run.latest_error,
         )
 
-        from posthog.tasks.email import send_batch_export_run_failure
+        from insights.tasks.email import send_batch_export_run_failure
 
         try:
             await database_sync_to_async(send_batch_export_run_failure)(inputs.id)

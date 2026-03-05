@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from products.data_warehouse.backend.models import DataWarehouseModelPath, DataWarehouseSavedQuery
 

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1013_eventdefinition_enforcement_mode_db_default"),
+        ("insights", "1013_eventdefinition_enforcement_mode_db_default"),
         ("conversations", "0014_remove_ticket_assigned_to"),
     ]
 
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=models.CASCADE, related_name="conversation_restore_tokens", to="posthog.team"
+                        on_delete=models.CASCADE, related_name="conversation_restore_tokens", to="insights.team"
                     ),
                 ),
             ],

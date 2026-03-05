@@ -3,19 +3,14 @@ from typing import Any
 from langchain.schema import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.errors import ExposedInsightsQLError, ResolutionError
-from posthog.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
-from posthog.insightsql.metadata import get_table_names
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.printer import prepare_and_print_ast
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
+from insights.insightsql.errors import ExposedInsightsQLError, ResolutionError
+from insights.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
+from insights.insightsql.metadata import get_table_names
+from insights.insightsql.parser import parse_select
+from insights.insightsql.printer import prepare_and_print_ast
 
-from ee.hogai.chat_agent.schema_generator.parsers import PydanticOutputParserException, parse_pydantic_structured_output
-from ee.hogai.chat_agent.schema_generator.utils import SchemaGeneratorOutput
-from ee.hogai.chat_agent.sql.toolkit import SQL_SCHEMA
-from ee.hogai.llm import MaxChatOpenAI
-from ee.hogai.tool import MaxTool
 
 _insightsql_functions: str | None = None
 

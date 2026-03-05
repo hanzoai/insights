@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from temporalio import activity
 
-from posthog.temporal.common.utils import asyncify
+from insights.temporal.common.utils import asyncify
 
 from products.tasks.backend.models import SandboxSnapshot, Task
 from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate

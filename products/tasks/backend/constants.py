@@ -1,6 +1,6 @@
 DEFAULT_TRUSTED_DOMAINS = [
     # Insights Services
-    "posthog.com",
+    "insights.com",
     "us.posthog.com",
     "eu.posthog.com",
     # Version Control

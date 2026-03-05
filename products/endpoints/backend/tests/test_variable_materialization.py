@@ -1,9 +1,9 @@
 from typing import Any
 
 import pytest
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 from products.endpoints.backend.materialization import (
     analyze_variables_for_materialization,
@@ -955,7 +955,7 @@ class TestMaterializedQueryExecution(APIBaseTest):
         assert True  # See _transform_select_for_materialized_table implementation
 
     def test_select_transformation_with_alias(self):
-        from posthog.insightsql.parser import parse_select
+        from insights.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import transform_select_for_materialized_table
 
@@ -978,7 +978,7 @@ class TestMaterializedQueryExecution(APIBaseTest):
         assert transformed[1].chain == ["date"]
 
     def test_select_transformation_without_alias(self):
-        from posthog.insightsql.parser import parse_select
+        from insights.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import transform_select_for_materialized_table
 
@@ -1224,7 +1224,7 @@ class TestTransformQuerySnapshots(APIBaseTest):
         assert group_by_columns.count("event") == 1, f"GROUP BY has duplicate 'event': {group_by_columns}"
 
     def test_ast_node_not_shared_between_select_and_group_by(self):
-        from posthog.insightsql.parser import parse_select
+        from insights.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import MaterializationTransformer
 

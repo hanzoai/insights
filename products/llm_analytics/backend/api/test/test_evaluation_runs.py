@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from django.conf import settings

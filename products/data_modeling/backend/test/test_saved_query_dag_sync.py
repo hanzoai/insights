@@ -1,9 +1,9 @@
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from parameterized import parameterized
 
-from posthog.insightsql.errors import QueryError
+from insights.insightsql.errors import QueryError
 
 from products.data_modeling.backend.models import Edge, Node
 from products.data_modeling.backend.models.node import NodeType

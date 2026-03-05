@@ -1,11 +1,11 @@
 import uuid
 from datetime import timedelta
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest import mock
 from unittest.mock import patch
 
-from posthog.models import ActivityLog
+from insights.models import ActivityLog
 
 from products.data_warehouse.backend.models import (
     DataModelingJob,

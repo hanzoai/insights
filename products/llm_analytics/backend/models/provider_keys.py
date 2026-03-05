@@ -1,7 +1,7 @@
 from django.db import models
 
-from posthog.helpers.encrypted_fields import EncryptedJSONField
-from posthog.models.utils import UUIDTModel
+from insights.helpers.encrypted_fields import EncryptedJSONField
+from insights.models.utils import UUIDTModel
 
 
 class LLMProvider(models.TextChoices):
@@ -21,14 +21,14 @@ class LLMProviderKey(UUIDTModel):
         INVALID = "invalid"
         ERROR = "error"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     provider = models.CharField(max_length=50, choices=LLMProvider.choices)
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=20, choices=State.choices, default=State.UNKNOWN)
     error_message = models.TextField(null=True, blank=True)
     encrypted_config = EncryptedJSONField(default=dict, ignore_decrypt_errors=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
     last_used_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

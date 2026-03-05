@@ -8,8 +8,8 @@ from django.conf import settings
 
 import aiokafka
 
-from posthog.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from posthog.temporal.common.clickhouse import ClickHouseClient
+from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
+from insights.temporal.common.clickhouse import ClickHouseClient
 
 from products.batch_exports.backend.temporal.destinations.workflows_batch_export import workflows_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel

@@ -18,7 +18,7 @@ from rest_framework.exceptions import Throttled, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.schema import (
+from insights.schema import (
     DataWarehouseSyncInterval,
     EndpointLastExecutionTimesRequest,
     EndpointRefreshMode,
@@ -34,37 +34,37 @@ from posthog.schema import (
     RefreshType,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import LimitContext
-from posthog.insightsql.errors import ExposedInsightsQLError, ResolutionError
-from posthog.insightsql.parser import parse_select
+from insights.insightsql import ast
+from insights.insightsql.constants import LimitContext
+from insights.insightsql.errors import ExposedInsightsQLError, ResolutionError
+from insights.insightsql.parser import parse_select
 
-from posthog.api.documentation import extend_schema
-from posthog.api.mixins import PydanticModelMixin
-from posthog.api.query import _process_query_request
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.services.query import process_query_model
-from posthog.api.shared import UserBasicSerializer
-from posthog.api.utils import action
-from posthog.clickhouse.client.connection import Workload
-from posthog.clickhouse.client.limit import ConcurrencyLimitExceeded
-from posthog.clickhouse.query_tagging import Product, get_query_tag_value, tag_queries
-from posthog.errors import ExposedCHQueryError
-from posthog.event_usage import report_user_action
-from posthog.exceptions_capture import capture_exception
-from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
-from posthog.insightsql_queries.query_runner import BLOCKING_EXECUTION_MODES
-from posthog.models import User
-from posthog.models.activity_logging.activity_log import (
+from insights.api.documentation import extend_schema
+from insights.api.mixins import PydanticModelMixin
+from insights.api.query import _process_query_request
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.services.query import process_query_model
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import action
+from insights.clickhouse.client.connection import Workload
+from insights.clickhouse.client.limit import ConcurrencyLimitExceeded
+from insights.clickhouse.query_tagging import Product, get_query_tag_value, tag_queries
+from insights.errors import ExposedCHQueryError
+from insights.event_usage import report_user_action
+from insights.exceptions_capture import capture_exception
+from insights.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
+from insights.insightsql_queries.query_runner import BLOCKING_EXECUTION_MODES
+from insights.models import User
+from insights.models.activity_logging.activity_log import (
     ActivityContextBase,
     Change,
     Detail,
     changes_between,
     log_activity,
 )
-from posthog.models.insight_variable import InsightVariable
-from posthog.schema_migrations.upgrade import upgrade
-from posthog.types import InsightQueryNode
+from insights.models.insight_variable import InsightVariable
+from insights.schema_migrations.upgrade import upgrade
+from insights.types import InsightQueryNode
 
 from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 from products.data_warehouse.backend.models.external_data_schema import (
@@ -1293,7 +1293,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             variables: Dict of variable name -> value from the request
             breakdown_info: Tuple of (property_name, property_type) from breakdown filter
         """
-        from posthog.schema import DashboardFilter, PropertyOperator
+        from insights.schema import DashboardFilter, PropertyOperator
 
         date_from = variables.get("date_from")
         date_to = variables.get("date_to")

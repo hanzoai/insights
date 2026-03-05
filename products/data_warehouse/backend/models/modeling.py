@@ -6,18 +6,18 @@ from django.contrib.postgres import indexes as pg_indexes
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection, models, transaction
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.database.models import SavedQuery
-from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
-from posthog.insightsql.errors import QueryError
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.resolver import Resolver
-from posthog.insightsql.resolver_utils import extract_select_queries
+from insights.insightsql import ast
+from insights.insightsql.database.database import Database
+from insights.insightsql.database.models import SavedQuery
+from insights.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+from insights.insightsql.errors import QueryError
+from insights.insightsql.parser import parse_select
+from insights.insightsql.resolver import Resolver
+from insights.insightsql.resolver_utils import extract_select_queries
 
-from posthog.models.team import Team
-from posthog.models.user import User
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
+from insights.models.team import Team
+from insights.models.user import User
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
 
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 from products.data_warehouse.backend.models.table import DataWarehouseTable
@@ -138,7 +138,7 @@ def get_parents_from_model_query(team: Team, model_name: str, model_query: str) 
         view_name: Optional name of the view being parsed. If provided, cycles back to
                    this view through other views will be detected.
     """
-    from posthog.insightsql.context import InsightsQLContext
+    from insights.insightsql.context import InsightsQLContext
 
     insightsql_query = parse_select(model_query)
     context = InsightsQLContext(
@@ -644,6 +644,6 @@ class DataWarehouseModelPath(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
     objects: DataWarehouseModelPathManager = DataWarehouseModelPathManager()
 
     path = LabelTreeField(null=False)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     table = models.ForeignKey(DataWarehouseTable, null=True, default=None, on_delete=models.SET_NULL)
     saved_query = models.ForeignKey(DataWarehouseSavedQuery, null=True, default=None, on_delete=models.SET_NULL)

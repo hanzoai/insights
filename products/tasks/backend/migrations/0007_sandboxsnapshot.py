@@ -4,12 +4,12 @@ import django.db.models.deletion
 import django.contrib.postgres.fields
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0867_add_updated_at_to_feature_flags"),
+        ("insights", "0867_add_updated_at_to_feature_flags"),
         ("tasks", "0006_remove_workflowstage_agent_alter_task_workflow_and_more"),
     ]
 
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="snapshots",
-                        to="posthog.integration",
+                        to="insights.integration",
                     ),
                 ),
             ],

@@ -43,9 +43,8 @@ jobs:
                         - '.github/workflows/ci-rust.yml'
                         - '.github/workflows/rust.yml'
                         - '.github/workflows/rust-docker-build.yml'
-                        - 'posthog/management/commands/setup_test_environment.py'
-                        - 'posthog/migrations/**'
-                        - 'ee/migrations/**'
+                        - 'insights/management/commands/setup_test_environment.py'
+                        - 'insights/migrations/**'
                         - 'docker-compose.dev.yml'
 
             # Bin-pack packages into balanced test shards.

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 from django.db.models import Q
 
-from posthog.insightsql.database.models import (
+from insights.insightsql.database.models import (
     BooleanDatabaseField,
     DateDatabaseField,
     DateTimeDatabaseField,

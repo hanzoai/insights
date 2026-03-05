@@ -16,8 +16,8 @@ from temporalio.client import (
 )
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.client import async_connect, sync_connect
-from posthog.temporal.common.schedule import (
+from insights.temporal.common.client import async_connect, sync_connect
+from insights.temporal.common.schedule import (
     a_pause_schedule,
     create_schedule,
     delete_schedule,
@@ -44,7 +44,7 @@ def get_sync_frequency(saved_query: "DataWarehouseSavedQuery") -> tuple[timedelt
 
 
 def get_saved_query_schedule(saved_query: "DataWarehouseSavedQuery") -> Schedule:
-    from posthog.temporal.data_modeling.run_workflow import RunWorkflowInputs, Selector
+    from insights.temporal.data_modeling.run_workflow import RunWorkflowInputs, Selector
 
     inputs = RunWorkflowInputs(
         team_id=saved_query.team_id,

@@ -3,9 +3,9 @@ from django.utils import timezone
 
 from rest_framework import serializers
 
-from posthog.api.shared import UserBasicSerializer
-from posthog.models.integration import Integration
-from posthog.storage import object_storage
+from insights.api.shared import UserBasicSerializer
+from insights.models.integration import Integration
+from insights.storage import object_storage
 
 from .models import Task, TaskRun
 from .services.title_generator import generate_task_title

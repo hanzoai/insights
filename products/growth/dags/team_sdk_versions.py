@@ -7,17 +7,17 @@ import dagster
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from posthog.schema import InsightsQLQueryResponse
+from insights.schema import InsightsQLQueryResponse
 
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.clickhouse.query_tagging import Product, tags_context
-from posthog.dags.common import JobOwners
-from posthog.dags.common.ops import get_all_team_ids_op
-from posthog.dags.common.resources import redis
-from posthog.exceptions_capture import capture_exception
-from posthog.models import Team
+from insights.clickhouse.query_tagging import Product, tags_context
+from insights.dags.common import JobOwners
+from insights.dags.common.ops import get_all_team_ids_op
+from insights.dags.common.resources import redis
+from insights.exceptions_capture import capture_exception
+from insights.models import Team
 
 from products.growth.dags.github_sdk_versions import SDK_TYPES
 

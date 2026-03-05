@@ -3,9 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.permissions import AccessControlPermission
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.permissions import AccessControlPermission
 
 from ..models.model_configuration import POSTHOG_ALLOWED_MODELS, LLMModelConfiguration
 from ..models.provider_keys import LLMProvider, LLMProviderKey

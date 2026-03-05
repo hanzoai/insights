@@ -20,19 +20,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.permissions import AccessControlPermission
-from posthog.rate_limit import LLMAnalyticsSentimentBurstThrottle, LLMAnalyticsSentimentSustainedThrottle
-from posthog.temporal.common.client import sync_connect
-from posthog.temporal.llm_analytics.sentiment.constants import (
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.permissions import AccessControlPermission
+from insights.rate_limit import LLMAnalyticsSentimentBurstThrottle, LLMAnalyticsSentimentSustainedThrottle
+from insights.temporal.common.client import sync_connect
+from insights.temporal.llm_analytics.sentiment.constants import (
     BATCH_MAX_TRACE_IDS,
     CACHE_TTL,
     MAX_RETRY_ATTEMPTS,
     WORKFLOW_NAME,
     WORKFLOW_TIMEOUT_BATCH_SECONDS,
 )
-from posthog.temporal.llm_analytics.sentiment.schema import ClassifySentimentInput
+from insights.temporal.llm_analytics.sentiment.schema import ClassifySentimentInput
 
 from products.llm_analytics.backend.api.metrics import llma_track_latency
 

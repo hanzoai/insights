@@ -66,7 +66,7 @@ Examples:
 - **Never** use f-strings with user-controlled values in SQL queries - this creates SQL injection vulnerabilities
 - Use parameterized queries for all VALUES: `cursor.execute("SELECT * FROM t WHERE id = %s", [id])`
 - Table/column names from Django ORM metadata (`model._meta.db_table`) are trusted sources
-- For ClickHouse identifiers, use `escape_clickhouse_identifier()` from `posthog/hogql/escape_sql.py`
+- For ClickHouse identifiers, use `escape_clickhouse_identifier()` from `insights/hogql/escape_sql.py`
 - When raw SQL is necessary with dynamic table/column names:
 
   ```python
@@ -130,11 +130,11 @@ docker run --rm -v "${PWD}:/src" semgrep/semgrep semgrep --test /src/.semgrep/ru
 
 ## Architecture guidelines
 
-- API views should declare request/response schemas — prefer `@validated_request` from `posthog.api.mixins` or `@extend_schema` from drf-spectacular
+- API views should declare request/response schemas — prefer `@validated_request` from `insights.api.mixins` or `@extend_schema` from drf-spectacular
 - Django serializers are the source of truth for frontend API types — `hogli build:openapi` generates TypeScript via drf-spectacular + Orval. Generated files (`api.schemas.ts`, `api.ts`) live in `frontend/src/generated/core/` and `products/{product}/frontend/generated/` — don't edit them manually, change serializers and rerun. See `docs/published/type-system.md` for the full pipeline
 - New features should live in `products/` — read [products/README.md](products/README.md) for layout and setup. When _creating a new_ product, follow [products/architecture.md](products/architecture.md) (DTOs, facades, isolation). Most existing products are legacy moves and don't use this architecture yet — match the patterns already in the product you're editing
 - Always filter querysets by `team_id` — in serializers, access the team via `self.context["get_team"]()`
-- **Do not add domain-specific fields to the `Team` model.** Use a Team Extension model instead — see `posthog/models/team/README.md` for the pattern and helpers
+- **Do not add domain-specific fields to the `Team` model.** Use a Team Extension model instead — see `insights/models/team/README.md` for the pattern and helpers
 
 ## Important rules for Code Style
 

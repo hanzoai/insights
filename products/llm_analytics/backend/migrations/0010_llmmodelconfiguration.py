@@ -3,12 +3,12 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0932_add_session_ids_to_restriction_config"),
+        ("insights", "0932_add_session_ids_to_restriction_config"),
         ("llm_analytics", "0009_rename_llm_analyti_team_pr_idx_llm_analyti_team_id_a78410_idx"),
     ]
 
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                         to="llm_analytics.llmproviderkey",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "indexes": [

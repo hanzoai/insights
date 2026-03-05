@@ -4,13 +4,12 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0012_backfill_ticket_message_stats"),
-        ("ee", "0014_roles_memberships_and_resource_access"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -43,12 +42,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "role",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="ee.role",
-                    ),
+                    "role_id_legacy",
+                    models.IntegerField(null=True, db_column="role_id"),
                 ),
             ],
             options={
@@ -56,8 +51,8 @@ class Migration(migrations.Migration):
                 "constraints": [
                     models.CheckConstraint(
                         check=(
-                            models.Q(user__isnull=False, role__isnull=True)
-                            | models.Q(user__isnull=True, role__isnull=False)
+                            models.Q(user__isnull=False, role_id_legacy__isnull=True)
+                            | models.Q(user__isnull=True, role_id_legacy__isnull=False)
                         ),
                         name="exactly_one_assignee_type",
                     ),
