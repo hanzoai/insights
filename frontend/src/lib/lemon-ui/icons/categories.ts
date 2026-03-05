@@ -324,7 +324,7 @@ export const TEAMS_AND_COMPANIES = {
     'Feature Success': ['IconFlask', 'IconTestTube', 'IconMultivariateTesting', 'IconSplitTesting', 'IconBalance'],
     Modeling: ['IconDirectedGraph'],
     Pipeline: ['IconWebhooks', 'IconDecisionTree', 'IconEndpoints'],
-    'Product OS': ['IconNotebook', 'IconInsightsQL', 'IconDashboard', 'IconSupport'],
+    'Product OS': ['IconNotebook', 'IconHogQL', 'IconDashboard', 'IconSupport'],
     Logos: ['IconLogomark', 'IconGithub', 'IconGitLab', 'IconLinear', 'IconRedux'],
     ErrorTracking: ['IconIssue'],
     LLMAnalytics: ['IconLlmAnalytics', 'IconLlmPromptEvaluation', 'IconLlmPromptManagement', 'IconScatter'],

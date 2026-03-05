@@ -69,7 +69,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
+                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
                         `main.tsx`):
                     </Markdown>
                     <CodeBlock
@@ -82,7 +82,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { InsightsProvider } from 'posthog-js/react'
+                                    import { PostHogProvider } from 'posthog-js/react'
 
                                     const options = {
                                       api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -91,9 +91,9 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
                                           <App />
-                                        </InsightsProvider>
+                                        </PostHogProvider>
                                       </StrictMode>
                                     )
                                 `,
