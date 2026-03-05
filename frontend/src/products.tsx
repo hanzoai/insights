@@ -449,7 +449,7 @@ export const productConfiguration: Record<string, any> = {
         name: 'Session summaries',
         projectBased: true,
         description:
-            'View and deep-dive into AI-generated summaries of session recordings. Create summaries from the Session replay page by applying filters and asking Hanzo AI to summarize sessions.',
+            'View and deep-dive into AI-generated summaries of session recordings. Create summaries from the Session replay page by applying filters and asking Insights AI to summarize sessions.',
         iconType: 'notebook',
     },
     SessionGroupSummary: {
@@ -1495,6 +1495,16 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['Apps'],
     },
     {
+        path: 'Site Inspector',
+        intents: [ProductKey.TOOLBAR],
+        href: urls.toolbarLaunch(),
+        type: 'toolbar',
+        category: 'Tools',
+        iconType: 'toolbar',
+        sceneKey: 'Toolbar',
+        sceneKeys: ['Toolbar'],
+    },
+    {
         path: 'Support',
         intents: [ProductKey.CONVERSATIONS],
         category: 'Behavior',
@@ -1530,16 +1540,6 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         iconColor: ['var(--product-tasks-light)', 'var(--product-tasks-dark)'] as FileSystemIconColor,
         sceneKey: 'TaskTracker',
         sceneKeys: ['TaskTracker', 'TaskDetail'],
-    },
-    {
-        path: 'Site Inspector',
-        intents: [ProductKey.TOOLBAR],
-        href: urls.toolbarLaunch(),
-        type: 'toolbar',
-        category: 'Tools',
-        iconType: 'toolbar',
-        sceneKey: 'Toolbar',
-        sceneKeys: ['Toolbar'],
     },
     {
         path: 'User interviews',
@@ -1578,9 +1578,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
 ]
 
 /** This const is auto-generated, as is the whole file */
-export const getTreeItemsGames = (): FileSystemImport[] => [
-    { path: '368 Mascots', href: urls.game368mascots() },
-]
+export const getTreeItemsGames = (): FileSystemImport[] => [{ path: '368 Mascots', href: urls.game368mascots() }]
 
 /** This const is auto-generated, as is the whole file */
 export const getTreeItemsMetadata = (): FileSystemImport[] => [
