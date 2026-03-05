@@ -13,7 +13,7 @@ export const pacePlugin: LegacyDestinationPlugin = {
         name: 'Pace Integration',
         description:
             'Pace is a tool that equips sellers with relevant insights at the right time so they can spend time growing revenue. It allows them to convert, retain, and grow customers by prioritizing time and effort on the users who need it most.',
-        icon_url: 'https://raw.githubusercontent.com/Insights/pace-insights-integration/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/pace-insights-integration/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: `return event`,

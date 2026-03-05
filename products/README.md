@@ -6,7 +6,7 @@ This structure ensures product features are self-contained and can evolve indepe
 The **entire product folder** (`products/<product_name>/`) is treated as a **Turborepo package**.
 Backend and frontend are sub-parts of that package.
 
-This is the (future) home for all Insights products ([RFC](https://github.com/Insights/product-internal/pull/703)).
+This is the (future) home for all Insights products ([RFC](https://github.com/PostHog/product-internal/pull/703)).
 
 For the detailed architecture rationale (frozen dataclasses, facades, isolated testing), see [architecture.md](./architecture.md).
 

@@ -12,7 +12,7 @@ export const insightsFilterOutPlugin: LegacyTransformationPlugin = {
         id: 'plugin-insights-filter-out-plugin',
         name: 'Filter Out Plugin',
         description: 'Filter out events where property values satisfy the given condition',
-        icon_url: 'https://raw.githubusercontent.com/Insights/insights-filter-out-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/insights-filter-out-plugin/main/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,

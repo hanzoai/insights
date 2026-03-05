@@ -80,7 +80,7 @@ def append_random(url: str) -> str:
 def snowflake_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="Snowflake Export",
-        url=append_random("https://github.com/Insights/snowflake-export-plugin"),
+        url=append_random("https://github.com/PostHog/snowflake-export-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -92,7 +92,7 @@ def snowflake_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def s3_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="S3 Export Plugin",
-        url=append_random("https://github.com/Insights/s3-export-plugin"),
+        url=append_random("https://github.com/PostHog/s3-export-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -104,7 +104,7 @@ def s3_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def bigquery_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="BigQuery Export",
-        url=append_random("https://github.com/Insights/bigquery-plugin"),
+        url=append_random("https://github.com/PostHog/bigquery-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -116,7 +116,7 @@ def bigquery_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def postgres_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="PostgreSQL Export Plugin",
-        url=append_random("https://github.com/Insights/postgres-plugin"),
+        url=append_random("https://github.com/PostHog/postgres-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -128,7 +128,7 @@ def postgres_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def redshift_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="Redshift Export Plugin",
-        url=append_random("https://github.com/Insights/postgres-plugin"),
+        url=append_random("https://github.com/PostHog/postgres-plugin"),
         plugin_type="custom",
         organization=organization,
     )

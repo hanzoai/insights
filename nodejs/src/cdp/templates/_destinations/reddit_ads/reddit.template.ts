@@ -97,7 +97,7 @@ let body := {
 };
 
 let url := f'https://ads-api.reddit.com/api/v2.0/conversions/events/{inputs.accountId}';
-let userAgent := 'hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)';
+let userAgent := 'hog:com.insights.cdp:0.0.1 (by /u/PostHogTeam)';
 let headers := {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {inputs.conversionsAccessToken}',

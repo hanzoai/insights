@@ -311,7 +311,7 @@
         },
         {
             "id": 3359,
-            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/Insights/posthog/pull/7439",
+            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/PostHog/posthog/pull/7439",
             "date_marker": "2021-11-29T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": null,

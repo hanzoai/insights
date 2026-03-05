@@ -239,7 +239,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         }
 
         // Extract plugin ID from URL (following the migration.py pattern)
-        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/Insights/', '')
+        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/PostHog/', '')
 
         const templateId = `plugin-${pluginId}`
 

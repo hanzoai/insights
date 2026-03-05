@@ -77,9 +77,9 @@ You can mix and match `parse_expr` and `ast` nodes as you please. The example ab
 
 ## Database schema and features
 
-The HogQL database schema is in flux. You will soon be able to explore it in the [Insights app itself](https://github.com/Insights/posthog/pull/14591).
+The HogQL database schema is in flux. You will soon be able to explore it in the [Insights app itself](https://github.com/PostHog/posthog/pull/14591).
 
-The most up to date resource is [hogql/database.py](https://github.com/Insights/posthog/blob/master/posthog/hogql/database.py) on Github. At the time of writing, these tables were available:
+The most up to date resource is [hogql/database.py](https://github.com/PostHog/posthog/blob/master/posthog/hogql/database.py) on Github. At the time of writing, these tables were available:
 
 ```python
 class Database(BaseModel):

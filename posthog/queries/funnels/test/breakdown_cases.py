@@ -1218,7 +1218,7 @@ def funnel_breakdown_test_factory(Funnel, FunnelPerson, _create_event, _create_a
             }
             # Dummy events to make sure that breakdown is not confused
             # It was confused before due to the nature of fetching breakdown values with a LIMIT based on value popularity
-            # See https://github.com/Insights/posthog/pull/5496
+            # See https://github.com/PostHog/posthog/pull/5496
             for current_url_letter in ascii_lowercase[:20]:
                 # Twenty dummy breakdown values
                 for _ in range(2):

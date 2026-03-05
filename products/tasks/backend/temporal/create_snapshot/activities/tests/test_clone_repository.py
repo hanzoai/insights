@@ -36,7 +36,7 @@ class TestCloneRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "Insights/posthog-js")
+            context = self._create_context(github_integration, "PostHog/posthog-js")
             input_data = CloneRepositoryInput(context=context, sandbox_id=sandbox.id)
 
             with patch(
@@ -66,7 +66,7 @@ class TestCloneRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "Insights/posthog-js")
+            context = self._create_context(github_integration, "PostHog/posthog-js")
             input_data = CloneRepositoryInput(context=context, sandbox_id=sandbox.id)
 
             with patch(

@@ -1,6 +1,6 @@
 {
     "name": "Replicator",
-    "url": "https://github.com/Insights/posthog-plugin-replicator",
+    "url": "https://github.com/PostHog/posthog-plugin-replicator",
     "description": "Replicate Insights event stream in another Insights instance",
     "main": "index.ts",
     "config": [

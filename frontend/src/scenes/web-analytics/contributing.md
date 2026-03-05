@@ -113,7 +113,7 @@ Captured at session start and persisted for the session lifetime:
 - Session docs: <https://posthog.com/docs/data/sessions>
 - Web analytics FAQ: <https://posthog.com/docs/web-analytics/faq>
 - SPA pageview tutorial: <https://posthog.com/tutorials/single-page-app-pageviews>
-- Source code: [session-props.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/page-view.ts)
+- Source code: [session-props.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/page-view.ts)
 
 ### Implementation details
 
