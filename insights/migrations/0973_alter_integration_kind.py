@@ -44,8 +44,8 @@ class AlterPosthogIntegrationKindField(Operation):
         )
 
     def state_forwards(self, app_label, state):
-        # Alter the field in the posthog app, not the workflows app
-        
+        # Alter the field in the insights app, not the workflows app
+        state.alter_field(
             "insights",
             self.model_name,
             self.name,
@@ -62,7 +62,7 @@ class AlterPosthogIntegrationKindField(Operation):
         pass
 
     def describe(self):
-        return f"Alter field self.name} on {self.model_name} (posthog app)"
+        return f"Alter field {self.name} on {self.model_name} (insights app)"
 
 
 class Migration(migrations.Migration):
