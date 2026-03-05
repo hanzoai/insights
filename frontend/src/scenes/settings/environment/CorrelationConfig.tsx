@@ -43,7 +43,7 @@ export function CorrelationConfig(): JSX.Element {
                     <div>
                         <h3 className="flex items-center gap-2">
                             <IconSelectProperties className="text-lg" />
-                            Excluded person properties
+                            Excluded user properties
                         </h3>
                         <PropertySelect
                             taxonomicFilterGroup={TaxonomicFilterGroupType.PersonProperties}

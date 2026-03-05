@@ -158,7 +158,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                         className={`${message.role === 'assistant' ? 'flex flex-col' : ''} max-w-full`}
                                     >
                                         {message.role === 'assistant' && (
-                                            <div className="text-sm text-primary-alt mb-1">Max</div>
+                                            <div className="text-sm text-primary-alt mb-1">AI</div>
                                         )}
                                         <div
                                             className={`p-2 rounded-lg min-w-[90%] whitespace-pre-wrap ${
@@ -171,13 +171,13 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                 ? typeof message.content === 'string' &&
                                                   (message.content.includes('<search_state>started</search_state>') ? (
                                                       <div className="flex items-center gap-2">
-                                                          <span>Max is searching...</span>
+                                                          <span>AI is searching...</span>
                                                           <Spinner className="text-lg" />
                                                       </div>
                                                   ) : message.content.includes(
                                                         '<search_state>completed</search_state>'
                                                     ) ? (
-                                                      <div>Max searched</div>
+                                                      <div>AI searched</div>
                                                   ) : (
                                                       <>
                                                           <MemoizedMessageContent content={message.content} />
@@ -340,7 +340,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                     {(hasServerError || isRateLimited) && (
                         <div className="flex justify-start">
                             <div className="flex flex-col">
-                                <div className="text-sm text-primary-alt mb-1">Max</div>
+                                <div className="text-sm text-primary-alt mb-1">AI</div>
                                 <div className="p-2 rounded-lg bg-surface-primary dark:bg-surface-primary text-default">
                                     <div className="flex items-center gap-2">
                                         <span>
@@ -366,7 +366,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                     <>
                         {isSearchingThinking && (
                             <div className="flex items-center gap-2 p-2 text-secondary justify-center">
-                                <span>Max is searching and thinking...</span>
+                                <span>AI is searching and thinking...</span>
                                 <Spinner className="text-sm" />
                             </div>
                         )}

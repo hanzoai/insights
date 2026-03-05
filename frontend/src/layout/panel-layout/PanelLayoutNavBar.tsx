@@ -138,7 +138,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
         if (itemIdentifier === 'Home' && currentPath === '/') {
             return true
         }
-        if (itemIdentifier === 'Activity' && currentPath.startsWith('/activity/')) {
+        if (itemIdentifier === 'EventExplorer' && currentPath.startsWith('/activity/')) {
             return true
         }
         if (itemIdentifier === 'Settings' && currentPath.startsWith('/settings/')) {
@@ -205,12 +205,12 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
             collapsedTooltip: 'Search',
         },
         {
-            identifier: 'Activity',
-            label: 'Activity',
+            identifier: 'EventExplorer',
+            label: 'Events',
             icon: <IconClock />,
             to: urls.activity(),
             onClick: () => handleStaticNavbarItemClick(urls.activity(), true),
-            collapsedTooltip: 'Activity',
+            collapsedTooltip: 'Events',
             documentationUrl: 'https://posthog.com/docs/data/events',
         },
         ...(isProductAutonomyEnabled
@@ -474,7 +474,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
                                                     </ContextMenuContent>
                                                 </ContextMenu>
                                             )
-                                        } else if (item.identifier === 'Activity' && item.to) {
+                                        } else if (item.identifier === 'EventExplorer' && item.to) {
                                             return (
                                                 <ContextMenu key={item.identifier}>
                                                     <ContextMenuTrigger asChild>{listItem}</ContextMenuTrigger>

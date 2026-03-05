@@ -90,10 +90,10 @@ const isItemActive = (item: TreeDataItem): boolean => {
     }
 
     // Special handling for products with child pages on distinct paths (e.g., /replay/home and /replay/playlists)
-    if (item.name === 'Session replay' && currentPath.startsWith('/replay/')) {
+    if (item.name === 'Session Replay' && currentPath.startsWith('/replay/')) {
         return true
     }
-    if (item.name === 'Data pipelines' && currentPath.startsWith('/pipeline/')) {
+    if (item.name === 'Data Pipelines' && currentPath.startsWith('/pipeline/')) {
         return true
     }
     if (item.name === 'Workflows' && currentPath.startsWith('/workflows')) {
@@ -181,7 +181,7 @@ export function ProjectTree({
 
     // Filter out Data pipelines item if it's been clicked
     if (dataPipelinesClicked) {
-        treeData = treeData.filter((item) => item.record?.path !== 'Data pipelines')
+        treeData = treeData.filter((item) => item.record?.path !== 'Data Pipelines')
     }
 
     if (fullFileSystemFiltered.length <= 5) {
@@ -305,7 +305,7 @@ export function ProjectTree({
                 }
 
                 // Track when Data pipelines button is clicked
-                if (item?.record?.path === 'Data pipelines' && !dataPipelinesClicked) {
+                if (item?.record?.path === 'Data Pipelines' && !dataPipelinesClicked) {
                     setDataPipelinesClicked(true)
                 }
 

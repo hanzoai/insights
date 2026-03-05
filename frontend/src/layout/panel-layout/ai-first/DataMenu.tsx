@@ -65,7 +65,7 @@ export function DataMenu(): JSX.Element {
                                     className="hidden lg:flex"
                                 >
                                     <IconPeople className="size-4 text-secondary" />
-                                    Persons
+                                    Users
                                 </ButtonPrimitive>
                             }
                         />

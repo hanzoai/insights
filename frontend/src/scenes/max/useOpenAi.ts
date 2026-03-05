@@ -11,7 +11,7 @@ import { PENDING_MAX_CONTEXT_KEY } from './maxLogic'
 import { MaxOpenContext, convertToMaxUIContext } from './utils'
 
 export interface UseOpenAiReturn {
-    /** Whether the Max side panel is currently open */
+    /** Whether the AI side panel is currently open */
     isMaxOpen: boolean
     /** Function to open AI - either as new tab (if flag enabled) or side panel */
     openAi: (initialPrompt?: string, context?: MaxOpenContext) => void
@@ -20,7 +20,7 @@ export interface UseOpenAiReturn {
 /**
  * Hook that abstracts opening Insights AI.
  * When UX_REMOVE_SIDEPANEL flag is enabled, opens AI in a new tab.
- * Otherwise, opens the Max side panel.
+ * Otherwise, opens the AI side panel.
  */
 export function useOpenAi(): UseOpenAiReturn {
     const { openSidePanel } = useActions(sidePanelStateLogic)

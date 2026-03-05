@@ -117,7 +117,7 @@ export const SIDE_PANEL_TABS: Record<
         Content: SidePanelSdkDoctor,
     },
     [SidePanelTab.Health]: {
-        label: 'Pipeline status',
+        label: 'Data Pipeline status',
         Icon: SidePanelHealthIcon,
         Content: SidePanelHealth,
     },

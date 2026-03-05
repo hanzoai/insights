@@ -773,8 +773,8 @@ export const billingJson: BillingType = {
                         },
                         {
                             key: 'replay_filter_person_properties',
-                            name: 'Filter person properties',
-                            description: 'Filter by person properties to quickly find relevant recordings.',
+                            name: 'Filter user properties',
+                            description: 'Filter by user properties to quickly find relevant recordings.',
                             unit: null,
                             limit: null,
                             note: null,
@@ -908,8 +908,8 @@ export const billingJson: BillingType = {
                         },
                         {
                             key: 'replay_filter_person_properties',
-                            name: 'Filter person properties',
-                            description: 'Filter by person properties to quickly find relevant recordings.',
+                            name: 'Filter user properties',
+                            description: 'Filter by user properties to quickly find relevant recordings.',
                             unit: null,
                             limit: null,
                             note: null,
@@ -1410,8 +1410,8 @@ export const billingJson: BillingType = {
                 },
                 {
                     key: 'replay_filter_person_properties',
-                    name: 'Filter person properties',
-                    description: 'Filter by person properties to quickly find relevant recordings.',
+                    name: 'Filter user properties',
+                    description: 'Filter by user properties to quickly find relevant recordings.',
                     images: null,
                     icon_key: null,
                     type: null,

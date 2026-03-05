@@ -78,7 +78,7 @@ export const sessionReplaySceneLogic = kea<sessionReplaySceneLogicType>([
                 if (tab !== ReplayTabs.Home) {
                     breadcrumbs.push({
                         key: Scene.Replay,
-                        name: 'Replay',
+                        name: 'Session Replay',
                         path: urls.replay(),
                         iconType: sceneConfigurations[Scene.Replay].iconType || 'default_icon_type',
                     })

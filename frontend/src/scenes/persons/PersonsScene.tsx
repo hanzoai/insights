@@ -76,9 +76,9 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                         onClick={() => {
                                             LemonDialog.openForm({
                                                 width: '30rem',
-                                                title: 'Reset deleted person',
-                                                description: `Once a person is deleted, the "distinct_id" associated with them can no longer be used.
-                                                You can use this tool to reset the "distinct_id" for a person so that new events associated with it will create a new Person profile.`,
+                                                title: 'Reset deleted user',
+                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
+                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
                                                 initialValues: {
                                                     distinct_id: '',
                                                 },
@@ -97,7 +97,7 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                         }}
                                     >
                                         <IconRewind />
-                                        Reset a deleted person...
+                                        Reset a deleted user...
                                     </ButtonPrimitive>
                                 </ScenePanelActionsSection>
                             </ScenePanel>
@@ -105,13 +105,13 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                             <LemonMenu
                                 items={[
                                     {
-                                        label: 'Reset a deleted person...',
+                                        label: 'Reset a deleted user...',
                                         onClick: () =>
                                             LemonDialog.openForm({
                                                 width: '30rem',
-                                                title: 'Reset deleted person',
-                                                description: `Once a person is deleted, the "distinct_id" associated with them can no longer be used.
-                                                You can use this tool to reset the "distinct_id" for a person so that new events associated with it will create a new Person profile.`,
+                                                title: 'Reset deleted user',
+                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
+                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
                                                 initialValues: {
                                                     distinct_id: '',
                                                 },
@@ -140,7 +140,7 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
             {!showDisplayNameNudge && (
                 <FeedbackBanner
                     feedbackButtonId="people-list"
-                    message="We're improving the persons experience. Send us your feedback!"
+                    message="We're improving the users experience. Send us your feedback!"
                 />
             )}
 
@@ -152,8 +152,8 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                 context={{
                     refresh: 'blocking',
                     emptyStateHeading: currentTeam?.ingested_event
-                        ? 'There are no matching persons for this query'
-                        : 'No persons exist because no events have been ingested',
+                        ? 'There are no matching users for this query'
+                        : 'No users exist because no events have been ingested',
                     emptyStateDetail: currentTeam?.ingested_event ? (
                         'Try changing the date range or property filters.'
                     ) : (

@@ -13,7 +13,7 @@ export const manifest: ProductManifest = {
         LLMAnalytics: {
             import: () => import('./frontend/LLMAnalyticsScene'),
             projectBased: true,
-            name: 'LLM analytics',
+            name: 'LLM Analytics',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
             description: 'Analyze and understand your LLM usage and performance.',
@@ -22,21 +22,21 @@ export const manifest: ProductManifest = {
         LLMAnalyticsTrace: {
             import: () => import('./frontend/LLMAnalyticsTraceScene'),
             projectBased: true,
-            name: 'LLM analytics trace',
+            name: 'Trace',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/traces',
         },
         LLMAnalyticsSession: {
             import: () => import('./frontend/LLMAnalyticsSessionScene'),
             projectBased: true,
-            name: 'LLM analytics session',
+            name: 'Session',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/sessions',
         },
         LLMAnalyticsUsers: {
             import: () => import('./frontend/LLMAnalyticsUsers'),
             projectBased: true,
-            name: 'LLM analytics users',
+            name: 'Users',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
         },
@@ -59,7 +59,7 @@ export const manifest: ProductManifest = {
         LLMAnalyticsDataset: {
             import: () => import('./frontend/datasets/LLMAnalyticsDatasetScene'),
             projectBased: true,
-            name: 'LLM analytics dataset',
+            name: 'Dataset',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
             iconType: 'llm_datasets',
@@ -77,7 +77,7 @@ export const manifest: ProductManifest = {
         LLMAnalyticsEvaluation: {
             import: () => import('./frontend/evaluations/LLMAnalyticsEvaluation'),
             projectBased: true,
-            name: 'LLM analytics evaluation',
+            name: 'Evaluation',
             activityScope: 'LLMAnalytics',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
@@ -86,7 +86,7 @@ export const manifest: ProductManifest = {
         LLMAnalyticsEvaluationTemplates: {
             import: () => import('./frontend/evaluations/EvaluationTemplates'),
             projectBased: true,
-            name: 'LLM analytics evaluation templates',
+            name: 'Evaluation templates',
             activityScope: 'LLMAnalytics',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
@@ -104,7 +104,7 @@ export const manifest: ProductManifest = {
         LLMAnalyticsPrompt: {
             import: () => import('./frontend/prompts/LLMPromptScene'),
             projectBased: true,
-            name: 'LLM analytics prompt',
+            name: 'Prompt',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
             iconType: 'llm_prompts',
@@ -121,7 +121,7 @@ export const manifest: ProductManifest = {
         LLMAnalyticsCluster: {
             import: () => import('./frontend/clusters/LLMAnalyticsClusterScene'),
             projectBased: true,
-            name: 'LLM analytics cluster',
+            name: 'Cluster',
             layout: 'app-container',
             defaultDocsPath: '/docs/llm-analytics/installation',
             iconType: 'llm_clusters',
@@ -217,7 +217,7 @@ export const manifest: ProductManifest = {
     treeItemsNew: [],
     treeItemsProducts: [
         {
-            path: 'LLM analytics',
+            path: 'LLM Analytics',
             intents: [
                 ProductKey.LLM_ANALYTICS,
                 ProductKey.LLM_EVALUATIONS,
