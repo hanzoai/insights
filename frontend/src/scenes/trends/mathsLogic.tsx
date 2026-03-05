@@ -10,7 +10,7 @@ import {
     CalendarHeatmapMathType,
     CountPerActorMathType,
     FunnelMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     PropertyMathType,
 } from '~/types'
 
@@ -22,7 +22,7 @@ export enum MathCategory {
     ActorCount,
     EventCountPerActor,
     PropertyValue,
-    HogQLExpression,
+    InsightsQLExpression,
 }
 
 export interface MathDefinition {
@@ -345,12 +345,12 @@ export const PROPERTY_MATH_DEFINITIONS: Record<PropertyMathType, MathDefinition>
         category: MathCategory.PropertyValue,
     },
 }
-export const HOGQL_MATH_DEFINITIONS: Record<HogQLMathType, MathDefinition> = {
-    [HogQLMathType.HogQL]: {
+export const INSIGHTSQL_MATH_DEFINITIONS: Record<InsightsQLMathType, MathDefinition> = {
+    [InsightsQLMathType.InsightsQL]: {
         name: 'SQL expression',
         shortName: 'SQL expression',
         description: <>Aggregate with a custom SQL expression.</>,
-        category: MathCategory.HogQLExpression,
+        category: MathCategory.InsightsQLExpression,
     },
 }
 
@@ -446,7 +446,7 @@ export const mathsLogic = kea<mathsLogicType>([
                     ...groupsMathDefinitions,
                     ...PROPERTY_MATH_DEFINITIONS,
                     ...COUNT_PER_ACTOR_MATH_DEFINITIONS,
-                    ...HOGQL_MATH_DEFINITIONS,
+                    ...INSIGHTSQL_MATH_DEFINITIONS,
                 }
                 return allMathDefinitions
             },

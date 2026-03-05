@@ -17,7 +17,7 @@ import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import { DataTableNode, NodeKind } from '~/queries/schema/schema-general'
 import {
     ActivityScope,
@@ -31,7 +31,7 @@ import {
     PersonsTabType,
 } from '~/types'
 
-import { asDisplay, getHogqlQueryStringForPersonId } from './person-utils'
+import { asDisplay, getInsightsqlQueryStringForPersonId } from './person-utils'
 import type { personsLogicType } from './personsLogicType'
 
 export interface PersonsLogicProps {
@@ -187,7 +187,7 @@ export const personsLogic = kea<personsLogicType>([
                     return person
                 },
                 loadPersonUUID: async ({ uuid }): Promise<PersonType | null> => {
-                    const response = await hogqlQuery(getHogqlQueryStringForPersonId(), { id: uuid }, 'blocking')
+                    const response = await insightsqlQuery(getInsightsqlQueryStringForPersonId(), { id: uuid }, 'blocking')
                     const row = response?.results?.[0]
                     if (row) {
                         const person: PersonType = {

@@ -22,8 +22,8 @@ from rest_framework.exceptions import ValidationError
 
 from posthog.schema import PersonsOnEventsMode
 
-from posthog.hogql.constants import MAX_SELECT_COHORT_CALCULATION_LIMIT
-from posthog.hogql.hogql import HogQLContext
+from posthog.insightsql.constants import MAX_SELECT_COHORT_CALCULATION_LIMIT
+from posthog.insightsql.insightsql import InsightsQLContext
 
 from posthog.clickhouse.client import sync_execute
 from posthog.models.action import Action
@@ -53,7 +53,7 @@ def get_person_ids_by_cohort_id(
         team_id=team_id,
         property_group=filter.property_groups,
         table_name="pdi",
-        hogql_context=filter.hogql_context,
+        insightsql_context=filter.insightsql_context,
     )
 
     results = sync_execute(
@@ -72,46 +72,46 @@ def get_person_ids_by_cohort_id(
 
 
 class TestCohort(ClickhouseTestMixin, BaseTest):
-    def calculate_cohort_hogql_test_harness(self, cohort: Cohort, pending_version: int):
+    def calculate_cohort_insightsql_test_harness(self, cohort: Cohort, pending_version: int):
         from unittest.mock import patch
 
-        # First run: with hogql cohort calculation disabled
-        version_without_hogql = pending_version * 2 + 2
+        # First run: with insightsql cohort calculation disabled
+        version_without_insightsql = pending_version * 2 + 2
 
         with patch("posthoganalytics.feature_enabled", return_value=False):
-            with self.capture_queries_startswith(("INSERT", "insert")) as queries_without_hogql:
-                cohort.calculate_people_ch(version_without_hogql)
+            with self.capture_queries_startswith(("INSERT", "insert")) as queries_without_insightsql:
+                cohort.calculate_people_ch(version_without_insightsql)
 
-            results_without_hogql = self._get_cohortpeople(cohort)
+            results_without_insightsql = self._get_cohortpeople(cohort)
 
             # Check LIMIT in queries
-            for query in queries_without_hogql:
+            for query in queries_without_insightsql:
                 if "LIMIT" in query:
                     assert all(
                         limit == str(MAX_SELECT_COHORT_CALCULATION_LIMIT) for limit in re.findall(r"LIMIT (\d+)", query)
                     )
 
-        # Second run: with hogql cohort calculation enabled
-        version_with_hogql = version_without_hogql + 1
+        # Second run: with insightsql cohort calculation enabled
+        version_with_insightsql = version_without_insightsql + 1
 
         with patch("posthoganalytics.feature_enabled", return_value=True):
-            with self.capture_queries_startswith(("INSERT", "insert")) as queries_with_hogql:
-                cohort.calculate_people_ch(version_with_hogql)
+            with self.capture_queries_startswith(("INSERT", "insert")) as queries_with_insightsql:
+                cohort.calculate_people_ch(version_with_insightsql)
 
-            results_with_hogql = self._get_cohortpeople(cohort)
+            results_with_insightsql = self._get_cohortpeople(cohort)
 
             # Check LIMIT in queries
-            for query in queries_with_hogql:
+            for query in queries_with_insightsql:
                 if "LIMIT" in query:
                     assert all(
                         limit == str(MAX_SELECT_COHORT_CALCULATION_LIMIT) for limit in re.findall(r"LIMIT (\d+)", query)
                     )
 
         # Assert the sets of person_ids are the same
-        self.assertCountEqual(results_without_hogql, results_with_hogql)
+        self.assertCountEqual(results_without_insightsql, results_with_insightsql)
 
         # Return the latest version
-        return version_with_hogql
+        return version_with_insightsql
 
     def _get_cohortpeople(self, cohort: Cohort, *, team_id: Optional[int] = None):
         team_id = team_id or cohort.team_id
@@ -172,12 +172,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         query, params = parse_prop_grouped_clauses(
             team_id=self.team.pk,
             property_group=filter.property_groups,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 1)
 
@@ -226,12 +226,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 if self.team.person_on_events_mode == PersonsOnEventsMode.DISABLED
                 else PersonPropertiesMode.DIRECT_ON_EVENTS
             ),
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
 
         self.assertEqual(len(result), 1)
@@ -283,12 +283,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 if self.team.person_on_events_mode == PersonsOnEventsMode.DISABLED
                 else PersonPropertiesMode.DIRECT_ON_EVENTS
             ),
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 1)
 
@@ -310,12 +310,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 if self.team.person_on_events_mode == PersonsOnEventsMode.DISABLED
                 else PersonPropertiesMode.DIRECT_ON_EVENTS
             ),
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 2)
 
@@ -363,12 +363,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 if self.team.person_on_events_mode == PersonsOnEventsMode.DISABLED
                 else PersonPropertiesMode.DIRECT_ON_EVENTS
             ),
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 1)
 
@@ -386,12 +386,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 if self.team.person_on_events_mode == PersonsOnEventsMode.DISABLED
                 else PersonPropertiesMode.DIRECT_ON_EVENTS
             ),
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 2)
 
@@ -437,12 +437,12 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         query, params = parse_prop_grouped_clauses(
             team_id=self.team.pk,
             property_group=filter.property_groups,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 2)
 
@@ -498,14 +498,14 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         query, params = parse_prop_grouped_clauses(
             team_id=self.team.pk,
             property_group=filter.property_groups,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid FROM events WHERE team_id = %(team_id)s {}".format(query)
         self.assertIn("\nFROM person_distinct_id2\n", final_query)
 
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 0)
 
@@ -561,7 +561,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results, 3)
 
         #  If we accidentally call calculate_people it shouldn't erase people
-        self.calculate_cohort_hogql_test_harness(cohort, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort, 0)
         results = get_person_ids_by_cohort_id(self.team.pk, cohort.id)
         self.assertEqual(len(results), 3)
 
@@ -570,19 +570,19 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         results = get_person_ids_by_cohort_id(self.team.pk, cohort.id)
         self.assertEqual(len(results), 3)
 
-    def test_insert_cohort_hogql_query_with_distinct_id(self):
+    def test_insert_cohort_insightsql_query_with_distinct_id(self):
         from posthog.api.cohort import insert_cohort_query_actors_into_ch
 
         p1 = Person.objects.create(team_id=self.team.pk, distinct_ids=["user1"])
         p2 = Person.objects.create(team_id=self.team.pk, distinct_ids=["user2"])
         Person.objects.create(team_id=self.team.pk, distinct_ids=["user3"])
 
-        # Create a cohort with a HogQL query that returns distinct_id
+        # Create a cohort with a InsightsQL query that returns distinct_id
         cohort = Cohort.objects.create(
             team=self.team,
             is_static=True,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT distinct_id FROM raw_person_distinct_ids WHERE distinct_id IN ['user1', 'user2']",
             },
         )
@@ -627,7 +627,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         results = self._get_cohortpeople(cohort1)
         self.assertEqual(len(results), 2)
@@ -663,13 +663,13 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         )
 
         cohort1 = Cohort.objects.create(team=self.team, groups=[{"action_id": action.pk, "days": 1}], name="cohort1")
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         results = self._get_cohortpeople(cohort1)
         self.assertEqual(len(results), 2)
 
         cohort2 = Cohort.objects.create(team=self.team, groups=[{"action_id": action.pk, "days": 1}], name="cohort2")
-        self.calculate_cohort_hogql_test_harness(cohort2, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort2, 0)
 
         results = self._get_cohortpeople(cohort2)
         self.assertEqual(len(results), 2)
@@ -755,7 +755,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             groups=[{"action_id": action.pk, "days": 3, "count": 2, "count_operator": "gte"}],
             name="cohort1",
         )
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         results = self._get_cohortpeople(cohort1)
         self.assertEqual(len(results), 2)
@@ -765,7 +765,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             groups=[{"action_id": action.pk, "days": 3, "count": 1, "count_operator": "lte"}],
             name="cohort2",
         )
-        self.calculate_cohort_hogql_test_harness(cohort2, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort2, 0)
 
         results = self._get_cohortpeople(cohort2)
         self.assertEqual(len(results), 1)
@@ -775,7 +775,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             groups=[{"action_id": action.pk, "days": 3, "count": 1, "count_operator": "eq"}],
             name="cohort3",
         )
-        self.calculate_cohort_hogql_test_harness(cohort3, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort3, 0)
 
         results = self._get_cohortpeople(cohort3)
         self.assertEqual(len(results), 1)
@@ -809,9 +809,9 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
         p2.delete()
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
     def test_cohortpeople_prop_changed(self):
         with freeze_time((datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")):
@@ -847,14 +847,14 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
                 name="cohort1",
             )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         with freeze_time((datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")):
             p2.version = 1
             p2.properties = {"$some_prop": "another", "$another_prop": "another"}
             p2.save()
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 1)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 1)
 
         results = self._get_cohortpeople(cohort1)
 
@@ -889,7 +889,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             ],
             name="cohort1",
         )
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
         results = self._get_cohortpeople(cohort1)
 
         self.assertEqual(len(results), 1)
@@ -905,7 +905,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         ]
         cohort1.save()
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 1)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 1)
 
         results = self._get_cohortpeople(cohort1)
         self.assertEqual(len(results), 1)
@@ -922,10 +922,10 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         cohort = Cohort.objects.create(team=self.team, groups=[], is_static=True, last_calculation=timezone.now())
         cohort.insert_users_by_list(["1", "123"])
 
-        self.calculate_cohort_hogql_test_harness(cohort, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort, 0)
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
-            sql, _ = format_filter_query(cohort, 0, HogQLContext(team_id=self.team.pk))
+            sql, _ = format_filter_query(cohort, 0, InsightsQLContext(team_id=self.team.pk))
             self.assertQueryMatchesSnapshot(sql)
 
     def test_cohortpeople_with_valid_other_cohort_filter(self):
@@ -937,7 +937,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             groups=[{"properties": [{"key": "foo", "value": "bar", "type": "person"}]}],
             name="cohort0",
         )
-        self.calculate_cohort_hogql_test_harness(cohort0, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort0, 0)
 
         cohort1: Cohort = Cohort.objects.create(
             team=self.team,
@@ -945,7 +945,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         res = self._get_cohortpeople(cohort1)
         self.assertEqual(len(res), 1)
@@ -985,7 +985,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             groups=[{"properties": [{"key": "$some_prop", "value": "something1", "type": "person"}]}],
             name="cohort0",
         )
-        self.calculate_cohort_hogql_test_harness(cohort0, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort0, 0)
 
         cohort1 = Cohort.objects.create(
             team=self.team,
@@ -1014,7 +1014,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
             filter = Filter(
@@ -1032,13 +1032,13 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             query, params = parse_prop_grouped_clauses(
                 team_id=self.team.pk,
                 property_group=filter.property_groups,
-                hogql_context=filter.hogql_context,
+                insightsql_context=filter.insightsql_context,
             )
             final_query = "SELECT uuid, distinct_id FROM events WHERE team_id = %(team_id)s {}".format(query)
 
             result = sync_execute(
                 final_query,
-                {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+                {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
             )
 
         self.assertEqual(len(result), 1)
@@ -1114,14 +1114,14 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         query, params = parse_prop_grouped_clauses(
             team_id=self.team.pk,
             property_group=filter.property_groups,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         final_query = "SELECT uuid, distinct_id FROM events WHERE team_id = %(team_id)s {}".format(query)
         self.assertIn("\nFROM person_distinct_id2\n", final_query)
 
         result = sync_execute(
             final_query,
-            {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+            {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
         )
         self.assertEqual(len(result), 2)  # because we didn't precalculate the cohort, both people are in the cohort
         distinct_ids = [r[1] for r in result]
@@ -1182,7 +1182,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             ],
             name="cohort0",
         )
-        self.calculate_cohort_hogql_test_harness(cohort0, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort0, 0)
 
         cohort1 = Cohort.objects.create(
             team=self.team,
@@ -1211,7 +1211,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
             filter = Filter(
@@ -1221,13 +1221,13 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             query, params = parse_prop_grouped_clauses(
                 team_id=self.team.pk,
                 property_group=filter.property_groups,
-                hogql_context=filter.hogql_context,
+                insightsql_context=filter.insightsql_context,
             )
             final_query = "SELECT uuid, distinct_id FROM events WHERE team_id = %(team_id)s {}".format(query)
 
             result = sync_execute(
                 final_query,
-                {**params, **filter.hogql_context.values, "team_id": self.team.pk},
+                {**params, **filter.insightsql_context.values, "team_id": self.team.pk},
             )
 
         self.assertEqual(len(result), 1)
@@ -1243,7 +1243,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         res = self._get_cohortpeople(cohort1)
         self.assertEqual(len(res), 0)
@@ -1255,7 +1255,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort2, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort2, 0)
         self.assertFalse(Cohort.objects.get().is_calculating)
 
     def test_query_with_multiple_new_style_cohorts(self):
@@ -1394,8 +1394,8 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort2, 0)
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort2, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         result = self._get_cohortpeople(cohort1)
         self.assertCountEqual([p1.uuid, p3.uuid], [r[0] for r in result])
@@ -1423,7 +1423,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        self.calculate_cohort_hogql_test_harness(cohort1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 0)
 
         # Should only have p1 in this cohort
         results = self._get_cohortpeople(cohort1)
@@ -1431,7 +1431,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
 
         cohort1.groups = [{"properties": [{"key": "$another_prop", "value": "something", "type": "person"}]}]
         cohort1.save()
-        self.calculate_cohort_hogql_test_harness(cohort1, 1)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 1)
 
         # Should only have p2, p3 in this cohort
         results = self._get_cohortpeople(cohort1)
@@ -1439,7 +1439,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
 
         cohort1.groups = [{"properties": [{"key": "$some_prop", "value": "something", "type": "person"}]}]
         cohort1.save()
-        self.calculate_cohort_hogql_test_harness(cohort1, 2)
+        self.calculate_cohort_insightsql_test_harness(cohort1, 2)
 
         # Should only have p1 again in this cohort
         results = self._get_cohortpeople(cohort1)
@@ -1469,7 +1469,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="cohort1",
         )
 
-        version = self.calculate_cohort_hogql_test_harness(cohort1, 5)
+        version = self.calculate_cohort_insightsql_test_harness(cohort1, 5)
 
         cohort1.pending_version = version
         cohort1.version = version
@@ -1512,7 +1512,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             name="shared cohort",
         )
         # Calculate cohort
-        self.calculate_cohort_hogql_test_harness(shared_cohort, 0)
+        self.calculate_cohort_insightsql_test_harness(shared_cohort, 0)
 
         # Verify shared_cohort is now calculated for both teams
         results_team1 = self._get_cohortpeople(shared_cohort, team_id=self.team.pk)
@@ -1631,7 +1631,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
 
         # Capture the SQL insert statements when the cohort is calculated
         with self.capture_queries_startswith(("INSERT INTO cohortpeople", "insert into cohortpeople")) as queries:
-            self.calculate_cohort_hogql_test_harness(cohort, 0)
+            self.calculate_cohort_insightsql_test_harness(cohort, 0)
 
         # Assert at least one query was captured
         self.assertTrue(len(queries) > 0, "No queries were captured during cohort calculation")
@@ -1702,7 +1702,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
 
         # Capture the SQL insert statements when the cohort is calculated
         with self.capture_queries_startswith(("INSERT INTO cohortpeople", "insert into cohortpeople")) as queries:
-            self.calculate_cohort_hogql_test_harness(cohort, 0)
+            self.calculate_cohort_insightsql_test_harness(cohort, 0)
 
         # Assert at least one query was captured
         self.assertTrue(len(queries) > 0, "No queries were captured during cohort calculation")
@@ -1751,7 +1751,7 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
         )
 
         with self.assertRaises(ValidationError):
-            self.calculate_cohort_hogql_test_harness(cohort, 0)
+            self.calculate_cohort_insightsql_test_harness(cohort, 0)
 
     def test_cohort_with_inclusion_and_exclusion_and_nested_negation(self):
         # Create two users with different properties
@@ -1812,9 +1812,9 @@ class TestCohort(ClickhouseTestMixin, BaseTest):
             },
             name="cohort_3",
         )
-        self.calculate_cohort_hogql_test_harness(cohort_1, 0)
-        self.calculate_cohort_hogql_test_harness(cohort_2, 0)
-        self.calculate_cohort_hogql_test_harness(cohort_3, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort_1, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort_2, 0)
+        self.calculate_cohort_insightsql_test_harness(cohort_3, 0)
 
         results = self._get_cohortpeople(cohort_3)
         self.assertEqual(len(results), 2)

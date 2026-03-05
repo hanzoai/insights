@@ -17,32 +17,32 @@ class FixSubTemplateIdsToTemplateIdsMigrationTest(NonAtomicTestMigrations):
         Organization = apps.get_model("posthog", "Organization")
         Project = apps.get_model("posthog", "Project")
         Team = apps.get_model("posthog", "Team")
-        HogFunction = apps.get_model("posthog", "HogFunction")
+        CustomFunction = apps.get_model("posthog", "CustomFunction")
 
         self.organization = Organization.objects.create(name="o1")
         self.project = Project.objects.create(organization=self.organization, name="p1", id=1000001)
         self.team = Team.objects.create(organization=self.organization, name="t1", project=self.project)
 
-        # Create HogFunctions with sub-template IDs
-        self.hf_slack = HogFunction.objects.create(
+        # Create CustomFunctions with sub-template IDs
+        self.hf_slack = CustomFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-slack-error-tracking-issue-created",
             hog="return event",
         )
-        self.hf_discord = HogFunction.objects.create(
+        self.hf_discord = CustomFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-discord-survey-response",
             hog="return event",
         )
-        self.hf_webhook = HogFunction.objects.create(
+        self.hf_webhook = CustomFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-webhook-error-tracking-issue-reopened",
             hog="return event",
         )
-        self.hf_teams = HogFunction.objects.create(
+        self.hf_teams = CustomFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-microsoft-teams-error-tracking-issue-created",

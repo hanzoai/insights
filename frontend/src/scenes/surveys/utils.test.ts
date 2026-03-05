@@ -15,7 +15,7 @@ import {
     buildPartialResponsesFilter,
     buildSurveyTimestampFilter,
     calculateNpsBreakdown,
-    createAnswerFilterHogQLExpression,
+    createAnswerFilterInsightsQLExpression,
     getResolvedSurveyDateRange,
     getSurveyEndDateForQuery,
     getSurveyResponse,
@@ -660,18 +660,18 @@ describe('survey utils', () => {
     })
 })
 
-describe('createAnswerFilterHogQLExpression', () => {
+describe('createAnswerFilterInsightsQLExpression', () => {
     const mockSurvey = {
         questions: [{ id: 'q1' }, { id: 'q2' }, { id: 'q3' }],
     } as any as Survey
 
     it('returns empty string for empty filters array', () => {
-        expect(createAnswerFilterHogQLExpression([], mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression([], mockSurvey)).toBe('')
     })
 
     it('returns empty string for null or undefined filters', () => {
-        expect(createAnswerFilterHogQLExpression(null as any, mockSurvey)).toBe('')
-        expect(createAnswerFilterHogQLExpression(undefined as any, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(null as any, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(undefined as any, mockSurvey)).toBe('')
     })
 
     it('handles single exact filter', () => {
@@ -679,7 +679,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: 'yes', operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = 'yes')`)
     })
 
@@ -688,7 +688,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q2', value: 'no', operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[1], 1)} = 'no')`)
     })
 
@@ -699,7 +699,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q3', value: undefined, operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        expect(createAnswerFilterHogQLExpression(filters, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(filters, mockSurvey)).toBe('')
     })
 
     it('skips filters with empty arrays', () => {
@@ -707,7 +707,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: [], operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        expect(createAnswerFilterHogQLExpression(filters, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(filters, mockSurvey)).toBe('')
     })
 
     it('skips icontains filters with empty search patterns', () => {
@@ -717,7 +717,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q3', value: '   ', operator: 'icontains', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        expect(createAnswerFilterHogQLExpression(filters, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(filters, mockSurvey)).toBe('')
     })
 
     it('handles exact operator with single value', () => {
@@ -725,7 +725,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: 'test', operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = 'test')`)
     })
 
@@ -739,7 +739,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} IN ('option1', 'option2'))`)
     })
 
@@ -748,7 +748,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: 'test', operator: 'is_not', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} != 'test')`)
     })
 
@@ -762,7 +762,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} NOT IN ('option1', 'option2'))`)
     })
 
@@ -771,7 +771,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: 'search', operator: 'icontains', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} ILIKE '%search%')`)
     })
 
@@ -780,7 +780,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: 'search', operator: 'not_icontains', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (NOT ${getSurveyResponse(mockSurvey.questions[0], 0)} ILIKE '%search%')`)
     })
 
@@ -789,7 +789,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: '.*test.*', operator: 'regex', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (match(${getSurveyResponse(mockSurvey.questions[0], 0)}, '.*test.*'))`)
     })
 
@@ -798,7 +798,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q1', value: '.*test.*', operator: 'not_regex', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (NOT match(${getSurveyResponse(mockSurvey.questions[0], 0)}, '.*test.*'))`)
     })
 
@@ -808,7 +808,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q2', value: 'no', operator: 'exact', type: PropertyFilterType.Event },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(
             `AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = 'yes') AND (${getSurveyResponse(
                 mockSurvey.questions[1],
@@ -823,7 +823,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             { key: '$survey_response_q4', value: 'test2', operator: 'exact', type: PropertyFilterType.Event }, // q4 doesn't exist in mockSurvey
         ] as EventPropertyFilter[]
 
-        expect(createAnswerFilterHogQLExpression(filters, mockSurvey)).toBe('')
+        expect(createAnswerFilterInsightsQLExpression(filters, mockSurvey)).toBe('')
     })
 
     it('handles array values for regex and not_regex operators', () => {
@@ -837,7 +837,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(
             `AND (match(${getSurveyResponse(
                 mockSurvey.questions[0],
@@ -856,7 +856,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} ILIKE '%searchterm%')`)
     })
 
@@ -870,7 +870,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = 'O\\'Reilly')`)
     })
 
@@ -884,7 +884,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(
             `AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = 'C:\\\\\\\\path\\\\\\\\to\\\\\\\\file')`
         )
@@ -900,7 +900,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(
             `AND (${getSurveyResponse(
                 mockSurvey.questions[0],
@@ -919,7 +919,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(
             `AND (${getSurveyResponse(mockSurvey.questions[0], 0)} = '\\' UNION SELECT * FROM users; --')`
         )
@@ -935,7 +935,7 @@ describe('createAnswerFilterHogQLExpression', () => {
             },
         ] as EventPropertyFilter[]
 
-        const result = createAnswerFilterHogQLExpression(filters, mockSurvey)
+        const result = createAnswerFilterInsightsQLExpression(filters, mockSurvey)
         expect(result).toBe(`AND (match(${getSurveyResponse(mockSurvey.questions[0], 0)}, '.*\\'; DROP TABLE.*'))`)
     })
 
@@ -959,7 +959,7 @@ describe('createAnswerFilterHogQLExpression', () => {
                 { key: '$survey_response_q1', value: 'test', operator: 'icontains', type: PropertyFilterType.Event },
             ] as EventPropertyFilter[]
 
-            const result = createAnswerFilterHogQLExpression(filters, surveyWithMultipleChoiceQuestion)
+            const result = createAnswerFilterInsightsQLExpression(filters, surveyWithMultipleChoiceQuestion)
             expect(result).toBe(
                 `AND (arrayExists(x -> x ilike '%test%', ${getSurveyResponse(surveyWithMultipleChoiceQuestion.questions[0], 0)}))`
             )
@@ -975,7 +975,7 @@ describe('createAnswerFilterHogQLExpression', () => {
                 },
             ] as EventPropertyFilter[]
 
-            const result = createAnswerFilterHogQLExpression(filters, surveyWithMultipleChoiceQuestion)
+            const result = createAnswerFilterInsightsQLExpression(filters, surveyWithMultipleChoiceQuestion)
             expect(result).toBe(
                 `AND (NOT arrayExists(x -> x ilike '%test%', ${getSurveyResponse(surveyWithMultipleChoiceQuestion.questions[0], 0)}))`
             )
@@ -986,7 +986,7 @@ describe('createAnswerFilterHogQLExpression', () => {
                 { key: '$survey_response_q1', value: '.*test.*', operator: 'regex', type: PropertyFilterType.Event },
             ] as EventPropertyFilter[]
 
-            const result = createAnswerFilterHogQLExpression(filters, surveyWithMultipleChoiceQuestion)
+            const result = createAnswerFilterInsightsQLExpression(filters, surveyWithMultipleChoiceQuestion)
             expect(result).toBe(
                 `AND (arrayExists(x -> match(x, '.*test.*'), ${getSurveyResponse(surveyWithMultipleChoiceQuestion.questions[0], 0)}))`
             )
@@ -1002,7 +1002,7 @@ describe('createAnswerFilterHogQLExpression', () => {
                 },
             ] as EventPropertyFilter[]
 
-            const result = createAnswerFilterHogQLExpression(filters, surveyWithMultipleChoiceQuestion)
+            const result = createAnswerFilterInsightsQLExpression(filters, surveyWithMultipleChoiceQuestion)
             expect(result).toBe(
                 `AND (NOT arrayExists(x -> match(x, '.*test.*'), ${getSurveyResponse(surveyWithMultipleChoiceQuestion.questions[0], 0)}))`
             )

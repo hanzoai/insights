@@ -24,8 +24,8 @@ import {
     AnyEntityNode,
     BreakdownFilter,
     FunnelsQuery,
-    HogQLQuery,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLVariable,
     InsightQueryNode,
     LifecycleQuery,
     Node,
@@ -38,11 +38,11 @@ import {
 } from '~/queries/schema/schema-general'
 import {
     isActionsNode,
-    isDataTableNodeWithHogQLQuery,
+    isDataTableNodeWithInsightsQLQuery,
     isDataVisualizationNode,
     isEventsNode,
     isFunnelsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightQueryWithBreakdown,
     isInsightQueryWithSeries,
     isInsightVizNode,
@@ -146,8 +146,8 @@ function SeriesDisplay({
                 {!isFunnelsQuery(query) && (
                     <>
                         by{' '}
-                        {mathDefinition?.category === MathCategory.HogQLExpression ? (
-                            <code>{series.math_hogql}</code>
+                        {mathDefinition?.category === MathCategory.InsightsQLExpression ? (
+                            <code>{series.math_insightsql}</code>
                         ) : (
                             <>
                                 {mathDefinition?.category === MathCategory.PropertyValue && series.math_property && (
@@ -262,14 +262,14 @@ export function SeriesSummary({
     query,
     heading,
 }: {
-    query: InsightQueryNode | HogQLQuery
+    query: InsightQueryNode | InsightsQLQuery
     heading?: JSX.Element | null
 }): JSX.Element {
     const IconComponent = QUERY_TYPES_METADATA[query.kind].icon
 
     return (
         <InsightDetailSectionDisplay icon={<IconComponent />} label={heading !== null ? heading || 'Query' : ''}>
-            {isHogQLQuery(query) ? (
+            {isInsightsQLQuery(query) ? (
                 <CodeSnippet language={Language.SQL} maxLinesWithoutExpansion={8} compact>
                     {query.query}
                 </CodeSnippet>
@@ -342,8 +342,8 @@ export function VariablesSummary({
     variables,
     variablesOverride,
 }: {
-    variables: Record<string, HogQLVariable> | undefined
-    variablesOverride?: Record<string, HogQLVariable>
+    variables: Record<string, InsightsQLVariable> | undefined
+    variablesOverride?: Record<string, InsightsQLVariable>
 }): JSX.Element | null {
     if (!variables) {
         return null
@@ -372,7 +372,7 @@ export function VariablesSummary({
     )
 }
 
-export function InsightBreakdownSummary({ query }: { query: InsightQueryNode | HogQLQuery }): JSX.Element | null {
+export function InsightBreakdownSummary({ query }: { query: InsightQueryNode | InsightsQLQuery }): JSX.Element | null {
     if (!isInsightQueryWithBreakdown(query) || !isValidBreakdown(query.breakdownFilter)) {
         return null
     }
@@ -448,7 +448,7 @@ interface InsightDetailsProps {
         last_modified_at: string
         last_refresh: string | null
     }
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
 }
 
 export const InsightDetails = React.memo(
@@ -460,16 +460,16 @@ export const InsightDetails = React.memo(
             <div className="InsightDetails space-y-2" ref={ref}>
                 {(isInsightVizNode(query) ||
                     isDataVisualizationNode(query) ||
-                    isDataTableNodeWithHogQLQuery(query)) && (
+                    isDataTableNodeWithInsightsQLQuery(query)) && (
                     <>
                         <SeriesSummary query={query.source} />
                         <VariablesSummary
-                            variables={isHogQLQuery(query.source) ? query.source.variables : undefined}
+                            variables={isInsightsQLQuery(query.source) ? query.source.variables : undefined}
                             variablesOverride={variablesOverride}
                         />
                         <PropertiesSummary
                             properties={
-                                isHogQLQuery(query.source) ? query.source.filters?.properties : query.source.properties
+                                isInsightsQLQuery(query.source) ? query.source.filters?.properties : query.source.properties
                             }
                         />
                         <InsightBreakdownSummary query={query.source} />

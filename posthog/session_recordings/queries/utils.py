@@ -9,15 +9,15 @@ from posthog.schema import (
     EventPropertyFilter,
     EventsNode,
     GroupPropertyFilter,
-    HogQLPropertyFilter,
+    InsightsQLPropertyFilter,
     PersonPropertyFilter,
     PersonsOnEventsMode,
     PropertyOperator,
     QueryTiming,
 )
 
-from posthog.hogql import ast
-from posthog.hogql.property import action_to_expr
+from posthog.insightsql import ast
+from posthog.insightsql.property import action_to_expr
 
 from posthog.models import Action, Team
 from posthog.types import AnyPropertyFilter
@@ -46,13 +46,13 @@ INVERSE_OPERATOR_FOR = {
 def is_event_property(p: AnyPropertyFilter) -> bool:
     p_type = getattr(p, "type", None)
     p_key = getattr(p, "key", "")
-    return p_type == "event" or (p_type == "hogql" and bool(re.search(r"(?<!person\.)properties\.", p_key)))
+    return p_type == "event" or (p_type == "insightsql" and bool(re.search(r"(?<!person\.)properties\.", p_key)))
 
 
 def is_person_property(p: AnyPropertyFilter) -> bool:
     p_type = getattr(p, "type", None)
     p_key = getattr(p, "key", "")
-    return p_type == "person" or (p_type == "hogql" and "person.properties" in p_key)
+    return p_type == "person" or (p_type == "insightsql" and "person.properties" in p_key)
 
 
 def is_group_property(p: AnyPropertyFilter) -> bool:
@@ -75,8 +75,8 @@ def expand_test_account_filters(team: Team) -> list[AnyPropertyFilter]:
                 prop_filters.append(EventPropertyFilter(**prop))
             case "group":
                 prop_filters.append(GroupPropertyFilter(**prop))
-            case "hogql":
-                prop_filters.append(HogQLPropertyFilter(**prop))
+            case "insightsql":
+                prop_filters.append(InsightsQLPropertyFilter(**prop))
             case "cohort":
                 prop_filters.append(CohortPropertyFilter(**prop))
             case None:

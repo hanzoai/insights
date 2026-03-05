@@ -1,5 +1,5 @@
 import { AgentMode } from '~/queries/schema/schema-assistant-messages'
-import { DashboardFilter, HogQLVariable, QuerySchema } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable, QuerySchema } from '~/queries/schema/schema-general'
 import { integer } from '~/queries/schema/type-utils'
 import { ActionType, DashboardType, EventDefinition, InsightShortId, QueryBasedInsightModel } from '~/types'
 
@@ -20,9 +20,9 @@ export interface MaxInsightContext {
     id: InsightShortId
     name?: string | null
     description?: string | null
-    query: QuerySchema // The actual query node, e.g., TrendsQuery, HogQLQuery
+    query: QuerySchema // The actual query node, e.g., TrendsQuery, InsightsQLQuery
     filtersOverride?: DashboardFilter
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
 }
 
 export interface MaxDashboardContext {
@@ -85,7 +85,7 @@ type MaxInsightContextInput = {
     type: MaxContextType.INSIGHT
     data: InsightWithQuery
     filtersOverride?: DashboardFilter
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
     revenueAnalyticsQuery?: RevenueAnalyticsQuery
 }
 type MaxDashboardContextInput = {
@@ -129,7 +129,7 @@ export const createMaxContextHelpers = {
             revenueAnalyticsQuery,
         }: {
             filtersOverride?: DashboardFilter
-            variablesOverride?: Record<string, HogQLVariable>
+            variablesOverride?: Record<string, InsightsQLVariable>
             revenueAnalyticsQuery?: RevenueAnalyticsQuery
         } = {}
     ): MaxInsightContextInput => ({

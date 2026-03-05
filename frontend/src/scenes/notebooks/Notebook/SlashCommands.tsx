@@ -9,7 +9,7 @@ import {
     IconCursor,
     IconFunnels,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconLifecycle,
     IconPeople,
     IconPython,
@@ -245,14 +245,14 @@ const SLASH_COMMANDS: SlashCommandsItem[] = [
     {
         title: 'SQL',
         search: 'sql',
-        icon: <IconHogQL color="currentColor" />,
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(
                 pos,
                 buildNodeQueryContent({
                     kind: NodeKind.DataTableNode,
                     source: {
-                        kind: NodeKind.HogQLQuery,
+                        kind: NodeKind.InsightsQLQuery,
                         query: `select event,
         person.properties.email,
         properties.$browser,
@@ -277,7 +277,7 @@ order by count() desc
     {
         title: 'SQL (DuckDB)',
         search: 'duck sql',
-        icon: <IconHogQL color="currentColor" />,
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
                 type: NotebookNodeType.DuckSQL,
@@ -292,15 +292,15 @@ order by count() desc
         featureFlag: FEATURE_FLAGS.NOTEBOOK_PYTHON,
     },
     {
-        title: 'SQL (HogQL)',
-        search: 'hogql sql',
-        icon: <IconHogQL color="currentColor" />,
+        title: 'SQL (InsightsQL)',
+        search: 'insightsql sql',
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
-                type: NotebookNodeType.HogQLSQL,
+                type: NotebookNodeType.InsightsQLSQL,
                 attrs: {
                     code: '',
-                    returnVariable: 'hogql_df',
+                    returnVariable: 'insightsql_df',
                     __init: {
                         showSettings: true,
                     },

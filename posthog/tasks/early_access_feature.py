@@ -4,9 +4,9 @@ import structlog
 import posthoganalytics
 from celery import shared_task
 
-from posthog.hogql import ast
-from posthog.hogql.constants import MAX_SELECT_RETURNED_ROWS, LimitContext
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.constants import MAX_SELECT_RETURNED_ROWS, LimitContext
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.cloud_utils import is_cloud
 
@@ -41,7 +41,7 @@ def send_events_for_early_access_feature_stage_change(feature_id: str, from_stag
         return
 
     # Get the unique persons enrolled in the feature along with their distinct ID
-    response = execute_hogql_query(
+    response = execute_insightsql_query(
         """
         SELECT
             argMax(id, created_at) AS id,

@@ -7,7 +7,7 @@ export type PythonExecutionVariable = {
     value?: string
     error?: string
     traceback?: string[]
-    hogqlQuery?: string
+    insightsqlQuery?: string
 }
 
 export type PythonExecutionMedia = {
@@ -40,7 +40,7 @@ export type PythonKernelVariableResponse = {
     data?: Record<string, any>
     metadata?: Record<string, any>
     type?: string
-    hogql_query?: string | null
+    insightsql_query?: string | null
     ename?: string
     evalue?: string
     traceback?: string[]
@@ -130,7 +130,7 @@ export const mergeExecutionVariables = (
             type: resolvedType,
             status: 'ok',
             value: extractTextValue(variable.data),
-            hogqlQuery: variable.hogql_query ?? undefined,
+            insightsqlQuery: variable.insightsql_query ?? undefined,
         }
     })
 }

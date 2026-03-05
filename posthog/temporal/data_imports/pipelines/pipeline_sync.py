@@ -167,15 +167,15 @@ async def validate_schema_and_update_table(
 
                 columns = {}
                 for column_name, db_column_type in db_columns.items():
-                    hogql_type = table_schema_dict.get(column_name)
+                    insightsql_type = table_schema_dict.get(column_name)
 
-                    if hogql_type is None:
-                        capture_exception(Exception(f"HogQL type not found for column: {column_name}"))
+                    if insightsql_type is None:
+                        capture_exception(Exception(f"InsightsQL type not found for column: {column_name}"))
                         continue
 
                     columns[column_name] = {
                         "clickhouse": db_column_type,
-                        "hogql": hogql_type,
+                        "insightsql": insightsql_type,
                     }
                 table_created.columns = columns
                 table_created.save()

@@ -88,7 +88,7 @@ function QueryDiffViewer({ before, after }: QueryDiffViewerProps): JSX.Element {
                 key="diff-viewer"
                 original={before?.query ?? ''}
                 modified={after?.query ?? ''}
-                language="hogQL"
+                language="insightsQL"
                 width={width}
                 options={{
                     renderOverviewRuler: false,

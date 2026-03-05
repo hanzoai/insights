@@ -81,7 +81,7 @@ export function PropertyDefinitionsTable(): JSX.Element {
             <LemonBanner type="info">
                 Looking for {filters.type === 'person' ? 'person ' : ''}property usage statistics?{' '}
                 <Link
-                    to={urls.insightNewHogQL({
+                    to={urls.insightNewInsightsQL({
                         query:
                             'SELECT arrayJoin(JSONExtractKeys(properties)) AS property_key, count()\n' +
                             (filters.type === 'person' ? 'FROM persons\n' : 'FROM events\n') +

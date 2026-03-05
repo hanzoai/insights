@@ -172,7 +172,7 @@ async def process_slack_conversation_activity(inputs: SlackConversationRunnerWor
 
     from posthog.schema import (
         ArtifactMessage,
-        AssistantHogQLQuery,
+        AssistantInsightsQLQuery,
         AssistantMessage,
         HumanMessage,
         VisualizationArtifactContent,
@@ -294,7 +294,7 @@ async def process_slack_conversation_activity(inputs: SlackConversationRunnerWor
     ]
     for viz_idx, viz in enumerate(viz_artifacts):
         title = f"Query {viz_idx + 1}"  # TODO: Use actual query title
-        if isinstance(viz.query, AssistantHogQLQuery):
+        if isinstance(viz.query, AssistantInsightsQLQuery):
             query_url = f"{settings.SITE_URL}/project/{team.id}/sql?open_query={quote(viz.query.query)}"
         else:
             wrapped_query = {"kind": "InsightVizNode", "source": viz.query.model_dump(exclude_none=True)}

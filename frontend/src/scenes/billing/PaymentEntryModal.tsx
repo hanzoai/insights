@@ -113,7 +113,7 @@ export const PaymentEntryModal = (): JSX.Element => {
                                 alt="Loading animation"
                             />
                         </div>
-                        <p className="text-secondary text-md mt-4">We're contacting the Hedgehogs for approval.</p>
+                        <p className="text-secondary text-md mt-4">Processing your request...</p>
                     </div>
                 )}
             </div>

@@ -15,13 +15,13 @@ import { codeEditorLogicType } from 'lib/monaco/codeEditorLogicType'
 import { findNextFocusableElement, findPreviousFocusableElement } from 'lib/monaco/domUtils'
 import { initHogLanguage } from 'lib/monaco/languages/hog'
 import { initHogJsonLanguage } from 'lib/monaco/languages/hogJson'
-import { initHogQLLanguage } from 'lib/monaco/languages/hogQL'
+import { initInsightsQLLanguage } from 'lib/monaco/languages/insightsQL'
 import { initHogTemplateLanguage } from 'lib/monaco/languages/hogTemplate'
 import { initLiquidLanguage } from 'lib/monaco/languages/liquid'
 import { inStorybookTestRunner } from 'lib/utils'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { AnyDataNode, HogLanguage, HogQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
+import { AnyDataNode, HogLanguage, InsightsQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
 
 if (loader) {
     loader.config({ monaco: monacoModule })
@@ -37,7 +37,7 @@ export interface CodeEditorProps extends Omit<EditorProps, 'loading' | 'theme'> 
     sourceQuery?: AnyDataNode
     globals?: Record<string, any>
     schema?: Record<string, any> | null
-    onMetadata?: (metadata: HogQLMetadataResponse | null) => void
+    onMetadata?: (metadata: InsightsQLMetadataResponse | null) => void
     onMetadataLoading?: (loading: boolean) => void
     onError?: (error: string | null) => void
     /** The original value to compare against - renders it in diff mode */
@@ -67,8 +67,8 @@ function initEditor(
     if (editorProps?.language === 'hog') {
         initHogLanguage(monaco)
     }
-    if (editorProps?.language === 'hogQL' || editorProps?.language === 'hogQLExpr') {
-        initHogQLLanguage(monaco, editorProps.language as HogLanguage)
+    if (editorProps?.language === 'insightsQL' || editorProps?.language === 'insightsQLExpr') {
+        initInsightsQLLanguage(monaco, editorProps.language as HogLanguage)
     }
     if (editorProps?.language === 'hogTemplate') {
         initHogTemplateLanguage(monaco)
@@ -163,7 +163,7 @@ export function CodeEditor({
         onError,
         onMetadata,
         onMetadataLoading,
-        metadataFilters: sourceQuery?.kind === NodeKind.HogQLQuery ? sourceQuery.filters : undefined,
+        metadataFilters: sourceQuery?.kind === NodeKind.InsightsQLQuery ? sourceQuery.filters : undefined,
     })
     useMountedLogic(builtCodeEditorLogic)
 

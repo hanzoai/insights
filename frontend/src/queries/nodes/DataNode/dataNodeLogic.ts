@@ -43,10 +43,10 @@ import {
     EventsQueryResponse,
     GroupsQuery,
     GroupsQueryResponse,
-    HogQLQuery,
-    HogQLQueryModifiers,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryModifiers,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     InsightVizNode,
     MarketingAnalyticsTableQuery,
     MarketingAnalyticsTableQueryResponse,
@@ -65,7 +65,7 @@ import {
     isErrorTrackingQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightActorsQuery,
     isInsightQueryNode,
     isMarketingAnalyticsTableQuery,
@@ -93,14 +93,14 @@ export interface DataNodeLogicProps {
     /** Load priority. Higher priority (smaller number) queries will be loaded first. */
     loadPriority?: number
     /** Override modifiers when making the request */
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
 
     dataNodeCollectionId?: string
 
     /** Dashboard filters to override the ones in the query */
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
 
     /** Whether to automatically load data when the query changes. Used for manual override in SQL editor */
     autoLoad?: boolean
@@ -149,7 +149,7 @@ function getConcurrencyController(query: DataNode, currentTeam: TeamType): Concu
     return concurrencyController
 }
 
-function addModifiers(query: DataNode, modifiers?: HogQLQueryModifiers): DataNode {
+function addModifiers(query: DataNode, modifiers?: InsightsQLQueryModifiers): DataNode {
     if (!modifiers) {
         return query
     }
@@ -213,7 +213,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             // If there is an incomplete query, load the data with the same query_id which should return its status
             // We need to force a refresh in this case
             const refreshType =
-                isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'force_async' : 'force_blocking'
+                isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'force_async' : 'force_blocking'
             actions.loadData(refreshType, queryStatus.id)
         } else if (
             hasQueryChanged &&
@@ -229,9 +229,9 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             let refreshType: RefreshType
             if (queryVarsHaveChanged) {
                 refreshType =
-                    isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'force_async' : 'force_blocking'
+                    isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'force_async' : 'force_blocking'
             } else {
-                refreshType = isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'async' : 'blocking'
+                refreshType = isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'async' : 'blocking'
             }
 
             actions.loadData(refreshType)
@@ -500,7 +500,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             },
         ],
         queryLog: [
-            null as HogQLQueryResponse | null,
+            null as InsightsQLQueryResponse | null,
             {
                 loadQueryLog: async (queryId, breakpoint) => {
                     if (!queryId) {
@@ -1011,9 +1011,9 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 // Create a simplified version of the query for counting
                 if (isActorsQuery(query)) {
                     return {
-                        kind: NodeKind.HogQLQuery,
+                        kind: NodeKind.InsightsQLQuery,
                         query: 'SELECT count(*) from persons',
-                    } as HogQLQuery
+                    } as InsightsQLQuery
                 }
 
                 if (isEventsQuery(query)) {

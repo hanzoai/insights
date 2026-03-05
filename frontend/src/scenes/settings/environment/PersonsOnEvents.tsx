@@ -9,9 +9,9 @@ import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
-type PoEMode = NonNullable<HogQLQueryModifiers['personsOnEventsMode']>
+type PoEMode = NonNullable<InsightsQLQueryModifiers['personsOnEventsMode']>
 
 const POE_OPTIONS: LemonRadioOption<PoEMode>[] = [
     {

@@ -39,7 +39,7 @@ interface QueryWindowProps {
 }
 
 export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): JSX.Element {
-    const codeEditorKey = `hogql-editor-${tabId}`
+    const codeEditorKey = `insightsql-editor-${tabId}`
 
     const {
         activeTab,
@@ -130,7 +130,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                                 if (editingView) {
                                     saveOrUpdateDraft(
                                         {
-                                            kind: NodeKind.HogQLQuery,
+                                            kind: NodeKind.InsightsQLQuery,
                                             query: queryInput ?? '',
                                         },
                                         editingView.id,
@@ -140,7 +140,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                                 } else {
                                     saveOrUpdateDraft(
                                         {
-                                            kind: NodeKind.HogQLQuery,
+                                            kind: NodeKind.InsightsQLQuery,
                                             query: queryInput ?? '',
                                         },
                                         undefined,

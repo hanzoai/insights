@@ -26,13 +26,13 @@ import {
 import {
     DashboardFilter,
     DataVisualizationNode,
-    HogQLVariable,
+    InsightsQLVariable,
     InsightVizNode,
     NodeKind,
     QuerySchema,
     QuerySchemaRoot,
 } from '~/queries/schema/schema-general'
-import { isHogQLQuery, isInsightQueryNode } from '~/queries/utils'
+import { isInsightsQLQuery, isInsightQueryNode } from '~/queries/utils'
 import { ActionType, DashboardType, EventDefinition, QueryBasedInsightModel } from '~/types'
 
 import { Scene } from '../sceneTypes'
@@ -179,7 +179,7 @@ export function formatSuggestion(suggestion: string): string {
 export const insightToMaxContext = (
     insight: Partial<QueryBasedInsightModel>,
     filtersOverride?: DashboardFilter,
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
 ): MaxInsightContext => {
     // Some insights (especially revenue analytics insights) don't have an inner source so we fallback to the outer query
     const source = (insight.query as any)?.source ?? insight.query
@@ -311,7 +311,7 @@ export const visualizationTypeToQuery = (
     visualization: VisualizationItem | VisualizationArtifactContent | VisualizationBlock
 ): QuerySchema | null => {
     const source = castAssistantQuery('answer' in visualization ? visualization.answer : visualization.query)
-    if (isHogQLQuery(source)) {
+    if (isInsightsQLQuery(source)) {
         return { kind: NodeKind.DataVisualizationNode, source: source } satisfies DataVisualizationNode
     }
     if (isInsightQueryNode(source)) {

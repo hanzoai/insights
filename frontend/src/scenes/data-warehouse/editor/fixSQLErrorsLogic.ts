@@ -21,7 +21,7 @@ export const fixSQLErrorsLogic = kea<fixSQLErrorsLogicType>([
             null as Response | null,
             {
                 fixErrors: async ({ query, error }) => {
-                    const response = await api.fixHogQLErrors.fix(query, error)
+                    const response = await api.fixInsightsQLErrors.fix(query, error)
 
                     return response as Response
                 },

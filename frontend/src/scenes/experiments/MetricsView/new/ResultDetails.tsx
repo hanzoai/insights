@@ -101,15 +101,15 @@ function convertExperimentResultToFunnelSteps(
 }
 
 function SqlCollapsible({
-    hogql,
+    insightsql,
     clickhouseSql,
     showClickhouseSql,
 }: {
-    hogql?: string
+    insightsql?: string
     clickhouseSql?: string
     showClickhouseSql: boolean
 }): JSX.Element {
-    const [activeTab, setActiveTab] = useState<'hogql' | 'clickhouse'>('hogql')
+    const [activeTab, setActiveTab] = useState<'insightsql' | 'clickhouse'>('insightsql')
 
     return (
         <LemonCollapse
@@ -123,14 +123,14 @@ function SqlCollapsible({
                             onChange={setActiveTab}
                             tabs={[
                                 {
-                                    key: 'hogql',
-                                    label: 'HogQL',
-                                    content: hogql ? (
+                                    key: 'insightsql',
+                                    label: 'InsightsQL',
+                                    content: insightsql ? (
                                         <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
-                                            {hogql}
+                                            {insightsql}
                                         </CodeSnippet>
                                     ) : (
-                                        <div className="text-muted">No HogQL available</div>
+                                        <div className="text-muted">No InsightsQL available</div>
                                     ),
                                 },
                                 {
@@ -146,9 +146,9 @@ function SqlCollapsible({
                                 },
                             ]}
                         />
-                    ) : hogql ? (
+                    ) : insightsql ? (
                         <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
-                            {hogql}
+                            {insightsql}
                         </CodeSnippet>
                     ) : (
                         <div className="text-muted">No SQL available</div>
@@ -303,7 +303,7 @@ export function ResultDetails({
                 />
             )}
             <SqlCollapsible
-                hogql={result.hogql}
+                insightsql={result.insightsql}
                 clickhouseSql={result.clickhouse_sql}
                 showClickhouseSql={!!featureFlags[FEATURE_FLAGS.EXPERIMENTS_SHOW_SQL]}
             />

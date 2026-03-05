@@ -21,14 +21,14 @@ interface FixErrorButtonProps {
 
 export function FixErrorButton({ type, size, contentOverride, source }: FixErrorButtonProps): JSX.Element {
     const { queryInput, fixErrorsError, metadata } = useValues(sqlEditorLogic)
-    const { fixErrors: fixHogQLErrors } = useActions(sqlEditorLogic)
+    const { fixErrors: fixInsightsQLErrors } = useActions(sqlEditorLogic)
     const { responseError } = useValues(dataNodeLogic)
-    const { responseLoading: fixHogQLErrorsLoading } = useValues(fixSQLErrorsLogic)
+    const { responseLoading: fixInsightsQLErrorsLoading } = useValues(fixSQLErrorsLogic)
 
     const queryError = responseError || metadata?.errors?.map((n) => n.message)?.join('. ') || undefined
 
     const icon = useMemo(() => {
-        if (fixHogQLErrorsLoading) {
+        if (fixInsightsQLErrorsLoading) {
             return <Spinner />
         }
 
@@ -37,7 +37,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
         }
 
         return <IconSparkles />
-    }, [fixHogQLErrorsLoading, fixErrorsError])
+    }, [fixInsightsQLErrorsLoading, fixErrorsError])
 
     const disabledReason = useMemo(() => {
         if (!queryError) {
@@ -52,7 +52,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
     }, [queryError, fixErrorsError])
 
     const content = useMemo(() => {
-        if (fixHogQLErrorsLoading) {
+        if (fixInsightsQLErrorsLoading) {
             return 'Fixing...'
         }
 
@@ -61,7 +61,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
         }
 
         return contentOverride ?? 'Fix errors with AI'
-    }, [fixErrorsError, fixHogQLErrorsLoading, contentOverride])
+    }, [fixErrorsError, fixInsightsQLErrorsLoading, contentOverride])
 
     return (
         <LemonButton
@@ -70,7 +70,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             disabledReason={disabledReason}
             icon={icon}
             onClick={() => {
-                fixHogQLErrors(queryInput ?? '', queryError)
+                fixInsightsQLErrors(queryInput ?? '', queryError)
                 posthog.capture(`sql-editor-fix-error-click`, { source })
             }}
         >

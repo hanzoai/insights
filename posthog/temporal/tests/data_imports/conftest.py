@@ -16,9 +16,9 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from posthog.schema import HogQLQueryResponse
+from posthog.schema import InsightsQLQueryResponse
 
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.temporal.data_imports.external_data_job import ExternalDataJobWorkflow
 from posthog.temporal.data_imports.pipelines.pipeline.delta_table_helper import DeltaTableHelper
@@ -62,7 +62,7 @@ async def run_external_data_job_workflow(
     expected_rows_synced: int | None,
     expected_total_rows: int | None,
     expected_columns: list[str] | None = None,
-) -> HogQLQueryResponse:
+) -> InsightsQLQueryResponse:
     workflow_id = str(uuid.uuid4())
     inputs = ExternalDataWorkflowInputs(
         team_id=team.id,
@@ -127,7 +127,7 @@ async def run_external_data_job_workflow(
     else:
         columns_str = ", ".join(expected_columns)
 
-    res = await sync_to_async(execute_hogql_query)(f"SELECT {columns_str} FROM {table_name}", team)
+    res = await sync_to_async(execute_insightsql_query)(f"SELECT {columns_str} FROM {table_name}", team)
     if expected_total_rows is not None:
         assert len(res.results) == expected_total_rows
     if expected_columns is not None:

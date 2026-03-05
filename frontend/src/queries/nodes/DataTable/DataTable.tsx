@@ -48,9 +48,9 @@ import {
 import { EventName } from '~/queries/nodes/EventsNode/EventName'
 import { EventPropertyFilters } from '~/queries/nodes/EventsNode/EventPropertyFilters'
 import { EventsFilter } from '~/queries/nodes/EventsNode/EventsFilter'
-import { HogQLQueryEditor } from '~/queries/nodes/HogQLQuery/HogQLQueryEditor'
+import { InsightsQLQueryEditor } from '~/queries/nodes/InsightsQLQuery/InsightsQLQueryEditor'
 import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
-import { EditHogQLButton } from '~/queries/nodes/Node/EditHogQLButton'
+import { EditInsightsQLButton } from '~/queries/nodes/Node/EditInsightsQLButton'
 import { OpenEditorButton } from '~/queries/nodes/Node/OpenEditorButton'
 import { PersonPropertyFilters } from '~/queries/nodes/PersonsNode/PersonPropertyFilters'
 import { PersonsSearch } from '~/queries/nodes/PersonsNode/PersonsSearch'
@@ -62,7 +62,7 @@ import {
     EventsNode,
     EventsQuery,
     GroupsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     MarketingAnalyticsTableQuery,
     NodeKind,
     NonIntegratedConversionsColumnsSchemaNames,
@@ -76,15 +76,15 @@ import {
     isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLAggregation,
-    isHogQLQuery,
+    isInsightsQLAggregation,
+    isInsightsQLQuery,
     isInsightActorsQuery,
     isMarketingAnalyticsTableQuery,
     isRevenueExampleEventsQuery,
     isSessionsQuery,
-    taxonomicEventFilterToHogQL,
-    taxonomicGroupFilterToHogQL,
-    taxonomicPersonFilterToHogQL,
+    taxonomicEventFilterToInsightsQL,
+    taxonomicGroupFilterToInsightsQL,
+    taxonomicPersonFilterToInsightsQL,
 } from '~/queries/utils'
 import { NonIntegratedConversionsCellActions } from '~/scenes/web-analytics/tabs/marketing-analytics/frontend/components/NonIntegratedConversionsTable/NonIntegratedConversionsCellActions'
 import { NonIntegratedConversionsRowActions } from '~/scenes/web-analytics/tabs/marketing-analytics/frontend/components/NonIntegratedConversionsTable/NonIntegratedConversionsRowActions'
@@ -125,12 +125,12 @@ interface DataTableProps {
 }
 
 const eventGroupTypes = [
-    TaxonomicFilterGroupType.HogQLExpression,
+    TaxonomicFilterGroupType.InsightsQLExpression,
     TaxonomicFilterGroupType.EventProperties,
     TaxonomicFilterGroupType.PersonProperties,
     TaxonomicFilterGroupType.EventFeatureFlags,
 ]
-const personGroupTypes = [TaxonomicFilterGroupType.HogQLExpression, TaxonomicFilterGroupType.PersonProperties]
+const personGroupTypes = [TaxonomicFilterGroupType.InsightsQLExpression, TaxonomicFilterGroupType.PersonProperties]
 
 let uniqueNode = 0
 
@@ -186,7 +186,7 @@ export function DataTable({
         response &&
         'usedPreAggregatedTables' in response &&
         response.usedPreAggregatedTables &&
-        response?.hogql
+        response?.insightsql
 
     const dataTableLogicProps: DataTableLogicProps = {
         query,
@@ -211,7 +211,7 @@ export function DataTable({
         showEventFilter,
         showEventsFilter,
         showPropertyFilter,
-        showHogQLEditor,
+        showInsightsQLEditor,
         showReload,
         showCount,
         showExport,
@@ -332,7 +332,7 @@ export function DataTable({
                                 <>
                                     <LemonDivider />
                                     <TaxonomicPopover
-                                        groupType={TaxonomicFilterGroupType.HogQLExpression}
+                                        groupType={TaxonomicFilterGroupType.InsightsQLExpression}
                                         value={key}
                                         groupTypes={groupTypes}
                                         metadataSource={query.source}
@@ -341,8 +341,8 @@ export function DataTable({
                                         fullWidth
                                         onChange={(v, g) => {
                                             const hogQl = isActorsQuery(query.source)
-                                                ? taxonomicPersonFilterToHogQL(g, v)
-                                                : taxonomicEventFilterToHogQL(g, v)
+                                                ? taxonomicPersonFilterToInsightsQL(g, v)
+                                                : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
                                                 hogQl &&
@@ -352,7 +352,7 @@ export function DataTable({
                                                 // The actual query may or may not be an events query.
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
-                                                const isAggregation = isHogQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(hogQl)
                                                 const isOrderBy = source.orderBy?.[0] === key
                                                 const isDescOrderBy = source.orderBy?.[0] === `${key} DESC`
                                                 setQuery({
@@ -445,7 +445,7 @@ export function DataTable({
                                 <>
                                     <LemonDivider />
                                     <TaxonomicPopover
-                                        groupType={TaxonomicFilterGroupType.HogQLExpression}
+                                        groupType={TaxonomicFilterGroupType.InsightsQLExpression}
                                         value=""
                                         groupTypes={groupTypes}
                                         metadataSource={query.source}
@@ -455,16 +455,16 @@ export function DataTable({
                                         fullWidth
                                         onChange={(v, g) => {
                                             const hogQl = isActorsQuery(query.source)
-                                                ? taxonomicPersonFilterToHogQL(g, v)
+                                                ? taxonomicPersonFilterToInsightsQL(g, v)
                                                 : isGroupsQuery(query.source)
-                                                  ? taxonomicGroupFilterToHogQL(g, v)
-                                                  : taxonomicEventFilterToHogQL(g, v)
+                                                  ? taxonomicGroupFilterToInsightsQL(g, v)
+                                                  : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
                                                 hogQl &&
                                                 sourceFeatures.has(QueryFeature.selectAndOrderByColumns)
                                             ) {
-                                                const isAggregation = isHogQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(hogQl)
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery({
@@ -484,7 +484,7 @@ export function DataTable({
                                         }}
                                     />
                                     <TaxonomicPopover
-                                        groupType={TaxonomicFilterGroupType.HogQLExpression}
+                                        groupType={TaxonomicFilterGroupType.InsightsQLExpression}
                                         value=""
                                         groupTypes={groupTypes}
                                         metadataSource={query.source}
@@ -494,16 +494,16 @@ export function DataTable({
                                         fullWidth
                                         onChange={(v, g) => {
                                             const hogQl = isActorsQuery(query.source)
-                                                ? taxonomicPersonFilterToHogQL(g, v)
+                                                ? taxonomicPersonFilterToInsightsQL(g, v)
                                                 : isGroupsQuery(query.source)
-                                                  ? taxonomicGroupFilterToHogQL(g, v)
-                                                  : taxonomicEventFilterToHogQL(g, v)
+                                                  ? taxonomicGroupFilterToInsightsQL(g, v)
+                                                  : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
                                                 hogQl &&
                                                 sourceFeatures.has(QueryFeature.selectAndOrderByColumns)
                                             ) {
-                                                const isAggregation = isHogQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(hogQl)
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery?.({
@@ -640,7 +640,7 @@ export function DataTable({
                 | PersonsNode
                 | ActorsQuery
                 | GroupsQuery
-                | HogQLQuery
+                | InsightsQLQuery
                 | SessionAttributionExplorerQuery
                 | SessionsQuery
                 | TracesQuery
@@ -671,7 +671,7 @@ export function DataTable({
                 key="date-range"
                 query={
                     query.source as
-                        | HogQLQuery
+                        | InsightsQLQuery
                         | EventsQuery
                         | SessionAttributionExplorerQuery
                         | SessionsQuery
@@ -702,7 +702,7 @@ export function DataTable({
         !isSessionsQuery(query.source) ? (
             <EventPropertyFilters
                 key="event-property"
-                query={query.source as EventsQuery | HogQLQuery | SessionAttributionExplorerQuery | TracesQuery}
+                query={query.source as EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | TracesQuery}
                 setQuery={setQuerySource}
                 taxonomicGroupTypes={Array.isArray(showPropertyFilter) ? showPropertyFilter : undefined}
             />
@@ -799,7 +799,7 @@ export function DataTable({
     const editorButton = (
         <>
             <OpenEditorButton query={query} />
-            {response && 'hogql' in response && response?.hogql ? <EditHogQLButton hogql={response.hogql} /> : null}
+            {response && 'insightsql' in response && response?.insightsql ? <EditInsightsQLButton insightsql={response.insightsql} /> : null}
         </>
     )
 
@@ -815,8 +815,8 @@ export function DataTable({
         <BindLogic logic={dataTableLogic} props={dataTableLogicProps}>
             <BindLogic logic={dataNodeLogic} props={dataNodeLogicProps}>
                 <div className="relative w-full flex flex-col gap-2 flex-1 h-full">
-                    {showHogQLEditor && isHogQLQuery(query.source) && !isReadOnly ? (
-                        <HogQLQueryEditor query={query.source} setQuery={setQuerySource} embedded={embedded} />
+                    {showInsightsQLEditor && isInsightsQLQuery(query.source) && !isReadOnly ? (
+                        <InsightsQLQueryEditor query={query.source} setQuery={setQuerySource} embedded={embedded} />
                     ) : null}
                     {showFirstRow && (
                         <div className="flex gap-2 items-center flex-wrap">

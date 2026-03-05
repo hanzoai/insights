@@ -34,7 +34,7 @@ import {
     TrendsQuery,
 } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     filterKeyForQuery,
     getDisplay,
     getResultCustomizations,
@@ -96,7 +96,7 @@ const cleanSeriesEntityMath = (
     entity: AnyEntityNode | GroupNode,
     mathAvailability: MathAvailability
 ): AnyEntityNode | GroupNode => {
-    const { math, math_property, math_group_type_index, math_hogql, ...baseEntity } = entity
+    const { math, math_property, math_group_type_index, math_insightsql, ...baseEntity } = entity
 
     // Recursively clean nested nodes in GroupNode
     if ('nodes' in baseEntity && Array.isArray(baseEntity.nodes)) {
@@ -162,7 +162,7 @@ export const insightNavLogic = kea<insightNavLogicType>([
             (query) => {
                 if (isDataTableNode(query)) {
                     return InsightType.JSON
-                } else if (containsHogQLQuery(query)) {
+                } else if (containsInsightsQLQuery(query)) {
                     return InsightType.SQL
                 } else if (isHogQuery(query)) {
                     return InsightType.HOG

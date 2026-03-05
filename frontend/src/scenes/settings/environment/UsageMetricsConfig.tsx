@@ -125,7 +125,7 @@ function UsageMetricsForm(): JSX.Element {
     const taxonomicGroupTypes = [
         TaxonomicFilterGroupType.EventProperties,
         TaxonomicFilterGroupType.EventMetadata,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
     ]
 
     return (

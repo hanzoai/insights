@@ -364,7 +364,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["labels"][6], "7 days")
             self.assertEqual(response[0]["data"][6], 0)
 
-        def test_stickiness_hogql_filter(self):
+        def test_stickiness_insightsql_filter(self):
             self._create_multiple_people()
 
             with freeze_time("2020-01-08T13:01:01Z"):
@@ -379,7 +379,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
                         "properties": [
                             {
                                 "key": "properties.$browser == 'Chrome' and like(person.properties.name, '%person%')",
-                                "type": "hogql",
+                                "type": "insightsql",
                             }
                         ],
                     },

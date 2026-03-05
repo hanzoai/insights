@@ -37,12 +37,12 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            const hogqlQuerySpy = jest.spyOn(queryModule, 'hogqlQuery')
+            const insightsqlQuerySpy = jest.spyOn(queryModule, 'insightsqlQuery')
 
             const result = await hasRecentAIEvents()
 
             expect(result).toBe(true)
-            expect(hogqlQuerySpy).not.toHaveBeenCalled()
+            expect(insightsqlQuerySpy).not.toHaveBeenCalled()
         })
 
         it('returns true for $ai_trace event type', async () => {
@@ -86,14 +86,14 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            const hogqlQuerySpy = jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({
+            const insightsqlQuerySpy = jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({
                 results: [[1]],
             } as any)
 
             const result = await hasRecentAIEvents()
 
             expect(result).toBe(true)
-            expect(hogqlQuerySpy).toHaveBeenCalled()
+            expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
         it('falls back to ClickHouse when no EventDefinition exists', async () => {
@@ -106,14 +106,14 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            const hogqlQuerySpy = jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({
+            const insightsqlQuerySpy = jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({
                 results: [[1]],
             } as any)
 
             const result = await hasRecentAIEvents()
 
             expect(result).toBe(true)
-            expect(hogqlQuerySpy).toHaveBeenCalled()
+            expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
         it('returns false when neither Postgres nor ClickHouse has AI events', async () => {
@@ -126,7 +126,7 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({
+            jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({
                 results: [],
             } as any)
 
@@ -153,14 +153,14 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            const hogqlQuerySpy = jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({
+            const insightsqlQuerySpy = jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({
                 results: [],
             } as any)
 
             const result = await hasRecentAIEvents()
 
             expect(result).toBe(false)
-            expect(hogqlQuerySpy).toHaveBeenCalled()
+            expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
         it('handles null results from ClickHouse gracefully', async () => {
@@ -173,7 +173,7 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({
+            jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({
                 results: null,
             } as any)
 
@@ -192,7 +192,7 @@ describe('aiEventsUtils', () => {
                 },
             })
 
-            jest.spyOn(queryModule, 'hogqlQuery').mockResolvedValue({} as any)
+            jest.spyOn(queryModule, 'insightsqlQuery').mockResolvedValue({} as any)
 
             const result = await hasRecentAIEvents()
 

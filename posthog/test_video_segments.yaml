@@ -70216,10 +70216,10 @@ segments:
       session_start_time: '2025-11-26T23:04:35.948000+00:00'
       session_duration: 24137
       segment:
-          title: Write HogQL query and debug errors
+          title: Write InsightsQL query and debug errors
           start_time: '12:58'
           end_time: '13:28'
-          description: Overcame syntax errors to craft and save HogQL insight.
+          description: Overcame syntax errors to craft and save InsightsQL insight.
           success: true
           failure_detected: true
           confusion_detected: false

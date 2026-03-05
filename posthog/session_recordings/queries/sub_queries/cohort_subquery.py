@@ -1,7 +1,7 @@
 from posthog.schema import CohortPropertyFilter, PropertyOperator, RecordingsQuery
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
 
 from posthog.models import Cohort, Team
 from posthog.session_recordings.queries.sub_queries.base_query import SessionRecordingsListingBaseQuery
@@ -62,7 +62,7 @@ class CohortPropertyGroupsSubQuery(SessionRecordingsListingBaseQuery):
         For NOT IN cohort: LEFT JOIN and filter WHERE cohort.matched != 1
 
         Filters by cohort_id (and version for dynamic) inside the subquery,
-        joins only on person_id. HogQL automatically adds team_id filtering.
+        joins only on person_id. InsightsQL automatically adds team_id filtering.
         """
         join_clauses: list[str] = []
         where_conditions: list[str] = []
@@ -75,7 +75,7 @@ class CohortPropertyGroupsSubQuery(SessionRecordingsListingBaseQuery):
             cohort_id_placeholder = f"cohort_id_{idx}"
             placeholders[cohort_id_placeholder] = ast.Constant(value=cohort_id)
 
-            # HogQL automatically adds team_id filter, so we only need cohort_id (and version)
+            # InsightsQL automatically adds team_id filter, so we only need cohort_id (and version)
             if is_static:
                 subquery = f"(SELECT person_id, 1 AS matched FROM static_cohort_people WHERE cohort_id = {{{cohort_id_placeholder}}})"
             else:

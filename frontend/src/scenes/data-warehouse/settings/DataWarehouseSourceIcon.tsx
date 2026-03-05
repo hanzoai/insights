@@ -19,7 +19,7 @@ import { availableSourcesDataLogic } from '../new/availableSourcesDataLogic'
 
 /**
  * In some cases we don't have the backend telling us what provider we have for blob storage, so we can have some
- * heuristic to guess, then fallback to a shrugging hedgehog.
+ * heuristic to guess, then fallback to a default icon.
  * @param url
  */
 export function mapUrlToProvider(url: string): string {

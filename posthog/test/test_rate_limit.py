@@ -25,7 +25,7 @@ from posthog.rate_limit import (
     AIResearchBurstRateThrottle,
     AIResearchSustainedRateThrottle,
     AISustainedRateThrottle,
-    HogQLQueryThrottle,
+    InsightsQLQueryThrottle,
     get_route_from_path,
 )
 
@@ -52,7 +52,7 @@ class TestUserAPI(APIBaseTest):
         cache.clear()
 
     def test_load_team_rate_limit_from_cache(self):
-        throttle = HogQLQueryThrottle()
+        throttle = InsightsQLQueryThrottle()
 
         # Set up cache with test data
         cache_key = f"team_ratelimit_query_{self.team.id}"
@@ -66,7 +66,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(throttle.duration, 3600)  # 1 hour in seconds
 
     def test_load_team_rate_limit_from_db(self):
-        throttle = HogQLQueryThrottle()
+        throttle = InsightsQLQueryThrottle()
 
         # Clear cache to ensure DB lookup
         cache_key = f"team_ratelimit_query_{self.team.id}"
@@ -88,7 +88,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(cache.get(cache_key), "200/day")
 
     def test_load_team_rate_limit_no_custom_limit(self):
-        throttle = HogQLQueryThrottle()
+        throttle = InsightsQLQueryThrottle()
 
         # Clear cache to ensure DB lookup
         cache_key = f"team_ratelimit_query_{self.team.id}"
@@ -102,14 +102,14 @@ class TestUserAPI(APIBaseTest):
         throttle.load_team_rate_limit(self.team.pk)
 
         # Should not set rate when no custom limit exists
-        self.assertEqual(throttle.rate, HogQLQueryThrottle.rate)
+        self.assertEqual(throttle.rate, InsightsQLQueryThrottle.rate)
 
         # Verify nothing was cached
         self.assertIsNone(cache.get(cache_key))
 
     @patch("posthog.models.Team.objects.get")
     def test_load_team_rate_limit_team_does_not_exist(self, mock_team_get):
-        throttle = HogQLQueryThrottle()
+        throttle = InsightsQLQueryThrottle()
 
         # Simulate team not found
         mock_team_get.side_effect = Team.DoesNotExist

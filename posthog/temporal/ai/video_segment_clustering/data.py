@@ -1,8 +1,8 @@
 from asgiref.sync import sync_to_async
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.query_tagging import Product, tags_context
 from posthog.models.team import Team
@@ -17,7 +17,7 @@ def count_distinct_persons(team: Team, distinct_ids: list[str]) -> int:
     """
     if not distinct_ids:
         return 0
-    result = execute_hogql_query(
+    result = execute_insightsql_query(
         query_type="DistinctPersonCount",
         query=parse_select(
             """
@@ -35,7 +35,7 @@ def count_distinct_persons(team: Team, distinct_ids: list[str]) -> int:
 def fetch_video_segment_metadata_rows(team: Team, lookback_hours: int):
     """Fetch recent video segment metadata from ClickHouse - just metadata, without embedding vectors."""
     with tags_context(product=Product.SESSION_SUMMARY):
-        result = execute_hogql_query(
+        result = execute_insightsql_query(
             query_type="VideoSegmentMetadataForClustering",
             query=parse_select(
                 # Note: We don't select embedding here to avoid large payloads
@@ -70,7 +70,7 @@ def fetch_video_segment_metadata_rows(team: Team, lookback_hours: int):
 def fetch_video_segment_embedding_rows(team: Team, document_ids: list[str]):
     """Fetch video segment embeddings from ClickHouse - specific segments, with embedding vectors included."""
     with tags_context(product=Product.SESSION_SUMMARY):
-        result = execute_hogql_query(
+        result = execute_insightsql_query(
             query_type="VideoSegmentEmbeddingsForClustering",
             query=parse_select(
                 """

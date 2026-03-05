@@ -5,7 +5,7 @@ import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 import { sessionRecordingEventUsageLogic } from 'scenes/session-recordings/sessionRecordingEventUsageLogic'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP } from '~/taxonomy/taxonomy'
 import { SessionRecordingPropertiesType, SessionRecordingType } from '~/types'
 
@@ -37,7 +37,7 @@ export const sessionRecordingsListPropertiesLogic = kea<sessionRecordingsListPro
                     const oldestTimestamp = sessions.map((x) => x.start_time).sort()[0]
                     const newestTimestamp = sessions.map((x) => x.end_time).sort()[sessions.length - 1]
 
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT
                             $session_id as session_id,
                             any(properties.$geoip_country_code) as $geoip_country_code,
@@ -60,7 +60,7 @@ export const sessionRecordingsListPropertiesLogic = kea<sessionRecordingsListPro
                         AND timestamp <= ${dayjs(newestTimestamp).add(1, 'day')}
                         GROUP BY session_id`
 
-                    const response = await api.queryHogQL(query, { scene: 'Replay', productKey: 'session_replay' })
+                    const response = await api.queryInsightsQL(query, { scene: 'Replay', productKey: 'session_replay' })
                     const loadTimeMs = performance.now() - startTime
 
                     actions.reportRecordingsListPropertiesFetched(loadTimeMs)

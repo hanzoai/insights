@@ -1,8 +1,8 @@
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.kudosity.template_kudosity import template as template_kudosity
 
 
-class TestTemplateKudosity(BaseHogFunctionTemplateTest):
+class TestTemplateKudosity(BaseCustomFunctionTemplateTest):
     template = template_kudosity
 
     def _inputs(self, **kwargs):

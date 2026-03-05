@@ -5,20 +5,20 @@ from django.core.management.base import BaseCommand
 from django.core.paginator import Paginator
 from django.db import transaction
 
-from posthog.models.hog_flow.hog_flow import BILLABLE_ACTION_TYPES, HogFlow
+from posthog.models.custom_flow.custom_flow import BILLABLE_ACTION_TYPES, CustomFlow
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Backfill billable_action_types field for existing HogFlows by extracting billable action types defined in BILLABLE_ACTION_TYPES"
+    help = "Backfill billable_action_types field for existing CustomFlows by extracting billable action types defined in BILLABLE_ACTION_TYPES"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--page-size",
             type=int,
             default=500,
-            help="Number of HogFlows to process per page (default: 500)",
+            help="Number of CustomFlows to process per page (default: 500)",
         )
         parser.add_argument(
             "--dry-run",
@@ -28,12 +28,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--team-id",
             type=int,
-            help="Team ID to backfill HogFlows for (if not provided, processes all teams)",
+            help="Team ID to backfill CustomFlows for (if not provided, processes all teams)",
         )
         parser.add_argument(
             "--hog-flow-id",
             type=str,
-            help="Specific HogFlow ID to backfill (if provided, only this flow is processed)",
+            help="Specific CustomFlow ID to backfill (if provided, only this flow is processed)",
         )
 
     def handle(self, *args, **options):
@@ -41,31 +41,31 @@ class Command(BaseCommand):
         page_size = options["page_size"]
         dry_run = options["dry_run"]
         team_id = options.get("team_id")
-        hog_flow_id = options.get("hog_flow_id")
+        custom_flow_id = options.get("custom_flow_id")
 
         if dry_run:
             self.stdout.write(self.style.WARNING("Running in DRY RUN mode - no changes will be made"))
 
-        self.stdout.write("Starting HogFlow billable_action_types backfill...")
+        self.stdout.write("Starting CustomFlow billable_action_types backfill...")
 
-        # Build queryset - process all HogFlows
-        queryset = HogFlow.objects.all()
+        # Build queryset - process all CustomFlows
+        queryset = CustomFlow.objects.all()
 
         # Apply filters
-        if hog_flow_id:
-            queryset = queryset.filter(id=hog_flow_id)
-            self.stdout.write(f"Processing single HogFlow: {hog_flow_id}")
+        if custom_flow_id:
+            queryset = queryset.filter(id=custom_flow_id)
+            self.stdout.write(f"Processing single CustomFlow: {custom_flow_id}")
         elif team_id:
             queryset = queryset.filter(team_id=team_id)
-            self.stdout.write(f"Processing HogFlows for team: {team_id}")
+            self.stdout.write(f"Processing CustomFlows for team: {team_id}")
         else:
-            self.stdout.write("Processing HogFlows for all teams")
+            self.stdout.write("Processing CustomFlows for all teams")
 
         total_count = queryset.count()
-        self.stdout.write(f"Found {total_count} HogFlows to process")
+        self.stdout.write(f"Found {total_count} CustomFlows to process")
 
         if total_count == 0:
-            self.stdout.write(self.style.WARNING("No HogFlows found matching criteria"))
+            self.stdout.write(self.style.WARNING("No CustomFlows found matching criteria"))
             return
 
         paginator = Paginator(queryset.order_by("id"), page_size)
@@ -103,21 +103,21 @@ class Command(BaseCommand):
                 except Exception as e:
                     error_count += 1
                     logger.error(
-                        f"Error processing HogFlow id={hogflow.id}, team_id={hogflow.team_id}: {e}",
+                        f"Error processing CustomFlow id={hogflow.id}, team_id={hogflow.team_id}: {e}",
                         exc_info=True,
                     )
 
             # Bulk update for better performance
             if flows_to_update and not dry_run:
                 with transaction.atomic():
-                    HogFlow.objects.bulk_update(flows_to_update, ["billable_action_types"], batch_size=page_size)
+                    CustomFlow.objects.bulk_update(flows_to_update, ["billable_action_types"], batch_size=page_size)
                     updated_count += len(flows_to_update)
 
             elif dry_run:
                 updated_count += len(flows_to_update)
 
             if updated_count > 0 and updated_count % 1000 == 0:
-                self.stdout.write(self.style.SUCCESS(f"Progress: {updated_count} HogFlows updated..."))
+                self.stdout.write(self.style.SUCCESS(f"Progress: {updated_count} CustomFlows updated..."))
 
         # Output summary
         duration = time.time() - start_time
@@ -126,7 +126,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f"\nDRY RUN completed in {duration:.2f}s.\n"
-                    f"Would have updated {updated_count} out of {total_count} HogFlows\n"
+                    f"Would have updated {updated_count} out of {total_count} CustomFlows\n"
                     f"Errors: {error_count}"
                 )
             )

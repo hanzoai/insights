@@ -4,17 +4,17 @@ from typing import Any
 from django.db import transaction
 from django.db.models import Q
 
-from posthog.api.hog_function import HogFunctionSerializer
-from posthog.models.hog_function_template import HogFunctionTemplate
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.api.custom_function import CustomFunctionSerializer
+from posthog.models.custom_function_template import CustomFunctionTemplate
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.plugin import PluginAttachment, PluginConfig
 from posthog.models.team.team import Team
 
-# python manage.py migrate_plugins_to_hog_functions --dry-run --test-mode --kind=transformation
+# python manage.py migrate_plugins_to_custom_functions --dry-run --test-mode --kind=transformation
 
 
 def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool):
-    hog_functions = []
+    custom_functions = []
     teams_cache: dict[int, Team] = {}
 
     with transaction.atomic():
@@ -82,15 +82,15 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "is_create": True,
             }
 
-            template = HogFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
+            template = CustomFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
 
             if not template:
                 raise Exception(f"Template not found for plugin {plugin_id}")
 
-            if HogFunction.objects.filter(
+            if CustomFunction.objects.filter(
                 template_id=template.id, type=kind, team_id=team.id, enabled=True, deleted=False
             ).exists():
-                print(f"Skipping plugin {plugin_name} as it already exists as a hog function")  # noqa: T201
+                print(f"Skipping plugin {plugin_name} as it already exists as a custom function")  # noqa: T201
                 continue
 
             data = {
@@ -99,7 +99,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "name": plugin_name,
                 "description": template.description,
                 "filters": template.filters,
-                "hog": template.code,
+                "custom_script": template.code,
                 "inputs": inputs,
                 "enabled": True,
                 "icon_url": template.icon_url,
@@ -107,28 +107,28 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "execution_order": plugin_config["order"],
             }
 
-            print("Attempting to create hog function...")  # noqa: T201
+            print("Attempting to create custom function...")  # noqa: T201
             print(json.dumps(data, indent=2))  # noqa: T201
 
-            serializer = HogFunctionSerializer(
+            serializer = CustomFunctionSerializer(
                 data=data,
                 context=serializer_context,
             )
             serializer.is_valid(raise_exception=True)
-            hog_functions.append(HogFunction(**serializer.validated_data))
+            custom_functions.append(CustomFunction(**serializer.validated_data))
 
-        print(hog_functions)  # noqa: T201
+        print(custom_functions)  # noqa: T201
 
-        if not hog_functions:
-            print("No hog functions to create")  # noqa: T201
+        if not custom_functions:
+            print("No custom functions to create")  # noqa: T201
             return []
 
         if dry_run:
-            print("Dry run, not creating hog functions")  # noqa: T201
-            return hog_functions
+            print("Dry run, not creating custom functions")  # noqa: T201
+            return custom_functions
 
-        print("Creating hog functions")  # noqa: T201
-        HogFunction.objects.bulk_create(hog_functions)
+        print("Creating custom functions")  # noqa: T201
+        CustomFunction.objects.bulk_create(custom_functions)
 
         if not test_mode:
             print("Disabling old plugins")  # noqa: T201
@@ -140,7 +140,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
 
         print("Done")  # noqa: T201
 
-        return hog_functions
+        return custom_functions
 
 
 def migrate_legacy_plugins(

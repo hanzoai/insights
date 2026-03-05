@@ -471,7 +471,7 @@ export function BatchExportsEditFields({
                         label="Semi-structured data type"
                         info={
                             <>
-                                Different PostHog models have semi-structured data fields in them, like
+                                Different PostCustom models have semi-structured data fields in them, like
                                 "events.properties". We can export these fields to Redshift as a "SUPER" type column, or
                                 a "VARCHAR" column. We recommend "SUPER" over "VARCHAR" as "VARCHAR" has a strict length
                                 limit that applies on the entire document, whereas with "SUPER" the limit applies on

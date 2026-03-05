@@ -3,11 +3,11 @@ import { useActions } from 'kea'
 import { LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
 import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
-type PersonsJoinModeType = NonNullable<HogQLQueryModifiers['personsJoinMode']>
+type PersonsJoinModeType = NonNullable<InsightsQLQueryModifiers['personsJoinMode']>
 
 const personsJoinOptions: LemonRadioOption<PersonsJoinModeType>[] = [
     {

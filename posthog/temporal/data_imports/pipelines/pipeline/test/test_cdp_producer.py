@@ -9,7 +9,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from asgiref.sync import sync_to_async
 
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.temporal.data_imports.pipelines.pipeline.cdp_producer import CDPProducer
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
@@ -20,7 +20,7 @@ from products.data_warehouse.backend.types import ExternalDataSourceType
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_produce_table_no_hog_function(team):
+async def test_should_produce_table_no_custom_function(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -37,7 +37,7 @@ async def test_should_produce_table_no_hog_function(team):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_produce_table_with_matching_hog_function(team):
+async def test_should_produce_table_with_matching_custom_function(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -48,7 +48,7 @@ async def test_should_produce_table_with_matching_hog_function(team):
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "postgres.table_1"}]},
@@ -60,7 +60,7 @@ async def test_should_produce_table_with_matching_hog_function(team):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_not_produce_table_with_disabled_matching_hog_function(team):
+async def test_should_not_produce_table_with_disabled_matching_custom_function(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -71,7 +71,7 @@ async def test_should_not_produce_table_with_disabled_matching_hog_function(team
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=False,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "postgres.table_1"}]},
@@ -83,7 +83,7 @@ async def test_should_not_produce_table_with_disabled_matching_hog_function(team
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_should_not_produce_table_with_deleted_matching_hog_function(team):
+async def test_should_not_produce_table_with_deleted_matching_custom_function(team):
     source = await sync_to_async(ExternalDataSource.objects.create)(
         team=team, source_type=ExternalDataSourceType.POSTGRES
     )
@@ -94,7 +94,7 @@ async def test_should_not_produce_table_with_deleted_matching_hog_function(team)
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         deleted=True,
@@ -118,7 +118,7 @@ async def test_should_produce_table_with_new_style_table_name(team):
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "postgres.table_1"}]},
@@ -141,7 +141,7 @@ async def test_should_produce_table_with_source_prefix(team):
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "postgres.eu.table_1"}]},
@@ -164,7 +164,7 @@ async def test_should_produce_table_with_leading_underscore_source_prefix(team):
         team=team, name="table_1", source=source, table=table
     )
 
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "postgres.eu.table_1"}]},

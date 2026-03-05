@@ -16,7 +16,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 import { SceneBreadcrumbBackButton } from '~/layout/scenes/components/SceneBreadcrumbs'
 import { Query } from '~/queries/Query/Query'
 import { isSessionPropertyFilters } from '~/queries/schema-guards'
-import { DataTableNode, HogQLQuery, SessionAttributionGroupBy } from '~/queries/schema/schema-general'
+import { DataTableNode, InsightsQLQuery, SessionAttributionGroupBy } from '~/queries/schema/schema-general'
 import { QueryContext, QueryContextColumnComponent } from '~/queries/types'
 
 import { sessionAttributionExplorerLogic } from './sessionAttributionExplorerLogic'
@@ -236,7 +236,7 @@ export function SessionAttributionExplorer(): JSX.Element {
                 context={queryContext}
                 query={query}
                 setQuery={(query) => {
-                    const source = query.source as HogQLQuery
+                    const source = query.source as InsightsQLQuery
                     if (source.filters && isSessionPropertyFilters(source.filters.properties)) {
                         setProperties(source.filters.properties)
                     } else {

@@ -148,7 +148,7 @@ export const alertFormLogic = kea<alertFormLogicType>([
 
                 const flushPendingNotifications = async (savedAlertId: string): Promise<void> => {
                     if (notifLogic.values.pendingNotifications.length > 0) {
-                        await notifLogic.asyncActions.createPendingHogFunctions(savedAlertId, alert.name)
+                        await notifLogic.asyncActions.createPendingCustomFunctions(savedAlertId, alert.name)
                     }
                 }
 

@@ -7,11 +7,11 @@ import { isAddonVisible } from 'scenes/billing/billing-utils'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { BillingSpendResponse, billingSpendLogic } from 'scenes/billing/billingSpendLogic'
 import { BillingUsageResponse, billingUsageLogic } from 'scenes/billing/billingUsageLogic'
-import { hogFunctionsListLogic } from 'scenes/hog-functions/list/hogFunctionsListLogic'
+import { customFunctionsListLogic } from 'scenes/custom-functions/list/customFunctionsListLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { BillingType, HogFunctionType, TeamType } from '~/types'
+import { BillingType, CustomFunctionType, TeamType } from '~/types'
 
 import type { maxBillingContextLogicType } from './maxBillingContextLogicType'
 
@@ -119,7 +119,7 @@ export const billingToMaxContext = (
     billing: BillingType | null,
     featureFlags: Record<string, any>,
     currentTeam: TeamType,
-    destinations: HogFunctionType[],
+    destinations: CustomFunctionType[],
     usageResponse?: BillingUsageResponse | null,
     spendResponse?: BillingSpendResponse | null
 ): MaxBillingContext | null => {
@@ -271,8 +271,8 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
             ['currentTeam'],
             featureFlagLogic,
             ['featureFlags'],
-            hogFunctionsListLogic({ type: 'destination' }),
-            ['hogFunctions'],
+            customFunctionsListLogic({ type: 'destination' }),
+            ['customFunctions'],
         ],
     })),
     selectors({
@@ -284,7 +284,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 s.isAdminOrOwner,
                 s.currentTeam,
                 s.featureFlags,
-                s.hogFunctions,
+                s.customFunctions,
             ],
             (
                 billing: BillingType | null,
@@ -293,7 +293,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 isAdminOrOwner: boolean,
                 currentTeam: TeamType,
                 featureFlags: Record<string, any>,
-                destinations: HogFunctionType[]
+                destinations: CustomFunctionType[]
             ): MaxBillingContext | null => {
                 if (!isAdminOrOwner) {
                     return null

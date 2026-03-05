@@ -11,7 +11,7 @@ import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
-import { AnyResponseType, DashboardFilter, HogQLVariable, InsightVizNode } from '~/queries/schema/schema-general'
+import { AnyResponseType, DashboardFilter, InsightsQLVariable, InsightVizNode } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 import { isFunnelsQuery, isRetentionQuery } from '~/queries/utils'
 import { InsightLogicProps } from '~/types'
@@ -40,7 +40,7 @@ type InsightVizProps = {
     embedded?: boolean
     inSharedMode?: boolean
     filtersOverride?: DashboardFilter | null
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Attach ourselves to another logic, such as the scene logic */
     attachTo?: BuiltLogic | LogicWrapper
     cachedResults?: AnyResponseType

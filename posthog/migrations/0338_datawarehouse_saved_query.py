@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "query",
-                    models.JSONField(blank=True, default=dict, help_text="HogQL query", null=True),
+                    models.JSONField(blank=True, default=dict, help_text="InsightsQL query", null=True),
                 ),
                 (
                     "created_by",

@@ -3,13 +3,13 @@ import { subscriptions } from 'kea-subscriptions'
 
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 import { InsightLogicProps } from '~/types'
 
 import { insightVizDataLogic } from '../insightVizDataLogic'
 import type { poeFilterLogicType } from './poeFilterLogicType'
 
-export type PoeModeTypes = HogQLQueryModifiers['personsOnEventsMode'] | null
+export type PoeModeTypes = InsightsQLQueryModifiers['personsOnEventsMode'] | null
 
 export const poeFilterLogic = kea<poeFilterLogicType>([
     props({} as InsightLogicProps),

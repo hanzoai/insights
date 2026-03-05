@@ -84,7 +84,7 @@ export function singleFilterToGroupFilter(filter: LocalFilter): LocalFilter {
         ...(filter.math && { math: filter.math }),
         ...(filter.math_property && { math_property: filter.math_property }),
         ...(filter.math_property_type && { math_property_type: filter.math_property_type }),
-        ...(filter.math_hogql && { math_hogql: filter.math_hogql }),
+        ...(filter.math_insightsql && { math_insightsql: filter.math_insightsql }),
         ...(filter.math_group_type_index !== undefined && { math_group_type_index: filter.math_group_type_index }),
     } as LocalFilter
 }
@@ -130,7 +130,7 @@ export const entityFilterLogic = kea<entityFilterLogicType>([
             math: filter.math,
             math_property: filter.math_property,
             math_property_type: filter.math_property_type,
-            math_hogql: filter.math_hogql,
+            math_insightsql: filter.math_insightsql,
             index: filter.index,
             math_group_type_index: filter.math_group_type_index,
         }),

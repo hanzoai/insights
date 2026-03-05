@@ -1,9 +1,9 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
 # See https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Messages
 
 
-template_mailgun_send_email: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_mailgun_send_email: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template_mailgun_send_email: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send emails using the Mailgun HTTP API",
     icon_url="/static/services/mailgun.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.template.to)) {
     return false

@@ -23,7 +23,7 @@ const MOCK_INSIGHT_SHORT_ID = 'abc123' as InsightShortId
 const MOCK_INSIGHT_QUERY: DataVisualizationNode = {
     kind: NodeKind.DataVisualizationNode,
     source: {
-        kind: NodeKind.HogQLQuery,
+        kind: NodeKind.InsightsQLQuery,
         query: 'SELECT count() FROM events',
     },
 }

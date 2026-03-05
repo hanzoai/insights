@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 
 from posthog.schema import PersonsOnEventsMode
 
-from posthog.hogql.hogql import translate_hogql
+from posthog.insightsql.insightsql import translate_insightsql
 
 from posthog.constants import MONTHLY_ACTIVE, NON_TIME_SERIES_DISPLAY_TYPES, UNIQUE_GROUPS, UNIQUE_USERS, WEEKLY_ACTIVE
 from posthog.models.entity import Entity
@@ -91,8 +91,8 @@ def process_math(
             params[key] = entity.math_property
     elif entity.math in COUNT_PER_ACTOR_MATH_FUNCTIONS:
         aggregate_operation = f"{COUNT_PER_ACTOR_MATH_FUNCTIONS[entity.math]}(intermediate_count)"
-    elif entity.math == "hogql":
-        aggregate_operation = translate_hogql(entity.math_hogql, filter.hogql_context)
+    elif entity.math == "insightsql":
+        aggregate_operation = translate_insightsql(entity.math_insightsql, filter.insightsql_context)
 
     return aggregate_operation, join_condition, params
 

@@ -40,7 +40,7 @@ def _setup(team: Team, job_inputs: dict[Any, Any]) -> ImportDataActivityInputs:
         external_data_source_id=source.id,
         credential=credentials,
         url_pattern="https://bucket.s3/data/*",
-        columns={"id": {"hogql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+        columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
     )
     schema = ExternalDataSchema.objects.create(
         team=team,

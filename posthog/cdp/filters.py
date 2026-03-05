@@ -2,10 +2,10 @@ from typing import Any, Optional
 
 from django.conf import settings
 
-from posthog.hogql.compiler.bytecode import create_bytecode
-from posthog.hogql.parser import parse_expr
-from posthog.hogql.property import action_to_expr, ast, property_to_expr
-from posthog.hogql.visitor import TraversingVisitor
+from posthog.insightsql.compiler.bytecode import create_bytecode
+from posthog.insightsql.parser import parse_expr
+from posthog.insightsql.property import action_to_expr, ast, property_to_expr
+from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.models.action.action import Action
 from posthog.models.team.team import Team
@@ -79,9 +79,9 @@ def _combine_expressions(expressions: list[ast.Expr]) -> ast.Expr:
         return ast.And(exprs=expressions)
 
 
-def hog_function_filters_to_expr(filters: dict, team: Team, actions: dict[int, Action]) -> ast.Expr:
+def custom_function_filters_to_expr(filters: dict, team: Team, actions: dict[int, Action]) -> ast.Expr:
     """
-    Build a HogQL expression from hog function filters.
+    Build a InsightsQL expression from custom function filters.
 
     Optimized to evaluate test account filters only once at the top level,
     rather than duplicating them for each event/action check.
@@ -131,7 +131,7 @@ def compile_filters_expr(filters: Optional[dict], team: Team, actions: Optional[
         )
         actions = {action.id: action for action in actions_list}
 
-    return hog_function_filters_to_expr(filters, team, actions)
+    return custom_function_filters_to_expr(filters, team, actions)
 
 
 class SelectFinder(TraversingVisitor):
@@ -222,7 +222,7 @@ def build_behavioral_event_expr(behavioral_filter: dict, team: Team) -> ast.Expr
 
 
 def cohort_filters_to_expr(filters: dict, team: Team) -> ast.Expr:
-    """Assemble a HogQL expression for cohort filters similarly to hog function filters.
+    """Assemble a InsightsQL expression for cohort filters similarly to custom function filters.
 
     - Recursively walks the cohort `properties` group
     - For behavioral filters, builds event matcher AND per-filter properties

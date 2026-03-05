@@ -11,7 +11,7 @@ import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
 import { resumeKeaLoadersErrors, silenceKeaLoadersErrors } from '~/initKea'
-import { HogQLQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryResponse } from '~/queries/schema/schema-general'
 import {
     RecordingSnapshot,
     SessionRecordingSnapshotSource,
@@ -180,7 +180,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             expect(api.create).toHaveBeenCalledTimes(2)
 
             const queries = (api.create as jest.MockedFunction<typeof api.create>).mock.calls.map(
-                (call) => (call[1] as { query: HogQLQueryResponse })?.query?.query
+                (call) => (call[1] as { query: InsightsQLQueryResponse })?.query?.query
             )
 
             // queries 0 varies 24 hours around start time

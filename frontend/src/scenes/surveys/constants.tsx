@@ -294,8 +294,8 @@ export const defaultSurveyTemplates: SurveyTemplate[] = [
         questions: [
             {
                 type: SurveyQuestionType.Link,
-                question: 'Hog mode is now available!',
-                description: 'You can never have too many hedgehogs.',
+                question: 'Custom mode is now available!',
+                description: 'Try out the latest features.',
                 descriptionContentType: 'text' as SurveyQuestionDescriptionContentType,
                 buttonText: 'Check it out 👉',
                 link: null,
