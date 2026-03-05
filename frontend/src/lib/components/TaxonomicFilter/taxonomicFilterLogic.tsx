@@ -40,7 +40,7 @@ import { COHORT_BEHAVIORAL_LIMITATIONS_URL } from 'scenes/feature-flags/constant
 import {
     getProductEventFilterOptions,
     getProductEventPropertyFilterOptions,
-} from 'scenes/hog-functions/filters/HogFunctionFiltersInternal'
+} from 'scenes/custom-functions/filters/CustomFunctionFiltersInternal'
 import { MaxContextTaxonomicFilterOption } from 'scenes/max/maxTypes'
 import { NotebookType } from 'scenes/notebooks/types'
 import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
@@ -77,7 +77,7 @@ import {
 
 import { HogFlowTaxonomicFilters } from 'products/workflows/frontend/Workflows/hogflows/filters/HogFlowTaxonomicFilters'
 
-import { InlineHogQLEditor } from './InlineHogQLEditor'
+import { InlineInsightsQLEditor } from './InlineInsightsQLEditor'
 import type { taxonomicFilterLogicType } from './taxonomicFilterLogicType'
 
 export const eventTaxonomicGroupProps: Pick<TaxonomicFilterGroup, 'getPopoverHeader' | 'getIcon'> = {
@@ -119,12 +119,12 @@ export const defaultDataWarehousePopoverFields: DataWarehousePopoverField[] = [
     {
         key: 'timestamp_field',
         label: 'Timestamp Field',
-        allowHogQL: true,
+        allowInsightsQL: true,
     },
     {
         key: 'distinct_id_field',
         label: 'Distinct ID Field',
-        allowHogQL: true,
+        allowInsightsQL: true,
     },
 ]
 
@@ -251,7 +251,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
         metadataSource: [
             () => [(_, props) => props.metadataSource],
             (metadataSource): AnyDataNode =>
-                metadataSource ?? { kind: NodeKind.HogQLQuery, query: 'select event from events' },
+                metadataSource ?? { kind: NodeKind.InsightsQLQuery, query: 'select event from events' },
         ],
         excludedProperties: [
             () => [(_, props) => props.excludedProperties],
@@ -277,9 +277,9 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
             () => [(_, props) => props.hideBehavioralCohorts],
             (hideBehavioralCohorts: boolean | undefined) => hideBehavioralCohorts ?? false,
         ],
-        hogQLGlobals: [
-            () => [(_, props) => props.hogQLGlobals],
-            (hogQLGlobals: Record<string, any> | undefined) => hogQLGlobals,
+        insightsQLGlobals: [
+            () => [(_, props) => props.insightsQLGlobals],
+            (insightsQLGlobals: Record<string, any> | undefined) => insightsQLGlobals,
         ],
         endpointFilters: [
             () => [(_, props) => props.endpointFilters],
@@ -300,7 +300,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                 s.maxContextOptions,
                 s.hideBehavioralCohorts,
                 s.endpointFilters,
-                s.hogQLGlobals,
+                s.insightsQLGlobals,
             ],
             (
                 currentTeam: TeamType,
@@ -316,7 +316,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                 maxContextOptions: MaxContextTaxonomicFilterOption[],
                 hideBehavioralCohorts: boolean,
                 endpointFilters: Record<string, any> | undefined,
-                hogQLGlobals: Record<string, any> | undefined
+                insightsQLGlobals: Record<string, any> | undefined
             ): TaxonomicFilterGroup[] => {
                 const { id: teamId } = currentTeam
                 const { excludedProperties, propertyAllowList } = propertyFilters
@@ -952,10 +952,10 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'SQL expression',
                         searchPlaceholder: null,
                         categoryLabel: () => 'SQL expression',
-                        type: TaxonomicFilterGroupType.HogQLExpression,
-                        render: InlineHogQLEditor,
+                        type: TaxonomicFilterGroupType.InsightsQLExpression,
+                        render: InlineInsightsQLEditor,
                         getPopoverHeader: () => 'SQL expression',
-                        componentProps: { metadataSource, globals: hogQLGlobals },
+                        componentProps: { metadataSource, globals: insightsQLGlobals },
                     },
                     {
                         name: 'Replay',
@@ -1216,7 +1216,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                     posthog.captureException(e, { posthog_feature: 'taxonomic_filter_swapped_in_query' })
                 }
                 props.onChange?.(group, value, item, originalQuery)
-            } else if (group.type === TaxonomicFilterGroupType.HogQLExpression && value) {
+            } else if (group.type === TaxonomicFilterGroupType.InsightsQLExpression && value) {
                 props.onChange?.(group, value, item, originalQuery)
             } else if (props.onEnter) {
                 // If the user pressed enter on a group with no item selected, we want to pass the original query

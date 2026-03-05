@@ -5,8 +5,8 @@ import polars as pl
 import dagster
 from dagster import AssetKey, JsonMetadataValue, MetadataValue
 
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.dags.common import JobOwners
 from posthog.dags.common.resources import ClayWebhookResource
@@ -140,7 +140,7 @@ def job_switchers_to_clay(
         SELECT {", ".join(COLUMNS)}
         FROM JobSwitchers_v3
     """
-    response = execute_hogql_query(
+    response = execute_insightsql_query(
         query=query,
         team=team,
         query_type="job_switchers_query",

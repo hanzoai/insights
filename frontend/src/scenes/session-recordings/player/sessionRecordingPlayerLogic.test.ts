@@ -463,10 +463,10 @@ describe('sessionRecordingPlayerLogic', () => {
 
             jest.runOnlyPendingTimers()
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostHog Replayer] 2 warnings (window.__posthog_player_warnings to safely log them)'
+                '[PostScript REPLayer] 2 warnings (window.__posthog_player_warnings to safely log them)'
             )
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostHog Replayer] 1 logs (window.__posthog_player_logs to safely log them)'
+                '[PostScript REPLayer] 1 logs (window.__posthog_player_logs to safely log them)'
             )
         })
     })

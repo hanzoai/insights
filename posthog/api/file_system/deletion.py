@@ -9,17 +9,17 @@ from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 
 from posthog.models.file_system.file_system import FileSystem, join_path, split_path
-from posthog.models.hog_functions.hog_function import HogFunctionType
+from posthog.models.custom_functions.custom_function import CustomFunctionType
 from posthog.models.signals import mute_selected_signals
 
 logger = logging.getLogger(__name__)
 
-LEGACY_HOG_FUNCTION_TYPES = [
+LEGACY_CUSTOM_FUNCTION_TYPES = [
     "broadcast",
     "campaign",
     "source",
 ]
-HOG_FUNCTION_TYPES = sorted(set(LEGACY_HOG_FUNCTION_TYPES + list(HogFunctionType.values)))
+CUSTOM_FUNCTION_TYPES = sorted(set(LEGACY_CUSTOM_FUNCTION_TYPES + list(CustomFunctionType.values)))
 
 
 @dataclass(frozen=True)

@@ -71,7 +71,7 @@ const buildVariableMenuItems = (
     options?: { showSettingsButton?: boolean; insertOnClick?: boolean }
 ): LemonMenuItem[] => {
     return variables.map((variable): LemonMenuItem => {
-        const variableAsHogQL = `{variables.${variable.code_name}}`
+        const variableAsInsightsQL = `{variables.${variable.code_name}}`
         const showSettingsButton = options?.showSettingsButton ?? false
         const insertOnClick = options?.insertOnClick ?? false
 
@@ -85,7 +85,7 @@ const buildVariableMenuItems = (
             return {
                 ...menuItem,
                 onClick: () => {
-                    insertTextAtCursor(variableAsHogQL)
+                    insertTextAtCursor(variableAsInsightsQL)
                     closeMenu()
                 },
             }
@@ -115,14 +115,14 @@ const buildVariableMenuItems = (
                 {
                     label: 'Insert into query',
                     onClick: () => {
-                        insertTextAtCursor(variableAsHogQL)
+                        insertTextAtCursor(variableAsInsightsQL)
                         closeMenu()
                     },
                 },
                 {
                     label: 'Copy variable code',
                     onClick: () => {
-                        void copyToClipboard(variableAsHogQL, 'variable SQL')
+                        void copyToClipboard(variableAsInsightsQL, 'variable SQL')
                         closeMenu()
                     },
                 },

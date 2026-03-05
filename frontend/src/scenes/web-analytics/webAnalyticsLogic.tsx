@@ -33,7 +33,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { dataNodeCollectionLogic } from '~/queries/nodes/DataNode/dataNodeCollectionLogic'
 import { WEB_VITALS_COLORS, WEB_VITALS_THRESHOLDS } from '~/queries/nodes/WebVitals/definitions'
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import { isCompareFilter, isWebAnalyticsPropertyFilters } from '~/queries/schema-guards'
 import {
     ActionConversionGoal,
@@ -55,7 +55,7 @@ import {
     WebStatsTableQuery,
     WebVitalsMetric,
 } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import {
     AvailableFeature,
     BaseMathType,
@@ -224,18 +224,18 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
         shouldShowGeoIPQueries: {
             _default: null as boolean | null,
             loadShouldShowGeoIPQueries: async (): Promise<boolean> => {
-                // Always display on dev mode, we don't always have events and/or hogQL functions
+                // Always display on dev mode, we don't always have events and/or insightsQL functions
                 // but we want the map to be there for debugging purposes
                 if (values.isDev) {
                     return true
                 }
 
-                const [propertiesResponse, hogFunctionsResponse] = await Promise.allSettled([
+                const [propertiesResponse, customFunctionsResponse] = await Promise.allSettled([
                     api.propertyDefinitions.list({
                         event_names: ['$pageview'],
                         properties: ['$geoip_country_code'],
                     }),
-                    api.hogFunctions.list({ types: ['transformation'] }),
+                    api.customFunctions.list({ types: ['transformation'] }),
                 ])
 
                 const hasNonStaleCountryCodeDefinition =
@@ -248,18 +248,18 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                     return false
                 }
 
-                if (hogFunctionsResponse.status !== 'fulfilled') {
+                if (customFunctionsResponse.status !== 'fulfilled') {
                     return false
                 }
 
-                const enabledGeoIPHogFunction = hogFunctionsResponse.value.results.find((hogFunction) => {
-                    const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(hogFunction.template?.id ?? '')
-                    const matchesName = hogFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
+                const enabledGeoIPCustomFunction = customFunctionsResponse.value.results.find((customFunction) => {
+                    const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(customFunction.template?.id ?? '')
+                    const matchesName = customFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
 
-                    return (isFromTemplate || matchesName) && hogFunction.enabled
+                    return (isFromTemplate || matchesName) && customFunction.enabled
                 })
 
-                return Boolean(enabledGeoIPHogFunction)
+                return Boolean(enabledGeoIPCustomFunction)
             },
         },
     })),
@@ -2570,8 +2570,8 @@ const checkCustomEventConversionGoalHasSessionIdsHelper = async (
     const { customEventName } = conversionGoal
     // check if we have any conversion events from the last week without sessions ids
 
-    const response = await hogqlQuery(
-        hogql`select count()
+    const response = await insightsqlQuery(
+        insightsql`select count()
               from events
               where timestamp >= (now() - toIntervalHour(24))
                 AND ($session_id IS NULL

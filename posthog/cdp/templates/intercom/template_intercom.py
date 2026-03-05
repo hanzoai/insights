@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Update contacts in Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -162,7 +162,7 @@ if (res.status >= 400) {
     },
 )
 
-template_send_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_send_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -171,7 +171,7 @@ template_send_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

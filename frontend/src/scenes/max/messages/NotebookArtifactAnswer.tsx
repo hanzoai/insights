@@ -33,7 +33,7 @@ import {
 } from '~/queries/schema/schema-assistant-artifacts'
 import { NotebookArtifactContent } from '~/queries/schema/schema-assistant-messages'
 import { DataVisualizationNode, InsightVizNode, NodeKind } from '~/queries/schema/schema-general'
-import { isFunnelsQuery, isHogQLQuery, isInsightVizNode } from '~/queries/utils'
+import { isFunnelsQuery, isInsightsQLQuery, isInsightVizNode } from '~/queries/utils'
 
 import { MarkdownMessage } from '../MarkdownMessage'
 import { MessageStatus } from '../maxLogic'
@@ -201,7 +201,7 @@ function VisualizationBlockPreview({ block }: { block: VisualizationBlock }): JS
             {isInsightVizNode(query) && isSummaryShown && (
                 <div className="px-2 py-1 border-t">
                     <SeriesSummary query={query.source} heading={null} />
-                    {!isHogQLQuery(query.source) && (
+                    {!isInsightsQLQuery(query.source) && (
                         <div className="flex flex-wrap gap-4 mt-1 *:grow">
                             <PropertiesSummary properties={query.source.properties} />
                             <InsightBreakdownSummary query={query.source} />
@@ -300,7 +300,7 @@ function blocksToTiptapContent(blocks: DocumentBlock[]): JSONContent[] {
             case 'visualization': {
                 // Create a ph-query node that the notebook can render
                 const source = castAssistantQuery(block.query)
-                const query = isHogQLQuery(source)
+                const query = isInsightsQLQuery(source)
                     ? { kind: NodeKind.DataVisualizationNode, source }
                     : { kind: NodeKind.InsightVizNode, source }
 

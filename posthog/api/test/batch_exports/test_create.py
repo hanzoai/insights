@@ -416,7 +416,7 @@ def test_cannot_create_a_batch_export_with_higher_frequencies_if_not_enabled(
         )
 
 
-TEST_HOGQL_QUERY = """
+TEST_INSIGHTSQL_QUERY = """
 SELECT
   event,
   team_id AS my_team,
@@ -429,7 +429,7 @@ FROM events
 
 
 def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, organization, team, user):
-    """Test creating a BatchExport with a custom schema expressed as a HogQL Query.
+    """Test creating a BatchExport with a custom schema expressed as a InsightsQL Query.
 
     When creating a BatchExport, we should create a corresponding Schedule in
     Temporal as described by the associated BatchExportSchedule model. In this
@@ -451,7 +451,7 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
     batch_export_data = {
         "name": "my-production-s3-bucket-destination",
         "destination": destination_data,
-        "hogql_query": TEST_HOGQL_QUERY,
+        "insightsql_query": TEST_INSIGHTSQL_QUERY,
         "interval": "hour",
     }
 
@@ -466,8 +466,8 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
     assert response.status_code == status.HTTP_201_CREATED, response.json()
 
     data = response.json()
-    expected_hogql_query = " ".join(TEST_HOGQL_QUERY.split())  # Don't care about whitespace
-    assert data["schema"]["hogql_query"] == expected_hogql_query
+    expected_insightsql_query = " ".join(TEST_INSIGHTSQL_QUERY.split())  # Don't care about whitespace
+    assert data["schema"]["insightsql_query"] == expected_insightsql_query
 
     codec = EncryptionCodec(settings=settings)
     schedule = describe_schedule(temporal, data["id"])
@@ -482,11 +482,11 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
         {"expression": "events.team_id", "alias": "my_team"},
         {"expression": "events.properties", "alias": "properties"},
         {
-            "expression": "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+            "expression": "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
             "alias": "browser",
         },
         {
-            "expression": "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_1)s), ''), 'null'), '^\"|\"$', '')",
+            "expression": "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')",
             "alias": "custom",
         },
         {"alias": "person_id", "expression": "events.person_id"},
@@ -494,10 +494,10 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
     expected_schema = {
         "fields": expected_fields,
         "values": {
-            "hogql_val_0": "$browser",
-            "hogql_val_1": "custom",
+            "insightsql_val_0": "$browser",
+            "insightsql_val_1": "custom",
         },
-        "hogql_query": expected_hogql_query,
+        "insightsql_query": expected_insightsql_query,
     }
 
     assert batch_export.schema == expected_schema
@@ -509,7 +509,7 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
     [
         ("SELECT", "Failed to parse query"),
         ("SELECT event,, FROM events", "Failed to parse query"),
-        ("SELECT unknown_field FROM events", "Invalid HogQL query: Unable to resolve field: unknown_field"),
+        ("SELECT unknown_field FROM events", "Invalid InsightsQL query: Unable to resolve field: unknown_field"),
         (
             "SELECT event, persons.id FROM events LEFT JOIN persons ON events.person_id = persons.id",
             "JOINs are not supported",
@@ -551,7 +551,7 @@ def test_create_batch_export_fails_with_invalid_query(
         "name": "my-production-s3-bucket-destination",
         "destination": destination_data,
         "interval": "hour",
-        "hogql_query": invalid_query,
+        "insightsql_query": invalid_query,
     }
 
     client.force_login(user)

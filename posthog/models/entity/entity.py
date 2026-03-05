@@ -23,7 +23,7 @@ MathType = Literal[
     "monthly_active",
     "unique_group",
     "unique_session",
-    "hogql",
+    "insightsql",
     # Equivalent to *PROPERTY_MATH_FUNCTIONS.keys(),
     "sum",
     "min",
@@ -61,7 +61,7 @@ class Entity(PropertyMixin):
     math: Optional[MathType]
     math_property: Optional[str]
     math_property_revenue_currency: Optional[RevenueCurrencyPropertyConfig]
-    math_hogql: Optional[str]
+    math_insightsql: Optional[str]
     math_group_type_index: Optional[GroupTypeIndex]
     # Index is not set at all by default (meaning: access = AttributeError) - it's populated in EntitiesMixin.entities
     # Used for identifying entities within a single query during query building,
@@ -98,7 +98,7 @@ class Entity(PropertyMixin):
         self.math = data.get("math")
         self.math_property = data.get("math_property")
         self.math_property_revenue_currency = data.get("math_property_revenue_currency")
-        self.math_hogql = data.get("math_hogql")
+        self.math_insightsql = data.get("math_insightsql")
         self.math_group_type_index = validate_group_type_index(
             "math_group_type_index", data.get("math_group_type_index")
         )
@@ -125,7 +125,7 @@ class Entity(PropertyMixin):
             "math_property_revenue_currency": dict(self.math_property_revenue_currency)
             if self.math_property_revenue_currency
             else None,
-            "math_hogql": self.math_hogql,
+            "math_insightsql": self.math_insightsql,
             "math_group_type_index": self.math_group_type_index,
             "properties": self.property_groups.to_dict(),
             "id_field": self.id_field,
@@ -188,7 +188,7 @@ class Entity(PropertyMixin):
         "math",
         "math_property",
         "math_property_revenue_currency",
-        "math_hogql",
+        "math_insightsql",
         "properties",
         "id_field",
         "timestamp_field",

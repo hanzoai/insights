@@ -10,7 +10,7 @@ import { CodeEditor, CodeEditorProps } from 'lib/monaco/CodeEditor'
 import MaxTool from 'scenes/max/MaxTool'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
-import { HogQLQuery } from '~/queries/schema/schema-general'
+import { InsightsQLQuery } from '~/queries/schema/schema-general'
 
 import { editorSizingLogic } from './editorSizingLogic'
 import { sqlEditorLogic } from './sqlEditorLogic'
@@ -19,7 +19,7 @@ interface QueryPaneProps {
     queryInput: string
     promptError: string | null
     codeEditorProps: Partial<CodeEditorProps>
-    sourceQuery: HogQLQuery
+    sourceQuery: InsightsQLQuery
     originalValue?: string
     onRun?: () => void
     editorVimModeEnabled?: boolean
@@ -47,12 +47,12 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                 ref={queryPaneResizerProps.containerRef}
             >
                 <div className="relative flex flex-col w-full min-h-0">
-                    <div className="flex-1 min-h-0" data-attr="hogql-query-editor">
+                    <div className="flex-1 min-h-0" data-attr="insightsql-query-editor">
                         <AutoSizer
                             renderProp={({ height, width }) =>
                                 height && width ? (
                                     <CodeEditor
-                                        language="hogQL"
+                                        language="insightsQL"
                                         value={props.queryInput}
                                         sourceQuery={props.sourceQuery}
                                         height={height}

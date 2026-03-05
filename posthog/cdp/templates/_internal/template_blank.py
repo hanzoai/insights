@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionMappingTemplate, HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionMappingTemplate, CustomFunctionTemplateDC
 
-blank_site_destination: HogFunctionTemplateDC = HogFunctionTemplateDC(
+blank_site_destination: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_destination",
@@ -53,7 +53,7 @@ export function onEvent({ inputs, posthog }) {
         },
     ],
     mapping_templates=[
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Aquisition",
             include_by_default=True,
             filters={"events": [{"id": "$pageview", "type": "events"}]},
@@ -80,7 +80,7 @@ export function onEvent({ inputs, posthog }) {
                 },
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Conversion",
             filters={"events": [{"id": "$autocapture", "type": "events"}]},
             inputs_schema=[
@@ -106,7 +106,7 @@ export function onEvent({ inputs, posthog }) {
                 },
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Retention",
             filters={"events": [{"id": "$pageleave", "type": "events"}]},
             inputs_schema=[
@@ -135,7 +135,7 @@ export function onEvent({ inputs, posthog }) {
     ],
 )
 
-blank_site_app: HogFunctionTemplateDC = HogFunctionTemplateDC(
+blank_site_app: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_app",

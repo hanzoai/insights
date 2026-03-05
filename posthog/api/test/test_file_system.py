@@ -26,7 +26,7 @@ from posthog.models.experiment import Experiment
 from posthog.models.feature_flag.feature_flag import FeatureFlag
 from posthog.models.file_system.file_system import FileSystem
 from posthog.models.file_system.file_system_view_log import FileSystemViewLog
-from posthog.models.hog_functions.hog_function import HogFunction, HogFunctionType
+from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
 from posthog.models.insight import Insight
 from posthog.models.link import Link
 from posthog.models.surveys.survey import Survey
@@ -192,14 +192,14 @@ FILE_SYSTEM_ACTIVITY_CASES: list[tuple[str, FileSystemActivityCase]] = [
         ),
     ),
     (
-        "hog_function",
+        "custom_function",
         FileSystemActivityCase(
-            type_string=f"hog_function/{HogFunctionType.DESTINATION}",
-            scope="HogFunction",
-            create_instance=lambda test: HogFunction.objects.create(
+            type_string=f"custom_function/{CustomFunctionType.DESTINATION}",
+            scope="CustomFunction",
+            create_instance=lambda test: CustomFunction.objects.create(
                 team=test.team,
-                name="File system hog function",
-                type=HogFunctionType.DESTINATION,
+                name="File system custom function",
+                type=CustomFunctionType.DESTINATION,
                 hog="return []",
                 created_by=test.user,
             ),

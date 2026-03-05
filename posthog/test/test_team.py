@@ -123,7 +123,7 @@ class TestTeam(BaseTest):
                 self.assertEqual(
                     team.person_on_events_mode, PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_ON_EVENTS
                 )
-                # called more than once when evaluating hogql
+                # called more than once when evaluating insightsql
                 mock_feature_enabled.assert_called_with(
                     "persons-on-events-v2-reads-enabled",
                     str(team.uuid),

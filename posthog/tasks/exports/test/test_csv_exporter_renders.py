@@ -21,7 +21,7 @@ for file in os.listdir(directory):
 
 
 @pytest.mark.parametrize("filename", fixtures)
-@pytest.mark.parametrize("mode", ("legacy", "hogql"))
+@pytest.mark.parametrize("mode", ("legacy", "insightsql"))
 @pytest.mark.django_db
 @patch("posthog.tasks.exports.csv_exporter.requests.request")
 @patch("posthog.tasks.exports.csv_exporter.process_query_dict")
@@ -53,12 +53,12 @@ def test_csv_rendering(mock_settings, mock_process_query_dict, mock_request, fil
 
         assert csv_rows == fixture["csv_rows"]
 
-    if mode == "hogql":
+    if mode == "insightsql":
         asset.export_context["source"] = {"some": "query"}
         asset.save()
-        if fixture.get("hogql_response"):
-            # If HogQL has a different response structure, add it to the fixture as `hogql_response`
-            mock_process_query_dict.return_value = fixture["hogql_response"]
+        if fixture.get("insightsql_response"):
+            # If InsightsQL has a different response structure, add it to the fixture as `insightsql_response`
+            mock_process_query_dict.return_value = fixture["insightsql_response"]
         elif fixture["response"].get("results") is not None:
             mock_process_query_dict.return_value = fixture["response"]
         else:

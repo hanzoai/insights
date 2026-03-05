@@ -10,7 +10,7 @@ import {
     CampaignFieldPreference,
     ConversionGoalFilter,
     DatabaseSchemaDataWarehouseTable,
-    HogQLQueryResponse,
+    InsightsQLQueryResponse,
     MARKETING_CAMPAIGN_TABLE_PATTERNS,
     MARKETING_INTEGRATION_FIELD_MAP,
     MarketingAnalyticsColumnsSchemaNames,
@@ -433,11 +433,11 @@ export const marketingAnalyticsSettingsLogic = kea<marketingAnalyticsSettingsLog
 
                 try {
                     const response = await api.query({
-                        kind: NodeKind.HogQLQuery,
+                        kind: NodeKind.InsightsQLQuery,
                         query,
                     })
-                    const hogqlResponse = response as HogQLQueryResponse
-                    const campaigns = (hogqlResponse.results || []).map((row: any[]) => ({
+                    const insightsqlResponse = response as InsightsQLQueryResponse
+                    const campaigns = (insightsqlResponse.results || []).map((row: any[]) => ({
                         name: String(row[0] || ''),
                         id: String(row[1] || ''),
                     }))

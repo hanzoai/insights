@@ -248,9 +248,9 @@ def create_tile(
         ),
         pytest.param(
             create_insight,
-            {"query": {"kind": "HogQLQuery", "query": ""}, "viewed_at_delta": timedelta(days=1)},
+            {"query": {"kind": "InsightsQLQuery", "query": ""}, "viewed_at_delta": timedelta(days=1)},
             TargetCacheAge.MID_PRIORITY,
-            id="insight with HogQLQuery query viewed recently",
+            id="insight with InsightsQLQuery query viewed recently",
         ),
         # other types of query aren't cacheable
         pytest.param(

@@ -31,7 +31,7 @@ import {
     FunnelMathType,
     FunnelsFilterType,
     GroupMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightShortId,
     InsightType,
     IntegrationType,
@@ -84,10 +84,10 @@ export enum NodeKind {
     SessionsQuery = 'SessionsQuery',
     PersonsNode = 'PersonsNode',
     HogQuery = 'HogQuery',
-    HogQLQuery = 'HogQLQuery',
-    HogQLASTQuery = 'HogQLASTQuery',
-    HogQLMetadata = 'HogQLMetadata',
-    HogQLAutocomplete = 'HogQLAutocomplete',
+    InsightsQLQuery = 'InsightsQLQuery',
+    InsightsQLASTQuery = 'InsightsQLASTQuery',
+    InsightsQLMetadata = 'InsightsQLMetadata',
+    InsightsQLAutocomplete = 'InsightsQLAutocomplete',
     ActorsQuery = 'ActorsQuery',
     GroupsQuery = 'GroupsQuery',
     FunnelsActorsQuery = 'FunnelsActorsQuery',
@@ -191,9 +191,9 @@ export type AnyDataNode =
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
     | HogQuery
-    | HogQLQuery
-    | HogQLMetadata
-    | HogQLAutocomplete
+    | InsightsQLQuery
+    | InsightsQLMetadata
+    | InsightsQLAutocomplete
     | RevenueAnalyticsGrossRevenueQuery
     | RevenueAnalyticsMetricsQuery
     | RevenueAnalyticsMRRQuery
@@ -251,10 +251,10 @@ export type QuerySchema =
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
     | HogQuery
-    | HogQLQuery
-    | HogQLMetadata
-    | HogQLAutocomplete
-    | HogQLASTQuery
+    | InsightsQLQuery
+    | InsightsQLMetadata
+    | InsightsQLAutocomplete
+    | InsightsQLASTQuery
     | SessionAttributionExplorerQuery
     | RevenueExampleEventsQuery
     | RevenueExampleDataWarehouseTablesQuery
@@ -356,9 +356,9 @@ export interface Node<R extends Record<string, any> = Record<string, any>> {
 export type AnyResponseType =
     | Record<string, any>
     | HogQueryResponse
-    | HogQLQueryResponse
-    | HogQLMetadataResponse
-    | HogQLAutocompleteResponse
+    | InsightsQLQueryResponse
+    | InsightsQLMetadataResponse
+    | InsightsQLAutocompleteResponse
     | EventsNode['response']
     | EventsQueryResponse
     | SessionsQueryResponse
@@ -380,12 +380,12 @@ export interface QueryLogTags {
 /** @internal - no need to emit to schema.json. */
 export interface DataNode<R extends Record<string, any> = Record<string, any>> extends Node<R> {
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
     tags?: QueryLogTags
 }
 
-/** HogQL Query Options are automatically set per team. However, they can be overridden in the query. */
-export interface HogQLQueryModifiers {
+/** InsightsQL Query Options are automatically set per team. However, they can be overridden in the query. */
+export interface InsightsQLQueryModifiers {
     personsOnEventsMode?:
         | 'disabled' // `disabled` is deprecated and set for removal - `person_id_override_properties_joined` is its faster functional equivalent
         | 'person_id_no_override_properties_on_events'
@@ -411,7 +411,7 @@ export interface HogQLQueryModifiers {
     useWebAnalyticsPreAggregatedTables?: boolean
     formatCsvAllowDoubleQuotes?: boolean
     convertToProjectTimezone?: boolean
-    /** Try to automatically convert HogQL queries to use preaggregated tables at the AST level **/
+    /** Try to automatically convert InsightsQL queries to use preaggregated tables at the AST level **/
     usePreaggregatedTableTransforms?: boolean
     usePreaggregatedIntermediateResults?: boolean
     optimizeProjections?: boolean
@@ -426,7 +426,7 @@ export interface DataWarehouseEventsModifier {
     id_field: string
 }
 
-export interface HogQLQueryResponse<T = any[]> extends AnalyticsQueryResponseBase {
+export interface InsightsQLQueryResponse<T = any[]> extends AnalyticsQueryResponseBase {
     results: T
     /** Input query string */
     query?: string
@@ -439,34 +439,34 @@ export interface HogQLQueryResponse<T = any[]> extends AnalyticsQueryResponseBas
     /** Query explanation output */
     explain?: string[]
     /** Query metadata output */
-    metadata?: HogQLMetadataResponse
+    metadata?: InsightsQLMetadataResponse
     hasMore?: boolean
     limit?: integer
     offset?: integer
 }
 
-export type CachedHogQLQueryResponse = CachedQueryResponse<HogQLQueryResponse>
+export type CachedInsightsQLQueryResponse = CachedQueryResponse<InsightsQLQueryResponse>
 
-/** Filters object that will be converted to a HogQL {filters} placeholder */
-export interface HogQLFilters {
+/** Filters object that will be converted to a InsightsQL {filters} placeholder */
+export interface InsightsQLFilters {
     properties?: AnyPropertyFilter[]
     dateRange?: DateRange
     filterTestAccounts?: boolean
 }
 
-export interface HogQLVariable {
+export interface InsightsQLVariable {
     variableId: string
     code_name: string
     value?: any
     isNull?: boolean
 }
 
-export interface HogQLQuery extends DataNode<HogQLQueryResponse> {
-    kind: NodeKind.HogQLQuery
+export interface InsightsQLQuery extends DataNode<InsightsQLQueryResponse> {
+    kind: NodeKind.InsightsQLQuery
     query: string
-    filters?: HogQLFilters
+    filters?: InsightsQLFilters
     /** Variables to be substituted into the query */
-    variables?: Record<string, HogQLVariable>
+    variables?: Record<string, InsightsQLVariable>
     /** Constant values that can be referenced with the {placeholder} syntax in the query */
     values?: Record<string, any>
     /** @deprecated use modifiers.debug instead */
@@ -475,8 +475,8 @@ export interface HogQLQuery extends DataNode<HogQLQueryResponse> {
     name?: string
 }
 
-export interface HogQLASTQuery extends Omit<HogQLQuery, 'query' | 'kind'> {
-    kind: NodeKind.HogQLASTQuery
+export interface InsightsQLASTQuery extends Omit<InsightsQLQuery, 'query' | 'kind'> {
+    kind: NodeKind.InsightsQLASTQuery
     query: Record<string, any>
 }
 
@@ -568,7 +568,7 @@ export interface RecordingsQuery extends DataNode<RecordingsQueryResponse> {
     user_modified_filters?: Record<string, any>
 }
 
-export interface HogQLNotice {
+export interface InsightsQLNotice {
     start?: integer
     end?: integer
     message: string
@@ -582,13 +582,13 @@ export enum QueryIndexUsage {
     Yes = 'yes',
 }
 
-export interface HogQLMetadataResponse {
+export interface InsightsQLMetadataResponse {
     query?: string
     isValid?: boolean
     isUsingIndices?: QueryIndexUsage
-    errors: HogQLNotice[]
-    warnings: HogQLNotice[]
-    notices: HogQLNotice[]
+    errors: InsightsQLNotice[]
+    warnings: InsightsQLNotice[]
+    notices: InsightsQLNotice[]
     query_status?: never
     table_names?: string[]
     ch_table_names?: string[]
@@ -652,7 +652,7 @@ export interface AutocompleteCompletionItem {
     kind: AutocompleteCompletionItemKind
 }
 
-export interface HogQLAutocompleteResponse {
+export interface InsightsQLAutocompleteResponse {
     suggestions: AutocompleteCompletionItem[]
     /** Whether or not the suggestions returned are complete */
     incomplete_list: boolean
@@ -664,14 +664,14 @@ export interface HogQLAutocompleteResponse {
 export enum HogLanguage {
     hog = 'hog',
     hogJson = 'hogJson',
-    hogQL = 'hogQL',
-    hogQLExpr = 'hogQLExpr',
+    insightsQL = 'insightsQL',
+    insightsQLExpr = 'insightsQLExpr',
     hogTemplate = 'hogTemplate',
     liquid = 'liquid',
 }
 
-export interface HogQLMetadata extends DataNode<HogQLMetadataResponse> {
-    kind: NodeKind.HogQLMetadata
+export interface InsightsQLMetadata extends DataNode<InsightsQLMetadataResponse> {
+    kind: NodeKind.InsightsQLMetadata
     /** Language to validate */
     language: HogLanguage
     /** Query to validate */
@@ -681,15 +681,15 @@ export interface HogQLMetadata extends DataNode<HogQLMetadataResponse> {
     /** Extra globals for the query */
     globals?: Record<string, any>
     /** Extra filters applied to query via {filters} */
-    filters?: HogQLFilters
+    filters?: InsightsQLFilters
     /** Variables to be subsituted into the query */
-    variables?: Record<string, HogQLVariable>
+    variables?: Record<string, InsightsQLVariable>
     /** Enable more verbose output, usually run from the /debug page */
     debug?: boolean
 }
 
-export interface HogQLAutocomplete extends DataNode<HogQLAutocompleteResponse> {
-    kind: NodeKind.HogQLAutocomplete
+export interface InsightsQLAutocomplete extends DataNode<InsightsQLAutocompleteResponse> {
+    kind: NodeKind.InsightsQLAutocomplete
     /** Language to validate */
     language: HogLanguage
     /** Query to validate */
@@ -699,7 +699,7 @@ export interface HogQLAutocomplete extends DataNode<HogQLAutocompleteResponse> {
     /** Global values in scope */
     globals?: Record<string, any>
     /** Table to validate the expression against */
-    filters?: HogQLFilters
+    filters?: InsightsQLFilters
     /**
      * Start position of the editor word
      */
@@ -716,7 +716,7 @@ export type MathType =
     | PropertyMathType
     | CountPerActorMathType
     | GroupMathType
-    | HogQLMathType
+    | InsightsQLMathType
     | ExperimentMetricMathType
     | CalendarHeatmapMathType
 
@@ -728,7 +728,7 @@ export interface EntityNode extends Node {
     math_property?: string
     math_property_type?: string
     math_property_revenue_currency?: RevenueCurrencyPropertyConfig
-    math_hogql?: string
+    math_insightsql?: string
     math_group_type_index?: 0 | 1 | 2 | 3 | 4
     /** Properties configurable in the interface */
     properties?: AnyPropertyFilter[]
@@ -784,7 +784,7 @@ export interface EventsQueryResponse extends AnalyticsQueryResponseBase {
     results: any[][]
     columns: any[]
     types: string[]
-    hogql: string
+    insightsql: string
     hasMore?: boolean
     limit?: integer
     offset?: integer
@@ -807,9 +807,9 @@ export interface EventsQuery extends DataNode<EventsQueryResponse> {
     /** source for querying events for insights */
     source?: InsightActorsQuery
     /** Return a limited set of data. Required. */
-    select: HogQLExpression[]
-    /** HogQL filters to apply on returned data */
-    where?: HogQLExpression[]
+    select: InsightsQLExpression[]
+    /** InsightsQL filters to apply on returned data */
+    where?: InsightsQLExpression[]
     /** Properties configurable in the interface */
     properties?: AnyPropertyFilter[]
     /** Fixed properties in the query, can't be edited in the interface (e.g. scoping down by person) */
@@ -846,7 +846,7 @@ export interface SessionsQueryResponse extends AnalyticsQueryResponseBase {
     results: any[][]
     columns: any[]
     types: string[]
-    hogql: string
+    insightsql: string
     hasMore?: boolean
     limit?: integer
     offset?: integer
@@ -857,9 +857,9 @@ export type CachedSessionsQueryResponse = CachedQueryResponse<SessionsQueryRespo
 export interface SessionsQuery extends DataNode<SessionsQueryResponse> {
     kind: NodeKind.SessionsQuery
     /** Return a limited set of data. Required. */
-    select: HogQLExpression[]
-    /** HogQL filters to apply on returned data */
-    where?: HogQLExpression[]
+    select: InsightsQLExpression[]
+    /** InsightsQL filters to apply on returned data */
+    where?: InsightsQLExpression[]
     /** Properties configurable in the interface */
     properties?: AnyPropertyFilter[]
     /** Fixed properties in the query, can't be edited in the interface (e.g. scoping down by person) */
@@ -921,7 +921,7 @@ export interface DataTableNode
                     | PersonsNode
                     | ActorsQuery
                     | GroupsQuery
-                    | HogQLQuery
+                    | InsightsQLQuery
                     | WebOverviewQuery
                     | WebStatsTableQuery
                     | WebExternalClicksTableQuery
@@ -958,7 +958,7 @@ export interface DataTableNode
         | PersonsNode
         | ActorsQuery
         | GroupsQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | WebOverviewQuery
         | WebStatsTableQuery
         | WebExternalClicksTableQuery
@@ -985,11 +985,11 @@ export interface DataTableNode
         | TraceQuery
         | EndpointsUsageTableQuery
     /** Columns shown in the table, unless the `source` provides them. */
-    columns?: HogQLExpression[]
+    columns?: InsightsQLExpression[]
     /** Columns that aren't shown in the table, even if in columns or returned data */
-    hiddenColumns?: HogQLExpression[]
+    hiddenColumns?: InsightsQLExpression[]
     /** Columns that are sticky when scrolling horizontally */
-    pinnedColumns?: HogQLExpression[]
+    pinnedColumns?: InsightsQLExpression[]
     tags?: QueryLogTags
 }
 
@@ -1097,7 +1097,7 @@ export interface SharingConfigurationSettings {
 
 export interface DataVisualizationNode extends Node<never> {
     kind: NodeKind.DataVisualizationNode
-    source: HogQLQuery
+    source: InsightsQLQuery
     display?: ChartDisplayType
     chartSettings?: ChartSettings
     tableSettings?: TableSettings
@@ -1122,8 +1122,8 @@ interface DataTableNodeViewProps {
     showPropertyFilter?: boolean | TaxonomicFilterGroupType[]
     /** Show filter to exclude test accounts */
     showTestAccountFilters?: boolean
-    /** Include a HogQL query editor above HogQL tables */
-    showHogQLEditor?: boolean
+    /** Include a InsightsQL query editor above InsightsQL tables */
+    showInsightsQLEditor?: boolean
     /** Show the kebab menu at the end of the row */
     showActions?: boolean
     /** Show a recording column for events with session recordings */
@@ -1245,7 +1245,7 @@ export interface InsightsQueryBase<R extends AnalyticsQueryResponseBase> extends
     /** Colors used in the insight's visualization */
     dataColorTheme?: number | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
     /** Tags that will be added to the Query log comment */
     tags?: QueryLogTags
 }
@@ -1453,7 +1453,7 @@ export type FunnelsFilter = {
     /** @default first_touch */
     breakdownAttributionType?: FunnelsFilterLegacy['breakdown_attribution_type']
     breakdownAttributionValue?: integer
-    funnelAggregateByHogQL?: FunnelsFilterLegacy['funnel_aggregate_by_hogql']
+    funnelAggregateByInsightsQL?: FunnelsFilterLegacy['funnel_aggregate_by_insightsql']
     /** To select the range of steps for trends & time to convert funnels, 0-indexed */
     funnelToStep?: integer
     funnelFromStep?: integer
@@ -1595,7 +1595,7 @@ export type PathsFilterLegacy = Omit<
 export type PathsFilter = {
     /** @default 50 */
     edgeLimit?: integer
-    pathsHogQLExpression?: PathsFilterLegacy['paths_hogql_expression']
+    pathsInsightsQLExpression?: PathsFilterLegacy['paths_insightsql_expression']
     includeEventTypes?: PathsFilterLegacy['include_event_types']
     startPoint?: PathsFilterLegacy['start_point']
     endPoint?: PathsFilterLegacy['end_point']
@@ -1715,7 +1715,7 @@ export type LifecycleFilter = {
     stacked?: boolean
 }
 
-// See posthog/hogql_queries/query_runner.py `ExecutionMode` for details on what the types mean
+// See posthog/insightsql_queries/query_runner.py `ExecutionMode` for details on what the types mean
 export type RefreshType =
     | 'async'
     | 'async_except_on_cache_miss'
@@ -1728,7 +1728,7 @@ export type RefreshType =
 export interface EndpointRequest {
     name?: string
     description?: string
-    query?: HogQLQuery | InsightQueryNode
+    query?: InsightsQLQuery | InsightQueryNode
     is_active?: boolean
     cache_age_seconds?: number
     /** Whether this endpoint's query results are materialized to S3 */
@@ -1757,7 +1757,7 @@ export interface EndpointRunRequest {
     /**
      * Variables to parameterize the endpoint query. The key is the variable name and the value is the variable value.
      *
-     * For HogQL endpoints:
+     * For InsightsQL endpoints:
      *   Keys must match a variable `code_name` defined in the query (referenced as `{variables.code_name}`).
      *   Example: `{"event_name": "$pageview"}`
      *
@@ -1777,7 +1777,7 @@ export interface EndpointRunRequest {
      * @deprecated Use `variables` instead. Will be removed in a future release.
      *
      * Override dashboard filters for insight endpoints (TrendsQuery, FunnelsQuery, etc.).
-     * Not allowed for HogQL endpoints.
+     * Not allowed for InsightsQL endpoints.
      *
      * For date filtering, use variables: `{"date_from": "2024-01-01", "date_to": "2024-01-31"}`
      */
@@ -1785,7 +1785,7 @@ export interface EndpointRunRequest {
     /** Specific endpoint version to execute. If not provided, the latest version is used. */
     version?: integer
     /**
-     * Whether to include debug information (such as the executed HogQL) in the response.
+     * Whether to include debug information (such as the executed InsightsQL) in the response.
      * @default false
      */
     debug?: boolean
@@ -1817,18 +1817,18 @@ export interface QueryRequest {
     async?: boolean
     /**
      * Submit a JSON string representing a query for PostHog data analysis,
-     * for example a HogQL query.
+     * for example a InsightsQL query.
      *
      * Example payload:
      *
      * ```
      *
-     * {"query": {"kind": "HogQLQuery", "query": "select * from events limit 100"}}
+     * {"query": {"kind": "InsightsQLQuery", "query": "select * from events limit 100"}}
      *
      * ```
      *
-     * For more details on HogQL queries,
-     * see the [PostHog HogQL documentation](/docs/hogql#api-access).
+     * For more details on InsightsQL queries,
+     * see the [PostHog InsightsQL documentation](/docs/insightsql#api-access).
      */
     query: QuerySchema
     filters_override?: DashboardFilter
@@ -1859,12 +1859,12 @@ export interface AnalyticsQueryResponseBase {
     results: any
     /** Measured timings for different parts of the query generation process */
     timings?: QueryTiming[]
-    /** Generated HogQL query. */
-    hogql?: string
+    /** Generated InsightsQL query. */
+    insightsql?: string
     /** Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise. */
     error?: string
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatus
     /** The date range used for the query */
@@ -1986,7 +1986,7 @@ export interface ActorsQueryResponse extends AnalyticsQueryResponseBase {
     results: any[][]
     columns: any[]
     types?: string[]
-    hogql: string
+    insightsql: string
     hasMore?: boolean
     limit: integer
     offset: integer
@@ -1997,8 +1997,8 @@ export type CachedActorsQueryResponse = CachedQueryResponse<ActorsQueryResponse>
 
 export interface ActorsQuery extends DataNode<ActorsQueryResponse> {
     kind: NodeKind.ActorsQuery
-    source?: InsightActorsQuery | FunnelsActorsQuery | FunnelCorrelationActorsQuery | StickinessActorsQuery | HogQLQuery
-    select?: HogQLExpression[]
+    source?: InsightActorsQuery | FunnelsActorsQuery | FunnelCorrelationActorsQuery | StickinessActorsQuery | InsightsQLQuery
+    select?: InsightsQLExpression[]
     search?: string
     /** Currently only person filters supported. No filters for querying groups. See `filter_conditions()` in actor_strategies.py. */
     properties?: AnyPersonScopeFilter[] | PropertyGroupFilterValue
@@ -2016,7 +2016,7 @@ export interface GroupsQueryResponse extends AnalyticsQueryResponseBase {
     kind: NodeKind.GroupsQuery
     columns: any[]
     types: string[]
-    hogql: string
+    insightsql: string
     hasMore?: boolean
     limit: integer
     offset: integer
@@ -2024,7 +2024,7 @@ export interface GroupsQueryResponse extends AnalyticsQueryResponseBase {
 
 export interface GroupsQuery extends DataNode<GroupsQueryResponse> {
     kind: NodeKind.GroupsQuery
-    select?: HogQLExpression[]
+    select?: InsightsQLExpression[]
     search?: string
     properties?: AnyGroupScopeFilter[]
     group_type_index: integer
@@ -2187,7 +2187,7 @@ export interface WebStatsTableQueryResponse extends AnalyticsQueryResponseBase {
     results: unknown[]
     types?: unknown[]
     columns?: unknown[]
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
     hasMore?: boolean
     limit?: integer
@@ -2205,7 +2205,7 @@ export interface WebExternalClicksTableQueryResponse extends AnalyticsQueryRespo
     results: unknown[]
     types?: unknown[]
     columns?: unknown[]
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
     hasMore?: boolean
     limit?: integer
@@ -2222,7 +2222,7 @@ export interface WebGoalsQueryResponse extends AnalyticsQueryResponseBase {
     results: unknown[]
     types?: unknown[]
     columns?: unknown[]
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
     hasMore?: boolean
     limit?: integer
@@ -2648,7 +2648,7 @@ export interface DocumentSimilarityQuery extends DataNode<DocumentSimilarityQuer
     threshold?: number // Some distance under-or-over which results will be excluded - useful mainly if sorting by timestamp
     model: string // Model to do the query with. Only documents embedded with this model will be considered.
 
-    // TODO - these are a hack, and we should expose them as proper HogQL filterables instead, but
+    // TODO - these are a hack, and we should expose them as proper InsightsQL filterables instead, but
     // I don't want to go to war in the taxonomic filter mines right now
     products: string[] // Limit the results to specific products. Empty means all.
     document_types: string[] // Limit the results to specific document types. Empty means all.
@@ -3098,7 +3098,7 @@ export interface ExperimentTrendsQuery extends DataNode<ExperimentTrendsQueryRes
     experiment_id?: integer
     count_query: TrendsQuery
     // Defaults to $feature_flag_called if not specified
-    // https://github.com/PostHog/posthog/blob/master/posthog/hogql_queries/experiments/experiment_trends_query_runner.py
+    // https://github.com/PostHog/posthog/blob/master/posthog/insightsql_queries/experiments/experiment_trends_query_runner.py
     exposure_query?: TrendsQuery
     fingerprint?: string
 }
@@ -3260,7 +3260,7 @@ export interface ExperimentQueryResponse {
     breakdown_results?: ExperimentBreakdownResult[]
 
     clickhouse_sql?: string
-    hogql?: string
+    insightsql?: string
 }
 
 // Strongly typed variants of ExperimentQueryResponse for better type safety
@@ -3341,7 +3341,7 @@ export interface ExperimentBreakdownResult {
 
 export interface NewExperimentQueryResponse {
     clickhouse_sql?: string
-    hogql?: string
+    insightsql?: string
     baseline: ExperimentStatsBaseValidated
     variant_results: ExperimentVariantResultFrequentist[] | ExperimentVariantResultBayesian[]
     breakdown_results?: ExperimentBreakdownResult[]
@@ -3414,7 +3414,7 @@ export type Day = integer
 
 export interface InsightActorsQueryBase extends DataNode<ActorsQueryResponse> {
     includeRecordings?: boolean
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
 }
 
 export interface InsightActorsQuery<S extends InsightsQueryBase<AnalyticsQueryResponseBase> = InsightQuerySource>
@@ -3583,7 +3583,7 @@ export interface DatabaseSchemaSource {
 
 export interface DatabaseSchemaField {
     name: string
-    hogql_value: string
+    insightsql_value: string
     type: DatabaseSerializedFieldType
     schema_valid: boolean
     table?: string
@@ -3612,7 +3612,7 @@ export interface DatabaseSchemaTableCommon {
 
 export interface DatabaseSchemaViewTable extends DatabaseSchemaTableCommon {
     type: 'view'
-    query: HogQLQuery
+    query: InsightsQLQuery
 }
 
 export enum DatabaseSchemaManagedViewTableKind {
@@ -3631,21 +3631,21 @@ export enum DataWarehouseSavedQueryOrigin {
 }
 
 export interface DatabaseSchemaManagedViewTable extends DatabaseSchemaTableCommon {
-    query: HogQLQuery
+    query: InsightsQLQuery
     type: 'managed_view'
     kind: DatabaseSchemaManagedViewTableKind
     source_id?: string
 }
 
 export interface DatabaseSchemaEndpointTable extends DatabaseSchemaTableCommon {
-    query: HogQLQuery
+    query: InsightsQLQuery
     type: 'endpoint'
     status?: string
 }
 
 export interface DatabaseSchemaMaterializedViewTable extends DatabaseSchemaTableCommon {
     type: 'materialized_view'
-    query: HogQLQuery
+    query: InsightsQLQuery
     last_run_at?: string
     status?: string
 }
@@ -3707,7 +3707,7 @@ export type DatabaseSerializedFieldType =
     | 'materialized_view'
     | 'unknown'
 
-export type HogQLExpression = string
+export type InsightsQLExpression = string
 
 // Various utility types below
 
@@ -3730,7 +3730,7 @@ export interface ResolvedDateRangeResponse {
 
 export type MultipleBreakdownType = Extract<
     BreakdownType,
-    'person' | 'event' | 'event_metadata' | 'group' | 'session' | 'hogql' | 'cohort' | 'revenue_analytics'
+    'person' | 'event' | 'event_metadata' | 'group' | 'session' | 'insightsql' | 'cohort' | 'revenue_analytics'
 >
 
 export interface Breakdown {
@@ -3759,7 +3759,7 @@ export interface BreakdownFilter {
     breakdown_hide_other_aggregation?: boolean | null // hides the "other" field for trends
 }
 
-// TODO: Rename to `DashboardFilters` for consistency with `HogQLFilters`
+// TODO: Rename to `DashboardFilters` for consistency with `InsightsQLFilters`
 export interface DashboardFilter {
     date_from?: string | null
     date_to?: string | null
@@ -4401,7 +4401,7 @@ export interface WebTrendsQueryResponse extends AnalyticsQueryResponseBase {
     /** Query explanation output */
     explain?: string[]
     /** Query metadata output */
-    metadata?: HogQLMetadataResponse
+    metadata?: InsightsQLMetadataResponse
     hasMore?: boolean
     limit?: integer
     offset?: integer
@@ -4417,7 +4417,7 @@ export interface MarketingAnalyticsTableQuery
     extends Omit<WebAnalyticsQueryBase<MarketingAnalyticsTableQueryResponse>, 'orderBy'> {
     kind: NodeKind.MarketingAnalyticsTableQuery
     /** Return a limited set of data. Will use default columns if empty. */
-    select?: HogQLExpression[]
+    select?: InsightsQLExpression[]
     /** Columns to order by - similar to EventsQuery format */
     orderBy?: MarketingAnalyticsOrderBy[]
     /** Number of rows to return */
@@ -4442,7 +4442,7 @@ export interface MarketingAnalyticsTableQueryResponse extends AnalyticsQueryResp
     results: MarketingAnalyticsItem[][]
     types?: unknown[]
     columns?: unknown[]
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
     hasMore?: boolean
     limit?: integer
@@ -4453,7 +4453,7 @@ export type CachedMarketingAnalyticsTableQueryResponse = CachedQueryResponse<Mar
 
 export interface MarketingAnalyticsAggregatedQueryResponse extends AnalyticsQueryResponseBase {
     results: Record<string, MarketingAnalyticsItem>
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
 }
 
@@ -4464,7 +4464,7 @@ export interface MarketingAnalyticsAggregatedQuery
     extends Omit<WebAnalyticsQueryBase<MarketingAnalyticsAggregatedQueryResponse>, 'orderBy' | 'limit' | 'offset'> {
     kind: NodeKind.MarketingAnalyticsAggregatedQuery
     /** Return a limited set of data. Will use default columns if empty. */
-    select?: HogQLExpression[]
+    select?: InsightsQLExpression[]
     /** Draft conversion goal that can be set in the UI without saving */
     draftConversionGoal?: ConversionGoalFilter
     /** Filter by integration IDs */
@@ -4481,7 +4481,7 @@ export interface NonIntegratedConversionsTableQuery
     extends Omit<WebAnalyticsQueryBase<NonIntegratedConversionsTableQueryResponse>, 'orderBy'> {
     kind: NodeKind.NonIntegratedConversionsTableQuery
     /** Return a limited set of data. Will use default columns if empty. */
-    select?: HogQLExpression[]
+    select?: InsightsQLExpression[]
     /** Columns to order by */
     orderBy?: MarketingAnalyticsOrderBy[]
     /** Number of rows to return */
@@ -4500,7 +4500,7 @@ export interface NonIntegratedConversionsTableQueryResponse extends AnalyticsQue
     results: MarketingAnalyticsItem[][]
     types?: unknown[]
     columns?: unknown[]
-    hogql?: string
+    insightsql?: string
     samplingRate?: SamplingRate
     hasMore?: boolean
     limit?: integer

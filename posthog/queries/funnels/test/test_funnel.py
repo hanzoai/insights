@@ -3539,7 +3539,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             self.assertEqual(result[1]["name"], "watched movie")
             self.assertEqual(result[1]["count"], 1)
 
-        def test_hogql_aggregation(self):
+        def test_insightsql_aggregation(self):
             # first person
             person_factory(
                 distinct_ids=["user"],
@@ -3570,7 +3570,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                 "funnel_window_days": 14,
             }
 
-            # without hogql aggregation
+            # without insightsql aggregation
             result = self._basic_funnel(filters=basic_filters).run()
             self.assertEqual(result[0]["name"], "user signed up")
             self.assertEqual(result[0]["count"], 2)
@@ -3581,7 +3581,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             result = self._basic_funnel(
                 filters={
                     **basic_filters,
-                    "funnel_aggregate_by_hogql": "properties.$session_id",
+                    "funnel_aggregate_by_insightsql": "properties.$session_id",
                 }
             ).run()
             self.assertEqual(result[0]["count"], 3)
@@ -3589,20 +3589,20 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             self.assertEqual(result[2]["count"], 1)
 
             # distinct_id
-            result = self._basic_funnel(filters={**basic_filters, "funnel_aggregate_by_hogql": "distinct_id"}).run()
+            result = self._basic_funnel(filters={**basic_filters, "funnel_aggregate_by_insightsql": "distinct_id"}).run()
             self.assertEqual(result[0]["count"], 2)
             self.assertEqual(result[1]["count"], 1)
             self.assertEqual(result[2]["count"], 1)
 
             # person_id
-            result = self._basic_funnel(filters={**basic_filters, "funnel_aggregate_by_hogql": "person_id"}).run()
+            result = self._basic_funnel(filters={**basic_filters, "funnel_aggregate_by_insightsql": "person_id"}).run()
             self.assertEqual(result[0]["count"], 2)
             self.assertEqual(result[1]["count"], 1)
             self.assertEqual(result[2]["count"], 1)
 
             # # person.properties.common_prop - not supported!
             # result = self._basic_funnel(
-            #     filters={**basic_filters, "funnel_aggregate_by_hogql": "person.properties.common_prop"}
+            #     filters={**basic_filters, "funnel_aggregate_by_insightsql": "person.properties.common_prop"}
             # ).run()
             # self.assertEqual(result[0]["count"], 1)
             # self.assertEqual(result[1]["count"], 1)

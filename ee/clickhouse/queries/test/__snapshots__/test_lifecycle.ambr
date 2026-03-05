@@ -291,7 +291,7 @@
   GROUP BY status
   '''
 # ---
-# name: TestClickhouseLifecycle.test_lifecycle_hogql_event_properties
+# name: TestClickhouseLifecycle.test_lifecycle_insightsql_event_properties
   '''
   WITH 'day' AS selected_period,
        periods AS
@@ -365,7 +365,7 @@
   GROUP BY status
   '''
 # ---
-# name: TestClickhouseLifecycle.test_lifecycle_hogql_event_properties_materialized
+# name: TestClickhouseLifecycle.test_lifecycle_insightsql_event_properties_materialized
   '''
   WITH 'day' AS selected_period,
        periods AS
@@ -439,7 +439,7 @@
   GROUP BY status
   '''
 # ---
-# name: TestClickhouseLifecycle.test_lifecycle_hogql_person_properties
+# name: TestClickhouseLifecycle.test_lifecycle_insightsql_person_properties
   '''
   WITH 'day' AS selected_period,
        periods AS
@@ -514,7 +514,7 @@
   GROUP BY status
   '''
 # ---
-# name: TestClickhouseLifecycle.test_lifecycle_hogql_person_properties_materialized
+# name: TestClickhouseLifecycle.test_lifecycle_insightsql_person_properties_materialized
   '''
   WITH 'day' AS selected_period,
        periods AS

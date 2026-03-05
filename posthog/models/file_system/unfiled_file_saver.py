@@ -11,7 +11,7 @@ from posthog.models.experiment import Experiment
 from posthog.models.feature_flag import FeatureFlag
 from posthog.models.file_system.file_system import FileSystem, escape_path, split_path
 from posthog.models.file_system.file_system_mixin import FileSystemSyncMixin
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.insight import Insight
 from posthog.models.link import Link
 from posthog.models.surveys.survey import Survey
@@ -33,7 +33,7 @@ MIXIN_MODELS = {
     "early_access_feature": EarlyAccessFeature,
     "session_recording_playlist": SessionRecordingPlaylist,
     "cohort": Cohort,
-    "hog_function": HogFunction,
+    "custom_function": CustomFunction,
     "survey": Survey,
 }
 

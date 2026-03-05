@@ -1,8 +1,8 @@
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.meta_ads.template_meta_ads import template as template_meta_ads
 
 
-class TestTemplateMetaAds(BaseHogFunctionTemplateTest):
+class TestTemplateMetaAds(BaseCustomFunctionTemplateTest):
     template = template_meta_ads
 
     def _inputs(self, **kwargs):

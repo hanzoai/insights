@@ -1,18 +1,18 @@
 """Data access layer for trace clustering.
 
-This module consolidates all HogQL queries used by the clustering workflow,
+This module consolidates all InsightsQL queries used by the clustering workflow,
 providing a single source of truth for data fetching operations.
-All queries are team-scoped through HogQL's automatic team filtering.
+All queries are team-scoped through InsightsQL's automatic team filtering.
 """
 
 from datetime import datetime
 
 import structlog
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.property import property_to_expr
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.property import property_to_expr
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.query_tagging import Product, tags_context
 from posthog.models.team import Team
@@ -48,7 +48,7 @@ def fetch_item_embeddings_for_clustering(
     analysis_level: AnalysisLevel = "trace",
     event_filters: list[dict] | None = None,
 ) -> tuple[list[ItemId], ItemEmbeddings, ItemBatchRunIds]:
-    """Query item IDs and embeddings from document_embeddings table using HogQL.
+    """Query item IDs and embeddings from document_embeddings table using InsightsQL.
 
     When event_filters are provided, uses ClickHouse subqueries to push the
     trace→generation→embedding join into the database rather than materializing
@@ -183,7 +183,7 @@ def fetch_item_embeddings_for_clustering(
             placeholders["generation_event"] = ast.Constant(value="$ai_generation")
 
     with tags_context(product=Product.LLM_ANALYTICS):
-        result = execute_hogql_query(
+        result = execute_insightsql_query(
             query_type="ItemEmbeddingsForClustering",
             query=query,
             placeholders=placeholders,
@@ -233,13 +233,13 @@ def fetch_item_summaries(
     window_end: datetime,
     analysis_level: AnalysisLevel = "trace",
 ) -> ItemSummaries:
-    """Fetch item summaries from $ai_trace_summary or $ai_generation_summary events using HogQL.
+    """Fetch item summaries from $ai_trace_summary or $ai_generation_summary events using InsightsQL.
 
     Filters summaries to only return those matching the batch_run_id from the embeddings,
     ensuring we get the summary from the same summarization run as the embedding.
 
     Args:
-        team: Team object (for HogQL team-scoped queries)
+        team: Team object (for InsightsQL team-scoped queries)
         item_ids: List of item IDs to fetch summaries for (trace_ids or generation_ids)
         batch_run_ids: Mapping of item_id -> batch_run_id from the embeddings query
         window_start: Start of time window
@@ -259,7 +259,7 @@ def fetch_item_summaries(
     # We'll filter by batch_run_id in Python after fetching
     max_rows = len(item_ids) * 5  # Allow for duplicates
 
-    # Use ast.Field placeholder for the ID property so HogQL can resolve materialized columns.
+    # Use ast.Field placeholder for the ID property so InsightsQL can resolve materialized columns.
     # JSONExtractString would bypass materialized column optimization.
     query = parse_select(
         """
@@ -285,7 +285,7 @@ def fetch_item_summaries(
     item_ids_tuple = ast.Tuple(exprs=[ast.Constant(value=iid) for iid in item_ids])
 
     with tags_context(product=Product.LLM_ANALYTICS):
-        result = execute_hogql_query(
+        result = execute_insightsql_query(
             query_type="ItemSummariesForClustering",
             query=query,
             placeholders={
@@ -316,7 +316,7 @@ def fetch_item_summaries(
             skipped_wrong_batch += 1
             continue
 
-        # HogQL parses timestamp strings into datetime objects
+        # InsightsQL parses timestamp strings into datetime objects
         trace_ts = row[5]
         trace_ts_str = trace_ts.isoformat() if trace_ts else ""
 

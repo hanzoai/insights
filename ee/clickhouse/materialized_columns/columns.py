@@ -139,7 +139,7 @@ class MaterializedColumn:
                   AND c.comment not LIKE '%%column_materializer::elements_chain::%%'
                 """,
                 {"database": CLICKHOUSE_DATABASE, "table": table, "data_table": data_table},
-                ch_user=ClickHouseUser.HOGQL,
+                ch_user=ClickHouseUser.INSIGHTSQL,
             )
 
         if table in MATERIALIZATION_VALID_TABLES and MATERIALIZED_COLUMNS_USE_CACHE:
@@ -154,7 +154,7 @@ class MaterializedColumn:
     @staticmethod
     def get_all(table: TablesWithMaterializedColumns) -> Iterator[MaterializedColumn]:
         if table not in MATERIALIZATION_VALID_TABLES:
-            logger.error("HogQL trying to get materialized columns for table: %s", table)
+            logger.error("InsightsQL trying to get materialized columns for table: %s", table)
             return
 
         rows = MaterializedColumn._get_all(table)

@@ -166,12 +166,12 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         response = self.client.get(f"/api/element/stats/?paginate_response=true&properties={properties_filter}").json()
         self.assertEqual(len(response["results"]), 1)
 
-    def test_element_stats_can_filter_by_hogql(self) -> None:
+    def test_element_stats_can_filter_by_insightsql(self) -> None:
         self._setup_events()
         properties_filter = json.dumps(
             [
                 {
-                    "type": "hogql",
+                    "type": "insightsql",
                     "key": "like(properties.$current_url, '%another_page%')",
                 },
             ]

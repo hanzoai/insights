@@ -11,7 +11,7 @@ from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_
 
 from posthog.event_usage import groups
 from posthog.models import ExportedAsset
-from posthog.settings import HOGQL_INCREASED_MAX_EXECUTION_TIME
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from posthog.tasks.exports.failure_handler import (
     EXCEPTIONS_TO_RETRY,
     USER_QUERY_ERRORS,
@@ -68,11 +68,11 @@ def _record_export_failure(exported_asset: ExportedAsset, e: Exception) -> None:
 @shared_task(
     acks_late=True,
     ignore_result=False,
-    # we let the hogql query run for HOGQL_INCREASED_MAX_EXECUTION_TIME, give this some breathing room
+    # we let the insightsql query run for INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME, give this some breathing room
     # soft time limit throws an error and lets us clean up
     # hard time limit kills without a word
-    soft_time_limit=HOGQL_INCREASED_MAX_EXECUTION_TIME + 60,
-    time_limit=HOGQL_INCREASED_MAX_EXECUTION_TIME + 120,
+    soft_time_limit=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 60,
+    time_limit=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 120,
     queue=CeleryQueue.EXPORTS.value,
 )
 def export_asset(

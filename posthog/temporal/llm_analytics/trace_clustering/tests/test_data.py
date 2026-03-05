@@ -31,7 +31,7 @@ def mock_team(db):
 
 class TestBuildPropertyFilterExpr:
     def test_single_filter_returns_expr_directly(self, mock_team):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         result = _build_property_filter_expr(
             [{"key": "$ai_model", "value": "gpt-4", "operator": "exact"}],
@@ -40,7 +40,7 @@ class TestBuildPropertyFilterExpr:
         assert not isinstance(result, ast.And)
 
     def test_multiple_filters_returns_and_expr(self, mock_team):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         result = _build_property_filter_expr(
             [
@@ -54,7 +54,7 @@ class TestBuildPropertyFilterExpr:
 
 
 class TestFetchItemEmbeddingsForClustering:
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_returns_correct_structure(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [
@@ -80,7 +80,7 @@ class TestFetchItemEmbeddingsForClustering:
             "trace_2": "batch_run_123",
         }
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_handles_legacy_rendering_values(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [
@@ -100,7 +100,7 @@ class TestFetchItemEmbeddingsForClustering:
         assert batch_run_ids == {}
         assert trace_ids == ["trace_1", "trace_2"]
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_no_filters_uses_simple_query(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [("trace_1", [0.1, 0.2], "batch_123")]
@@ -118,7 +118,7 @@ class TestFetchItemEmbeddingsForClustering:
         assert "event_types" not in call_kwargs["placeholders"]
         assert "property_filters" not in call_kwargs["placeholders"]
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_trace_level_with_filters_uses_subquery(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [("trace_1", [0.1, 0.2], "batch_123")]
@@ -143,7 +143,7 @@ class TestFetchItemEmbeddingsForClustering:
         # Trace-level should not have generation_event placeholder
         assert "generation_event" not in call_kwargs["placeholders"]
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_generation_level_with_filters_uses_nested_subquery(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [
@@ -171,7 +171,7 @@ class TestFetchItemEmbeddingsForClustering:
         assert "event_types" in call_kwargs["placeholders"]
         assert "property_filters" in call_kwargs["placeholders"]
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_with_filters_returns_empty_when_no_results(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = []
@@ -191,9 +191,9 @@ class TestFetchItemEmbeddingsForClustering:
         assert embeddings_map == {}
         assert batch_run_ids == {}
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_single_query_for_all_cases(self, mock_execute, mock_team):
-        """All cases (no filters, trace+filters, generation+filters) use a single execute_hogql_query call."""
+        """All cases (no filters, trace+filters, generation+filters) use a single execute_insightsql_query call."""
         mock_result = MagicMock()
         mock_result.results = [("id_1", [0.1], "batch_1")]
         mock_execute.return_value = mock_result
@@ -214,7 +214,7 @@ class TestFetchItemEmbeddingsForClustering:
 
 
 class TestFetchItemSummaries:
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_returns_summaries_for_item_ids(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [
@@ -255,7 +255,7 @@ class TestFetchItemSummaries:
         assert summaries["trace_1"]["title"] == "Title 1"
         assert summaries["trace_2"]["title"] == "Title 2"
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_filters_by_batch_run_id(self, mock_execute, mock_team):
         mock_result = MagicMock()
         # Two summaries for trace_1: one with matching batch_run_id, one without
@@ -295,7 +295,7 @@ class TestFetchItemSummaries:
         # Only the summary with matching batch_run_id should be returned
         assert summaries["trace_1"]["title"] == "Correct Title"
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_accepts_legacy_summaries_without_batch_run_id(self, mock_execute, mock_team):
         mock_result = MagicMock()
         mock_result.results = [
@@ -326,7 +326,7 @@ class TestFetchItemSummaries:
 
         assert summaries == {}
 
-    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_hogql_query")
+    @patch("posthog.temporal.llm_analytics.trace_clustering.data.execute_insightsql_query")
     def test_extracts_timestamp_as_iso_string(self, mock_execute, mock_team):
         test_timestamp = datetime(2025, 1, 5, 10, 30, 45)
         mock_result = MagicMock()

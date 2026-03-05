@@ -99,13 +99,13 @@ const dataWarehousePopoverFields: DataWarehousePopoverField[] = [
     {
         key: 'data_warehouse_join_key',
         label: 'Data Warehouse Join Key',
-        allowHogQL: true,
+        allowInsightsQL: true,
     },
     {
         key: 'events_join_key',
         label: 'Events Join Key',
-        allowHogQL: true,
-        hogQLOnly: true,
+        allowInsightsQL: true,
+        insightsQLOnly: true,
         tableName: 'events',
     },
 ]
@@ -333,16 +333,16 @@ export function ExperimentMetricForm({
                             dataWarehousePopoverFields={dataWarehousePopoverFields}
                             {...commonActionFilterProps}
                         />
-                        {metric.source.math === ExperimentMetricMathType.HogQL && (
+                        {metric.source.math === ExperimentMetricMathType.InsightsQL && (
                             <div className="text-muted text-sm mt-2">
                                 SQL expressions allow you to write custom computations and aggregations. The expression
                                 should return a numeric value and will be evaluated for each user in the experiment.{' '}
                                 <Link
-                                    to="https://posthog.com/docs/hogql/expressions"
+                                    to="https://posthog.com/docs/insightsql/expressions"
                                     target="_blank"
                                     disableDocsPanel={true}
                                 >
-                                    Learn more about HogQL expressions
+                                    Learn more about InsightsQL expressions
                                 </Link>
                             </div>
                         )}

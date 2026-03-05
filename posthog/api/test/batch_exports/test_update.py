@@ -527,8 +527,8 @@ def test_can_patch_config_with_invalid_old_values(client: HttpClient, interval, 
     assert args.get("invalid_key", None) is None
 
 
-def test_can_patch_hogql_query(client: HttpClient, temporal, organization, team, user):
-    """Test we can patch a schema with a HogQL query."""
+def test_can_patch_insightsql_query(client: HttpClient, temporal, organization, team, user):
+    """Test we can patch a schema with a InsightsQL query."""
     destination_data = {
         "type": "S3",
         "config": {
@@ -557,7 +557,7 @@ def test_can_patch_hogql_query(client: HttpClient, temporal, organization, team,
 
     new_batch_export_data = {
         "name": "my-production-s3-bucket-destination",
-        "hogql_query": "select toString(uuid) as uuid, 'test' as test, toInt(1+1) as n from events",
+        "insightsql_query": "select toString(uuid) as uuid, 'test' as test, toInt(1+1) as n from events",
     }
 
     response = patch_batch_export(client, team.pk, batch_export["id"], new_batch_export_data)
@@ -574,15 +574,15 @@ def test_can_patch_hogql_query(client: HttpClient, temporal, organization, team,
             },
             {
                 "alias": "test",
-                "expression": "%(hogql_val_0)s",
+                "expression": "%(insightsql_val_0)s",
             },
             {
                 "alias": "n",
-                "expression": "accurateCastOrNull(plus(1, 1), %(hogql_val_1)s)",
+                "expression": "accurateCastOrNull(plus(1, 1), %(insightsql_val_1)s)",
             },
         ],
-        "values": {"hogql_val_0": "test", "hogql_val_1": "Int64"},
-        "hogql_query": "SELECT toString(uuid) AS uuid, 'test' AS test, toInt(plus(1, 1)) AS n FROM events",
+        "values": {"insightsql_val_0": "test", "insightsql_val_1": "Int64"},
+        "insightsql_query": "SELECT toString(uuid) AS uuid, 'test' AS test, toInt(plus(1, 1)) AS n FROM events",
     }
 
     # validate the underlying temporal schedule has been updated
@@ -604,20 +604,20 @@ def test_can_patch_hogql_query(client: HttpClient, temporal, organization, team,
                 },
                 {
                     "alias": "test",
-                    "expression": "%(hogql_val_0)s",
+                    "expression": "%(insightsql_val_0)s",
                 },
                 {
                     "alias": "n",
-                    "expression": "accurateCastOrNull(plus(1, 1), %(hogql_val_1)s)",
+                    "expression": "accurateCastOrNull(plus(1, 1), %(insightsql_val_1)s)",
                 },
             ],
-            "values": {"hogql_val_0": "test", "hogql_val_1": "Int64"},
-            "hogql_query": "SELECT toString(uuid) AS uuid, 'test' AS test, toInt(plus(1, 1)) AS n FROM events",
+            "values": {"insightsql_val_0": "test", "insightsql_val_1": "Int64"},
+            "insightsql_query": "SELECT toString(uuid) AS uuid, 'test' AS test, toInt(plus(1, 1)) AS n FROM events",
         },
     }
 
 
-def test_patch_returns_error_on_unsupported_hogql_query(client: HttpClient, temporal, organization, team, user):
+def test_patch_returns_error_on_unsupported_insightsql_query(client: HttpClient, temporal, organization, team, user):
     destination_data = {
         "type": "S3",
         "config": {
@@ -647,8 +647,8 @@ def test_patch_returns_error_on_unsupported_hogql_query(client: HttpClient, temp
 
     new_batch_export_data = {
         "name": "my-production-s3-bucket-destination",
-        # toInt32 is not a supported HogQL function
-        "hogql_query": "select toInt32(1+1) as n from events",
+        # toInt32 is not a supported InsightsQL function
+        "insightsql_query": "select toInt32(1+1) as n from events",
     }
     response = put_batch_export(client, team.pk, batch_export["id"], new_batch_export_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST

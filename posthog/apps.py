@@ -81,11 +81,11 @@ class PostHogConfig(AppConfig):
             setup_async_migrations()
 
         from posthog.api.file_system import registrations as file_system_registrations
-        from posthog.tasks.hog_functions import queue_sync_hog_function_templates
+        from posthog.tasks.custom_functions import queue_sync_custom_function_templates
 
         # Skip during tests since we handle this in conftest.py
         if not settings.TEST:
-            queue_sync_hog_function_templates()
+            queue_sync_custom_function_templates()
 
         file_system_registrations.register_core_file_system_types()
 

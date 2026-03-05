@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send SMS alerts via Kudosity when PostHog events or metrics cross thresholds. Ideal for operational monitoring, on-call notifications, and business metric tracking.",
     icon_url="/static/services/kudosity.png",
     category=["SMS & Push Notifications", "Monitoring & Alerts"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 // Validate required fields
 if (empty(inputs.recipient)) {

@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send user, company, and event data to Userlist",
     icon_url="/static/services/userlist.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let base_uri := 'https://incoming.userlist.com/posthog'
 

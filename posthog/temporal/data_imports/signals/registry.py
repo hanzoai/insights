@@ -31,7 +31,7 @@ class SignalSourceTableConfig(BaseModel):
     partition_field: str
     # Columns to SELECT — only what the emitter and extra metadata need
     fields: tuple[str, ...]
-    # Optional HogQL WHERE clause, e.g. "status NOT IN ('closed', 'solved')"
+    # Optional InsightsQL WHERE clause, e.g. "status NOT IN ('closed', 'solved')"
     where_clause: str | None = None
     # Max records to process per sync
     max_records: int = 1000

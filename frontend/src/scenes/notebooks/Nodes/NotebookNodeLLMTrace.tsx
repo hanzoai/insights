@@ -141,7 +141,7 @@ const Settings = ({ attributes }: NotebookNodeAttributeProperties<NotebookNodeLL
                                 TaxonomicFilterGroupType.PersonProperties,
                                 ...groupsTaxonomicTypes,
                                 TaxonomicFilterGroupType.Cohorts,
-                                TaxonomicFilterGroupType.HogQLExpression,
+                                TaxonomicFilterGroupType.InsightsQLExpression,
                             ]}
                         />
                         <DataTableSavedFiltersButton

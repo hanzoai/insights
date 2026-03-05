@@ -14,7 +14,7 @@ import { urls } from 'scenes/urls'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { Query } from '~/queries/Query/Query'
 import { Node } from '~/queries/schema/schema-general'
-import { containsHogQLQuery, isInsightVizNode } from '~/queries/utils'
+import { containsInsightsQLQuery, isInsightVizNode } from '~/queries/utils'
 import { InsightShortId, ItemMode } from '~/types'
 
 import { teamLogic } from '../teamLogic'
@@ -117,7 +117,7 @@ export function InsightAsScene({ insightId, attachTo, tabId }: InsightAsScenePro
                     context={{
                         showOpenEditorButton: false,
                         showQueryEditor: actuallyShowQueryEditor,
-                        showQueryHelp: insightMode === ItemMode.Edit && !containsHogQLQuery(query),
+                        showQueryHelp: insightMode === ItemMode.Edit && !containsInsightsQLQuery(query),
                         insightProps,
                     }}
                     filtersOverride={filtersOverride}

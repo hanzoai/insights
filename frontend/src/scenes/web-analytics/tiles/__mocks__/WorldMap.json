@@ -4,7 +4,7 @@
     "calculation_trigger": null,
     "error": "",
     "hasMore": false,
-    "hogql": "SELECT\n    sum(total) AS total,\n    if(ifNull(greaterOrEquals(row_number, 251), 0), '$$_posthog_breakdown_other_$$', breakdown_value) AS breakdown_value\nFROM\n    (SELECT\n        count AS total,\n        breakdown_value AS breakdown_value,\n        row_number() OVER (ORDER BY total DESC) AS row_number\n    FROM\n        (SELECT\n            sum(total) AS count,\n            breakdown_value\n        FROM\n            (SELECT\n                count(DISTINCT e.person_id) AS total,\n                ifNull(nullIf(toString(properties.$geoip_country_code), ''), '$$_posthog_breakdown_null_$$') AS breakdown_value\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2025-01-06 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2025-01-20 23:59:59'))), equals(event, '$pageview'))\n            GROUP BY\n                breakdown_value)\n        GROUP BY\n            breakdown_value\n        ORDER BY\n            breakdown_value ASC)\n    ORDER BY\n        total DESC,\n        breakdown_value ASC)\nWHERE\n    notEquals(breakdown_value, NULL)\nGROUP BY\n    breakdown_value\nORDER BY\n    if(equals(breakdown_value, '$$_posthog_breakdown_other_$$'), 2, if(equals(breakdown_value, '$$_posthog_breakdown_null_$$'), 1, 0)) ASC,\n    total DESC,\n    breakdown_value ASC\nLIMIT 50000",
+    "insightsql": "SELECT\n    sum(total) AS total,\n    if(ifNull(greaterOrEquals(row_number, 251), 0), '$$_posthog_breakdown_other_$$', breakdown_value) AS breakdown_value\nFROM\n    (SELECT\n        count AS total,\n        breakdown_value AS breakdown_value,\n        row_number() OVER (ORDER BY total DESC) AS row_number\n    FROM\n        (SELECT\n            sum(total) AS count,\n            breakdown_value\n        FROM\n            (SELECT\n                count(DISTINCT e.person_id) AS total,\n                ifNull(nullIf(toString(properties.$geoip_country_code), ''), '$$_posthog_breakdown_null_$$') AS breakdown_value\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2025-01-06 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2025-01-20 23:59:59'))), equals(event, '$pageview'))\n            GROUP BY\n                breakdown_value)\n        GROUP BY\n            breakdown_value\n        ORDER BY\n            breakdown_value ASC)\n    ORDER BY\n        total DESC,\n        breakdown_value ASC)\nWHERE\n    notEquals(breakdown_value, NULL)\nGROUP BY\n    breakdown_value\nORDER BY\n    if(equals(breakdown_value, '$$_posthog_breakdown_other_$$'), 2, if(equals(breakdown_value, '$$_posthog_breakdown_null_$$'), 1, 0)) ASC,\n    total DESC,\n    breakdown_value ASC\nLIMIT 50000",
     "is_cached": false,
     "last_refresh": "2025-01-20T21:45:54.521201Z",
     "modifiers": {
@@ -78,7 +78,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -135,7 +135,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -192,7 +192,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -249,7 +249,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -306,7 +306,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -363,7 +363,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -420,7 +420,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -477,7 +477,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -534,7 +534,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -591,7 +591,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -648,7 +648,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -705,7 +705,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -762,7 +762,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -819,7 +819,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -876,7 +876,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -933,7 +933,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -990,7 +990,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1047,7 +1047,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1104,7 +1104,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1161,7 +1161,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1218,7 +1218,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1275,7 +1275,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1332,7 +1332,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1389,7 +1389,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1446,7 +1446,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1503,7 +1503,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1560,7 +1560,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1617,7 +1617,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1674,7 +1674,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1731,7 +1731,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1788,7 +1788,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1845,7 +1845,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1902,7 +1902,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -1959,7 +1959,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2016,7 +2016,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2073,7 +2073,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2130,7 +2130,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2187,7 +2187,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2244,7 +2244,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2301,7 +2301,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2358,7 +2358,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2415,7 +2415,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2472,7 +2472,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2529,7 +2529,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2586,7 +2586,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2643,7 +2643,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2700,7 +2700,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2757,7 +2757,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2814,7 +2814,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2871,7 +2871,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2928,7 +2928,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -2985,7 +2985,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3042,7 +3042,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3099,7 +3099,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3156,7 +3156,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3213,7 +3213,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3270,7 +3270,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3327,7 +3327,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3384,7 +3384,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3441,7 +3441,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3498,7 +3498,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3555,7 +3555,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3612,7 +3612,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3669,7 +3669,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3726,7 +3726,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3783,7 +3783,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3840,7 +3840,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3897,7 +3897,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -3954,7 +3954,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4011,7 +4011,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4068,7 +4068,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4125,7 +4125,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4182,7 +4182,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4239,7 +4239,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4296,7 +4296,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4353,7 +4353,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4410,7 +4410,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4467,7 +4467,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4524,7 +4524,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4581,7 +4581,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4638,7 +4638,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4695,7 +4695,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4752,7 +4752,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4809,7 +4809,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4866,7 +4866,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4923,7 +4923,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -4980,7 +4980,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5037,7 +5037,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5094,7 +5094,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5151,7 +5151,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5208,7 +5208,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5265,7 +5265,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5322,7 +5322,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5379,7 +5379,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5436,7 +5436,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5493,7 +5493,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5550,7 +5550,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5607,7 +5607,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5664,7 +5664,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5721,7 +5721,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5778,7 +5778,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5835,7 +5835,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5892,7 +5892,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -5949,7 +5949,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6006,7 +6006,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6063,7 +6063,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6120,7 +6120,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6177,7 +6177,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6234,7 +6234,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6291,7 +6291,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6348,7 +6348,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6405,7 +6405,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6462,7 +6462,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6519,7 +6519,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6576,7 +6576,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6633,7 +6633,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6690,7 +6690,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6747,7 +6747,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6804,7 +6804,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6861,7 +6861,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6918,7 +6918,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -6975,7 +6975,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7032,7 +7032,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7089,7 +7089,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7146,7 +7146,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7203,7 +7203,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7260,7 +7260,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7317,7 +7317,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7374,7 +7374,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7431,7 +7431,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7488,7 +7488,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7545,7 +7545,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7602,7 +7602,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7659,7 +7659,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7716,7 +7716,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7773,7 +7773,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7830,7 +7830,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7887,7 +7887,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -7944,7 +7944,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8001,7 +8001,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8058,7 +8058,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8115,7 +8115,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8172,7 +8172,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8229,7 +8229,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8286,7 +8286,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8343,7 +8343,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8400,7 +8400,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8457,7 +8457,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8514,7 +8514,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8571,7 +8571,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8628,7 +8628,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8685,7 +8685,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8742,7 +8742,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8799,7 +8799,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8856,7 +8856,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8913,7 +8913,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -8970,7 +8970,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9027,7 +9027,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9084,7 +9084,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9141,7 +9141,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9198,7 +9198,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9255,7 +9255,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9312,7 +9312,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9369,7 +9369,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9426,7 +9426,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9483,7 +9483,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9540,7 +9540,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9597,7 +9597,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9654,7 +9654,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9711,7 +9711,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9768,7 +9768,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9825,7 +9825,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9882,7 +9882,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9939,7 +9939,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -9996,7 +9996,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10053,7 +10053,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10110,7 +10110,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10167,7 +10167,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10224,7 +10224,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10281,7 +10281,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10338,7 +10338,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10395,7 +10395,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10452,7 +10452,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10509,7 +10509,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10566,7 +10566,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10623,7 +10623,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10680,7 +10680,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10737,7 +10737,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10794,7 +10794,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10851,7 +10851,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10908,7 +10908,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -10965,7 +10965,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11022,7 +11022,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11079,7 +11079,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11136,7 +11136,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11193,7 +11193,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11250,7 +11250,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11307,7 +11307,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11364,7 +11364,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11421,7 +11421,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },
@@ -11478,7 +11478,7 @@
                 "custom_name": null,
                 "math": "dau",
                 "math_property": null,
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             },

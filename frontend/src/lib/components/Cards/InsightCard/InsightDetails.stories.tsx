@@ -75,14 +75,14 @@ Lifecycle.args = {
     insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/lifecycle.json'),
 }
 
-export const DataTableHogQLQuery = Template.bind({})
-DataTableHogQLQuery.args = {
-    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataTableHogQL.json'),
+export const DataTableInsightsQLQuery = Template.bind({})
+DataTableInsightsQLQuery.args = {
+    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataTableInsightsQL.json'),
 }
 
-export const DataVisualizationHogQLQuery = Template.bind({})
-DataVisualizationHogQLQuery.args = {
-    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataVisualizationHogQL.json'),
+export const DataVisualizationInsightsQLQuery = Template.bind({})
+DataVisualizationInsightsQLQuery.args = {
+    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataVisualizationInsightsQL.json'),
 }
 
 export const DataTableEventsQuery = Template.bind({})

@@ -24,8 +24,8 @@ from temporalio.client import (
     ScheduleState,
 )
 
-from posthog.hogql.database.database import Database
-from posthog.hogql.hogql import HogQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.insightsql import InsightsQLContext
 
 from posthog.batch_exports.models import BatchExport, BatchExportBackfill, BatchExportDestination, BatchExportRun
 from posthog.clickhouse.client import sync_execute
@@ -871,7 +871,7 @@ def sync_batch_export(batch_export: BatchExport, created: bool):
         else settings.BATCH_EXPORTS_TASK_QUEUE
     )
 
-    context = HogQLContext(
+    context = InsightsQLContext(
         team_id=batch_export.team.id,
         enable_select_queries=True,
         limit_top_select=False,

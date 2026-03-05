@@ -14,17 +14,17 @@ from structlog.contextvars import bind_contextvars
 from structlog.types import FilteringBoundLogger
 from temporalio import activity
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLGlobalSettings
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database
-from posthog.hogql.errors import ParsingError
-from posthog.hogql.parser import parse_select
-from posthog.hogql.printer import prepare_ast_for_printing, print_prepared_ast
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.errors import ParsingError
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 
 from posthog.clickhouse.query_tagging import Feature, Product, tag_queries
 from posthog.models import Team
-from posthog.settings import HOGQL_INCREASED_MAX_EXECUTION_TIME
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from posthog.settings.base_variables import TEST
 from posthog.sync import database_sync_to_async
 from posthog.temporal.common.clickhouse import get_client as get_clickhouse_client
@@ -44,9 +44,9 @@ CLICKHOUSE_MAX_BLOCK_SIZE_ROWS = 50 * 1000
 DELTA_TABLE_RETENTION_HOURS = 24
 
 
-class EmptyHogQLResponseColumnsError(Exception):
+class EmptyInsightsQLResponseColumnsError(Exception):
     def __init__(self):
-        super().__init__("After running a HogQL query, no columns were returned")
+        super().__init__("After running a InsightsQL query, no columns were returned")
 
 
 class InvalidNodeTypeException(Exception):
@@ -207,15 +207,15 @@ def _transform_unsupported_decimals(batch: pa.RecordBatch) -> pa.RecordBatch:
 
 
 async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogger) -> int:
-    """Get the total row count for a HogQL query."""
+    """Get the total row count for a InsightsQL query."""
     count_query = f"SELECT count() FROM ({query})"
 
     query_node = parse_select(count_query)
 
-    settings = HogQLGlobalSettings()
-    settings.max_execution_time = HOGQL_INCREASED_MAX_EXECUTION_TIME
+    settings = InsightsQLGlobalSettings()
+    settings.max_execution_time = INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
-    context = HogQLContext(
+    context = InsightsQLContext(
         team=team,
         enable_select_queries=True,
         limit_top_select=False,
@@ -223,15 +223,15 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
     context.output_format = "TabSeparated"
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
-    prepared_hogql_query = await database_sync_to_async(prepare_ast_for_printing)(
+    prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
         query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
     )
 
-    if prepared_hogql_query is None:
-        raise EmptyHogQLResponseColumnsError()
+    if prepared_insightsql_query is None:
+        raise EmptyInsightsQLResponseColumnsError()
 
     printed = await database_sync_to_async(print_prepared_ast)(
-        prepared_hogql_query,
+        prepared_insightsql_query,
         context=context,
         dialect="clickhouse",
         settings=settings,
@@ -246,30 +246,30 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
         return count
 
 
-async def hogql_table(query: str, team: Team, logger: FilteringBoundLogger):
-    """Execute a HogQL query and yield batches of results."""
+async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger):
+    """Execute a InsightsQL query and yield batches of results."""
     query_node = parse_select(query)
     if query_node is None:
         raise ParsingError(f"Failed to parse query node from query, parse_select() returned None: query={query}")
 
-    settings = HogQLGlobalSettings()
-    settings.max_execution_time = HOGQL_INCREASED_MAX_EXECUTION_TIME
+    settings = InsightsQLGlobalSettings()
+    settings.max_execution_time = INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
-    context = HogQLContext(
+    context = InsightsQLContext(
         team=team,
         enable_select_queries=True,
         limit_top_select=False,
     )
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
-    prepared_hogql_query = await database_sync_to_async(prepare_ast_for_printing)(
+    prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
         query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
     )
-    if prepared_hogql_query is None:
-        raise EmptyHogQLResponseColumnsError()
+    if prepared_insightsql_query is None:
+        raise EmptyInsightsQLResponseColumnsError()
 
     printed = await database_sync_to_async(print_prepared_ast)(
-        prepared_hogql_query,
+        prepared_insightsql_query,
         context=context,
         dialect="clickhouse",
         settings=settings,
@@ -327,15 +327,15 @@ async def hogql_table(query: str, team: Team, logger: FilteringBoundLogger):
     context.output_format = "ArrowStream"
     settings.preferred_block_size_bytes = MB_100_IN_BYTES
 
-    arrow_prepared_hogql_query = await database_sync_to_async(prepare_ast_for_printing)(
+    arrow_prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
         query_node, context=context, dialect="clickhouse", stack=[], settings=settings
     )
 
-    if arrow_prepared_hogql_query is None:
-        raise EmptyHogQLResponseColumnsError()
+    if arrow_prepared_insightsql_query is None:
+        raise EmptyInsightsQLResponseColumnsError()
 
     arrow_printed = await database_sync_to_async(print_prepared_ast)(
-        arrow_prepared_hogql_query, context=context, dialect="clickhouse", stack=[], settings=settings
+        arrow_prepared_insightsql_query, context=context, dialect="clickhouse", stack=[], settings=settings
     )
 
     await logger.adebug(f"Running clickhouse query: {arrow_printed}")
@@ -409,9 +409,9 @@ async def materialize_view_activity(inputs: MaterializeViewInputs) -> Materializ
     except FileNotFoundError:
         await logger.adebug(f"Skipping deletion because table not found: uri={table_uri}")
 
-    hogql_query = typing.cast(dict, saved_query.query)["query"]
+    insightsql_query = typing.cast(dict, saved_query.query)["query"]
     try:
-        rows_expected = await get_query_row_count(hogql_query, team, logger)
+        rows_expected = await get_query_row_count(insightsql_query, team, logger)
         await logger.ainfo(f"Expected rows: {rows_expected}")
         job.rows_expected = rows_expected
         await database_sync_to_async(job.save)()
@@ -424,7 +424,7 @@ async def materialize_view_activity(inputs: MaterializeViewInputs) -> Materializ
     storage_options = _get_aws_storage_options()
     delta_table: deltalake.DeltaTable | None = None
     async with Heartbeater():
-        async for index, res in asyncstdlib.enumerate(hogql_table(hogql_query, team, logger)):
+        async for index, res in asyncstdlib.enumerate(insightsql_table(insightsql_query, team, logger)):
             batch, ch_types = res
             batch = _transform_unsupported_decimals(batch)
             batch = _transform_date_and_datetimes(batch, ch_types)

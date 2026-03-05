@@ -127,7 +127,6 @@ import { ProjectDisplayName } from './project/ProjectSettings'
 import { SettingSection } from './types'
 import { AllowImpersonation } from './user/AllowImpersonation'
 import { ChangePassword, ChangePasswordTitle } from './user/ChangePassword'
-import { HedgehogModeSettings } from './user/HedgehogModeSettings'
 import { OptOutCapture } from './user/OptOutCapture'
 import { PasskeySettings } from './user/PasskeySettings'
 import { PersonalAPIKeys } from './user/PersonalAPIKeys'
@@ -1557,13 +1556,6 @@ export const SETTINGS_MAP: SettingSection[] = [
                 component: <AllowImpersonation />,
                 flag: 'CONTROL_SUPPORT_LOGIN',
                 keywords: ['impersonation', 'support login', 'debug'],
-            },
-            {
-                id: 'hedgehog-mode',
-                title: 'Hedgehog mode',
-                description: 'Enable the Hanzo hedgehog companion that follows you around the app.',
-                component: <HedgehogModeSettings />,
-                keywords: ['hedgehog', 'mascot', 'fun', 'companion', 'hog'],
             },
             {
                 id: 'customization-irl',

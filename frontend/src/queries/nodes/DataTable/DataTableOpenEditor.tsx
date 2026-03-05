@@ -24,7 +24,7 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
             icon={<IconTableChart />}
             to={urls.insightNew({ query })}
             sideAction={
-                response && 'hogql' in response && response.hogql
+                response && 'insightsql' in response && response.insightsql
                     ? {
                           dropdown: {
                               overlay: (
@@ -32,7 +32,7 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
                                       items={[
                                           {
                                               label: 'Open in SQL editor',
-                                              to: urls.sqlEditor({ query: response.hogql }),
+                                              to: urls.sqlEditor({ query: response.insightsql }),
                                               'data-attr': 'open-sql-editor-button',
                                           },
                                       ]}

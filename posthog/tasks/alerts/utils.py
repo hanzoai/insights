@@ -114,11 +114,11 @@ def next_check_time(alert: AlertConfiguration) -> datetime:
             raise ValueError(f"Invalid alert calculation interval: {alert.calculation_interval}")
 
 
-def trigger_alert_hog_functions(alert: AlertConfiguration, properties: dict) -> None:
-    """Trigger all HogFunctions linked to the alert as notification destinations by producing an internal event."""
+def trigger_alert_custom_functions(alert: AlertConfiguration, properties: dict) -> None:
+    """Trigger all CustomFunctions linked to the alert as notification destinations by producing an internal event."""
 
     logger.info(
-        "Triggering internal event for alert destinations/hog functions",
+        "Triggering internal event for alert destinations/custom functions",
         alert_id=alert.id,
         properties=properties,
     )
@@ -152,7 +152,7 @@ def trigger_alert_hog_functions(alert: AlertConfiguration, properties: dict) -> 
             },
         )
         logger.error(
-            "Failed to produce internal event for alert destinations/hog functions",
+            "Failed to produce internal event for alert destinations/custom functions",
             alert_id=alert.id,
             error=str(e),
             exc_info=True,
@@ -185,7 +185,7 @@ def send_notifications_for_breaches(alert: AlertConfiguration, breaches: list[st
         logger.info("send_notifications_for_breaches", alert_id=alert.id, anomaly_count=len(breaches))
         message.send()
 
-    trigger_alert_hog_functions(alert=alert, properties={"breaches": ", ".join(breaches)})
+    trigger_alert_custom_functions(alert=alert, properties={"breaches": ", ".join(breaches)})
 
 
 def send_notifications_for_errors(alert: AlertConfiguration, error: dict) -> None:

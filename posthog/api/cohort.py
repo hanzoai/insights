@@ -28,12 +28,12 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework_csv import renderers as csvrenderers
 
-from posthog.schema import ActorsQuery, HogQLQuery
+from posthog.schema import ActorsQuery, InsightsQLQuery
 
-from posthog.hogql.compiler.bytecode import create_bytecode
-from posthog.hogql.constants import CSV_EXPORT_LIMIT
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.property import property_to_expr
+from posthog.insightsql.compiler.bytecode import create_bytecode
+from posthog.insightsql.constants import CSV_EXPORT_LIMIT
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.property import property_to_expr
 
 from posthog.api.forbid_destroy_model import ForbidDestroyModel
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -58,7 +58,7 @@ from posthog.models.async_deletion import AsyncDeletion, DeletionType
 from posthog.models.cohort import DEFAULT_COHORT_INSERT_BATCH_SIZE, CohortOrEmpty
 from posthog.models.cohort.calculation_history import CohortCalculationHistory
 from posthog.models.cohort.cohort import REALTIME_COHORT_MAX_PERSON_COUNT, CohortType
-from posthog.models.cohort.util import get_all_cohort_dependencies, get_friendly_error_message, print_cohort_hogql_query
+from posthog.models.cohort.util import get_all_cohort_dependencies, get_friendly_error_message, print_cohort_insightsql_query
 from posthog.models.cohort.validation import CohortTypeValidationSerializer
 from posthog.models.feature_flag.flag_matching import (
     FeatureFlagMatcher,
@@ -111,7 +111,7 @@ def validate_filters_and_compute_realtime_support(
 
 def generate_cohort_filter_bytecode(filter_data: dict, team: Team) -> tuple[list[Any] | None, str | None, str | None]:
     """
-    Generate HogQL bytecode for cohort filter data.
+    Generate InsightsQL bytecode for cohort filter data.
     Similar to generate_template_bytecode in validation.py but for cohort-specific filters.
     Returns tuple of (bytecode, error, conditionHash)
     """
@@ -197,8 +197,8 @@ class EventPropFilter(BaseModel, extra="forbid"):
     operator: str | None = None
 
 
-class HogQLFilter(BaseModel, extra="forbid"):
-    type: Literal["hogql"]
+class InsightsQLFilter(BaseModel, extra="forbid"):
+    type: Literal["insightsql"]
     key: str
     value: Any | None = None
 
@@ -219,7 +219,7 @@ class BehavioralFilter(FilterBytecodeMixin, BaseModel, extra="forbid"):
     seq_event_type: str | None = None
     total_periods: int | None = None
     min_periods: int | None = None
-    event_filters: list[Union[EventPropFilter, HogQLFilter]] | None = None
+    event_filters: list[Union[EventPropFilter, InsightsQLFilter]] | None = None
     explicit_datetime: str | None = None
 
 
@@ -703,10 +703,10 @@ class CohortSerializer(serializers.ModelSerializer):
             raise ValidationError("Query must be a dictionary.")
         if query.get("kind") == "ActorsQuery":
             ActorsQuery.model_validate(query)
-        elif query.get("kind") == "HogQLQuery":
-            HogQLQuery.model_validate(query)
+        elif query.get("kind") == "InsightsQLQuery":
+            InsightsQLQuery.model_validate(query)
         else:
-            raise ValidationError(f"Query must be an ActorsQuery or HogQLQuery. Got: {query.get('kind')}")
+            raise ValidationError(f"Query must be an ActorsQuery or InsightsQLQuery. Got: {query.get('kind')}")
         return query
 
     def validate_filters(self, raw: dict):
@@ -1110,7 +1110,7 @@ class CohortViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelVi
         query, params = PersonQuery(filter, team.pk, cohort=cohort).get_query(paginate=True)
         raw_result = sync_execute(
             query,
-            {**params, **filter.hogql_context.values},
+            {**params, **filter.insightsql_context.values},
             # workload=Workload.OFFLINE,  # this endpoint is only used by external API requests
         )
         actor_ids = [row[0] for row in raw_result]
@@ -1388,13 +1388,13 @@ def insert_cohort_people_into_pg(cohort: Cohort, *, team_id: int):
 
 
 def insert_cohort_query_actors_into_ch(cohort: Cohort, *, team: Team):
-    context = HogQLContext(enable_select_queries=True, team_id=team.id)
-    query = print_cohort_hogql_query(cohort, context, team=team)
+    context = InsightsQLContext(enable_select_queries=True, team_id=team.id)
+    query = print_cohort_insightsql_query(cohort, context, team=team)
     insert_actors_into_cohort_by_query(cohort, query, {}, context, team_id=team.id)
 
 
 def insert_actors_into_cohort_by_query(
-    cohort: Cohort, query: str, params: dict[str, Any], context: HogQLContext, *, team_id: int
+    cohort: Cohort, query: str, params: dict[str, Any], context: InsightsQLContext, *, team_id: int
 ):
     sync_execute(
         INSERT_COHORT_ALL_PEOPLE_THROUGH_PERSON_ID.format(cohort_table=PERSON_STATIC_COHORT_TABLE, query=query),

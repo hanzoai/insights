@@ -46,7 +46,7 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
     const handleSubmit = (): void => {
         const sqlQuery = queryInput || ''
         if (!sqlQuery.trim()) {
-            lemonToast.error('You are missing a HogQL query.')
+            lemonToast.error('You are missing a InsightsQL query.')
             return
         }
 
@@ -73,7 +73,7 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
         )
 
         const queryPayload = {
-            kind: NodeKind.HogQLQuery as const,
+            kind: NodeKind.InsightsQLQuery as const,
             query: sqlQuery,
             variables: transformedVariables,
         }

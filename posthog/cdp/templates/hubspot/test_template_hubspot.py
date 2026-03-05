@@ -1,7 +1,7 @@
 import pytest
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.hubspot.template_hubspot import (
     TemplateHubspotMigrator,
     template as template_hubspot,
@@ -12,7 +12,7 @@ from posthog.models import PluginConfig
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateHubspot(BaseHogFunctionTemplateTest):
+class TestTemplateHubspot(BaseCustomFunctionTemplateTest):
     template = template_hubspot
 
     def _inputs(self, **kwargs):
@@ -85,7 +85,7 @@ EVENT_DEFINITION_RESPONSE = {
 }
 
 
-class TestTemplateHubspotEvent(BaseHogFunctionTemplateTest):
+class TestTemplateHubspotEvent(BaseCustomFunctionTemplateTest):
     template = template_hubspot_event
 
     def _inputs(self, **kwargs):

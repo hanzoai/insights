@@ -1,10 +1,10 @@
 import { INSIGHT_ALERT_FIRING_EVENT_ID, INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID } from 'lib/constants'
 import {
-    HOG_FUNCTION_SUB_TEMPLATES,
-    HOG_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
-} from 'scenes/hog-functions/sub-templates/sub-templates'
+    CUSTOM_FUNCTION_SUB_TEMPLATES,
+    CUSTOM_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+} from 'scenes/custom-functions/sub-templates/sub-templates'
 
-import { CyclotronJobFiltersType, HogFunctionType, PropertyFilterType, PropertyOperator } from '~/types'
+import { CyclotronJobFiltersType, CustomFunctionType, PropertyFilterType, PropertyOperator } from '~/types'
 
 export const ALERT_NOTIFICATION_TYPE_SLACK = 'slack' as const
 export const ALERT_NOTIFICATION_TYPE_WEBHOOK = 'webhook' as const
@@ -28,7 +28,7 @@ export const buildAlertFilterConfig = (alertId: string): CyclotronJobFiltersType
 })
 
 const INSIGHT_ALERT_SLACK_INPUTS =
-    HOG_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === 'template-slack')
+    CUSTOM_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === 'template-slack')
         ?.inputs ?? {}
 
 export type PendingAlertNotification =
@@ -43,12 +43,12 @@ export type PendingAlertNotification =
           webhookUrl: string
       }
 
-export function buildHogFunctionPayload(
+export function buildCustomFunctionPayload(
     alertId: string,
     alertName: string | undefined,
     notification: PendingAlertNotification
-): Partial<HogFunctionType> {
-    const commonProps = HOG_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
+): Partial<CustomFunctionType> {
+    const commonProps = CUSTOM_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
     const base = {
         type: commonProps.type,
         enabled: true,

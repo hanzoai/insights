@@ -23,7 +23,7 @@ from posthog.temporal.data_imports.pipelines.common.extract import (
 from posthog.temporal.data_imports.pipelines.pipeline.batcher import Batcher
 from posthog.temporal.data_imports.pipelines.pipeline.cdp_producer import CDPProducer
 from posthog.temporal.data_imports.pipelines.pipeline.delta_table_helper import DeltaTableHelper
-from posthog.temporal.data_imports.pipelines.pipeline.hogql_schema import HogQLSchema
+from posthog.temporal.data_imports.pipelines.pipeline.insightsql_schema import InsightsQLSchema
 from posthog.temporal.data_imports.pipelines.pipeline.pipeline import async_iterate
 from posthog.temporal.data_imports.pipelines.pipeline.typings import PipelineResult, ResumableData, SourceResponse
 from posthog.temporal.data_imports.pipelines.pipeline.utils import (
@@ -56,7 +56,7 @@ class PipelineV3(Generic[ResumableData]):
     _reset_pipeline: bool
     _delta_table_helper: DeltaTableHelper
     _resumable_source_manager: ResumableSourceManager[ResumableData] | None
-    _internal_schema: HogQLSchema
+    _internal_schema: InsightsQLSchema
     _cdp_producer: CDPProducer
     _batcher: Batcher
     _load_id: int
@@ -135,7 +135,7 @@ class PipelineV3(Generic[ResumableData]):
 
         self._resumable_source_manager = resumable_source_manager
         self._batcher = Batcher(self._logger)
-        self._internal_schema = HogQLSchema()
+        self._internal_schema = InsightsQLSchema()
         self._cdp_producer = CDPProducer(
             team_id=self._job.team_id, schema_id=self._schema.id, job_id=job_id, logger=self._logger
         )

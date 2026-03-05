@@ -2,7 +2,7 @@ import { expectLogic, partial } from 'kea-test-utils'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { performQuery } from '~/queries/query'
-import { DashboardFilter, HogQLVariable, NodeKind } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable, NodeKind } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
 import { initKeaTests } from '~/test/init'
 
@@ -506,7 +506,7 @@ describe('dataNodeLogic', () => {
     })
 
     it('passes variablesOverride to api', async () => {
-        const variablesOverride: Record<string, HogQLVariable> = {
+        const variablesOverride: Record<string, InsightsQLVariable> = {
             test_1: {
                 variableId: 'some_id',
                 code_name: 'some_name',

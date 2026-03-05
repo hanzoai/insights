@@ -1,5 +1,5 @@
 from posthog.cdp.templates.clearbit.template_clearbit import template as template_clearbit
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 
 EXAMPLE_RESPONSE = {
     "person": {
@@ -16,7 +16,7 @@ EXAMPLE_RESPONSE = {
 }
 
 
-class TestTemplateClearbit(BaseHogFunctionTemplateTest):
+class TestTemplateClearbit(BaseCustomFunctionTemplateTest):
     template = template_clearbit
 
     def _inputs(self, **kwargs):
@@ -65,8 +65,8 @@ class TestTemplateClearbit(BaseHogFunctionTemplateTest):
                     "event": "$set",
                     "distinct_id": "distinct-id",
                     "properties": {
-                        "$lib": "hog_function",
-                        "$hog_function_source": "https://us.posthog.com/hog_functions/1234",
+                        "$lib": "custom_function",
+                        "$custom_function_source": "https://us.posthog.com/custom_functions/1234",
                         "$set_once": {
                             "person": {
                                 "id": "1234",

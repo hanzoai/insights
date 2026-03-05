@@ -44,7 +44,7 @@ class TestGetDagStructureActivity:
             query = await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
                 team=ateam,
                 name=name,
-                query={"query": "SELECT 1", "kind": "HogQLQuery"},
+                query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
                 created_by=auser,
             )
             queries.append(query)
@@ -145,13 +145,13 @@ class TestGetDagStructureActivity:
         mat_query = await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
             team=ateam,
             name="mat_view_ephemeral_test",
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
             created_by=auser,
         )
         ephemeral_query = await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
             team=ateam,
             name="ephemeral_view_test",
-            query={"query": "SELECT 2", "kind": "HogQLQuery"},
+            query={"query": "SELECT 2", "kind": "InsightsQLQuery"},
             created_by=auser,
         )
         mat_node = await database_sync_to_async(Node.objects.create)(

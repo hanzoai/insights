@@ -10,7 +10,7 @@ import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightSceneLogic } from 'scenes/insights/insightSceneLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
 
-import { DashboardFilter, HogQLVariable } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable } from '~/queries/schema/schema-general'
 import { ActionType, DashboardType, EventDefinition, InsightShortId, QueryBasedInsightModel } from '~/types'
 
 import {
@@ -74,7 +74,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
         addOrUpdateContextInsight: (
             data: InsightWithQuery,
             filtersOverride?: DashboardFilter,
-            variablesOverride?: Record<string, HogQLVariable>
+            variablesOverride?: Record<string, InsightsQLVariable>
         ) => ({ data, filtersOverride, variablesOverride }),
         addOrUpdateContextDashboard: (data: DashboardType<QueryBasedInsightModel>) => ({ data }),
         addOrUpdateContextEvent: (data: EventDefinition) => ({ data }),
@@ -89,7 +89,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
         loadAndProcessInsight: (
             data: InsightItemInfo,
             filtersOverride?: DashboardFilter,
-            variablesOverride?: Record<string, HogQLVariable>,
+            variablesOverride?: Record<string, InsightsQLVariable>,
             revenueAnalyticsQuery?: RevenueAnalyticsQuery
         ) => ({ data, filtersOverride, variablesOverride, revenueAnalyticsQuery }),
         setSelectedContextOption: (value: string) => ({ value }),
@@ -393,7 +393,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
                 // Handle insight selection
                 if (itemInfo.type === MaxContextType.INSIGHT) {
                     let filtersOverride: DashboardFilter | undefined = undefined
-                    let variablesOverride: Record<string, HogQLVariable> | undefined = undefined
+                    let variablesOverride: Record<string, InsightsQLVariable> | undefined = undefined
                     let revenueAnalyticsQuery: RevenueAnalyticsQuery | undefined = undefined
 
                     // This is an "on this page" insight selection. Look for and add possible applied filters.

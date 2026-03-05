@@ -47,7 +47,7 @@ const propertyFilters = [
         type: 'cohort',
     },
     {
-        type: 'hogql',
+        type: 'insightsql',
         key: 'properties.$current_url',
         value: null,
     },

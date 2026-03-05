@@ -7,8 +7,8 @@ def remove_engage_destinations(apps, schema_editor):
     """
     Remove broken engage destination templates and their uses
     """
-    HogFunction = apps.get_model("posthog", "HogFunction")
-    HogFunctionTemplate = apps.get_model("posthog", "HogFunctionTemplate")
+    CustomFunction = apps.get_model("posthog", "CustomFunction")
+    CustomFunctionTemplate = apps.get_model("posthog", "CustomFunctionTemplate")
 
     # segment engage destinations
     template_ids_to_remove = [
@@ -19,11 +19,11 @@ def remove_engage_destinations(apps, schema_editor):
         "segment-actions-taboola-actions",
     ]
 
-    # Mark all HogFunction instances that use these templates as deleted
-    HogFunction.objects.filter(template_id__in=template_ids_to_remove).update(deleted=True)
+    # Mark all CustomFunction instances that use these templates as deleted
+    CustomFunction.objects.filter(template_id__in=template_ids_to_remove).update(deleted=True)
 
     # Delete the templates themselves
-    HogFunctionTemplate.objects.filter(template_id__in=template_ids_to_remove).delete()
+    CustomFunctionTemplate.objects.filter(template_id__in=template_ids_to_remove).delete()
 
 
 def reverse_remove_engage_destinations(apps, schema_editor):

@@ -67,7 +67,7 @@ export function TileFiltersOverride({ tile }: { tile: DashboardTile<QueryBasedIn
                             TaxonomicFilterGroupType.Cohorts,
                             TaxonomicFilterGroupType.Elements,
                             TaxonomicFilterGroupType.SessionProperties,
-                            TaxonomicFilterGroupType.HogQLExpression,
+                            TaxonomicFilterGroupType.InsightsQLExpression,
                             TaxonomicFilterGroupType.DataWarehousePersonProperties,
                         ]}
                     />

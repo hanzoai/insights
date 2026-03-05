@@ -39,7 +39,7 @@ import type { funnelDataLogicType } from './funnelDataLogicType'
 import {
     TIME_INTERVAL_BOUNDS,
     aggregateBreakdownResult,
-    aggregationLabelForHogQL,
+    aggregationLabelForInsightsQL,
     flattenedStepsByBreakdown,
     getIncompleteConversionWindowStartDate,
     getLastFilledStep,
@@ -225,8 +225,8 @@ export const funnelDataLogic = kea<funnelDataLogicType>([
                     return { singular: '', plural: '' }
                 }
 
-                return querySource.funnelsFilter?.funnelAggregateByHogQL
-                    ? aggregationLabelForHogQL(querySource.funnelsFilter.funnelAggregateByHogQL)
+                return querySource.funnelsFilter?.funnelAggregateByInsightsQL
+                    ? aggregationLabelForInsightsQL(querySource.funnelsFilter.funnelAggregateByInsightsQL)
                     : aggregationLabel(querySource.aggregation_group_type_index)
             },
         ],

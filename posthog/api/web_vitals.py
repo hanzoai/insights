@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.auth import TemporaryTokenAuthentication
-from posthog.hogql_queries.query_runner import ExecutionMode, get_query_runner
+from posthog.insightsql_queries.query_runner import ExecutionMode, get_query_runner
 from posthog.rbac.user_access_control import UserAccessControlError
 
 

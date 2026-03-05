@@ -258,7 +258,7 @@ class PersonQuery:
             group_properties_joined=False,
             person_properties_mode=PersonPropertiesMode.DIRECT,
             prepend=f"person_filter_fin_{prepend}",
-            hogql_context=self._filter.hogql_context,
+            insightsql_context=self._filter.insightsql_context,
         )
         prefiltering_conditions, prefiltering_params = parse_prop_grouped_clauses(
             self._team_id,
@@ -269,7 +269,7 @@ class PersonQuery:
             # from the person BEFORE aggregation by version here, to eliminate persons early on
             person_properties_mode=PersonPropertiesMode.DIRECT_ON_PERSONS,
             prepend=f"person_filter_pre_{prepend}",
-            hogql_context=self._filter.hogql_context,
+            insightsql_context=self._filter.insightsql_context,
         )
         params.update(prefiltering_params)
         return prefiltering_conditions, finalization_conditions, params
@@ -380,7 +380,7 @@ class PersonQuery:
                 group_properties_joined=False,
                 person_properties_mode=PersonPropertiesMode.DIRECT,
                 _top_level=False,
-                hogql_context=self._filter.hogql_context,
+                insightsql_context=self._filter.insightsql_context,
             )
             finalization_sql = f"AND ({finalization_conditions_sql} OR {id_conditions_sql})"
 
@@ -397,7 +397,7 @@ class PersonQuery:
                 # from the person BEFORE aggregation by version here, to eliminate persons early on
                 person_properties_mode=PersonPropertiesMode.DIRECT_ON_PERSONS,
                 _top_level=False,
-                hogql_context=self._filter.hogql_context,
+                insightsql_context=self._filter.insightsql_context,
             )
             params.update(prefiltering_params)
             prefiltering_sql = f"""AND ({prefiltering_conditions_sql} OR {id_conditions_sql})"""

@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Engage.so",
     icon_url="/static/services/engage.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 fetch('https://api.engage.so/posthog', {
     'method': 'POST',
@@ -55,7 +55,7 @@ fetch('https://api.engage.so/posthog', {
 )
 
 
-class TemplateEngageMigrator(HogFunctionTemplateMigrator):
+class TemplateEngageMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-engage-so-plugin"
 
     @classmethod

@@ -38,7 +38,7 @@ class Notifications(TypedDict, total=False):
 
 
 NOTIFICATION_DEFAULTS: Notifications = {
-    "plugin_disabled": True,  # Catch all for any Pipeline destination issue (plugins, hog functions, batch exports)
+    "plugin_disabled": True,  # Catch all for any Pipeline destination issue (plugins, custom functions, batch exports)
     "error_tracking_issue_assigned": True,  # Error tracking issue assignment
     "error_tracking_weekly_digest": True,  # Error tracking weekly digest enabled by default
     "discussions_mentioned": True,  # Mentions in comments enabled by default

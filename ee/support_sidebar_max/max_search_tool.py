@@ -10,18 +10,18 @@ SITEMAP_URL = "https://posthog.com/sitemap/sitemap-0.xml"
 
 STATUS_PAGE_URL = "https://www.posthogstatus.com"
 
-HOGQL_PRIORITY_URLS = [
-    "https://posthog.com/docs/hogql",
-    "https://posthog.com/docs/hogql/aggregations",
-    "https://posthog.com/docs/hogql/clickhouse-functions",
-    "https://posthog.com/docs/hogql/expressions",
+INSIGHTSQL_PRIORITY_URLS = [
+    "https://posthog.com/docs/insightsql",
+    "https://posthog.com/docs/insightsql/aggregations",
+    "https://posthog.com/docs/insightsql/clickhouse-functions",
+    "https://posthog.com/docs/insightsql/expressions",
     "https://posthog.com/docs/product-analytics/sql",
 ]
 
 
-def is_hogql_query(query):
-    hogql_keywords = ["hogql", "sql", "query", "aggregate", "function", "expression"]
-    return any(keyword in query.lower() for keyword in hogql_keywords)
+def is_insightsql_query(query):
+    insightsql_keywords = ["insightsql", "sql", "query", "aggregate", "function", "expression"]
+    return any(keyword in query.lower() for keyword in insightsql_keywords)
 
 
 def is_status_query(query):
@@ -40,8 +40,8 @@ def get_relevant_urls(query):
             loc = url.text
             if "/questions/" not in loc:
                 urls.append(loc)
-        if is_hogql_query(query):
-            urls.extend(HOGQL_PRIORITY_URLS)
+        if is_insightsql_query(query):
+            urls.extend(INSIGHTSQL_PRIORITY_URLS)
         urls.append(STATUS_PAGE_URL)
         return urls
     except requests.RequestException as e:
@@ -73,7 +73,7 @@ def prioritize_urls(urls, query):
         depth_score = min(url_depth, 5)
         priority_score = 5 if any(dir in url for dir in priority_dirs[query_type]) else 0
 
-        if is_hogql_query(query) and url in HOGQL_PRIORITY_URLS:
+        if is_insightsql_query(query) and url in INSIGHTSQL_PRIORITY_URLS:
             priority_score += 10
 
         if is_status_query(query) and url == STATUS_PAGE_URL:

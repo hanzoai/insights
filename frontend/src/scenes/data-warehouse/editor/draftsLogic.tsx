@@ -6,7 +6,7 @@ import { lemonToast } from '@posthog/lemon-ui'
 
 import api, { ApiError, PaginatedResponse } from 'lib/api'
 
-import { HogQLQuery } from '~/queries/schema/schema-general'
+import { InsightsQLQuery } from '~/queries/schema/schema-general'
 import { DataWarehouseSavedQueryDraft } from '~/types'
 
 import type { draftsLogicType } from './draftsLogicType'
@@ -16,13 +16,13 @@ export const draftsLogic = kea<draftsLogicType>([
     path(['scenes', 'data-warehouse', 'editor', 'draftsLogic']),
 
     actions({
-        saveAsDraft: (query: HogQLQuery, viewId: string, tab: QueryTab) => ({
+        saveAsDraft: (query: InsightsQLQuery, viewId: string, tab: QueryTab) => ({
             query,
             viewId,
             tab,
         }),
         updateDraft: (draft: DataWarehouseSavedQueryDraft) => ({ draft }),
-        saveOrUpdateDraft: (query: HogQLQuery, viewId?: string, draftId?: string, activeTab?: QueryTab) => ({
+        saveOrUpdateDraft: (query: InsightsQLQuery, viewId?: string, draftId?: string, activeTab?: QueryTab) => ({
             query,
             viewId,
             draftId,

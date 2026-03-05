@@ -19,17 +19,17 @@ export const BreakdownTag: Story = {
                 <BreakdownTagComponent breakdownType="event" breakdown="$browser" onClick={() => alert('Clicked!')} />
             </div>
             <div className="mb-3">
-                <h5>Breakdown tag for custom HogQL</h5>
+                <h5>Breakdown tag for custom InsightsQL</h5>
                 <BreakdownTagComponent
-                    breakdownType="hogql"
+                    breakdownType="insightsql"
                     breakdown="$properties.browser"
                     onClick={() => alert('Clicked!')}
                 />
             </div>
             <div className="mb-3">
-                <h5>Breakdown tag for custom HogQL, with title from comment</h5>
+                <h5>Breakdown tag for custom InsightsQL, with title from comment</h5>
                 <BreakdownTagComponent
-                    breakdownType="hogql"
+                    breakdownType="insightsql"
                     breakdown="coalesce(null, 1, 2) -- some sql"
                     onClick={() => alert('Clicked!')}
                 />
