@@ -133,11 +133,6 @@ export type NullEnumApi = (typeof NullEnumApi)[keyof typeof NullEnumApi]
 
 export const NullEnumApi = {} as const
 
-/**
- * @nullable
- */
-export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
-
 export interface UserBasicApi {
     readonly id: number
     readonly uuid: string
@@ -154,8 +149,6 @@ export interface UserBasicApi {
     email: string
     /** @nullable */
     is_email_verified?: boolean | null
-    /** @nullable */
-    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 
@@ -1813,7 +1806,6 @@ export interface UserApi {
     has_seen_product_intro_for?: unknown | null
     readonly scene_personalisation: readonly ScenePersonalisationBasicApi[]
     theme_mode?: ThemeModeEnumApi | BlankEnumApi | NullEnumApi | null
-    mascot_config?: unknown | null
     /** @nullable */
     allow_sidebar_suggestions?: boolean | null
     shortcut_position?: ShortcutPositionEnumApi | BlankEnumApi | NullEnumApi | null
@@ -1884,7 +1876,6 @@ export interface PatchedUserApi {
     has_seen_product_intro_for?: unknown | null
     readonly scene_personalisation?: readonly ScenePersonalisationBasicApi[]
     theme_mode?: ThemeModeEnumApi | BlankEnumApi | NullEnumApi | null
-    mascot_config?: unknown | null
     /** @nullable */
     allow_sidebar_suggestions?: boolean | null
     shortcut_position?: ShortcutPositionEnumApi | BlankEnumApi | NullEnumApi | null

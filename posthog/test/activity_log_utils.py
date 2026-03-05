@@ -177,25 +177,25 @@ class ActivityLogTestHelper(APILicensedTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()
 
-    # CustomFunction (using Plugin as base)
-    def create_custom_function(self, name: str = "Test Custom Function", **kwargs) -> dict[str, Any]:
+    # InsightsFunction (using Plugin as base)
+    def create_insights_function(self, name: str = "Test Custom Function", **kwargs) -> dict[str, Any]:
         """Create a custom function via API."""
         data = {
             "name": name,
             "description": "Test custom function",
             "enabled": True,
             "inputs": {},
-            "custom_script": "export function onEvent(event, { inputs }) { console.log(event) }",
+            "fn": "export function onEvent(event, { inputs }) { console.log(event) }",
             **kwargs,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/custom_functions/", data, format="json")
+        response = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def update_custom_function(self, function_id: str, updates: dict[str, Any]) -> dict[str, Any]:
+    def update_insights_function(self, function_id: str, updates: dict[str, Any]) -> dict[str, Any]:
         """Update a custom function via API."""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/custom_functions/{function_id}/", updates, format="json"
+            f"/api/projects/{self.team.id}/insights_functions/{function_id}/", updates, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()

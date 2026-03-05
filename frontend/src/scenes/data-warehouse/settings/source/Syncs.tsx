@@ -6,7 +6,7 @@ import { TZLabel } from 'lib/components/TZLabel'
 import { dayjsUtcToTimezone } from 'lib/dayjs'
 import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LogsViewer } from 'scenes/custom-functions/logs/LogsViewer'
+import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 

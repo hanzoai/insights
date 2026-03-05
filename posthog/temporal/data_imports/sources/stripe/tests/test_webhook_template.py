@@ -5,11 +5,11 @@ import hashlib
 
 from parameterized import parameterized
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.temporal.data_imports.sources.stripe.webhook_template import template
 
 
-class TestStripeWarehouseWebhookTemplate(BaseCustomFunctionTemplateTest):
+class TestStripeWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
     def createHogGlobals(self, globals=None) -> dict:

@@ -2,8 +2,6 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { windowValues } from 'kea-window-values'
 import { Insights } from 'posthog-js'
 
-import { mascotModeLogic } from 'lib/components/MascotMode/mascotModeLogic'
-import { MascotActor } from 'lib/components/MascotMode/types'
 import { InsightsAppToolbarEvent } from 'lib/components/IframedToolbarBrowser/utils'
 
 import { actionsLogic } from '~/toolbar/actions/actionsLogic'
@@ -22,7 +20,6 @@ import { generatePiiMaskingCSS } from './piiMaskingStyles'
 import type { toolbarLogicType } from './toolbarLogicType'
 
 const MARGIN = 2
-const MASCOT_OFFSET = 80
 
 const PII_MASKING_STYLESHEET_ID = 'posthog-pii-masking-styles'
 
@@ -32,7 +29,6 @@ export type MenuState =
     | 'actions'
     | 'flags'
     | 'inspect'
-    | 'mascot'
     | 'debugger'
     | 'experiments'
     | 'web-vitals'
@@ -67,8 +63,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
             ['allExperimentsLoading'],
             webVitalsToolbarLogic,
             ['remoteWebVitalsLoading'],
-            mascotModeLogic,
-            ['mascotMode'],
         ],
         actions: [
             toolbarConfigLogic,
@@ -102,10 +96,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
     actions(() => ({
         toggleTheme: (theme?: 'light' | 'dark') => ({ theme }),
         toggleMinimized: (minimized?: boolean) => ({ minimized }),
-        setMascotModeEnabled: (mascotModeEnabled: boolean) => ({ mascotModeEnabled }),
         setDragPosition: (x: number, y: number) => ({ x, y }),
-        syncWithMascot: true,
-        openMascotOptions: true,
         setVisibleMenu: (visibleMenu: MenuState) => ({
             visibleMenu,
         }),
@@ -192,14 +183,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
             { persist: true },
             {
                 setFixedPosition: (_, { position }) => position,
-            },
-        ],
-        mascotModeEnabled: [
-            false,
-            { persist: true },
-            {
-                setMascotModeEnabled: (_, { mascotModeEnabled }) => mascotModeEnabled,
-                setCspBlocksNewFunction: (state, { blocked }) => (blocked ? false : state), // if the CSP blocks new Function, disable hedgehod mode
             },
         ],
         isEmbeddedInApp: [
@@ -352,19 +335,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
             },
         ],
 
-        getMascotActor: [
-            (s) => [s.mascotMode],
-            (mascotMode): (() => MascotActor | null) => {
-                return () => {
-                    const player = mascotMode?.stateManager?.getPlayerMascotActor()
-                    if (!player || !player.rigidBody) {
-                        return null
-                    }
-
-                    return player
-                }
-            },
-        ],
         piiWarning: [
             (s) => [s.posthog, s.piiMaskingEnabled],
             (posthog: Insights | null, piiMaskingEnabled: boolean) => {
@@ -430,10 +400,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
                 allExperimentsLoading ||
                 remoteWebVitalsLoading,
         ],
-        mascotModeAvailable: [
-            (s) => [s.cspBlocksNewFunction],
-            (cspBlocksNewFunction: boolean): boolean => !cspBlocksNewFunction,
-        ],
     }),
     listeners(({ actions, values }) => ({
         setVisibleMenu: ({ visibleMenu }) => {
@@ -444,7 +410,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
 
             if (visibleMenu === 'heatmap') {
                 actions.enableHeatmap()
-                values.getMascotActor()?.setOnFire(1)
             } else if (visibleMenu === 'actions') {
                 actions.showButtonActions()
             } else if (visibleMenu === 'experiments') {
@@ -527,33 +492,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
             }
         },
 
-        syncWithMascot: () => {
-            const player = values.getMascotActor()
-
-            if (!values.mascotModeEnabled || !player) {
-                return
-            }
-
-            if (values.minimized !== values.mascotMode?.gameUI?.visible) {
-                actions.toggleMinimized(values.mascotMode?.gameUI?.visible)
-            }
-
-            if (values.isDragging) {
-                // Set the mascot position instead
-                player.setPosition({
-                    x: values.position.x,
-                    y: values.position.y + MASCOT_OFFSET,
-                })
-
-                return
-            }
-
-            const { x, y } = player.rigidBody.position
-            const newX = x
-            const newY = y - MASCOT_OFFSET
-            actions.setDragPosition(newX, newY)
-        },
-
         createAction: () => {
             actions.setVisibleMenu('actions')
         },
@@ -574,13 +512,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
                     '*'
                 )
             }
-        },
-        openMascotOptions: () => {
-            values.mascotMode?.gameUI?.show({
-                screen: 'configuration',
-                messages: [],
-                actor: values.getMascotActor() ?? undefined,
-            })
         },
         togglePiiMasking: () => {
             const styleElement = document.getElementById(PII_MASKING_STYLESHEET_ID) as HTMLStyleElement | null
@@ -617,8 +548,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
         },
     })),
     afterMount(({ actions, values, cache }) => {
-        // Detect whether the page's CSP blocks new Function() — if so, mascot mode
-        // (which relies on pixi.js) cannot work and should be disabled.
+        // Detect whether the page's CSP blocks new Function()
         try {
             new Function('return true')()
         } catch {
@@ -648,16 +578,6 @@ export const toolbarLogic = kea<toolbarLogicType>([
             makeNavigateWrapper(actions.maybeSendNavigationMessage, '__ph_toolbar_logic_wrapped__'),
             'historyProxy'
         )
-
-        cache.disposables.add(() => {
-            const syncMascotLoop = setInterval(() => {
-                if (values.mascotModeEnabled && values.getMascotActor()) {
-                    actions.syncWithMascot()
-                }
-            }, 100)
-
-            return () => clearInterval(syncMascotLoop)
-        }, 'syncMascotLoop')
 
         // Initialize PII masking if already enabled
         // Remove stylesheet on unmount

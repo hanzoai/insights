@@ -1,4 +1,4 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
 COMMON_INPUTS_SCHEMA = [
     {
@@ -11,7 +11,7 @@ COMMON_INPUTS_SCHEMA = [
     },
 ]
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=True,
     type="destination",
@@ -20,7 +20,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Sends a message to a discord channel",
     icon_url="/static/services/discord.png",
     category=["Customer Success"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (not match(inputs.webhookUrl, '^https://discord.com/api/webhooks/.*')) {
     throw Error('Invalid URL. The URL should match the format: https://discord.com/api/webhooks/...')

@@ -7,15 +7,15 @@ import { UUIDT } from '~/utils/utils'
 
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
     createScriptExecutionGlobals,
-    createCustomFunction,
-    insertCustomFunction,
+    createInsightsFunction,
+    insertInsightsFunction,
 } from '../_tests/fixtures'
-import { compileScript } from '../templates/compiler'
-import { CyclotronJobInvocationCustomFunction, CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
+import { compileFn } from '../templates/compiler'
+import { CyclotronJobInvocationInsightsFunction, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
 
@@ -28,9 +28,9 @@ describe('CdpCyclotronWorker', () => {
     let processor: CdpCyclotronWorker
     let hub: Hub
     let team: Team
-    let fn: CustomFunctionType
-    let globals: CustomFunctionInvocationGlobalsWithInputs
-    let invocation: CyclotronJobInvocationCustomFunction
+    let fn: InsightsFunctionType
+    let globals: InsightsFunctionInvocationGlobalsWithInputs
+    let invocation: CyclotronJobInvocationInsightsFunction
 
     beforeEach(async () => {
         await resetTestDatabase()
@@ -38,13 +38,13 @@ describe('CdpCyclotronWorker', () => {
         team = await getFirstTeam(hub)
         processor = new CdpCyclotronWorker(hub)
 
-        fn = await insertCustomFunction(
+        fn = await insertInsightsFunction(
             hub.postgres,
             team.id,
-            createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+            createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 template_id: 'template-webhook',
             })
         )
@@ -100,35 +100,35 @@ describe('CdpCyclotronWorker', () => {
         })
 
         it('should route custom functions to correct executor services based on template_id', async () => {
-            const segmentFn = await insertCustomFunction(
+            const segmentFn = await insertInsightsFunction(
                 hub.postgres,
                 team.id,
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'segment-actions-amplitude',
                 })
             )
 
-            const nativeFn = await insertCustomFunction(
+            const nativeFn = await insertInsightsFunction(
                 hub.postgres,
                 team.id,
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'native-webhook',
                 })
             )
 
-            const pluginFn = await insertCustomFunction(
+            const pluginFn = await insertInsightsFunction(
                 hub.postgres,
                 team.id,
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'plugin-insights-intercom-plugin',
                 })
             )
@@ -150,28 +150,28 @@ describe('CdpCyclotronWorker', () => {
             expect(nativeExecutorSpy).toHaveBeenCalledTimes(1)
             expect(nativeExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    customFunction: expect.objectContaining({ template_id: 'native-webhook' }),
+                    insightsFunction: expect.objectContaining({ template_id: 'native-webhook' }),
                 })
             )
 
             expect(pluginExecutorSpy).toHaveBeenCalledTimes(1)
             expect(pluginExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    customFunction: expect.objectContaining({ template_id: 'plugin-insights-intercom-plugin' }),
+                    insightsFunction: expect.objectContaining({ template_id: 'plugin-insights-intercom-plugin' }),
                 })
             )
 
             expect(segmentExecutorSpy).toHaveBeenCalledTimes(1)
             expect(segmentExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    customFunction: expect.objectContaining({ template_id: 'segment-actions-amplitude' }),
+                    insightsFunction: expect.objectContaining({ template_id: 'segment-actions-amplitude' }),
                 })
             )
 
             expect(scriptExecutorSpy).toHaveBeenCalledTimes(1)
             expect(scriptExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    customFunction: expect.objectContaining({ template_id: 'template-webhook' }),
+                    insightsFunction: expect.objectContaining({ template_id: 'template-webhook' }),
                 })
             )
         })
@@ -193,7 +193,7 @@ describe('CdpCyclotronWorker', () => {
             expect(result.error).toBe(undefined)
             expect(result.metrics).toEqual([])
             expect(result.invocation.id).toEqual(invocationId)
-            expect(result.invocation.queue).toEqual('custom_script')
+            expect(result.invocation.queue).toEqual('fn')
             // NOTE: Check the queue scheduled at is within the bounds of the backoff
             expect(result.invocation.queueScheduledAt?.toMillis()).toBeGreaterThan(
                 DateTime.now().plus({ milliseconds: hub.CDP_FETCH_BACKOFF_BASE_MS }).toMillis()
@@ -254,18 +254,18 @@ describe('CdpCyclotronWorker', () => {
         })
 
         it('should skip a loaded function if it is disabled', async () => {
-            const fn2 = await insertCustomFunction(
+            const fn2 = await insertInsightsFunction(
                 hub.postgres,
                 team.id,
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     enabled: false,
                 })
             )
 
-            const results = await processor['loadCustomFunctions']([createExampleInvocation(fn2, globals)])
+            const results = await processor['loadInsightsFunctions']([createExampleInvocation(fn2, globals)])
             expect(results).toEqual([])
         })
 
@@ -285,13 +285,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const segmentFn = await insertCustomFunction(
+                const segmentFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
-                    createCustomFunction({
-                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createInsightsFunction({
+                        ...FN_EXAMPLES.simple_fetch,
+                        ...FN_INPUTS_EXAMPLES.simple_fetch,
+                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'segment-actions-mixpanel',
                     })
                 )
@@ -320,13 +320,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const pluginFn = await insertCustomFunction(
+                const pluginFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
-                    createCustomFunction({
-                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createInsightsFunction({
+                        ...FN_EXAMPLES.simple_fetch,
+                        ...FN_INPUTS_EXAMPLES.simple_fetch,
+                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'plugin-insights-intercom-plugin',
                     })
                 )
@@ -349,13 +349,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const nativeFn = await insertCustomFunction(
+                const nativeFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
-                    createCustomFunction({
-                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createInsightsFunction({
+                        ...FN_EXAMPLES.simple_fetch,
+                        ...FN_INPUTS_EXAMPLES.simple_fetch,
+                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'native-webhook',
                     })
                 )
@@ -378,13 +378,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const scriptFn = await insertCustomFunction(
+                const scriptFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
-                    createCustomFunction({
-                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createInsightsFunction({
+                        ...FN_EXAMPLES.simple_fetch,
+                        ...FN_INPUTS_EXAMPLES.simple_fetch,
+                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     })
                 )
 
@@ -437,13 +437,13 @@ describe('CdpCyclotronWorker', () => {
                         }
                         print(f'fib {fibonacci(64)}');`
 
-                const evilFunction = await insertCustomFunction(
+                const evilFunction = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
-                    createCustomFunction({
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                    createInsightsFunction({
+                        ...FN_FILTERS_EXAMPLES.no_filters,
                         script: evilFunctionCode,
-                        bytecode: await compileScript(evilFunctionCode),
+                        bytecode: await compileFn(evilFunctionCode),
                     })
                 )
 
@@ -457,7 +457,7 @@ describe('CdpCyclotronWorker', () => {
                 const results = await processor.processInvocations(invocations)
 
                 const timings = results.flatMap(
-                    (x) => (x.invocation.state as CyclotronJobInvocationCustomFunction['state']).timings
+                    (x) => (x.invocation.state as CyclotronJobInvocationInsightsFunction['state']).timings
                 )
 
                 const total = timings.reduce((acc, timing) => acc + timing.duration_ms, 0)

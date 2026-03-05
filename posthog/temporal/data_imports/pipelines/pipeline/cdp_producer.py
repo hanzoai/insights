@@ -15,7 +15,7 @@ from posthog.insightsql.database.database import get_data_warehouse_table_name
 from posthog.exceptions_capture import capture_exception
 from posthog.kafka_client.client import _AsyncKafkaProducer, get_async_warpstream_kafka_producer
 from posthog.kafka_client.topics import KAFKA_DWH_CDP_RAW_TABLE
-from posthog.models.custom_functions import CustomFunction
+from posthog.models.insights_functions import InsightsFunction
 from posthog.sync import database_sync_to_async_pool
 from posthog.temporal.data_imports.pipelines.helpers import build_table_name
 
@@ -95,7 +95,7 @@ class CDPProducer:
             self.logger.debug(f"Using table_name = {dot_notated_table_name}, source = data-warehouse-table")
 
             return (
-                CustomFunction.objects.filter(
+                InsightsFunction.objects.filter(
                     team_id=self.team_id,
                     enabled=True,
                     filters__source="data-warehouse-table",

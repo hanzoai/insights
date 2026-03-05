@@ -18,7 +18,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import BlankWorkflowHog from 'public/blank-dashboard.png'
 
-import type { CustomFlowTemplate } from '../customflows/types'
+import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { newWorkflowLogic } from '../newWorkflowLogic'
 import { workflowTemplatesLogic } from './workflowTemplatesLogic'
 
@@ -29,12 +29,12 @@ interface WorkflowTemplateChooserProps {
 // Adapted from DashboardTemplateChooser.tsx; try to keep parity for a consistent user experience
 export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JSX.Element {
     const { filteredTemplates, workflowTemplatesLoading, tagFilter, availableTags } = useValues(workflowTemplatesLogic)
-    const { deleteCustomFlowTemplate, setTagFilter } = useActions(workflowTemplatesLogic)
+    const { deleteInsightsFlowTemplate, setTagFilter } = useActions(workflowTemplatesLogic)
     const { user } = useValues(userLogic)
 
     const { createWorkflowFromTemplate, createEmptyWorkflow } = useActions(newWorkflowLogic)
 
-    const canEditTemplate = (template: CustomFlowTemplate): boolean => {
+    const canEditTemplate = (template: InsightsFlowTemplate): boolean => {
         if (template.scope === 'global') {
             return user?.is_staff ?? false
         }
@@ -42,7 +42,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
         return true
     }
 
-    const canDeleteTemplate = (template: CustomFlowTemplate): boolean => {
+    const canDeleteTemplate = (template: InsightsFlowTemplate): boolean => {
         // Global templates are managed in code and can't be deleted from the database
         return template.scope !== 'global'
     }
@@ -89,7 +89,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                 {workflowTemplatesLoading ? (
                     <Spinner className="text-6xl" />
                 ) : (
-                    filteredTemplates.map((template: CustomFlowTemplate, index: number) => (
+                    filteredTemplates.map((template: InsightsFlowTemplate, index: number) => (
                         <TemplateItem
                             key={template.id}
                             template={template}
@@ -120,7 +120,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                                                   status: 'danger',
                                                   onClick: async () => {
                                                       try {
-                                                          await deleteCustomFlowTemplate(template)
+                                                          await deleteInsightsFlowTemplate(template)
                                                           lemonToast.success(`Template "${template.name}" deleted`)
                                                       } catch (error: any) {
                                                           lemonToast.error(
@@ -152,7 +152,7 @@ function TemplateItem({
     index,
     'data-attr': dataAttr,
 }: {
-    template: Pick<CustomFlowTemplate, 'name' | 'description' | 'image_url' | 'scope' | 'tags'>
+    template: Pick<InsightsFlowTemplate, 'name' | 'description' | 'image_url' | 'scope' | 'tags'>
     onClick: () => void
     onEdit?: (e: React.MouseEvent) => void
     onDelete?: (e: React.MouseEvent) => void

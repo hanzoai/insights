@@ -620,7 +620,7 @@ export const KNOWN_LIB_VALUES = new Set([
     'analytics-go',
     'serverless',
     'wordpress',
-    'custom_function',
+    'insights_function',
     'http',
     'desktop',
     'elixir',

@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { CustomFunctionInvocationGlobals } from '../../../types'
+import { InsightsFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './hash-properties.template'
 
@@ -26,7 +26,7 @@ function sha256(data: string, salt = '1234567890'): string {
 
 describe('hash-properties.template', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: CustomFunctionInvocationGlobals
+    let mockGlobals: InsightsFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

@@ -3,7 +3,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import { urls } from 'scenes/urls'
 
-import type { CustomFlowTemplate } from './customflows/types'
+import type { InsightsFlowTemplate } from './insightsflows/types'
 import type { newWorkflowLogicType } from './newWorkflowLogicType'
 
 export const newWorkflowLogic = kea<newWorkflowLogicType>([
@@ -11,7 +11,7 @@ export const newWorkflowLogic = kea<newWorkflowLogicType>([
     actions({
         showNewWorkflowModal: true,
         hideNewWorkflowModal: true,
-        createWorkflowFromTemplate: (template: CustomFlowTemplate) => ({ template }),
+        createWorkflowFromTemplate: (template: InsightsFlowTemplate) => ({ template }),
         createEmptyWorkflow: true,
     }),
     reducers({

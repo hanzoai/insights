@@ -29,7 +29,7 @@ import { dataWarehouseSavedQueryActivityDescriber } from 'scenes/data-warehouse/
 import { experimentActivityDescriber } from 'scenes/experiments/experimentActivityDescriber'
 import { flagActivityDescriber } from 'scenes/feature-flags/activityDescriptions'
 import { groupActivityDescriber } from 'scenes/groups/activityDescriptions'
-import { customFunctionActivityDescriber } from 'scenes/custom-functions/misc/activityDescriptions'
+import { insightsFunctionActivityDescriber } from 'scenes/insights-functions/misc/activityDescriptions'
 import { notebookActivityDescriber } from 'scenes/notebooks/Notebook/notebookActivityDescriber'
 import { personActivityDescriber } from 'scenes/persons/activityDescriptions'
 import { productTourActivityDescriber } from 'scenes/product-tours/activityDescriptions'
@@ -120,9 +120,9 @@ export const describerFor = (logItem?: ActivityLogItem): Describer | undefined =
             return dashboardActivityDescriber
         case ActivityScope.FEATURE_FLAG:
             return flagActivityDescriber
-        case ActivityScope.CUSTOM_FUNCTION:
-            return customFunctionActivityDescriber
-        case ActivityScope.CUSTOM_FLOW:
+        case ActivityScope.INSIGHTS_FUNCTION:
+            return insightsFunctionActivityDescriber
+        case ActivityScope.INSIGHTS_FLOW:
             return workflowActivityDescriber
         case ActivityScope.COHORT:
             return cohortActivityDescriber

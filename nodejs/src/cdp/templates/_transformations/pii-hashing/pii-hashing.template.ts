@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'hidden',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: CustomFunctionTemplate = {
     name: 'PII Data Hashing',
     description:
         'This transformation hashes sensitive personal data (PII) like email, phone numbers, etc. using SHA-256 to protect user privacy.',
-    icon_url: '/static/mascot/builder-mascot-02.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Get the properties to hash from inputs and split by comma
 let propertiesToHash := []

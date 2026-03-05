@@ -4,17 +4,17 @@ from typing import Any
 from django.db import transaction
 from django.db.models import Q
 
-from posthog.api.custom_function import CustomFunctionSerializer
-from posthog.models.custom_function_template import CustomFunctionTemplate
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.api.insights_function import InsightsFunctionSerializer
+from posthog.models.insights_function_template import InsightsFunctionTemplate
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.plugin import PluginAttachment, PluginConfig
 from posthog.models.team.team import Team
 
-# python manage.py migrate_plugins_to_custom_functions --dry-run --test-mode --kind=transformation
+# python manage.py migrate_plugins_to_insights_functions --dry-run --test-mode --kind=transformation
 
 
 def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool):
-    custom_functions = []
+    insights_functions = []
     teams_cache: dict[int, Team] = {}
 
     with transaction.atomic():
@@ -82,12 +82,12 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "is_create": True,
             }
 
-            template = CustomFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
+            template = InsightsFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
 
             if not template:
                 raise Exception(f"Template not found for plugin {plugin_id}")
 
-            if CustomFunction.objects.filter(
+            if InsightsFunction.objects.filter(
                 template_id=template.id, type=kind, team_id=team.id, enabled=True, deleted=False
             ).exists():
                 print(f"Skipping plugin {plugin_name} as it already exists as a custom function")  # noqa: T201
@@ -99,7 +99,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 "name": plugin_name,
                 "description": template.description,
                 "filters": template.filters,
-                "custom_script": template.code,
+                "fn": template.code,
                 "inputs": inputs,
                 "enabled": True,
                 "icon_url": template.icon_url,
@@ -110,25 +110,25 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
             print("Attempting to create custom function...")  # noqa: T201
             print(json.dumps(data, indent=2))  # noqa: T201
 
-            serializer = CustomFunctionSerializer(
+            serializer = InsightsFunctionSerializer(
                 data=data,
                 context=serializer_context,
             )
             serializer.is_valid(raise_exception=True)
-            custom_functions.append(CustomFunction(**serializer.validated_data))
+            insights_functions.append(InsightsFunction(**serializer.validated_data))
 
-        print(custom_functions)  # noqa: T201
+        print(insights_functions)  # noqa: T201
 
-        if not custom_functions:
+        if not insights_functions:
             print("No custom functions to create")  # noqa: T201
             return []
 
         if dry_run:
             print("Dry run, not creating custom functions")  # noqa: T201
-            return custom_functions
+            return insights_functions
 
         print("Creating custom functions")  # noqa: T201
-        CustomFunction.objects.bulk_create(custom_functions)
+        InsightsFunction.objects.bulk_create(insights_functions)
 
         if not test_mode:
             print("Disabling old plugins")  # noqa: T201
@@ -140,7 +140,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
 
         print("Done")  # noqa: T201
 
-        return custom_functions
+        return insights_functions
 
 
 def migrate_legacy_plugins(

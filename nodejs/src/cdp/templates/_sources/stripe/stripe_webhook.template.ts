@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Capture an event via a Stripe webhook',
     icon_url: '/static/services/stripe.png',
     category: ['Revenue', 'Payment'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if(request.method != 'POST') {
   return {

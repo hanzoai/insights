@@ -94,7 +94,7 @@ export const loadAppMetricsTotals = async (
 
     const response = await api.queryInsightsQL(
         query,
-        { scene: 'CustomFunction', productKey: 'pipeline_destinations' },
+        { scene: 'InsightsFunction', productKey: 'pipeline_destinations' },
         { refresh: 'async_except_on_cache_miss' }
     )
 
@@ -208,7 +208,7 @@ const loadAppMetricsTimeSeries = async (
 
     const response = await api.queryInsightsQL(
         query,
-        { scene: 'CustomFunction', productKey: 'pipeline_destinations' },
+        { scene: 'InsightsFunction', productKey: 'pipeline_destinations' },
         { refresh: 'async_except_on_cache_miss' }
     )
 
@@ -241,7 +241,7 @@ const convertDateFieldToDayJs = (date: string, timezone: string): Dayjs => {
 export const appMetricsLogic = kea<appMetricsLogicType>([
     props({} as unknown as AppMetricsLogicProps),
     key(({ logicKey }: AppMetricsLogicProps) => logicKey),
-    path((id) => ['scenes', 'custom-functions', 'metrics', 'appMetricsLogic', id]),
+    path((id) => ['scenes', 'insights-functions', 'metrics', 'appMetricsLogic', id]),
     connect(() => ({
         values: [teamLogic, ['currentTeam']],
     })),

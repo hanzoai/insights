@@ -12,7 +12,7 @@ export const pluginStonlyUtmExtractor: LegacyTransformationPlugin = {
         id: 'plugin-plugin-stonly-UTM-Extractor',
         name: 'UTM Extractor',
         description: 'UTM extractor',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

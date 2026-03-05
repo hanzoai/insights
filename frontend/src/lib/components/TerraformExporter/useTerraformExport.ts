@@ -6,7 +6,7 @@ import { buildAlertFilterConfig } from 'lib/utils/alertUtils'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { DashboardType, CustomFunctionType, InsightModel, QueryBasedInsightModel } from '~/types'
+import { DashboardType, InsightsFunctionType, InsightModel, QueryBasedInsightModel } from '~/types'
 
 import api from '../../api'
 import { DashboardExportResult, generateDashboardHCL } from './dashboardHclExporter'
@@ -54,37 +54,37 @@ async function fetchAlertsForInsights(insights: InsightModel[]): Promise<Map<num
     return alertsByInsightId
 }
 
-async function fetchCustomFunctionsForAlerts(alerts: AlertType[]): Promise<Map<string, CustomFunctionType[]>> {
-    const customFunctionsByAlertId = new Map<string, CustomFunctionType[]>()
+async function fetchInsightsFunctionsForAlerts(alerts: AlertType[]): Promise<Map<string, InsightsFunctionType[]>> {
+    const insightsFunctionsByAlertId = new Map<string, InsightsFunctionType[]>()
 
     if (alerts.length === 0) {
-        return customFunctionsByAlertId
+        return insightsFunctionsByAlertId
     }
 
-    const customFunctionPromises = alerts.map(async (alert) => {
+    const insightsFunctionPromises = alerts.map(async (alert) => {
         try {
-            const response = await api.customFunctions.list({
+            const response = await api.insightsFunctions.list({
                 filter_groups: [buildAlertFilterConfig(alert.id)],
                 types: ['internal_destination'],
                 full: true,
             })
-            return { alertId: alert.id, customFunctions: response.results }
+            return { alertId: alert.id, insightsFunctions: response.results }
         } catch (e) {
             posthog.captureException(e instanceof Error ? e : new Error(String(e)), {
-                extra: { context: 'TerraformExporter', operation: 'fetchCustomFunctionsForAlerts', alertId: alert.id },
+                extra: { context: 'TerraformExporter', operation: 'fetchInsightsFunctionsForAlerts', alertId: alert.id },
             })
-            return { alertId: alert.id, customFunctions: [] }
+            return { alertId: alert.id, insightsFunctions: [] }
         }
     })
 
-    const results = await Promise.all(customFunctionPromises)
-    for (const { alertId, customFunctions } of results) {
-        if (customFunctions.length > 0) {
-            customFunctionsByAlertId.set(alertId, customFunctions)
+    const results = await Promise.all(insightsFunctionPromises)
+    for (const { alertId, insightsFunctions } of results) {
+        if (insightsFunctions.length > 0) {
+            insightsFunctionsByAlertId.set(alertId, insightsFunctions)
         }
     }
 
-    return customFunctionsByAlertId
+    return insightsFunctionsByAlertId
 }
 
 async function exportInsight(
@@ -100,7 +100,7 @@ async function exportInsight(
     }
 
     const alerts = Array.from(alertsByInsightId.values()).flat()
-    const customFunctionsByAlertId = await fetchCustomFunctionsForAlerts(alerts)
+    const insightsFunctionsByAlertId = await fetchInsightsFunctionsForAlerts(alerts)
 
     if (checkStale()) {
         throw new Error('Fetch cancelled')
@@ -109,7 +109,7 @@ async function exportInsight(
     try {
         return generateInsightHCL(insight, {
             alerts,
-            customFunctionsByAlertId,
+            insightsFunctionsByAlertId,
             projectId,
         })
     } catch (e) {
@@ -137,7 +137,7 @@ async function exportDashboard(
     }
 
     const allAlerts = Array.from(alertsByInsightId.values()).flat()
-    const customFunctionsByAlertId = await fetchCustomFunctionsForAlerts(allAlerts)
+    const insightsFunctionsByAlertId = await fetchInsightsFunctionsForAlerts(allAlerts)
 
     if (checkStale()) {
         throw new Error('Fetch cancelled')
@@ -147,7 +147,7 @@ async function exportDashboard(
         return generateDashboardHCL(dashboard, {
             insights,
             alertsByInsightId,
-            customFunctionsByAlertId,
+            insightsFunctionsByAlertId,
             projectId,
         })
     } catch (e) {

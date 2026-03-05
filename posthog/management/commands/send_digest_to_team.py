@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from posthog.models import Team
-from posthog.tasks.email import send_team_custom_functions_digest
+from posthog.tasks.email import send_team_insights_functions_digest
 
 
 class Command(BaseCommand):
-    help = "Send CustomFunctions digest email to a specific team to test notification logic"
+    help = "Send InsightsFunctions digest email to a specific team to test notification logic"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
         try:
             # Trigger the same logic as the daily digest for this specific team
-            send_team_custom_functions_digest(team_id, test_email_override)
-            self.stdout.write(self.style.SUCCESS(f"Successfully triggered CustomFunctions digest for team {team_id}"))
+            send_team_insights_functions_digest(team_id, test_email_override)
+            self.stdout.write(self.style.SUCCESS(f"Successfully triggered InsightsFunctions digest for team {team_id}"))
         except Exception as e:
             raise CommandError(f"Failed to send digest: {str(e)}")

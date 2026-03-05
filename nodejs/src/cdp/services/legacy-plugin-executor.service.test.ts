@@ -8,13 +8,13 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import { PostgresUse } from '../../utils/db/postgres'
-import { createExampleInvocation, createScriptExecutionGlobals, createCustomFunction } from '../_tests/fixtures'
+import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID, TRANSFORMATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyDestinationPlugin, LegacyTransformationPlugin } from '../legacy-plugins/types'
 import {
-    CyclotronJobInvocationCustomFunction,
-    CustomFunctionInvocationGlobalsWithInputs,
-    CustomFunctionType,
+    CyclotronJobInvocationInsightsFunction,
+    InsightsFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionType,
     MinimalLogEntry,
 } from '../types'
 import { LegacyPluginExecutorService } from './legacy-plugin-executor.service'
@@ -33,8 +33,8 @@ describe('LegacyPluginExecutorService', () => {
     let service: LegacyPluginExecutorService
     let hub: Hub
     let team: Team
-    let globals: CustomFunctionInvocationGlobalsWithInputs
-    let fn: CustomFunctionType
+    let globals: InsightsFunctionInvocationGlobalsWithInputs
+    let fn: InsightsFunctionType
     let pluginConfigId: number
     let uniquePluginId: number
 
@@ -46,7 +46,7 @@ describe('LegacyPluginExecutorService', () => {
         service = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
         team = await getFirstTeam(hub)
 
-        fn = createCustomFunction({
+        fn = createInsightsFunction({
             name: 'Plugin test',
             template_id: customerIoPlugin.template.id,
             team_id: team.id,
@@ -300,7 +300,7 @@ describe('LegacyPluginExecutorService', () => {
             jest.spyOn(customerIoPlugin, 'onEvent')
 
             const invocation = createExampleInvocation(fn, globals)
-            invocation.customFunction.name = 'My function [CDP-TEST-HIDDEN]'
+            invocation.insightsFunction.name = 'My function [CDP-TEST-HIDDEN]'
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
                 email: 'test@hanzo.ai',
@@ -491,10 +491,10 @@ describe('LegacyPluginExecutorService', () => {
     describe('smoke tests', () => {
         const buildInvocation = (
             plugin: LegacyDestinationPlugin | LegacyTransformationPlugin
-        ): CyclotronJobInvocationCustomFunction => {
+        ): CyclotronJobInvocationInsightsFunction => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.inputs = {}
-            invocation.customFunction.template_id = plugin.template.id
+            invocation.insightsFunction.template_id = plugin.template.id
 
             const inputs: Record<string, any> = {}
 
@@ -524,7 +524,7 @@ describe('LegacyPluginExecutorService', () => {
         }))
         it.each(testCasesDestination)('should run the destination plugin: %s', async ({ name, plugin }) => {
             const invocation = buildInvocation(plugin)
-            invocation.customFunction.name = name
+            invocation.insightsFunction.name = name
             invocation.state.globals.event.event = '$identify' // Many plugins filter for this
 
             if (plugin.template.id === 'plugin-customerio-plugin') {
@@ -541,8 +541,8 @@ describe('LegacyPluginExecutorService', () => {
 
         it.each(testCasesTransformation)('should run the transformation plugin: %s', async ({ name, plugin }) => {
             const invocation = buildInvocation(plugin)
-            invocation.customFunction.name = name
-            invocation.customFunction.type = 'transformation'
+            invocation.insightsFunction.name = name
+            invocation.insightsFunction.type = 'transformation'
             invocation.state.globals.event.event = '$pageview'
             const res = await service.execute(invocation)
             expect(getLogMessages(res.logs)).toMatchSnapshot()
@@ -550,9 +550,9 @@ describe('LegacyPluginExecutorService', () => {
     })
 
     describe('first-time-event-tracker', () => {
-        let invocation: CyclotronJobInvocationCustomFunction
+        let invocation: CyclotronJobInvocationInsightsFunction
         beforeEach(() => {
-            fn = createCustomFunction({
+            fn = createInsightsFunction({
                 team_id: team.id,
                 name: 'First time event tracker',
                 template_id: 'plugin-first-time-event-tracker',

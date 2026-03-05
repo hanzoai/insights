@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: CustomFunctionTemplate = {
     name: 'Hash properties',
     description:
         'Hashes sensitive fields with SHA256 using a salt. This helps protect user privacy while maintaining data consistency.',
-    icon_url: '/static/mascot/police-mascot.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Function to hash a value with SHA256
 fun hashValue(value, salt) {

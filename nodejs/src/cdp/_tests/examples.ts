@@ -1,14 +1,14 @@
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
 
 import { PropertyOperator } from '../../types'
-import { CustomFunctionType } from '../types'
+import { InsightsFunctionType } from '../types'
 
 /**
  * Custom functions are largely generated and built in the django service, making it tricky to test on this side.
  * As such we have a bunch of prebuilt examples here for usage in tests.
  */
 
-export const CUSTOM_SCRIPT_EXAMPLES: Record<string, Pick<CustomFunctionType, 'custom_script' | 'bytecode' | 'type'>> = {
+export const FN_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'fn' | 'bytecode' | 'type'>> = {
     // Simple return examples (no async functions)
     simple_return_object: {
         type: 'destination',
@@ -314,7 +314,7 @@ export const CUSTOM_SCRIPT_EXAMPLES: Record<string, Pick<CustomFunctionType, 'cu
     },
 }
 
-export const CUSTOM_SCRIPT_INPUTS_EXAMPLES: Record<string, Pick<CustomFunctionType, 'inputs' | 'inputs_schema'>> = {
+export const FN_INPUTS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'inputs' | 'inputs_schema'>> = {
     simple_fetch: {
         inputs_schema: [
             { key: 'url', type: 'string', label: 'Webhook URL', secret: false, required: true },
@@ -574,7 +574,7 @@ export const CUSTOM_SCRIPT_INPUTS_EXAMPLES: Record<string, Pick<CustomFunctionTy
     },
 }
 
-export const CUSTOM_SCRIPT_FILTERS_EXAMPLES: Record<string, Pick<CustomFunctionType, 'filters'>> = {
+export const FN_FILTERS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'filters'>> = {
     no_filters: { filters: { events: [], actions: [], bytecode: ['_h', 29] } },
     broken_filters: { filters: { events: [], actions: [], bytecode: ['_H', 1, 29, 35, 35, 35] } },
     // Test account filter: filters out users with @hanzo.ai in their email
@@ -839,7 +839,7 @@ export const CUSTOM_SCRIPT_FILTERS_EXAMPLES: Record<string, Pick<CustomFunctionT
     no_filters_data_warehouse_table: { filters: { source: 'data-warehouse-table', bytecode: ['_h', 29] } },
 }
 
-export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<CustomFunctionType, 'masking'>> = {
+export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'masking'>> = {
     all: {
         masking: {
             ttl: 30,
@@ -866,7 +866,7 @@ export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<CustomFunctionType, 'mask
     },
 }
 
-export const CUSTOM_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
+export const INSIGHTS_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
     everyTime: {
         trigger_masking: {
             ttl: 30,

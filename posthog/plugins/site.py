@@ -119,10 +119,10 @@ def get_decide_site_apps(team: "Team", using_database: str = "default") -> list[
 
 
 def get_decide_site_functions(team: "Team", using_database: str = "default") -> list[dict]:
-    from posthog.models import CustomFunction
+    from posthog.models import InsightsFunction
 
     sources = (
-        CustomFunction.objects.db_manager(using_database)
+        InsightsFunction.objects.db_manager(using_database)
         .filter(
             team=team,
             enabled=True,

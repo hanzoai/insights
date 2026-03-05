@@ -98,7 +98,7 @@ export function WorkflowScene(props: WorkflowSceneLogicProps): JSX.Element {
              * If we're rendering tabs, props.id is guaranteed to be
              * defined and not "new" (see return statement below)
              */
-            content: <ActivityLog id={props.id!} scope={ActivityScope.CUSTOM_FLOW} />,
+            content: <ActivityLog id={props.id!} scope={ActivityScope.INSIGHTS_FLOW} />,
         },
     ]
 

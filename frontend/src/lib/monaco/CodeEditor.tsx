@@ -64,7 +64,7 @@ function initEditor(
         initModel(model, builtCodeEditorLogic)
     }
 
-    if (editorProps?.language === 'custom_script') {
+    if (editorProps?.language === 'fn') {
         initScriptLanguage(monaco)
     }
     if (editorProps?.language === 'insightsQL' || editorProps?.language === 'insightsQLExpr') {

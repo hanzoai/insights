@@ -136,7 +136,7 @@ class ReadActivityLog(BaseModel):
             "Filter by resource scope. Available scopes: "
             "Action, AlertConfiguration, Annotation, BatchExport, BatchImport, Cohort, Comment, "
             "Dashboard, DataManagement, EarlyAccessFeature, EventDefinition, Experiment, "
-            "ExternalDataSchema, ExternalDataSource, FeatureFlag, CustomFlow, CustomFunction, "
+            "ExternalDataSchema, ExternalDataSource, FeatureFlag, InsightsFlow, InsightsFunction, "
             "Insight, Notebook, Organization, OrganizationDomain, OrganizationMembership, "
             "Person, PersonalAPIKey, Plugin, PluginConfig, Project, PropertyDefinition, "
             "Replay, SessionRecordingPlaylist, Survey, Tag, TaggedItem, Team, User, "

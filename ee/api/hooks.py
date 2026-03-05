@@ -7,21 +7,21 @@ from django.http import Http404
 from rest_framework import exceptions, mixins, serializers, status, viewsets
 from rest_framework.response import Response
 
-from posthog.api.custom_function import CustomFunctionSerializer
+from posthog.api.insights_function import InsightsFunctionSerializer
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.cdp.templates.zapier.template_zapier import template as template_zapier
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.user import User
 
 from ee.models.hook import HOOK_EVENTS, Hook
 
 
-def create_zapier_custom_function(hook: Hook, serializer_context: dict, from_migration: bool = False) -> CustomFunction:
+def create_zapier_insights_function(hook: Hook, serializer_context: dict, from_migration: bool = False) -> InsightsFunction:
     description = template_zapier.description
     if from_migration:
         description = f"{description} Migrated from legacy hook {hook.id}."
 
-    serializer = CustomFunctionSerializer(
+    serializer = InsightsFunctionSerializer(
         data={
             "template_id": template_zapier.id,
             "type": "destination",
@@ -58,7 +58,7 @@ def create_zapier_custom_function(hook: Hook, serializer_context: dict, from_mig
         context=serializer_context,
     )
     serializer.is_valid(raise_exception=True)
-    return CustomFunction(**serializer.validated_data)
+    return InsightsFunction(**serializer.validated_data)
 
 
 class HookSerializer(serializers.ModelSerializer):
@@ -103,12 +103,12 @@ class HookViewSet(
         serializer.is_valid(raise_exception=True)
         hook = Hook(**serializer.validated_data)
 
-        custom_function = create_zapier_custom_function(hook, serializer_context=self.get_serializer_context())
-        custom_function.save()
+        insights_function = create_zapier_insights_function(hook, serializer_context=self.get_serializer_context())
+        insights_function.save()
 
         response_serializer = self.get_serializer(
             data={
-                "id": custom_function.id,
+                "id": insights_function.id,
                 "event": serializer.validated_data["event"],
                 "target": serializer.validated_data["target"],
                 "resource_id": serializer.validated_data.get("resource_id"),
@@ -130,7 +130,7 @@ class HookViewSet(
             found = True
 
             # We do this by finding one where the description contains the hook id
-            fns = CustomFunction.objects.filter(
+            fns = InsightsFunction.objects.filter(
                 team_id=self.team_id,
                 template_id=template_zapier.id,
                 description__icontains=f"{instance.id}",
@@ -149,14 +149,14 @@ class HookViewSet(
         if not found:
             # Otherwise we try and delete the custom function by id
             try:
-                custom_function = CustomFunction.objects.get(
+                insights_function = InsightsFunction.objects.get(
                     team_id=self.team_id, template_id=template_zapier.id, id=kwargs["pk"]
                 )
-                custom_function.enabled = False
-                custom_function.deleted = True
-                custom_function.save()
+                insights_function.enabled = False
+                insights_function.deleted = True
+                insights_function.save()
                 found = True
-            except (CustomFunction.DoesNotExist, ValidationError):
+            except (InsightsFunction.DoesNotExist, ValidationError):
                 pass
 
         if found:

@@ -4,14 +4,14 @@ from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTes
 
 from posthog.insightsql.compiler.bytecode import create_bytecode
 
-from posthog.cdp.filters import compile_filters_bytecode, custom_function_filters_to_expr
+from posthog.cdp.filters import compile_filters_bytecode, insights_function_filters_to_expr
 from posthog.models.action.action import Action
 
 from common.hogvm.python.execute import execute_bytecode
 from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
-class TestCustomFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     action: Action
     filters: dict
 
@@ -62,7 +62,7 @@ class TestCustomFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingT
         }
 
     def filters_to_bytecode(self, filters: dict):
-        res = custom_function_filters_to_expr(filters=filters, team=self.team, actions={self.action.id: self.action})
+        res = insights_function_filters_to_expr(filters=filters, team=self.team, actions={self.action.id: self.action})
 
         return json.loads(json.dumps(create_bytecode(res).bytecode))
 
@@ -156,7 +156,7 @@ class TestCustomFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingT
         ]
 
         # Also works if we don't pass the actions dict
-        expr = custom_function_filters_to_expr(filters={"actions": self.filters["actions"]}, team=self.team, actions={})
+        expr = insights_function_filters_to_expr(filters={"actions": self.filters["actions"]}, team=self.team, actions={})
         bytecode_2 = create_bytecode(expr).bytecode
         assert bytecode == bytecode_2
 

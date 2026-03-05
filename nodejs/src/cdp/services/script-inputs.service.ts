@@ -4,8 +4,8 @@ import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
 import { CyclotronInputType } from '~/schema/cyclotron'
 import { Hub } from '~/types'
 
-import { CustomFunctionInvocationGlobals, CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
-import { execScript } from '../utils/script-exec'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
+import { execFn } from '../utils/script-exec'
 import { LiquidRenderer } from '../utils/liquid'
 import { RecipientTokensService } from './messaging/recipient-tokens.service'
 
@@ -21,34 +21,34 @@ export class ScriptInputsService {
     }
 
     public async buildInputs(
-        customFunction: CustomFunctionType,
-        globals: CustomFunctionInvocationGlobals,
+        insightsFunction: InsightsFunctionType,
+        globals: InsightsFunctionInvocationGlobals,
         additionalInputs?: Record<string, any>
     ): Promise<Record<string, any>> {
         // TODO: Load the values from the integrationManager
 
-        const inputs: CustomFunctionType['inputs'] = {
+        const inputs: InsightsFunctionType['inputs'] = {
             // Include the inputs from the custom function
-            ...customFunction.inputs,
-            ...customFunction.encrypted_inputs,
+            ...insightsFunction.inputs,
+            ...insightsFunction.encrypted_inputs,
             // Plus any additional inputs
             ...additionalInputs,
             // and decode any integration inputs
-            ...(await this.loadIntegrationInputs(customFunction)),
+            ...(await this.loadIntegrationInputs(insightsFunction)),
         }
 
-        const newGlobals: CustomFunctionInvocationGlobalsWithInputs = {
+        const newGlobals: InsightsFunctionInvocationGlobalsWithInputs = {
             ...globals,
             inputs: {},
         }
 
         const _formatInput = async (input: CyclotronInputType, key: string): Promise<any> => {
-            const templating = input.templating ?? 'custom_script'
+            const templating = input.templating ?? 'fn'
 
             if (templating === 'liquid') {
                 return formatLiquidInput(input.value, newGlobals, key)
             }
-            if (templating === 'custom_script' && input?.bytecode) {
+            if (templating === 'fn' && input?.bytecode) {
                 return await formatScriptInput(input.bytecode, newGlobals, key)
             }
 
@@ -56,21 +56,21 @@ export class ScriptInputsService {
         }
 
         // Add unsubscribe url if we have an email input here
-        const emailInputSchema = customFunction.inputs_schema?.find((input) =>
+        const emailInputSchema = insightsFunction.inputs_schema?.find((input) =>
             ['native_email', 'email'].includes(input.type)
         )
-        const emailInput = customFunction.inputs?.[emailInputSchema?.key ?? '']
+        const emailInput = insightsFunction.inputs?.[emailInputSchema?.key ?? '']
 
         if (emailInputSchema && emailInput) {
             // If we have an email value then we template it out to get the email address
             const emailValue = await _formatInput(emailInput, emailInputSchema.key)
             if (emailValue?.to?.email) {
                 newGlobals.unsubscribe_url = this.recipientTokensService.generatePreferencesUrl({
-                    team_id: customFunction.team_id,
+                    team_id: insightsFunction.team_id,
                     identifier: emailValue.to.email,
                 })
                 newGlobals.unsubscribe_url_one_click = this.recipientTokensService.generateOneClickUnsubscribeUrl({
-                    team_id: customFunction.team_id,
+                    team_id: insightsFunction.team_id,
                     identifier: emailValue.to.email,
                 })
             }
@@ -92,24 +92,24 @@ export class ScriptInputsService {
     }
 
     public async buildInputsWithGlobals(
-        customFunction: CustomFunctionType,
-        globals: CustomFunctionInvocationGlobals,
+        insightsFunction: InsightsFunctionType,
+        globals: InsightsFunctionInvocationGlobals,
         additionalInputs?: Record<string, any>
-    ): Promise<CustomFunctionInvocationGlobalsWithInputs> {
+    ): Promise<InsightsFunctionInvocationGlobalsWithInputs> {
         return {
             ...globals,
-            inputs: await this.buildInputs(customFunction, globals, additionalInputs),
+            inputs: await this.buildInputs(insightsFunction, globals, additionalInputs),
         }
     }
 
     public async loadIntegrationInputs(
-        customFunction: CustomFunctionType
+        insightsFunction: InsightsFunctionType
     ): Promise<Record<string, { value: Record<string, any> | null }>> {
         const inputsToLoad: Record<string, number> = {}
 
-        customFunction.inputs_schema?.forEach((schema) => {
+        insightsFunction.inputs_schema?.forEach((schema) => {
             if (schema.type === 'integration') {
-                const input = customFunction.inputs?.[schema.key]
+                const input = insightsFunction.inputs?.[schema.key]
                 const value = input?.value?.integrationId ?? input?.value
                 if (value && typeof value === 'number') {
                     inputsToLoad[schema.key] = value
@@ -131,7 +131,7 @@ export class ScriptInputsService {
 
             const integration = integrations[value]
             // IMPORTANT: Check the team ID is correct
-            if (integration && integration.team_id === customFunction.team_id) {
+            if (integration && integration.team_id === insightsFunction.team_id) {
                 returnInputs[key] = {
                     value: {
                         ...integration.config,
@@ -154,7 +154,7 @@ export class ScriptInputsService {
 
 export const formatScriptInput = async (
     bytecode: any,
-    globals: CustomFunctionInvocationGlobalsWithInputs,
+    globals: InsightsFunctionInvocationGlobalsWithInputs,
     key?: string
 ): Promise<any> => {
     // Similar to how we generate the bytecode by iterating over the values,
@@ -166,7 +166,7 @@ export const formatScriptInput = async (
     }
 
     if (Array.isArray(bytecode) && (bytecode[0] === '_h' || bytecode[0] === '_H')) {
-        const { execResult: result, error } = await execScript(bytecode, { globals })
+        const { execResult: result, error } = await execFn(bytecode, { globals })
         if (!result || error) {
             throw error ?? result?.error
         }
@@ -208,7 +208,7 @@ export const formatScriptInput = async (
 
 export const formatLiquidInput = (
     value: unknown,
-    globals: CustomFunctionInvocationGlobalsWithInputs,
+    globals: InsightsFunctionInvocationGlobalsWithInputs,
     key?: string
 ): any => {
     if (value === null || value === undefined) {
@@ -216,7 +216,7 @@ export const formatLiquidInput = (
     }
 
     if (typeof value === 'string') {
-        return LiquidRenderer.renderWithCustomFunctionGlobals(value, globals)
+        return LiquidRenderer.renderWithInsightsFunctionGlobals(value, globals)
     }
 
     if (Array.isArray(value)) {

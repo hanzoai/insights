@@ -40,7 +40,7 @@ import { COHORT_BEHAVIORAL_LIMITATIONS_URL } from 'scenes/feature-flags/constant
 import {
     getProductEventFilterOptions,
     getProductEventPropertyFilterOptions,
-} from 'scenes/custom-functions/filters/CustomFunctionFiltersInternal'
+} from 'scenes/insights-functions/filters/InsightsFunctionFiltersInternal'
 import { MaxContextTaxonomicFilterOption } from 'scenes/max/maxTypes'
 import { NotebookType } from 'scenes/notebooks/types'
 import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
@@ -75,7 +75,7 @@ import {
     TeamType,
 } from '~/types'
 
-import { CustomFlowTaxonomicFilters } from 'products/workflows/frontend/Workflows/customflows/filters/CustomFlowTaxonomicFilters'
+import { InsightsFlowTaxonomicFilters } from 'products/workflows/frontend/Workflows/insightsflows/filters/InsightsFlowTaxonomicFilters'
 
 import { InlineInsightsQLEditor } from './InlineInsightsQLEditor'
 import type { taxonomicFilterLogicType } from './taxonomicFilterLogicType'
@@ -373,7 +373,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         searchPlaceholder: 'variable key',
                         type: TaxonomicFilterGroupType.WorkflowVariables,
                         categoryLabel: () => 'Workflow variables',
-                        render: CustomFlowTaxonomicFilters,
+                        render: InsightsFlowTaxonomicFilters,
                         getPopoverHeader: () => 'Workflow variables',
                     },
                     {

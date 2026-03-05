@@ -18,7 +18,7 @@ TEMPLATE_FILES = [
 _TEMPLATE_CACHE: Optional[list[dict]] = None
 
 
-class SimpleCustomFlowTemplateActionSerializer(serializers.Serializer):
+class SimpleInsightsFlowTemplateActionSerializer(serializers.Serializer):
     """
     Simplified action serializer for validating templates without requiring context.
     Used only for loading templates from code files.
@@ -53,7 +53,7 @@ class SimpleCustomFlowTemplateActionSerializer(serializers.Serializer):
         return data
 
 
-class SimpleCustomFlowTemplateSerializer(serializers.Serializer):
+class SimpleInsightsFlowTemplateSerializer(serializers.Serializer):
     """
     Simplified serializer for validating templates without requiring Django context.
     Used only for loading templates from code files.
@@ -73,7 +73,7 @@ class SimpleCustomFlowTemplateSerializer(serializers.Serializer):
     conversion = serializers.JSONField(required=False, allow_null=True)
     exit_condition = serializers.JSONField(required=False, allow_null=True)
     edges = serializers.JSONField(required=False, allow_null=True)
-    actions = SimpleCustomFlowTemplateActionSerializer(many=True, required=True)
+    actions = SimpleInsightsFlowTemplateActionSerializer(many=True, required=True)
     abort_action = serializers.JSONField(required=False, allow_null=True)
     variables = serializers.JSONField(required=False, allow_null=True)
 
@@ -130,7 +130,7 @@ def load_global_templates() -> list[dict]:
 
             # Validate the template using the simplified serializer
             try:
-                serializer = SimpleCustomFlowTemplateSerializer(data=data)
+                serializer = SimpleInsightsFlowTemplateSerializer(data=data)
                 if serializer.is_valid():
                     templates.append({**data, "tags": data.get("tags") or []})
                 else:

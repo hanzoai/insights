@@ -1,8 +1,8 @@
 from posthog.cdp.templates.engage.template_engage import template as template_engage
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
 
-class TestTemplateEngageso(BaseCustomFunctionTemplateTest):
+class TestTemplateEngageso(BaseInsightsFunctionTemplateTest):
     template = template_engage
 
     def _inputs(self, **kwargs):

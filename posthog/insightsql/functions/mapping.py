@@ -17,7 +17,7 @@ from .clickhouse.mathematical import MATH_FUNCTIONS
 from .clickhouse.strings import STRINGS_FUNCTIONS
 from .config import INSIGHTSQL_PERMITTED_PARAMETRIC_FUNCTIONS
 from .core import InsightsQLFunctionMeta
-from .posthog import INSIGHTSQL_POSTCUSTOM_FUNCTIONS
+from .posthog import INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
 from .udfs import UDFS
 
 INSIGHTSQL_COMPARISON_MAPPING: dict[str, ast.CompareOperationOp] = {
@@ -269,8 +269,8 @@ def find_insightsql_function(name: str) -> Optional[InsightsQLFunctionMeta]:
     return _find_function(name, INSIGHTSQL_CLICKHOUSE_FUNCTIONS)
 
 
-def find_insightsql_postcustom_function(name: str) -> Optional[InsightsQLFunctionMeta]:
-    return _find_function(name, INSIGHTSQL_POSTCUSTOM_FUNCTIONS)
+def find_insightsql_postinsights_function(name: str) -> Optional[InsightsQLFunctionMeta]:
+    return _find_function(name, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS)
 
 
 def is_allowed_parametric_function(name: str) -> bool:

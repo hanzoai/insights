@@ -45,7 +45,7 @@ from posthog.insightsql.query import execute_insightsql_query
 from posthog.insightsql_queries.insights.funnels.funnel import FunnelUDF
 from posthog.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
 from posthog.models import DataWarehouseTable
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.team.team import Team
 from posthog.temporal.common.shutdown import ShutdownMonitor, WorkerShuttingDownError
 from posthog.temporal.data_imports.cdp_producer_job import CDPProducerJobWorkflow
@@ -3153,7 +3153,7 @@ async def test_non_retryable_error_short_circuiting(team, stripe_customer, mock_
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_cdp_producer_push_to_s3(team, stripe_customer, mock_stripe_client, minio_client):
-    await sync_to_async(CustomFunction.objects.create)(
+    await sync_to_async(InsightsFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "stripe.customer"}]},
@@ -3205,7 +3205,7 @@ async def test_cdp_producer_push_to_s3(team, stripe_customer, mock_stripe_client
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_cdp_producer_push_to_kafka(team, stripe_customer, mock_stripe_client, minio_client, pipeline_mode):
-    await sync_to_async(CustomFunction.objects.create)(
+    await sync_to_async(InsightsFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "stripe.customer"}]},
