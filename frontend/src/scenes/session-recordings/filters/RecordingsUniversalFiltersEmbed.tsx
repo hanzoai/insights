@@ -88,7 +88,7 @@ function QuickFilterButton({
     setFilters: (filters: Partial<RecordingUniversalFilters>) => void
 }): JSX.Element {
     const icon = propertyType === PropertyFilterType.Person ? <IconPerson /> : <IconUnverifiedEvent />
-    const propertyTypeLabel = propertyType === PropertyFilterType.Person ? 'Person property' : 'Event property'
+    const propertyTypeLabel = propertyType === PropertyFilterType.Person ? 'User property' : 'Event property'
 
     const { getPropertyCheckState } = useValues(recordingsUniversalFiltersEmbedLogic)
     const { propertyMissing, propertyLoading } = getPropertyCheckState(filterKey, propertyType)

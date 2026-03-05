@@ -1,8 +1,8 @@
 /**
- * Schema types for Max AI error tracking tools
+ * Schema types for AI assistant error tracking tools
  */
 
-/** Preview of an error tracking issue for display in Max AI chat */
+/** Preview of an error tracking issue for display in AI assistant chat */
 export interface MaxErrorTrackingIssuePreview {
     /** Issue ID */
     id: string

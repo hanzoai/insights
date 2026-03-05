@@ -109,7 +109,7 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                 const breadcrumbs: Breadcrumb[] = [
                     {
                         key: Scene.ErrorTracking,
-                        name: 'Error tracking',
+                        name: 'Error Tracking',
                         path: urls.errorTracking(),
                         iconType: 'error_tracking',
                     },

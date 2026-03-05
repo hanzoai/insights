@@ -690,7 +690,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         ) {
             descriptions.push(
                 <>
-                    set <em>excluded person properties</em> to{' '}
+                    set <em>excluded user properties</em> to{' '}
                     <code>{after.excluded_person_property_names.join(', ')}</code>
                 </>
             )

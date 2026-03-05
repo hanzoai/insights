@@ -279,7 +279,7 @@ function getEventTable(service: BatchExportService['type']): DatabaseSchemaBatch
 
 const personsTable: DatabaseSchemaBatchExportTable = {
     type: 'batch_export',
-    id: 'Persons',
+    id: 'Users',
     name: 'persons',
     fields: {
         team_id: {

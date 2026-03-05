@@ -673,7 +673,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             }
         },
         onReapplySuggestedInsight: () => {
-            // Reapply the Max AI suggestion
+            // Reapply the AI suggestion
             if (values.suggestedQuery) {
                 const insightDataLogicInstance = insightDataLogic.findMounted(values.insightProps)
                 if (insightDataLogicInstance) {

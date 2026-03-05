@@ -37,7 +37,7 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
                     {
                         key: 'persons',
                         url: urls.persons(),
-                        label: 'Persons',
+                        label: 'Users',
                         tooltipDocLink: 'https://posthog.com/docs/data/persons',
                     },
                     {
