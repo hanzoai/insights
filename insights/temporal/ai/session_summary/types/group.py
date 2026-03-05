@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Literal
 
 from insights.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
+from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 
 
 
