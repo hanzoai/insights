@@ -3,7 +3,7 @@ from typing import Literal, cast
 
 from antlr4 import CommonTokenStream, InputStream, ParserRuleContext, ParseTreeVisitor
 from antlr4.error.ErrorListener import ErrorListener
-from hogql_parser import (
+from insightsql_parser import (
     parse_expr_json as _parse_expr_json_cpp,
     parse_full_template_string_json as _parse_full_template_string_json_cpp,
     parse_order_expr_json as _parse_order_expr_json_cpp,

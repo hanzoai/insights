@@ -126,19 +126,31 @@ ENV UV_PROJECT_ENVIRONMENT=/python-runtime
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     "build-essential" \
+    "cmake" \
+    "curl" \
     "git" \
     "libpq-dev" \
     "libxmlsec1=1.2.37-2" \
     "libxmlsec1-dev=1.2.37-2" \
     "libffi-dev" \
+    "unzip" \
+    "uuid-dev" \
     "zlib1g-dev" \
     "pkg-config" \
     && \
     rm -rf /var/lib/apt/lists/*
 
+# Build ANTLR4 C++ runtime for insightsql-parser
+RUN curl -L https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip -o /tmp/antlr4-source.zip && \
+    cd /tmp && unzip antlr4-source.zip -d antlr4-source && cd antlr4-source && \
+    cmake . -DBUILD_TESTING=OFF -DANTLR4_BUILD_TESTS=OFF && \
+    make -j$(nproc) && make install && ldconfig && \
+    rm -rf /tmp/antlr4-source /tmp/antlr4-source.zip
+
 # Install Python dependencies using cache mount for faster rebuilds
 # Cache ID includes libxmlsec1 version to bust cache when system library changes
 COPY pyproject.toml uv.lock ./
+COPY common/insightsql_parser common/insightsql_parser/
 RUN --mount=type=cache,id=uv-libxmlsec1.2.37-2,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project --no-binary-package lxml --no-binary-package xmlsec
 
