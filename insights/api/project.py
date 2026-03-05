@@ -15,6 +15,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from insights.schema import ProductKey
 
 from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.api.shared import ProjectBackwardCompatBasicSerializer
 from insights.api.team import (
     TEAM_CONFIG_FIELDS_SET,
