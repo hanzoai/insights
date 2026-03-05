@@ -1,5 +1,5 @@
 import { LogicWrapper } from 'kea'
-import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'posthog-js'
+import type { PostHog, PropertyMatchType, SupportedWebVitalsMetrics } from 'posthog-js'
 import { ReactNode } from 'react'
 import { Layout } from 'react-grid-layout'
 
@@ -788,7 +788,7 @@ export interface ToolbarParams {
 }
 
 export interface ToolbarProps extends ToolbarParams {
-    posthog?: Insights
+    posthog?: PostHog
     disableExternalStyles?: boolean
 }
 

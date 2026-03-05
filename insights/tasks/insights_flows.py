@@ -21,14 +21,14 @@ def refresh_affected_insights_flows(team_id: Optional[int] = None, action_id: Op
     if action_id:
         action = Action.objects.get(id=action_id)
         team_id = action.team_id
-        # Find hog flows that reference this action in their trigger filters
+        # Find insights flows that reference this action in their trigger filters
         affected_insights_flows = list(
             InsightsFlow.objects.select_related("team")
             .filter(team_id=action.team_id, status="active")
             .filter(trigger__contains={"actions": [{"id": str(action_id)}]})
         )
     elif team_id:
-        # Find hog flows that have test account filters enabled
+        # Find insights flows that have test account filters enabled
         affected_insights_flows = list(
             InsightsFlow.objects.select_related("team")
             .filter(team_id=team_id, status="active")

@@ -105,7 +105,7 @@ export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
     )
 }
 
-interface HogDebugProps {
+interface ScriptDebugProps {
     queryKey: string
     query: ScriptQuery
     setQuery: (query: ScriptQuery) => void
@@ -114,7 +114,7 @@ interface HogDebugProps {
     attachTo?: LogicWrapper | BuiltLogic
 }
 
-export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo }: HogDebugProps): JSX.Element {
+export function ScriptDebug({ query, setQuery, queryKey, debug, modifiers, attachTo }: ScriptDebugProps): JSX.Element {
     const dataNodeLogicProps: DataNodeLogicProps = {
         query,
         key: queryKey,
