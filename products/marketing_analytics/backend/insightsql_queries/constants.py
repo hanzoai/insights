@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 from pydantic import BaseModel
 
-from posthog.schema import (
+from insights.schema import (
     BingAdsDefaultSources,
     BingAdsTableExclusions,
     BingAdsTableKeywords,
@@ -47,7 +47,7 @@ from posthog.schema import (
     WebAnalyticsItemKind,
 )
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 # Magic values
 DEFAULT_LIMIT = 100

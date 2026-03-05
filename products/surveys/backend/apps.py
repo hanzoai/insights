@@ -7,20 +7,20 @@ class SurveysConfig(AppConfig):
     label = "surveys"
 
     def ready(self) -> None:
-        from posthog.api.file_system.deletion import (
+        from insights.api.file_system.deletion import (
             register_file_system_type,
             register_post_delete_hook,
             register_pre_delete_hook,
         )
-        from posthog.models.activity_logging.activity_log import Detail, log_activity
-        from posthog.models.activity_logging.model_activity import is_impersonated_session
+        from insights.models.activity_logging.activity_log import Detail, log_activity
+        from insights.models.activity_logging.model_activity import is_impersonated_session
 
         def _with_flags(queryset):
             return queryset.select_related("targeting_flag", "internal_targeting_flag")
 
         register_file_system_type(
             "survey",
-            "posthog",
+            "insights",
             "Survey",
             queryset_modifier=_with_flags,
             hard_delete=True,

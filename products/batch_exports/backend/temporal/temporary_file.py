@@ -19,7 +19,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from psycopg import sql
 
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.heartbeat import DateRange
 

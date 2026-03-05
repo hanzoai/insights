@@ -2,9 +2,9 @@ import uuid
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 
-from posthog.models.event.util import bulk_create_events
+from insights.models.event.util import bulk_create_events
 
 from products.live_debugger.backend.models import LiveDebuggerBreakpoint
 
@@ -13,7 +13,7 @@ class TestLiveDebuggerBreakpointModel(ClickhouseTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         # Clean ClickHouse events table before each test
-        from posthog.clickhouse.client import sync_execute
+        from insights.clickhouse.client import sync_execute
 
         sync_execute("TRUNCATE TABLE IF EXISTS sharded_events")
 

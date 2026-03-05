@@ -4,8 +4,8 @@
 import glob
 import json
 
-from posthog.insightsql import ast
-from posthog.insightsql.compiler.bytecode import create_bytecode, parse_program
+from insights.insightsql import ast
+from insights.insightsql.compiler.bytecode import create_bytecode, parse_program
 
 source = "common/hogvm/stl/src/*.iscript"
 target_ts = "common/hogvm/typescript/src/stl/bytecode.ts"

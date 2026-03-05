@@ -6,9 +6,9 @@ import httpx
 import dagster
 from dagster_aws.s3 import S3Resource
 
-from posthog.clickhouse.client import sync_execute
-from posthog.dags.common import JobOwners
-from posthog.models.team import Team
+from insights.clickhouse.client import sync_execute
+from insights.dags.common import JobOwners
+from insights.models.team import Team
 
 
 def get_last_cached_domains(context: dagster.AssetExecutionContext, asset_key: str) -> set[str]:

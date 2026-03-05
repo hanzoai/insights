@@ -5,12 +5,12 @@ from typing import Optional
 
 from django.db.models import Prefetch
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.insightsql.timings import InsightsQLTimings
+from insights.insightsql.timings import InsightsQLTimings
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.team.team import Team
+from insights.exceptions_capture import capture_exception
+from insights.models.team.team import Team
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
 from products.data_warehouse.backend.models.external_data_source import ExternalDataSource

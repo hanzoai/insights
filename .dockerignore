@@ -39,7 +39,7 @@
 !pnpm-workspace.yaml
 !pyproject.toml
 !uv.lock
-!posthog
+!insights
 !posthog.json
 !products
 !requirements-dev.txt
@@ -58,7 +58,6 @@ common/*/*/dist
 common/*/dist
 products/**/node_modules
 nodejs/node_modules
-ee/**/node_modules
 docs/**/node_modules
 **/__pycache__
 rust/.env

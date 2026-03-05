@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Optional
 
-from posthog.schema import (
+from insights.schema import (
     CachedRevenueAnalyticsMetricsQueryResponse,
     DatabaseSchemaManagedViewTableKind,
     InsightsQLQueryResponse,
@@ -9,12 +9,12 @@ from posthog.schema import (
     RevenueAnalyticsMetricsQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.models import UnknownDatabaseField
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.database.models import UnknownDatabaseField
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.insightsql_queries.utils.timestamp_utils import format_label_date
-from posthog.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
+from insights.insightsql_queries.utils.timestamp_utils import format_label_date
+from insights.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
 
 from products.revenue_analytics.backend.views import (
     RevenueAnalyticsBaseView,

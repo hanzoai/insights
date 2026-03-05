@@ -2,7 +2,7 @@ from django.conf import settings
 
 from rest_framework.request import Request
 
-from posthog.models.insight_variable import InsightVariable
+from insights.models.insight_variable import InsightVariable
 
 from products.endpoints.backend.models import Endpoint, EndpointVersion
 

@@ -1,10 +1,10 @@
-from posthog.schema import LogsSparklineBreakdownBy
+from insights.schema import LogsSparklineBreakdownBy
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.clickhouse.client.connection import Workload
+from insights.clickhouse.client.connection import Workload
 
 from products.logs.backend.logs_query_runner import LogsQueryResponse, LogsQueryRunner
 

@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest, BaseTest
+from insights.test.base import APIBaseTest, BaseTest
 from unittest.mock import patch
 
 from django.db import transaction
@@ -6,13 +6,12 @@ from django.db import transaction
 from parameterized import parameterized
 from rest_framework import status
 
-from posthog.models import ActivityLog, Comment, Organization, User
-from posthog.models.person import Person
+from insights.models import ActivityLog, Comment, Organization, User
+from insights.models.person import Person
 
 from products.conversations.backend.models import Ticket, TicketAssignment
 from products.conversations.backend.models.constants import Channel, Priority, Status
 
-from ee.models.rbac.role import Role
 
 
 # Patch on_commit to execute immediately in tests

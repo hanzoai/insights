@@ -1,6 +1,6 @@
 import json
 
-from posthog.test.base import APIBaseTest, BaseTest, QueryMatchingTest, snapshot_postgres_queries
+from insights.test.base import APIBaseTest, BaseTest, QueryMatchingTest, snapshot_postgres_queries
 from unittest.mock import ANY, patch
 
 from django.core.cache import cache
@@ -8,8 +8,8 @@ from django.test.client import Client
 
 from rest_framework import status
 
-from posthog.models import FeatureFlag, Person
-from posthog.models.team.team_caching import set_team_in_cache
+from insights.models import FeatureFlag, Person
+from insights.models.team.team_caching import set_team_in_cache
 
 from products.early_access_features.backend.models import EarlyAccessFeature
 
@@ -625,7 +625,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         assert {"custom": "data", "number": 42} in payloads
         assert {} in payloads
 
-    @patch("posthog.api.feature_flag.report_user_action")
+    @patch("insights.api.feature_flag.report_user_action")
     def test_creation_context_is_set_to_early_access_features(self, mock_capture):
         response = self.client.post(
             f"/api/projects/{self.team.id}/early_access_feature/",
@@ -656,7 +656,7 @@ class TestEarlyAccessFeature(APIBaseTest):
             },
         )
 
-    @patch("posthog.tasks.early_access_feature.send_events_for_early_access_feature_stage_change.delay")
+    @patch("insights.tasks.early_access_feature.send_events_for_early_access_feature_stage_change.delay")
     def test_send_events_for_early_access_feature_stage_change_fires_on_stage_change(self, mock_celery_task):
         response = self.client.post(
             f"/api/projects/{self.team.id}/early_access_feature/",
@@ -699,7 +699,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         assert EarlyAccessFeature.objects.filter(id=feature_id).exists()
         assert FeatureFlag.objects.filter(id=response_data["feature_flag"]["id"]).exists()
 
-        from posthog.models.file_system.file_system import FileSystem
+        from insights.models.file_system.file_system import FileSystem
 
         fs_entry = FileSystem.objects.filter(
             team=self.team,

@@ -6,7 +6,7 @@ from typing import Optional
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.base import InsightsWorkflow
 
 from .activities import (
     CleanupSandboxInput,

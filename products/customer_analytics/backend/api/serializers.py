@@ -76,7 +76,7 @@ class CustomerJourneySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         from django.db import IntegrityError
 
-        from posthog.exceptions import Conflict
+        from insights.exceptions import Conflict
 
         validated_data["created_by"] = self.context["request"].user
         validated_data["team_id"] = self.context["team_id"]

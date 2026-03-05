@@ -13,13 +13,13 @@ from zoneinfo import ZoneInfo
 import dagster
 from dagster import AssetExecutionContext, RetryPolicy, RunRequest, SkipReason
 
-from posthog.schema import ExperimentFunnelMetric, ExperimentMeanMetric, ExperimentQuery, ExperimentRatioMetric
+from insights.schema import ExperimentFunnelMetric, ExperimentMeanMetric, ExperimentQuery, ExperimentRatioMetric
 
-from posthog.clickhouse.client.connection import Workload
-from posthog.clickhouse.query_tagging import tags_context
-from posthog.dags.common import JobOwners, dagster_tags
-from posthog.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
-from posthog.models.experiment import ExperimentMetricResult, ExperimentTimeseriesRecalculation
+from insights.clickhouse.client.connection import Workload
+from insights.clickhouse.query_tagging import tags_context
+from insights.dags.common import JobOwners, dagster_tags
+from insights.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
+from insights.models.experiment import ExperimentMetricResult, ExperimentTimeseriesRecalculation
 
 from products.experiments.dags.utils import remove_step_sessions_from_experiment_result
 

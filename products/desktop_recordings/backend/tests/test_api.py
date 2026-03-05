@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
 from rest_framework import status
@@ -15,7 +15,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
         """RESTful POST creates recording with upload token and empty transcript"""
         mock_recall_response = {"id": str(uuid4()), "upload_token": "test-upload-token-123"}
 
-        with patch("posthog.settings.integrations.RECALL_AI_API_KEY", "test-api-key"):
+        with patch("insights.settings.integrations.RECALL_AI_API_KEY", "test-api-key"):
             with patch("products.desktop_recordings.backend.api.RecallAIClient") as mock_client:
                 mock_instance = MagicMock()
                 mock_instance.create_sdk_upload.return_value = mock_recall_response
@@ -48,7 +48,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
         """Create recording should fail gracefully when Recall.ai API key not configured"""
         from unittest.mock import patch
 
-        with patch("posthog.settings.integrations.RECALL_AI_API_KEY", ""):
+        with patch("insights.settings.integrations.RECALL_AI_API_KEY", ""):
             response = self.client.post(
                 f"/api/environments/{self.team.id}/desktop_recordings/",
                 {"platform": "zoom"},

@@ -11,12 +11,12 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.service import BatchExportField, BatchExportInsertInputs, HttpBatchExportInputs
-from posthog.models import BatchExportRun
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import InsightsWorkflow
-from posthog.temporal.common.clickhouse import get_client
-from posthog.temporal.common.logger import get_logger
+from insights.batch_exports.service import BatchExportField, BatchExportInsertInputs, HttpBatchExportInputs
+from insights.models import BatchExportRun
+from insights.sync import database_sync_to_async
+from insights.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.logger import get_logger
 
 from products.batch_exports.backend.temporal.batch_exports import (
     FinishBatchExportRunInputs,

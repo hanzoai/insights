@@ -9,9 +9,9 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from posthog.models import Integration, Organization, Team
-from posthog.models.user import User
-from posthog.storage import object_storage
+from insights.models import Integration, Organization, Team
+from insights.models.user import User
+from insights.storage import object_storage
 
 from products.tasks.backend.models import SandboxEnvironment, SandboxSnapshot, Task, TaskRun
 
@@ -406,7 +406,7 @@ class TestTaskRun(TestCase):
         # Verify S3 object has TTL tags
         from botocore.exceptions import ClientError
 
-        from posthog.storage.object_storage import ObjectStorage, object_storage_client
+        from insights.storage.object_storage import ObjectStorage, object_storage_client
 
         try:
             client = object_storage_client()

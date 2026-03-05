@@ -6,10 +6,10 @@ from django.db import models
 import structlog
 import temporalio
 
-from posthog.helpers.encrypted_fields import EncryptedJSONField
-from posthog.models.activity_logging.model_activity import ModelActivityMixin
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
-from posthog.sync import database_sync_to_async
+from insights.helpers.encrypted_fields import EncryptedJSONField
+from insights.models.activity_logging.model_activity import ModelActivityMixin
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
+from insights.sync import database_sync_to_async
 
 from products.data_warehouse.backend.types import ExternalDataSourceType
 
@@ -39,7 +39,7 @@ class ExternalDataSource(ModelActivityMixin, CreatedMetaFields, UpdatedMetaField
     source_id = models.CharField(max_length=400)
     connection_id = models.CharField(max_length=400)
     destination_id = models.CharField(max_length=400, null=True, blank=True)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     # Deprecated, use `ExternalDataSchema.sync_frequency_interval`
     sync_frequency = models.CharField(

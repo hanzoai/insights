@@ -1,14 +1,14 @@
 from django.db import models
 
-from posthog.helpers.encrypted_fields import EncryptedTextField
-from posthog.models.utils import CreatedMetaFields, UUIDTModel, sane_repr
-from posthog.sync import database_sync_to_async
+from insights.helpers.encrypted_fields import EncryptedTextField
+from insights.models.utils import CreatedMetaFields, UUIDTModel, sane_repr
+from insights.sync import database_sync_to_async
 
 
 class DataWarehouseCredential(CreatedMetaFields, UUIDTModel):
     access_key = EncryptedTextField(max_length=500)
     access_secret = EncryptedTextField(max_length=500)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     __repr__ = sane_repr("access_key")
 

@@ -10,11 +10,11 @@ from dateutil import parser
 from django_deprecate_fields import deprecate_field
 from dlt.common.normalizers.naming.snake_case import NamingConvention
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.activity_logging.model_activity import ModelActivityMixin
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
-from posthog.sync import database_sync_to_async
-from posthog.temporal.data_imports.pipelines.pipeline.typings import PartitionFormat, PartitionMode
+from insights.exceptions_capture import capture_exception
+from insights.models.activity_logging.model_activity import ModelActivityMixin
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
+from insights.sync import database_sync_to_async
+from insights.temporal.data_imports.pipelines.pipeline.typings import PartitionFormat, PartitionMode
 
 from products.data_warehouse.backend.data_load.service import (
     external_data_workflow_exists,
@@ -46,7 +46,7 @@ class ExternalDataSchema(ModelActivityMixin, CreatedMetaFields, UpdatedMetaField
         MONTHLY = "month", "Monthly"
 
     name = models.CharField(max_length=400)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     source = models.ForeignKey("data_warehouse.ExternalDataSource", related_name="schemas", on_delete=models.CASCADE)
     table = models.ForeignKey("data_warehouse.DataWarehouseTable", on_delete=models.SET_NULL, null=True, blank=True)
     should_sync = models.BooleanField(default=True)

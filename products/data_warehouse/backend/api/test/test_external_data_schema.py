@@ -2,7 +2,7 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest import mock
 
 from django.conf import settings
@@ -13,11 +13,11 @@ import pytest_asyncio
 from asgiref.sync import sync_to_async
 from temporalio.service import RPCError
 
-from posthog.api.test.test_organization import create_organization
-from posthog.api.test.test_team import create_team
-from posthog.api.test.test_user import create_user
-from posthog.temporal.common.schedule import describe_schedule
-from posthog.temporal.data_imports.sources.stripe.source import StripeSource
+from insights.api.test.test_organization import create_organization
+from insights.api.test.test_team import create_team
+from insights.api.test.test_user import create_user
+from insights.temporal.common.schedule import describe_schedule
+from insights.temporal.data_imports.sources.stripe.source import StripeSource
 
 from products.data_warehouse.backend.api.test.utils import create_external_data_source_ok
 from products.data_warehouse.backend.models import DataWarehouseTable

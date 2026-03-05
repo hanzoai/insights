@@ -3,11 +3,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind, RevenueAnalyticsEventItem
+from insights.schema import DatabaseSchemaManagedViewTableKind, RevenueAnalyticsEventItem
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
-from posthog.models.team.team import Team
+from insights.models.team.team import Team
 
 from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
 

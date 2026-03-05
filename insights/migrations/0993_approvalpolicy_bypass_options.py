@@ -1,0 +1,15 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("insights", "0992_drop_approvalpolicy_bypass_roles_column"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="approvalpolicy",
+            name="bypass_org_membership_levels",
+            field=models.JSONField(default=list),
+        ),
+    ]

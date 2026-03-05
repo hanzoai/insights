@@ -42,7 +42,7 @@ jobs:
                       hog:
                         # Avoid running tests for irrelevant changes
                         - 'common/hogvm/**/*'
-                        - 'posthog/hogql/**/*'
+                        - 'insights/hogql/**/*'
                         - 'bin/hog'
                         - 'bin/hoge'
                         - 'package.json'

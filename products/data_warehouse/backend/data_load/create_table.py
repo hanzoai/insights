@@ -6,9 +6,9 @@ from asgiref.sync import sync_to_async
 from clickhouse_driver.errors import ServerException
 from structlog.contextvars import bind_contextvars
 
-from posthog.exceptions_capture import capture_exception
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.logger import get_logger
+from insights.exceptions_capture import capture_exception
+from insights.sync import database_sync_to_async
+from insights.temporal.common.logger import get_logger
 
 from products.data_warehouse.backend.models import (
     DataModelingJob,

@@ -2,7 +2,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     APIBaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -11,7 +11,7 @@ from posthog.test.base import (
 )
 from unittest.mock import patch
 
-from posthog.schema import (
+from insights.schema import (
     CurrencyCode,
     DateRange,
     InsightsQLQueryModifiers,
@@ -23,8 +23,8 @@ from posthog.schema import (
     RevenueAnalyticsPropertyFilter,
 )
 
-from posthog.models.utils import uuid7
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.models.utils import uuid7
+from insights.temporal.data_imports.sources.stripe.constants import (
     CHARGE_RESOURCE_NAME as STRIPE_CHARGE_RESOURCE_NAME,
     CUSTOMER_RESOURCE_NAME as STRIPE_CUSTOMER_RESOURCE_NAME,
     INVOICE_RESOURCE_NAME as STRIPE_INVOICE_RESOURCE_NAME,

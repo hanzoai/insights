@@ -11,7 +11,7 @@ import django.utils.timezone
 from asgiref.sync import sync_to_async
 from pydantic import BaseModel, ConfigDict, Field
 
-from posthog.schema import (
+from insights.schema import (
     SurveyAnalysisQuestionGroup,
     SurveyAnalysisResponseItem,
     SurveyAppearanceSchema,
@@ -21,13 +21,12 @@ from posthog.schema import (
     SurveyType,
 )
 
-from posthog.constants import DEFAULT_SURVEY_APPEARANCE
-from posthog.exceptions_capture import capture_exception
-from posthog.models import Survey, Team
+from insights.constants import DEFAULT_SURVEY_APPEARANCE
+from insights.exceptions_capture import capture_exception
+from insights.models import Survey, Team
 
 from products.surveys.backend.summarization.fetch import fetch_responses
 
-from ee.hogai.tool import MaxTool
 
 
 def get_team_survey_config(team: Team) -> dict[str, Any]:

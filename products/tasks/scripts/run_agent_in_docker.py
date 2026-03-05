@@ -15,7 +15,7 @@ repo_root = script_dir.parent.parent.parent
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "posthog.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "insights.settings")
 os.environ["DEBUG"] = "1"
 
 import django
@@ -24,9 +24,9 @@ django.setup()
 
 from django.db import transaction
 
-from posthog.models import FeatureFlag, Integration, PersonalAPIKey, Team, User
-from posthog.models.personal_api_key import hash_key_value
-from posthog.models.utils import generate_random_token_personal
+from insights.models import FeatureFlag, Integration, PersonalAPIKey, Team, User
+from insights.models.personal_api_key import hash_key_value
+from insights.models.utils import generate_random_token_personal
 
 from products.tasks.backend.models import Task, TaskRun
 from products.tasks.backend.services.docker_sandbox import DockerSandbox

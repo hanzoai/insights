@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 
 from parameterized import parameterized
 
-from posthog.models import Organization, Team
+from insights.models import Organization, Team
 
 from products.tasks.backend.repository_readiness import (
     MAX_CANDIDATE_PATHS,

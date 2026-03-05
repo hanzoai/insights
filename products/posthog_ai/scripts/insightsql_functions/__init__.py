@@ -7,9 +7,9 @@ def insightsql_functions() -> list[str]:
     Excludes underscore-prefixed internals, UDFs, and *If combinator variants
     (e.g. countIf, sumIf) where the base function also exists.
     """
-    from posthog.insightsql.functions.aggregations import INSIGHTSQL_AGGREGATIONS
-    from posthog.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS
-    from posthog.insightsql.functions.udfs import UDFS
+    from insights.insightsql.functions.aggregations import INSIGHTSQL_AGGREGATIONS
+    from insights.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS
+    from insights.insightsql.functions.udfs import UDFS
 
     all_names: set[str] = set()
     for name in INSIGHTSQL_CLICKHOUSE_FUNCTIONS:

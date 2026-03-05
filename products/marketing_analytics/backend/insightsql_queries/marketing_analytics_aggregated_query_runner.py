@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Optional
 
-from posthog.schema import (
+from insights.schema import (
     CachedMarketingAnalyticsAggregatedQueryResponse,
     DateRange,
     MarketingAnalyticsAggregatedQuery,
@@ -11,8 +11,8 @@ from posthog.schema import (
     MarketingAnalyticsItem,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
 from .constants import BASE_COLUMN_MAPPING, UNIFIED_CONVERSION_GOALS_CTE_ALIAS, to_marketing_analytics_data
 from .conversion_goals_aggregator import ConversionGoalsAggregator

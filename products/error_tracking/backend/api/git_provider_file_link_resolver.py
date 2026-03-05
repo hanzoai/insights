@@ -8,9 +8,9 @@ import structlog
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.models.integration import GitHubIntegration, GitLabIntegration, Integration
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.models.integration import GitHubIntegration, GitLabIntegration, Integration
 
 logger = structlog.get_logger(__name__)
 

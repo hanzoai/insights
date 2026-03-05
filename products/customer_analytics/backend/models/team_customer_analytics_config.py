@@ -2,8 +2,8 @@ import logging
 
 from django.db import models
 
-from posthog.models import Team
-from posthog.models.team.extensions import register_team_extension_signal
+from insights.models import Team
+from insights.models.team.extensions import register_team_extension_signal
 
 from products.customer_analytics.backend.constants import DEFAULT_ACTIVITY_EVENT
 

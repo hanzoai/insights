@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         related_name="error_tracking_spike_detection_config",
                         serialize=False,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 ("snooze_duration_minutes", models.IntegerField(default=10)),

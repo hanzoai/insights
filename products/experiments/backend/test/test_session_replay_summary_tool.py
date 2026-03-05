@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
-from posthog.models import Experiment, FeatureFlag
-from posthog.session_recordings.models.session_recording import SessionRecording
+from insights.models import Experiment, FeatureFlag
+from insights.session_recordings.models.session_recording import SessionRecording
 
 from products.experiments.backend.max_tools import SessionReplaySummaryTool
 
-from ee.hogai.utils.types import AssistantState
 
 
 @freeze_time("2025-01-15T12:00:00Z")

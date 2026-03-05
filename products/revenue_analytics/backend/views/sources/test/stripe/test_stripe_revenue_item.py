@@ -1,13 +1,13 @@
 from typing import Any
 
-from posthog.test.base import snapshot_clickhouse_queries
+from insights.test.base import snapshot_clickhouse_queries
 
 from parameterized import parameterized
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.temporal.data_imports.sources.stripe.constants import (
     CHARGE_RESOURCE_NAME,
     CUSTOMER_RESOURCE_NAME,
     INVOICE_RESOURCE_NAME,

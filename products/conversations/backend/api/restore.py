@@ -20,15 +20,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from posthog.auth import WidgetAuthentication
-from posthog.models import Team
-from posthog.rate_limit import (
+from insights.auth import WidgetAuthentication
+from insights.models import Team
+from insights.rate_limit import (
     RestoreRedeemThrottle,
     RestoreRequestThrottle,
     WidgetTeamThrottle,
     WidgetUserBurstThrottle,
 )
-from posthog.tasks.email import send_conversation_restore_email
+from insights.tasks.email import send_conversation_restore_email
 
 from products.conversations.backend.api.serializers import validate_origin, validate_url_domain
 from products.conversations.backend.cache import invalidate_tickets_cache

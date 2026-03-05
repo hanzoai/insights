@@ -1,11 +1,10 @@
 from django.shortcuts import get_object_or_404
 
-from posthog.models import Action, ChangeRequest, Cohort, Insight, Notebook
-from posthog.models.personal_api_key import PersonalAPIKey
-from posthog.models.project import Project
-from posthog.models.user_scene_personalisation import UserScenePersonalisation
+from insights.models import Action, ChangeRequest, Cohort, Insight, Notebook
+from insights.models.personal_api_key import PersonalAPIKey
+from insights.models.project import Project
+from insights.models.user_scene_personalisation import UserScenePersonalisation
 
-from ee.models.rbac.role import Role, RoleMembership
 
 # ============================================================
 # idor-taint-user-input-to-model-get (ERROR - user input flows to lookup)

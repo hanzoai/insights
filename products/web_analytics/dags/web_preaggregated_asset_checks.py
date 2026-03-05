@@ -6,23 +6,23 @@ import chdb
 import structlog
 from dagster import AssetCheckExecutionContext, AssetCheckResult, AssetCheckSeverity, Field, MetadataValue, asset_check
 
-from posthog.schema import DateRange, InsightsQLQueryModifiers, WebOverviewItem, WebOverviewQuery
+from insights.schema import DateRange, InsightsQLQueryModifiers, WebOverviewItem, WebOverviewQuery
 
-from posthog.insightsql.database.schema.web_analytics_s3 import (
+from insights.insightsql.database.schema.web_analytics_s3 import (
     get_s3_function_args,
     get_s3_url,
     get_s3_web_bounces_structure,
     get_s3_web_stats_structure,
 )
-from posthog.insightsql.query import InsightsQLQueryExecutor
+from insights.insightsql.query import InsightsQLQueryExecutor
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.client.escape import substitute_params
-from posthog.clickhouse.query_tagging import DagsterTags, get_query_tags, tags_context
-from posthog.dags.common import dagster_tags
-from posthog.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
-from posthog.models import Team
-from posthog.settings.base_variables import DEBUG
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.client.escape import substitute_params
+from insights.clickhouse.query_tagging import DagsterTags, get_query_tags, tags_context
+from insights.dags.common import dagster_tags
+from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
+from insights.models import Team
+from insights.settings.base_variables import DEBUG
 
 from products.web_analytics.dags.web_preaggregated_utils import TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS
 

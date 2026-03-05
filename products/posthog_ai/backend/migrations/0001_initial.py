@@ -4,14 +4,14 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0969_add_oauth_is_verified"),
+        ("insights", "0969_add_oauth_is_verified"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="agent_memories", to="posthog.team"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="agent_memories", to="insights.team"
                     ),
                 ),
                 (

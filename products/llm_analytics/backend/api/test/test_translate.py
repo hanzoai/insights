@@ -1,6 +1,6 @@
 """Tests for translation API endpoint."""
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
 from rest_framework import status

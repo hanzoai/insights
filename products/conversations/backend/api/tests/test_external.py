@@ -1,12 +1,12 @@
 import uuid
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from parameterized import parameterized
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from posthog.models import Team
+from insights.models import Team
 
 from products.conversations.backend.models import Ticket
 from products.conversations.backend.models.constants import Priority, Status

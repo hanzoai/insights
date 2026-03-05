@@ -21,10 +21,9 @@ jobs:
               with:
                   filters: |
                       migrations:
-                          - 'posthog/migrations/*.py'
-                          - 'posthog/clickhouse/migrations/*.py'
+                          - 'insights/migrations/*.py'
+                          - 'insights/clickhouse/migrations/*.py'
                           - 'products/*/backend/migrations/*.py'
-                          - 'ee/migrations/*.py'
                       sqlx_migrations:
                           - 'rust/persons_migrations/*.sql'
                           - 'rust/behavioral_cohorts_migrations/*.sql'

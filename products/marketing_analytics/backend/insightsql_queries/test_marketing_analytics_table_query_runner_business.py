@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any, Union
 
 import pytest
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 from unittest.mock import Mock
 
-from posthog.schema import (
+from insights.schema import (
     BaseMathType,
     ConversionGoalFilter2,
     DateRange,
@@ -17,11 +17,11 @@ from posthog.schema import (
     SourceMap,
 )
 
-from posthog.insightsql.errors import QueryError
-from posthog.insightsql.test.utils import pretty_print_in_tests
+from insights.insightsql.errors import QueryError
+from insights.insightsql.test.utils import pretty_print_in_tests
 
-from posthog.models import Action
-from posthog.models.team.team import Team
+from insights.models import Action
+from insights.models.team.team import Team
 
 from products.data_warehouse.backend.models import DataWarehouseTable, ExternalDataSource
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential

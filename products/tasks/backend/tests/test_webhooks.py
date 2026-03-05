@@ -8,9 +8,9 @@ from django.test import TestCase
 
 from rest_framework.test import APIClient
 
-from posthog.models.organization import Organization
-from posthog.models.team.team import Team
-from posthog.models.user import User
+from insights.models.organization import Organization
+from insights.models.team.team import Team
+from insights.models.user import User
 
 from products.tasks.backend.models import Task, TaskRun
 

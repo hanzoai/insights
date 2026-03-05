@@ -2,8 +2,8 @@ import json
 from collections.abc import Callable
 from typing import Any, Optional
 
-from posthog.insightsql.compiler.bytecode import create_bytecode
-from posthog.insightsql.parser import parse_expr, parse_program
+from insights.insightsql.compiler.bytecode import create_bytecode
+from insights.insightsql.parser import parse_expr, parse_program
 
 from common.hogvm.python.execute import execute_bytecode, get_nested_value
 from common.hogvm.python.operation import (

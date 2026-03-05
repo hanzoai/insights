@@ -1,6 +1,6 @@
 from django.core.cache import cache
 
-from posthog.rate_limit import APIQueriesBurstThrottle, APIQueriesSustainedThrottle
+from insights.rate_limit import APIQueriesBurstThrottle, APIQueriesSustainedThrottle
 
 MATERIALIZED_ENDPOINT_CACHE_KEY = "endpoint_materialized_ready:{team_id}:{endpoint_name}"
 MATERIALIZED_ENDPOINT_CACHE_TTL = 3600  # 1 hour fallback TTL

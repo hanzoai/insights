@@ -35,7 +35,7 @@ def render_insightsql_example(query_dict: dict[str, Any]) -> str:
 
     global _cached_team
     if _cached_team is None:
-        from posthog.models.team import Team
+        from insights.models.team import Team
 
         _cached_team = Team.objects.first()
         if _cached_team is None:
@@ -43,12 +43,12 @@ def render_insightsql_example(query_dict: dict[str, Any]) -> str:
 
     from freezegun import freeze_time
 
-    from posthog.schema import InsightsQLFilters
+    from insights.schema import InsightsQLFilters
 
-    from posthog.insightsql.filters import replace_filters
-    from posthog.insightsql.printer.utils import to_printed_insightsql
+    from insights.insightsql.filters import replace_filters
+    from insights.insightsql.printer.utils import to_printed_insightsql
 
-    from posthog.insightsql_queries.query_runner import get_query_runner
+    from insights.insightsql_queries.query_runner import get_query_runner
 
     with freeze_time(FROZEN_TIME):
         kind = query_dict.get("kind")
@@ -76,11 +76,11 @@ def render_insightsql_example(query_dict: dict[str, Any]) -> str:
 
 
 def _render_recordings_query(query_dict: dict[str, Any], team: Any) -> str:
-    from posthog.schema import RecordingsQuery
+    from insights.schema import RecordingsQuery
 
-    from posthog.insightsql.printer.utils import to_printed_insightsql
+    from insights.insightsql.printer.utils import to_printed_insightsql
 
-    from posthog.session_recordings.queries.session_recording_list_from_query import SessionRecordingListFromQuery
+    from insights.session_recordings.queries.session_recording_list_from_query import SessionRecordingListFromQuery
 
     query = RecordingsQuery(**{k: v for k, v in query_dict.items() if k != "kind"})
     listing = SessionRecordingListFromQuery(team=team, query=query)

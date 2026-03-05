@@ -6,8 +6,7 @@ on:
     paths:
       - 'Dockerfile'
       - 'frontend/**'
-      - 'posthog/**'
-      - 'ee/**'
+      - 'insights/**'
       - 'requirements*.txt'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:

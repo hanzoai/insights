@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     APIBaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -16,7 +16,7 @@ from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 
-from posthog.schema import (
+from insights.schema import (
     DateRange,
     ErrorTrackingIssueFilter,
     ErrorTrackingQuery,
@@ -29,7 +29,7 @@ from posthog.schema import (
     SubscriptionDropoffMode,
 )
 
-from posthog.models.utils import uuid7
+from insights.models.utils import uuid7
 
 from products.error_tracking.backend.insightsql_queries.error_tracking_query_runner import (
     ErrorTrackingQueryRunner,
@@ -43,7 +43,6 @@ from products.error_tracking.backend.models import (
     update_error_tracking_issue_fingerprints,
 )
 
-from ee.models.rbac.role import Role
 
 
 class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):

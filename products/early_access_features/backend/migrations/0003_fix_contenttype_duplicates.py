@@ -14,10 +14,10 @@ def fix_contenttype_duplicates(apps, schema_editor):
 
     This caused Django to create a NEW ContentType entry when it saw the model
     registered under app_label='early_access_features', while the OLD ContentType
-    with app_label='posthog' remained.
+    with app_label='insights' remained.
 
     Production investigation (2025-10-10) confirmed:
-    - ContentType ID 296: app_label='posthog' (original, needs update)
+    - ContentType ID 296: app_label='insights' (original, needs update)
     - ContentType ID 2580: app_label='early_access_features' (duplicate, needs deletion)
     - Both have 4 permissions each (8 total duplicates)
     - 0 permissions assigned to users/groups (no data loss risk)
@@ -38,7 +38,7 @@ def fix_contenttype_duplicates(apps, schema_editor):
 
     try:
         # Get both ContentType entries
-        old_ct = ContentType.objects.get(app_label="posthog", model="earlyaccessfeature")
+        old_ct = ContentType.objects.get(app_label="insights", model="earlyaccessfeature")
         new_ct = ContentType.objects.get(app_label="early_access_features", model="earlyaccessfeature")
 
         # Sanity check: ensure no permissions are assigned to users/groups

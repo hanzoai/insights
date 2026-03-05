@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import log_activity_from_viewset
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import log_activity_from_viewset
 
 from products.customer_analytics.backend.models import CustomerJourney, CustomerProfileConfig
 

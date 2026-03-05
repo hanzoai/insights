@@ -4,7 +4,7 @@ Tests for evaluation summary API endpoint.
 
 import uuid
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from rest_framework import status
@@ -370,7 +370,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def _create_another_team(self):
-        from posthog.models import Organization, Project, Team
+        from insights.models import Organization, Project, Team
 
         org = Organization.objects.create(name="other-org")
         project = Project.objects.create(id=Team.objects.increment_id_sequence(), organization=org)

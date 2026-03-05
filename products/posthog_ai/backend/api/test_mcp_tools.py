@@ -1,9 +1,9 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import AsyncMock, patch
 
 from rest_framework import status
 
-from posthog.models import Organization, Team
+from insights.models import Organization, Team
 
 
 class TestMCPToolsAPI(APIBaseTest):
@@ -69,7 +69,6 @@ class TestMCPToolsAPI(APIBaseTest):
 
     @patch("ee.hogai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
     def test_invoke_tool_error_returns_error_response(self, mock_execute):
-        from ee.hogai.tool_errors import MaxToolRetryableError
 
         mock_execute.side_effect = MaxToolRetryableError("Query validation failed: syntax error")
 

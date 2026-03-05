@@ -16,8 +16,8 @@ source_roots = [
 [[modules]]
 path = "<root>"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
     "products.error_tracking",
     "products.llm_analytics",
     "products.logs",
@@ -31,32 +31,15 @@ utility = true
 [[modules]]
 path = "common.hogvm.python"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 utility = true
 
 [[modules]]
-path = "ee"
+path = "insights"
 depends_on = [
     "<root>",
-    "posthog",
-    "products.data_warehouse",
-    "products.error_tracking",
-    "products.experiments",
-    "products.feature_flags",
-    "products.llm_analytics",
-    "products.notebooks",
-    "products.replay",
-    "products.revenue_analytics",
-    "products.surveys",
-    "products.tasks",
-]
 
-[[modules]]
-path = "posthog"
-depends_on = [
-    "<root>",
-    "ee",
     "products.batch_exports",
     "products.customer_analytics",
     "products.data_modeling",
@@ -85,23 +68,23 @@ depends_on = [
 [[modules]]
 path = "products.batch_exports"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.cdp"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.customer_analytics"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 layer = "non_isolated"
 
@@ -113,7 +96,7 @@ layer = "non_isolated"
 [[modules]]
 path = "products.data_modeling"
 depends_on = [
-    "posthog",
+    "insights",
     "products.data_warehouse",
 ]
 layer = "non_isolated"
@@ -121,8 +104,8 @@ layer = "non_isolated"
 [[modules]]
 path = "products.data_warehouse"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
     "products.data_modeling",
     "products.revenue_analytics",
 ]
@@ -131,21 +114,21 @@ layer = "non_isolated"
 [[modules]]
 path = "products.desktop_recordings"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.early_access_features"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.endpoints"
 depends_on = [
-    "posthog",
+    "insights",
     "products.data_warehouse",
 ]
 layer = "non_isolated"
@@ -153,54 +136,54 @@ layer = "non_isolated"
 [[modules]]
 path = "products.error_tracking"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.experiments"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.feature_flags"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.links"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.live_debugger"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.llm_analytics"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.logs"
 depends_on = [
-    "posthog",
+    "insights",
 ]
 layer = "non_isolated"
 
@@ -212,7 +195,7 @@ layer = "non_isolated"
 [[modules]]
 path = "products.marketing_analytics"
 depends_on = [
-    "posthog",
+    "insights",
     "products.data_warehouse",
 ]
 layer = "non_isolated"
@@ -220,8 +203,8 @@ layer = "non_isolated"
 [[modules]]
 path = "products.notebooks"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
     "products.tasks",
 ]
 layer = "non_isolated"
@@ -234,16 +217,16 @@ layer = "non_isolated"
 [[modules]]
 path = "products.replay"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.revenue_analytics"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
     "products.data_warehouse",
 ]
 layer = "non_isolated"
@@ -251,7 +234,7 @@ layer = "non_isolated"
 [[modules]]
 path = "products.signals"
 depends_on = [
-    "posthog",
+    "insights",
     "products.error_tracking",
     "products.tasks",
 ]
@@ -260,24 +243,24 @@ layer = "non_isolated"
 [[modules]]
 path = "products.slack_app"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.surveys"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.tasks"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
     "products.error_tracking",
     "products.llm_analytics",
     "products.slack_app",
@@ -287,23 +270,23 @@ layer = "non_isolated"
 [[modules]]
 path = "products.user_interviews"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.web_analytics"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"
 
 [[modules]]
 path = "products.workflows"
 depends_on = [
-    "ee",
-    "posthog",
+
+    "insights",
 ]
 layer = "non_isolated"

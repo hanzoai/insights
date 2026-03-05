@@ -7,10 +7,10 @@ from django.conf import settings
 from temporalio import exceptions, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.models import BatchExportRun
-from posthog.batch_exports.service import BackfillDetails, BatchExportField, BatchExportModel, BatchExportSchema
-from posthog.settings.base_variables import TEST
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.batch_exports.models import BatchExportRun
+from insights.batch_exports.service import BackfillDetails, BatchExportField, BatchExportModel, BatchExportSchema
+from insights.settings.base_variables import TEST
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.batch_exports import FinishBatchExportRunInputs, finish_batch_export_run
 from products.batch_exports.backend.temporal.metrics import get_export_finished_metric, get_export_started_metric

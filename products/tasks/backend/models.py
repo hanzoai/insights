@@ -12,12 +12,12 @@ from django.utils import timezone
 
 import structlog
 
-from posthog.helpers.encrypted_fields import EncryptedJSONStringField
-from posthog.models.integration import Integration
-from posthog.models.team.team import Team
-from posthog.models.user import User
-from posthog.models.utils import DeletedMetaFields, UUIDModel
-from posthog.storage import object_storage
+from insights.helpers.encrypted_fields import EncryptedJSONStringField
+from insights.models.integration import Integration
+from insights.models.team.team import Team
+from insights.models.user import User
+from insights.models.utils import DeletedMetaFields, UUIDModel
+from insights.storage import object_storage
 
 from products.tasks.backend.constants import DEFAULT_TRUSTED_DOMAINS
 
@@ -35,8 +35,8 @@ class Task(DeletedMetaFields, models.Model):
         SESSION_SUMMARIES = "session_summaries", "Session Summaries"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
     task_number = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -44,7 +44,7 @@ class Task(DeletedMetaFields, models.Model):
 
     # Repository configuration
     github_integration = models.ForeignKey(
-        "posthog.Integration",
+        "insights.Integration",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -193,7 +193,7 @@ class TaskRun(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="runs")
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     branch = models.CharField(max_length=255, blank=True, null=True, help_text="Branch name for the run")
     environment = models.CharField(
@@ -471,8 +471,8 @@ class SandboxEnvironment(UUIDModel):
         FULL = "full", "Full"
         CUSTOM = "custom", "Custom"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
 
     name = models.CharField(max_length=255)
 

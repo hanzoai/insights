@@ -5,7 +5,7 @@ from typing import Generic, Optional, TypeVar, cast
 
 import structlog
 
-from posthog.schema import (
+from insights.schema import (
     ConversionGoalFilter1,
     ConversionGoalFilter2,
     ConversionGoalFilter3,
@@ -14,14 +14,14 @@ from posthog.schema import (
     NodeKind,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
 
-from posthog.insightsql_queries.query_runner import AnalyticsQueryResponseProtocol, AnalyticsQueryRunner
-from posthog.insightsql_queries.utils.query_compare_to_date_range import QueryCompareToDateRange
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.insightsql_queries.utils.query_previous_period_date_range import QueryPreviousPeriodDateRange
-from posthog.models.team.team import DEFAULT_CURRENCY
+from insights.insightsql_queries.query_runner import AnalyticsQueryResponseProtocol, AnalyticsQueryRunner
+from insights.insightsql_queries.utils.query_compare_to_date_range import QueryCompareToDateRange
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.insightsql_queries.utils.query_previous_period_date_range import QueryPreviousPeriodDateRange
+from insights.models.team.team import DEFAULT_CURRENCY
 
 from products.marketing_analytics.backend.insightsql_queries.constants import UNIFIED_CONVERSION_GOALS_CTE_ALIAS
 

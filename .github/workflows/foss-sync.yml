@@ -42,7 +42,7 @@ jobs:
             - name: Checkout posthog-foss
               uses: actions/checkout@v6
               with:
-                  repository: 'posthog/posthog-foss'
+                  repository: 'insights/posthog-foss'
                   ref: master
                   token: ${{ steps.app-token.outputs.token }}
             - name: Change LICENSE to pure MIT
@@ -58,6 +58,6 @@ jobs:
               uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
               with:
                   message: 'Sync and remove all non-FOSS parts'
-                  remove: '["-r ee/ .github/dependabot.yml"]'
+                  remove: '[".github/dependabot.yml"]'
                   default_author: github_actions
                   github_token: ${{ steps.app-token.outputs.token }}

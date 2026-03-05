@@ -3,12 +3,12 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0891_file_system_view_log"),
+        ("insights", "0891_file_system_view_log"),
         ("error_tracking", "0001_migrate_error_tracking_models"),
     ]
 
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.cohort")),
+                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.cohort")),
                 (
                     "issue",
                     models.ForeignKey(

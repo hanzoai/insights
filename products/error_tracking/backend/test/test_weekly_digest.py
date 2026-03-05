@@ -1,11 +1,11 @@
 from datetime import timedelta
 from uuid import uuid4
 
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 
 from django.utils import timezone
 
-from posthog.models.utils import uuid7
+from insights.models.utils import uuid7
 
 from products.error_tracking.backend.models import ErrorTrackingIssue, ErrorTrackingIssueFingerprintV2
 from products.error_tracking.backend.weekly_digest import (
@@ -17,7 +17,6 @@ from products.error_tracking.backend.weekly_digest import (
     get_top_issues_for_team,
 )
 
-from ee.clickhouse.materialized_columns.columns import materialize
 
 
 def _days_ago(n: int) -> str:

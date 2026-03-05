@@ -6,9 +6,9 @@ view source builders, including mixins for ClickHouse queries, snapshots,
 and API testing.
 """
 
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 from products.revenue_analytics.backend.views.core import BuiltQuery
 from products.revenue_analytics.backend.views.schemas import Schema

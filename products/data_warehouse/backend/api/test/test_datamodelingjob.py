@@ -1,8 +1,8 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from django.utils import timezone
 
-from posthog.models.team.team import Team
+from insights.models.team.team import Team
 
 from products.data_warehouse.backend.models.data_modeling_job import DataModelingJob
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery

@@ -9,8 +9,8 @@ import django.contrib.postgres.indexes
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
-import posthog.helpers.encrypted_fields
+import insights.models.utils
+import insights.helpers.encrypted_fields
 
 import products.data_warehouse.backend.models.modeling
 import products.data_warehouse.backend.models.datawarehouse_saved_query
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0897_migrate_data_warehouse_models"),
+        ("insights", "0897_migrate_data_warehouse_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                                 to=settings.AUTH_USER_MODEL,
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehousecredential",
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                                 to=settings.AUTH_USER_MODEL,
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehousemanagedviewset",
@@ -318,7 +318,7 @@ class Migration(migrations.Migration):
                                 to=settings.AUTH_USER_MODEL,
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_externaldatasource",
@@ -374,7 +374,7 @@ class Migration(migrations.Migration):
                                 to=settings.AUTH_USER_MODEL,
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_querytabstate",
@@ -461,7 +461,7 @@ class Migration(migrations.Migration):
                                 to="data_warehouse.datawarehousetable",
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_externaldataschema",
@@ -524,7 +524,7 @@ class Migration(migrations.Migration):
                                 to="data_warehouse.externaldataschema",
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_externaldatajob",
@@ -560,7 +560,7 @@ class Migration(migrations.Migration):
                                 on_delete=django.db.models.deletion.CASCADE, to="data_warehouse.datawarehousesavedquery"
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehouseviewlink",
@@ -579,7 +579,7 @@ class Migration(migrations.Migration):
                 migrations.AddField(
                     model_name="datawarehousetable",
                     name="team",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
                 migrations.CreateModel(
                     name="DataWarehouseSavedQueryDraft",
@@ -627,7 +627,7 @@ class Migration(migrations.Migration):
                                 to="data_warehouse.datawarehousesavedquery",
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehousesavedquerydraft",
@@ -646,7 +646,7 @@ class Migration(migrations.Migration):
                 migrations.AddField(
                     model_name="datawarehousesavedquery",
                     name="team",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
                 migrations.CreateModel(
                     name="DataWarehouseModelPath",
@@ -687,7 +687,7 @@ class Migration(migrations.Migration):
                                 to="data_warehouse.datawarehousetable",
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehousemodelpath",
@@ -720,7 +720,7 @@ class Migration(migrations.Migration):
                                 to=settings.AUTH_USER_MODEL,
                             ),
                         ),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                     options={
                         "db_table": "posthog_datawarehousejoin",
@@ -782,7 +782,7 @@ class Migration(migrations.Migration):
                         (
                             "team",
                             models.ForeignKey(
-                                null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.team"
+                                null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.team"
                             ),
                         ),
                     ],

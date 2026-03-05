@@ -1,17 +1,17 @@
 import datetime as dt
 from zoneinfo import ZoneInfo
 
-from posthog.schema import IntervalType, LogAttributesQuery, LogAttributesQueryResponse
+from insights.schema import IntervalType, LogAttributesQuery, LogAttributesQueryResponse
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import InsightsQLGlobalSettings
-from posthog.insightsql.parser import parse_expr, parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.constants import InsightsQLGlobalSettings
+from insights.insightsql.parser import parse_expr, parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.clickhouse.client.connection import Workload
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models.filters.mixins.utils import cached_property
+from insights.clickhouse.client.connection import Workload
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models.filters.mixins.utils import cached_property
 
 from products.logs.backend.logs_query_runner import LogsQueryRunnerMixin
 

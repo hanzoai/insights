@@ -1,8 +1,8 @@
 from typing import cast
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.temporal.data_imports.sources.stripe.constants import (
     SUBSCRIPTION_RESOURCE_NAME as STRIPE_SUBSCRIPTION_RESOURCE_NAME,
 )
 

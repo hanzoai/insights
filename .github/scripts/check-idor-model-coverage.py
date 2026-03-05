@@ -24,7 +24,7 @@ def setup_django() -> None:
     """Initialize Django settings for model introspection."""
     repo_root = str(Path(__file__).resolve().parent.parent.parent)
     sys.path.insert(0, repo_root)
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "posthog.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "insights.settings")
     import django
 
     django.setup()

@@ -15,12 +15,12 @@ from django.utils import timezone
 
 import structlog
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.models import Team, User
-from posthog.redis import get_client
+from insights.models import Team, User
+from insights.redis import get_client
 
 from products.notebooks.backend.models import KernelRuntime, Notebook
 from products.tasks.backend.services.sandbox import (

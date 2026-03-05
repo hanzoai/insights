@@ -9,7 +9,7 @@ from django.test import override_settings
 import pytest_asyncio
 from psycopg import sql
 
-from posthog.batch_exports.service import BatchExportModel, BatchExportSchema
+from insights.batch_exports.service import BatchExportModel, BatchExportSchema
 
 from products.batch_exports.backend.temporal.destinations.postgres_batch_export import (
     PostgresInsertInputs,
@@ -317,7 +317,7 @@ async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_r
     """
     import datetime as dt
 
-    from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+    from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
     model = BatchExportModel(name="sessions", schema=None)
     table_name = f"test_insert_activity_mutability_table_sessions_{ateam.pk}"

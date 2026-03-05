@@ -8,14 +8,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.permissions import AccessControlPermission
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.permissions import AccessControlPermission
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
 from ..models.evaluation_configs import validate_evaluation_configs
 from ..models.evaluations import Evaluation

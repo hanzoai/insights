@@ -1,11 +1,11 @@
 from typing import Optional
 
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 from unittest.mock import Mock, patch
 
-from posthog.schema import BaseMathType, DateRange, MarketingAnalyticsAggregatedQuery, NodeKind
+from insights.schema import BaseMathType, DateRange, MarketingAnalyticsAggregatedQuery, NodeKind
 
-from posthog.insightsql.test.utils import pretty_print_in_tests
+from insights.insightsql.test.utils import pretty_print_in_tests
 
 from products.marketing_analytics.backend.insightsql_queries.marketing_analytics_aggregated_query_runner import (
     MarketingAnalyticsAggregatedQueryRunner,

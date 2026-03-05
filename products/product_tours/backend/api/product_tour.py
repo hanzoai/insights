@@ -16,21 +16,21 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.feature_flag import FeatureFlagSerializer, MinimalFeatureFlagSerializer
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.api.utils import get_token
-from posthog.auth import TemporaryTokenAuthentication
-from posthog.cloud_utils import is_cloud
-from posthog.constants import PRODUCT_TOUR_TARGETING_FLAG_PREFIX
-from posthog.event_usage import report_user_action
-from posthog.exceptions import generate_exception_response
-from posthog.models.activity_logging.activity_log import Detail, changes_between, log_activity
-from posthog.models.surveys.survey import Survey
-from posthog.models.team.team import Team
-from posthog.models.user import User
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
-from posthog.utils_cors import cors_response
+from insights.api.feature_flag import FeatureFlagSerializer, MinimalFeatureFlagSerializer
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import get_token
+from insights.auth import TemporaryTokenAuthentication
+from insights.cloud_utils import is_cloud
+from insights.constants import PRODUCT_TOUR_TARGETING_FLAG_PREFIX
+from insights.event_usage import report_user_action
+from insights.exceptions import generate_exception_response
+from insights.models.activity_logging.activity_log import Detail, changes_between, log_activity
+from insights.models.surveys.survey import Survey
+from insights.models.team.team import Team
+from insights.models.user import User
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.utils_cors import cors_response
 
 from products.product_tours.backend.constants import ProductTourEventName
 from products.product_tours.backend.generate_tour_content import ContentGenerationResult, generate_with_gemini
@@ -216,7 +216,7 @@ class ProductTourSerializerCreateUpdateOnly(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        from posthog.models.feature_flag import FeatureFlag
+        from insights.models.feature_flag import FeatureFlag
 
         # For partial updates (PATCH), fall back to the instance's existing
         # linked_flag_id when the field wasn't included in the request.

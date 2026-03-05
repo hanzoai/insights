@@ -2,9 +2,9 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from posthog.models import OAuthAccessToken, OAuthApplication
-from posthog.models.utils import generate_random_oauth_access_token
-from posthog.utils import get_instance_region
+from insights.models import OAuthAccessToken, OAuthApplication
+from insights.models.utils import generate_random_oauth_access_token
+from insights.utils import get_instance_region
 
 from products.tasks.backend.models import Task
 from products.tasks.backend.temporal.exceptions import OAuthTokenError, TaskInvalidStateError

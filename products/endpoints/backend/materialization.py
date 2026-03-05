@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from posthog.schema import InsightsQLQuery, InsightsQLQueryModifiers
+from insights.schema import InsightsQLQuery, InsightsQLQueryModifiers
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.printer import to_printed_insightsql
-from posthog.insightsql.timings import InsightsQLTimings
-from posthog.insightsql.visitor import CloningVisitor, TraversingVisitor
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.printer import to_printed_insightsql
+from insights.insightsql.timings import InsightsQLTimings
+from insights.insightsql.visitor import CloningVisitor, TraversingVisitor
 
-from posthog.exceptions_capture import capture_exception
-from posthog.insightsql_queries.query_runner import get_query_runner
-from posthog.models.team import Team
+from insights.exceptions_capture import capture_exception
+from insights.insightsql_queries.query_runner import get_query_runner
+from insights.models.team import Team
 
 
 class VariableInHavingClauseError(ValueError):

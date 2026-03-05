@@ -1,6 +1,6 @@
 import uuid
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from parameterized import parameterized
@@ -165,7 +165,7 @@ class TestConversationEvents(BaseTest):
     @patch("products.conversations.backend.events.capture_internal")
     def test_event_uses_ticket_team_token_not_other_team(self, mock_capture):
         """Verify events route to the ticket's team, not any other team."""
-        from posthog.models import Organization, Team
+        from insights.models import Organization, Team
 
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Team")
@@ -181,7 +181,7 @@ class TestConversationEvents(BaseTest):
     @patch("products.conversations.backend.events.capture_internal")
     def test_two_teams_events_routed_to_respective_projects(self, mock_capture):
         """Events from Team 1 ticket use Team 1 token, Team 2 ticket uses Team 2 token."""
-        from posthog.models import Organization, Team
+        from insights.models import Organization, Team
 
         # Create second team
         other_org = Organization.objects.create(name="Other Org")
