@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                     "access_token",
                     models.CharField(
                         blank=True,
-                        default=posthog.models.exported_asset.get_default_access_token,
+                        default=insights.models.exported_asset.get_default_access_token,
                         max_length=400,
                         null=True,
                     ),

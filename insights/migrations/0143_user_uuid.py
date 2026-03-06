@@ -8,7 +8,7 @@ import insights.models.utils
 def create_user_uuid(apps, schema_editor):
     User = apps.get_model("insights", "User")
     for user in User.objects.all():
-        user.uuid = posthog.models.utils.UUIDT()
+        user.uuid = insights.models.utils.UUIDT()
         user.save()
 
 
@@ -31,6 +31,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="user",
             name="uuid",
-            field=models.UUIDField(default=posthog.models.utils.UUIDT, unique=True, editable=False),
+            field=models.UUIDField(default=insights.models.utils.UUIDT, unique=True, editable=False),
         ),
     ]

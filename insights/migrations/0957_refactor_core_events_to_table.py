@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7,
+                        default=insights.models.utils.uuid7,
                         editable=False,
                         primary_key=True,
                         serialize=False,

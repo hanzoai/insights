@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                     "short_id",
                     models.CharField(
                         blank=True,
-                        default=posthog.utils.generate_short_id,
+                        default=insights.utils.generate_short_id,
                         max_length=12,
                     ),
                 ),

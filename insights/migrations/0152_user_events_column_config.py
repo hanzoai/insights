@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="user",
             name="events_column_config",
-            field=models.JSONField(default=posthog.models.user.events_column_config_default),
+            field=models.JSONField(default=insights.models.user.events_column_config_default),
         ),
     ]

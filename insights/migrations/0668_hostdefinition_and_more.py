@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("host", models.CharField(max_length=400)),
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="hostdefinition",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 expression="(coalesce(project_id, team_id), host)",
                 name="hostdefinition_coalesced_idx",
                 concurrently=False,  # New table, this will lock for milliseconds only
