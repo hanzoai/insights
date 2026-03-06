@@ -1,4 +1,4 @@
-# posthog/person_db_router.py
+# insights/person_db_router.py
 
 from django.conf import settings
 
@@ -43,7 +43,7 @@ class PersonDBRouter:
     A router to control all database operations on models in the persons database.
     """
 
-    PERSONS_APP_LABEL = "posthog"  # Django app_label kept as posthog for DB compat
+    PERSONS_APP_LABEL = "insights"
 
     def db_for_read(self, model, **hints):
         """

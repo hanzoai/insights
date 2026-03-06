@@ -25,7 +25,7 @@ def get_s3_function_args(s3_path: str) -> str:
 def get_s3_url(table_name: str, team_id: int) -> str:
     if DEBUG:
         s3_endpoint = "http://objectstorage:19000"
-        bucket = "posthog"
+        bucket = "insights"
         key = f"{table_name}/{team_id}/data.native"
         return f"{s3_endpoint}/{bucket}/{key}"
 
