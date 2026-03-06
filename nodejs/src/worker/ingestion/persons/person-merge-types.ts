@@ -85,7 +85,7 @@ export type PersonMergeResult =
     | {
           success: true
           person: InternalPerson | undefined
-          kafkaAck: Promise<void>
+          streamAck: Promise<void>
           needsPersonUpdate: boolean
       }
     | {
@@ -116,13 +116,13 @@ export type MergeMode =
  */
 export function mergeSuccess(
     person: InternalPerson | undefined,
-    kafkaAck: Promise<void>,
+    streamAck: Promise<void>,
     needsPersonUpdate: boolean
 ): PersonMergeResult {
     return {
         success: true,
         person,
-        kafkaAck,
+        streamAck,
         needsPersonUpdate,
     }
 }

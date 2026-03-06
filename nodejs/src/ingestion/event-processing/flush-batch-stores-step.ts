@@ -1,4 +1,4 @@
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { MessageSizeTooLarge } from '../../utils/db/error'
 import { logger } from '../../utils/logger'
 import { BatchWritingGroupStore } from '../../worker/ingestion/groups/batch-writing-group-store'
@@ -10,34 +10,34 @@ import { PipelineResult, ok } from '../pipelines/results'
 export interface FlushBatchStoresStepConfig {
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
 }
 
 /**
  * Batch processing step that flushes person and group stores and returns
- * Kafka produce promises as side effects.
+ * Stream produce promises as side effects.
  *
  * This step should be added at the end of the pipeline after all events
  * have been processed but before handleResults/handleSideEffects.
  *
  * The step:
  * 1. Flushes both person and group stores (blocking DB operations)
- * 2. Creates Kafka produce promises for all store updates
+ * 2. Creates Stream produce promises for all store updates
  * 3. Returns those promises as side effects (non-blocking)
  *
- * This allows the pipeline to handle Kafka produces the same way it handles
+ * This allows the pipeline to handle stream produces the same way it handles
  * event emission - as side effects that can be scheduled and awaited separately
  * from the consumer commit.
  *
- * @param config - Configuration containing the stores and Kafka producer
+ * @param config - Configuration containing the stores and Stream producer
  * @param config.personsStore - The person store (singleton per consumer)
  * @param config.groupStore - The group store (singleton per consumer)
- * @param config.kafkaProducer - Kafka producer for sending store updates
+ * @param config.streamProducer - Stream producer for sending store updates
  *
  * @returns A batch processing step that flushes both stores
  */
 export function createFlushBatchStoresStep<T>(config: FlushBatchStoresStepConfig): BatchProcessingStep<T, void> {
-    const { personsStore, groupStore, kafkaProducer } = config
+    const { personsStore, groupStore, streamProducer } = config
 
     return async function flushBatchStoresStep(batch: T[]): Promise<PipelineResult<void>[]> {
         if (batch.length === 0) {
@@ -53,8 +53,8 @@ export function createFlushBatchStoresStep<T>(config: FlushBatchStoresStepConfig
                 personStoreMessageCount: personsStoreMessages.length,
             })
 
-            // Create Kafka produce promises for all person/group store updates
-            const producePromises = createProducePromises(personsStoreMessages, kafkaProducer)
+            // Create stream produce promises for all person/group store updates
+            const producePromises = createProducePromises(personsStoreMessages, streamProducer)
 
             // Report metrics for this batch
             personsStore.reportBatch()
@@ -82,20 +82,20 @@ export function createFlushBatchStoresStep<T>(config: FlushBatchStoresStepConfig
 }
 
 /**
- * Creates Kafka produce promises for all person store flush results.
+ * Creates Stream produce promises for all person store flush results.
  * These promises handle errors appropriately:
  * - MessageSizeTooLarge: Captures ingestion warning (non-fatal)
  * - Other errors: Propagated to fail the side effect
  */
 function createProducePromises(
     personsStoreMessages: FlushResult[],
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
 ): Promise<unknown>[] {
     const promises: Promise<unknown>[] = []
 
     for (const record of personsStoreMessages) {
         for (const message of record.topicMessage.messages) {
-            const promise = kafkaProducer
+            const promise = streamProducer
                 .produce({
                     topic: record.topicMessage.topic,
                     key: message.key ? Buffer.from(message.key) : null,
@@ -111,7 +111,7 @@ function createProducePromises(
                             distinctId: record.distinctId,
                             uuid: record.uuid,
                         })
-                        return captureIngestionWarning(kafkaProducer, record.teamId, 'message_size_too_large', {
+                        return captureIngestionWarning(streamProducer, record.teamId, 'message_size_too_large', {
                             eventUuid: record.uuid,
                             distinctId: record.distinctId,
                             step: 'flushBatchStoresStep',

@@ -6,21 +6,21 @@ import { logger } from '../utils/logger'
 const SSL_HANDSHAKE_TIMEOUT_THRESHOLD_US = 5_000_000
 const AUTH_TIMEOUT_THRESHOLD_US = 10_000_000
 
-export const kafkaBrokerRtt = new Histogram({
-    name: 'kafka_broker_rtt_ms',
+export const streamBrokerRtt = new Histogram({
+    name: 'stream_broker_rtt_ms',
     help: 'Round trip time to broker in milliseconds',
     labelNames: ['broker_id', 'broker_name', 'consumer_group'],
     buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
 })
 
-export const kafkaBrokerSslHandshakeFailures = new Counter({
-    name: 'kafka_broker_ssl_handshake_failures_total',
+export const streamBrokerSslHandshakeFailures = new Counter({
+    name: 'stream_broker_ssl_handshake_failures_total',
     help: 'Total number of SSL handshake failures',
     labelNames: ['broker_id', 'broker_name', 'consumer_group', 'error'],
 })
 
-export const kafkaBrokerAuthFailures = new Counter({
-    name: 'kafka_broker_auth_failures_total',
+export const streamBrokerAuthFailures = new Counter({
+    name: 'stream_broker_auth_failures_total',
     help: 'Total number of authentication failures',
     labelNames: ['broker_id', 'broker_name', 'consumer_group'],
 })
@@ -159,7 +159,7 @@ export function trackBrokerMetrics(
         }
 
         if (stats.rtt?.avg) {
-            kafkaBrokerRtt.observe(labels, stats.rtt.avg)
+            streamBrokerRtt.observe(labels, stats.rtt.avg)
         }
 
         // Check for broker connection issues
@@ -178,7 +178,7 @@ export function trackBrokerMetrics(
 
         // ssl handshake issues
         if (stats.state === 'SSL_HANDSHAKE' && stats.stateage > SSL_HANDSHAKE_TIMEOUT_THRESHOLD_US) {
-            kafkaBrokerSslHandshakeFailures.inc({
+            streamBrokerSslHandshakeFailures.inc({
                 ...labels,
                 error: 'ssl_handshake_timeout',
             })
@@ -191,7 +191,7 @@ export function trackBrokerMetrics(
 
         // auth issues
         if ((stats.state === 'AUTH' || stats.state === 'SASL_AUTH') && stats.stateage > AUTH_TIMEOUT_THRESHOLD_US) {
-            kafkaBrokerAuthFailures.inc({
+            streamBrokerAuthFailures.inc({
                 ...labels,
             })
             logger.error('Authentication stuck', {

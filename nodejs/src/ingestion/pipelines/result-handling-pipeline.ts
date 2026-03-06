@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { PromiseScheduler } from '../../utils/promise-scheduler'
 import { pipelineLastStepCounter } from '../../worker/ingestion/event-pipeline/metrics'
 import { logDroppedMessage, redirectMessageToTopic, sendMessageToDLQ } from '../../worker/ingestion/pipeline-helpers'
@@ -8,7 +8,7 @@ import { BatchPipeline, BatchPipelineResultWithContext } from './batch-pipeline.
 import { PipelineResult, isDlqResult, isDropResult, isOkResult, isRedirectResult } from './results'
 
 export type PipelineConfig = {
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     dlqTopic: string
     promiseScheduler: PromiseScheduler
 }
@@ -78,7 +78,7 @@ export class ResultHandlingPipeline<
 
         if (isDlqResult(result)) {
             const dlqPromise = sendMessageToDLQ(
-                this.config.kafkaProducer,
+                this.config.streamProducer,
                 originalMessage,
                 result.error || new Error(result.reason),
                 stepName,
@@ -89,7 +89,7 @@ export class ResultHandlingPipeline<
             logDroppedMessage(originalMessage, result.reason, stepName)
         } else if (isRedirectResult(result)) {
             const redirectPromise = redirectMessageToTopic(
-                this.config.kafkaProducer,
+                this.config.streamProducer,
                 this.config.promiseScheduler,
                 originalMessage,
                 result.topic,

@@ -12,8 +12,8 @@ import {
     createSessionReplayPipeline,
     runSessionReplayPipeline,
 } from '../ingestion/session_replay'
-import { KafkaConsumer } from '../kafka/consumer'
-import { KafkaProducerWrapper } from '../kafka/producer'
+import { StreamConsumer } from '../stream/consumer'
+import { StreamProducerWrapper } from '../stream/producer'
 import { getBlockDecryptor, getBlockEncryptor } from '../session-replay/shared/crypto'
 import { VerifyingEncryptor } from '../session-replay/shared/crypto/verifying-encryptor'
 import { getKeyStore } from '../session-replay/shared/keystore'
@@ -37,7 +37,7 @@ import { logger } from '../utils/logger'
 import { captureException } from '../utils/insights'
 import { PromiseScheduler } from '../utils/promise-scheduler'
 import { captureIngestionWarning } from '../worker/ingestion/utils'
-import { KafkaOffsetManager } from './kafka/offset-manager'
+import { StreamOffsetManager } from './stream/offset-manager'
 import { SessionRecordingIngesterMetrics } from './metrics'
 import { BlackholeSessionBatchFileStorage } from './sessions/blackhole-session-batch-writer'
 import { RetentionAwareStorage } from './sessions/retention-aware-batch-writer'
@@ -56,8 +56,8 @@ import { LibVersionMonitor } from './versions/lib-version-monitor'
 export type SessionRecordingIngesterHub = SessionRecordingConfig &
     Pick<
         PluginsServerConfig,
-        // For KafkaProducerWrapper.create
-        | 'KAFKA_CLIENT_RACK'
+        // For StreamProducerWrapper.create
+        | 'STREAM_CLIENT_RACK'
         // For createRedisPool (common Redis config not in SessionRecordingConfig)
         | 'REDIS_URL'
         | 'REDIS_POOL_MIN_SIZE'
@@ -74,7 +74,7 @@ export type SessionRecordingIngesterHub = SessionRecordingConfig &
     >
 
 export class SessionRecordingIngester {
-    kafkaConsumer: KafkaConsumer
+    streamConsumer: StreamConsumer
     topic: string
     consumerGroupId: string
     totalNumPartitions = 0
@@ -94,9 +94,9 @@ export class SessionRecordingIngester {
         SessionReplayPipelineOutput,
         { message: Message }
     >
-    private readonly kafkaMetadataProducer: KafkaProducerWrapper
-    private readonly kafkaMessageProducer: KafkaProducerWrapper
-    private readonly ingestionWarningProducer?: KafkaProducerWrapper
+    private readonly streamMetadataProducer: StreamProducerWrapper
+    private readonly streamMessageProducer: StreamProducerWrapper
+    private readonly ingestionWarningProducer?: StreamProducerWrapper
     private readonly overflowTopic: string
     private readonly topTracker: TopTracker
     private topTrackerLogInterval?: NodeJS.Timeout
@@ -107,9 +107,9 @@ export class SessionRecordingIngester {
         private hub: SessionRecordingIngesterHub,
         private consumeOverflow: boolean,
         postgres: PostgresRouter,
-        kafkaMetadataProducer: KafkaProducerWrapper,
-        kafkaMessageProducer: KafkaProducerWrapper,
-        ingestionWarningProducer?: KafkaProducerWrapper
+        streamMetadataProducer: StreamProducerWrapper,
+        streamMessageProducer: StreamProducerWrapper,
+        ingestionWarningProducer?: StreamProducerWrapper
     ) {
         this.topic = hub.INGESTION_SESSION_REPLAY_CONSUMER_CONSUME_TOPIC
         this.overflowTopic = hub.INGESTION_SESSION_REPLAY_CONSUMER_OVERFLOW_TOPIC
@@ -118,7 +118,7 @@ export class SessionRecordingIngester {
 
         this.promiseScheduler = new PromiseScheduler()
 
-        this.kafkaConsumer = new KafkaConsumer({
+        this.streamConsumer = new StreamConsumer({
             topic: this.topic,
             groupId: this.consumerGroupId,
             callEachBatchWhenEmpty: true,
@@ -126,8 +126,8 @@ export class SessionRecordingIngester {
             autoOffsetStore: false,
         })
 
-        this.kafkaMetadataProducer = kafkaMetadataProducer
-        this.kafkaMessageProducer = kafkaMessageProducer
+        this.streamMetadataProducer = streamMetadataProducer
+        this.streamMessageProducer = streamMessageProducer
         this.ingestionWarningProducer = ingestionWarningProducer
 
         let s3Client: S3Client | null = null
@@ -202,14 +202,14 @@ export class SessionRecordingIngester {
 
         const retentionService = new RetentionService(this.redisPool, this.teamService)
 
-        const offsetManager = new KafkaOffsetManager(this.commitOffsets.bind(this), this.topic)
+        const offsetManager = new StreamOffsetManager(this.commitOffsets.bind(this), this.topic)
         const metadataStore = new SessionMetadataStore(
-            this.kafkaMetadataProducer,
-            this.hub.SESSION_RECORDING_V2_REPLAY_EVENTS_KAFKA_TOPIC
+            this.streamMetadataProducer,
+            this.hub.SESSION_RECORDING_V2_REPLAY_EVENTS_STREAM_TOPIC
         )
         const consoleLogStore = new SessionConsoleLogStore(
-            this.kafkaMetadataProducer,
-            this.hub.SESSION_RECORDING_V2_CONSOLE_LOG_ENTRIES_KAFKA_TOPIC,
+            this.streamMetadataProducer,
+            this.hub.SESSION_RECORDING_V2_CONSOLE_LOG_ENTRIES_STREAM_TOPIC,
             { messageLimit: this.hub.SESSION_RECORDING_V2_CONSOLE_LOG_STORE_SYNC_BATCH_LIMIT }
         )
         this.fileStorage = s3Client
@@ -260,7 +260,7 @@ export class SessionRecordingIngester {
         })
 
         this.sessionReplayPipeline = createSessionReplayPipeline({
-            kafkaProducer: this.kafkaMessageProducer,
+            streamProducer: this.streamMessageProducer,
             eventIngestionRestrictionManager: this.eventIngestionRestrictionManager,
             overflowEnabled: !this.consumeOverflow,
             overflowTopic: this.overflowTopic,
@@ -280,7 +280,7 @@ export class SessionRecordingIngester {
     }
 
     public async handleEachBatch(messages: Message[]): Promise<void> {
-        this.kafkaConsumer.heartbeat()
+        this.streamConsumer.heartbeat()
 
         if (messages.length > 0) {
             logger.info('🔁', `blob_ingester_consumer_v2 - handling batch`, {
@@ -306,8 +306,8 @@ export class SessionRecordingIngester {
 
         const batchSize = messages.length
         const batchSizeKb = messages.reduce((acc, m) => (m.value?.length ?? 0) + acc, 0) / 1024
-        SessionRecordingIngesterMetrics.observeKafkaBatchSize(batchSize)
-        SessionRecordingIngesterMetrics.observeKafkaBatchSizeKb(batchSizeKb)
+        SessionRecordingIngesterMetrics.observeStreamBatchSize(batchSize)
+        SessionRecordingIngesterMetrics.observeStreamBatchSizeKb(batchSizeKb)
 
         // Run messages through the pipeline (handles restrictions, parsing, and team filtering)
         const pipelineOutputs = await instrumentFn(
@@ -327,13 +327,13 @@ export class SessionRecordingIngester {
                 : messagesWithTeam
         })
 
-        this.kafkaConsumer.heartbeat()
+        this.streamConsumer.heartbeat()
 
         await instrumentFn(`recordingingesterv2.handleEachBatch.processMessages`, async () =>
             this.processMessages(processedMessages)
         )
 
-        this.kafkaConsumer.heartbeat()
+        this.streamConsumer.heartbeat()
 
         if (this.sessionBatchManager.shouldFlush()) {
             await instrumentFn(`recordingingesterv2.handleEachBatch.flush`, async () =>
@@ -395,7 +395,7 @@ export class SessionRecordingIngester {
     public async start(): Promise<void> {
         logger.info('🔁', 'blob_ingester_consumer_v2 - starting session recordings blob consumer', {
             librdKafkaVersion: librdkafkaVersion,
-            kafkaCapabilities: features,
+            streamCapabilities: features,
         })
 
         await this.keyStore.start()
@@ -404,11 +404,11 @@ export class SessionRecordingIngester {
         // Check that the storage backend is healthy before starting the consumer
         // This is especially important in local dev with minio
         await this.fileStorage.checkHealth()
-        await this.kafkaConsumer.connect((messages) => this.handleEachBatch(messages))
+        await this.streamConsumer.connect((messages) => this.handleEachBatch(messages))
 
-        this.totalNumPartitions = (await this.kafkaConsumer.getPartitionsForTopic(this.topic)).length
+        this.totalNumPartitions = (await this.streamConsumer.getPartitionsForTopic(this.topic)).length
 
-        this.kafkaConsumer.on('rebalance', async (err, topicPartitions) => {
+        this.streamConsumer.on('rebalance', async (err, topicPartitions) => {
             logger.info('🔁', 'blob_ingester_consumer_v2 - rebalancing', { err, topicPartitions })
             /**
              * see https://github.com/Blizzard/node-rdkafka#rebalancing
@@ -433,9 +433,9 @@ export class SessionRecordingIngester {
             // TODO: immediately die? or just keep going?
         })
 
-        // nothing happens here unless we configure SESSION_RECORDING_KAFKA_CONSUMPTION_STATISTICS_EVENT_INTERVAL_MS
-        this.kafkaConsumer.on('event.stats', (stats) => {
-            logger.info('🪵', 'blob_ingester_consumer_v2 - kafka stats', { stats })
+        // nothing happens here unless we configure SESSION_RECORDING_STREAM_CONSUMPTION_STATISTICS_EVENT_INTERVAL_MS
+        this.streamConsumer.on('event.stats', (stats) => {
+            logger.info('🪵', 'blob_ingester_consumer_v2 - stream stats', { stats })
         })
 
         // Start periodic logging of top tracked metrics (every 60 seconds)
@@ -455,7 +455,7 @@ export class SessionRecordingIngester {
         }
 
         const assignedPartitions = this.assignedTopicPartitions
-        await this.kafkaConsumer.disconnect()
+        await this.streamConsumer.disconnect()
 
         void this.promiseScheduler.schedule(this.onRevokePartitions(assignedPartitions))
 
@@ -463,9 +463,9 @@ export class SessionRecordingIngester {
 
         // Clean up resources owned by this ingester
         this.keyStore.stop()
-        // Note: kafkaMetadataProducer may be shared (e.g., hub.kafkaProducer in production),
+        // Note: streamMetadataProducer may be shared (e.g., hub.streamProducer in production),
         // so callers are responsible for disconnecting it if they created it
-        await this.kafkaMessageProducer.disconnect()
+        await this.streamMessageProducer.disconnect()
         if (this.ingestionWarningProducer) {
             await this.ingestionWarningProducer.disconnect()
         }
@@ -481,11 +481,11 @@ export class SessionRecordingIngester {
 
     public isHealthy(): HealthCheckResult {
         // TODO: Maybe extend this to check if we are shutting down so we don't get killed early.
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 
     private get assignedTopicPartitions(): TopicPartition[] {
-        return this.kafkaConsumer.assignments() ?? []
+        return this.streamConsumer.assignments() ?? []
     }
 
     private get assignedPartitions(): TopicPartition['partition'][] {
@@ -510,7 +510,7 @@ export class SessionRecordingIngester {
 
     private async commitOffsets(offsets: TopicPartitionOffset[]): Promise<void> {
         await instrumentFn(`recordingingesterv2.handleEachBatch.flush.commitOffsets`, () => {
-            this.kafkaConsumer.offsetsStore(offsets)
+            this.streamConsumer.offsetsStore(offsets)
             return Promise.resolve()
         })
     }

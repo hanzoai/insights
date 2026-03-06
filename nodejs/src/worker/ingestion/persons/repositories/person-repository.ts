@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '../../../../kafka/producer'
+import { TopicMessage } from '../../../../stream/producer'
 import {
     InternalPerson,
     PersonPropertyFilter,
@@ -79,12 +79,12 @@ export interface PersonRepository {
      * Returns results indexed by person UUID, each containing:
      * - success: boolean indicating if the update succeeded
      * - version: the new version if successful
-     * - kafkaMessage: the Kafka message to send if successful
+     * - streamMessage: the stream message to send if successful
      * - error: error details if the update failed
      */
     updatePersonsBatch(
         personUpdates: PersonUpdate[]
-    ): Promise<Map<string, { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }>>
+    ): Promise<Map<string, { success: boolean; version?: number; streamMessage?: TopicMessage; error?: Error }>>
 
     deletePerson(person: InternalPerson): Promise<TopicMessage[]>
 

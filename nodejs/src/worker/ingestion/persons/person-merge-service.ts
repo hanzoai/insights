@@ -4,7 +4,7 @@ import { Counter } from 'prom-client'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '../../../kafka/producer'
+import { TopicMessage } from '../../../stream/producer'
 import { InternalPerson } from '../../../types'
 import { timeoutGuard } from '../../../utils/db/utils'
 import { logger } from '../../../utils/logger'
@@ -170,7 +170,7 @@ export class PersonMergeService {
         }
         if (isDistinctIdIllegal(mergeIntoDistinctId)) {
             await captureIngestionWarning(
-                this.context.kafkaProducer,
+                this.context.streamProducer,
                 teamId,
                 'cannot_merge_with_illegal_distinct_id',
                 {
@@ -184,7 +184,7 @@ export class PersonMergeService {
         }
         if (isDistinctIdIllegal(otherPersonDistinctId)) {
             await captureIngestionWarning(
-                this.context.kafkaProducer,
+                this.context.streamProducer,
                 teamId,
                 'cannot_merge_with_illegal_distinct_id',
                 {
@@ -258,8 +258,8 @@ export class PersonMergeService {
                 )
                 const distinctIdVersion = insertedDistinctId ? 0 : 1
 
-                const kafkaMessages = await tx.addDistinctId(existingPerson, distinctIdToAdd, distinctIdVersion)
-                await this.context.kafkaProducer.queueMessages(kafkaMessages)
+                const streamMessages = await tx.addDistinctId(existingPerson, distinctIdToAdd, distinctIdVersion)
+                await this.context.streamProducer.queueMessages(streamMessages)
                 return mergeSuccess(existingPerson, Promise.resolve(), true)
             })
         } else if (otherPerson && mergeIntoPerson) {
@@ -356,7 +356,7 @@ export class PersonMergeService {
         // If merge isn't allowed, we will ignore it, log an ingestion warning and return success with original person
         if (!mergeAllowed) {
             await captureIngestionWarning(
-                this.context.kafkaProducer,
+                this.context.streamProducer,
                 this.context.team.id,
                 'cannot_merge_already_identified',
                 {
@@ -414,7 +414,7 @@ export class PersonMergeService {
         // Handle specific error types
         if (result.error instanceof PersonMergeRaceConditionError) {
             await captureIngestionWarning(
-                this.context.kafkaProducer,
+                this.context.streamProducer,
                 this.context.team.id,
                 'merge_race_condition',
                 {
@@ -455,7 +455,7 @@ export class PersonMergeService {
                 })
                 .inc()
 
-            const [mergedPerson, kafkaMessages] = await this.context.personStore.inTransaction(
+            const [mergedPerson, streamMessages] = await this.context.personStore.inTransaction(
                 'mergePeople',
                 async (tx) => {
                     const [person, updatePersonMessages] = await tx.updatePersonForMerge(
@@ -517,8 +517,8 @@ export class PersonMergeService {
                 })
                 .inc()
 
-            const kafkaAck = this.context.kafkaProducer.queueMessages(kafkaMessages)
-            return mergeSuccess(mergedPerson, kafkaAck, true)
+            const streamAck = this.context.streamProducer.queueMessages(streamMessages)
+            return mergeSuccess(mergedPerson, streamAck, true)
         } catch (error) {
             // Map exceptions to result types - these will cause transaction rollback
             if (error instanceof SourcePersonNotFoundError) {
@@ -739,8 +739,8 @@ export class PersonMergeService {
         version: number,
         tx?: PersonsStoreTransaction
     ): Promise<void> {
-        const kafkaMessages = await (tx || this.context.personStore).addDistinctId(person, distinctId, version)
-        await this.context.kafkaProducer.queueMessages(kafkaMessages)
+        const streamMessages = await (tx || this.context.personStore).addDistinctId(person, distinctId, version)
+        await this.context.streamProducer.queueMessages(streamMessages)
     }
 
     private async refreshPersonData(

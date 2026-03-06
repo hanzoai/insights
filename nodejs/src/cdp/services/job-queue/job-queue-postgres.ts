@@ -67,7 +67,7 @@ export class CyclotronJobQueuePostgres {
                 dbUrl: this.config.CYCLOTRON_DATABASE_URL,
             },
             queueName: this.queue,
-            includeVmState: true, // NOTE: We used to omit the vmstate but given we can requeue to kafka we need it
+            includeVmState: true, // NOTE: We used to omit the vmstate but given we can requeue to stream we need it
             batchMaxSize: this.config.CONSUMER_BATCH_SIZE, // Use the common value
             pollDelayMs: this.config.CDP_CYCLOTRON_BATCH_DELAY_MS,
             includeEmptyBatches: true,
@@ -176,7 +176,7 @@ export class CyclotronJobQueuePostgres {
     }
 
     public async releaseInvocations(invocations: CyclotronJobInvocation[]) {
-        // Called specially for jobs that came from postgres but are being requeued to kafka
+        // Called specially for jobs that came from postgres but are being requeued to stream
         const worker = this.getCyclotronWorker()
         await Promise.all(
             invocations.map(async (item) => {

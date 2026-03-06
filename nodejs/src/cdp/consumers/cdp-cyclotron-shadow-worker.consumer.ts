@@ -15,7 +15,7 @@ const shadowInvocationsProcessed = new Counter({
  * Executes the full invocation pipeline (including bytecode) but with no-op HTTP fetches,
  * scoped via AsyncLocalStorage so other workers in the same process are unaffected.
  *
- * Skips Kafka log/metric production to avoid shadow data mixing with real data.
+ * Skips stream log/metric production to avoid shadow data mixing with real data.
  * Instead exposes Prometheus metrics for observability.
  */
 export class CdpCyclotronShadowWorker extends CdpCyclotronWorker {

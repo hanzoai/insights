@@ -1,4 +1,4 @@
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { ClickHouseTimestamp } from '../../types'
 import { logger } from '../../utils/logger'
 import { ConsoleLogLevel } from '../rrweb-types'
@@ -21,7 +21,7 @@ export class SessionConsoleLogStore {
     private readonly messageLimit: number
 
     constructor(
-        private readonly producer: KafkaProducerWrapper,
+        private readonly producer: StreamProducerWrapper,
         private readonly topic: string,
         options: { messageLimit: number }
     ) {

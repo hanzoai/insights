@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
 
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { Team } from '../../../types'
 import { MergeMode } from './person-merge-types'
 import { PersonsStore } from './persons-store'
@@ -21,7 +21,7 @@ export class PersonContext {
         public readonly distinctId: string,
         public readonly timestamp: DateTime,
         public readonly processPerson: boolean, // $process_person_profile flag from the event
-        public readonly kafkaProducer: KafkaProducerWrapper,
+        public readonly streamProducer: StreamProducerWrapper,
         public readonly personStore: PersonsStore,
         public readonly measurePersonJsonbSize: number = 0,
         public readonly mergeMode: MergeMode,

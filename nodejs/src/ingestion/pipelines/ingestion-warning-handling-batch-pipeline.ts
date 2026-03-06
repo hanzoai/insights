@@ -1,4 +1,4 @@
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { Team } from '../../types'
 import { captureIngestionWarning } from '../../worker/ingestion/utils'
 import { BatchPipeline, BatchPipelineResultWithContext } from './batch-pipeline.interface'
@@ -11,7 +11,7 @@ export class IngestionWarningHandlingBatchPipeline<
 > implements BatchPipeline<TInput, TOutput, CInput, COutput>
 {
     constructor(
-        private kafkaProducer: KafkaProducerWrapper,
+        private streamProducer: StreamProducerWrapper,
         private previousPipeline: BatchPipeline<TInput, TOutput, CInput, COutput>
     ) {}
 
@@ -29,7 +29,7 @@ export class IngestionWarningHandlingBatchPipeline<
             if (resultWithContext.context.warnings && resultWithContext.context.warnings.length > 0) {
                 const warningPromises = resultWithContext.context.warnings.map((warning) =>
                     captureIngestionWarning(
-                        this.kafkaProducer,
+                        this.streamProducer,
                         resultWithContext.context.team.id,
                         warning.type,
                         warning.details,

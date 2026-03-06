@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { Hub, Team } from '../../types'
 import { EventIngestionRestrictionManager } from '../../utils/event-ingestion-restrictions'
 import { EventSchemaEnforcementManager } from '../../utils/event-schema-enforcement-manager'
@@ -40,7 +40,7 @@ export type PreprocessingHub = Pick<
 
 export interface JoinedIngestionPipelineConfig {
     hub: PreprocessingHub
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
     scriptTransformer: ScriptTransformerService
@@ -56,8 +56,8 @@ export interface JoinedIngestionPipelineConfig {
 
     // Per-distinct-id config
     perDistinctIdOptions: EventPipelineRunnerOptions & {
-        DATASTORE_JSON_EVENTS_KAFKA_TOPIC: string
-        DATASTORE_HEATMAPS_KAFKA_TOPIC: string
+        DATASTORE_JSON_EVENTS_STREAM_TOPIC: string
+        DATASTORE_HEATMAPS_STREAM_TOPIC: string
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
@@ -113,7 +113,7 @@ export function createJoinedIngestionPipeline<
 >(builder: BatchPipelineBuilder<TInput, TInput, TContext, TContext>, config: JoinedIngestionPipelineConfig) {
     const {
         hub,
-        kafkaProducer,
+        streamProducer,
         personsStore,
         groupStore,
         scriptTransformer,
@@ -133,7 +133,7 @@ export function createJoinedIngestionPipeline<
     } = config
 
     const pipelineConfig: PipelineConfig = {
-        kafkaProducer,
+        streamProducer,
         dlqTopic,
         promiseScheduler,
     }
@@ -160,7 +160,7 @@ export function createJoinedIngestionPipeline<
         scriptTransformer,
         personsStore,
         groupStore,
-        kafkaProducer,
+        streamProducer,
         groupId,
     }
 
@@ -197,11 +197,11 @@ export function createJoinedIngestionPipeline<
                                     createFlushBatchStoresStep({
                                         personsStore,
                                         groupStore,
-                                        kafkaProducer,
+                                        streamProducer,
                                     })
                                 )
                         )
-                        .handleIngestionWarnings(kafkaProducer)
+                        .handleIngestionWarnings(streamProducer)
                 )
         )
         .handleResults(pipelineConfig)

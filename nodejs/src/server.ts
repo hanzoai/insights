@@ -20,13 +20,13 @@ import { CdpPersonUpdatesConsumer } from './cdp/consumers/cdp-person-updates-con
 import { CdpPrecalculatedFiltersConsumer } from './cdp/consumers/cdp-precalculated-filters.consumer'
 import { defaultConfig } from './config/config'
 import {
-    KAFKA_EVENTS_PLUGIN_INGESTION,
-    KAFKA_EVENTS_PLUGIN_INGESTION_HISTORICAL,
-    KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW,
-} from './config/kafka-topics'
+    STREAM_EVENTS_PLUGIN_INGESTION,
+    STREAM_EVENTS_PLUGIN_INGESTION_HISTORICAL,
+    STREAM_EVENTS_PLUGIN_INGESTION_OVERFLOW,
+} from './config/stream-topics'
 import { startEvaluationScheduler } from './evaluation-scheduler/evaluation-scheduler'
 import { IngestionConsumer } from './ingestion/ingestion-consumer'
-import { KafkaProducerWrapper } from './kafka/producer'
+import { StreamProducerWrapper } from './stream/producer'
 import { onShutdown } from './lifecycle'
 import { LogsIngestionConsumer } from './logs-ingestion/logs-ingestion-consumer'
 import { SessionRecordingIngester } from './session-recording/consumer'
@@ -106,14 +106,14 @@ export class PluginServer {
                 // in a single process. In production these are each separate Deployments of the standard ingestion consumer
                 const consumersOptions = [
                     {
-                        topic: KAFKA_EVENTS_PLUGIN_INGESTION,
+                        topic: STREAM_EVENTS_PLUGIN_INGESTION,
                         group_id: `datastore-ingestion`,
                     },
                     {
-                        topic: KAFKA_EVENTS_PLUGIN_INGESTION_HISTORICAL,
+                        topic: STREAM_EVENTS_PLUGIN_INGESTION_HISTORICAL,
                         group_id: `datastore-ingestion-historical`,
                     },
-                    { topic: KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW, group_id: 'datastore-ingestion-overflow' },
+                    { topic: STREAM_EVENTS_PLUGIN_INGESTION_OVERFLOW, group_id: 'datastore-ingestion-overflow' },
                     { topic: 'client_iwarnings_ingestion', group_id: 'client_iwarnings_ingestion' },
                     { topic: 'heatmaps_ingestion', group_id: 'heatmaps_ingestion' },
                 ]
@@ -144,9 +144,9 @@ export class PluginServer {
                 serviceLoaders.push(async () => {
                     const actualHub = hub ?? (await createHub(this.config))
                     const postgres = actualHub.postgres
-                    const kafkaMetadataProducer = actualHub.kafkaProducer
-                    const kafkaMessageProducer = await KafkaProducerWrapper.create(
-                        actualHub.KAFKA_CLIENT_RACK,
+                    const streamMetadataProducer = actualHub.streamProducer
+                    const streamMessageProducer = await StreamProducerWrapper.create(
+                        actualHub.STREAM_CLIENT_RACK,
                         'WARPSTREAM_PRODUCER'
                     )
 
@@ -154,8 +154,8 @@ export class PluginServer {
                         actualHub,
                         false,
                         postgres,
-                        kafkaMetadataProducer,
-                        kafkaMessageProducer
+                        streamMetadataProducer,
+                        streamMessageProducer
                     )
                     await ingester.start()
                     return ingester.service
@@ -166,9 +166,9 @@ export class PluginServer {
                 serviceLoaders.push(async () => {
                     const actualHub = hub ?? (await createHub(this.config))
                     const postgres = actualHub.postgres
-                    const kafkaMetadataProducer = actualHub.kafkaProducer
-                    const kafkaMessageProducer = await KafkaProducerWrapper.create(
-                        actualHub.KAFKA_CLIENT_RACK,
+                    const streamMetadataProducer = actualHub.streamProducer
+                    const streamMessageProducer = await StreamProducerWrapper.create(
+                        actualHub.STREAM_CLIENT_RACK,
                         'WARPSTREAM_PRODUCER'
                     )
 
@@ -176,8 +176,8 @@ export class PluginServer {
                         actualHub,
                         true,
                         postgres,
-                        kafkaMetadataProducer,
-                        kafkaMessageProducer
+                        streamMetadataProducer,
+                        streamMessageProducer
                     )
                     await ingester.start()
                     return ingester.service
@@ -401,9 +401,9 @@ export class PluginServer {
         ])
 
         if (this.hub) {
-            logger.info('💤', ' Shutting down kafka producer...')
+            logger.info('💤', ' Shutting down stream producer...')
             // Wait 2 seconds to flush the last queues and caches
-            await Promise.all([this.hub?.kafkaProducer.flush(), delay(2000)])
+            await Promise.all([this.hub?.streamProducer.flush(), delay(2000)])
             await closeHub(this.hub)
         }
 
