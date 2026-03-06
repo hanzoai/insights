@@ -271,8 +271,8 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && rm -rf /tmp/*
 
 # Copy ANTLR4 C++ runtime shared library (required by insightsql-parser at runtime)
-# Must run ldconfig as root before switching to non-root user
-COPY --from=insights-build /usr/lib/libantlr4-runtime.so* /usr/lib/
+# cmake installs to /usr/lib/x86_64-linux-gnu/ on Debian multiarch
+COPY --from=insights-build /usr/lib/x86_64-linux-gnu/libantlr4-runtime.so* /usr/lib/x86_64-linux-gnu/
 RUN ldconfig
 
 # Install and use a non-root user.
