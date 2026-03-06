@@ -10,14 +10,14 @@ class ColumnConfiguration(UUIDModel):
         PRIVATE = "private", "Private (only visible to creator)"
         SHARED = "shared", "Shared with team"
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default="Column configuration")
     context_key = models.CharField(max_length=255, db_index=True)
     columns = ArrayField(models.TextField(), null=False, blank=False, default=list)
     filters = models.JSONField(default=dict, null=True, blank=True)
     visibility = models.CharField(max_length=10, choices=Visibility.choices, default=Visibility.SHARED)
 
-    created_by = models.ForeignKey("insights.User", on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey("posthog.User", on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

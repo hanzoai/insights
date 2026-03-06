@@ -104,7 +104,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
     name = models.CharField(max_length=128)
     format = models.CharField(max_length=128, choices=TableFormat.choices)
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
 
     url_pattern = models.CharField(max_length=500)
     queryable_folder = models.CharField(max_length=500, null=True, blank=True)

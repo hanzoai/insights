@@ -24,8 +24,8 @@ def get_default_access_token() -> str:
 class SharingConfiguration(models.Model):
     # Relations
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
-    dashboard = models.ForeignKey("insights.Dashboard", on_delete=models.CASCADE, null=True)
-    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE, null=True)
+    dashboard = models.ForeignKey("posthog.Dashboard", on_delete=models.CASCADE, null=True)
+    insight = models.ForeignKey("posthog.Insight", on_delete=models.CASCADE, null=True)
     recording = models.ForeignKey(
         "SessionRecording",
         related_name="sharing_configurations",

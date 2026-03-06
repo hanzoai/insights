@@ -27,13 +27,13 @@ class EarlyAccessFeature(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     ReleaseStage = [Stage.CONCEPT, Stage.ALPHA, Stage.BETA, Stage.GENERAL_AVAILABILITY]
 
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="features",
         related_query_name="feature",
     )
     feature_flag = models.ForeignKey(
-        "insights.FeatureFlag",
+        "posthog.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.PROTECT,

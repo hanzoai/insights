@@ -28,15 +28,15 @@ class InsightsFlowBatchJob(RootTeamMixin, UUIDTModel):
         CANCELLED = "cancelled"
         FAILED = "failed"
 
-    team = models.ForeignKey("insights.Team", on_delete=models.DO_NOTHING)
-    insights_flow = models.ForeignKey("insights.InsightsFlow", on_delete=models.DO_NOTHING)
+    team = models.ForeignKey("posthog.Team", on_delete=models.DO_NOTHING)
+    insights_flow = models.ForeignKey("posthog.InsightsFlow", on_delete=models.DO_NOTHING)
     variables = models.JSONField(default=dict)
     scheduled_at = models.DateTimeField(null=True, blank=True)
     filters = models.JSONField(default=dict)
     status = models.CharField(max_length=20, choices=State.choices, default=State.QUEUED)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey("insights.User", on_delete=models.DO_NOTHING, null=True, blank=True)
+    created_by = models.ForeignKey("posthog.User", on_delete=models.DO_NOTHING, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
