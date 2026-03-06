@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             model_name="team",
             name="api_token",
             field=models.CharField(
-                default=posthog.models.utils.generate_random_token,
+                default=insights.models.utils.generate_random_token,
                 max_length=200,
                 unique=True,
                 validators=[

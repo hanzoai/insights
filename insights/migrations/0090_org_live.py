@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
             model_name="team",
             name="api_token",
             field=models.CharField(
-                default=posthog.models.utils.generate_random_token,
+                default=insights.models.utils.generate_random_token,
                 max_length=200,
                 null=True,
                 unique=True,
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="person",
             name="uuid",
-            field=models.UUIDField(db_index=True, default=posthog.models.utils.UUIDT, editable=False),
+            field=models.UUIDField(db_index=True, default=insights.models.utils.UUIDT, editable=False),
         ),
         migrations.AlterField(
             model_name="team",

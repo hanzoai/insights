@@ -20,13 +20,13 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("kind", models.CharField(choices=[("vercel", "Vercel")], max_length=50)),
                 ("integration_id", models.TextField(blank=True, null=True)),
                 ("config", models.JSONField(default=dict)),
-                ("sensitive_config", posthog.helpers.encrypted_fields.EncryptedJSONField(default=dict)),
+                ("sensitive_config", insights.helpers.encrypted_fields.EncryptedJSONField(default=dict)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (

@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="integration",
             name="sensitive_config",
-            field=posthog.helpers.encrypted_fields.EncryptedJSONField(default=dict),
+            field=insights.helpers.encrypted_fields.EncryptedJSONField(default=dict),
         ),
     ]
