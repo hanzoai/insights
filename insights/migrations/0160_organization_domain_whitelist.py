@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0159_remove_funnels_with_breakdown"),
+        ("posthog", "0159_remove_funnels_with_breakdown"),
     ]
 
     operations = [

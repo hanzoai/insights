@@ -6,7 +6,7 @@ import insights.models.insight
 
 
 def create_short_ids(apps, schema_editor):
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     for obj in DashboardItem.objects.all():
         obj.short_id = insights.utils.generate_short_id()
         obj.save()
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0155_organization_available_features"),
+        ("posthog", "0155_organization_available_features"),
     ]
 
     operations = [

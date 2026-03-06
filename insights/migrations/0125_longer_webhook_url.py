@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0124_unset_is_calculating_static_cohorts"),
+        ("posthog", "0124_unset_is_calculating_static_cohorts"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0098_events_property_usage"),
+        ("posthog", "0098_events_property_usage"),
     ]
 
     operations = [
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     "plugin_config",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.PluginConfig",
+                        to="posthog.PluginConfig",
                     ),
                 ),
                 (
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.Team",
+                        to="posthog.Team",
                     ),
                 ),
             ],

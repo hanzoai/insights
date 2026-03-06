@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic: bool = False
 
     dependencies = [
-        ("insights", "0283_prompt_sequence_model"),
+        ("posthog", "0283_prompt_sequence_model"),
     ]
 
     operations = [

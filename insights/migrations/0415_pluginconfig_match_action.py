@@ -22,7 +22,7 @@ from django.db import migrations, models
 # # ORIGINAL migration
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("insights", "0411_eventproperty_indexes"),
+#         ("posthog", "0411_eventproperty_indexes"),
 #     ]
 
 #     operations = [
@@ -34,7 +34,7 @@ from django.db import migrations, models
 #                 null=True,
 #                 on_delete=django.db.models.deletion.SET_NULL,
 #                 related_name="plugin_configs",
-#                 to="insights.action",
+#                 to="posthog.action",
 #             ),
 #         ),
 #     ]
@@ -43,7 +43,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0414_personalapikey_mask_value"),
+        ("posthog", "0414_personalapikey_mask_value"),
     ]
 
     operations = [
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="plugin_configs",
-                        to="insights.action",
+                        to="posthog.action",
                     ),
                 )
             ],

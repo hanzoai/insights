@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0383_externaldatasource_cascade"),
+        ("posthog", "0383_externaldatasource_cascade"),
     ]
 
     operations = [

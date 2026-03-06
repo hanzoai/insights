@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0111_plugin_storage"),
+        ("posthog", "0111_plugin_storage"),
     ]
 
     operations = [
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
                 ),
             ],
         ),

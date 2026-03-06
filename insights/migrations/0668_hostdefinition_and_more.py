@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0667_encrypt_feature_flag_config"),
+        ("posthog", "0667_encrypt_feature_flag_config"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="host_definitions",
                         related_query_name="host_definition",
-                        to="insights.project",
+                        to="posthog.project",
                     ),
                 ),
                 (
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="host_definitions",
                         related_query_name="host_definition",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

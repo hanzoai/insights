@@ -8,7 +8,7 @@ def insert_salesforce_events_tasks(apps, schema_editor):
         cursor.execute("SELECT id, team_id FROM posthog_externaldatasource where source_type = 'Salesforce'")
         salesforce_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
     for source in salesforce_sources:
         schema = ExternalDataSchema.objects.create(
             name="Event",
@@ -36,7 +36,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0709_alter_integration_kind"),
+        ("posthog", "0709_alter_integration_kind"),
     ]
 
     operations = [

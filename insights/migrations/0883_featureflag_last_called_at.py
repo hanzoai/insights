@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0882_add_team_default_evaluation_tags"),
+        ("posthog", "0882_add_team_default_evaluation_tags"),
     ]
 
     operations = [

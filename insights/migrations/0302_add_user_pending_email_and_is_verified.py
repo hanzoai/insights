@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0301_organization_enforce_2fa"),
+        ("posthog", "0301_organization_enforce_2fa"),
     ]
 
     operations = [

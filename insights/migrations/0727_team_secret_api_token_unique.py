@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0726_team_secret_api_token_and_backup"),
+        ("posthog", "0726_team_secret_api_token_and_backup"),
     ]
 
     operations = [

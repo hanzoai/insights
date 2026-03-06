@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0716_backfill_team_revenue_analytics_config"),
+        ("posthog", "0716_backfill_team_revenue_analytics_config"),
     ]
 
     operations = [

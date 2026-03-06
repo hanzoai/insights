@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0224_saml_multitenant"),
+        ("posthog", "0224_saml_multitenant"),
     ]
 
     operations = [
@@ -28,12 +28,12 @@ class Migration(migrations.Migration):
                     "insight",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.insight",
+                        to="posthog.insight",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
                 (
                     "user",

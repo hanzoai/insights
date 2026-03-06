@@ -8,7 +8,7 @@ def backfill_message_stats(apps, schema_editor):
     Backfill message_count, last_message_at, last_message_text for existing tickets.
     """
     Ticket = apps.get_model("conversations", "Ticket")
-    Comment = apps.get_model("insights", "Comment")
+    Comment = apps.get_model("posthog", "Comment")
 
     batch_size = 500
     offset = 0
@@ -55,7 +55,7 @@ def reverse_backfill(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("conversations", "0011_ticket_message_stats_fields"),
-        ("insights", "0982_comment_conversations_index"),  # Ensure Comment model is available
+        ("posthog", "0982_comment_conversations_index"),  # Ensure Comment model is available
     ]
 
     operations = [

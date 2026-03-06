@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0273_mark_inactive_exports_as_finished"),
+        ("posthog", "0273_mark_inactive_exports_as_finished"),
     ]
 
     operations = [

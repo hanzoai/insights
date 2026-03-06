@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allow concurrent operations
 
     dependencies = [
-        ("insights", "0457_datawarehousejoin_deleted_at_and_more"),
+        ("posthog", "0457_datawarehousejoin_deleted_at_and_more"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 migrations.AlterField(

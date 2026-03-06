@@ -11,7 +11,7 @@ import insights.models.activity_logging.activity_log
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0220_backfill_primary_dashboards"),
+        ("posthog", "0220_backfill_primary_dashboards"),
     ]
 
     operations = [

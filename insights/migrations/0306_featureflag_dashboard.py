@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0305_rework_person_overrides"),
+        ("posthog", "0305_rework_person_overrides"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="insights.dashboard",
+                to="posthog.dashboard",
             ),
         ),
     ]

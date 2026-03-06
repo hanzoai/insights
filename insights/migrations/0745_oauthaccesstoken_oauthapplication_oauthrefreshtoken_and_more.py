@@ -15,7 +15,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0744_datawarehousetable_size_in_s3_mib"),
+        ("posthog", "0744_datawarehousetable_size_in_s3_mib"),
     ]
 
     # Note: We need to run this migration before the oauth2_provider migrations, as we swap out their models for our own
@@ -145,7 +145,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="oauth_applications",
-                        to="insights.organization",
+                        to="posthog.organization",
                     ),
                 ),
                 (

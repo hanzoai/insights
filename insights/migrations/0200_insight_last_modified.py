@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0199_update_experiment_model"),
+        ("posthog", "0199_update_experiment_model"),
     ]
 
     operations = [

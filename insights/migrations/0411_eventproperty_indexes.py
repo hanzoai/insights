@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0410_action_steps_population"),
+        ("posthog", "0410_action_steps_population"),
     ]
 
     operations = [

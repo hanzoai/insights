@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0717_errortrackingassignmentrule_role_and_more"),
+        ("posthog", "0717_errortrackingassignmentrule_role_and_more"),
     ]
 
     operations = [

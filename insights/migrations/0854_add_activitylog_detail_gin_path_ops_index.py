@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0853_create_index_populate_updated_at_flags"),
+        ("posthog", "0853_create_index_populate_updated_at_flags"),
     ]
 
     operations = [

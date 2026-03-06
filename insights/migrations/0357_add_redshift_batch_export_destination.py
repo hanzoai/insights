@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0356_add_replay_cost_control"),
+        ("posthog", "0356_add_replay_cost_control"),
     ]
 
     operations = [

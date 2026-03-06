@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0967_oauth_dcr_fields"),
+        ("posthog", "0967_oauth_dcr_fields"),
     ]
 
     operations = [

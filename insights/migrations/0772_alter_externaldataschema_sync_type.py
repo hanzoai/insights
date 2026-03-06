@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0771_teamrevenueanalyticsconfig_filter_test_accounts_and_more"),
+        ("posthog", "0771_teamrevenueanalyticsconfig_filter_test_accounts_and_more"),
     ]
 
     operations = [

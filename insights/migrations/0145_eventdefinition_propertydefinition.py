@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0144_update_django_3_1_8"),
+        ("posthog", "0144_update_django_3_1_8"),
     ]
 
     operations = [
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="property_definitions",
                         related_query_name="team",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="event_definitions",
                         related_query_name="team",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

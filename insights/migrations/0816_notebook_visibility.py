@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0815_sharingconfiguration_settings"),
+        ("posthog", "0815_sharingconfiguration_settings"),
     ]
 
     operations = [

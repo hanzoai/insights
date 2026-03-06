@@ -6,8 +6,8 @@ logger = structlog.get_logger(__name__)
 
 
 def backfill_revenue_analytics_config(apps, schema_editor):
-    ExternalDataSource = apps.get_model("insights", "ExternalDataSource")
-    ExternalDataSourceRevenueAnalyticsConfig = apps.get_model("insights", "ExternalDataSourceRevenueAnalyticsConfig")
+    ExternalDataSource = apps.get_model("posthog", "ExternalDataSource")
+    ExternalDataSourceRevenueAnalyticsConfig = apps.get_model("posthog", "ExternalDataSourceRevenueAnalyticsConfig")
 
     for source in ExternalDataSource.objects.iterator(chunk_size=100):
         try:
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0840_externaldatasourcerevenueanalyticsconfig"),
+        ("posthog", "0840_externaldatasourcerevenueanalyticsconfig"),
     ]
 
     operations = [

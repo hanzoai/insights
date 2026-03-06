@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0291_create_person_override_model"),
+        ("posthog", "0291_create_person_override_model"),
     ]
 
     operations = [

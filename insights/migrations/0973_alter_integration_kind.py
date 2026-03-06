@@ -67,7 +67,7 @@ class AlterPosthogIntegrationKindField(Operation):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0972_team_logs_settings"),
+        ("posthog", "0972_team_logs_settings"),
     ]
 
     operations = [

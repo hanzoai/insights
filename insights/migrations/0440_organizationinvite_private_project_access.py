@@ -7,7 +7,7 @@ import insights.models.organization_invite
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0439_survey_actions"),
+        ("posthog", "0439_survey_actions"),
     ]
 
     operations = [

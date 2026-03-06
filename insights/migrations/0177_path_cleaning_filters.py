@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0176_update_person_props_function"),
+        ("posthog", "0176_update_person_props_function"),
     ]
 
     operations = [

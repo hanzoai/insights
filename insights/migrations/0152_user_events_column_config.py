@@ -7,7 +7,7 @@ import insights.models.user
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0151_plugin_preinstalled"),
+        ("posthog", "0151_plugin_preinstalled"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0752_organization_members_can_invite"),
+        ("posthog", "0752_organization_members_can_invite"),
     ]
 
     operations = [
