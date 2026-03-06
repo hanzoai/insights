@@ -56,6 +56,9 @@ COPY ./rust ./rust
 COPY ./common/esbuilder/ ./common/esbuilder/
 COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
 COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
+COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
+COPY ./common/siphash/ ./common/siphash/
+COPY ./common/insights-node/ ./common/insights-node/
 COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
