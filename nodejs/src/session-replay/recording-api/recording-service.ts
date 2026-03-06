@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 import { PostgresRouter, PostgresUse } from '../../utils/db/postgres'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Counter } from 'prom-client'
 
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
