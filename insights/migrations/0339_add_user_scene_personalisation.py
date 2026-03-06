@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0338_datawarehouse_saved_query"),
+        ("posthog", "0338_datawarehouse_saved_query"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.dashboard",
+                        to="posthog.dashboard",
                     ),
                 ),
                 (
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 (

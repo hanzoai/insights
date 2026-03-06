@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0354_organization_never_drop_data"),
+        ("posthog", "0354_organization_never_drop_data"),
     ]
 
     operations = [
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The BatchExport this backfill belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.batchexport",
+                        to="posthog.batchexport",
                     ),
                 ),
                 (
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The team this belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

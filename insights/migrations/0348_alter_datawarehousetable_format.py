@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0347_add_bigquery_export_type"),
+        ("posthog", "0347_add_bigquery_export_type"),
     ]
 
     operations = [

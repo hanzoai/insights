@@ -14,7 +14,7 @@ def forwards(apps, schema_editor):
         """)
         stripe_schemas = cursor.fetchall()
 
-    ExternalDataSchema: ExternalDataSchemaModel = apps.get_model("insights", "ExternalDataSchema")
+    ExternalDataSchema: ExternalDataSchemaModel = apps.get_model("posthog", "ExternalDataSchema")
 
     for (id,) in stripe_schemas:
         schema = ExternalDataSchema.objects.get(id=id)
@@ -29,7 +29,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0793_team_feature_flag_confirmation"),
+        ("posthog", "0793_team_feature_flag_confirmation"),
     ]
 
     operations = [migrations.RunPython(forwards, reverse)]

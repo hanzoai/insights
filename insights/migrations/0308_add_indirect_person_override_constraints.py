@@ -21,7 +21,7 @@ DROP_FUNCTION_FOR_CONSTRAINT_SQL = "DROP FUNCTION is_override_person_not_used_as
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0307_pluginconfig_admin"),
+        ("posthog", "0307_pluginconfig_admin"),
     ]
 
     operations = [
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 db_column="old_person_id",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="person_override_old",
-                to="insights.personoverridemapping",
+                to="posthog.personoverridemapping",
             ),
         ),
         migrations.RemoveField(model_name="personoverride", name="override_person_id"),
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 db_column="override_person_id",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="person_override_override",
-                to="insights.personoverridemapping",
+                to="posthog.personoverridemapping",
             ),
         ),
         # These two constraints need to be re-added as they are dropped when removing fields.

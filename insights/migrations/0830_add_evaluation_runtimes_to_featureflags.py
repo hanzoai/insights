@@ -5,7 +5,7 @@ from django.db import migrations
 
 def backfill_evaluation_runtime(apps, schema_editor):
     """Backfill evaluation_runtime field in batches to avoid locking"""
-    FeatureFlag = apps.get_model("insights", "FeatureFlag")
+    FeatureFlag = apps.get_model("posthog", "FeatureFlag")
 
     batch_size = 1000
     total_updated = 0
@@ -30,7 +30,7 @@ def backfill_evaluation_runtime(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0829_organization_default_role"),
+        ("posthog", "0829_organization_default_role"),
     ]
 
     operations = [

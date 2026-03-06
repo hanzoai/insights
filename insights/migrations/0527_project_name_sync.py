@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0526_remoteconfig")]
+    dependencies = [("posthog", "0526_remoteconfig")]
 
     operations = [
         migrations.RunSQL(

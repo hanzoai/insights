@@ -32,7 +32,7 @@ def reverse_noop(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0998_team_proactive_tasks_enabled"),
+        ("posthog", "0998_team_proactive_tasks_enabled"),
     ]
 
     operations = [

@@ -5,8 +5,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0116_plugin_latest_tag"),
-        ("insights", "0116_session_recording_retention_period"),
+        ("posthog", "0116_plugin_latest_tag"),
+        ("posthog", "0116_session_recording_retention_period"),
     ]
 
     operations = []

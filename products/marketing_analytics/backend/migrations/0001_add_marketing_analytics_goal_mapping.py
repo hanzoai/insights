@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0958_drop_teamcoreeventsconfig_table"),
+        ("posthog", "0958_drop_teamcoreeventsconfig_table"),
     ]
 
     operations = [
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="marketing_goal_mappings",
-                        to="insights.coreevent",
+                        to="posthog.coreevent",
                     ),
                 ),
                 (
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="marketing_analytics_goal_mappings",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

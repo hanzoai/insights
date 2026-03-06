@@ -10,7 +10,7 @@ from insights.helpers.encrypted_fields import EncryptedTextField
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0328_add_starter_feature_flag_template"),
+        ("posthog", "0328_add_starter_feature_flag_template"),
     ]
 
     operations = [
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
             options={
@@ -97,12 +97,12 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.datawarehousecredential",
+                        to="posthog.datawarehousecredential",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
             options={

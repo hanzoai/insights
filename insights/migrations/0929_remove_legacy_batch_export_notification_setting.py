@@ -35,7 +35,7 @@ def remove_legacy_notification_key(apps, schema_editor):
         SET partial_notification_settings = partial_notification_settings - 'batch_export_run_failure'
         WHERE partial_notification_settings ? 'batch_export_run_failure';
     """
-    User = apps.get_model("insights", "User")
+    User = apps.get_model("posthog", "User")
     users_with_legacy_key = User.objects.filter(partial_notification_settings__has_key="batch_export_run_failure")
 
     for user in users_with_legacy_key.iterator():
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0928_add_team_require_evaluation_tags"),
+        ("posthog", "0928_add_team_require_evaluation_tags"),
     ]
 
     operations = [

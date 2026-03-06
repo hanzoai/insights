@@ -12,7 +12,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0213_deprecated_old_tags"),
+        ("posthog", "0213_deprecated_old_tags"),
     ]
 
     operations = [migrations.RunPython(forwards, reverse, elidable=True)]

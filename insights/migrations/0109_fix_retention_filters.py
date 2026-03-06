@@ -6,7 +6,7 @@ MAPPING = {"h": "Hour", "d": "Day", "w": "Week", "m": "Month"}
 
 
 def fix_retention_dashboard_items(apps, schema_editor):
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     for item in DashboardItem.objects.filter(filters__insight="RETENTION", filters__period__in=MAPPING.keys()):
         item.filters["period"] = MAPPING[item.filters["period"]]
         item.save()
@@ -18,7 +18,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0108_plugin_organization"),
+        ("posthog", "0108_plugin_organization"),
     ]
 
     operations = [

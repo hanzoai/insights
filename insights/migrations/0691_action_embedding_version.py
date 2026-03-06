@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0690_alter_personid_persondistinctid")]
+    dependencies = [("posthog", "0690_alter_personid_persondistinctid")]
 
     operations = [
         migrations.AddField(

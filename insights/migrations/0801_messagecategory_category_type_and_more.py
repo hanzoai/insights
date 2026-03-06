@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0800_add_sharing_token_rotation_fields"),
+        ("posthog", "0800_add_sharing_token_rotation_fields"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="insights.messagecategory",
+                        to="posthog.messagecategory",
                     ),
                 ),
             ],

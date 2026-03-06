@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0150_increase_element_varchars"),
+        ("posthog", "0150_increase_element_varchars"),
     ]
 
     operations = [

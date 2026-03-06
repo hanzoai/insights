@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0499_insights_function_type"),
+        ("posthog", "0499_insights_function_type"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ("ref", models.TextField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("storage_ptr", models.TextField(null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.CreateModel(
@@ -43,10 +43,10 @@ class Migration(migrations.Migration):
                 (
                     "symbol_set",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingsymbolset"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingsymbolset"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.AddIndex(

@@ -32,7 +32,7 @@ DROP_FUNCTION_FOR_CONSTRAINT_SQL = "DROP FUNCTION is_override_person_not_used_as
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0299_set_templates_global"),
+        ("posthog", "0299_set_templates_global"),
     ]
 
     operations = [

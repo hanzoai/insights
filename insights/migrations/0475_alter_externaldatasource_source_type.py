@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0474_hogfunction_encrypted_inputs"),
+        ("posthog", "0474_hogfunction_encrypted_inputs"),
     ]
 
     operations = [

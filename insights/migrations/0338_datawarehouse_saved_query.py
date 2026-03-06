@@ -11,7 +11,7 @@ import products.data_warehouse.backend.models.datawarehouse_saved_query
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0337_more_session_recording_fields"),
+        ("posthog", "0337_more_session_recording_fields"),
     ]
 
     operations = [
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),

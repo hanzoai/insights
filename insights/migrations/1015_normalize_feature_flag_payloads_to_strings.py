@@ -10,7 +10,7 @@ BATCH_SIZE = 500
 
 
 def normalize_payloads_to_strings(apps, schema_editor):
-    FeatureFlag = apps.get_model("insights", "FeatureFlag")
+    FeatureFlag = apps.get_model("posthog", "FeatureFlag")
 
     total_updated = 0
     while True:
@@ -46,7 +46,7 @@ def normalize_payloads_to_strings(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1014_increase_annotation_content_max_length"),
+        ("posthog", "1014_increase_annotation_content_max_length"),
     ]
 
     operations = [

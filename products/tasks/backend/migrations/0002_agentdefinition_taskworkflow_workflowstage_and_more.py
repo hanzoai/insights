@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0858_datamodelingjob_storage_delta_mib_and_more"),
+        ("posthog", "0858_datamodelingjob_storage_delta_mib_and_more"),
         ("tasks", "0001_initial"),
     ]
 
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True, help_text="Whether this agent is available for use")),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_agent_definition",
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 ("version", models.IntegerField(default=1, help_text="Version number for tracking workflow changes")),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_task_workflow",

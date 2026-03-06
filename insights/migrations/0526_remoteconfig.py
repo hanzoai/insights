@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0525_insights_function_transpiled"),
+        ("posthog", "0525_insights_function_transpiled"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ("config", models.JSONField()),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("synced_at", models.DateTimeField(null=True)),
-                ("team", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "abstract": False,

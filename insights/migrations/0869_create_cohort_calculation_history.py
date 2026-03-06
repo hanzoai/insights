@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0868_move_recording_activity_log_to_replay"),
+        ("posthog", "0868_move_recording_activity_log_to_replay"),
     ]
 
     operations = [
@@ -39,8 +39,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("error", models.TextField(blank=True, help_text="Error message if calculation failed", null=True)),
-                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.cohort")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.cohort")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_cohortcalculationhistory",

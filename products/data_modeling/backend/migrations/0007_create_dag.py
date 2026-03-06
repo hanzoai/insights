@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1003_clean_up_stale_alert_subscriptions"),
+        ("posthog", "1003_clean_up_stale_alert_subscriptions"),
         ("data_modeling", "0006_backfill_nodes_edges_from_saved_queries"),
     ]
 
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
             options={

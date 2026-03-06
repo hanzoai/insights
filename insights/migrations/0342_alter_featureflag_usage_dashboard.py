@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0341_add_session_recording_storage_version"),
+        ("posthog", "0341_add_session_recording_storage_version"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to="insights.dashboard",
+                to="posthog.dashboard",
             ),
         ),
     ]

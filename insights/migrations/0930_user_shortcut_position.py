@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0929_remove_legacy_batch_export_notification_setting"),
+        ("posthog", "0929_remove_legacy_batch_export_notification_setting"),
     ]
 
     operations = [

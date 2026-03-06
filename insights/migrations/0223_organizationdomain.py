@@ -9,8 +9,8 @@ import insights.models.organization_domain
 
 
 def migrate_domain_whitelist(apps, schema_editor):
-    Organization = apps.get_model("insights", "Organization")
-    OrganizationDomain = apps.get_model("insights", "OrganizationDomain")
+    Organization = apps.get_model("posthog", "Organization")
+    OrganizationDomain = apps.get_model("posthog", "OrganizationDomain")
 
     for organization in Organization.objects.exclude(domain_whitelist=[]):
         for domain in organization.domain_whitelist:
@@ -24,7 +24,7 @@ def migrate_domain_whitelist(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0222_fix_deleted_primary_dashboards"),
+        ("posthog", "0222_fix_deleted_primary_dashboards"),
     ]
 
     operations = [
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="domains",
-                        to="insights.organization",
+                        to="posthog.organization",
                     ),
                 ),
             ],
