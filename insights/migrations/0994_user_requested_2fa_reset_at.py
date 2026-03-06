@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0993_approvalpolicy_bypass_options"),
+        ("insights", "0993_approvalpolicy_bypass_options"),
     ]
 
     operations = [

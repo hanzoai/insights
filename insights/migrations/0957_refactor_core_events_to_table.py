@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0956_team_conversations_enabled_and_more"),
+        ("insights", "0956_team_conversations_enabled_and_more"),
     ]
 
     operations = [
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="core_events",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],

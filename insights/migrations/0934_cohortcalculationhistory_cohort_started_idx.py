@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0933_add_event_names_and_uuids_to_restriction_config"),
+        ("insights", "0933_add_event_names_and_uuids_to_restriction_config"),
     ]
 
     operations = [
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             model_name="cohortcalculationhistory",
             index=models.Index(
                 fields=["cohort", "-started_at"],
-                name="posthog_coh_cohort__cbac1b_idx",
+                name="insights_coh_cohort__cbac1b_idx",
             ),
         ),
     ]

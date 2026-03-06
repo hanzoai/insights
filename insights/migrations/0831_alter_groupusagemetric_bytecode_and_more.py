@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0830_add_evaluation_runtimes_to_featureflags")]
+    dependencies = [("insights", "0830_add_evaluation_runtimes_to_featureflags")]
 
     operations = [
         migrations.AlterField(

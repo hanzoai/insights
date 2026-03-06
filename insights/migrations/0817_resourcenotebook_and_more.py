@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0816_notebook_visibility"),
+        ("insights", "0816_notebook_visibility"),
     ]
 
     operations = [
@@ -28,13 +28,13 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="notebooks",
-                        to="posthog.group",
+                        to="insights.group",
                     ),
                 ),
                 (
                     "notebook",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="resources", to="posthog.notebook"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="resources", to="insights.notebook"
                     ),
                 ),
             ],

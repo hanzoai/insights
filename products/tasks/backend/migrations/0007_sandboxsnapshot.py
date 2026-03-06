@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0867_add_updated_at_to_feature_flags"),
+        ("insights", "0867_add_updated_at_to_feature_flags"),
         ("tasks", "0006_remove_workflowstage_agent_alter_task_workflow_and_more"),
     ]
 
@@ -59,14 +59,14 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="snapshots",
-                        to="posthog.integration",
+                        to="insights.integration",
                     ),
                 ),
             ],
             options={
-                "db_table": "posthog_sandbox_snapshot",
+                "db_table": "insights_sandbox_snapshot",
                 "indexes": [
-                    models.Index(fields=["integration", "status", "-created_at"], name="posthog_san_integra_93cdea_idx")
+                    models.Index(fields=["integration", "status", "-created_at"], name="insights_san_integra_93cdea_idx")
                 ],
             },
         ),

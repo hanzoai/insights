@@ -7,8 +7,8 @@ from django.db import migrations
 
 # Create a "plugin.json" file for each plugin that's missing it due to an error in 0233 (!![] == !!None in python)
 def migrate_plugin_source(apps, schema_editor):
-    Plugin = apps.get_model("posthog", "Plugin")
-    PluginSourceFile = apps.get_model("posthog", "PluginSourceFile")
+    Plugin = apps.get_model("insights", "Plugin")
+    PluginSourceFile = apps.get_model("insights", "PluginSourceFile")
 
     for plugin in Plugin.objects.filter(plugin_type="source"):
         PluginSourceFile.objects.update_or_create(
@@ -28,7 +28,7 @@ def migrate_plugin_source(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0233_plugin_source_file"),
+        ("insights", "0233_plugin_source_file"),
     ]
 
     operations = [

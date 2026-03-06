@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0845_delete_invalid_personalapikeys"),
+        ("insights", "0845_delete_invalid_personalapikeys"),
     ]
 
     operations = [
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="created_share_passwords",
-                        to="posthog.user",
+                        to="insights.user",
                     ),
                 ),
                 (
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="share_passwords",
-                        to="posthog.sharingconfiguration",
+                        to="insights.sharingconfiguration",
                     ),
                 ),
             ],

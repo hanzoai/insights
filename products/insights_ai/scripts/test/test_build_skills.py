@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from products.posthog_ai.scripts.build_skills import (
+from products.insights_ai.scripts.build_skills import (
     DiscoveredSkill,
     SkillBuilder,
     SkillDiscoverer,

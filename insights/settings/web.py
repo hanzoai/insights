@@ -54,7 +54,7 @@ PRODUCTS_APPS = [
     "products.slack_app.backend.apps.SlackAppConfig",
     "products.product_tours.backend.apps.ProductToursConfig",
     "products.workflows.backend.apps.WorkflowsConfig",
-    "products.posthog_ai.backend.apps.PosthogAiConfig",
+    "products.insights_ai.backend.apps.InsightsAiConfig",
     "products.signals.backend.apps.SignalsConfig",
 ]
 
@@ -154,7 +154,7 @@ ROOT_URLCONF = "insights.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["frontend/dist", "posthog/templates"],
+        "DIRS": ["frontend/dist", "insights/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -190,7 +190,7 @@ SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
 SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
 SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
-AUTH_USER_MODEL = "posthog.User"
+AUTH_USER_MODEL = "insights.User"
 
 LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
@@ -201,7 +201,7 @@ CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
-SOCIAL_AUTH_USER_MODEL = "posthog.User"
+SOCIAL_AUTH_USER_MODEL = "insights.User"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS: bool = get_from_env("SOCIAL_AUTH_REDIRECT_IS_HTTPS", not DEBUG, type_cast=str_to_bool)
 
 SOCIAL_AUTH_PIPELINE = (
@@ -245,7 +245,7 @@ SESSION_COOKIE_AGE = get_from_env("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14, type_
 # For sensitive actions we have an additional permission (default 2 hour)
 SESSION_SENSITIVE_ACTIONS_AGE = get_from_env("SESSION_SENSITIVE_ACTIONS_AGE", 60 * 60 * 2, type_cast=int)
 
-CSRF_COOKIE_NAME = "posthog_csrftoken"
+CSRF_COOKIE_NAME = "insights_csrftoken"
 CSRF_COOKIE_AGE = get_from_env("CSRF_COOKIE_AGE", SESSION_COOKIE_AGE, type_cast=int)
 
 # The total time allowed for an impersonated session
@@ -499,7 +499,7 @@ LIVESTREAM_HOST = get_from_env("LIVESTREAM_HOST", "")
 
 # Marker file created by Kubernetes preStop hook to signal pod is shutting down.
 # When this file exists, the /_readyz endpoint returns 503 to stop receiving new traffic.
-PRESTOP_MARKER_FILE = get_from_env("PRESTOP_MARKER_FILE", "/tmp/posthog_prestop")
+PRESTOP_MARKER_FILE = get_from_env("PRESTOP_MARKER_FILE", "/tmp/insights_prestop")
 
 ####
 # Local dev
@@ -511,9 +511,9 @@ DEV_DISABLE_NAVIGATION_HOOKS = get_from_env("DEV_DISABLE_NAVIGATION_HOOKS", Fals
 # Random/temporary
 # Everything that is supposed to be removed eventually
 
-# temporary flag to control new UUID version setting in posthog-js
+# temporary flag to control new UUID version setting in insights-js
 # is set to v7 to test new generation but can be set to "og" to revert
-POSTHOG_JS_UUID_VERSION = os.getenv("POSTHOG_JS_UUID_VERSION", "v7")
+INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", os.getenv("POSTHOG_JS_UUID_VERSION", "v7"))
 
 # Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest
@@ -573,11 +573,11 @@ OAUTH2_PROVIDER = {
     "CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL": 1,
 }
 
-OAUTH2_PROVIDER_APPLICATION_MODEL = "posthog.OAuthApplication"
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "posthog.OAuthAccessToken"
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "posthog.OAuthRefreshToken"
-OAUTH2_PROVIDER_ID_TOKEN_MODEL = "posthog.OAuthIDToken"
-OAUTH2_PROVIDER_GRANT_MODEL = "posthog.OAuthGrant"
+OAUTH2_PROVIDER_APPLICATION_MODEL = "insights.OAuthApplication"
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "insights.OAuthAccessToken"
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "insights.OAuthRefreshToken"
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "insights.OAuthIDToken"
+OAUTH2_PROVIDER_GRANT_MODEL = "insights.OAuthGrant"
 
 # Sharing configuration settings
 SHARING_TOKEN_GRACE_PERIOD_SECONDS = 60 * 5  # 5 minutes

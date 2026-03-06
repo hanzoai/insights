@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0271_delete_promptsequencestate"),
+        ("insights", "0271_delete_promptsequencestate"),
     ]
 
     # NOTE: This is basically a no-op as the default logic is all in runtime anyway

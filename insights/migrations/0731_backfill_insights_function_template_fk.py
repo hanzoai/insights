@@ -8,8 +8,8 @@ logger = structlog.get_logger(__name__)
 
 
 def backfill_insights_function_template_fk(apps, schema_editor):
-    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
-    InsightsFunctionTemplate = apps.get_model("posthog", "InsightsFunctionTemplate")
+    InsightsFunction = apps.get_model("insights", "InsightsFunction")
+    InsightsFunctionTemplate = apps.get_model("insights", "InsightsFunctionTemplate")
 
     total_count = InsightsFunction.objects.filter(template_id__isnull=False, insights_function_template__isnull=True).count()
 
@@ -54,7 +54,7 @@ def backfill_insights_function_template_fk(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0730_add_insights_function_template_as_fk_to_insights_function"),
+        ("insights", "0730_add_insights_function_template_as_fk_to_insights_function"),
     ]
 
     operations = [

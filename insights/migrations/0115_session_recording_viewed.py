@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0114_fix_team_event_names"),
+        ("insights", "0114_fix_team_event_names"),
     ]
 
     operations = [
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ("session_id", models.CharField(max_length=200)),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
                 ),
                 (
                     "user",
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
             model_name="sessionrecordingviewed",
             index=models.Index(
                 fields=["team_id", "user_id", "session_id"],
-                name="posthog_ses_team_id_465af1_idx",
+                name="insights_ses_team_id_465af1_idx",
             ),
         ),
         migrations.AlterUniqueTogether(

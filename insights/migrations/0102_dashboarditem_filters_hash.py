@@ -13,7 +13,7 @@ def generate_cache_key(stringified: str) -> str:
 
 
 def forward(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for item in DashboardItem.objects.filter(filters__isnull=False, dashboard__isnull=False).exclude(filters={}):
         filter = Filter(data=item.filters)
         item.filters_hash = generate_cache_key(f"{filter.toJSON()}_{item.team_id}")
@@ -26,7 +26,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0101_org_owners"),
+        ("insights", "0101_org_owners"),
     ]
 
     operations = [

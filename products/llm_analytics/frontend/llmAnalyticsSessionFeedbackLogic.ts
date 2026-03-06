@@ -125,7 +125,7 @@ export const llmAnalyticsSessionFeedbackLogic = kea<llmAnalyticsSessionFeedbackL
                         properties.$ai_trace_id as trace_id,
                         timestamp
                     FROM events
-                    WHERE event = 'posthog_ai_support_ticket_created'
+                    WHERE event = 'insights_ai_support_ticket_created'
                       AND properties.$ai_conversation_id = {sessionId}
                     ORDER BY timestamp DESC
                 `,

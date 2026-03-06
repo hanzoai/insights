@@ -52,7 +52,7 @@ import getOrganizationDetails from './organizations/getDetails'
 import getOrganizations from './organizations/getOrganizations'
 import setActiveOrganization from './organizations/setActive'
 // Insights AI tools
-import { executeSql, readDataSchema, readDataWarehouseSchema } from './posthogAiTools'
+import { executeSql, readDataSchema, readDataWarehouseSchema } from './insightsAiTools'
 // Projects
 import eventDefinitions from './projects/eventDefinitions'
 import getProjects from './projects/getProjects'

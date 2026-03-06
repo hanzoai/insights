@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 migrations.RunSQL(
-                    sql='ALTER TABLE "posthog_conversations_ticket" ALTER COLUMN "ticket_number" SET NOT NULL;',
-                    reverse_sql='ALTER TABLE "posthog_conversations_ticket" ALTER COLUMN "ticket_number" DROP NOT NULL;',
+                    sql='ALTER TABLE "insights_conversations_ticket" ALTER COLUMN "ticket_number" SET NOT NULL;',
+                    reverse_sql='ALTER TABLE "insights_conversations_ticket" ALTER COLUMN "ticket_number" DROP NOT NULL;',
                 ),
             ],
         ),

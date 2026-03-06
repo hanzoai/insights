@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0296_team_allow_blank_fields"),
+        ("insights", "0296_team_allow_blank_fields"),
     ]
 
     operations = [

@@ -54,7 +54,7 @@ class DesktopRecording(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_desktop_recording"
+        db_table = "insights_desktop_recording"
         ordering = ["-started_at"]
         indexes = [
             models.Index(fields=["team", "-started_at"]),

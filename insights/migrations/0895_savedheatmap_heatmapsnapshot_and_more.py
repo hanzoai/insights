@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0894_organizationdomain_scim_bearer_token_and_more"),
+        ("insights", "0894_organizationdomain_scim_bearer_token_and_more"),
     ]
 
     operations = [
@@ -57,10 +57,10 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_heatmapsaved",
+                "db_table": "insights_heatmapsaved",
             },
         ),
         migrations.CreateModel(
@@ -79,22 +79,22 @@ class Migration(migrations.Migration):
                 (
                     "heatmap",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="snapshots", to="posthog.savedheatmap"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="snapshots", to="insights.savedheatmap"
                     ),
                 ),
             ],
         ),
         migrations.AddIndex(
             model_name="savedheatmap",
-            index=models.Index(fields=["team", "url"], name="posthog_hea_team_id_7540ce_idx"),
+            index=models.Index(fields=["team", "url"], name="insights_hea_team_id_7540ce_idx"),
         ),
         migrations.AddIndex(
             model_name="savedheatmap",
-            index=models.Index(fields=["status"], name="posthog_hea_status_851064_idx"),
+            index=models.Index(fields=["status"], name="insights_hea_status_851064_idx"),
         ),
         migrations.AddIndex(
             model_name="savedheatmap",
-            index=models.Index(fields=["deleted"], name="posthog_hea_deleted_9942b0_idx"),
+            index=models.Index(fields=["deleted"], name="insights_hea_deleted_9942b0_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="savedheatmap",
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="heatmapsnapshot",
-            index=models.Index(fields=["heatmap", "width"], name="posthog_hea_heatmap_9543e8_idx"),
+            index=models.Index(fields=["heatmap", "width"], name="insights_hea_heatmap_9543e8_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="heatmapsnapshot",

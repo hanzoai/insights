@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0199_update_experiment_model"),
+        ("insights", "0199_update_experiment_model"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            UPDATE posthog_dashboarditem SET last_modified_at = updated_at;
+            UPDATE insights_dashboarditem SET last_modified_at = updated_at;
         """,
             elidable=True,
         ),

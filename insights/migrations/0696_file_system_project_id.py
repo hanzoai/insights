@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0695_alter_experiment_end_date_and_more"),
+        ("insights", "0695_alter_experiment_end_date_and_more"),
     ]
 
     operations = [
@@ -19,41 +19,41 @@ class Migration(migrations.Migration):
                     model_name="filesystem",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_filesystem" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_filesystem_project_id_767c1359_fk_posthog_p" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "posthog_filesystem_project_id_767c1359_fk_posthog_p" IMMEDIATE;""",
+                    ALTER TABLE "insights_filesystem" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_filesystem_project_id_767c1359_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+                    SET CONSTRAINTS "insights_filesystem_project_id_767c1359_fk_insights_p" IMMEDIATE;""",
                     reverse_sql="""
-                        ALTER TABLE "posthog_filesystem" DROP COLUMN IF EXISTS "project_id";""",
+                        ALTER TABLE "insights_filesystem" DROP COLUMN IF EXISTS "project_id";""",
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_filesystem_project_id_767c1359_239c0515" ON "posthog_filesystem" ("project_id");""",
+                    CREATE INDEX CONCURRENTLY "insights_filesystem_project_id_767c1359_239c0515" ON "insights_filesystem" ("project_id");""",
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_filesystem_project_id_767c1359_239c0515";""",
+                        DROP INDEX IF EXISTS "insights_filesystem_project_id_767c1359_239c0515";""",
                 ),
             ],
         ),
         AddIndexConcurrently(
             model_name="filesystem",
-            index=models.Index(fields=["project"], name="posthog_fil_project_840481_idx"),
+            index=models.Index(fields=["project"], name="insights_fil_project_840481_idx"),
         ),
         AddIndexConcurrently(
             model_name="filesystem",
-            index=models.Index(fields=["team"], name="posthog_fil_team_id_4941ed_idx"),
+            index=models.Index(fields=["team"], name="insights_fil_team_id_4941ed_idx"),
         ),
         AddIndexConcurrently(
             model_name="filesystem",
             index=models.Index(
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("path"),
-                name="posthog_fs_project_path",
+                name="insights_fs_project_path",
             ),
         ),
         AddIndexConcurrently(
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
             index=models.Index(
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("depth"),
-                name="posthog_fs_project_depth",
+                name="insights_fs_project_depth",
             ),
         ),
         AddIndexConcurrently(
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("type"),
                 models.F("ref"),
-                name="posthog_fs_project_typeref",
+                name="insights_fs_project_typeref",
             ),
         ),
     ]

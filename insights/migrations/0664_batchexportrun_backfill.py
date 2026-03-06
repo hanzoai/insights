@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0663_alter_insightvariable_type")]
+    dependencies = [("insights", "0663_alter_insightvariable_type")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="runs",
                         related_query_name="run",
-                        to="posthog.batchexportbackfill",
+                        to="insights.batchexportbackfill",
                     ),
                 ),
             ],
@@ -31,20 +31,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_batchexportrun" ADD COLUMN "backfill_id" uuid NULL CONSTRAINT "posthog_batchexportr_backfill_id_9243c0f7_fk_posthog_b" REFERENCES "posthog_batchexportbackfill"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_batchexportr_backfill_id_9243c0f7_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_batchexportrun" ADD COLUMN "backfill_id" uuid NULL CONSTRAINT "insights_batchexportr_backfill_id_9243c0f7_fk_insights_b" REFERENCES "insights_batchexportbackfill"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_batchexportr_backfill_id_9243c0f7_fk_insights_b" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_batchexportrun" DROP COLUMN IF EXISTS "backfill_id";
+                        ALTER TABLE "insights_batchexportrun" DROP COLUMN IF EXISTS "backfill_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_batchexportrun_backfill_id_9243c0f7" ON "posthog_batchexportrun" ("backfill_id");
+                    CREATE INDEX CONCURRENTLY "insights_batchexportrun_backfill_id_9243c0f7" ON "insights_batchexportrun" ("backfill_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_batchexportrun_backfill_id_9243c0f7";
+                        DROP INDEX IF EXISTS "insights_batchexportrun_backfill_id_9243c0f7";
                     """,
                 ),
             ],

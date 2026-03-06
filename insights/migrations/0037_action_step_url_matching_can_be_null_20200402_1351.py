@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0036_remove_current_url_index"),
+        ("insights", "0036_remove_current_url_index"),
     ]
 
     operations = [

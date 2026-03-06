@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0310_add_starter_dashboard_template"),
+        ("insights", "0310_add_starter_dashboard_template"),
     ]
 
     operations = [
@@ -23,14 +23,14 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             # safe to ignore null locking this table it has fewer than 10 items on it
             sql="""
-                UPDATE posthog_dashboardtemplate SET scope = 'global' WHERE team_id IS NULL -- not-null-ignore
+                UPDATE insights_dashboardtemplate SET scope = 'global' WHERE team_id IS NULL -- not-null-ignore
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),
         migrations.RunSQL(
             # safe to ignore null locking this table it has fewer than 10 items on it
             sql="""
-                UPDATE posthog_dashboardtemplate SET scope = 'team' WHERE team_id IS NOT NULL -- not-null-ignore
+                UPDATE insights_dashboardtemplate SET scope = 'team' WHERE team_id IS NOT NULL -- not-null-ignore
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),

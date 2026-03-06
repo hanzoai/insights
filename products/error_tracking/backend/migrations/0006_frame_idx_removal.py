@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
             state_operations=[
                 migrations.RemoveIndex(
                     model_name="errortrackingstackframe",
-                    name="posthog_err_team_id_dc6a7f_idx",
+                    name="insights_err_team_id_dc6a7f_idx",
                 ),
                 migrations.RemoveConstraint(
                     model_name="errortrackingstackframe",
@@ -23,10 +23,10 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE posthog_errortrackingstackframe DROP CONSTRAINT IF EXISTS "unique_raw_id_per_team";
+                    ALTER TABLE insights_errortrackingstackframe DROP CONSTRAINT IF EXISTS "unique_raw_id_per_team";
                     """,
                     reverse_sql="""
-                        ALTER TABLE posthog_errortrackingstackframe ADD CONSTRAINT "unique_raw_id_per_team" UNIQUE (team_id, raw_id);
+                        ALTER TABLE insights_errortrackingstackframe ADD CONSTRAINT "unique_raw_id_per_team" UNIQUE (team_id, raw_id);
                     """,
                 ),
             ],

@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0212_alter_persondistinctid_team"),
+        ("insights", "0212_alter_persondistinctid_team"),
     ]
 
     operations = [
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tagged_items",
-                to="posthog.dashboard",
+                to="insights.dashboard",
             ),
         ),
         migrations.AddField(
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tagged_items",
-                to="posthog.eventdefinition",
+                to="insights.eventdefinition",
             ),
         ),
         migrations.AddField(
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tagged_items",
-                to="posthog.insight",
+                to="insights.insight",
             ),
         ),
         migrations.AddField(
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tagged_items",
-                to="posthog.propertydefinition",
+                to="insights.propertydefinition",
             ),
         ),
         migrations.AlterUniqueTogether(

@@ -6,7 +6,7 @@ logger = structlog.get_logger(__name__)
 
 
 def migrate_replay_retention_period(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     teams_to_migrate = []
     batch_size = 100
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0861_alter_survey_questions"),
+        ("insights", "0861_alter_survey_questions"),
     ]
 
     operations = [

@@ -10,18 +10,18 @@ def migrate_dashboard_insight_relations(apps, _) -> None:
     logger = structlog.get_logger(__name__)
     logger.info("starting_0227_add_dashboard_tiles")
 
-    DashboardTile = apps.get_model("posthog", "DashboardTile")
+    DashboardTile = apps.get_model("insights", "DashboardTile")
 
     with connection.cursor() as cursor:
         """
         Fetch all of the insights that have a dashboard ID
-        and don't already have a posthog_dashboardtile relation
+        and don't already have a insights_dashboardtile relation
         """
         cursor.execute(
             """
             SELECT old_relation.id, old_relation.dashboard_id, old_relation.layouts, old_relation.color
-            FROM posthog_dashboarditem as old_relation
-            LEFT JOIN posthog_dashboardtile new_relation
+            FROM insights_dashboarditem as old_relation
+            LEFT JOIN insights_dashboardtile new_relation
                 ON new_relation.insight_id = old_relation.id AND new_relation.dashboard_id = old_relation.dashboard_id
             WHERE old_relation.dashboard_id IS NOT NULL -- has a dashboard id on the old relation
             AND old_relation.deleted = FALSE -- no point linking deleted insights
@@ -53,14 +53,14 @@ def migrate_dashboard_insight_relations(apps, _) -> None:
 
 
 def reverse(apps, _) -> None:
-    DashboardTile = apps.get_model("posthog", "DashboardTile")
+    DashboardTile = apps.get_model("insights", "DashboardTile")
     # issues a single delete
     DashboardTile.objects.all().delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0226_longer_action_slack_message_format"),
+        ("insights", "0226_longer_action_slack_message_format"),
     ]
 
     operations = [
@@ -78,11 +78,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "dashboard",
-                    models.ForeignKey(on_delete=models.deletion.CASCADE, to="posthog.dashboard"),
+                    models.ForeignKey(on_delete=models.deletion.CASCADE, to="insights.dashboard"),
                 ),
                 (
                     "insight",
-                    models.ForeignKey(on_delete=models.deletion.CASCADE, to="posthog.insight"),
+                    models.ForeignKey(on_delete=models.deletion.CASCADE, to="insights.insight"),
                 ),
                 ("layouts", models.JSONField(default=dict)),
                 ("color", models.CharField(blank=True, max_length=400, null=True)),
@@ -94,8 +94,8 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 related_name="dashboards",
-                through="posthog.DashboardTile",
-                to="posthog.Insight",
+                through="insights.DashboardTile",
+                to="insights.Insight",
             ),
         ),
         migrations.RunPython(migrate_dashboard_insight_relations, reverse, elidable=True),

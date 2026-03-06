@@ -94,7 +94,7 @@ services:
             service: worker
         build: .
         volumes:
-            - .:/app/posthog
+            - .:/app/insights
         environment:
             - DEBUG=1
             - PLUGIN_SERVER_IDLE=1
@@ -108,7 +108,7 @@ services:
         build: .
         command: ./bin/docker-server-unit
         volumes:
-            - .:/app/posthog
+            - .:/app/insights
         environment:
             - DEBUG=1
             - OBJECT_STORAGE_ENDPOINT=http://objectstorage:19000
@@ -163,7 +163,7 @@ services:
             context: .
             dockerfile: Dockerfile.node
         volumes:
-            - .:/app/posthog
+            - .:/app/insights
         environment:
             - DOCKER=1
         depends_on:
@@ -179,7 +179,7 @@ services:
             service: migrate
         build: .
         volumes:
-            - .:/app/posthog
+            - .:/app/insights
         environment:
             - DEBUG=1
 
@@ -219,7 +219,7 @@ services:
             service: temporal-django-worker
         build: .
         volumes:
-            - .:/app/posthog
+            - .:/app/insights
         depends_on:
             - db
             - kv
@@ -233,7 +233,7 @@ services:
             file: docker-compose.base.yml
             service: cyclotron-janitor
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/cyclotron'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/cyclotron'
             KAFKA_HOSTS: 'kafka:9092'
             DEBUG: 1 # Add debug mode like other services
         depends_on:

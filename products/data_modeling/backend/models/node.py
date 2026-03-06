@@ -37,7 +37,7 @@ class Node(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
         super().save(*args, **kwargs)
 
     class Meta:
-        db_table = "posthog_datamodelingnode"
+        db_table = "insights_datamodelingnode"
         constraints = [
             models.CheckConstraint(
                 name="saved_query_required_on_non_table_node_type",

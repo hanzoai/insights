@@ -7,10 +7,10 @@ from unittest.mock import patch
 import dagster
 
 from products.llm_analytics.backend.models import Dataset, DatasetItem
-from products.posthog_ai.dags.run_evaluation import prepare_dataset
+from products.insights_ai.dags.run_evaluation import prepare_dataset
 
 
-@patch("products.posthog_ai.dags.run_evaluation._get_team_id")
+@patch("products.insights_ai.dags.run_evaluation._get_team_id")
 @pytest.mark.django_db
 def test_prepare_dataset_handles_deleted_field_correctly(mock_get_team_id):
     """Test that prepare_dataset correctly filters datasets and items with deleted=False or deleted=None"""

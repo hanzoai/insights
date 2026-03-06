@@ -4,79 +4,79 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0921_teammarketinganalyticsconfig__campaign_field_preferences_and_more"),
+        ("insights", "0921_teammarketinganalyticsconfig__campaign_field_preferences_and_more"),
     ]
 
     operations = [
         # Drop foreign key constraints for all tables that are now in the persons database
-        # These tables are managed separately and don't need FK constraints to posthog_team
-        # posthog_persondistinctid
+        # These tables are managed separately and don't need FK constraints to insights_team
+        # insights_persondistinctid
         migrations.RunSQL(
             sql="""
-                ALTER TABLE posthog_persondistinctid
-                DROP CONSTRAINT IF EXISTS "posthog_persondistinctid_team_id_46330ec9_fk_posthog_team_id";
+                ALTER TABLE insights_persondistinctid
+                DROP CONSTRAINT IF EXISTS "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id";
             """,
             reverse_sql="""
-                ALTER TABLE posthog_persondistinctid
-                ADD CONSTRAINT "posthog_persondistinctid_team_id_46330ec9_fk_posthog_team_id"
+                ALTER TABLE insights_persondistinctid
+                ADD CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id"
                 FOREIGN KEY (team_id)
-                REFERENCES posthog_team(id)
+                REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
             """,
         ),
-        # posthog_personlessdistinctid
+        # insights_personlessdistinctid
         migrations.RunSQL(
             sql="""
-                ALTER TABLE posthog_personlessdistinctid
-                DROP CONSTRAINT IF EXISTS "posthog_personlessdi_team_id_99211fb1_fk_posthog_t";
+                ALTER TABLE insights_personlessdistinctid
+                DROP CONSTRAINT IF EXISTS "insights_personlessdi_team_id_99211fb1_fk_insights_t";
             """,
             reverse_sql="""
-                ALTER TABLE posthog_personlessdistinctid
-                ADD CONSTRAINT "posthog_personlessdi_team_id_99211fb1_fk_posthog_t"
+                ALTER TABLE insights_personlessdistinctid
+                ADD CONSTRAINT "insights_personlessdi_team_id_99211fb1_fk_insights_t"
                 FOREIGN KEY (team_id)
-                REFERENCES posthog_team(id)
+                REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
             """,
         ),
-        # posthog_personoverride
+        # insights_personoverride
         migrations.RunSQL(
             sql="""
-                ALTER TABLE posthog_personoverride
-                DROP CONSTRAINT IF EXISTS "posthog_personoverride_team_id_92291e67_fk_posthog_team_id";
+                ALTER TABLE insights_personoverride
+                DROP CONSTRAINT IF EXISTS "insights_personoverride_team_id_92291e67_fk_insights_team_id";
             """,
             reverse_sql="""
-                ALTER TABLE posthog_personoverride
-                ADD CONSTRAINT "posthog_personoverride_team_id_92291e67_fk_posthog_team_id"
+                ALTER TABLE insights_personoverride
+                ADD CONSTRAINT "insights_personoverride_team_id_92291e67_fk_insights_team_id"
                 FOREIGN KEY (team_id)
-                REFERENCES posthog_team(id)
+                REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
             """,
         ),
-        # posthog_featureflaghashkeyoverride
+        # insights_featureflaghashkeyoverride
         migrations.RunSQL(
             sql="""
-                ALTER TABLE posthog_featureflaghashkeyoverride
-                DROP CONSTRAINT IF EXISTS "posthog_featureflagh_team_id_b626eed2_fk_posthog_t";
+                ALTER TABLE insights_featureflaghashkeyoverride
+                DROP CONSTRAINT IF EXISTS "insights_featureflagh_team_id_b626eed2_fk_insights_t";
             """,
             reverse_sql="""
-                ALTER TABLE posthog_featureflaghashkeyoverride
-                ADD CONSTRAINT "posthog_featureflagh_team_id_b626eed2_fk_posthog_t"
+                ALTER TABLE insights_featureflaghashkeyoverride
+                ADD CONSTRAINT "insights_featureflagh_team_id_b626eed2_fk_insights_t"
                 FOREIGN KEY (team_id)
-                REFERENCES posthog_team(id)
+                REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
             """,
         ),
-        # posthog_grouptypemapping
+        # insights_grouptypemapping
         migrations.RunSQL(
             sql="""
-                ALTER TABLE posthog_grouptypemapping
-                DROP CONSTRAINT IF EXISTS "posthog_grouptypemapping_team_id_5fb54d04_fk_posthog_team_id";
+                ALTER TABLE insights_grouptypemapping
+                DROP CONSTRAINT IF EXISTS "insights_grouptypemapping_team_id_5fb54d04_fk_insights_team_id";
             """,
             reverse_sql="""
-                ALTER TABLE posthog_grouptypemapping
-                ADD CONSTRAINT "posthog_grouptypemapping_team_id_5fb54d04_fk_posthog_team_id"
+                ALTER TABLE insights_grouptypemapping
+                ADD CONSTRAINT "insights_grouptypemapping_team_id_5fb54d04_fk_insights_team_id"
                 FOREIGN KEY (team_id)
-                REFERENCES posthog_team(id)
+                REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
             """,
         ),

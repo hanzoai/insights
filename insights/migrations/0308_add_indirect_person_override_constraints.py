@@ -21,7 +21,7 @@ DROP_FUNCTION_FOR_CONSTRAINT_SQL = "DROP FUNCTION is_override_person_not_used_as
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0307_pluginconfig_admin"),
+        ("insights", "0307_pluginconfig_admin"),
     ]
 
     operations = [
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 db_column="old_person_id",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="person_override_old",
-                to="posthog.personoverridemapping",
+                to="insights.personoverridemapping",
             ),
         ),
         migrations.RemoveField(model_name="personoverride", name="override_person_id"),
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 db_column="override_person_id",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="person_override_override",
-                to="posthog.personoverridemapping",
+                to="insights.personoverridemapping",
             ),
         ),
         # These two constraints need to be re-added as they are dropped when removing fields.
@@ -103,13 +103,13 @@ class Migration(migrations.Migration):
         migrations.RunSQL("CREATE EXTENSION IF NOT EXISTS intarray", "DROP EXTENSION intarray"),
         migrations.RunSQL(
             """
-            ALTER TABLE posthog_personoverride
+            ALTER TABLE insights_personoverride
             ADD CONSTRAINT exclude_override_person_id_from_being_old_person_id
             EXCLUDE USING gist((array[old_person_id, override_person_id]) WITH &&, override_person_id WITH <>)
             DEFERRABLE
             INITIALLY DEFERRED
             """,
-            "ALTER TABLE posthog_personoverride DROP CONSTRAINT exclude_override_person_id_from_being_old_person_id",
+            "ALTER TABLE insights_personoverride DROP CONSTRAINT exclude_override_person_id_from_being_old_person_id",
         ),
         migrations.AddConstraint(
             model_name="personoverridemapping",

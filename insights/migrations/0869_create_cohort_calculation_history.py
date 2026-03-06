@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0868_move_recording_activity_log_to_replay"),
+        ("insights", "0868_move_recording_activity_log_to_replay"),
     ]
 
     operations = [
@@ -39,14 +39,14 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("error", models.TextField(blank=True, help_text="Error message if calculation failed", null=True)),
-                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.cohort")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("cohort", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.cohort")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_cohortcalculationhistory",
+                "db_table": "insights_cohortcalculationhistory",
                 "indexes": [
-                    models.Index(fields=["team", "cohort"], name="posthog_coh_team_id_0ba00c_idx"),
-                    models.Index(fields=["team", "started_at"], name="posthog_coh_team_id_762cc7_idx"),
+                    models.Index(fields=["team", "cohort"], name="insights_coh_team_id_0ba00c_idx"),
+                    models.Index(fields=["team", "started_at"], name="insights_coh_team_id_762cc7_idx"),
                 ],
             },
         ),

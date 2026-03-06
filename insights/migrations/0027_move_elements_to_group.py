@@ -19,9 +19,9 @@ def hash_elements(elements) -> str:
 
 
 def forwards(apps, schema_editor):
-    Event = apps.get_model("posthog", "Event")
-    ElementGroup = apps.get_model("posthog", "ElementGroup")
-    Element = apps.get_model("posthog", "Element")
+    Event = apps.get_model("insights", "Event")
+    ElementGroup = apps.get_model("insights", "ElementGroup")
+    Element = apps.get_model("insights", "Element")
 
     hashes_seen: list[str] = []
     while Event.objects.filter(element__isnull=False, elements_hash__isnull=True, event="$autocapture").exists():
@@ -59,7 +59,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0026_auto_20200227_0804"),
+        ("insights", "0026_auto_20200227_0804"),
     ]
 
     operations = [

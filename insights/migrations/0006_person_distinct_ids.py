@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0005_remove_person_distinct_ids"),
+        ("insights", "0005_remove_person_distinct_ids"),
     ]
 
     operations = [

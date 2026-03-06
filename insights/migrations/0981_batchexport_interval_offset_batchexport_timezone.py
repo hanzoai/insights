@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0980_team_default_experiment_confidence_level")]
+    dependencies = [("insights", "0980_team_default_experiment_confidence_level")]
 
     operations = [
         migrations.AddField(

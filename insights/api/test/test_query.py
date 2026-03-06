@@ -651,17 +651,17 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(response.results), 15)
 
     @patch("insights.api.query.process_query_model")
-    def test_query_limit_context_posthog_ai(self, mock_process_query_model):
+    def test_query_limit_context_insights_ai(self, mock_process_query_model):
         mock_process_query_model.return_value = {"results": []}
         self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {
                 "query": {"kind": "InsightsQLQuery", "query": "select 1"},
-                "limit_context": "posthog_ai",
+                "limit_context": "insights_ai",
             },
         )
         mock_process_query_model.assert_called_once()
-        self.assertEqual(mock_process_query_model.call_args[1]["limit_context"], LimitContext.POSTHOG_AI)
+        self.assertEqual(mock_process_query_model.call_args[1]["limit_context"], LimitContext.INSIGHTS_AI)
 
     @patch("insights.api.query.process_query_model")
     def test_query_limit_context_default(self, mock_process_query_model):

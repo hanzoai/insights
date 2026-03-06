@@ -84,7 +84,7 @@ import {
 import { getRandomThinkingMessage } from './utils/thinkingMessages'
 
 /** Key for persisting pending AI prompts across page reloads (e.g., OAuth redirects) */
-export const PENDING_AI_PROMPT_KEY = 'posthog_ai_pending_prompt'
+export const PENDING_AI_PROMPT_KEY = 'insights_ai_pending_prompt'
 
 export type MessageStatus = 'loading' | 'completed' | 'error'
 
@@ -1223,7 +1223,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
 
         queueingEnabled: [
             (s) => [s.featureFlags],
-            (featureFlags): boolean => !!featureFlags[FEATURE_FLAGS.POSTHOG_AI_QUEUE_MESSAGES_SYSTEM],
+            (featureFlags): boolean => !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM],
         ],
 
         queueIsFull: [

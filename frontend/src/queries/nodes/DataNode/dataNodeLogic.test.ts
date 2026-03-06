@@ -600,7 +600,7 @@ describe('dataNodeLogic', () => {
         logic = dataNodeLogic({
             key: 'key',
             query,
-            limitContext: 'posthog_ai',
+            limitContext: 'insights_ai',
         })
         logic.mount()
 
@@ -613,7 +613,7 @@ describe('dataNodeLogic', () => {
             undefined,
             undefined,
             false,
-            'posthog_ai'
+            'insights_ai'
         )
     })
 })

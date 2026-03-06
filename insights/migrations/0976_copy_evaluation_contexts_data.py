@@ -9,7 +9,7 @@ def copy_evaluation_settings(apps, schema_editor):
     This ensures existing team settings are preserved during the rename.
     Uses batching for safety on large tables.
     """
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     # Copy default_evaluation_environments_enabled -> default_evaluation_contexts_enabled
     # Only copy where the old field is True and the new field is not already True
@@ -28,7 +28,7 @@ def copy_evaluation_settings(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0975_add_evaluation_contexts_fields"),
+        ("insights", "0975_add_evaluation_contexts_fields"),
     ]
 
     operations = [

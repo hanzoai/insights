@@ -5,13 +5,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0420_alert"),
+        ("insights", "0420_alert"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql="""
-        update posthog_propertydefinition
+        update insights_propertydefinition
         set property_type = 'String', is_numerical=False
         where name LIKE '$survey_response%' and property_type = 'Numeric' and type = 1
             """,

@@ -8,13 +8,13 @@ from products.data_warehouse.backend.models import ExternalDataSchema as Externa
 def forwards(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute("""
-            select sch.id from posthog_externaldataschema sch
-            left join posthog_externaldatasource s on s.id = sch.source_id
+            select sch.id from insights_externaldataschema sch
+            left join insights_externaldatasource s on s.id = sch.source_id
             where s.source_type = 'Stripe' and sch.should_sync is true and sch.deleted is false and sch.sync_type = 'append' and not (sync_type_config ? 'incremental_field')
         """)
         stripe_schemas = cursor.fetchall()
 
-    ExternalDataSchema: ExternalDataSchemaModel = apps.get_model("posthog", "ExternalDataSchema")
+    ExternalDataSchema: ExternalDataSchemaModel = apps.get_model("insights", "ExternalDataSchema")
 
     for (id,) in stripe_schemas:
         schema = ExternalDataSchema.objects.get(id=id)
@@ -29,7 +29,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0793_team_feature_flag_confirmation"),
+        ("insights", "0793_team_feature_flag_confirmation"),
     ]
 
     operations = [migrations.RunPython(forwards, reverse)]

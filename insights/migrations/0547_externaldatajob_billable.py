@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0546_update_creation_mode_on_generated_dashboards"),
+        ("insights", "0546_update_creation_mode_on_generated_dashboards"),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            UPDATE posthog_externaldatajob
+            UPDATE insights_externaldatajob
             SET billable = CASE
                 WHEN pipeline_version = 'v2-non-dlt' THEN false
                 ELSE true

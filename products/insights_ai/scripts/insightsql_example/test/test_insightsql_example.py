@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from unittest.mock import MagicMock, patch
 
-import products.posthog_ai.scripts.insightsql_example as insightsql_example_module
-from products.posthog_ai.scripts.insightsql_example import render_insightsql_example
+import products.insights_ai.scripts.insightsql_example as insightsql_example_module
+from products.insights_ai.scripts.insightsql_example import render_insightsql_example
 
 SAMPLE_QUERY = {"kind": "TrendsQuery", "series": [{"kind": "EventsNode", "event": "$pageview"}]}
 

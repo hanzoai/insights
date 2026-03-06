@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0699_alter_integration_kind"),
+        ("insights", "0699_alter_integration_kind"),
     ]
 
     operations = [
@@ -47,10 +47,10 @@ class Migration(migrations.Migration):
                 (
                     "saved_query",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.datawarehousesavedquery"
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.datawarehousesavedquery"
                     ),
                 ),
-                ("team", models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.team")),
+                ("team", models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.team")),
             ],
             options={
                 "abstract": False,

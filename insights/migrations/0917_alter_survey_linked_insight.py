@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for CREATE INDEX CONCURRENTLY
 
     dependencies = [
-        ("posthog", "0916_alter_userproductlist_reason"),
+        ("insights", "0916_alter_userproductlist_reason"),
     ]
 
     operations = [
@@ -24,17 +24,17 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_insight",
                         related_query_name="survey_linked_insight",
-                        to="posthog.insight",
+                        to="insights.insight",
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY IF NOT EXISTS "posthog_survey_linked_insight_id_586524f3" ON "posthog_survey" ("linked_insight_id"); -- existing-table-constraint-ignore
+                    CREATE INDEX CONCURRENTLY IF NOT EXISTS "insights_survey_linked_insight_id_586524f3" ON "insights_survey" ("linked_insight_id"); -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_survey_linked_insight_id_586524f3";
+                        DROP INDEX IF EXISTS "insights_survey_linked_insight_id_586524f3";
                     """,
                 ),
             ],

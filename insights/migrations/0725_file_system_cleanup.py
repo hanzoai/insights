@@ -8,24 +8,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0724_errortrackinggroupingrule"),
+        ("insights", "0724_errortrackinggroupingrule"),
     ]
     operations = [
         RemoveIndexConcurrently(
             model_name="filesystem",
-            name="posthog_fil_project_840481_idx",
+            name="insights_fil_project_840481_idx",
         ),
         RemoveIndexConcurrently(
             model_name="filesystem",
-            name="posthog_fs_project_path",
+            name="insights_fs_project_path",
         ),
         RemoveIndexConcurrently(
             model_name="filesystem",
-            name="posthog_fs_project_depth",
+            name="insights_fs_project_depth",
         ),
         RemoveIndexConcurrently(
             model_name="filesystem",
-            name="posthog_fs_project_typeref",
+            name="insights_fs_project_typeref",
         ),
         migrations.AlterField(
             model_name="filesystem",
@@ -34,14 +34,14 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="filesystem",
-            index=models.Index(models.F("team_id"), models.F("path"), name="posthog_fs_team_path"),
+            index=models.Index(models.F("team_id"), models.F("path"), name="insights_fs_team_path"),
         ),
         AddIndexConcurrently(
             model_name="filesystem",
-            index=models.Index(models.F("team_id"), models.F("depth"), name="posthog_fs_team_depth"),
+            index=models.Index(models.F("team_id"), models.F("depth"), name="insights_fs_team_depth"),
         ),
         AddIndexConcurrently(
             model_name="filesystem",
-            index=models.Index(models.F("team_id"), models.F("type"), models.F("ref"), name="posthog_fs_team_typeref"),
+            index=models.Index(models.F("team_id"), models.F("type"), models.F("ref"), name="insights_fs_team_typeref"),
         ),
     ]

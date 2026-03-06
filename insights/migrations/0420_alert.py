@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0419_remove_organization_available_features"),
+        ("insights", "0419_remove_organization_available_features"),
     ]
 
     operations = [
@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=100)),
                 ("target_value", models.TextField()),
                 ("anomaly_condition", models.JSONField(default=dict)),
-                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.insight")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.insight")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
     ]

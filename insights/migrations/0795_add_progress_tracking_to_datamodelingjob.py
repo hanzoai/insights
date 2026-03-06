@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0794_fix_stripe_tables"),
+        ("insights", "0794_fix_stripe_tables"),
     ]
 
     operations = [

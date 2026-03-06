@@ -8,7 +8,7 @@ from insights.constants import TREND_FILTER_TYPE_ACTIONS
 
 
 def move_funnel_steps(apps, schema_editor):
-    Funnel = apps.get_model("posthog", "Funnel")
+    Funnel = apps.get_model("insights", "Funnel")
     for funnel in Funnel.objects.all():
         funnel.filters = {
             "actions": [
@@ -34,7 +34,7 @@ def revert_funnel_steps(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0043_slack_webhooks"),
+        ("insights", "0043_slack_webhooks"),
     ]
 
     operations = [

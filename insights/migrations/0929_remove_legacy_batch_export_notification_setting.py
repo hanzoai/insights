@@ -22,20 +22,20 @@ def remove_legacy_notification_key(apps, schema_editor):
 
     To check affected users before running:
         SELECT id, email, partial_notification_settings, date_joined
-        FROM posthog_user
+        FROM insights_user
         WHERE partial_notification_settings ? 'batch_export_run_failure';
 
     To verify no new users are affected (should return 0):
-        SELECT COUNT(*) FROM posthog_user
+        SELECT COUNT(*) FROM insights_user
         WHERE partial_notification_settings ? 'batch_export_run_failure'
           AND date_joined > '2024-10-03';
 
     To fix manually if needed:
-        UPDATE posthog_user
+        UPDATE insights_user
         SET partial_notification_settings = partial_notification_settings - 'batch_export_run_failure'
         WHERE partial_notification_settings ? 'batch_export_run_failure';
     """
-    User = apps.get_model("posthog", "User")
+    User = apps.get_model("insights", "User")
     users_with_legacy_key = User.objects.filter(partial_notification_settings__has_key="batch_export_run_failure")
 
     for user in users_with_legacy_key.iterator():
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0928_add_team_require_evaluation_tags"),
+        ("insights", "0928_add_team_require_evaluation_tags"),
     ]
 
     operations = [

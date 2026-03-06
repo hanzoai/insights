@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0146_eventproperty_sync"),
+        ("insights", "0146_eventproperty_sync"),
     ]
 
     operations = [
@@ -54,18 +54,18 @@ class Migration(migrations.Migration):
                 ("instance_id", models.UUIDField()),
                 (
                     "plugin",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.plugin"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.plugin"),
                 ),
                 (
                     "plugin_config",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.pluginconfig",
+                        to="insights.pluginconfig",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
             model_name="pluginlogentry",
             index=models.Index(
                 fields=["plugin_config_id", "timestamp"],
-                name="posthog_plu_plugin__736133_idx",
+                name="insights_plu_plugin__736133_idx",
             ),
         ),
     ]

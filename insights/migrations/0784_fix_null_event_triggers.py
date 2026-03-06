@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    team_model = apps.get_model("posthog", "Team")
+    team_model = apps.get_model("insights", "Team")
 
     # this is a relatively small number of teams, so we don't need to worry about batching
     for team in team_model.objects.exclude(session_recording_event_trigger_config=None):
@@ -26,7 +26,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0783_remove_segment_engage_destinations"),
+        ("insights", "0783_remove_segment_engage_destinations"),
     ]
 
     operations = [

@@ -16,8 +16,8 @@ class Migration(AsyncMigrationDefinition):
     description = "Move partitions with data in the future or far in the past to a backup table so we can exclude this data from queries and delete it later."
 
     depends_on = "0009_minmax_indexes_for_materialized_columns"
-    posthog_min_version = "1.43.0"
-    posthog_max_version = "1.49.99"
+    insights_min_version = "1.43.0"
+    insights_max_version = "1.49.99"
 
     parameters = {
         "OLDEST_PARTITION_TO_KEEP": (
@@ -75,7 +75,7 @@ class Migration(AsyncMigrationDefinition):
                 database=AnalyticsDBMS.CLICKHOUSE,
                 sql=f"""
                 CREATE TABLE {backup_table_name}
-                ON CLUSTER 'posthog'
+                ON CLUSTER 'insights'
                 AS sharded_events
                 ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/posthog.{backup_table_name}', '{replica}', _timestamp)
                 PARTITION BY toYYYYMM(timestamp)

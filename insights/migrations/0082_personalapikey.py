@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0081_person_is_identified"),
+        ("insights", "0081_person_is_identified"),
     ]
 
     operations = [
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="personal_api_keys",
-                        to="posthog.Team",
+                        to="insights.Team",
                     ),
                 ),
                 (

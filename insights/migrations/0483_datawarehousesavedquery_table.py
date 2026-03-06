@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0482_alertconfiguration_calculation_interval_and_more"),
+        ("insights", "0482_alertconfiguration_calculation_interval_and_more"),
     ]
 
     operations = [
@@ -20,26 +20,26 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.datawarehousetable",
+                        to="insights.datawarehousetable",
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_datawarehousesavedquery" ADD COLUMN "table_id" uuid NULL CONSTRAINT "posthog_datawarehous_table_id_96fdb4f5_fk_posthog_d" REFERENCES "posthog_datawarehousetable"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_datawarehous_table_id_96fdb4f5_fk_posthog_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_datawarehousesavedquery" ADD COLUMN "table_id" uuid NULL CONSTRAINT "insights_datawarehous_table_id_96fdb4f5_fk_insights_d" REFERENCES "insights_datawarehousetable"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_datawarehous_table_id_96fdb4f5_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                    ALTER TABLE "posthog_datawarehousesavedquery" DROP COLUMN IF EXISTS "table_id";
+                    ALTER TABLE "insights_datawarehousesavedquery" DROP COLUMN IF EXISTS "table_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_datawarehousesavedquery_table_id_96fdb4f5" ON "posthog_datawarehousesavedquery" ("table_id");
+                    CREATE INDEX CONCURRENTLY "insights_datawarehousesavedquery_table_id_96fdb4f5" ON "insights_datawarehousesavedquery" ("table_id");
                     """,
                     reverse_sql="""
-                    DROP INDEX IF EXISTS "posthog_datawarehousesavedquery_table_id_96fdb4f5";
+                    DROP INDEX IF EXISTS "insights_datawarehousesavedquery_table_id_96fdb4f5";
                     """,
                 ),
             ],

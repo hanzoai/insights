@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0979_survey_enable_iframe_embedding"),
+        ("insights", "0979_survey_enable_iframe_embedding"),
     ]
 
     operations = [

@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0504_add_dead_clicks_setting"),
+        ("insights", "0504_add_dead_clicks_setting"),
     ]
 
     operations = [
@@ -17,24 +17,24 @@ class Migration(migrations.Migration):
                     model_name="grouptypemapping",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_grouptypemapping" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_grouptypemap_project_id_239c0515_fk_posthog_p" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "posthog_grouptypemap_project_id_239c0515_fk_posthog_p" IMMEDIATE;""",
+                    ALTER TABLE "insights_grouptypemapping" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_grouptypemap_project_id_239c0515_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+                    SET CONSTRAINTS "insights_grouptypemap_project_id_239c0515_fk_insights_p" IMMEDIATE;""",
                     reverse_sql="""
-                    ALTER TABLE "posthog_grouptypemapping" DROP COLUMN IF EXISTS "project_id";""",
+                    ALTER TABLE "insights_grouptypemapping" DROP COLUMN IF EXISTS "project_id";""",
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_grouptypemapping_project_id_239c0515" ON "posthog_grouptypemapping" ("project_id");""",
+                    CREATE INDEX CONCURRENTLY "insights_grouptypemapping_project_id_239c0515" ON "insights_grouptypemapping" ("project_id");""",
                     reverse_sql="""
-                    DROP INDEX IF EXISTS "posthog_grouptypemapping_project_id_239c0515";""",
+                    DROP INDEX IF EXISTS "insights_grouptypemapping_project_id_239c0515";""",
                 ),
             ],
         ),

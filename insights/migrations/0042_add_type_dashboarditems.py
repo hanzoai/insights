@@ -6,7 +6,7 @@ from insights.constants import TREND_FILTER_TYPE_ACTIONS, TREND_FILTER_TYPE_EVEN
 
 
 def update_filter_types(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for item in DashboardItem.objects.filter(filters__actions__isnull=False):
         new_actions = []
         for action in item.filters["actions"]:
@@ -20,7 +20,7 @@ def update_filter_types(apps, schema_editor):
 
 
 def reverse_filter_types(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for item in DashboardItem.objects.filter(filters__actions__isnull=False):
         old_actions = []
         for action in item.filters["actions"]:
@@ -34,7 +34,7 @@ def reverse_filter_types(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0041_merge_20200407_1805"),
+        ("insights", "0041_merge_20200407_1805"),
     ]
 
     operations = [migrations.RunPython(update_filter_types, reverse_filter_types, elidable=True)]

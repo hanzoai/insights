@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0716_backfill_team_revenue_analytics_config"),
+        ("insights", "0716_backfill_team_revenue_analytics_config"),
     ]
 
     operations = [
@@ -26,34 +26,34 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_errortrackingassignmentrule" ADD COLUMN "role_id" uuid NULL; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_errortrackingassignmentrule" ADD COLUMN "role_id" uuid NULL; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_errortrackingassignmentrule" DROP COLUMN IF EXISTS "role_id";
+                        ALTER TABLE "insights_errortrackingassignmentrule" DROP COLUMN IF EXISTS "role_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_errortrackingissueassignment" ADD COLUMN "role_id" uuid NULL; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_errortrackingissueassignment" ADD COLUMN "role_id" uuid NULL; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_errortrackingissueassignment" DROP COLUMN IF EXISTS "role_id";
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP COLUMN IF EXISTS "role_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_errortrackingassignmentrule_role_id_5faac145" ON "posthog_errortrackingassignmentrule" ("role_id");
+                    CREATE INDEX CONCURRENTLY "insights_errortrackingassignmentrule_role_id_5faac145" ON "insights_errortrackingassignmentrule" ("role_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_errortrackingassignmentrule_role_id_5faac145";
+                        DROP INDEX IF EXISTS "insights_errortrackingassignmentrule_role_id_5faac145";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_errortrackingissueassignment_role_id_f84c52d3" ON "posthog_errortrackingissueassignment" ("role_id");
+                    CREATE INDEX CONCURRENTLY "insights_errortrackingissueassignment_role_id_f84c52d3" ON "insights_errortrackingissueassignment" ("role_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_errortrackingissueassignment_role_id_f84c52d3";
+                        DROP INDEX IF EXISTS "insights_errortrackingissueassignment_role_id_f84c52d3";
                     """,
                 ),
             ],

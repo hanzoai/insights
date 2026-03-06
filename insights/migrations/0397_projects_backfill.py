@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0396_projects_and_environments"),
+        ("insights", "0396_projects_and_environments"),
     ]
 
     operations = [
@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     sql="""
                     -- For each team without a parent project, create such a project
-                    INSERT INTO posthog_project (id, name, created_at, organization_id)
+                    INSERT INTO insights_project (id, name, created_at, organization_id)
                     SELECT id, name, created_at, organization_id
-                    FROM posthog_team
+                    FROM insights_team
                     WHERE project_id IS NULL;
                     -- At this point, all teams have a parent project, so we can safely set project_id on every team
-                    UPDATE posthog_team
+                    UPDATE insights_team
                     SET project_id = id;""",
                     reverse_sql=migrations.RunSQL.noop,
                 )
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="teams",
                         related_query_name="team",
-                        to="posthog.project",
+                        to="insights.project",
                     ),
                 ),
             ],

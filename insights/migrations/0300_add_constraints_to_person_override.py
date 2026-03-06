@@ -14,12 +14,12 @@ CREATE OR REPLACE FUNCTION is_override_person_not_used_as_old_person(team_id big
 RETURNS BOOLEAN AS $$
   SELECT NOT EXISTS (
     SELECT 1
-      FROM "posthog_personoverride"
+      FROM "insights_personoverride"
       WHERE team_id = $1
       AND override_person_id = $3
     ) AND NOT EXISTS (
         SELECT 1
-      FROM "posthog_personoverride"
+      FROM "insights_personoverride"
       WHERE team_id = $1
       AND old_person_id = $2
     );
@@ -32,7 +32,7 @@ DROP_FUNCTION_FOR_CONSTRAINT_SQL = "DROP FUNCTION is_override_person_not_used_as
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0299_set_templates_global"),
+        ("insights", "0299_set_templates_global"),
     ]
 
     operations = [

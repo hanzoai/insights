@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0999_remove_presorted_events_modifier"),
+        ("insights", "0999_remove_presorted_events_modifier"),
     ]
 
     operations = [
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="health_issues",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
