@@ -1,5 +1,5 @@
 import { StreamProducerWrapper } from '../../stream/producer'
-import { ClickHouseTimestamp } from '../../types'
+import { DatastoreTimestamp } from '../../types'
 import { logger } from '../../utils/logger'
 import { ConsoleLogLevel } from '../rrweb-types'
 import { SessionBatchMetrics } from './metrics'
@@ -11,7 +11,7 @@ export type ConsoleLogEntry = {
     log_source: 'session_replay'
     log_source_id: string
     instance_id: string | null
-    timestamp: ClickHouseTimestamp
+    timestamp: DatastoreTimestamp
     batch_id: string
 }
 

@@ -4,7 +4,7 @@ import { Message } from 'node-rdkafka'
 
 import { insertRow } from '~/tests/helpers/sql'
 
-import { ClickHousePerson, ClickHouseTimestamp, ProjectId, RawClickHouseEvent, Team } from '../../types'
+import { DatastorePerson, DatastoreTimestamp, ProjectId, RawDatastoreEvent, Team } from '../../types'
 import { PostgresRouter } from '../../utils/db/postgres'
 import { UUIDT } from '../../utils/utils'
 import { CohortMembershipChange } from '../consumers/cdp-cohort-membership.consumer'
@@ -68,18 +68,18 @@ export const createIntegration = (integration: Partial<IntegrationType>) => {
     return item
 }
 
-export const createIncomingEvent = (teamId: number, data: Partial<RawClickHouseEvent>): RawClickHouseEvent => {
+export const createIncomingEvent = (teamId: number, data: Partial<RawDatastoreEvent>): RawDatastoreEvent => {
     return {
         team_id: teamId,
         project_id: teamId as ProjectId,
-        created_at: new Date().toISOString() as ClickHouseTimestamp,
+        created_at: new Date().toISOString() as DatastoreTimestamp,
         elements_chain: '[]',
-        person_created_at: new Date().toISOString() as ClickHouseTimestamp,
+        person_created_at: new Date().toISOString() as DatastoreTimestamp,
         person_properties: '{}',
         distinct_id: 'distinct_id_1',
         uuid: randomUUID(),
         event: '$pageview',
-        timestamp: new Date().toISOString() as ClickHouseTimestamp,
+        timestamp: new Date().toISOString() as DatastoreTimestamp,
         properties: '{}',
         person_mode: 'full',
         historical_migration: false,
@@ -113,7 +113,7 @@ export const createInternalEvent = (teamId: number, data: Partial<CdpInternalEve
     }
 }
 
-export const createClickhousePerson = (teamId: number, data: Partial<ClickHousePerson>): ClickHousePerson => {
+export const createDatastorePerson = (teamId: number, data: Partial<DatastorePerson>): DatastorePerson => {
     return {
         team_id: teamId,
         id: randomUUID(),
@@ -212,7 +212,7 @@ export const insertIntegration = async (
     team_id: Team['id'],
     integration: Partial<IntegrationType> = {}
 ): Promise<IntegrationType> => {
-    const res = await insertRow(postgres, 'posthog_integration', {
+    const res = await insertRow(postgres, 'insights_integration', {
         ...createIntegration({
             ...integration,
             team_id: team_id,

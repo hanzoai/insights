@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { StreamProducerWrapper } from '../../../stream/producer'
 import { Team } from '../../../types'

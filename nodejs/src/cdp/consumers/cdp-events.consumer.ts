@@ -6,7 +6,7 @@ import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
 import { STREAM_EVENTS_JSON } from '../../config/stream-topics'
 import { StreamConsumer } from '../../stream/consumer'
-import { HealthCheckResult, Hub, PluginsServerConfig, RawClickHouseEvent } from '../../types'
+import { HealthCheckResult, Hub, PluginsServerConfig, RawDatastoreEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { captureException } from '../../utils/insights'
@@ -380,19 +380,19 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawClickHouseEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.scriptTypes),
-                        this.insightsFlowManager.getInsightsFlowsForTeam(clickHouseEvent.team_id),
-                        this.hub.teamManager.getTeam(clickHouseEvent.team_id),
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(datastoreEvent.team_id, this.scriptTypes),
+                        this.insightsFlowManager.getInsightsFlowsForTeam(datastoreEvent.team_id),
+                        this.hub.teamManager.getTeam(datastoreEvent.team_id),
                     ])
 
                     if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

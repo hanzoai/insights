@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ProcessedPluginEvent, RetryError } from '@posthog/plugin-scaffold'
+import { ProcessedPluginEvent, RetryError } from '@hanzo/plugin-scaffold'
 
 import { LegacyDestinationPluginMeta } from '../../types'
 
@@ -92,7 +92,7 @@ export const onEvent = async (
                     throw new RetryError(`Server error: ${res.status}`)
                 } else {
                     // node-fetch handles 300s internaly, so we're left with 400s here: skip the batch and move forward
-                    // We might have old events in ClickHouse that don't pass new stricter checks, don't fail the whole export if that happens
+                    // We might have old events in datastore that don't pass new stricter checks, don't fail the whole export if that happens
                     logger.warn(`Skipping ${batchDescription}, rejected by ${config.host}: ${res.status}`)
                 }
             },

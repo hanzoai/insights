@@ -4,7 +4,7 @@ import { InternalCaptureEvent } from '~/common/services/internal-capture'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
 import { Hub, TimestampFormat } from '../../../types'
-import { safeClickhouseString } from '../../../utils/db/utils'
+import { safeDatastoreString } from '../../../utils/db/utils'
 import { logger } from '../../../utils/logger'
 import { captureException } from '../../../utils/insights'
 import { castTimestampOrNow } from '../../../utils/utils'
@@ -81,7 +81,7 @@ export class InsightsFunctionMonitoringService {
 
         await Promise.all([
             ...messages.map((x) => {
-                const value = x.value ? Buffer.from(safeClickhouseString(JSON.stringify(x.value))) : null
+                const value = x.value ? Buffer.from(safeDatastoreString(JSON.stringify(x.value))) : null
                 return this.hub.streamProducer
                     .produce({
                         topic: x.topic,
@@ -116,7 +116,7 @@ export class InsightsFunctionMonitoringService {
         const appMetric: AppMetricType = {
             app_source: source,
             ...metric,
-            timestamp: castTimestampOrNow(null, TimestampFormat.ClickHouse),
+            timestamp: castTimestampOrNow(null, TimestampFormat.Datastore),
         }
 
         counterInsightsFunctionMetric.labels(metric.metric_kind, metric.metric_name).inc(appMetric.count)

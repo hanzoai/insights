@@ -113,7 +113,7 @@ export class LogsIngestionConsumer {
 
     protected groupId: string
     protected topic: string
-    protected clickhouseTopic: string
+    protected datastoreTopic: string
     protected overflowTopic?: string
     protected dlqTopic?: string
 
@@ -124,7 +124,7 @@ export class LogsIngestionConsumer {
         // The group and topic are configurable allowing for multiple ingestion consumers to be run in parallel
         this.groupId = overrides.LOGS_INGESTION_CONSUMER_GROUP_ID ?? hub.LOGS_INGESTION_CONSUMER_GROUP_ID
         this.topic = overrides.LOGS_INGESTION_CONSUMER_CONSUME_TOPIC ?? hub.LOGS_INGESTION_CONSUMER_CONSUME_TOPIC
-        this.clickhouseTopic =
+        this.datastoreTopic =
             overrides.LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC ?? hub.LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC
         this.overflowTopic =
             overrides.LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC ?? hub.LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC
@@ -312,7 +312,7 @@ export class LogsIngestionConsumer {
                     const processedValue = await processLogMessageBuffer(message.message.value, logsSettings)
 
                     return this.streamProducer!.produce({
-                        topic: this.clickhouseTopic,
+                        topic: this.datastoreTopic,
                         value: processedValue,
                         key: null,
                         headers: {
@@ -376,7 +376,7 @@ export class LogsIngestionConsumer {
             return
         }
 
-        const timestamp = castTimestampOrNow(null, TimestampFormat.ClickHouse)
+        const timestamp = castTimestampOrNow(null, TimestampFormat.Datastore)
 
         const metricsPromises: Promise<void>[] = []
         for (const [teamId, stats] of usageStats) {

@@ -1,14 +1,14 @@
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { Element, Person, PersonMode, PreIngestionEvent, RawStreamEvent, TimestampFormat } from '../../types'
-import { safeClickhouseString } from '../../utils/db/utils'
+import { safeDatastoreString } from '../../utils/db/utils'
 import { elementsToString, extractElements } from '../../utils/elements-chain'
 import { logger } from '../../utils/logger'
 import { captureException } from '../../utils/insights'
-import { castTimestampOrNow, castTimestampToClickhouseFormat } from '../../utils/utils'
+import { castTimestampOrNow, castTimestampToDatastoreFormat } from '../../utils/utils'
 import { MAX_GROUP_TYPES_PER_TEAM } from './group-type-manager'
 
 const elementsOrElementsChainCounter = new Counter({
@@ -20,8 +20,8 @@ const elementsOrElementsChainCounter = new Counter({
 export function getElementsChain(properties: Properties): string {
     /*
     We're deprecating $elements in favor of $elements_chain, which doesn't require extra
-    processing on the ingestion side and is the way we store elements in ClickHouse.
-    As part of that we'll move posthog-js to send us $elements_chain as string directly,
+    processing on the ingestion side and is the way we store elements in datastore.
+    As part of that we'll move insights-js to send us $elements_chain as string directly,
     but we still need to support the old way of sending $elements and converting them
     to $elements_chain, while everyone hasn't upgraded.
     */
@@ -91,21 +91,21 @@ export function createEvent(
 
     const rawEvent: RawStreamEvent = {
         uuid,
-        event: safeClickhouseString(event),
+        event: safeDatastoreString(event),
         properties: JSON.stringify(properties ?? {}),
-        timestamp: castTimestampOrNow(timestamp, TimestampFormat.ClickHouse),
+        timestamp: castTimestampOrNow(timestamp, TimestampFormat.Datastore),
         team_id: teamId,
         project_id: projectId,
-        distinct_id: safeClickhouseString(distinctId),
-        elements_chain: safeClickhouseString(elementsChain),
-        created_at: castTimestampOrNow(null, TimestampFormat.ClickHouse),
+        distinct_id: safeDatastoreString(distinctId),
+        elements_chain: safeDatastoreString(elementsChain),
+        created_at: castTimestampOrNow(null, TimestampFormat.Datastore),
         captured_at:
             capturedAt !== null
-                ? castTimestampToClickhouseFormat(DateTime.fromJSDate(capturedAt), TimestampFormat.ClickHouse)
+                ? castTimestampToDatastoreFormat(DateTime.fromJSDate(capturedAt), TimestampFormat.Datastore)
                 : null,
         person_id: person.uuid,
         person_properties: eventPersonProperties,
-        person_created_at: castTimestampOrNow(person.created_at, TimestampFormat.ClickHouseSecondPrecision),
+        person_created_at: castTimestampOrNow(person.created_at, TimestampFormat.DatastoreSecondPrecision),
         person_mode: personMode,
         // Only include historical_migration when true to avoid bloating messages
         ...(historicalMigration ? { historical_migration: true } : {}),

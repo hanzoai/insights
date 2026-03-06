@@ -9,7 +9,7 @@ export type ScriptRateLimiterServiceHub = Pick<
 >
 
 export const BASE_REDIS_KEY =
-    process.env.NODE_ENV == 'test' ? '@insights-test/script-rate-limiter' : '@posthog/script-rate-limiter'
+    process.env.NODE_ENV == 'test' ? '@insights-test/script-rate-limiter' : '@hanzo/script-rate-limiter'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
 
 export type ScriptRateLimit = {

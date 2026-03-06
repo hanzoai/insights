@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { Insights } from 'hanzo-insights-node'
 
 import { defaultConfig } from '../config/config'
 import { Team } from '../types'
@@ -6,7 +6,7 @@ import { Team } from '../types'
 const fs = require('fs')
 
 const client = defaultConfig.INSIGHTS_API_KEY
-    ? new PostHog(defaultConfig.INSIGHTS_API_KEY, {
+    ? new Insights(defaultConfig.INSIGHTS_API_KEY, {
           host: defaultConfig.INSIGHTS_HOST_URL,
           enableExceptionAutocapture: false, // TODO - disabled while data volume is a problem, PS seems /extremely/ chatty exceptions wise
       })

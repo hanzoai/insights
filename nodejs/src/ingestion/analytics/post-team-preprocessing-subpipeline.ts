@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { processPersonlessDistinctIdsBatchStep } from '~/worker/ingestion/event-pipeline/processPersonlessDistinctIdsBatchStep'
 

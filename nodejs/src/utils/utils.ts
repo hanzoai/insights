@@ -3,9 +3,9 @@ import { DateTime } from 'luxon'
 import { Pool } from 'pg'
 import { Readable } from 'stream'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
-import { ClickHouseTimestamp, ClickHouseTimestampSecondPrecision, ISOTimestamp, TimestampFormat } from '../types'
+import { DatastoreTimestamp, DatastoreTimestampSecondPrecision, ISOTimestamp, TimestampFormat } from '../types'
 import { logger } from './logger'
 import { captureException } from './insights'
 
@@ -291,8 +291,8 @@ export class UUID7 extends UUID {
 }
 
 /* Format timestamps.
-Allowed timestamp formats support ISO and ClickHouse formats according to
-`timestampFormat`. This distinction is relevant because ClickHouse does NOT
+Allowed timestamp formats support ISO and datastore formats according to
+`timestampFormat`. This distinction is relevant because datastore does NOT
  necessarily accept all possible ISO timestamps. */
 export function castTimestampOrNow(
     timestamp?: DateTime | string | null,
@@ -300,51 +300,51 @@ export function castTimestampOrNow(
 ): ISOTimestamp
 export function castTimestampOrNow(
     timestamp: DateTime | string | null,
-    timestampFormat: TimestampFormat.ClickHouse
-): ClickHouseTimestamp
+    timestampFormat: TimestampFormat.Datastore
+): DatastoreTimestamp
 export function castTimestampOrNow(
     timestamp: DateTime | string | null,
-    timestampFormat: TimestampFormat.ClickHouseSecondPrecision
-): ClickHouseTimestampSecondPrecision
+    timestampFormat: TimestampFormat.DatastoreSecondPrecision
+): DatastoreTimestampSecondPrecision
 export function castTimestampOrNow(
     timestamp?: DateTime | string | null,
     timestampFormat: TimestampFormat = TimestampFormat.ISO
-): ISOTimestamp | ClickHouseTimestamp | ClickHouseTimestampSecondPrecision {
+): ISOTimestamp | DatastoreTimestamp | DatastoreTimestampSecondPrecision {
     if (!timestamp) {
         timestamp = DateTime.utc()
     } else if (typeof timestamp === 'string') {
         timestamp = DateTime.fromISO(timestamp)
     }
 
-    return castTimestampToClickhouseFormat(timestamp, timestampFormat)
+    return castTimestampToDatastoreFormat(timestamp, timestampFormat)
 }
 
 const DATETIME_FORMAT_DATASTORE_SECOND_PRECISION = 'yyyy-MM-dd HH:mm:ss'
-const DATETIME_FORMAT_CLICKHOUSE = 'yyyy-MM-dd HH:mm:ss.u'
+const DATETIME_FORMAT_DATASTORE = 'yyyy-MM-dd HH:mm:ss.u'
 
-export function castTimestampToClickhouseFormat(timestamp: DateTime, timestampFormat: TimestampFormat.ISO): ISOTimestamp
-export function castTimestampToClickhouseFormat(
+export function castTimestampToDatastoreFormat(timestamp: DateTime, timestampFormat: TimestampFormat.ISO): ISOTimestamp
+export function castTimestampToDatastoreFormat(
     timestamp: DateTime,
-    timestampFormat: TimestampFormat.ClickHouse
-): ClickHouseTimestamp
-export function castTimestampToClickhouseFormat(
+    timestampFormat: TimestampFormat.Datastore
+): DatastoreTimestamp
+export function castTimestampToDatastoreFormat(
     timestamp: DateTime,
-    timestampFormat: TimestampFormat.ClickHouseSecondPrecision
-): ClickHouseTimestampSecondPrecision
-export function castTimestampToClickhouseFormat(
+    timestampFormat: TimestampFormat.DatastoreSecondPrecision
+): DatastoreTimestampSecondPrecision
+export function castTimestampToDatastoreFormat(
     timestamp: DateTime,
     timestampFormat: TimestampFormat
-): ISOTimestamp | ClickHouseTimestamp | ClickHouseTimestampSecondPrecision
-export function castTimestampToClickhouseFormat(
+): ISOTimestamp | DatastoreTimestamp | DatastoreTimestampSecondPrecision
+export function castTimestampToDatastoreFormat(
     timestamp: DateTime,
     timestampFormat: TimestampFormat = TimestampFormat.ISO
-): ISOTimestamp | ClickHouseTimestamp | ClickHouseTimestampSecondPrecision {
+): ISOTimestamp | DatastoreTimestamp | DatastoreTimestampSecondPrecision {
     timestamp = timestamp.toUTC()
     switch (timestampFormat) {
-        case TimestampFormat.ClickHouseSecondPrecision:
-            return timestamp.toFormat(DATETIME_FORMAT_DATASTORE_SECOND_PRECISION) as ClickHouseTimestampSecondPrecision
-        case TimestampFormat.ClickHouse:
-            return timestamp.toFormat(DATETIME_FORMAT_CLICKHOUSE) as ClickHouseTimestamp
+        case TimestampFormat.DatastoreSecondPrecision:
+            return timestamp.toFormat(DATETIME_FORMAT_DATASTORE_SECOND_PRECISION) as DatastoreTimestampSecondPrecision
+        case TimestampFormat.Datastore:
+            return timestamp.toFormat(DATETIME_FORMAT_DATASTORE) as DatastoreTimestamp
         case TimestampFormat.ISO:
             return timestamp.toUTC().toISO() as ISOTimestamp
         default:
@@ -352,16 +352,16 @@ export function castTimestampToClickhouseFormat(
     }
 }
 
-// Used only when parsing clickhouse timestamps
-export function clickHouseTimestampToDateTime(timestamp: ClickHouseTimestamp): DateTime {
-    return DateTime.fromFormat(timestamp, DATETIME_FORMAT_CLICKHOUSE, { zone: 'UTC' })
+// Used only when parsing datastore timestamps
+export function datastoreTimestampToDateTime(timestamp: DatastoreTimestamp): DateTime {
+    return DateTime.fromFormat(timestamp, DATETIME_FORMAT_DATASTORE, { zone: 'UTC' })
 }
 
-export function clickHouseTimestampToISO(timestamp: ClickHouseTimestamp): ISOTimestamp {
-    return clickHouseTimestampToDateTime(timestamp).toISO() as ISOTimestamp
+export function datastoreTimestampToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
+    return datastoreTimestampToDateTime(timestamp).toISO() as ISOTimestamp
 }
 
-export function clickHouseTimestampSecondPrecisionToISO(timestamp: ClickHouseTimestamp): ISOTimestamp {
+export function datastoreTimestampSecondPrecisionToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
     return DateTime.fromFormat(timestamp, DATETIME_FORMAT_DATASTORE_SECOND_PRECISION, {
         zone: 'UTC',
     }).toISO() as ISOTimestamp
@@ -379,9 +379,9 @@ export function sanitizeSqlIdentifier(unquotedIdentifier: string): string {
 }
 
 /** Escape single quotes and slashes */
-export function escapeClickHouseString(string: string): string {
+export function escapeDatastoreString(string: string): string {
     // In string literals, you need to escape at least `'` and `\`.
-    // https://clickhouse.tech/docs/en/sql-reference/syntax/
+    // https://clickhouse.com/docs/en/sql-reference/syntax/
     return string.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 }
 
@@ -577,7 +577,7 @@ export const KNOWN_LIB_VALUES = new Set([
     'insights-python',
     '',
     'js',
-    'posthog-node',
+    'hanzo-insights-node',
     'insights-react-native',
     'insights-ruby',
     'insights-ios',

@@ -1,4 +1,4 @@
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { aiCostModalityExtractionCounter } from '../metrics'
 
@@ -156,7 +156,7 @@ export const extractModalityTokens = (event: EventWithProperties): EventWithProp
             aiCostModalityExtractionCounter.labels({ status: 'no_details' }).inc()
         }
     } finally {
-        // CRITICAL: Always delete $ai_usage to prevent it from being stored in ClickHouse
+        // CRITICAL: Always delete $ai_usage to prevent it from being stored in datastore
         // This must happen regardless of whether extraction succeeds or fails
         delete event.properties['$ai_usage']
     }
