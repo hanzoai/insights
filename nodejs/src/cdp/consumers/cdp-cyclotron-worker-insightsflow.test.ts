@@ -8,7 +8,7 @@ import { PostgresPersonRepository } from '~/worker/ingestion/persons/repositorie
 
 import { Hub, InternalPerson, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { createInsightsFlowInvocationContext, insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import {
     CyclotronJobInvocation,
@@ -16,7 +16,7 @@ import {
     CyclotronJobInvocationResult,
     InsightsFlowInvocationContext,
 } from '../types'
-import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-customflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-insightsflow.consumer'
 
 jest.setTimeout(1000)
 
