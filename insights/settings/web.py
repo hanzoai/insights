@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "django.contrib.staticfiles",
     "insights.apps.InsightsConfig",
+    "insights.models.rbac.apps.EEConfig",
     "rest_framework",
     "loginas",
     "corsheaders",
