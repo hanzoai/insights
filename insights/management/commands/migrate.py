@@ -40,7 +40,7 @@ def get_managed_apps() -> set[str]:
         return get_managed_app_names(Path(settings.BASE_DIR))
     except Exception as e:
         warnings.warn(f"Could not scan product apps for migrations: {e}", stacklevel=2)
-        return {"posthog", "ee", "rbac"}
+        return {"insights", "rbac"}
 
 
 def get_app_migrations_dir(app_label: str) -> Path | None:

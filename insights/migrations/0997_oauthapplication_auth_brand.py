@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
             model_name="oauthapplication",
             name="auth_brand",
             field=models.CharField(
-                choices=[("insights", "posthog"), ("twig", "twig")],
+                choices=[("posthog", "posthog"), ("twig", "twig")],
                 default="posthog",
                 help_text="Branding to use on authentication pages",
                 max_length=32,
