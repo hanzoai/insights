@@ -78,6 +78,11 @@ from products.user_interviews.backend.api import UserInterviewViewSet
 from products.workflows.backend.api import MessageCategoryViewSet, MessagePreferencesViewSet, MessageTemplatesViewSet
 
 
+# Stub for ee/api/session_summaries.py (removed with ee/)
+class SessionGroupSummaryViewSet(viewsets.GenericViewSet):
+    pass
+
+
 from ..heatmaps.heatmaps_api import HeatmapScreenshotViewSet, HeatmapViewSet, LegacyHeatmapViewSet, SavedHeatmapViewSet
 from ..session_recordings.session_recording_api import SessionRecordingViewSet
 from ..session_recordings.session_recording_external_reference_api import SessionRecordingExternalReferenceViewSet
