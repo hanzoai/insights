@@ -11,10 +11,10 @@ from insights.insightsql.errors import QueryError
 from insights.insightsql.parser import parse_program
 from insights.insightsql.visitor import Visitor
 
-from common.hogvm.python.execute import BytecodeResult, execute_bytecode
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_VERSION, Operation
-from common.hogvm.python.stl import STL
-from common.hogvm.python.stl.bytecode import BYTECODE_STL
+from common.scriptvm.python.execute import BytecodeResult, execute_bytecode
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_VERSION, Operation
+from common.scriptvm.python.stl import STL
+from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
 if TYPE_CHECKING:
     from insights.models import Team

@@ -306,18 +306,18 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
             self.save()
 
         # Auto-assign default role if configured
-        if organization.default_role_id:
+        if organization.default_role_id_legacy:
             try:
 
                 RoleMembership.objects.create(
-                    role_id=organization.default_role_id, user=self, organization_member=membership
+                    role_id=organization.default_role_id_legacy, user=self, organization_member=membership
                 )
             except Exception as e:
                 capture_exception(
                     e,
                     {
                         "organization_id": organization.id,
-                        "role_id": organization.default_role_id,
+                        "role_id": organization.default_role_id_legacy,
                         "context": "default_role_assignment",
                         "tag": "platform-features",
                     },

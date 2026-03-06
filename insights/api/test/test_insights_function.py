@@ -18,7 +18,7 @@ from insights.models.action.action import Action
 from insights.models.insights_function_template import InsightsFunctionTemplate
 from insights.models.insights_functions.insights_function import DEFAULT_STATE, InsightsFunction, InsightsFunctionState
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION, Operation
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION, Operation
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 geoip_template = MOCK_NODE_TEMPLATES[2]

@@ -3906,7 +3906,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
         [
             ("ExposedCHQueryError", "insights.errors.ExposedCHQueryError", "NO_COMMON_TYPE error from ClickHouse"),
             ("ExposedInsightsQLError", "insights.insightsql.errors.ExposedInsightsQLError", "Invalid InsightsQL syntax"),
-            ("HogVMException", "common.hogvm.python.utils.HogVMException", "Global variable not found: variables"),
+            ("HogVMException", "common.scriptvm.python.utils.HogVMException", "Global variable not found: variables"),
         ]
     )
     @patch("insights.caching.calculate_results.calculate_for_query_based_insight")
@@ -3917,7 +3917,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.hogvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import HogVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,
@@ -3955,7 +3955,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.hogvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import HogVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,
@@ -3988,7 +3988,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.hogvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import HogVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,

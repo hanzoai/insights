@@ -14,8 +14,8 @@ from insights.cdp.validation import compile_script
 from insights.models import InsightsFunction
 from insights.models.utils import uuid7
 
-from common.hogvm.python.execute import execute_bytecode
-from common.hogvm.python.stl import now
+from common.scriptvm.python.execute import execute_bytecode
+from common.scriptvm.python.stl import now
 
 
 def mock_transpile(code: str, type: str = "site") -> str:

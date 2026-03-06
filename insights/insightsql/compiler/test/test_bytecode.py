@@ -5,7 +5,7 @@ from insights.insightsql.compiler.bytecode import create_bytecode, execute_hog, 
 from insights.insightsql.errors import QueryError
 from insights.insightsql.parser import parse_program
 
-from common.hogvm.python.operation import (
+from common.scriptvm.python.operation import (
     INSIGHTSQL_BYTECODE_IDENTIFIER as _H,
     INSIGHTSQL_BYTECODE_VERSION,
     Operation as op,
@@ -563,7 +563,7 @@ class TestBytecode(BaseTest):
         )
 
     def test_bytecode_execute(self):
-        # Test a simple operations. The script execution itself is tested under common/hogvm/python/
+        # Test a simple operations. The script execution itself is tested under common/scriptvm/python/
         self.assertEqual(execute_hog("1 + 2", team=self.team).result, 3)
         self.assertEqual(
             execute_hog(

@@ -34,7 +34,7 @@ jobs:
                   filters: |
                       node_files:
                         - 'nodejs/**'
-                        - 'common/hogvm/typescript/**'
+                        - 'common/scriptvm/typescript/**'
                         - 'common/plugin_transpiler/**'
                         - 'common/esbuilder/**'
                         - 'rust/cyclotron-node/**'

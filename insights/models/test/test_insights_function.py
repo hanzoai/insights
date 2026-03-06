@@ -11,7 +11,7 @@ from insights.models.insights_functions.insights_function import InsightsFunctio
 from insights.models.team.team import Team
 from insights.models.user import User
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 to_dict = lambda x: json.loads(json.dumps(x))
 

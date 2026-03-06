@@ -2,7 +2,7 @@ from typing import Any
 
 from insights.test.base import APIBaseTest
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 class TestCohortBytecodeScenarios(APIBaseTest):
@@ -529,7 +529,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         # Test that cohort bytecode generation wraps comparison operations with null checks
         from insights.api.cohort import generate_cohort_filter_bytecode
 
-        from common.hogvm.python.operation import Operation
+        from common.scriptvm.python.operation import Operation
 
         # Test GT operator with person property
         filter_data_gt = {
