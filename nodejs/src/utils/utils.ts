@@ -381,7 +381,6 @@ export function sanitizeSqlIdentifier(unquotedIdentifier: string): string {
 /** Escape single quotes and slashes */
 export function escapeDatastoreString(string: string): string {
     // In string literals, you need to escape at least `'` and `\`.
-    // https://clickhouse.com/docs/en/sql-reference/syntax/
     return string.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 }
 
