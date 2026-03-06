@@ -1,6 +1,5 @@
 from django.db import models
 
-from insights.models.dashboard import Dashboard
 from insights.models.utils import UUIDTModel, sane_repr
 
 
@@ -17,7 +16,10 @@ class DashboardPrivilege(UUIDTModel):
         related_name="explicit_dashboard_privileges",
         related_query_name="explicit_dashboard_privilege",
     )
-    level = models.PositiveSmallIntegerField(choices=Dashboard.RestrictionLevel.choices)
+    # Matches Dashboard.RestrictionLevel choices (21=view, 37=edit)
+    level = models.PositiveSmallIntegerField(
+        choices=[(21, "Can view dashboard"), (37, "Can edit dashboard")]
+    )
     added_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
