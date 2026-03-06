@@ -64,7 +64,7 @@ jobs:
         timeout-minutes: 30
 
         name: Python code quality
-        runs-on: depot-ubuntu-latest
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v6
@@ -123,7 +123,7 @@ jobs:
                   echo "👀 Running ty type checker (informational - does not block CI)"
                   echo "📊 Trial run to evaluate ty vs mypy. Feedback welcome in #team-devex"
                   echo ""
-                  ./bin/ty.py check posthog ee common dags || echo "⚠️ ty found type issues (annotations below)"
+                  ./bin/ty.py check insights common dags || echo "⚠️ ty found type issues (annotations below)"
 
             - name: Add mypy Problem Matcher
               shell: bash

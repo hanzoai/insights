@@ -11,7 +11,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'Insights/posthog'
+        if: github.repository == 'hanzoai/insights'
         name: Determine if sandbox image needs to be built
         permissions:
             contents: read
@@ -32,12 +32,12 @@ jobs:
         needs: changes
         name: Build and push Tasks Sandbox container image
         if: |
-            github.repository == 'Insights/posthog' && (
+            github.repository == 'hanzoai/insights' && (
                 needs.changes.outputs.sandbox_image == 'true' ||
                 github.event_name == 'workflow_dispatch' ||
                 contains(github.event.pull_request.labels.*.name, 'build-tasks-sandbox-image')
             )
-        runs-on: depot-ubuntu-latest
+        runs-on: ubuntu-latest
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow at least reading the repo contents, add other permissions if necessary
@@ -73,7 +73,7 @@ jobs:
                   file: ./products/tasks/backend/sandbox/images/Dockerfile.sandbox-base
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/posthog/posthog-sandbox-base:master,ghcr.io/posthog/posthog-sandbox-base:{0}', github.sha) || format('ghcr.io/posthog/posthog-sandbox-base:{0}', github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/hanzoai/insights-sandbox-base:master,ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}
 
@@ -84,6 +84,6 @@ jobs:
                   file: ./products/tasks/backend/sandbox/images/Dockerfile.sandbox-notebook
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/posthog/posthog-sandbox-notebook:master,ghcr.io/posthog/posthog-sandbox-notebook:{0}', github.sha) || format('ghcr.io/posthog/posthog-sandbox-notebook:{0}', github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/hanzoai/insights-sandbox-notebook:master,ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}
