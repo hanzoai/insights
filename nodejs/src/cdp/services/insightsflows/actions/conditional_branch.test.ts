@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { FN_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { InsightsFlow, InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findActionById, findActionByType } from '../customflow-utils'
+import { findActionById, findActionByType } from '../insightsflow-utils'
 import { checkConditions } from './conditional_branch'
 
 describe('action.conditional_branch', () => {

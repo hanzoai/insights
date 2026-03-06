@@ -1,7 +1,7 @@
 import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findContinueAction } from '../customflow-utils'
+import { findContinueAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 // NOTE: This is not an actively used action as the triggering is done by the scheduler

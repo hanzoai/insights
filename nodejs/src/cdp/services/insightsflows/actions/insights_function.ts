@@ -11,7 +11,7 @@ import { ScriptExecutorExecuteAsyncOptions } from '../../script-executor.service
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
 import { trackInsightsFlowBillableInvocation } from '../billing-utils'
 import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
-import { actionIdForLogging, findContinueAction } from '../customflow-utils'
+import { actionIdForLogging, findContinueAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 type FunctionActionType = 'function' | 'function_email' | 'function_sms'

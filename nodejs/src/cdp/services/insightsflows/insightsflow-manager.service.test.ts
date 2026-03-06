@@ -1,6 +1,6 @@
 import '~/tests/helpers/mocks/date.mock'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { InsightsFlow } from '~/schema/insightsflow'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { createTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'

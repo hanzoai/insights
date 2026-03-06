@@ -5,7 +5,7 @@ import { InsightsFlow } from '~/schema/insightsflow'
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
