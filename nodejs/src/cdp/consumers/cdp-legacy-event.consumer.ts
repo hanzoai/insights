@@ -114,21 +114,21 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         const { rows } = await this.hub.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
-                insights_pluginconfig.id,
-                insights_pluginconfig.team_id,
-                insights_pluginconfig.plugin_id,
-                insights_pluginconfig.enabled,
-                insights_pluginconfig.config,
-                insights_pluginconfig.created_at,
-                insights_pluginconfig.updated_at,
-                insights_plugin.id as plugin__id,
-                insights_plugin.url as plugin__url
-            FROM insights_pluginconfig
-            LEFT JOIN insights_plugin ON insights_plugin.id = insights_pluginconfig.plugin_id
-            WHERE insights_pluginconfig.team_id = ANY($1)
-                AND insights_pluginconfig.enabled = 't'
-                AND (insights_pluginconfig.deleted IS NULL OR insights_pluginconfig.deleted != 't')
-                AND insights_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
+                posthog_pluginconfig.id,
+                posthog_pluginconfig.team_id,
+                posthog_pluginconfig.plugin_id,
+                posthog_pluginconfig.enabled,
+                posthog_pluginconfig.config,
+                posthog_pluginconfig.created_at,
+                posthog_pluginconfig.updated_at,
+                posthog_plugin.id as plugin__id,
+                posthog_plugin.url as plugin__url
+            FROM posthog_pluginconfig
+            LEFT JOIN posthog_plugin ON posthog_plugin.id = posthog_pluginconfig.plugin_id
+            WHERE posthog_pluginconfig.team_id = ANY($1)
+                AND posthog_pluginconfig.enabled = 't'
+                AND (posthog_pluginconfig.deleted IS NULL OR posthog_pluginconfig.deleted != 't')
+                AND posthog_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
             [teamIds.map((id) => parseInt(id))],
             'loadPluginConfigInsightsFunctions'
         )
@@ -141,7 +141,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             const { rows: attachmentRows } = await this.hub.postgres.query(
                 PostgresUse.COMMON_READ,
                 `SELECT plugin_config_id, key, contents
-                FROM insights_pluginattachment
+                FROM posthog_pluginattachment
                 WHERE plugin_config_id = ANY($1)`,
                 [pluginConfigIds],
                 'loadPluginConfigAttachments'

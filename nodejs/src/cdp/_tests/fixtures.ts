@@ -212,7 +212,7 @@ export const insertIntegration = async (
     team_id: Team['id'],
     integration: Partial<IntegrationType> = {}
 ): Promise<IntegrationType> => {
-    const res = await insertRow(postgres, 'insights_integration', {
+    const res = await insertRow(postgres, 'posthog_integration', {
         ...createIntegration({
             ...integration,
             team_id: team_id,

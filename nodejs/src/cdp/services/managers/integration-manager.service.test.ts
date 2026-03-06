@@ -70,7 +70,7 @@ describe('IntegrationManager', () => {
         // Update the integration in the database
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_integration
+            `UPDATE posthog_integration
                  SET config = jsonb_set(config, '{team}', '"updated-team"'::jsonb),
                      sensitive_config = jsonb_set(sensitive_config, '{access_token}', $1::jsonb)
                  WHERE id = $2`,
@@ -83,7 +83,7 @@ describe('IntegrationManager', () => {
         // Verify the database update worked
         const updatedIntegration = await hub.postgres.query(
             PostgresUse.COMMON_READ,
-            `SELECT config, sensitive_config FROM insights_integration WHERE id = $1`,
+            `SELECT config, sensitive_config FROM posthog_integration WHERE id = $1`,
             [integrations[0].id],
             'fetchUpdatedIntegration'
         )

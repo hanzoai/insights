@@ -29,7 +29,7 @@ describe('RecipientsManager', () => {
         const id = new UUIDT().toString()
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO insights_messagerecipientpreference (id, team_id, identifier, preferences, created_at, updated_at, deleted)
+            `INSERT INTO posthog_messagerecipientpreference (id, team_id, identifier, preferences, created_at, updated_at, deleted)
              VALUES ($1, $2, $3, $4, NOW(), NOW(), false)`,
             [id, teamId, identifier, JSON.stringify(preferences)],
             'testInsertRecipient'
@@ -79,7 +79,7 @@ describe('RecipientsManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_messagerecipientpreference SET deleted = true WHERE id = $1`,
+                `UPDATE posthog_messagerecipientpreference SET deleted = true WHERE id = $1`,
                 [id],
                 'testMarkDeleted'
             )
@@ -171,7 +171,7 @@ describe('RecipientsManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `DELETE FROM insights_messagerecipientpreference WHERE id = $1`,
+                `DELETE FROM posthog_messagerecipientpreference WHERE id = $1`,
                 [id],
                 'testDeleteRecipient'
             )
@@ -190,7 +190,7 @@ describe('RecipientsManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `DELETE FROM insights_messagerecipientpreference WHERE id = $1`,
+                `DELETE FROM posthog_messagerecipientpreference WHERE id = $1`,
                 [id],
                 'testDeleteRecipient'
             )

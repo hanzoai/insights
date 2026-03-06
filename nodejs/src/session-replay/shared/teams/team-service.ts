@@ -70,7 +70,7 @@ export async function fetchTeamTokensWithRecordings(client: PostgresRouter): Pro
         PostgresUse.COMMON_READ,
         `
             SELECT id, api_token, capture_console_log_opt_in, session_recording_retention_period, session_recording_encryption
-            FROM insights_team
+            FROM posthog_team
             WHERE session_recording_opt_in = true
         `,
         [],
