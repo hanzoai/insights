@@ -113,3 +113,7 @@ PROM_PUSHGATEWAY_ADDRESS: str | None = os.getenv("PROM_PUSHGATEWAY_ADDRESS", Non
 
 INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME: int = get_from_env("INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME", 600, type_cast=int)
 
+# Customer.io email service (optional, only for transactional emails)
+CUSTOMER_IO_API_KEY: str = os.getenv("CUSTOMER_IO_API_KEY", "")
+CUSTOMER_IO_API_URL: str = os.getenv("CUSTOMER_IO_API_URL", "https://api.customer.io")
+

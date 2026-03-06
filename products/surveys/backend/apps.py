@@ -20,7 +20,7 @@ class SurveysConfig(AppConfig):
 
         register_file_system_type(
             "survey",
-            "insights",
+            "posthog",
             "Survey",
             queryset_modifier=_with_flags,
             hard_delete=True,
