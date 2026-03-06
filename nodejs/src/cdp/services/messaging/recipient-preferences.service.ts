@@ -1,6 +1,6 @@
 import { logger } from '~/utils/logger'
 
-import { InsightsFlowAction } from '../../../schema/customflow'
+import { InsightsFlowAction } from '../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFunction } from '../../types'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 

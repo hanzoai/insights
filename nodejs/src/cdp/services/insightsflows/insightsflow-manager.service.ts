@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { Team } from '~/types'
 import { PostgresRouter, PostgresUse } from '~/utils/db/postgres'
 import { LazyLoader } from '~/utils/lazy-loader'
