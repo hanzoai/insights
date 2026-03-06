@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0463_datawarehousemodelpath_and_more"),
+        ("insights", "0463_datawarehousemodelpath_and_more"),
     ]
 
     operations = [

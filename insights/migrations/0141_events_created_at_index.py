@@ -6,7 +6,7 @@ from django.db import connection, migrations
 def migrate(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(
-            "CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_eve_created_6a34ca_idx ON posthog_event(created_at)"
+            "CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_eve_created_6a34ca_idx ON insights_event(created_at)"
         )
 
 
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0140_team_data_attributes"),
+        ("insights", "0140_team_data_attributes"),
     ]
 
     operations = [

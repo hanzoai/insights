@@ -30,4 +30,4 @@ class SessionRecordingExternalReference(UUIDModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "posthog_sessionrecordingexternalreference"
+        db_table = "insights_sessionrecordingexternalreference"

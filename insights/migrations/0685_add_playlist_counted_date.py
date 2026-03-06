@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0684_action_embedding_last_synced_at_and_more"),
+        ("insights", "0684_action_embedding_last_synced_at_and_more"),
     ]
 
     operations = [

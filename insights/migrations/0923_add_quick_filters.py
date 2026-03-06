@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0922_remove_persons_db_team_fks"),
+        ("insights", "0922_remove_persons_db_team_fks"),
     ]
 
     operations = [
@@ -34,10 +34,10 @@ class Migration(migrations.Migration):
                 ("options", models.JSONField(blank=True, default=list, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_quickfilter",
+                "db_table": "insights_quickfilter",
             },
         ),
         migrations.CreateModel(
@@ -56,16 +56,16 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="context_memberships",
-                        to="posthog.quickfilter",
+                        to="insights.quickfilter",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_quickfiltercontext",
+                "db_table": "insights_quickfiltercontext",
                 "indexes": [
-                    models.Index(fields=["team", "context"], name="posthog_qui_team_id_3d3d27_idx"),
-                    models.Index(fields=["quick_filter", "context"], name="posthog_qui_quick_f_ff6325_idx"),
+                    models.Index(fields=["team", "context"], name="insights_qui_team_id_3d3d27_idx"),
+                    models.Index(fields=["quick_filter", "context"], name="insights_qui_quick_f_ff6325_idx"),
                 ],
             },
         ),
@@ -77,6 +77,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="quickfilter",
-            index=models.Index(fields=["team"], name="posthog_qui_team_id_24fea4_idx"),
+            index=models.Index(fields=["team"], name="insights_qui_team_id_24fea4_idx"),
         ),
     ]

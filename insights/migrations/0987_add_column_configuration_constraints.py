@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0986_add_column_configuration_fields"),
+        ("insights", "0986_add_column_configuration_fields"),
     ]
 
     operations = [
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     sql="""
                         CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "unique_user_view_name"
-                            ON "posthog_columnconfiguration" ("team_id", "context_key", "name", "created_by_id")
+                            ON "insights_columnconfiguration" ("team_id", "context_key", "name", "created_by_id")
                             WHERE "visibility" = 'private';
                         """,
                     reverse_sql="DROP INDEX CONCURRENTLY IF EXISTS unique_user_view_name",
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     sql="""
                         CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "unique_team_view_name"
-                            ON "posthog_columnconfiguration" ("team_id", "context_key", "name")
+                            ON "insights_columnconfiguration" ("team_id", "context_key", "name")
                             WHERE "visibility" = 'shared';
                         """,
                     reverse_sql="DROP INDEX CONCURRENTLY IF EXISTS unique_team_view_name",

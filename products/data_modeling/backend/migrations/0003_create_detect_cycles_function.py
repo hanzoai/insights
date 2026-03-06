@@ -4,7 +4,7 @@ from django.db import migrations
 
 # detect cycles
 CREATE_OR_REPLACE_DETECT_CYCLES = """\
-CREATE OR REPLACE FUNCTION posthog_datamodelingedge_detect_cycles()
+CREATE OR REPLACE FUNCTION insights_datamodelingedge_detect_cycles()
 RETURNS TRIGGER AS $$
 BEGIN
   -- acquire team_id, dag_id scoped lock
@@ -25,7 +25,7 @@ BEGIN
     WITH RECURSIVE reachable(node_id) AS (
       -- base case
       SELECT e.target_id
-      FROM posthog_datamodelingedge e
+      FROM insights_datamodelingedge e
       WHERE e.source_id = NEW.target_id
         AND e.team_id = NEW.team_id
         AND e.dag_id = NEW.dag_id
@@ -34,7 +34,7 @@ BEGIN
 
       -- recursive case
       SELECT e.target_id
-      FROM posthog_datamodelingedge e
+      FROM insights_datamodelingedge e
       INNER JOIN reachable r ON e.source_id = r.node_id
       WHERE e.target_id <> NEW.target_id
         AND e.team_id = NEW.team_id

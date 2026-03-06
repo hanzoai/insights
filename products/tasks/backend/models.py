@@ -35,8 +35,8 @@ class Task(DeletedMetaFields, models.Model):
         SESSION_SUMMARIES = "session_summaries", "Session Summaries"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
     task_number = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -44,7 +44,7 @@ class Task(DeletedMetaFields, models.Model):
 
     # Repository configuration
     github_integration = models.ForeignKey(
-        "posthog.Integration",
+        "insights.Integration",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -67,7 +67,7 @@ class Task(DeletedMetaFields, models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_task"
+        db_table = "insights_task"
         managed = True
 
     def __str__(self):
@@ -193,7 +193,7 @@ class TaskRun(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="runs")
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     branch = models.CharField(max_length=255, blank=True, null=True, help_text="Branch name for the run")
     environment = models.CharField(
@@ -241,7 +241,7 @@ class TaskRun(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "posthog_task_run"
+        db_table = "insights_task_run"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -399,7 +399,7 @@ class SandboxSnapshot(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_sandbox_snapshot"
+        db_table = "insights_sandbox_snapshot"
         indexes = [
             models.Index(fields=["integration", "status", "-created_at"]),
         ]
@@ -471,8 +471,8 @@ class SandboxEnvironment(UUIDModel):
         FULL = "full", "Full"
         CUSTOM = "custom", "Custom"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
 
     name = models.CharField(max_length=255)
 
@@ -517,7 +517,7 @@ class SandboxEnvironment(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_sandbox_environment"
+        db_table = "insights_sandbox_environment"
         indexes = [
             models.Index(fields=["team", "created_by"]),
         ]

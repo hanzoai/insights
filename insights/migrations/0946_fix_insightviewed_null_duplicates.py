@@ -8,7 +8,7 @@ logger = structlog.get_logger(__name__)
 
 def clean_duplicates(apps, schema_editor):
     """Delete duplicate InsightViewed records where team and user are NULL."""
-    InsightViewed = apps.get_model("posthog", "InsightViewed")
+    InsightViewed = apps.get_model("insights", "InsightViewed")
 
     # Find insights with duplicate NULL team/user records
     duplicates = (
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
     # atomic=True (default) - cleanup runs in a transaction for safety
 
     dependencies = [
-        ("posthog", "0945_scheduledchange_recurring_fields"),
+        ("insights", "0945_scheduledchange_recurring_fields"),
     ]
 
     operations = [

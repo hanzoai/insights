@@ -25,10 +25,10 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE posthog_errortrackingstackframe ADD CONSTRAINT unique_team_id_raw_id_part UNIQUE USING INDEX idx_team_id_raw_id_part;
+                    ALTER TABLE insights_errortrackingstackframe ADD CONSTRAINT unique_team_id_raw_id_part UNIQUE USING INDEX idx_team_id_raw_id_part;
                     """,
                     reverse_sql="""
-                        ALTER TABLE posthog_errortrackingstackframe DROP CONSTRAINT IF EXISTS "unique_team_id_raw_id_part";
+                        ALTER TABLE insights_errortrackingstackframe DROP CONSTRAINT IF EXISTS "unique_team_id_raw_id_part";
                     """,
                 ),
             ],

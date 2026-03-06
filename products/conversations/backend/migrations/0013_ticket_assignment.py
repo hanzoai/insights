@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "posthog_conversations_ticket_assignment",
+                "db_table": "insights_conversations_ticket_assignment",
                 "constraints": [
                     models.CheckConstraint(
                         check=(

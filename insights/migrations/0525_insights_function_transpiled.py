@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0524_datawarehousejoin_configuration")]
+    dependencies = [("insights", "0524_datawarehousejoin_configuration")]
 
     operations = [
         migrations.AddField(
@@ -36,6 +36,6 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="customfunction",
-            index=models.Index(fields=["type", "enabled", "team"], name="posthog_hog_type_6f8967_idx"),
+            index=models.Index(fields=["type", "enabled", "team"], name="insights_hog_type_6f8967_idx"),
         ),
     ]

@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0917_alter_survey_linked_insight"),
+        ("insights", "0917_alter_survey_linked_insight"),
     ]
 
     operations = [
@@ -30,10 +30,10 @@ class Migration(migrations.Migration):
                 ),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "indexes": [models.Index(fields=["team", "context_key"], name="posthog_col_team_id_0cba64_idx")],
+                "indexes": [models.Index(fields=["team", "context_key"], name="insights_col_team_id_0cba64_idx")],
             },
         ),
         migrations.AddConstraint(

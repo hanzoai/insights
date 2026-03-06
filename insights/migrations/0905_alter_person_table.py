@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("posthog", "0904_alter_dashboard_creation_mode"),
+        ("insights", "0904_alter_dashboard_creation_mode"),
     ]
 
     operations = [
         migrations.AlterModelTable(
             name="person",
-            table="posthog_person",
+            table="insights_person",
         ),
     ]

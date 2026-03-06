@@ -17,7 +17,7 @@ def reverse(_apps, _schema_editor) -> None:
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0251_event_buffer"),
+        ("insights", "0251_event_buffer"),
     ]
 
     operations = [

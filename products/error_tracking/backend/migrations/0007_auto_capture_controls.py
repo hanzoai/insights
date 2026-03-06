@@ -73,11 +73,11 @@ class Migration(migrations.Migration):
                         size=None,
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_errortrackingautocapturecontrols",
-                "indexes": [models.Index(fields=["team_id"], name="posthog_err_team_id_eed4d1_idx")],
+                "db_table": "insights_errortrackingautocapturecontrols",
+                "indexes": [models.Index(fields=["team_id"], name="insights_err_team_id_eed4d1_idx")],
             },
         ),
         migrations.AddConstraint(

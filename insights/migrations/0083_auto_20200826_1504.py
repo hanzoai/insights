@@ -8,7 +8,7 @@ from insights.models.utils import UUIDT
 
 
 def create_uuid(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     for team in Team.objects.all():
         team.uuid = UUIDT()
         team.save()
@@ -16,7 +16,7 @@ def create_uuid(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0082_personalapikey"),
+        ("insights", "0082_personalapikey"),
     ]
 
     operations = [

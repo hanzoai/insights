@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0289_add_tags_to_feature_flags"),
+        ("insights", "0289_add_tags_to_feature_flags"),
     ]
 
     operations = [
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],

@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0025_cohort"),
+        ("insights", "0025_cohort"),
     ]
 
     operations = [
@@ -41,17 +41,17 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="posthog.Event",
+                to="insights.Event",
             ),
         ),
         migrations.AddIndex(
             model_name="event",
-            index=models.Index(fields=["elements_hash"], name="posthog_eve_element_48becd_idx"),
+            index=models.Index(fields=["elements_hash"], name="insights_eve_element_48becd_idx"),
         ),
         migrations.AddField(
             model_name="elementgroup",
             name="team",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
         ),
         migrations.AddField(
             model_name="element",
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="posthog.ElementGroup",
+                to="insights.ElementGroup",
             ),
         ),
     ]

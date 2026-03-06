@@ -8,7 +8,7 @@ from insights.insightsql_queries.legacy_compatibility.filter_to_query import fil
 
 
 def update_filters_to_queries(apps, schema_editor):
-    DashboardTemplate = apps.get_model("posthog", "DashboardTemplate")
+    DashboardTemplate = apps.get_model("insights", "DashboardTemplate")
 
     for template in DashboardTemplate.objects.all():
         for tile in template.tiles:
@@ -25,7 +25,7 @@ def revert_queries_to_filters(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0529_insights_function_mappings")]
+    dependencies = [("insights", "0529_insights_function_mappings")]
 
     operations = [
         migrations.RunPython(update_filters_to_queries, revert_queries_to_filters),

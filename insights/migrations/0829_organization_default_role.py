@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0828_grouptypemapping_created_at"),
+        ("insights", "0828_grouptypemapping_created_at"),
     ]
 
     operations = [
@@ -27,18 +27,18 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_organization" ADD COLUMN "default_role_id" uuid NULL; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_organization" ADD COLUMN "default_role_id" uuid NULL; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_organization" DROP COLUMN IF EXISTS "default_role_id";
+                        ALTER TABLE "insights_organization" DROP COLUMN IF EXISTS "default_role_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_organization_default_role_id_03bcd28b" ON "posthog_organization" ("default_role_id");
+                    CREATE INDEX CONCURRENTLY "insights_organization_default_role_id_03bcd28b" ON "insights_organization" ("default_role_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_organization_default_role_id_03bcd28b";
+                        DROP INDEX IF EXISTS "insights_organization_default_role_id_03bcd28b";
                     """,
                 ),
             ],

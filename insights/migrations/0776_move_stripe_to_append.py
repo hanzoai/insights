@@ -5,15 +5,15 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0775_survey_is_publicly_shareable"),
+        ("insights", "0775_survey_is_publicly_shareable"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql="""
-                UPDATE posthog_externaldataschema AS schema
+                UPDATE insights_externaldataschema AS schema
                 SET sync_type = 'append'
-                FROM posthog_externaldatasource AS source
+                FROM insights_externaldatasource AS source
                 WHERE schema.source_id = source.id AND source.source_type = 'Stripe'
             """,
             reverse_sql=migrations.RunSQL.noop,

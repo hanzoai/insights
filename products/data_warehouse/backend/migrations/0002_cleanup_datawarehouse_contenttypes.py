@@ -69,7 +69,7 @@ def cleanup_broken_contenttypes(apps, schema_editor):
                 cursor.execute(
                     """
                     SELECT COUNT(*)
-                    FROM posthog_user_user_permissions uup
+                    FROM insights_user_user_permissions uup
                     JOIN auth_permission p ON uup.permission_id = p.id
                     WHERE p.content_type_id = %s
                 """,
@@ -115,7 +115,7 @@ def cleanup_broken_contenttypes(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("data_warehouse", "0001_migrate_data_warehouse_models"),
-        ("posthog", "0897_migrate_data_warehouse_models"),
+        ("insights", "0897_migrate_data_warehouse_models"),
     ]
 
     operations = [

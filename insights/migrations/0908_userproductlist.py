@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0907_alter_persistedfolder_type"),
+        ("insights", "0907_alter_persistedfolder_type"),
     ]
 
     operations = [
@@ -34,13 +34,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("enabled", models.BooleanField(default=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 "verbose_name": "User Product List",
                 "verbose_name_plural": "User Product Lists",
-                "indexes": [models.Index(models.F("team_id"), models.F("user_id"), name="posthog_upl_team_user")],
+                "indexes": [models.Index(models.F("team_id"), models.F("user_id"), name="insights_upl_team_user")],
                 "unique_together": {("team", "user", "product_path")},
             },
         ),

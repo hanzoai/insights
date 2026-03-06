@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0865_remove_experimentmetricresult_posthog_exp_experim_b5f6d4_idx_and_more")]
+    dependencies = [("insights", "0865_remove_experimentmetricresult_insights_exp_experim_b5f6d4_idx_and_more")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                         help_text="The integration for this destination.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.integration",
+                        to="insights.integration",
                     ),
                 ),
             ],
@@ -29,20 +29,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_batchexportdestination" ADD COLUMN "integration_id" integer NULL CONSTRAINT "posthog_batchexportd_integration_id_7927a172_fk_posthog_i" REFERENCES "posthog_integration"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_batchexportd_integration_id_7927a172_fk_posthog_i" IMMEDIATE;  -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_batchexportdestination" ADD COLUMN "integration_id" integer NULL CONSTRAINT "insights_batchexportd_integration_id_7927a172_fk_insights_i" REFERENCES "insights_integration"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_batchexportd_integration_id_7927a172_fk_insights_i" IMMEDIATE;  -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_batchexportdestination" DROP COLUMN IF EXISTS "integration_id";
+                        ALTER TABLE "insights_batchexportdestination" DROP COLUMN IF EXISTS "integration_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_batchexportdestination_integration_id_7927a172" ON "posthog_batchexportdestination" ("integration_id");
+                    CREATE INDEX CONCURRENTLY "insights_batchexportdestination_integration_id_7927a172" ON "insights_batchexportdestination" ("integration_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_batchexportdestination_integration_id_7927a172";
+                        DROP INDEX IF EXISTS "insights_batchexportdestination_integration_id_7927a172";
                     """,
                 ),
             ],

@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0883_featureflag_last_called_at"),
+        ("insights", "0883_featureflag_last_called_at"),
     ]
 
     operations = [
@@ -38,11 +38,11 @@ class Migration(migrations.Migration):
                 ),
                 ("last_successful_date", models.DateField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.experiment")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.experiment")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "indexes": [models.Index(fields=["status"], name="posthog_exp_status_01657f_idx")],
+                "indexes": [models.Index(fields=["status"], name="insights_exp_status_01657f_idx")],
             },
         ),
         migrations.AddConstraint(

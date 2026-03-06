@@ -1839,9 +1839,9 @@ export interface QueryRequest {
      */
     name?: string
     /**
-     * Limit context for the query. Only 'posthog_ai' is allowed as a client-provided value.
+     * Limit context for the query. Only 'insights_ai' is allowed as a client-provided value.
      */
-    limit_context?: 'posthog_ai' | null
+    limit_context?: 'insights_ai' | null
 }
 
 export interface QueryUpgradeRequest {

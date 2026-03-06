@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0846_add_share_password_model"),
+        ("insights", "0846_add_share_password_model"),
     ]
 
     operations = [

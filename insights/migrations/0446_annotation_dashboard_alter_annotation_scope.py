@@ -6,7 +6,7 @@ from django.db import migrations, models
 ## Original Migration
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("posthog", "0444_integration_unique_id"),
+#         ("insights", "0444_integration_unique_id"),
 #     ]
 
 #     operations = [
@@ -14,7 +14,7 @@ from django.db import migrations, models
 #             model_name="annotation",
 #             name="dashboard",
 #             field=models.ForeignKey(
-#                 blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.dashboard"
+#                 blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.dashboard"
 #             ),
 #         ),
 #         migrations.AlterField(
@@ -37,7 +37,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0445_require_team_project_id_not_valid"),
+        ("insights", "0445_require_team_project_id_not_valid"),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.dashboard",
+                        to="insights.dashboard",
                     ),
                 )
             ],
@@ -58,20 +58,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_annotation" ADD COLUMN "dashboard_id" integer NULL CONSTRAINT "posthog_annotation_dashboard_id_91ef4125_fk_posthog_d" REFERENCES "posthog_dashboard"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_annotation_dashboard_id_91ef4125_fk_posthog_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_annotation" ADD COLUMN "dashboard_id" integer NULL CONSTRAINT "insights_annotation_dashboard_id_91ef4125_fk_insights_d" REFERENCES "insights_dashboard"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_annotation_dashboard_id_91ef4125_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_annotation" DROP COLUMN IF EXISTS "dashboard_id";
+                        ALTER TABLE "insights_annotation" DROP COLUMN IF EXISTS "dashboard_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_annotation_dashboard_id_91ef4125" ON "posthog_annotation" ("dashboard_id");
+                    CREATE INDEX CONCURRENTLY "insights_annotation_dashboard_id_91ef4125" ON "insights_annotation" ("dashboard_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_annotation_dashboard_id_91ef4125";
+                        DROP INDEX IF EXISTS "insights_annotation_dashboard_id_91ef4125";
                     """,
                 ),
             ],

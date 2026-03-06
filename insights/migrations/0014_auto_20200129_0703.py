@@ -7,7 +7,7 @@ import insights.models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0013_element_attr_class"),
+        ("insights", "0013_element_attr_class"),
     ]
 
     operations = [

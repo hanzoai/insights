@@ -10,7 +10,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0989_add_tags_to_insightsflow_template")]
+    dependencies = [("insights", "0989_add_tags_to_insightsflow_template")]
 
     operations = [
         migrations.CreateModel(
@@ -59,16 +59,16 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="project_secret_api_keys",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
             options={
-                "db_table": "posthog_projectsecretapikey",
+                "db_table": "insights_projectsecretapikey",
                 "indexes": [
                     models.Index(
                         fields=["team", "created_at"],
-                        name="posthog_pro_team_id_d4c925_idx",
+                        name="insights_pro_team_id_d4c925_idx",
                     )
                 ],
             },

@@ -54,7 +54,7 @@ function SessionSceneWrapper(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
     const { searchParams } = useValues(router)
     const traceSearchParams = sanitizeTraceUrlSearchParams(searchParams, { removeSearch: true })
-    const showFeedback = !!featureFlags[FEATURE_FLAGS.POSTHOG_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS]
+    const showFeedback = !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS]
 
     const {
         traces,

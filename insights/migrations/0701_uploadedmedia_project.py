@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0700_datamodelingjob"),
+        ("insights", "0700_datamodelingjob"),
     ]
 
     operations = [
@@ -18,24 +18,24 @@ class Migration(migrations.Migration):
                     model_name="uploadedmedia",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_uploadedmedia" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_uploadedmedia_project_id_uzTGNcheyj_fk_posthog_p" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "posthog_uploadedmedia_project_id_uzTGNcheyj_fk_posthog_p" IMMEDIATE;""",
+                    ALTER TABLE "insights_uploadedmedia" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_uploadedmedia_project_id_uzTGNcheyj_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+                    SET CONSTRAINTS "insights_uploadedmedia_project_id_uzTGNcheyj_fk_insights_p" IMMEDIATE;""",
                     reverse_sql="""
-                        ALTER TABLE "posthog_uploadedmedia" DROP COLUMN IF EXISTS "project_id";""",
+                        ALTER TABLE "insights_uploadedmedia" DROP COLUMN IF EXISTS "project_id";""",
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_uploadedmedia_project_id_uzTGNcheyj_WxVp79RtER" ON "posthog_uploadedmedia" ("project_id");""",
+                    CREATE INDEX CONCURRENTLY "insights_uploadedmedia_project_id_uzTGNcheyj_WxVp79RtER" ON "insights_uploadedmedia" ("project_id");""",
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_uploadedmedia_project_id_uzTGNcheyj_WxVp79RtER";""",
+                        DROP INDEX IF EXISTS "insights_uploadedmedia_project_id_uzTGNcheyj_WxVp79RtER";""",
                 ),
             ],
         ),

@@ -31,7 +31,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
     def test_get_returns_existing_config(self):
         ClusteringConfig.objects.create(
             team=self.team,
-            event_filters=[{"key": "ai_product", "value": "posthog_ai", "operator": "exact", "type": "event"}],
+            event_filters=[{"key": "ai_product", "value": "insights_ai", "operator": "exact", "type": "event"}],
         )
 
         response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
@@ -56,7 +56,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
     def test_can_clear_event_filters(self):
         ClusteringConfig.objects.create(
             team=self.team,
-            event_filters=[{"key": "ai_product", "value": "posthog_ai", "operator": "exact", "type": "event"}],
+            event_filters=[{"key": "ai_product", "value": "insights_ai", "operator": "exact", "type": "event"}],
         )
 
         response = self.client.post(
@@ -87,7 +87,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
 
     def test_set_event_filters_persists_across_requests(self):
         filters = [
-            {"key": "ai_product", "value": "posthog_ai", "operator": "exact", "type": "event"},
+            {"key": "ai_product", "value": "insights_ai", "operator": "exact", "type": "event"},
             {"key": "$ai_model", "value": "gpt-4", "operator": "exact", "type": "event"},
         ]
 

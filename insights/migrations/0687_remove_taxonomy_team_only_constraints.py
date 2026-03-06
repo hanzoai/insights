@@ -7,17 +7,17 @@ class Migration(migrations.Migration):
     atomic = False  # Because revert contains CURRENTLY
 
     dependencies = [
-        ("posthog", "0686_alter_errortrackingissue_status"),
+        ("insights", "0686_alter_errortrackingissue_status"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
             model_name="eventproperty",
-            name="posthog_event_property_unique_team_event_property",
+            name="insights_event_property_unique_team_event_property",
         ),
         migrations.RemoveConstraint(
             model_name="propertydefinition",
-            name="posthog_propertydefinition_uniq",
+            name="insights_propertydefinition_uniq",
         ),
         migrations.SeparateDatabaseAndState(
             state_operations=[
@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
                 # Using RunSQL just to work around a decade-old bug in Django's sqlmigrate failing @ AlterUniqueTogether
                 # https://code.djangoproject.com/ticket/26624
                 migrations.RunSQL(
-                    "ALTER TABLE posthog_eventdefinition DROP CONSTRAINT posthog_eventdefinition_team_id_name_80fa0b87_uniq",
-                    reverse_sql="ALTER TABLE posthog_eventdefinition ADD CONSTRAINT posthog_eventdefinition_team_id_name_80fa0b87_uniq UNIQUE (team_id, name)",
+                    "ALTER TABLE insights_eventdefinition DROP CONSTRAINT insights_eventdefinition_team_id_name_80fa0b87_uniq",
+                    reverse_sql="ALTER TABLE insights_eventdefinition ADD CONSTRAINT insights_eventdefinition_team_id_name_80fa0b87_uniq UNIQUE (team_id, name)",
                 ),
             ],
         ),

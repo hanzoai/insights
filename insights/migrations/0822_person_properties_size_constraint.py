@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0821_batchimport_backoff_columns"),
+        ("insights", "0821_batchimport_backoff_columns"),
     ]
 
     operations = [
@@ -17,9 +17,9 @@ class Migration(migrations.Migration):
                     SELECT 1
                     FROM pg_constraint c
                     WHERE c.conname = 'check_properties_size'
-                      AND c.conrelid = 'posthog_person'::regclass
+                      AND c.conrelid = 'insights_person'::regclass
                 ) THEN
-                    ALTER TABLE posthog_person
+                    ALTER TABLE insights_person
                     ADD CONSTRAINT check_properties_size
                     CHECK (pg_column_size(properties) <= 655360) NOT VALID;
                 END IF;
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             $$ LANGUAGE plpgsql;
             """,
             reverse_sql="""
-            ALTER TABLE posthog_person
+            ALTER TABLE insights_person
             DROP CONSTRAINT IF EXISTS check_properties_size;
             """,
         ),

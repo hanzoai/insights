@@ -29,7 +29,7 @@ from insights.insightsql_queries.query_runner import ExecutionMode
 from insights.models import GroupTypeMapping, Team
 from insights.models.property_definition import PropertyDefinition
 
-from products.posthog_ai.dags.utils import (
+from products.insights_ai.dags.utils import (
     check_dump_exists,
     compose_clickhouse_dump_path,
     compose_postgres_dump_path,
@@ -80,7 +80,7 @@ def snapshot_postgres_model(
     retry_policy=DEFAULT_RETRY_POLICY,
     code_version="v1",
     tags={
-        "owner": JobOwners.TEAM_POSTHOG_AI.value,
+        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
         "dagster/max_runtime": 60 * 15,  # 15 minutes
     },
 )
@@ -105,7 +105,7 @@ def snapshot_postgres_team_data(
                 asset_key="team_postgres_snapshot",
                 description="Avro snapshots of team Postgres data",
                 metadata={"team_id": team_id, **deps},
-                tags={"owner": JobOwners.TEAM_POSTHOG_AI.value},
+                tags={"owner": JobOwners.TEAM_INSIGHTS_AI.value},
             )
         )
     except Team.DoesNotExist as e:
@@ -298,7 +298,7 @@ def snapshot_actors_property_taxonomy(
     description="Snapshots ClickHouse team data",
     retry_policy=DEFAULT_RETRY_POLICY,
     tags={
-        "owner": JobOwners.TEAM_POSTHOG_AI.value,
+        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
         "dagster/max_runtime": 60 * 15,  # 15 minutes
     },
     code_version="v1",
@@ -343,7 +343,7 @@ def snapshot_clickhouse_team_data(
                 "team_id": team_id,
                 **materialized_result.model_dump(),
             },
-            tags={"owner": JobOwners.TEAM_POSTHOG_AI.value},
+            tags={"owner": JobOwners.TEAM_INSIGHTS_AI.value},
         )
     )
 

@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0960_remove_dashboardtemplate_unique_template_name_per_team_and_more"),
+        ("insights", "0960_remove_dashboardtemplate_unique_template_name_per_team_and_more"),
     ]
 
     operations = [
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="external_references",
-                        to="posthog.integration",
+                        to="insights.integration",
                     ),
                 ),
                 (
@@ -36,13 +36,13 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="external_references",
                         related_query_name="external_reference",
-                        to="posthog.sessionrecording",
+                        to="insights.sessionrecording",
                         db_index=True,
                     ),
                 ),
             ],
             options={
-                "db_table": "posthog_sessionrecordingexternalreference",
+                "db_table": "insights_sessionrecordingexternalreference",
             },
         ),
     ]

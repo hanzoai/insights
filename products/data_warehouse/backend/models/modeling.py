@@ -639,11 +639,11 @@ class DataWarehouseModelPath(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
                 fields=("team_id", "path"), name="unique_team_id_path", deferrable=models.Deferrable.IMMEDIATE
             ),
         ]
-        db_table = "posthog_datawarehousemodelpath"
+        db_table = "insights_datawarehousemodelpath"
 
     objects: DataWarehouseModelPathManager = DataWarehouseModelPathManager()
 
     path = LabelTreeField(null=False)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     table = models.ForeignKey(DataWarehouseTable, null=True, default=None, on_delete=models.SET_NULL)
     saved_query = models.ForeignKey(DataWarehouseSavedQuery, null=True, default=None, on_delete=models.SET_NULL)

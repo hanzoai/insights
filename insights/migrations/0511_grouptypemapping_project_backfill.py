@@ -7,12 +7,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0510_salesforce_missing_schemas"),
+        ("insights", "0510_salesforce_missing_schemas"),
     ]
 
     operations = [
         migrations.RunSQL(
-            sql="""UPDATE posthog_grouptypemapping SET project_id = team_id;""",
+            sql="""UPDATE insights_grouptypemapping SET project_id = team_id;""",
             reverse_sql=migrations.RunSQL.noop,
             elidable=True,
         ),
@@ -27,14 +27,14 @@ class Migration(migrations.Migration):
             model_name="grouptypemapping",
             index=models.Index(
                 fields=("project", "group_type"),
-                name="posthog_group_type_proj_idx",
+                name="insights_group_type_proj_idx",
             ),
         ),
         AddIndexConcurrently(
             model_name="grouptypemapping",
             index=models.Index(
                 fields=("project", "group_type_index"),
-                name="posthog_group_type_i_proj_idx",
+                name="insights_group_type_i_proj_idx",
             ),
         ),
     ]

@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0438_errortrackinggroup"),
+        ("insights", "0438_errortrackinggroup"),
     ]
 
     operations = [
         migrations.AddField(
             model_name="survey",
             name="actions",
-            field=models.ManyToManyField(to="posthog.action"),
+            field=models.ManyToManyField(to="insights.action"),
         ),
     ]

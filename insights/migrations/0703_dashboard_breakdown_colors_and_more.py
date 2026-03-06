@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0702_datacolortheme_project")]
+    dependencies = [("insights", "0702_datacolortheme_project")]
 
     operations = [
         migrations.AddField(
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         #     model_name="dashboard",
         #     name="data_color_theme",
         #     field=models.ForeignKey(
-        #         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.datacolortheme"
+        #         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.datacolortheme"
         #     ),
         # ),
         migrations.SeparateDatabaseAndState(
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.datacolortheme",
+                        to="insights.datacolortheme",
                     ),
                 )
             ],
@@ -41,20 +41,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_dashboard" ADD COLUMN "data_color_theme_id" integer NULL CONSTRAINT "posthog_dashboard_data_color_theme_id_0084ccbf_fk_posthog_d" REFERENCES "posthog_datacolortheme"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_dashboard_data_color_theme_id_0084ccbf_fk_posthog_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_dashboard" ADD COLUMN "data_color_theme_id" integer NULL CONSTRAINT "insights_dashboard_data_color_theme_id_0084ccbf_fk_insights_d" REFERENCES "insights_datacolortheme"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_dashboard_data_color_theme_id_0084ccbf_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_dashboard" DROP COLUMN IF EXISTS "data_color_theme_id";
+                        ALTER TABLE "insights_dashboard" DROP COLUMN IF EXISTS "data_color_theme_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_dashboard_data_color_theme_id_0084ccbf" ON "posthog_dashboard" ("data_color_theme_id");
+                    CREATE INDEX CONCURRENTLY "insights_dashboard_data_color_theme_id_0084ccbf" ON "insights_dashboard" ("data_color_theme_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_dashboard_data_color_theme_id_0084ccbf";
+                        DROP INDEX IF EXISTS "insights_dashboard_data_color_theme_id_0084ccbf";
                     """,
                 ),
             ],

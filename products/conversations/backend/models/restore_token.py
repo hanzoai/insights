@@ -24,7 +24,7 @@ DEFAULT_TOKEN_TTL_MINUTES = 60
 class ConversationRestoreToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     token_hash = models.CharField(max_length=64, unique=True, db_index=True)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE, related_name="conversation_restore_tokens")
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, related_name="conversation_restore_tokens")
 
     # Email to find tickets for (stored directly since we send emails to this address anyway)
     recipient_email = models.EmailField(max_length=254)
@@ -38,7 +38,7 @@ class ConversationRestoreToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "posthog_conversations_restore_token"
+        db_table = "insights_conversations_restore_token"
         indexes = [
             models.Index(fields=["team", "recipient_email"], name="posthog_crt_team_email_idx"),
             models.Index(fields=["expires_at"], name="posthog_crt_expires_idx"),

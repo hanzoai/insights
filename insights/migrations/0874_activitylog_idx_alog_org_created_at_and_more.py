@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0873_alter_cohortpeople_options_and_more"),
+        ("insights", "0873_alter_cohortpeople_options_and_more"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_scp_act_crtd ON posthog_activitylog (team_id, scope, activity, created_at DESC) WHERE (NOT was_impersonated) AND (NOT is_system);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_scp_act_crtd ON insights_activitylog (team_id, scope, activity, created_at DESC) WHERE (NOT was_impersonated) AND (NOT is_system);"
                     ],
                     reverse_sql=["DROP INDEX CONCURRENTLY IF EXISTS idx_alog_team_scp_act_crtd;"],
                 ),

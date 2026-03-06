@@ -60,7 +60,7 @@ describe('feedbackPromptLogic', () => {
 
         it('does not show prompt when cooldown is active', async () => {
             // Set cooldown to recently shown
-            localStorage.setItem('posthog_ai_feedback_last_shown', Date.now().toString())
+            localStorage.setItem('insights_ai_feedback_last_shown', Date.now().toString())
 
             await expectLogic(logic, () => {
                 logic.actions.checkShouldShowPrompt(10, 5, 5)
@@ -186,7 +186,7 @@ describe('feedbackPromptLogic', () => {
                 logic.actions.recordFeedbackShown()
             })
 
-            const storedTime = parseInt(localStorage.getItem('posthog_ai_feedback_last_shown') || '0', 10)
+            const storedTime = parseInt(localStorage.getItem('insights_ai_feedback_last_shown') || '0', 10)
             expect(storedTime).toBeGreaterThanOrEqual(beforeTime)
             expect(storedTime).toBeLessThanOrEqual(Date.now())
         })
@@ -225,7 +225,7 @@ describe('feedbackPromptLogic', () => {
         })
 
         it('returns false when cooldown is active', () => {
-            localStorage.setItem('posthog_ai_feedback_last_shown', Date.now().toString())
+            localStorage.setItem('insights_ai_feedback_last_shown', Date.now().toString())
 
             // Need to remount to pick up the new localStorage value
             logic.unmount()
@@ -238,7 +238,7 @@ describe('feedbackPromptLogic', () => {
         it('returns true when cooldown has expired', () => {
             // Set cooldown to 25 hours ago (longer than 24 hour cooldown)
             const expiredTime = Date.now() - 25 * 60 * 60 * 1000
-            localStorage.setItem('posthog_ai_feedback_last_shown', expiredTime.toString())
+            localStorage.setItem('insights_ai_feedback_last_shown', expiredTime.toString())
 
             logic.unmount()
             logic = feedbackPromptLogic({ conversationId: MOCK_CONVERSATION_ID })

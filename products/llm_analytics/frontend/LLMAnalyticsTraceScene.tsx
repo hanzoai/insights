@@ -73,7 +73,7 @@ import { llmPersonsLazyLoaderLogic } from './llmPersonsLazyLoaderLogic'
 import { SummaryViewDisplay } from './summary-view/SummaryViewDisplay'
 import { TextViewDisplay } from './text-view/TextViewDisplay'
 import { exportTraceToClipboard } from './traceExportUtils'
-import { usePosthogAIBillingCalculations } from './usePosthogAIBillingCalculations'
+import { useInsightsAIBillingCalculations } from './useInsightsAIBillingCalculations'
 import {
     formatLLMCost,
     formatLLMEventTitle,
@@ -195,7 +195,7 @@ function TraceSceneWrapper(): JSX.Element {
     const { openSidePanel } = useActions(sidePanelStateLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const { showBillingInfo, markupUsd, billedTotalUsd, billedCredits } = usePosthogAIBillingCalculations(enrichedTree)
+    const { showBillingInfo, markupUsd, billedTotalUsd, billedCredits } = useInsightsAIBillingCalculations(enrichedTree)
     const backTo = searchParams.back_to
     const backPath =
         backTo === 'generations'

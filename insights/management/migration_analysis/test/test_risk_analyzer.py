@@ -105,7 +105,7 @@ class TestAddFieldOperations:
 
     def test_add_many_to_many_field(self):
         """ManyToMany fields create junction tables, not columns - always safe."""
-        field: models.Field = models.ManyToManyField("posthog.Survey", blank=True)
+        field: models.Field = models.ManyToManyField("insights.Survey", blank=True)
 
         op = create_mock_operation(
             migrations.AddField,
@@ -212,7 +212,7 @@ class TestRenameOperations:
         for the table rename - only Python code references change.
 
         Note: This test requires a real model in the app registry with db_table set.
-        For example, products.tasks.TaskProgress has db_table="posthog_task_progress".
+        For example, products.tasks.TaskProgress has db_table="insights_task_progress".
         """
         mock_migration = MagicMock()
         mock_migration.app_label = "tasks"  # products.tasks app

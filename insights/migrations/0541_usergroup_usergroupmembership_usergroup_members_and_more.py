@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0540_team_human_friendly_comparison_periods"),
+        ("insights", "0540_team_human_friendly_comparison_periods"),
     ]
 
     operations = [
@@ -39,20 +39,20 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("group", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup")),
+                ("group", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup")),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
             model_name="usergroup",
             name="members",
-            field=models.ManyToManyField(through="posthog.UserGroupMembership", to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(through="insights.UserGroupMembership", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="usergroup",
             name="team",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="posthog.team"
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="insights.team"
             ),
         ),
         migrations.AddConstraint(
