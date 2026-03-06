@@ -1,4 +1,4 @@
-import { convertScriptToJS } from '@posthog/scriptvm'
+import { convertScriptToJS } from '@insights/scriptvm'
 
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
 import { CyclotronInputType } from '~/schema/cyclotron'

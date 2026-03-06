@@ -14,7 +14,7 @@ import {
     CyclotronManager,
     CyclotronShadowManager,
     CyclotronWorker,
-} from '@posthog/cyclotron'
+} from '@insights/cyclotron'
 
 import { CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 

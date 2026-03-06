@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon'
 import { Counter, Histogram } from 'prom-client'
 
-import { ExecResult } from '@posthog/scriptvm'
+import { ExecResult } from '@insights/scriptvm'
 
 import { InsightsFlow } from '../../schema/insightsflow'
 import { RawClickHouseEvent } from '../../types'
