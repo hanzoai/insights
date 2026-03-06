@@ -7,7 +7,7 @@ Policies enforce architectural decisions and coding standards.
 from abc import ABC, abstractmethod
 
 # Apps owned by Insights where policies are enforced
-POSTHOG_OWNED_APPS = ["posthog", "ee"]
+POSTHOG_OWNED_APPS = ["insights"]
 
 
 def is_posthog_app(app_label: str, migration=None) -> bool:
