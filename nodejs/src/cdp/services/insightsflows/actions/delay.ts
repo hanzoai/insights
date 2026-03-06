@@ -1,6 +1,6 @@
 import { DateTime, DurationLike } from 'luxon'
 
-import { InsightsFlowAction } from '../../../../schema/customflow'
+import { InsightsFlowAction } from '../../../../schema/insightsflow'
 import { findContinueAction } from '../customflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 

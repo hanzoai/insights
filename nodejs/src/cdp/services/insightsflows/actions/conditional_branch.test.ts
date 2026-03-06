@@ -4,7 +4,7 @@ import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.bui
 import { FN_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
-import { InsightsFlow, InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlow, InsightsFlowAction } from '~/schema/insightsflow'
 
 import { findActionById, findActionByType } from '../customflow-utils'
 import { checkConditions } from './conditional_branch'

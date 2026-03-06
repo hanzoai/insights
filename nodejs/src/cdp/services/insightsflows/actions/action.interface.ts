@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlowAction } from '../../../../schema/customflow'
+import { InsightsFlowAction } from '../../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '../../../types'
 import { ScriptExecutorExecuteAsyncOptions } from '../../script-executor.service'
 

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { createTeam, getFirstTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { PostgresUse } from '~/utils/db/postgres'
 import { UUIDT } from '~/utils/utils'

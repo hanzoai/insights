@@ -2,7 +2,7 @@ import { Message } from 'node-rdkafka'
 
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 import { KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS } from '~/config/kafka-topics'
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { ClickHouseRouter } from '~/utils/db/clickhouse'
 import { parseJSON } from '~/utils/json-parse'
 import { captureException } from '~/utils/insights'
