@@ -1,5 +1,5 @@
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { Hub } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 import { delay } from '~/utils/utils'
