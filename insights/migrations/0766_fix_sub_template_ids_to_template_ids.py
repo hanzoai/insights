@@ -48,7 +48,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0765_hogflows"),
+        ("posthog", "0765_insightsflows"),
     ]
 
     operations = [
