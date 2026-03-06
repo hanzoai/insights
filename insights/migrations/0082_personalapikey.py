@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.CharField(
-                        default=posthog.models.utils.generate_random_token,
+                        default=insights.models.utils.generate_random_token,
                         max_length=50,
                         primary_key=True,
                         serialize=False,
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.CharField(
-                        default=posthog.models.utils.generate_random_token,
+                        default=insights.models.utils.generate_random_token,
                         editable=False,
                         max_length=50,
                         unique=True,

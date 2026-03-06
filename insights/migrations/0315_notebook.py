@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     "short_id",
                     models.CharField(
                         blank=True,
-                        default=posthog.utils.generate_short_id,
+                        default=insights.utils.generate_short_id,
                         max_length=12,
                     ),
                 ),

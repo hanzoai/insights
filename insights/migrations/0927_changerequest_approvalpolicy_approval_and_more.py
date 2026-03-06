@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("action_key", models.CharField(max_length=128)),
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("action_key", models.CharField(max_length=128)),
@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 (
