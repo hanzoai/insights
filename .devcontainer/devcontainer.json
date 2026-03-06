@@ -6,7 +6,7 @@
     "build": {
         "dockerfile": "Dockerfile",
         "context": "../",
-        "cacheFrom": "ghcr.io/posthog/posthog/codespaces:master"
+        "cacheFrom": "ghcr.io/hanzoai/insights-codespaces:latest"
     },
     "remoteUser": "vscode",
     "remoteEnv": {
