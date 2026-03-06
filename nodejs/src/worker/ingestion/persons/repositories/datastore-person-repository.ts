@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
-import { DatastoreRouter } from '~/utils/db/clickhouse'
+import { DatastoreRouter } from '~/utils/db/datastore'
 import { logger } from '~/utils/logger'
 
 import { TopicMessage } from '../../../../stream/producer'
@@ -17,13 +17,13 @@ import {
 } from '../../../../types'
 import { CreatePersonResult } from '../../../../utils/db/db'
 import { parseJSON } from '../../../../utils/json-parse'
-import { escapeClickHouseString } from '../../../../utils/utils'
+import { escapeDatastoreString } from '../../../../utils/utils'
 import { PersonUpdate } from '../person-update-batch'
 import { InternalPersonWithDistinctId, PersonRepository } from './person-repository'
 import { PersonRepositoryTransaction } from './person-repository-transaction'
 
 /**
- * Read-only ClickHouse implementation of PersonRepository, primarily used by batch insightsflows.
+ * Read-only datastore implementation of PersonRepository, primarily used by batch insightsflows.
  *
  * This count/fetch persons by properties implementation mimics the behavior of the existing
  * InsightsQL-based person queries in Python, it should be functionally equivalent to the queries
@@ -92,7 +92,7 @@ export class DatastorePersonRepository implements PersonRepository {
         const cursor = options?.cursor
 
         const propertyFilters = this.buildPropertyFilters(properties)
-        const cursorFilter = cursor ? `AND id > '${escapeClickHouseString(cursor)}'` : ''
+        const cursorFilter = cursor ? `AND id > '${escapeDatastoreString(cursor)}'` : ''
 
         const query = `
             SELECT
@@ -144,7 +144,7 @@ export class DatastorePersonRepository implements PersonRepository {
             query,
         })
 
-        const results = await this.query<ClickHousePersonWithDistinctId>(query)
+        const results = await this.query<DatastorePersonWithDistinctId>(query)
         return results.map((row) => ({
             ...this.convertToInternalPerson(row),
             distinct_id: row.distinct_id,
@@ -152,7 +152,7 @@ export class DatastorePersonRepository implements PersonRepository {
     }
 
     /**
-     * Helper method to build property filter conditions for ClickHouse queries.
+     * Helper method to build property filter conditions for datastore queries.
      * Matches the behavior of Python's property_to_expr for person properties.
      * Note: Does not support cohort properties - those require joins to cohort tables.
      */
@@ -163,7 +163,7 @@ export class DatastorePersonRepository implements PersonRepository {
 
         const filters = properties.map((filter) => {
             const { key, value, operator = 'exact' } = filter
-            const escapedKey = escapeClickHouseString(key)
+            const escapedKey = escapeDatastoreString(key)
 
             // Helper to wrap expression in argMax for HAVING clause
             const argMaxProp = (expr: string) => `argMax(${expr}, version)`
@@ -186,14 +186,14 @@ export class DatastorePersonRepository implements PersonRepository {
                             return '1=0'
                         }
 
-                        const values = normalizedValues.map((v) => `'${escapeClickHouseString(v!)}'`).join(', ')
+                        const values = normalizedValues.map((v) => `'${escapeDatastoreString(v!)}'`).join(', ')
                         return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) IN (${values})`
                     } else {
                         const normalizedValue = normalizeValue(value)
                         if (normalizedValue === null) {
                             return `${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)} = ''`
                         }
-                        return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) = '${escapeClickHouseString(normalizedValue)}'`
+                        return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) = '${escapeDatastoreString(normalizedValue)}'`
                     }
                 }
 
@@ -206,14 +206,14 @@ export class DatastorePersonRepository implements PersonRepository {
                             return '1=1'
                         }
 
-                        const values = normalizedValues.map((v) => `'${escapeClickHouseString(v!)}'`).join(', ')
+                        const values = normalizedValues.map((v) => `'${escapeDatastoreString(v!)}'`).join(', ')
                         return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) NOT IN (${values})`
                     } else {
                         const normalizedValue = normalizeValue(value)
                         if (normalizedValue === null) {
                             return `${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)} != ''`
                         }
-                        return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) != '${escapeClickHouseString(normalizedValue)}'`
+                        return `toString(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}) != '${escapeDatastoreString(normalizedValue)}'`
                     }
                 }
 
@@ -225,7 +225,7 @@ export class DatastorePersonRepository implements PersonRepository {
                     if (normalizedValue === null) {
                         return '1=0'
                     }
-                    return `positionCaseInsensitive(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeClickHouseString(normalizedValue)}') > 0`
+                    return `positionCaseInsensitive(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeDatastoreString(normalizedValue)}') > 0`
                 }
 
                 case 'not_icontains': {
@@ -236,7 +236,7 @@ export class DatastorePersonRepository implements PersonRepository {
                     if (normalizedValue === null) {
                         return '1=1'
                     }
-                    return `positionCaseInsensitive(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeClickHouseString(normalizedValue)}') = 0`
+                    return `positionCaseInsensitive(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeDatastoreString(normalizedValue)}') = 0`
                 }
 
                 case 'regex': {
@@ -247,7 +247,7 @@ export class DatastorePersonRepository implements PersonRepository {
                     if (normalizedValue === null) {
                         return '1=0'
                     }
-                    return `match(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeClickHouseString(normalizedValue)}')`
+                    return `match(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeDatastoreString(normalizedValue)}')`
                 }
 
                 case 'not_regex': {
@@ -258,7 +258,7 @@ export class DatastorePersonRepository implements PersonRepository {
                     if (normalizedValue === null) {
                         return '1=1'
                     }
-                    return `NOT match(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeClickHouseString(normalizedValue)}')`
+                    return `NOT match(${argMaxProp(`JSONExtractString(properties, '${escapedKey}')`)}, '${escapeDatastoreString(normalizedValue)}')`
                 }
 
                 case 'gt': {
@@ -325,9 +325,9 @@ export class DatastorePersonRepository implements PersonRepository {
     }
 
     /**
-     * Convert ClickHouse person row to InternalPerson
+     * Convert datastore person row to InternalPerson
      */
-    private convertToInternalPerson(row: ClickHousePersonRow): InternalPerson {
+    private convertToInternalPerson(row: DatastorePersonRow): InternalPerson {
         return {
             id: row.id,
             uuid: row.id,
@@ -387,14 +387,14 @@ export class DatastorePersonRepository implements PersonRepository {
 
     private buildDateBeforeExprWithArgMax(escapedKey: string, value: string): string {
         const parsedExpr = this.buildDatePropertyExprWithArgMax(escapedKey)
-        const dateValue = escapeClickHouseString(this.normalizeDateValue(value))
+        const dateValue = escapeDatastoreString(this.normalizeDateValue(value))
         return `${parsedExpr} < parseDateTimeBestEffortOrNull('${dateValue}')`
     }
 
     private buildDateAfterExprWithArgMax(escapedKey: string, value: string): string {
         const parsedExpr = this.buildDatePropertyExprWithArgMax(escapedKey)
         const dateValue = this.normalizeDateValue(value)
-        const escapedDateValue = escapeClickHouseString(dateValue)
+        const escapedDateValue = escapeDatastoreString(dateValue)
         const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateValue)
         const compareValue = isDateOnly
             ? `subtractSeconds(addDays(toDate('${escapedDateValue}'), 1), 1)`
@@ -494,10 +494,10 @@ export class DatastorePersonRepository implements PersonRepository {
 }
 
 /**
- * ClickHouse person row with aggregated fields
- * Note: ClickHouse JSON format returns numeric columns as strings
+ * Datastore person row with aggregated fields
+ * Note: Datastore JSON format returns numeric columns as strings
  */
-interface ClickHousePersonRow {
+interface DatastorePersonRow {
     id: string
     team_id: number | string
     is_identified: number
@@ -507,8 +507,8 @@ interface ClickHousePersonRow {
 }
 
 /**
- * ClickHouse person row joined with distinct_id
+ * Datastore person row joined with distinct_id
  */
-interface ClickHousePersonWithDistinctId extends ClickHousePersonRow {
+interface DatastorePersonWithDistinctId extends DatastorePersonRow {
     distinct_id: string
 }

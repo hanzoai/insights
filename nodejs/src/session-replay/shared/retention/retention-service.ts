@@ -11,7 +11,7 @@ export class RetentionService {
     constructor(
         private redisPool: RedisPool,
         private teamService: TeamService,
-        private keyPrefix = '@posthog/replay/'
+        private keyPrefix = '@hanzo/replay/'
     ) {}
 
     private generateRedisKey(sessionId: string): string {

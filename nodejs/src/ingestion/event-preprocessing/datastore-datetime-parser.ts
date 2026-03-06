@@ -1,12 +1,12 @@
 /**
- * ClickHouse DateTime Best Effort Parser
+ * Datastore DateTime Best Effort Parser
  *
- * A faithful JavaScript port of ClickHouse's parseDateTimeBestEffort logic.
- * Translated line-by-line from: ClickHouse/src/IO/parseDateTimeBestEffort.cpp
+ * A faithful JavaScript port of Datastore's parseDateTimeBestEffort logic.
+ * Translated line-by-line from: datastore/src/IO/parseDateTimeBestEffort.cpp
  *
- * ARCHITECTURE (mirrors ClickHouse's two-layer design):
+ * ARCHITECTURE (mirrors datastore's two-layer design):
  *
- * In ClickHouse, parsing happens in two layers:
+ * In datastore, parsing happens in two layers:
  *
  * 1. Parser (parseDateTimeBestEffort.cpp):
  *    - Parses as much as it can from the input buffer
@@ -20,7 +20,7 @@
  *
  * We mirror this structure:
  * - parseDateTimeBestEffort(): Layer 1 - returns { outcome, fullyConsumed }
- * - isValidClickHouseDateTime(): Layer 2 - combines both checks
+ * - isValidDatastoreDateTime(): Layer 2 - combines both checks
  */
 
 interface ParseResult {
@@ -148,7 +148,7 @@ function readDecimalNumber(digits: number[], start: number, count: number): numb
  * - fullyConsumed: was all input consumed?
  *
  * Note: This function does NOT reject trailing garbage - that's Layer 2's job.
- * For validation, use isValidClickHouseDateTime() which combines both checks.
+ * For validation, use isValidDatastoreDateTime() which combines both checks.
  *
  * C++ template parameters mapped to our implementation:
  * - ReturnType: bool (tryParse variant, returns success/failure instead of throwing)
@@ -782,10 +782,10 @@ export function parseDateTimeBestEffort(
 /**
  * Layer 2: Wrapper that mirrors FunctionsConversion.h
  *
- * Checks if a value will be successfully parsed by ClickHouse's
+ * Checks if a value will be successfully parsed by datastore's
  * parseDateTime64BestEffortOrNull function.
  *
- * Combines two checks (just like ClickHouse):
+ * Combines two checks (just like datastore):
  * 1. Did parsing succeed? (from parseDateTimeBestEffort)
  * 2. Was all input consumed? (mirrors: if (!isAllRead(read_buffer)) parsed = false)
  *
@@ -793,7 +793,7 @@ export function parseDateTimeBestEffort(
  * Example: "2020-01-01xyz" -> false (valid parse, but "xyz" left over)
  * Example: "garbage" -> false (invalid parse)
  */
-export function isValidClickHouseDateTime(value: unknown): boolean {
+export function isValidDatastoreDateTime(value: unknown): boolean {
     if (typeof value === 'number') {
         return true
     }

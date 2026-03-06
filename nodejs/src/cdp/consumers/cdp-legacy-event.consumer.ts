@@ -5,7 +5,7 @@ import { LegacyPluginAppMetrics } from '~/cdp/legacy-plugins/app-metrics'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 
 import { StreamConsumer } from '../../stream/consumer'
-import { HealthCheckResult, Hub, ISOTimestamp, PostIngestionEvent, ProjectId, RawClickHouseEvent } from '../../types'
+import { HealthCheckResult, Hub, ISOTimestamp, PostIngestionEvent, ProjectId, RawDatastoreEvent } from '../../types'
 import { PostgresUse } from '../../utils/db/postgres'
 import { parseJSON } from '../../utils/json-parse'
 import { LazyLoader } from '../../utils/lazy-loader'
@@ -239,7 +239,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         }
 
         // Extract plugin ID from URL (following the migration.py pattern)
-        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/PostHog/', '')
+        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/hanzoai/', '')
 
         const templateId = `plugin-${pluginId}`
 
@@ -350,9 +350,9 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawClickHouseEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                    const team = await this.hub.teamManager.getTeam(clickHouseEvent.team_id)
+                    const team = await this.hub.teamManager.getTeam(datastoreEvent.team_id)
 
                     if (!team) {
                         return
@@ -364,7 +364,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

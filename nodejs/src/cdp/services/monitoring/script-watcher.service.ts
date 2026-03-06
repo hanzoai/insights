@@ -17,9 +17,9 @@ import {
 export type ScriptWatcherServiceHub = Pick<
     Hub,
     | 'teamManager'
-    | 'CDP_WATCHER_HOG_COST_TIMING_LOWER_MS'
-    | 'CDP_WATCHER_HOG_COST_TIMING_UPPER_MS'
-    | 'CDP_WATCHER_HOG_COST_TIMING'
+    | 'CDP_WATCHER_COST_TIMING_LOWER_MS'
+    | 'CDP_WATCHER_COST_TIMING_UPPER_MS'
+    | 'CDP_WATCHER_COST_TIMING'
     | 'CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS'
     | 'CDP_WATCHER_ASYNC_COST_TIMING_UPPER_MS'
     | 'CDP_WATCHER_ASYNC_COST_TIMING'
@@ -34,7 +34,7 @@ export type ScriptWatcherServiceHub = Pick<
     | 'CDP_WATCHER_OBSERVE_RESULTS_BUFFER_MAX_RESULTS'
 >
 
-export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@posthog/script-watcher-2'
+export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@hanzo/script-watcher-2'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
 const REDIS_KEY_STATE = `${BASE_REDIS_KEY}/state`
 const REDIS_KEY_STATE_LOCK = `${BASE_REDIS_KEY}/state-lock`
@@ -103,9 +103,9 @@ export class ScriptWatcherService {
     ) {
         this.costsMapping = {
             script: {
-                lowerBound: this.hub.CDP_WATCHER_HOG_COST_TIMING_LOWER_MS,
-                upperBound: this.hub.CDP_WATCHER_HOG_COST_TIMING_UPPER_MS,
-                cost: this.hub.CDP_WATCHER_HOG_COST_TIMING,
+                lowerBound: this.hub.CDP_WATCHER_COST_TIMING_LOWER_MS,
+                upperBound: this.hub.CDP_WATCHER_COST_TIMING_UPPER_MS,
+                cost: this.hub.CDP_WATCHER_COST_TIMING,
             },
             async_function: {
                 lowerBound: this.hub.CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS,
@@ -123,7 +123,7 @@ export class ScriptWatcherService {
         }
 
         this.lazyLoader = new LazyLoader({
-            name: 'hog_watcher_lazy_loader',
+            name: 'script_watcher_lazy_loader',
             refreshAgeMs: 30_000, // Cache for 30 seconds
             refreshJitterMs: 10_000,
             loader: async (ids) => await this.getPersistedStates(ids),

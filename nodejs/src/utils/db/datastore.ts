@@ -1,4 +1,4 @@
-import { ClickHouseClient, createClient as createClickhouseClient } from '@clickhouse/client'
+import { DatastoreNativeClient, createClient as createDatastoreNativeClient } from '@clickhouse/client'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
 
@@ -20,10 +20,11 @@ export interface DatastoreConnectionConfig {
 }
 
 /** @deprecated Use DatastoreConnectionConfig */
+// @deprecated
 export type ClickHouseConnectionConfig = DatastoreConnectionConfig
 
-function createDatastoreClient(config: DatastoreConnectionConfig): ClickHouseClient {
-    return createClickhouseClient({
+function createDatastoreClient(config: DatastoreConnectionConfig): DatastoreNativeClient {
+    return createDatastoreNativeClient({
         url: config.url,
         username: config.username,
         password: config.password,
@@ -38,7 +39,7 @@ function createDatastoreClient(config: DatastoreConnectionConfig): ClickHouseCli
 }
 
 export class DatastoreRouter {
-    private client: ClickHouseClient | null = null
+    private client: DatastoreNativeClient | null = null
 
     constructor(private hub: PluginsServerConfig) {}
 

@@ -1,14 +1,14 @@
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { PluginEvent, ProcessedPluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent, ProcessedPluginEvent } from '@hanzo/plugin-scaffold'
 
 import { StreamProducerWrapper, TopicMessage } from '../../stream/producer'
 import { PipelineEvent, TeamId, TimestampFormat } from '../../types'
-import { safeClickhouseString } from '../../utils/db/utils'
+import { safeDatastoreString } from '../../utils/db/utils'
 import { logger } from '../../utils/logger'
 import { IngestionWarningLimiter } from '../../utils/token-bucket'
-import { UUIDT, castTimestampOrNow, castTimestampToClickhouseFormat } from '../../utils/utils'
+import { UUIDT, castTimestampOrNow, castTimestampToDatastoreFormat } from '../../utils/utils'
 import { STREAM_EVENTS_DEAD_LETTER_QUEUE, STREAM_INGESTION_WARNINGS } from './../../config/stream-topics'
 
 export const ingestionWarningCounter = new Counter({
@@ -17,9 +17,9 @@ export const ingestionWarningCounter = new Counter({
     labelNames: ['type', 'emitted'],
 })
 
-function getClickhouseTimestampOrNull(isoTimestamp?: string): string | null {
+function getDatastoreTimestampOrNull(isoTimestamp?: string): string | null {
     return isoTimestamp
-        ? castTimestampToClickhouseFormat(DateTime.fromISO(isoTimestamp), TimestampFormat.ClickHouseSecondPrecision)
+        ? castTimestampToDatastoreFormat(DateTime.fromISO(isoTimestamp), TimestampFormat.DatastoreSecondPrecision)
         : null
 }
 
@@ -35,23 +35,23 @@ export function generateEventDeadLetterQueueMessage(
     }
     const pluginEvent: PluginEvent = { now: event.timestamp, sent_at: event.timestamp, ...event } as any as PluginEvent
     const { now, sent_at, timestamp, ...usefulEvent } = pluginEvent
-    const currentTimestamp = getClickhouseTimestampOrNull(new Date().toISOString())
-    const eventNow = getClickhouseTimestampOrNull(now)
+    const currentTimestamp = getDatastoreTimestampOrNull(new Date().toISOString())
+    const eventNow = getDatastoreTimestampOrNull(now)
 
     const deadLetterQueueEvent = {
         ...usefulEvent,
-        event: safeClickhouseString(usefulEvent.event),
-        distinct_id: safeClickhouseString(usefulEvent.distinct_id),
-        site_url: safeClickhouseString(usefulEvent.site_url || ''),
-        ip: safeClickhouseString(usefulEvent.ip || ''),
+        event: safeDatastoreString(usefulEvent.event),
+        distinct_id: safeDatastoreString(usefulEvent.distinct_id),
+        site_url: safeDatastoreString(usefulEvent.site_url || ''),
+        ip: safeDatastoreString(usefulEvent.ip || ''),
         id: new UUIDT().toString(),
         event_uuid: event.uuid,
         properties: JSON.stringify(event.properties ?? {}),
         now: eventNow,
         error_timestamp: currentTimestamp,
         raw_payload: JSON.stringify(event),
-        error_location: safeClickhouseString(errorLocation),
-        error: safeClickhouseString(errorMessage),
+        error_location: safeDatastoreString(errorLocation),
+        error: safeDatastoreString(errorMessage),
         tags: ['plugin_server', 'ingest_event'],
         team_id: event.team_id || teamId,
     }
@@ -100,7 +100,7 @@ export async function captureIngestionWarning(
                             type: type,
                             source: 'plugin-server',
                             details: JSON.stringify(details),
-                            timestamp: castTimestampOrNow(null, TimestampFormat.ClickHouse),
+                            timestamp: castTimestampOrNow(null, TimestampFormat.Datastore),
                         }),
                     },
                 ],

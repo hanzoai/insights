@@ -31,16 +31,16 @@ export const STREAM_SESSION_RECORDING_SNAPSHOT_ITEM_EVENTS = `${prefix}session_r
 export const STREAM_SESSION_RECORDING_SNAPSHOT_ITEM_OVERFLOW = `${prefix}session_recording_snapshot_item_overflow${suffix}`
 export const STREAM_SESSION_RECORDING_SNAPSHOT_ITEM_DLQ = `${prefix}session_recording_snapshot_item_dlq${suffix}`
 
-// write session recording and replay events to ClickHouse
+// write session recording and replay events to datastore
 export const STREAM_DATASTORE_SESSION_RECORDING_EVENTS = `${prefix}datastore_session_recording_events${suffix}`
 export const STREAM_DATASTORE_SESSION_REPLAY_EVENTS = `${prefix}datastore_session_replay_events${suffix}`
 
-// write performance events to ClickHouse
+// write performance events to datastore
 export const STREAM_PERFORMANCE_EVENTS = `${prefix}datastore_performance_events${suffix}`
-// write heatmap events to ClickHouse
+// write heatmap events to datastore
 export const STREAM_DATASTORE_HEATMAP_EVENTS = `${prefix}datastore_heatmap_events${suffix}`
 
-// log entries for ingestion into ClickHouse
+// log entries for ingestion into datastore
 export const STREAM_LOG_ENTRIES = `${prefix}log_entries${suffix}`
 
 // CDP topics

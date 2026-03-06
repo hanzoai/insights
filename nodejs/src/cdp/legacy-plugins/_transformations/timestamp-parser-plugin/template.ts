@@ -11,7 +11,7 @@ export const timestampParserPlugin: LegacyTransformationPlugin = {
         id: 'plugin-timestamp-parser-plugin',
         name: 'Timestamp Parser',
         description: 'Parse your event timestamps into useful date properties.',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/timestamp-parser-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/timestamp-parser-plugin/main/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,
