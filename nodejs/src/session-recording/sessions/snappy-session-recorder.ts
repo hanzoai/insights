@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import snappy from 'snappy'
 
 import { logger } from '../../utils/logger'
-import { ParsedMessageData } from '../kafka/types'
+import { ParsedMessageData } from '../stream/types'
 import { hrefFrom, isClick, isKeypress, isMouseActivity } from '../rrweb-types'
 import { SegmentationEvent, activeMillisecondsFromSegmentationEvents, toSegmentationEvent } from '../segmentation'
 

@@ -6,8 +6,8 @@
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
-import { KafkaConsumer } from '../../../kafka/consumer'
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamConsumer } from '../../../stream/consumer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { HealthCheckResult, HealthCheckResultError, PluginsServerConfig } from '../../../types'
 import { logger } from '../../../utils/logger'
 import { CyclotronJobInvocation, CyclotronJobQueueKind } from '../../types'
@@ -38,8 +38,8 @@ export const getDelayByQueue = (queue: CyclotronJobQueueKind): number => {
 }
 
 export class CyclotronJobQueueDelay {
-    private kafkaConsumer?: KafkaConsumer
-    private kafkaProducer?: KafkaProducerWrapper
+    private streamConsumer?: StreamConsumer
+    private streamProducer?: StreamProducerWrapper
     protected name = 'CdpCyclotronDelayQueue'
 
     constructor(
@@ -52,17 +52,17 @@ export class CyclotronJobQueueDelay {
      * Helper to only start the producer related code (e.g. when not a consumer)
      */
     public async startAsProducer() {
-        // NOTE: For producing we use different values dedicated for Cyclotron as this is typically using its own Kafka cluster
-        this.kafkaProducer = await KafkaProducerWrapper.create(this.config.KAFKA_CLIENT_RACK, 'CDP_PRODUCER')
+        // NOTE: For producing we use different values dedicated for Cyclotron as this is typically using its own stream cluster
+        this.streamProducer = await StreamProducerWrapper.create(this.config.STREAM_CLIENT_RACK, 'CDP_PRODUCER')
     }
 
     public async startAsConsumer() {
         const groupId = `cdp-cyclotron-${this.queue}-consumer`
         const topic = `cdp_cyclotron_${this.queue}`
 
-        // NOTE: As there is only ever one consumer per process we use the KAFKA_CONSUMER_ vars as with any other consumer
+        // NOTE: As there is only ever one consumer per process we use the STREAM_CONSUMER_ vars as with any other consumer
         // Disable auto-commit for manual control over long-running batches
-        this.kafkaConsumer = new KafkaConsumer({
+        this.streamConsumer = new StreamConsumer({
             groupId,
             topic,
             callEachBatchWhenEmpty: true,
@@ -70,26 +70,26 @@ export class CyclotronJobQueueDelay {
             autoOffsetStore: false,
         })
 
-        logger.info('🔄', 'Connecting kafka consumer', { groupId, topic })
-        await this.kafkaConsumer.connect(async (messages) => {
-            const { backgroundTask } = await this.consumeKafkaBatch(messages)
+        logger.info('🔄', 'Connecting stream consumer', { groupId, topic })
+        await this.streamConsumer.connect(async (messages) => {
+            const { backgroundTask } = await this.consumeStreamBatch(messages)
             return { backgroundTask }
         })
     }
 
     public async stopConsumer() {
-        await this.kafkaConsumer?.disconnect()
+        await this.streamConsumer?.disconnect()
     }
 
     public async stopProducer() {
-        await this.kafkaProducer?.disconnect()
+        await this.streamProducer?.disconnect()
     }
 
     public isHealthy(): HealthCheckResult {
-        if (!this.kafkaConsumer) {
-            return new HealthCheckResultError('Kafka consumer not initialized', {})
+        if (!this.streamConsumer) {
+            return new HealthCheckResultError('Stream consumer not initialized', {})
         }
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 
     private async delayWithCancellation(delayMs: number): Promise<void> {
@@ -97,7 +97,7 @@ export class CyclotronJobQueueDelay {
         const startTime = Date.now()
 
         while (Date.now() - startTime < delayMs) {
-            if (this.kafkaConsumer?.isShuttingDown() || this.kafkaConsumer?.isRebalancing()) {
+            if (this.streamConsumer?.isShuttingDown() || this.streamConsumer?.isRebalancing()) {
                 throw new Error('Delay cancelled due to consumer shutdown or rebalancing')
             }
 
@@ -110,11 +110,11 @@ export class CyclotronJobQueueDelay {
         }
     }
 
-    private getKafkaProducer(): KafkaProducerWrapper {
-        if (!this.kafkaProducer) {
-            throw new Error('KafkaProducer not initialized')
+    private getStreamProducer(): StreamProducerWrapper {
+        if (!this.streamProducer) {
+            throw new Error('StreamProducer not initialized')
         }
-        return this.kafkaProducer
+        return this.streamProducer
     }
 
     private getHeaderValue(headers: any[] | undefined, key: string): string | undefined {
@@ -131,7 +131,7 @@ export class CyclotronJobQueueDelay {
         return undefined
     }
 
-    private async consumeKafkaBatch(messages: Message[]): Promise<{ backgroundTask: Promise<any> }> {
+    private async consumeStreamBatch(messages: Message[]): Promise<{ backgroundTask: Promise<any> }> {
         if (messages.length === 0) {
             return await this.consumeBatch([])
         }
@@ -152,7 +152,7 @@ export class CyclotronJobQueueDelay {
                         queueScheduledAt,
                         messageKey: message.key,
                     })
-                    this.kafkaConsumer?.offsetsStore([
+                    this.streamConsumer?.offsetsStore([
                         {
                             ...message,
                             offset: message.offset + 1,
@@ -175,7 +175,7 @@ export class CyclotronJobQueueDelay {
 
                 await this.delayWithCancellation(waitTime)
 
-                const producer = this.getKafkaProducer()
+                const producer = this.getStreamProducer()
 
                 await producer.produce({
                     value: message.value,
@@ -187,7 +187,7 @@ export class CyclotronJobQueueDelay {
                     headers: message.headers as unknown as Record<string, string>,
                 })
 
-                const result = this.kafkaConsumer?.offsetsStore([
+                const result = this.streamConsumer?.offsetsStore([
                     {
                         ...message,
                         offset: message.offset + 1,

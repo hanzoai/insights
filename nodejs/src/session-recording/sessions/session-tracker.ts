@@ -11,7 +11,7 @@ export class SessionTracker {
     private readonly keyPrefix = '@posthog/replay/session-seen'
 
     // In-memory cache to avoid hitting Redis for every message
-    // Since Kafka partitions by session ID, the same session always hits the same consumer
+    // Since Stream partitions by session ID, the same session always hits the same consumer
     private readonly localCache: LRUCache<string, true>
 
     constructor(

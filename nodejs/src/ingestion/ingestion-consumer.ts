@@ -5,8 +5,8 @@ import { Gauge } from 'prom-client'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
 import { ScriptTransformerHub, ScriptTransformerService } from '../cdp/script-transformations/script-transformer.service'
-import { KafkaConsumer } from '../kafka/consumer'
-import { KafkaProducerWrapper } from '../kafka/producer'
+import { StreamConsumer } from '../stream/consumer'
+import { StreamProducerWrapper } from '../stream/producer'
 import {
     HealthCheckResult,
     HealthCheckResultError,
@@ -43,7 +43,7 @@ import { RedisOverflowRepository } from './utils/overflow-redirect/overflow-redi
  * - ScriptTransformerService (via ScriptTransformerHub)
  * - BatchWritingGroupStore (via GroupHub)
  * - EventIngestionRestrictionManager
- * - KafkaProducerWrapper
+ * - StreamProducerWrapper
  * - BatchWritingPersonsStore
  * - Preprocessing and ingestion pipelines
  */
@@ -56,8 +56,8 @@ export type IngestionConsumerHub = ScriptTransformerHub &
         // GroupHub (BatchWritingGroupStore)
         | 'groupRepository'
         | 'clickhouseGroupRepository'
-        // KafkaProducerWrapper.create
-        | 'KAFKA_CLIENT_RACK'
+        // StreamProducerWrapper.create
+        | 'STREAM_CLIENT_RACK'
         // PreprocessingHub (additional fields not in ScriptTransformerHub)
         | 'cookielessManager'
         // BatchWritingPersonsStore
@@ -81,10 +81,10 @@ export class IngestionConsumer {
     protected topic: string
     protected dlqTopic: string
     protected overflowTopic?: string
-    protected kafkaConsumer: KafkaConsumer
+    protected streamConsumer: StreamConsumer
     isStopping = false
-    protected kafkaProducer?: KafkaProducerWrapper
-    protected kafkaOverflowProducer?: KafkaProducerWrapper
+    protected streamProducer?: StreamProducerWrapper
+    protected streamOverflowProducer?: StreamProducerWrapper
     public scriptTransformer: ScriptTransformerService
     private overflowRedirectService?: OverflowRedirectService
     private overflowLaneTTLRefreshService?: OverflowRedirectService
@@ -164,7 +164,7 @@ export class IngestionConsumer {
 
         this.scriptTransformer = new ScriptTransformerService(hub)
 
-        this.personsStore = new BatchWritingPersonsStore(this.hub.personRepository, this.hub.kafkaProducer, {
+        this.personsStore = new BatchWritingPersonsStore(this.hub.personRepository, this.hub.streamProducer, {
             dbWriteMode: this.hub.PERSON_BATCH_WRITING_DB_WRITE_MODE,
             useBatchUpdates: this.hub.PERSON_BATCH_WRITING_USE_BATCH_UPDATES,
             maxConcurrentUpdates: this.hub.PERSON_BATCH_WRITING_MAX_CONCURRENT_UPDATES,
@@ -179,7 +179,7 @@ export class IngestionConsumer {
             optimisticUpdateRetryInterval: this.hub.GROUP_BATCH_WRITING_OPTIMISTIC_UPDATE_RETRY_INTERVAL_MS,
         })
 
-        this.kafkaConsumer = new KafkaConsumer({
+        this.streamConsumer = new StreamConsumer({
             groupId: this.groupId,
             topic: this.topic,
         })
@@ -196,19 +196,19 @@ export class IngestionConsumer {
     public async start(): Promise<void> {
         await Promise.all([
             this.scriptTransformer.start(),
-            KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK).then((producer) => {
-                this.kafkaProducer = producer
+            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK).then((producer) => {
+                this.streamProducer = producer
             }),
-            // TRICKY: When we produce overflow events they are back to the kafka we are consuming from
-            KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK, 'CONSUMER').then((producer) => {
-                this.kafkaOverflowProducer = producer
+            // TRICKY: When we produce overflow events they are back to the stream we are consuming from
+            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK, 'CONSUMER').then((producer) => {
+                this.streamOverflowProducer = producer
             }),
         ])
 
         // Initialize pipeline
         const joinedPipelineConfig: JoinedIngestionPipelineConfig = {
             hub: this.hub,
-            kafkaProducer: this.kafkaProducer!,
+            streamProducer: this.streamProducer!,
             personsStore: this.personsStore,
             groupStore: this.groupStore,
             scriptTransformer: this.scriptTransformer,
@@ -222,8 +222,8 @@ export class IngestionConsumer {
             overflowRedirectService: this.overflowRedirectService,
             overflowLaneTTLRefreshService: this.overflowLaneTTLRefreshService,
             perDistinctIdOptions: {
-                DATASTORE_JSON_EVENTS_KAFKA_TOPIC: this.hub.DATASTORE_JSON_EVENTS_KAFKA_TOPIC,
-                DATASTORE_HEATMAPS_KAFKA_TOPIC: this.hub.DATASTORE_HEATMAPS_KAFKA_TOPIC,
+                DATASTORE_JSON_EVENTS_STREAM_TOPIC: this.hub.DATASTORE_JSON_EVENTS_STREAM_TOPIC,
+                DATASTORE_HEATMAPS_STREAM_TOPIC: this.hub.DATASTORE_HEATMAPS_STREAM_TOPIC,
                 SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: this.hub.SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP,
                 TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: this.hub.TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE,
                 PIPELINE_STEP_STALLED_LOG_TIMEOUT: this.hub.PIPELINE_STEP_STALLED_LOG_TIMEOUT,
@@ -243,13 +243,13 @@ export class IngestionConsumer {
             joinedPipelineConfig
         ).build()
 
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             return await instrumentFn(
                 {
                     key: `ingestionConsumer.handleEachBatch`,
                     sendException: false,
                 },
-                async () => await this.handleKafkaBatch(messages)
+                async () => await this.handleStreamBatch(messages)
             )
         })
     }
@@ -260,21 +260,21 @@ export class IngestionConsumer {
 
         // Mark as stopping so that we don't actually process any more incoming messages, but still keep the process alive
         logger.info('🔁', `${this.name} - stopping batch consumer`)
-        await this.kafkaConsumer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping kafka producer`)
-        await this.kafkaProducer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping kafka overflow producer`)
-        await this.kafkaOverflowProducer?.disconnect()
+        await this.streamConsumer?.disconnect()
+        logger.info('🔁', `${this.name} - stopping stream producer`)
+        await this.streamProducer?.disconnect()
+        logger.info('🔁', `${this.name} - stopping stream overflow producer`)
+        await this.streamOverflowProducer?.disconnect()
         logger.info('🔁', `${this.name} - stopping script transformer`)
         await this.scriptTransformer.stop()
         logger.info('👍', `${this.name} - stopped!`)
     }
 
     public isHealthy(): HealthCheckResult {
-        if (!this.kafkaConsumer) {
-            return new HealthCheckResultError('Kafka consumer not initialized', {})
+        if (!this.streamConsumer) {
+            return new HealthCheckResultError('Stream consumer not initialized', {})
         }
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 
     private runInstrumented<T>(name: string, func: () => Promise<T>): Promise<T> {
@@ -302,15 +302,15 @@ export class IngestionConsumer {
             batchSize: partitionBatchSizes.get(partition) || 0,
         }))
 
-        logger.info('📖', `KAFKA_BATCH_START: ${this.name}`, {
+        logger.info('📖', `STREAM_BATCH_START: ${this.name}`, {
             pod: podName,
             totalMessages: messages.length,
             partitions: partitionData,
         })
     }
 
-    public async handleKafkaBatch(messages: Message[]): Promise<{ backgroundTask?: Promise<any> }> {
-        if (this.hub.KAFKA_BATCH_START_LOGGING_ENABLED) {
+    public async handleStreamBatch(messages: Message[]): Promise<{ backgroundTask?: Promise<any> }> {
+        if (this.hub.STREAM_BATCH_START_LOGGING_ENABLED) {
             this.logBatchStart(messages)
         }
 

@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '../../../kafka/producer'
+import { TopicMessage } from '../../../stream/producer'
 import { InternalPerson, PropertiesLastOperation, PropertiesLastUpdatedAt, Team } from '../../../types'
 import { CreatePersonResult, MoveDistinctIdsResult } from '../../../utils/db/db'
 import { BatchWritingStore } from '../stores/batch-writing-store'

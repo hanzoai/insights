@@ -3,7 +3,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 import { PreIngestionEvent, Team } from '~/types'
 
 import { AI_EVENT_TYPES, processAiEvent } from '../../../ingestion/ai'
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { logger } from '../../../utils/logger'
 import { captureException } from '../../../utils/insights'
 import { BatchWritingGroupStore } from '../groups/batch-writing-group-store'
@@ -13,7 +13,7 @@ import { captureIngestionWarning } from '../utils'
 import { invalidTimestampCounter } from './metrics'
 
 export async function prepareEventStep(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     eventsProcessor: EventsProcessor,
     groupStore: BatchWritingGroupStore,
     event: PluginEvent,
@@ -25,7 +25,7 @@ export async function prepareEventStep(
     const invalidTimestampCallback = function (type: string, details: Record<string, any>) {
         invalidTimestampCounter.labels(type).inc()
 
-        tsParsingIngestionWarnings.push(captureIngestionWarning(kafkaProducer, team_id, type, details))
+        tsParsingIngestionWarnings.push(captureIngestionWarning(streamProducer, team_id, type, details))
     }
 
     if (AI_EVENT_TYPES.has(event.event)) {

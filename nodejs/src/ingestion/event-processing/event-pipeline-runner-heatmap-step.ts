@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { EventHeaders, PipelineEvent, PreIngestionEvent, Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
 import { EventPipelineRunner, EventPipelineRunnerOptions } from '../../worker/ingestion/event-pipeline/runner'
@@ -23,7 +23,7 @@ export type EventPipelineRunnerHeatmapStepResult<TInput> = TInput & {
 
 export function createEventPipelineRunnerHeatmapStep<TInput extends EventPipelineRunnerHeatmapStepInput>(
     config: EventPipelineRunnerOptions,
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     teamManager: TeamManager,
     groupTypeManager: GroupTypeManager,
     personsStore: PersonsStore,
@@ -41,7 +41,7 @@ export function createEventPipelineRunnerHeatmapStep<TInput extends EventPipelin
 
         const runner = new EventPipelineRunner(
             config,
-            kafkaProducer,
+            streamProducer,
             teamManager,
             groupTypeManager,
             normalizedEvent,
