@@ -319,7 +319,7 @@ export function castTimestampOrNow(
     return castTimestampToClickhouseFormat(timestamp, timestampFormat)
 }
 
-const DATETIME_FORMAT_CLICKHOUSE_SECOND_PRECISION = 'yyyy-MM-dd HH:mm:ss'
+const DATETIME_FORMAT_DATASTORE_SECOND_PRECISION = 'yyyy-MM-dd HH:mm:ss'
 const DATETIME_FORMAT_CLICKHOUSE = 'yyyy-MM-dd HH:mm:ss.u'
 
 export function castTimestampToClickhouseFormat(timestamp: DateTime, timestampFormat: TimestampFormat.ISO): ISOTimestamp
@@ -342,7 +342,7 @@ export function castTimestampToClickhouseFormat(
     timestamp = timestamp.toUTC()
     switch (timestampFormat) {
         case TimestampFormat.ClickHouseSecondPrecision:
-            return timestamp.toFormat(DATETIME_FORMAT_CLICKHOUSE_SECOND_PRECISION) as ClickHouseTimestampSecondPrecision
+            return timestamp.toFormat(DATETIME_FORMAT_DATASTORE_SECOND_PRECISION) as ClickHouseTimestampSecondPrecision
         case TimestampFormat.ClickHouse:
             return timestamp.toFormat(DATETIME_FORMAT_CLICKHOUSE) as ClickHouseTimestamp
         case TimestampFormat.ISO:
@@ -362,7 +362,7 @@ export function clickHouseTimestampToISO(timestamp: ClickHouseTimestamp): ISOTim
 }
 
 export function clickHouseTimestampSecondPrecisionToISO(timestamp: ClickHouseTimestamp): ISOTimestamp {
-    return DateTime.fromFormat(timestamp, DATETIME_FORMAT_CLICKHOUSE_SECOND_PRECISION, {
+    return DateTime.fromFormat(timestamp, DATETIME_FORMAT_DATASTORE_SECOND_PRECISION, {
         zone: 'UTC',
     }).toISO() as ISOTimestamp
 }

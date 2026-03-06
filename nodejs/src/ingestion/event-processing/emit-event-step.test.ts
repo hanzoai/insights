@@ -63,7 +63,7 @@ describe('emit-event-step', () => {
 
         config = {
             kafkaProducer: mockKafkaProducer,
-            datastoreJsonEventsTopic: 'clickhouse_events_json',
+            datastoreJsonEventsTopic: 'datastore_events_json',
             groupId: 'test-group-id',
         }
 
@@ -100,7 +100,7 @@ describe('emit-event-step', () => {
             }
             expect(result.sideEffects).toHaveLength(1)
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: 'test-uuid',
                 value: Buffer.from(JSON.stringify(mockRawEvent)),
                 headers: { productTrack: 'general' },
@@ -163,7 +163,7 @@ describe('emit-event-step', () => {
             await step(input)
 
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: 'test-uuid',
                 value: Buffer.from(JSON.stringify(mockRawEvent)),
                 headers: { productTrack: 'general' },
@@ -199,7 +199,7 @@ describe('emit-event-step', () => {
             await step(input)
 
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: 'different-uuid',
                 value: Buffer.from(JSON.stringify(eventWithDifferentUuid)),
                 headers: { productTrack: 'general' },
@@ -228,7 +228,7 @@ describe('emit-event-step', () => {
 
             expect(isOkResult(result)).toBe(true)
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: 'test-uuid',
                 value: Buffer.from(JSON.stringify(mockRawEvent)),
                 headers: { productTrack: 'general' },
@@ -256,7 +256,7 @@ describe('emit-event-step', () => {
 
             expect(isOkResult(result)).toBe(true)
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: 'test-uuid',
                 value: Buffer.from(JSON.stringify(mockRawEvent)),
                 headers: { productTrack: 'general' },
@@ -330,7 +330,7 @@ describe('emit-event-step', () => {
             await step(input)
 
             expect(mockKafkaProducer.produce).toHaveBeenCalledWith({
-                topic: 'clickhouse_events_json',
+                topic: 'datastore_events_json',
                 key: aiEvent.uuid,
                 value: Buffer.from(JSON.stringify(aiEvent)),
                 headers: { productTrack: 'llma' },

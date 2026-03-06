@@ -77,9 +77,9 @@ export class EventSchemaEnforcementManager {
                 ed.name as event_name,
                 p.name as property_name,
                 array_agg(DISTINCT p.property_type ORDER BY p.property_type) as property_types
-            FROM posthog_eventdefinition ed
-            JOIN posthog_eventschema es ON es.event_definition_id = ed.id
-            JOIN posthog_schemapropertygroupproperty p ON p.property_group_id = es.property_group_id
+            FROM insights_eventdefinition ed
+            JOIN insights_eventschema es ON es.event_definition_id = ed.id
+            JOIN insights_schemapropertygroupproperty p ON p.property_group_id = es.property_group_id
             WHERE ed.team_id = ANY($1)
               AND ed.enforcement_mode = 'reject'
               AND p.is_required = true

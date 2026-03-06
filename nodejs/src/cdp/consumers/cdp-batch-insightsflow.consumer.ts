@@ -4,10 +4,10 @@ import { Message } from 'node-rdkafka'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 import { KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS } from '~/config/kafka-topics'
 import { InsightsFlow } from '~/schema/insightsflow'
-import { ClickHouseRouter } from '~/utils/db/clickhouse'
+import { DatastoreRouter } from '~/utils/db/clickhouse'
 import { parseJSON } from '~/utils/json-parse'
 import { captureException } from '~/utils/insights'
-import { ClickHousePersonRepository } from '~/worker/ingestion/persons/repositories/clickhouse-person-repository'
+import { DatastorePersonRepository } from '~/worker/ingestion/persons/repositories/clickhouse-person-repository'
 
 import { KafkaConsumer } from '../../kafka/consumer'
 import { HealthCheckResult, Hub, PersonPropertyFilter, Team } from '../../types'
@@ -42,9 +42,9 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
 
     private scriptRateLimiter: ScriptRateLimiterService
 
-    private clickHouseRouter: ClickHouseRouter
-    private clickHousePersonsRepository: ClickHousePersonRepository
-    private clickHousePersonsManager: PersonsManagerService
+    private datastoreRouter: DatastoreRouter
+    private datastorePersonsRepository: DatastorePersonRepository
+    private datastorePersonsManager: PersonsManagerService
 
     constructor(
         hub: Hub,
@@ -56,9 +56,9 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
         this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
 
-        this.clickHouseRouter = new ClickHouseRouter(hub)
-        this.clickHousePersonsRepository = new ClickHousePersonRepository(this.clickHouseRouter)
-        this.clickHousePersonsManager = new PersonsManagerService(this.clickHousePersonsRepository)
+        this.datastoreRouter = new DatastoreRouter(hub)
+        this.datastorePersonsRepository = new DatastorePersonRepository(this.datastoreRouter)
+        this.datastorePersonsManager = new PersonsManagerService(this.datastorePersonsRepository)
     }
 
     private createInsightsFlowInvocation({
@@ -123,7 +123,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         const matchingPersonsCount = await instrumentFn(
             'cdpProducer.generateBatch.queueMatchingPersons.matchingPersonsCount',
             async () => {
-                return await this.clickHousePersonsManager.countMany({
+                return await this.datastorePersonsManager.countMany({
                     teamId: team.id,
                     properties: (filters.properties as PersonPropertyFilter[]) || [],
                 })
@@ -147,7 +147,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
 
         const invocations: CyclotronJobInvocation[] = []
         await instrumentFn('cdpProducer.generateBatch.queueMatchingPersons.paginatePersons', async () => {
-            await this.clickHousePersonsManager.streamMany({
+            await this.datastorePersonsManager.streamMany({
                 filters: {
                     teamId: team.id,
                     properties: (filters.properties as PersonPropertyFilter[]) || [],
@@ -262,7 +262,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         // Make sure we are ready to produce to cyclotron first
         await this.cyclotronJobQueue.startAsProducer()
         // Connect to ClickHouse
-        this.clickHouseRouter.initialize()
+        this.datastoreRouter.initialize()
         // Start consuming messages
         await this.kafkaConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
@@ -284,7 +284,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         logger.info('💤', 'Stopping cyclotron job queue...')
         await this.cyclotronJobQueue.stop()
         logger.info('💤', 'Stopping ClickHouse router...')
-        await this.clickHouseRouter.close()
+        await this.datastoreRouter.close()
         logger.info('💤', 'Stopping consumer...')
         // IMPORTANT: super always comes last
         await super.stop()
