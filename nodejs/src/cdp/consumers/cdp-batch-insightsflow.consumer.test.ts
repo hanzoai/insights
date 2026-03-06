@@ -276,8 +276,8 @@ describe('CdpBatchInsightsFlowRequestsConsumer', () => {
                 ])
             })
 
-            processor['clickHousePersonsManager'].countMany = mockCountMany
-            processor['clickHousePersonsManager'].streamMany = mockStreamMany
+            processor['datastorePersonsManager'].countMany = mockCountMany
+            processor['datastorePersonsManager'].streamMany = mockStreamMany
 
             // Mock rate limiter to not limit
             jest.spyOn(processor['scriptRateLimiter'], 'rateLimitMany').mockResolvedValue([
@@ -374,8 +374,8 @@ describe('CdpBatchInsightsFlowRequestsConsumer', () => {
             const mockStreamMany = jest.fn().mockImplementation(async ({ onPersonBatch }: any) => {
                 await onPersonBatch([{ personId: 'person-1', distinctId: 'distinct-1' }])
             })
-            jest.spyOn(processor['clickHousePersonsManager'], 'countMany').mockResolvedValue(1)
-            processor['clickHousePersonsManager'].streamMany = mockStreamMany
+            jest.spyOn(processor['datastorePersonsManager'], 'countMany').mockResolvedValue(1)
+            processor['datastorePersonsManager'].streamMany = mockStreamMany
 
             // Mock rate limiter
             jest.spyOn(processor['scriptRateLimiter'], 'rateLimitMany').mockResolvedValue([
@@ -424,8 +424,8 @@ describe('CdpBatchInsightsFlowRequestsConsumer', () => {
             const mockStreamMany = jest.fn().mockImplementation(async ({ onPersonBatch }: any) => {
                 await onPersonBatch([{ personId: 'person-1', distinctId: 'distinct-1' }])
             })
-            jest.spyOn(processor['clickHousePersonsManager'], 'countMany').mockResolvedValue(1)
-            processor['clickHousePersonsManager'].streamMany = mockStreamMany
+            jest.spyOn(processor['datastorePersonsManager'], 'countMany').mockResolvedValue(1)
+            processor['datastorePersonsManager'].streamMany = mockStreamMany
 
             // Mock rate limiter
             jest.spyOn(processor['scriptRateLimiter'], 'rateLimitMany').mockResolvedValue([
@@ -496,8 +496,8 @@ describe('CdpBatchInsightsFlowRequestsConsumer', () => {
             const mockStreamMany = jest.fn().mockImplementation(async ({ onPersonBatch }: any) => {
                 await onPersonBatch([{ personId: 'person-1', distinctId: 'distinct-1' }])
             })
-            jest.spyOn(processor['clickHousePersonsManager'], 'countMany').mockResolvedValue(1)
-            processor['clickHousePersonsManager'].streamMany = mockStreamMany
+            jest.spyOn(processor['datastorePersonsManager'], 'countMany').mockResolvedValue(1)
+            processor['datastorePersonsManager'].streamMany = mockStreamMany
 
             // Mock rate limiter
             jest.spyOn(processor['scriptRateLimiter'], 'rateLimitMany').mockResolvedValue([
@@ -560,8 +560,8 @@ describe('CdpBatchInsightsFlowRequestsConsumer', () => {
                     { personId: 'person-2', distinctId: 'distinct-2' },
                 ])
             })
-            jest.spyOn(processor['clickHousePersonsManager'], 'countMany').mockResolvedValue(2)
-            processor['clickHousePersonsManager'].streamMany = mockStreamMany
+            jest.spyOn(processor['datastorePersonsManager'], 'countMany').mockResolvedValue(2)
+            processor['datastorePersonsManager'].streamMany = mockStreamMany
 
             // Mock rate limiter
             jest.spyOn(processor['scriptRateLimiter'], 'rateLimitMany').mockResolvedValue([
