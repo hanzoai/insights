@@ -4,7 +4,7 @@ import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findContinueAction, findNextAction } from '../customflow-utils'
+import { findContinueAction, findNextAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 import { calculatedScheduledAt } from './delay'
 
