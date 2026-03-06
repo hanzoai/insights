@@ -225,7 +225,7 @@ runs:
               fi
               pytest $pytest_targets -m "not async_migrations" \
                   --ignore=posthog/temporal \
-                  --ignore=common/hogvm/python/test \
+                  --ignore=common/scriptvm/python/test \
                   --splits "$CONCURRENCY" --group "$GROUP" \
                   --durations=100 --durations-min=1.0 --store-durations --clean-durations \
                   $PYTEST_ARGS

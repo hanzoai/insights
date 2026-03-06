@@ -17,7 +17,7 @@ from insights.models.team.team import Team
 from products.error_tracking.backend.hogvm_stl import RUST_HOGVM_STL
 from products.error_tracking.backend.models import ErrorTrackingIssueAssignment
 
-from common.hogvm.python.operation import Operation
+from common.scriptvm.python.operation import Operation
 
 logger = structlog.get_logger(__name__)
 

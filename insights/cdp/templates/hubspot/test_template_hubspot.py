@@ -9,7 +9,7 @@ from insights.cdp.templates.hubspot.template_hubspot import (
 )
 from insights.models import PluginConfig
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):

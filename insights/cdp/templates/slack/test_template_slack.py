@@ -3,7 +3,7 @@ import pytest
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.cdp.templates.slack.template_slack import template as template_slack
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestTemplateSlack(BaseInsightsFunctionTemplateTest):

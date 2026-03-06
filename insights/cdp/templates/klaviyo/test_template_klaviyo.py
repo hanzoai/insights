@@ -6,7 +6,7 @@ from insights.cdp.templates.klaviyo.template_klaviyo import (
     template_user as klaviyo_user,
 )
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestTemplateKlaviyoUser(BaseInsightsFunctionTemplateTest):

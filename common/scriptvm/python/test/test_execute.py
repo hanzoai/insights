@@ -5,13 +5,13 @@ from typing import Any, Optional
 from insights.insightsql.compiler.bytecode import create_bytecode
 from insights.insightsql.parser import parse_expr, parse_program
 
-from common.hogvm.python.execute import execute_bytecode, get_nested_value
-from common.hogvm.python.operation import (
+from common.scriptvm.python.execute import execute_bytecode, get_nested_value
+from common.scriptvm.python.operation import (
     INSIGHTSQL_BYTECODE_IDENTIFIER as _H,
     INSIGHTSQL_BYTECODE_VERSION as VERSION,
     Operation as op,
 )
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestBytecodeExecute:
