@@ -270,6 +270,11 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && npm --version \
     && rm -rf /tmp/*
 
+# Copy ANTLR4 C++ runtime shared library (required by insightsql-parser at runtime)
+# Must run ldconfig as root before switching to non-root user
+COPY --from=insights-build /usr/lib/libantlr4-runtime.so* /usr/lib/
+RUN ldconfig
+
 # Install and use a non-root user.
 RUN groupadd -g 1000 posthog && \
     useradd -r -g posthog posthog && \
@@ -283,10 +288,6 @@ RUN echo $COMMIT_HASH > /code/commit.txt
 # Copy the Python dependencies and Django staticfiles from the insights-build stage.
 COPY --from=insights-build --chown=posthog:posthog /code/staticfiles /code/staticfiles
 COPY --from=insights-build --chown=posthog:posthog /python-runtime /python-runtime
-
-# Copy ANTLR4 C++ runtime shared library (required by insightsql-parser at runtime)
-COPY --from=insights-build /usr/lib/libantlr4-runtime.so* /usr/lib/
-RUN ldconfig
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime
 
