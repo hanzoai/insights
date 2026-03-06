@@ -6,7 +6,7 @@
 import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 
-import { CyclotronManager, CyclotronShadowManager } from '@posthog/cyclotron'
+import { CyclotronManager, CyclotronShadowManager } from '@insights/cyclotron'
 
 const TEST_CYCLOTRON_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron'
 const TEST_CYCLOTRON_SHADOW_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron_shadow'
