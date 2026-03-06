@@ -69,7 +69,7 @@
         "@posthog/esbuilder": "workspace:*",
         "@posthog/hedgehog-mode": "^0.0.48",
         "@hanzo/insightsql-parser": "workspace:*",
-        "@posthog/hogvm": "workspace:*",
+        "@insights/scriptvm": "workspace:*",
         "@posthog/icons": "^0.36.6",
         "@posthog/plugin-scaffold": "^1.4.4",
         "@posthog/products-actions": "workspace:*",

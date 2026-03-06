@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import { RE2JS } from 're2js'
 
-import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@posthog/hogvm'
+import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@insights/scriptvm'
 
 import { performQuery } from '~/queries/query'
 import { InsightsQLASTQuery, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
