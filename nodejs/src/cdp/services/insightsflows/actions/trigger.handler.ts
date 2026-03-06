@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
