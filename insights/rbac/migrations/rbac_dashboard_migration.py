@@ -5,6 +5,7 @@ import structlog
 from insights.exceptions_capture import capture_exception
 from insights.models.dashboard import Dashboard
 from insights.models.organization import Organization, OrganizationMembership
+from insights.models.rbac.access_control import AccessControl
 
 
 logger = structlog.get_logger(__name__)
