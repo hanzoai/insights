@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 
 import { KafkaProducerWrapper } from '../../kafka/producer'

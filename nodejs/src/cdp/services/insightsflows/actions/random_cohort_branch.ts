@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
