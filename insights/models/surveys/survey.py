@@ -48,7 +48,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         constraints = [models.UniqueConstraint(fields=["team", "name"], name="unique survey name for team")]
 
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="surveys",
         related_query_name="survey",
@@ -56,7 +56,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     name = models.CharField(max_length=400)
     description = models.TextField(blank=True)
     linked_flag = models.ForeignKey(
-        "insights.FeatureFlag",
+        "posthog.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -64,7 +64,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         related_query_name="survey_linked_flag",
     )
     targeting_flag = models.ForeignKey(
-        "insights.FeatureFlag",
+        "posthog.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -72,7 +72,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         related_query_name="survey_targeting_flag",
     )
     linked_insight = models.ForeignKey(
-        "insights.Insight",
+        "posthog.Insight",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -82,7 +82,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         db_constraint=True,
     )
     internal_targeting_flag = models.ForeignKey(
-        "insights.FeatureFlag",
+        "posthog.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -90,7 +90,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         related_query_name="survey_internal_targeting_flag",
     )
     internal_response_sampling_flag = models.ForeignKey(
-        "insights.FeatureFlag",
+        "posthog.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -192,7 +192,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     appearance = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
-        "insights.User",
+        "posthog.User",
         on_delete=models.SET_NULL,
         related_name="surveys",
         related_query_name="survey",

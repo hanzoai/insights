@@ -55,11 +55,11 @@ class TestBackgroundDeleteModel(BaseTest):
         Person.objects.create(team=self.team, properties={})
         Person.objects.create(team=self.team, properties={})
 
-        self.command.handle("insights.Person", team_id=self.team.id)
+        self.command.handle("posthog.Person", team_id=self.team.id)
 
         # Verify task was called
         mock_task.delay.assert_called_once_with(
-            model_name="insights.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
+            model_name="posthog.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
         )
 
     @patch("insights.management.commands.background_delete_model.background_delete_model_task")
@@ -68,7 +68,7 @@ class TestBackgroundDeleteModel(BaseTest):
         # Create some test persons
         Person.objects.create(team=self.team, properties={})
 
-        self.command.handle("insights.Person", team_id=self.team.id, dry_run=True)
+        self.command.handle("posthog.Person", team_id=self.team.id, dry_run=True)
 
         # Verify task was not called
         mock_task.delay.assert_not_called()
@@ -106,7 +106,7 @@ class TestBackgroundDeleteModel(BaseTest):
         # Create some test persons
         Person.objects.create(team=self.team, properties={})
 
-        self.command.handle("insights.Person", team_id=self.team.id)
+        self.command.handle("posthog.Person", team_id=self.team.id)
 
         # Verify task was not called
         mock_task.delay.assert_not_called()
@@ -142,7 +142,7 @@ class TestBackgroundDeleteModel(BaseTest):
         """Test that command exits early when no records found"""
         # Don't create any persons, so count will be 0
 
-        self.command.handle("insights.Person", team_id=self.team.id)
+        self.command.handle("posthog.Person", team_id=self.team.id)
 
         # No need to mock task since it should never be called
 
@@ -157,11 +157,11 @@ class TestBackgroundDeleteModel(BaseTest):
 
             # Try to use a batch size larger than the limit
             with patch("builtins.input", return_value="DELETE 2 RECORDS"):
-                self.command.handle("insights.Person", team_id=self.team.id, batch_size=100000)
+                self.command.handle("posthog.Person", team_id=self.team.id, batch_size=100000)
 
             # Verify task was called with the limited batch size
             mock_task.delay.assert_called_once_with(
-                model_name="insights.Person", team_id=self.team.id, batch_size=50000, records_to_delete=2
+                model_name="posthog.Person", team_id=self.team.id, batch_size=50000, records_to_delete=2
             )
 
     @patch("insights.management.commands.background_delete_model.background_delete_model_task")
@@ -172,11 +172,11 @@ class TestBackgroundDeleteModel(BaseTest):
         Person.objects.create(team=self.team, properties={})
         Person.objects.create(team=self.team, properties={})
 
-        self.command.handle("insights.Person", team_id=self.team.id, synchronous=True)
+        self.command.handle("posthog.Person", team_id=self.team.id, synchronous=True)
 
         # Verify task was called directly (not with .delay())
         mock_task.assert_called_once_with(
-            model_name="insights.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
+            model_name="posthog.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
         )
         # Verify .delay() was not called
         mock_task.delay.assert_not_called()
@@ -204,11 +204,11 @@ class TestBackgroundDeleteModel(BaseTest):
         self.assertEqual(Person.objects.filter(team=team2).count(), 3)
 
         # Run command for team 1 only
-        self.command.handle("insights.Person", team_id=self.team.id)
+        self.command.handle("posthog.Person", team_id=self.team.id)
 
         # Verify task was called with correct team_id
         mock_task.delay.assert_called_once_with(
-            model_name="insights.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
+            model_name="posthog.Person", team_id=self.team.id, batch_size=10000, records_to_delete=2
         )
 
         # Verify counts haven't changed (since we're just testing the command, not the actual deletion)
