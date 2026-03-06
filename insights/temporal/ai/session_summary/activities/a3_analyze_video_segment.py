@@ -28,6 +28,13 @@ from insights.temporal.ai.session_summary.types.video import (
     VideoSegmentSpec,
     VideoSummarySingleSessionInputs,
 )
+from insights.temporal.ai.session_summary.ee_stubs import (
+    SingleSessionSummaryLlmInputs,
+    calculate_time_since_start,
+    capture_session_summary_timing,
+    get_column_index,
+    prepare_datetime,
+)
 from insights.temporal.ai.session_summary.utils import format_seconds_as_mm_ss, parse_str_timestamp_to_s
 
 

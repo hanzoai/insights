@@ -23,6 +23,8 @@ from insights.schema import ReplayInactivityPeriod
 from insights.models.exported_asset import ExportedAsset
 from insights.models.team.team import Team
 from insights.storage import object_storage
+from insights.temporal.ai.session_summary.constants import MOMENT_VIDEO_EXPORT_FORMAT
+from insights.temporal.ai.session_summary.ee_stubs import get_video_duration_s
 from insights.temporal.ai.session_summary.types.video import (
     UploadedVideo,
     UploadVideoToGeminiOutput,
