@@ -135,7 +135,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         PERSON_INFO_CACHE_TTL: 5 * 60, // 5 min
         STREAM_HEALTHCHECK_SECONDS: 20,
         PLUGIN_SERVER_MODE: null,
-        NODEJS_CAPABILITY_GROUPS: null, // Set via hogli dev:setup - e.g. "cdp_workflows,session_replay"
+        NODEJS_CAPABILITY_GROUPS: null, // Set via insights-cli dev:setup - e.g. "cdp_workflows,session_replay"
         PLUGIN_SERVER_EVENTS_INGESTION_PIPELINE: null,
         PLUGIN_LOAD_SEQUENTIALLY: false,
         MAX_TEAM_ID_TO_BUFFER_ANONYMOUS_EVENTS_FOR: 0,
@@ -172,7 +172,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         SESSION_RECORDING_BUFFER_AGE_IN_MEMORY_MULTIPLIER: 1.2,
         SESSION_RECORDING_MAX_BUFFER_SIZE_KB: 1024 * 50, // 50MB
         SESSION_RECORDING_REMOTE_FOLDER: 'session_recordings',
-        SESSION_RECORDING_REDIS_PREFIX: '@posthog/replay/',
+        SESSION_RECORDING_REDIS_PREFIX: '@hanzo/replay/',
         SESSION_RECORDING_PARTITION_REVOKE_OPTIMIZATION: false,
         SESSION_RECORDING_PARALLEL_CONSUMPTION: false,
         INSIGHTS_SESSION_RECORDING_REDIS_HOST: undefined,
@@ -192,9 +192,9 @@ export function getDefaultConfig(): PluginsServerConfig {
 
         // CDP
         CDP_WATCHER_COST_ERROR: 100,
-        CDP_WATCHER_HOG_COST_TIMING: 100,
-        CDP_WATCHER_HOG_COST_TIMING_LOWER_MS: 50,
-        CDP_WATCHER_HOG_COST_TIMING_UPPER_MS: 550,
+        CDP_WATCHER_COST_TIMING: 100,
+        CDP_WATCHER_COST_TIMING_LOWER_MS: 50,
+        CDP_WATCHER_COST_TIMING_UPPER_MS: 550,
         CDP_WATCHER_ASYNC_COST_TIMING: 20,
         CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS: 100,
         CDP_WATCHER_ASYNC_COST_TIMING_UPPER_MS: 5000,
@@ -211,7 +211,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         CDP_RATE_LIMITER_BUCKET_SIZE: 100,
         CDP_RATE_LIMITER_REFILL_RATE: 1, // per second request rate limit
         CDP_RATE_LIMITER_TTL: 60 * 60 * 24, // This is really long as it is essentially only important to make sure the key is eventually deleted
-        CDP_HOG_FILTERS_TELEMETRY_TEAMS: '',
+        CDP_FILTERS_TELEMETRY_TEAMS: '',
         DISABLE_OPENTELEMETRY_TRACING: false, // Disable OpenTelemetry spans for better performance (keeps metrics and timeouts)
         CDP_REDIS_PASSWORD: '',
         CDP_EVENT_PROCESSOR_EXECUTE_FIRST_STEP: true,
@@ -229,7 +229,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         CDP_CYCLOTRON_COMPRESS_VM_STATE: isProdEnv() ? false : true,
         CDP_CYCLOTRON_USE_BULK_COPY_JOB: isProdEnv() ? false : true,
         CDP_CYCLOTRON_COMPRESS_STREAM_DATA: true,
-        CDP_HOG_WATCHER_SAMPLE_RATE: 0, // default is off
+        CDP_SCRIPT_WATCHER_SAMPLE_RATE: 0, // default is off
         CDP_BATCH_WORKFLOW_PRODUCER_BATCH_SIZE: 1, // set to 1 intentionally, batch requests fanout into many workflow invocations
 
         CDP_FETCH_RETRIES: 3,
@@ -239,7 +239,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         CDP_WATCHER_AUTOMATICALLY_DISABLE_FUNCTIONS: isProdEnv() ? false : true, // For prod we primarily use overflow and some more manual control
         CDP_EMAIL_TRACKING_URL: 'http://localhost:8010',
 
-        CDP_LEGACY_EVENT_CONSUMER_GROUP_ID: 'clickhouse-plugin-server-async-onevent',
+        CDP_LEGACY_EVENT_CONSUMER_GROUP_ID: 'datastore-plugin-server-async-onevent',
         CDP_LEGACY_EVENT_CONSUMER_TOPIC: STREAM_EVENTS_JSON,
         CDP_LEGACY_EVENT_CONSUMER_INCLUDE_WEBHOOKS: false,
 

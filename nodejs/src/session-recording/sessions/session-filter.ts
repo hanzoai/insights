@@ -33,7 +33,7 @@ export interface SessionFilterConfig {
  * to minimize Redis round-trips.
  */
 export class SessionFilter {
-    private readonly keyPrefix = '@posthog/replay/session-blocked'
+    private readonly keyPrefix = '@hanzo/replay/session-blocked'
 
     // In-memory cache to avoid hitting Redis for every message
     // Since Stream partitions by session ID, the same session always hits the same consumer

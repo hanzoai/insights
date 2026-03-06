@@ -478,7 +478,7 @@ const HIDDEN_DESTINATIONS = [
     'segment-actions-toplyne-cloud',
     'segment-actions-heap-cloud',
 
-    // these destinations require a raw segment event (https://github.com/PostHog/insights/pull/33451)
+    // these destinations require a raw segment event (https://github.com/hanzoai/insights/pull/33451)
     'segment-actions-equals',
     'segment-actions-gainsight-px-cloud',
     'segment-actions-iqm',

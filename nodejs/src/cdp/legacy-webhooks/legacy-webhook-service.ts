@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { mutatePostIngestionEventWithElementsList } from '~/utils/event'
-import { clickHouseTimestampSecondPrecisionToISO, clickHouseTimestampToISO } from '~/utils/utils'
+import { datastoreTimestampSecondPrecisionToISO, datastoreTimestampToISO } from '~/utils/utils'
 
 import {
     Action,
@@ -9,7 +9,7 @@ import {
     HookPayload,
     Hub,
     PostIngestionEvent,
-    RawClickHouseEvent,
+    RawDatastoreEvent,
     RawStreamEvent,
     Team,
 } from '../../types'
@@ -109,17 +109,17 @@ export class LegacyWebhookService {
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawClickHouseEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     if (
-                        !this.actionMatcher.hasWebhooks(clickHouseEvent.team_id) ||
-                        !(await this.hub.teamManager.hasAvailableFeature(clickHouseEvent.team_id, 'zapier'))
+                        !this.actionMatcher.hasWebhooks(datastoreEvent.team_id) ||
+                        !(await this.hub.teamManager.hasAvailableFeature(datastoreEvent.team_id, 'zapier'))
                     ) {
                         // exit early if no webhooks nor resthooks
                         return
                     }
 
-                    const eventWithoutGroups = convertToPostIngestionEvent(clickHouseEvent)
+                    const eventWithoutGroups = convertToPostIngestionEvent(datastoreEvent)
                     // This is very inefficient, we always pull group properties for all groups (up to 5) for this event
                     // from PG if a webhook is defined for this team.
                     // Instead we should be lazily loading group properties only when needed, but this is the fastest way to fix this consumer
@@ -165,11 +165,11 @@ function convertToPostIngestionEvent(event: RawStreamEvent): PostIngestionEvent 
         projectId: event.project_id,
         distinctId: event.distinct_id,
         properties,
-        timestamp: clickHouseTimestampToISO(event.timestamp),
+        timestamp: datastoreTimestampToISO(event.timestamp),
         elementsList: undefined,
         person_id: event.person_id,
         person_created_at: event.person_created_at
-            ? clickHouseTimestampSecondPrecisionToISO(event.person_created_at)
+            ? datastoreTimestampSecondPrecisionToISO(event.person_created_at)
             : null,
         person_properties: event.person_properties ? parseJSON(event.person_properties) : {},
     }

@@ -8,7 +8,7 @@ import { SessionBatchMetrics } from './metrics'
 const DEFAULT_LOCAL_CACHE_MAX_SIZE = 100_000
 
 export class SessionTracker {
-    private readonly keyPrefix = '@posthog/replay/session-seen'
+    private readonly keyPrefix = '@hanzo/replay/session-seen'
 
     // In-memory cache to avoid hitting Redis for every message
     // Since Stream partitions by session ID, the same session always hits the same consumer

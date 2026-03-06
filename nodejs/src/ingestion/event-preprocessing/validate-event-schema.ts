@@ -2,7 +2,7 @@ import { EventSchemaEnforcement, PipelineEvent, Team } from '../../types'
 import { EventSchemaEnforcementManager } from '../../utils/event-schema-enforcement-manager'
 import { drop, ok } from '../pipelines/results'
 import { ProcessingStep } from '../pipelines/steps'
-import { isValidClickHouseDateTime } from './clickhouse-datetime-parser'
+import { isValidDatastoreDateTime } from './datastore-datetime-parser'
 
 /**
  * Checks if a value can be coerced to the given Insights property type.
@@ -20,7 +20,7 @@ function canCoerceToType(value: unknown, propertyType: string): boolean {
 
         case 'Numeric':
             // Accepts: numbers, numeric strings
-            // Rejects: Infinity, -Infinity, NaN, booleans (these become null in ClickHouse)
+            // Rejects: Infinity, -Infinity, NaN, booleans (these become null in datastore)
             if (typeof value === 'number') {
                 return Number.isFinite(value)
             }
@@ -32,7 +32,7 @@ function canCoerceToType(value: unknown, propertyType: string): boolean {
             return false
 
         case 'Boolean':
-            // Accepts: booleans, "true"/"false" strings (case sensitive - ClickHouse transform only matches lowercase)
+            // Accepts: booleans, "true"/"false" strings (case sensitive - datastore transform only matches lowercase)
             if (typeof value === 'boolean') {
                 return true
             }
@@ -42,7 +42,7 @@ function canCoerceToType(value: unknown, propertyType: string): boolean {
             return false
 
         case 'DateTime':
-            return isValidClickHouseDateTime(value)
+            return isValidDatastoreDateTime(value)
 
         case 'Object':
             return typeof value === 'object'

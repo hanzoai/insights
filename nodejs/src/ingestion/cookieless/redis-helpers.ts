@@ -1,7 +1,7 @@
 import { Pool as GenericPool } from 'generic-pool'
 import Redis from 'ioredis'
 
-import { CacheOptions } from '@posthog/plugin-scaffold'
+import { CacheOptions } from '@hanzo/plugin-scaffold'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
 

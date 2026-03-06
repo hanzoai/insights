@@ -1,6 +1,6 @@
 import { Counter, Gauge, Histogram } from 'prom-client'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
@@ -32,7 +32,7 @@ import { getTransformationFunctions } from './transformation-functions'
 export type ScriptTransformerHub = Pick<
     Hub,
     // Direct usage in ScriptTransformerService
-    | 'CDP_HOG_WATCHER_SAMPLE_RATE'
+    | 'CDP_SCRIPT_WATCHER_SAMPLE_RATE'
     | 'geoipService'
     | 'SITE_URL'
     // Redis pool config
@@ -47,7 +47,7 @@ export type ScriptTransformerHub = Pick<
     | 'pubSub'
     | 'encryptedFields'
     // ScriptExecutorService + EmailService
-    | 'CDP_WATCHER_HOG_COST_TIMING_UPPER_MS'
+    | 'CDP_WATCHER_COST_TIMING_UPPER_MS'
     | 'CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN'
     | 'CDP_FETCH_BACKOFF_BASE_MS'
     | 'CDP_FETCH_BACKOFF_MAX_MS'
@@ -67,8 +67,8 @@ export type ScriptTransformerHub = Pick<
     | 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC'
     | 'INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC'
     // ScriptWatcherService
-    | 'CDP_WATCHER_HOG_COST_TIMING_LOWER_MS'
-    | 'CDP_WATCHER_HOG_COST_TIMING'
+    | 'CDP_WATCHER_COST_TIMING_LOWER_MS'
+    | 'CDP_WATCHER_COST_TIMING'
     | 'CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS'
     | 'CDP_WATCHER_ASYNC_COST_TIMING_UPPER_MS'
     | 'CDP_WATCHER_ASYNC_COST_TIMING'
@@ -84,35 +84,35 @@ export type ScriptTransformerHub = Pick<
 >
 
 export const scriptTransformationDroppedEvents = new Counter({
-    name: 'hog_transformation_dropped_events',
+    name: 'script_transformation_dropped_events',
     help: 'Indicates how many events are dropped by script transformations',
 })
 
 export const scriptTransformationInvocations = new Counter({
-    name: 'hog_transformation_invocations_total',
+    name: 'script_transformation_invocations_total',
     help: 'Number of times transformEvent was called directly',
 })
 
 export const scriptTransformationAttempts = new Counter({
-    name: 'hog_transformation_attempts_total',
+    name: 'script_transformation_attempts_total',
     help: 'Number of transformation attempts before any processing',
     labelNames: ['type'],
 })
 
 export const scriptTransformationCompleted = new Counter({
-    name: 'hog_transformation_completed_total',
+    name: 'script_transformation_completed_total',
     help: 'Number of successfully completed transformations',
     labelNames: ['type'],
 })
 
 export const scriptWatcherLatency = new Histogram({
-    name: 'hog_watcher_latency_seconds',
+    name: 'script_watcher_latency_seconds',
     help: 'Time spent in ScriptWatcher operations in seconds during ingestion',
     labelNames: ['operation'],
 })
 
 export const scriptTransformationPendingInvocationResults = new Gauge({
-    name: 'hog_transformation_pending_invocation_results',
+    name: 'script_transformation_pending_invocation_results',
     help: 'Number of invocation results accumulated and waiting to be processed. High values indicate memory accumulation.',
 })
 
@@ -169,7 +169,7 @@ export class ScriptTransformerService {
         this.invocationResults = []
         scriptTransformationPendingInvocationResults.set(0)
 
-        const shouldRunScriptWatcher = Math.random() < this.hub.CDP_HOG_WATCHER_SAMPLE_RATE
+        const shouldRunScriptWatcher = Math.random() < this.hub.CDP_SCRIPT_WATCHER_SAMPLE_RATE
 
         await Promise.allSettled([
             this.insightsFunctionMonitoringService
@@ -254,7 +254,7 @@ export class ScriptTransformerService {
         const transformationsFailed: string[] = []
         const transformationsSkipped: string[] = []
 
-        const shouldRunScriptWatcher = Math.random() < this.hub.CDP_HOG_WATCHER_SAMPLE_RATE
+        const shouldRunScriptWatcher = Math.random() < this.hub.CDP_SCRIPT_WATCHER_SAMPLE_RATE
 
         // Create globals once and update the event properties after each transformation
         const globals = this.createInvocationGlobals(event)
