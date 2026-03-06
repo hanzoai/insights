@@ -14,7 +14,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'Insights/posthog'
+        if: github.repository == 'hanzoai/insights'
         name: Determine need to run proto checks
         outputs:
             proto: ${{ steps.filter.outputs.proto || 'true' }}
@@ -35,7 +35,7 @@ jobs:
         name: Lint proto definitions
         needs: changes
         if: needs.changes.outputs.proto == 'true'
-        runs-on: depot-ubuntu-22.04-4
+        runs-on: ubuntu-22.04
 
         steps:
             - uses: actions/checkout@v6
@@ -54,7 +54,7 @@ jobs:
         name: Check for breaking changes
         needs: changes
         if: needs.changes.outputs.proto == 'true'
-        runs-on: depot-ubuntu-22.04-4
+        runs-on: ubuntu-22.04
 
         steps:
             - uses: actions/checkout@v6
@@ -67,7 +67,7 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Check for breaking changes
-              run: buf breaking proto/ --against 'https://github.com/PostHog/posthog.git#branch=master,subdir=proto'
+              run: buf breaking proto/ --against 'https://github.com/hanzoai/insights.git#branch=master,subdir=proto'
 
     proto_checks:
         needs: [changes, lint, breaking]
