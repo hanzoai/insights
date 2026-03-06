@@ -235,7 +235,7 @@ class Database(BaseModel):
     tables: TableNode = TableNode(
         children={
             **ROOT_TABLES__DO_NOT_ADD_ANY_MORE,
-            "posthog": TableNode(
+            "insights": TableNode(
                 children={
                     **ROOT_TABLES__DO_NOT_ADD_ANY_MORE
                     # Add new tables here
@@ -370,7 +370,7 @@ class Database(BaseModel):
             elif isinstance(table, Table):
                 field_input = table.fields
 
-            fields = serialize_fields(field_input, context, table_name.split("."), table_type="posthog")
+            fields = serialize_fields(field_input, context, table_name.split("."), table_type="insights")
             fields_dict = {field.name: field for field in fields}
             tables[table_name] = DatabaseSchemaInsightsTable(fields=fields_dict, id=table_name, name=table_name)
 
@@ -387,7 +387,7 @@ class Database(BaseModel):
             elif isinstance(table, Table):
                 system_field_input = table.fields
 
-            fields = serialize_fields(system_field_input, context, table_key.split("."), table_type="posthog")
+            fields = serialize_fields(system_field_input, context, table_key.split("."), table_type="insights")
             fields_dict = {field.name: field for field in fields}
             tables[table_key] = DatabaseSchemaSystemTable(fields=fields_dict, id=table_key, name=table_key)
 
@@ -1241,7 +1241,7 @@ def serialize_fields(
     context: InsightsQLContext,
     table_chain: list[str],
     db_columns: DataWarehouseTableColumns | None = None,
-    table_type: Literal["posthog"] | Literal["external"] = "posthog",
+    table_type: Literal["insights"] | Literal["external"] = "insights",
 ) -> list[DatabaseSchemaField]:
     from insights.insightsql.resolver import resolve_types_from_table
 
@@ -1269,7 +1269,7 @@ def serialize_fields(
             if field.hidden:
                 continue
 
-        if field_key == "team_id" and table_type == "posthog":
+        if field_key == "team_id" and table_type == "insights":
             pass
         elif isinstance(field, DatabaseField):
             if isinstance(field, IntegerDatabaseField):

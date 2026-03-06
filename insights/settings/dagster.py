@@ -17,4 +17,4 @@ DAGSTER_UI_PORT: int = int(os.getenv("DAGSTER_UI_PORT", 3030))
 
 DAGSTER_AI_EVALS_S3_BUCKET: str = os.getenv("DAGSTER_AI_EVALS_S3_BUCKET", "ai-evals")
 
-DAGSTER_FAVICONS_S3_BUCKET: str = os.getenv("DAGSTER_FAVICONS_S3_BUCKET", "posthog")
+DAGSTER_FAVICONS_S3_BUCKET: str = os.getenv("DAGSTER_FAVICONS_S3_BUCKET", "insights")

@@ -526,7 +526,7 @@ def ensure_events_table_exists(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        if table_exists(conn, alias, "posthog", "events"):
+        if table_exists(conn, alias, "insights", "events"):
             context.log.info("Events table already exists in duckling catalog")
             # Ensure partitioning is set even on existing tables (idempotent)
             _set_table_partitioning(
@@ -543,7 +543,7 @@ def ensure_events_table_exists(
             conn.execute(ddl)
         except duckdb.CatalogException as exc:
             # Check if this was a race condition (another worker created the table)
-            if table_exists(conn, alias, "posthog", "events"):
+            if table_exists(conn, alias, "insights", "events"):
                 context.log.info("Events table was created by another worker")
                 # Ensure partitioning is set even when another worker created the table
                 _set_table_partitioning(
@@ -658,7 +658,7 @@ def delete_events_table(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        if not table_exists(conn, alias, "posthog", "events"):
+        if not table_exists(conn, alias, "insights", "events"):
             context.log.info("Events table does not exist, nothing to delete")
             return False
 

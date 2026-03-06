@@ -4996,7 +4996,7 @@ class DatabaseSchemaInsightsTable(BaseModel):
     id: str
     name: str
     row_count: float | None = None
-    type: Literal["posthog"] = "posthog"
+    type: Literal["insights"] = "insights"
 
 
 class DatabaseSchemaSystemTable(BaseModel):
