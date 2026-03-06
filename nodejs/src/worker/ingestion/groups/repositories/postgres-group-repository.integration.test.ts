@@ -45,7 +45,7 @@ describe('PostgresGroupRepository Integration', () => {
 
     const insertTestTeam = async (teamId: number) => {
         // First create the project that the team references
-        await insertRow(postgres, 'insights_project', {
+        await insertRow(postgres, 'posthog_project', {
             id: teamId,
             organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
             name: `Test Project ${teamId}`,
@@ -53,7 +53,7 @@ describe('PostgresGroupRepository Integration', () => {
         })
 
         // Then create the team
-        await insertRow(postgres, 'insights_team', {
+        await insertRow(postgres, 'posthog_team', {
             id: teamId,
             name: `Test Team ${teamId}`,
             organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -204,13 +204,13 @@ describe('PostgresGroupRepository Integration', () => {
             const group2CreatedAt = DateTime.fromISO('2023-02-01T00:00:00Z').toUTC()
 
             // Insert first group with its own team/project
-            await insertRow(postgres, 'insights_project', {
+            await insertRow(postgres, 'posthog_project', {
                 id: group1ProjectId,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
                 name: `Test Project ${group1ProjectId}`,
                 created_at: new Date().toISOString(),
             })
-            await insertRow(postgres, 'insights_team', {
+            await insertRow(postgres, 'posthog_team', {
                 id: group1TeamId,
                 name: `Test Team ${group1TeamId}`,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -252,13 +252,13 @@ describe('PostgresGroupRepository Integration', () => {
             })
 
             // Insert second group with its own team/project
-            await insertRow(postgres, 'insights_project', {
+            await insertRow(postgres, 'posthog_project', {
                 id: group2ProjectId,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
                 name: `Test Project ${group2ProjectId}`,
                 created_at: new Date().toISOString(),
             })
-            await insertRow(postgres, 'insights_team', {
+            await insertRow(postgres, 'posthog_team', {
                 id: group2TeamId,
                 name: `Test Team ${group2TeamId}`,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -1302,7 +1302,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'], // project_id = teamId because insertTestTeam creates project with id = teamId
                 'test-fetch-group-type'
             )
@@ -1334,7 +1334,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify only one record exists
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1411,13 +1411,13 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify both exist independently
             const { rows: rows1 } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE project_id = $1',
+                'SELECT * FROM posthog_grouptypemapping WHERE project_id = $1',
                 [localTeamId1],
                 'test-fetch-project1'
             )
             const { rows: rows2 } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE project_id = $1',
+                'SELECT * FROM posthog_grouptypemapping WHERE project_id = $1',
                 [localTeamId2],
                 'test-fetch-project2'
             )
@@ -1432,7 +1432,7 @@ describe('PostgresGroupRepository Integration', () => {
             await insertTestTeam(teamId)
 
             // Simulate race condition by directly inserting a group type
-            await insertRow(postgres, 'insights_grouptypemapping', {
+            await insertRow(postgres, 'posthog_grouptypemapping', {
                 team_id: teamId,
                 project_id: teamId,
                 group_type: 'company',
@@ -1464,7 +1464,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1484,7 +1484,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1509,7 +1509,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was not inserted (transaction rolled back)
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2',
                 [teamId, teamId],
                 'test-fetch-group-types'
             )
@@ -1535,7 +1535,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, specialGroupType],
                 'test-fetch-group-type'
             )
@@ -1562,7 +1562,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, emptyGroupType],
                 'test-fetch-group-type'
             )
@@ -1589,7 +1589,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, longGroupType],
                 'test-fetch-group-type'
             )

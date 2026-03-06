@@ -210,7 +210,7 @@ export class RecordingService {
             return
         }
 
-        const tables = ['ee_single_session_summary', 'insights_exportedrecording', 'insights_comment'] as const
+        const tables = ['ee_single_session_summary', 'posthog_exportedrecording', 'posthog_comment'] as const
         const results = await Promise.allSettled([
             this.postgres.query(
                 PostgresUse.COMMON_WRITE,
@@ -220,13 +220,13 @@ export class RecordingService {
             ),
             this.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `DELETE FROM insights_exportedrecording WHERE team_id = $1 AND session_id = $2`,
+                `DELETE FROM posthog_exportedrecording WHERE team_id = $1 AND session_id = $2`,
                 [teamId, sessionId],
                 'deleteExportedRecording'
             ),
             this.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `DELETE FROM insights_comment WHERE team_id = $1 AND scope = 'recording' AND item_id = $2`,
+                `DELETE FROM posthog_comment WHERE team_id = $1 AND scope = 'recording' AND item_id = $2`,
                 [teamId, sessionId],
                 'deleteRecordingComments'
             ),

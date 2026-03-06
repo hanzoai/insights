@@ -923,7 +923,7 @@ describe('Session Recording Consumer Integration', () => {
         // Enable console log capture for the primary team so console log tests work
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'UPDATE insights_team SET capture_console_log_opt_in = true WHERE id = $1',
+            'UPDATE posthog_team SET capture_console_log_opt_in = true WHERE id = $1',
             [team.id],
             'enable-console-log-capture'
         )

@@ -40,7 +40,7 @@ describe('EventSchemaEnforcementManager', () => {
     ): Promise<string> => {
         const result = await postgres.query<{ id: string }>(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO insights_eventdefinition
+            `INSERT INTO posthog_eventdefinition
                 (id, team_id, name, enforcement_mode, created_at, last_seen_at)
              VALUES
                 (gen_random_uuid(), $1, $2, $3, NOW(), NOW())
@@ -55,7 +55,7 @@ describe('EventSchemaEnforcementManager', () => {
         const groupName = name ?? `Test Group ${Date.now()}-${Math.random().toString(36).slice(2)}`
         const result = await postgres.query<{ id: string }>(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO insights_schemapropertygroup
+            `INSERT INTO posthog_schemapropertygroup
                 (id, team_id, name, description, created_at, updated_at)
              VALUES
                 (gen_random_uuid(), $1, $2, '', NOW(), NOW())
@@ -69,7 +69,7 @@ describe('EventSchemaEnforcementManager', () => {
     const createEventSchema = async (eventDefinitionId: string, propertyGroupId: string): Promise<void> => {
         await postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO insights_eventschema
+            `INSERT INTO posthog_eventschema
                 (id, event_definition_id, property_group_id, created_at, updated_at)
              VALUES
                 (gen_random_uuid(), $1, $2, NOW(), NOW())`,
@@ -86,7 +86,7 @@ describe('EventSchemaEnforcementManager', () => {
     ): Promise<void> => {
         await postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO insights_schemapropertygroupproperty
+            `INSERT INTO posthog_schemapropertygroupproperty
                 (id, property_group_id, name, property_type, is_required, description, created_at, updated_at)
              VALUES
                 (gen_random_uuid(), $1, $2, $3, $4, '', NOW(), NOW())`,
