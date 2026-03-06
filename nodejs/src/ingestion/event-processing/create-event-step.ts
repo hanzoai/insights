@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { EventHeaders, Person, PreIngestionEvent, RawKafkaEvent } from '../../types'
+import { EventHeaders, Person, PreIngestionEvent, RawStreamEvent } from '../../types'
 import { createEvent } from '../../worker/ingestion/create-event'
 import { PipelineResult, ok } from '../pipelines/results'
 import { ProcessingStep } from '../pipelines/steps'
@@ -15,7 +15,7 @@ export interface CreateEventStepInput {
 }
 
 export interface CreateEventStepResult {
-    eventToEmit: RawKafkaEvent
+    eventToEmit: RawStreamEvent
     inputHeaders: EventHeaders
     inputMessage: Message
 }

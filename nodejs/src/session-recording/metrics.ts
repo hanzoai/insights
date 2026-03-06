@@ -13,15 +13,15 @@ export class SessionRecordingIngesterMetrics {
         help: 'A gauge of the number of sessions being revoked when partitions are revoked when a re-balance occurs',
     })
 
-    private static readonly kafkaBatchSize = new Histogram({
-        name: 'recording_blob_ingestion_v2_kafka_batch_size',
-        help: 'The size of the batches we are receiving from Kafka',
+    private static readonly streamBatchSize = new Histogram({
+        name: 'recording_blob_ingestion_v2_stream_batch_size',
+        help: 'The size of the batches we are receiving from stream',
         buckets: [0, 1, 5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 500, 750, 1000, 1500, 2000, 3000, Infinity],
     })
 
-    private static readonly kafkaBatchSizeKb = new Histogram({
-        name: 'recording_blob_ingestion_v2_kafka_batch_size_kb',
-        help: 'The size in kb of the batches we are receiving from Kafka',
+    private static readonly streamBatchSizeKb = new Histogram({
+        name: 'recording_blob_ingestion_v2_stream_batch_size_kb',
+        help: 'The size in kb of the batches we are receiving from stream',
         buckets: BUCKETS_KB_WRITTEN,
     })
 
@@ -32,8 +32,8 @@ export class SessionRecordingIngesterMetrics {
     })
 
     private static readonly messageReceived = new Counter({
-        name: 'recording_blob_ingestion_v2_kafka_message_received',
-        help: 'The number of messages we have received from Kafka',
+        name: 'recording_blob_ingestion_v2_stream_message_received',
+        help: 'The number of messages we have received from stream',
         labelNames: ['partition'],
     })
 
@@ -71,11 +71,11 @@ export class SessionRecordingIngesterMetrics {
         this.sessionInfo.observe(rawSize)
     }
 
-    public static observeKafkaBatchSize(size: number): void {
-        this.kafkaBatchSize.observe(size)
+    public static observeStreamBatchSize(size: number): void {
+        this.streamBatchSize.observe(size)
     }
 
-    public static observeKafkaBatchSizeKb(sizeKb: number): void {
-        this.kafkaBatchSizeKb.observe(sizeKb)
+    public static observeStreamBatchSizeKb(sizeKb: number): void {
+        this.streamBatchSizeKb.observe(sizeKb)
     }
 }

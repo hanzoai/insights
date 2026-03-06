@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
-import { ParsedMessageData } from '../../session-recording/kafka/types'
+import { StreamProducerWrapper } from '../../stream/producer'
+import { ParsedMessageData } from '../../session-recording/stream/types'
 import { TeamForReplay } from '../../session-recording/teams/types'
 import { TopTracker } from '../../session-recording/top-tracker'
 import { TeamService } from '../../session-replay/shared/teams/team-service'
@@ -25,7 +25,7 @@ export interface SessionReplayPipelineOutput {
 }
 
 export interface SessionReplayPipelineConfig {
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     eventIngestionRestrictionManager: EventIngestionRestrictionManager
     overflowEnabled: boolean
     overflowTopic: string
@@ -40,7 +40,7 @@ export interface SessionReplayPipelineConfig {
  *
  * The pipeline processes messages through these phases:
  * 1. Restrictions - Parse headers and apply event ingestion restrictions (drop/overflow)
- * 2. Parse - Parse Kafka messages into structured session recording data
+ * 2. Parse - Parse stream messages into structured session recording data
  * 3. Team Filter - Validate team ownership and enrich with team context
  *
  * The pipeline will be extended in future commits to include version monitoring
@@ -50,7 +50,7 @@ export function createSessionReplayPipeline(
     config: SessionReplayPipelineConfig
 ): BatchPipelineUnwrapper<SessionReplayPipelineInput, SessionReplayPipelineOutput, { message: Message }> {
     const {
-        kafkaProducer,
+        streamProducer,
         eventIngestionRestrictionManager,
         overflowEnabled,
         overflowTopic,
@@ -61,7 +61,7 @@ export function createSessionReplayPipeline(
     } = config
 
     const pipelineConfig: PipelineConfig = {
-        kafkaProducer,
+        streamProducer,
         dlqTopic,
         promiseScheduler,
     }

@@ -1,6 +1,6 @@
 import { PluginEvent } from '@posthog/plugin-scaffold'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { EventHeaders, Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
 import { EventPipelineRunnerOptions } from '../../worker/ingestion/event-pipeline/runner'
@@ -22,20 +22,20 @@ export interface HeatmapSubpipelineInput {
 
 export interface HeatmapSubpipelineConfig {
     options: EventPipelineRunnerOptions & {
-        DATASTORE_HEATMAPS_KAFKA_TOPIC: string
+        DATASTORE_HEATMAPS_STREAM_TOPIC: string
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
 }
 
 export function createHeatmapSubpipeline<TInput extends HeatmapSubpipelineInput, TContext>(
     builder: StartPipelineBuilder<TInput, TContext>,
     config: HeatmapSubpipelineConfig
 ): PipelineBuilder<TInput, void, TContext> {
-    const { options, teamManager, groupTypeManager, personsStore, groupStore, kafkaProducer } = config
+    const { options, teamManager, groupTypeManager, personsStore, groupStore, streamProducer } = config
 
     return builder
         .pipe(createDisablePersonProcessingStep())
@@ -43,7 +43,7 @@ export function createHeatmapSubpipeline<TInput extends HeatmapSubpipelineInput,
         .pipe(
             createEventPipelineRunnerHeatmapStep(
                 options,
-                kafkaProducer,
+                streamProducer,
                 teamManager,
                 groupTypeManager,
                 personsStore,
@@ -52,8 +52,8 @@ export function createHeatmapSubpipeline<TInput extends HeatmapSubpipelineInput,
         )
         .pipe(
             createExtractHeatmapDataStep({
-                kafkaProducer,
-                DATASTORE_HEATMAPS_KAFKA_TOPIC: options.DATASTORE_HEATMAPS_KAFKA_TOPIC,
+                streamProducer,
+                DATASTORE_HEATMAPS_STREAM_TOPIC: options.DATASTORE_HEATMAPS_STREAM_TOPIC,
             })
         )
         .pipe(createSkipEmitEventStep())

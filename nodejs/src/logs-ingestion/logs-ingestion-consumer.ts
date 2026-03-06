@@ -3,10 +3,10 @@ import { Counter } from 'prom-client'
 
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
-import { KafkaProducerWrapper } from '~/kafka/producer'
+import { StreamProducerWrapper } from '~/stream/producer'
 
-import { KAFKA_APP_METRICS_2 } from '../config/kafka-topics'
-import { KafkaConsumer, parseKafkaHeaders } from '../kafka/consumer'
+import { STREAM_APP_METRICS_2 } from '../config/stream-topics'
+import { StreamConsumer, parseStreamHeaders } from '../stream/consumer'
 import { HealthCheckResult, Hub, LogsIngestionConsumerConfig, PluginServerService, TimestampFormat } from '../types'
 import { isDevEnv } from '../utils/env-utils'
 import { logger } from '../utils/logger'
@@ -20,7 +20,7 @@ import { LogsIngestionMessage } from './types'
  * This includes all fields needed by LogsIngestionConsumer and its dependencies:
  * - LogsRateLimiterService
  * - Redis (logs kind)
- * - KafkaProducerWrapper
+ * - StreamProducerWrapper
  * - TeamManager
  * - QuotaLimiting (for billing quota enforcement)
  */
@@ -31,8 +31,8 @@ export type LogsIngestionConsumerHub = LogsIngestionConsumerConfig &
         | 'REDIS_URL'
         | 'REDIS_POOL_MIN_SIZE'
         | 'REDIS_POOL_MAX_SIZE'
-        // KafkaProducerWrapper.create
-        | 'KAFKA_CLIENT_RACK'
+        // StreamProducerWrapper.create
+        | 'STREAM_CLIENT_RACK'
         // TeamManager
         | 'teamManager'
         // QuotaLimiting (billing quota enforcement)
@@ -105,9 +105,9 @@ export const logsRecordsDroppedCounter = new Counter({
 
 export class LogsIngestionConsumer {
     protected name = 'LogsIngestionConsumer'
-    protected kafkaConsumer: KafkaConsumer
-    private kafkaProducer?: KafkaProducerWrapper // Warpstream - for logs data
-    private mskProducer?: KafkaProducerWrapper // MSK - for app_metrics
+    protected streamConsumer: StreamConsumer
+    private streamProducer?: StreamProducerWrapper // Warpstream - for logs data
+    private mskProducer?: StreamProducerWrapper // MSK - for app_metrics
     private redis: RedisV2
     private rateLimiter: LogsRateLimiterService
 
@@ -130,7 +130,7 @@ export class LogsIngestionConsumer {
             overrides.LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC ?? hub.LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC
         this.dlqTopic = overrides.LOGS_INGESTION_CONSUMER_DLQ_TOPIC ?? hub.LOGS_INGESTION_CONSUMER_DLQ_TOPIC
 
-        this.kafkaConsumer = new KafkaConsumer({ groupId: this.groupId, topic: this.topic })
+        this.streamConsumer = new StreamConsumer({ groupId: this.groupId, topic: this.topic })
         // Logs ingestion uses its own Redis instance with TLS support
         this.redis = createRedisV2PoolFromConfig({
             connection: hub.LOGS_REDIS_HOST
@@ -311,12 +311,12 @@ export class LogsIngestionConsumer {
                     }
                     const processedValue = await processLogMessageBuffer(message.message.value, logsSettings)
 
-                    return this.kafkaProducer!.produce({
+                    return this.streamProducer!.produce({
                         topic: this.clickhouseTopic,
                         value: processedValue,
                         key: null,
                         headers: {
-                            ...parseKafkaHeaders(message.message.headers),
+                            ...parseStreamHeaders(message.message.headers),
                             token: message.token,
                             team_id: message.teamId.toString(),
                             'json-parse': jsonParse.toString(),
@@ -350,12 +350,12 @@ export class LogsIngestionConsumer {
         logMessageDlqCounter.inc({ reason: errorName, team_id: message.teamId.toString() })
 
         try {
-            await this.kafkaProducer!.produce({
+            await this.streamProducer!.produce({
                 topic: this.dlqTopic,
                 value: message.message.value,
                 key: null,
                 headers: {
-                    ...parseKafkaHeaders(message.message.headers),
+                    ...parseStreamHeaders(message.message.headers),
                     token: message.token,
                     team_id: message.teamId.toString(),
                     error_message: errorMessage,
@@ -407,7 +407,7 @@ export class LogsIngestionConsumer {
         }
         // Use MSK producer for app_metrics, not the Warpstream producer used for logs
         return this.mskProducer!.produce({
-            topic: KAFKA_APP_METRICS_2,
+            topic: STREAM_APP_METRICS_2,
             value: Buffer.from(
                 JSON.stringify({
                     team_id: teamId,
@@ -424,14 +424,14 @@ export class LogsIngestionConsumer {
         })
     }
 
-    @instrumented('logsIngestionConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<LogsIngestionMessage[]> {
+    @instrumented('logsIngestionConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<LogsIngestionMessage[]> {
         const events: LogsIngestionMessage[] = []
 
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const headers = parseKafkaHeaders(message.headers)
+                    const headers = parseStreamHeaders(message.headers)
                     const token = headers.token
 
                     if (!token) {
@@ -482,45 +482,45 @@ export class LogsIngestionConsumer {
         return events
     }
 
-    public async processKafkaBatch(
+    public async processStreamBatch(
         messages: Message[]
     ): Promise<{ backgroundTask?: Promise<any>; messages: LogsIngestionMessage[] }> {
-        const events = await this._parseKafkaBatch(messages)
+        const events = await this._parseStreamBatch(messages)
         return await this.processBatch(events)
     }
 
     public async start(): Promise<void> {
         await Promise.all([
-            // Warpstream producer for logs data (uses KAFKA_PRODUCER_* env vars)
-            KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK).then((producer) => {
-                this.kafkaProducer = producer
+            // Warpstream producer for logs data (uses STREAM_PRODUCER_* env vars)
+            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK).then((producer) => {
+                this.streamProducer = producer
             }),
-            // Metrics producer for app_metrics (uses KAFKA_METRICS_PRODUCER_* env vars)
-            KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK, 'METRICS_PRODUCER').then((producer) => {
+            // Metrics producer for app_metrics (uses STREAM_METRICS_PRODUCER_* env vars)
+            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK, 'METRICS_PRODUCER').then((producer) => {
                 this.mskProducer = producer
             }),
         ])
 
         // Start consuming messages
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
 
             return await instrumentFn('logsIngestionConsumer.handleEachBatch', async () => {
-                return await this.processKafkaBatch(messages)
+                return await this.processStreamBatch(messages)
             })
         })
     }
 
     public async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
-        await this.kafkaConsumer.disconnect()
-        await Promise.all([this.kafkaProducer?.disconnect(), this.mskProducer?.disconnect()])
+        await this.streamConsumer.disconnect()
+        await Promise.all([this.streamProducer?.disconnect(), this.mskProducer?.disconnect()])
         logger.info('💤', 'Consumer stopped!')
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 }

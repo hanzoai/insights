@@ -260,7 +260,7 @@ export const CYCLOTRON_INVOCATION_JOB_QUEUES = [
 ] as const
 export type CyclotronJobQueueKind = (typeof CYCLOTRON_INVOCATION_JOB_QUEUES)[number]
 
-export const CYCLOTRON_JOB_QUEUE_SOURCES = ['postgres', 'kafka', 'delay', 'shadow'] as const
+export const CYCLOTRON_JOB_QUEUE_SOURCES = ['postgres', 'stream', 'delay', 'shadow'] as const
 export type CyclotronJobQueueSource = (typeof CYCLOTRON_JOB_QUEUE_SOURCES)[number]
 
 // Agnostic job invocation type
@@ -281,7 +281,7 @@ export type CyclotronJobInvocation = {
     queueScheduledAt?: DateTime
     // Metadata for the invocation - TODO: check when this gets cleared
     queueMetadata?: Record<string, any> | null
-    // Where the invocation came from (kafka or postgres)
+    // Where the invocation came from (stream or postgres)
     queueSource?: CyclotronJobQueueSource
 }
 

@@ -36,7 +36,7 @@ export class SessionFilter {
     private readonly keyPrefix = '@posthog/replay/session-blocked'
 
     // In-memory cache to avoid hitting Redis for every message
-    // Since Kafka partitions by session ID, the same session always hits the same consumer
+    // Since Stream partitions by session ID, the same session always hits the same consumer
     // Maps key -> blocked status (true = blocked, false = not blocked but checked)
     private readonly localCache: LRUCache<string, boolean>
 

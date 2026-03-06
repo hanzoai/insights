@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
-import { KAFKA_COHORT_MEMBERSHIP_CHANGED, KAFKA_COHORT_MEMBERSHIP_CHANGED_TRIGGER } from '../../config/kafka-topics'
-import { KafkaConsumer } from '../../kafka/consumer'
+import { STREAM_COHORT_MEMBERSHIP_CHANGED, STREAM_COHORT_MEMBERSHIP_CHANGED_TRIGGER } from '../../config/stream-topics'
+import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, Hub } from '../../types'
 import { PostgresUse } from '../../utils/db/postgres'
 import { parseJSON } from '../../utils/json-parse'
@@ -30,18 +30,18 @@ export type CdpCohortMembershipConsumerHub = CdpConsumerBaseHub & Pick<Hub, 'pos
 
 export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMembershipConsumerHub> {
     protected name = 'CdpCohortMembershipConsumer'
-    private kafkaConsumer: KafkaConsumer
+    private streamConsumer: StreamConsumer
 
     constructor(hub: CdpCohortMembershipConsumerHub) {
         super(hub)
-        this.kafkaConsumer = new KafkaConsumer({
+        this.streamConsumer = new StreamConsumer({
             groupId: 'cdp-cohort-membership-consumer',
-            topic: KAFKA_COHORT_MEMBERSHIP_CHANGED,
+            topic: STREAM_COHORT_MEMBERSHIP_CHANGED,
         })
     }
 
     private async publishCohortMembershipTriggers(changes: CohortMembershipChange[]): Promise<void> {
-        if (!this.kafkaProducer || changes.length === 0) {
+        if (!this.streamProducer || changes.length === 0) {
             return
         }
 
@@ -50,8 +50,8 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
             key: change.person_id,
         }))
 
-        await this.kafkaProducer.queueMessages({
-            topic: KAFKA_COHORT_MEMBERSHIP_CHANGED_TRIGGER,
+        await this.streamProducer.queueMessages({
+            topic: STREAM_COHORT_MEMBERSHIP_CHANGED_TRIGGER,
             messages,
         })
     }
@@ -144,7 +144,7 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
 
         logger.info('🚀', `${this.name} starting...`)
 
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
@@ -167,7 +167,7 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
 
     public async stop(): Promise<void> {
         logger.info('💤', `Stopping ${this.name}...`)
-        await this.kafkaConsumer.disconnect()
+        await this.streamConsumer.disconnect()
 
         // IMPORTANT: super always comes last
         await super.stop()
@@ -175,6 +175,6 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 }

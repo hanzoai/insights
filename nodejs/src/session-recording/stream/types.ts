@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 const dateTimeSchema = z.custom<DateTime>((val) => val instanceof DateTime)
 
-// This is the schema for the raw event message from Kafka
+// This is the schema for the raw event message from stream
 
 export const RawEventMessageSchema = z.object({
     distinct_id: z.string(),
@@ -13,7 +13,7 @@ export const RawEventMessageSchema = z.object({
 
 export type RawEventMessage = z.infer<typeof RawEventMessageSchema>
 
-// This is the schema for the message metadata from Kafka
+// This is the schema for the message metadata from stream
 
 export const MessageMetadataSchema = z.object({
     partition: z.number(),

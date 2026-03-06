@@ -95,7 +95,7 @@ export class PersonPropertyService {
             return [updatedPerson, Promise.resolve()]
         }
 
-        const [updatedPerson, kafkaMessages] = await this.context.personStore.updatePersonWithPropertiesDiffForUpdate(
+        const [updatedPerson, streamMessages] = await this.context.personStore.updatePersonWithPropertiesDiffForUpdate(
             person,
             propertyUpdates.toSet,
             propertyUpdates.toUnset,
@@ -103,8 +103,8 @@ export class PersonPropertyService {
             this.context.distinctId,
             propertyUpdates.shouldForceUpdate
         )
-        const kafkaAck = this.context.kafkaProducer.queueMessages(kafkaMessages)
-        return [updatedPerson, kafkaAck]
+        const streamAck = this.context.streamProducer.queueMessages(streamMessages)
+        return [updatedPerson, streamAck]
     }
 
     getContext(): PersonContext {

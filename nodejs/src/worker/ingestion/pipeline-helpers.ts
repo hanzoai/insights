@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { PipelineEvent } from '../../types'
 import { logger } from '../../utils/logger'
 import { captureException } from '../../utils/insights'
@@ -12,7 +12,7 @@ import { captureIngestionWarning, generateEventDeadLetterQueueMessage } from './
  * Send an event to the dead letter queue with proper logging and metrics
  */
 export async function sendEventToDLQ(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     originalEvent: PipelineEvent,
     error: unknown,
     stepName: string,
@@ -33,7 +33,7 @@ export async function sendEventToDLQ(
 
     try {
         await captureIngestionWarning(
-            kafkaProducer,
+            streamProducer,
             eventTeamId,
             'pipeline_step_dlq',
             {
@@ -53,7 +53,7 @@ export async function sendEventToDLQ(
             `plugin_server_ingest_event:${step}`
         )
 
-        await kafkaProducer.queueMessages(dlqMessage)
+        await streamProducer.queueMessages(dlqMessage)
     } catch (dlqError) {
         logger.error('Failed to send event to DLQ', {
             step,
@@ -69,10 +69,10 @@ export async function sendEventToDLQ(
 }
 
 /**
- * Redirect an event to a specified Kafka topic
+ * Redirect an event to a specified stream topic
  */
 export async function redirectEventToTopic(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     originalEvent: PipelineEvent,
     topic: string,
     stepName?: string,
@@ -91,7 +91,7 @@ export async function redirectEventToTopic(
     })
 
     try {
-        const producePromise = kafkaProducer.produce({
+        const producePromise = streamProducer.produce({
             topic: topic,
             key: preserveKey ? `${teamId}:${originalEvent.distinct_id}` : null,
             value: Buffer.from(JSON.stringify(originalEvent)),
@@ -131,7 +131,7 @@ export async function redirectEventToTopic(
 // ============================================================================
 
 /**
- * Helper function to copy and extend headers from a Kafka message
+ * Helper function to copy and extend headers from a stream message
  * Converts various header value types to strings and adds new headers
  */
 function copyAndExtendHeaders(
@@ -141,7 +141,7 @@ function copyAndExtendHeaders(
     const originalHeaders = originalMessage.headers || []
     const stringHeaders: Record<string, string> = {}
 
-    // Kafka headers are always in array format (MessageHeader[])
+    // Stream headers are always in array format (MessageHeader[])
     for (const headerObj of originalHeaders) {
         for (const [key, value] of Object.entries(headerObj)) {
             if (value === undefined) {
@@ -165,14 +165,14 @@ function copyAndExtendHeaders(
 }
 
 /**
- * Extract event metadata from a Kafka message for logging purposes
+ * Extract event metadata from a stream message for logging purposes
  * Only extracts from headers as strings, never parses the payload
  */
 function getEventMetadata(message: Message): { teamId?: string; distinctId?: string; event?: string; uuid?: string } {
     const originalHeaders = message.headers || []
     const headers: Record<string, any> = {}
 
-    // Kafka headers are always in array format (MessageHeader[])
+    // Stream headers are always in array format (MessageHeader[])
     for (const headerObj of originalHeaders) {
         for (const [key, value] of Object.entries(headerObj)) {
             headers[key] = value
@@ -193,10 +193,10 @@ function getEventMetadata(message: Message): { teamId?: string; distinctId?: str
 }
 
 /**
- * Send a Kafka message to the dead letter queue with proper logging and metrics
+ * Send a stream message to the dead letter queue with proper logging and metrics
  */
 export async function sendMessageToDLQ(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     originalMessage: Message,
     error: unknown,
     stepName: string,
@@ -219,7 +219,7 @@ export async function sendMessageToDLQ(
     try {
         if (messageInfo.teamId) {
             await captureIngestionWarning(
-                kafkaProducer,
+                streamProducer,
                 parseInt(messageInfo.teamId, 10),
                 'pipeline_step_dlq',
                 {
@@ -233,7 +233,7 @@ export async function sendMessageToDLQ(
             )
         }
 
-        await kafkaProducer.produce({
+        await streamProducer.produce({
             topic: dlqTopic,
             value: originalMessage.value,
             key: originalMessage.key ?? null,
@@ -263,10 +263,10 @@ export async function sendMessageToDLQ(
 }
 
 /**
- * Redirect a Kafka message to a specified Kafka topic
+ * Redirect a stream message to a specified stream topic
  */
 export async function redirectMessageToTopic(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     promiseScheduler: PromiseScheduler,
     originalMessage: Message,
     topic: string,
@@ -288,7 +288,7 @@ export async function redirectMessageToTopic(
             'redirect-timestamp': new Date().toISOString(),
         })
 
-        const producePromise = kafkaProducer.produce({
+        const producePromise = streamProducer.produce({
             topic: topic,
             value: originalMessage.value,
             key: preserveKey ? (originalMessage.key ?? null) : null,
@@ -319,7 +319,7 @@ export async function redirectMessageToTopic(
 }
 
 /**
- * Log a dropped event from a Kafka message with proper metrics
+ * Log a dropped event from a stream message with proper metrics
  */
 export function logDroppedMessage(originalMessage: Message, reason: string, stepName?: string): void {
     const step = stepName || 'unknown'

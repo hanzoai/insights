@@ -4,7 +4,7 @@ import { SessionBlockMetadata } from '../../session-replay/shared/metadata/sessi
 import { SessionMetadataStore } from '../../session-replay/shared/metadata/session-metadata-store'
 import { KeyStore, RecordingEncryptor, SessionKey } from '../../session-replay/shared/types'
 import { logger } from '../../utils/logger'
-import { KafkaOffsetManager } from '../kafka/offset-manager'
+import { StreamOffsetManager } from '../stream/offset-manager'
 import { MessageWithTeam } from '../teams/types'
 import { SessionBatchMetrics } from './metrics'
 import { SessionBatchFileStorage } from './session-batch-file-storage'
@@ -19,7 +19,7 @@ import { SnappySessionRecorder } from './snappy-session-recorder'
  * Manages the recording of a batch of session recordings:
  *
  * - Appends new events into the appropriate session
- * - Tracks Kafka partition offsets, so that the consumer group can make progress after the batch is persisted
+ * - Tracks stream partition offsets, so that the consumer group can make progress after the batch is persisted
  * - Persists the batch to storage
  * - Handles partition revocation
  *
@@ -69,7 +69,7 @@ export class SessionBatchRecorder {
     private readonly rateLimiter: SessionRateLimiter
 
     constructor(
-        private readonly offsetManager: KafkaOffsetManager,
+        private readonly offsetManager: StreamOffsetManager,
         private readonly storage: SessionBatchFileStorage,
         private readonly metadataStore: SessionMetadataStore,
         private readonly consoleLogStore: SessionConsoleLogStore,
@@ -232,7 +232,7 @@ export class SessionBatchRecorder {
 
     /**
      * Discards all sessions for a given partition, so that they are not persisted in this batch
-     * Used when partitions are revoked during Kafka rebalancing
+     * Used when partitions are revoked during stream rebalancing
      */
     public discardPartition(partition: number): void {
         const partitionSize = this.partitionSizes.get(partition)
@@ -252,7 +252,7 @@ export class SessionBatchRecorder {
     }
 
     /**
-     * Flushes the session recordings to storage and commits Kafka offsets
+     * Flushes the session recordings to storage and commits stream offsets
      *
      * @throws If the flush operation fails
      */
