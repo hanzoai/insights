@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0205_auto_20220204_1748"),
+        ("posthog", "0205_auto_20220204_1748"),
     ]
 
     operations = [
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=255)),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="tagged_items",
-                        to="insights.action",
+                        to="posthog.action",
                     ),
                 ),
                 (
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="tagged_items",
-                        to="insights.tag",
+                        to="posthog.tag",
                     ),
                 ),
             ],

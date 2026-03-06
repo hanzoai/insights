@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("insights", "0663_alter_insightvariable_type")]
+    dependencies = [("posthog", "0663_alter_insightvariable_type")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="runs",
                         related_query_name="run",
-                        to="insights.batchexportbackfill",
+                        to="posthog.batchexportbackfill",
                     ),
                 ),
             ],

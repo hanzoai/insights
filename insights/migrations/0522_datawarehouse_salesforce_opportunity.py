@@ -7,7 +7,7 @@ def insert_salesforce_opportunity_schemas(apps, schema_editor):
         cursor.execute("SELECT id, team_id FROM posthog_externaldatasource where source_type = 'Salesforce'")
         salesforce_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
     for source in salesforce_sources:
         schema = ExternalDataSchema.objects.create(
             name="Opportunity",
@@ -26,7 +26,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0521_alter_errortrackingstackframe_context"),
+        ("posthog", "0521_alter_errortrackingstackframe_context"),
     ]
 
     operations = [

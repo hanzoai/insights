@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0919_teammarketinganalyticsconfig__custom_source_mappings"),
+        ("posthog", "0919_teammarketinganalyticsconfig__custom_source_mappings"),
     ]
 
     operations = [

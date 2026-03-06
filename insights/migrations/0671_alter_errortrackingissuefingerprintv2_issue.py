@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0670_querytabstate_querytabstate_unique_team_created_by")]
+    dependencies = [("posthog", "0670_querytabstate_querytabstate_unique_team_created_by")]
 
     operations = [
         migrations.AlterField(
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="fingerprints",
-                to="insights.errortrackingissue",
+                to="posthog.errortrackingissue",
             ),
         ),
     ]

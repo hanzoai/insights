@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0514_errortrackingstackframe_context")]
+    dependencies = [("posthog", "0514_errortrackingstackframe_context")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 migrations.AlterField(
                     model_name="grouptypemapping",
                     name="project",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.project"),
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.project"),
                 ),
                 migrations.AddConstraint(
                     model_name="grouptypemapping",

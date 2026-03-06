@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0270_add_uploaded_media"),
+        ("posthog", "0270_add_uploaded_media"),
     ]
 
     operations = [

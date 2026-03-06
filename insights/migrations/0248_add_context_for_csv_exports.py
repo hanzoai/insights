@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0247_feature_flags_experience_continuity"),
+        ("posthog", "0247_feature_flags_experience_continuity"),
     ]
 
     operations = [

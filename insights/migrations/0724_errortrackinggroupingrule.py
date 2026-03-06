@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0723_add_help_text_to_cohorts"),
+        ("posthog", "0723_add_help_text_to_cohorts"),
     ]
 
     operations = [
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ("order_key", models.IntegerField()),
                 ("description", models.TextField(null=True)),
                 ("role_id_legacy", models.IntegerField(null=True, db_column="role_id")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
                 (
                     "user",
                     models.ForeignKey(
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user_group",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
                 ),
             ],
             options={

@@ -7,7 +7,7 @@ from insights.schema import ActorsQuery, CohortPropertyFilter, DataTableNode, No
 
 
 def convert_insights(apps, schema_editor):
-    Insight = apps.get_model("insights", "Insight")
+    Insight = apps.get_model("posthog", "Insight")
 
     insights = Insight.objects.filter(query__kind=NodeKind.DATA_TABLE_NODE, query__source__kind=NodeKind.PERSONS_NODE)
 
@@ -41,7 +41,7 @@ def convert_insights(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0458_alter_insightviewed_team_alter_insightviewed_user"),
+        ("posthog", "0458_alter_insightviewed_team_alter_insightviewed_user"),
     ]
 
     operations = [

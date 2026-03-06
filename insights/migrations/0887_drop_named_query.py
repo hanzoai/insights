@@ -3,7 +3,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0886_fake_social_django_jsonfield_migrations"),
+        ("posthog", "0886_fake_social_django_jsonfield_migrations"),
     ]
 
     operations = [

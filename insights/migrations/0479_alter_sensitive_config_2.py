@@ -5,7 +5,7 @@ from django.db import migrations
 
 def re_encrypt_integrations(apps, schema_editor):
     for model in ["Integration"]:
-        Model = apps.get_model("insights", model)
+        Model = apps.get_model("posthog", model)
 
         items = Model.objects.all()
         for item in items:
@@ -20,7 +20,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0478_migrate_encrypted_fields"),
+        ("posthog", "0478_migrate_encrypted_fields"),
     ]
 
     operations = [

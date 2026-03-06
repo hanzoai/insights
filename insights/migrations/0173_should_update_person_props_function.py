@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0172_person_properties_last_operation"),
+        ("posthog", "0172_person_properties_last_operation"),
     ]
 
     # Superseded by 0175_should_update_person_props

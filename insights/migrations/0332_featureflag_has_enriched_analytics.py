@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0331_add_missing_property_definition_index"),
+        ("posthog", "0331_add_missing_property_definition_index"),
     ]
 
     operations = [

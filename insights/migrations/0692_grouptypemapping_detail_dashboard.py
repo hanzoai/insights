@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0691_action_embedding_version"),
+        ("posthog", "0691_action_embedding_version"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                     model_name="grouptypemapping",
                     name="detail_dashboard",
                     field=models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.dashboard"
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.dashboard"
                     ),
                 )
             ],

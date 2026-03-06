@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0851_add_activitylog_org_detail_exists_index"),
+        ("posthog", "0851_add_activitylog_org_detail_exists_index"),
     ]
 
     operations = [

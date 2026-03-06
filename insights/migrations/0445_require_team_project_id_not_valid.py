@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0444_integration_unique_id"),
+        ("posthog", "0444_integration_unique_id"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="teams",
                         related_query_name="team",
-                        to="insights.project",
+                        to="posthog.project",
                     ),
                 )
             ]

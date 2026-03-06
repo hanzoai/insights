@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0923_add_quick_filters"),
+        ("posthog", "0923_add_quick_filters"),
     ]
 
     operations = [

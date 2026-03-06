@@ -15,7 +15,7 @@ def reverse_migration(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0671_alter_errortrackingissuefingerprintv2_issue"),
+        ("posthog", "0671_alter_errortrackingissuefingerprintv2_issue"),
     ]
 
     operations = [

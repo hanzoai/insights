@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0284_improved_caching_state_idx"),
+        ("posthog", "0284_improved_caching_state_idx"),
     ]
 
     operations = [

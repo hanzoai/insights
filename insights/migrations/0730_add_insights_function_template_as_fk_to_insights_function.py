@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0729_sessionrecordingplaylist_type"),
+        ("posthog", "0729_sessionrecordingplaylist_type"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="insights_functions",
-                        to="insights.hogfunctiontemplate",
+                        to="posthog.hogfunctiontemplate",
                     ),
                 ),
             ],

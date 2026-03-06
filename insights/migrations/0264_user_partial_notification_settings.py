@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0263_plugin_config_web_token"),
+        ("posthog", "0263_plugin_config_web_token"),
     ]
 
     operations = [

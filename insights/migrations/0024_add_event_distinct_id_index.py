@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0023_team_opt_out_capture"),
+        ("posthog", "0023_team_opt_out_capture"),
     ]
 
     operations = [

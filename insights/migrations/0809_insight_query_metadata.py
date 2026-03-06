@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0808_add_evaluation_environment_to_feature_flag"),
+        ("posthog", "0808_add_evaluation_environment_to_feature_flag"),
     ]
 
     operations = [

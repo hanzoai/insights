@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0553_feature_flag_config"),
+        ("posthog", "0553_feature_flag_config"),
     ]
 
     operations = [

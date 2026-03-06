@@ -7,7 +7,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0475_alter_externaldatasource_source_type"),
+        ("posthog", "0475_alter_externaldatasource_source_type"),
     ]
 
     operations = [

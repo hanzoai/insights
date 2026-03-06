@@ -6,7 +6,7 @@ from django.db import migrations
 # check out 0415_pluginconfig_match_action for a similar migration in non-blocking way
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("insights", "0739_teamrevenueanalyticsconfig__goals")]
+    dependencies = [("posthog", "0739_teamrevenueanalyticsconfig__goals")]
 
     operations = [
         migrations.RunSQL(

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0261_team_capture_console_log_opt_in"),
+        ("posthog", "0261_team_capture_console_log_opt_in"),
     ]
 
     operations = [

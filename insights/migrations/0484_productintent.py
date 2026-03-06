@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0483_datawarehousesavedquery_table"),
+        ("posthog", "0483_datawarehousesavedquery_table"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("product_type", models.CharField(max_length=255)),
                 ("onboarding_completed_at", models.DateTimeField(blank=True, null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "unique_together": {("team", "product_type")},

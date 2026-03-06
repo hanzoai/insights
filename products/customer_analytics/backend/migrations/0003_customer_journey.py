@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "1000_create_healthissue_table"),
+        ("posthog", "1000_create_healthissue_table"),
         ("customer_analytics", "0002_customer_profile_config"),
     ]
 
@@ -44,12 +44,12 @@ class Migration(migrations.Migration):
                     "insight",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.insight",
+                        to="posthog.insight",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),

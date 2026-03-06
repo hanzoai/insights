@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0050_dashboards"),
+        ("posthog", "0050_dashboards"),
     ]
 
     operations = [
@@ -51,18 +51,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "cohort",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Cohort"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Cohort"),
                 ),
                 (
                     "person",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Person"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Person"),
                 ),
             ],
         ),
         migrations.AddField(
             model_name="cohort",
             name="people",
-            field=models.ManyToManyField(through="insights.CohortPeople", to="insights.Person"),
+            field=models.ManyToManyField(through="posthog.CohortPeople", to="posthog.Person"),
         ),
         migrations.AddIndex(
             model_name="cohortpeople",

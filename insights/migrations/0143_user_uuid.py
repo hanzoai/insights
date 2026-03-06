@@ -6,7 +6,7 @@ import insights.models.utils
 
 
 def create_user_uuid(apps, schema_editor):
-    User = apps.get_model("insights", "User")
+    User = apps.get_model("posthog", "User")
     for user in User.objects.all():
         user.uuid = insights.models.utils.UUIDT()
         user.save()
@@ -18,7 +18,7 @@ def backwards(app, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0142_fix_team_data_attributes_default"),
+        ("posthog", "0142_fix_team_data_attributes_default"),
     ]
 
     operations = [

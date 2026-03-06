@@ -13,7 +13,7 @@ CHUNK_SIZE = 500
 # we know for this migration that all the rows with no type
 # are definitely saved filters and not collections
 def migrate_playlist_types(apps, schema_editor):
-    SessionRecordingPlaylist = apps.get_model("insights", "SessionRecordingPlaylist")
+    SessionRecordingPlaylist = apps.get_model("posthog", "SessionRecordingPlaylist")
 
     saved_filters_with_no_type = SessionRecordingPlaylist.objects.filter(
         type__isnull=True, deleted=False, filters__isnull=False
@@ -35,7 +35,7 @@ def migrate_playlist_types(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0798_alter_integration_kind"),
+        ("posthog", "0798_alter_integration_kind"),
     ]
 
     operations = [

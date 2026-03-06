@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0789_migrate_playlist_types"),
+        ("posthog", "0789_migrate_playlist_types"),
     ]
 
     operations = [

@@ -7,7 +7,7 @@ def backfill_primary_dashboards(apps, _):
     logger = structlog.get_logger(__name__)
     logger.info("starting 0220_set_primary_dashboard")
 
-    Team = apps.get_model("insights", "Team")
+    Team = apps.get_model("posthog", "Team")
 
     team_dashboards = []
     with connection.cursor() as cursor:
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0219_migrate_tags_v2"),
+        ("posthog", "0219_migrate_tags_v2"),
     ]
 
     operations = [migrations.RunPython(backfill_primary_dashboards, reverse, elidable=True)]

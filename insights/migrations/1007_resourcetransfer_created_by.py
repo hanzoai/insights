@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1006_resource_transfer_duplicated_resource_id"),
+        ("posthog", "1006_resource_transfer_duplicated_resource_id"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

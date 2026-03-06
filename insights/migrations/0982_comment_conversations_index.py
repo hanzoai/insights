@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for AddIndexConcurrently
 
     dependencies = [
-        ("insights", "0981_batchexport_interval_offset_batchexport_timezone"),
+        ("posthog", "0981_batchexport_interval_offset_batchexport_timezone"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0513_alter_dashboardtemplate_github_url"),
+        ("posthog", "0513_alter_dashboardtemplate_github_url"),
     ]
 
     operations = [

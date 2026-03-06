@@ -4,8 +4,8 @@ from django.db import migrations, models
 
 
 def adjust_teams_for_stricter_requirements(apps, schema_editor):
-    Team = apps.get_model("insights", "Team")
-    Organization = apps.get_model("insights", "Organization")
+    Team = apps.get_model("posthog", "Team")
+    Organization = apps.get_model("posthog", "Organization")
     first_organization = Organization.objects.order_by("id").first()
     if first_organization is not None:
         Team.objects.filter(organization_id__isnull=True).update(organization_id=first_organization.id)
@@ -18,7 +18,7 @@ def adjust_teams_for_stricter_requirements(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0126_fix_funnels_insights_links"),
+        ("posthog", "0126_fix_funnels_insights_links"),
     ]
 
     operations = [

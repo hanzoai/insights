@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0933_add_event_names_and_uuids_to_restriction_config"),
+        ("posthog", "0933_add_event_names_and_uuids_to_restriction_config"),
     ]
 
     operations = [

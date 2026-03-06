@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0285_capture_performance_opt_in"),
+        ("posthog", "0285_capture_performance_opt_in"),
     ]
 
     operations = [

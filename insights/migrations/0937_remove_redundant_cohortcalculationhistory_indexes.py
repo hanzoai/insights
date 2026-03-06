@@ -5,7 +5,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0936_survey_headline_response_count_and_more"),
+        ("posthog", "0936_survey_headline_response_count_and_more"),
     ]
 
     operations = [

@@ -2,7 +2,7 @@ from django.db import migrations
 
 
 def create_starter_template(apps, schema_editor):
-    DashboardTemplate = apps.get_model("insights", "DashboardTemplate")
+    DashboardTemplate = apps.get_model("posthog", "DashboardTemplate")
     DashboardTemplate.objects.create(
         template_name="Product analytics",
         dashboard_description="High-level overview of your product including daily active users, weekly active users, retention, and growth accounting.",
@@ -149,7 +149,7 @@ def create_starter_template(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0309_team_autocapture_opt_out"),
+        ("posthog", "0309_team_autocapture_opt_out"),
     ]
 
     operations = [migrations.RunPython(create_starter_template, reverse_code=migrations.RunPython.noop)]

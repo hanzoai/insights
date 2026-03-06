@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0930_user_shortcut_position"),
+        ("posthog", "0930_user_shortcut_position"),
     ]
 
     operations = [
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="materialized_column_slots",
                         related_query_name="materialized_column_slot",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 (
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="materialized_column_slots",
                         related_query_name="materialized_column_slot",
-                        to="insights.propertydefinition",
+                        to="posthog.propertydefinition",
                     ),
                 ),
                 (

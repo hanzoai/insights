@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0704_productintent_contexts"),
+        ("posthog", "0704_productintent_contexts"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="child_teams",
                         related_query_name="child_team",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

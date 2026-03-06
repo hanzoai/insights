@@ -8,7 +8,7 @@ def insert_stripe_account_schemas(apps, schema_editor):
         cursor.execute("SELECT id, team_id FROM posthog_externaldatasource where source_type = 'Stripe'")
         stripe_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
     for source in stripe_sources:
         schema = ExternalDataSchema.objects.create(
             name="Account",
@@ -27,7 +27,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0464_action_pinned_at"),
+        ("posthog", "0464_action_pinned_at"),
     ]
 
     operations = [

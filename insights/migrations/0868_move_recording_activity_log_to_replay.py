@@ -8,7 +8,7 @@ logger = structlog.get_logger(__name__)
 
 
 def migrate_recording_scope_to_replay(apps, schema_editor):
-    ActivityLog = apps.get_model("insights", "ActivityLog")
+    ActivityLog = apps.get_model("posthog", "ActivityLog")
 
     logs_to_migrate = []
     batch_size = 500
@@ -41,7 +41,7 @@ def migrate_recording_scope_to_replay(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0867_add_updated_at_to_feature_flags"),
+        ("posthog", "0867_add_updated_at_to_feature_flags"),
     ]
 
     operations = [

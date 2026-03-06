@@ -6,13 +6,13 @@ from django.db import migrations, models
 # Dont want to send emails for integrations that have been around for a while
 # so let's completely ignore existing accounts
 def backfill_notified_first_sync(apps, schema_editor):
-    TeamRevenueAnalyticsConfig = apps.get_model("insights", "TeamRevenueAnalyticsConfig")
+    TeamRevenueAnalyticsConfig = apps.get_model("posthog", "TeamRevenueAnalyticsConfig")
     TeamRevenueAnalyticsConfig.objects.update(notified_first_sync=True)
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0731_backfill_insights_function_template_fk"),
+        ("posthog", "0731_backfill_insights_function_template_fk"),
     ]
 
     operations = [

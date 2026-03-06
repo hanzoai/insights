@@ -5,7 +5,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for CREATE INDEX CONCURRENTLY
 
     dependencies = [
-        ("insights", "0946_fix_insightviewed_null_duplicates"),
+        ("posthog", "0946_fix_insightviewed_null_duplicates"),
     ]
 
     operations = [

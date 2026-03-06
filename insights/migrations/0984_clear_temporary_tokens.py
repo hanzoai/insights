@@ -7,13 +7,13 @@ def clear_temporary_tokens(apps, schema_editor):
     """
     Clear all existing temporary_token values.
     """
-    User = apps.get_model("insights", "User")
+    User = apps.get_model("posthog", "User")
     User.objects.filter(temporary_token__isnull=False).update(temporary_token=None)
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0983_alter_integration_kind"),
+        ("posthog", "0983_alter_integration_kind"),
     ]
 
     operations = [

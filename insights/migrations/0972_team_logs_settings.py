@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0971_exportedasset_failure_type"),
+        ("posthog", "0971_exportedasset_failure_type"),
     ]
 
     operations = [

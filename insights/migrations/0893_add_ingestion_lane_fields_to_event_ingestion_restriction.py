@@ -8,7 +8,7 @@ import insights.models.event_ingestion_restriction_config
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0892_alter_integration_kind"),
+        ("posthog", "0892_alter_integration_kind"),
     ]
 
     operations = [
