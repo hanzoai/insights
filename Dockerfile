@@ -283,6 +283,9 @@ RUN echo $COMMIT_HASH > /code/commit.txt
 # Copy the Python dependencies and Django staticfiles from the insights-build stage.
 COPY --from=insights-build --chown=posthog:posthog /code/staticfiles /code/staticfiles
 COPY --from=insights-build --chown=posthog:posthog /python-runtime /python-runtime
+
+# Copy ANTLR4 C++ runtime shared library (required by insightsql-parser at runtime)
+COPY --from=insights-build /usr/lib/libantlr4-runtime.so* /usr/lib/
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime
 
