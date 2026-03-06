@@ -279,7 +279,7 @@ export class CdpApi {
     private postFunctionInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
         try {
             const { id, team_id } = req.params
-            const { clickhouse_event, mock_async_functions, configuration, invocation_id } = req.body
+            const { datastore_event, mock_async_functions, configuration, invocation_id } = req.body
             let { globals } = req.body
 
             logger.info('⚡️', 'Received invocation', { id, team_id, body: req.body })
@@ -303,8 +303,8 @@ export class CdpApi {
                 return res.status(404).json({ error: 'Team not found' })
             }
 
-            globals = clickhouse_event
-                ? convertToInsightsFunctionInvocationGlobals(clickhouse_event, team, this.hub.SITE_URL)
+            globals = datastore_event
+                ? convertToInsightsFunctionInvocationGlobals(datastore_event, team, this.hub.SITE_URL)
                 : globals
 
             if (!globals || !globals.event) {
@@ -441,7 +441,7 @@ export class CdpApi {
     private postCustomflowInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
         try {
             const { id, team_id } = req.params
-            const { clickhouse_event, configuration, invocation_id, current_action_id, mock_async_functions } = req.body
+            const { datastore_event, configuration, invocation_id, current_action_id, mock_async_functions } = req.body
 
             logger.info('⚡️', 'Received customflow invocation', { id, team_id, body: req.body })
 
@@ -468,9 +468,9 @@ export class CdpApi {
                 return res.status(404).json({ error: 'Custom flow not found' })
             }
 
-            const globals: InsightsFunctionInvocationGlobals | null = clickhouse_event
+            const globals: InsightsFunctionInvocationGlobals | null = datastore_event
                 ? convertToInsightsFunctionInvocationGlobals(
-                      clickhouse_event,
+                      datastore_event,
                       team,
                       this.hub.SITE_URL ?? 'http://localhost:8000'
                   )
