@@ -3,7 +3,7 @@
  * To make this easier this class is designed to abstract the queue as much as possible from
  * the underlying implementation.
  */
-import { Message, StreamConsumer as RdStreamConsumer } from 'node-rdkafka'
+import { Message, KafkaConsumer as RdStreamConsumer } from 'node-rdkafka'
 import { hostname } from 'os'
 import { Counter, Histogram } from 'prom-client'
 import { compress, uncompress } from 'snappy'
