@@ -80,7 +80,7 @@ export class RealtimeSupportedFilterManagerCDP {
                 id as cohort_id,
                 team_id,
                 filters
-            FROM insights_cohort
+            FROM posthog_cohort
             WHERE team_id = ANY($1)
               AND deleted = FALSE
               AND filters IS NOT NULL

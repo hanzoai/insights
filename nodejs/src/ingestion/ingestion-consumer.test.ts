@@ -197,7 +197,7 @@ describe('IngestionConsumer', () => {
         it('should process a cookieless event', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Stateful, team.id],
                 'set cookieless to stateful'
             )
@@ -209,7 +209,7 @@ describe('IngestionConsumer', () => {
         it('should drop a cookieless event if the team has cookieless disabled', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Disabled, team.id],
                 'set cookieless to disabled'
             )
