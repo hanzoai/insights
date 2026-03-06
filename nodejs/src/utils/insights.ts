@@ -1,4 +1,4 @@
-import { Insights } from 'hanzo-insights-node'
+import { PostHog as Insights } from 'hanzo-insights-node'
 
 import { defaultConfig } from '../config/config'
 import { Team } from '../types'
