@@ -7,16 +7,16 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0726_team_secret_api_token_and_backup"),
+        ("insights", "0726_team_secret_api_token_and_backup"),
     ]
 
     operations = [
         migrations.RunSQL(
-            sql="CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_unique_idx ON posthog_team (secret_api_token);",
+            sql="CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_unique_idx ON insights_team (secret_api_token);",
             reverse_sql="DROP INDEX CONCURRENTLY team_secret_api_token_unique_idx;",
         ),
         migrations.RunSQL(
-            sql="CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_backup_unique_idx ON posthog_team (secret_api_token_backup);",
+            sql="CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_backup_unique_idx ON insights_team (secret_api_token_backup);",
             reverse_sql="DROP INDEX CONCURRENTLY team_secret_api_token_backup_unique_idx;",
         ),
     ]

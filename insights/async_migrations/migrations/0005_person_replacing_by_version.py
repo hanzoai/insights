@@ -70,8 +70,8 @@ class Migration(AsyncMigrationDefinition):
 
     depends_on = "0004_replicated_schema"
 
-    posthog_min_version = "1.38.0"
-    posthog_max_version = "1.41.99"
+    insights_min_version = "1.38.0"
+    insights_max_version = "1.41.99"
 
     def is_required(self) -> bool:
         result = sync_execute(

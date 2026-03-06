@@ -10,7 +10,7 @@ import {
     setActiveProjectAndOrg,
     validateEnvironmentVariables,
 } from '@/shared/test-utils'
-import executeSqlTool from '@/tools/posthogAiTools/executeSql'
+import executeSqlTool from '@/tools/insightsAiTools/executeSql'
 import type { Context } from '@/tools/types'
 
 describe('execute-sql', { concurrent: false }, () => {

@@ -5,7 +5,7 @@ class ClusteringConfig(models.Model):
     """Team-level configuration for LLM analytics clustering filters."""
 
     team = models.OneToOneField(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         primary_key=True,
         related_name="clustering_config",

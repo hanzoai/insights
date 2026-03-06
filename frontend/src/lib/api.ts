@@ -5254,7 +5254,7 @@ const api = {
             refresh?: RefreshType
             filtersOverride?: DashboardFilter | null
             variablesOverride?: Record<string, InsightsQLVariable> | null
-            limitContext?: 'posthog_ai'
+            limitContext?: 'insights_ai'
         }
     ): Promise<
         T extends { [response: string]: any }

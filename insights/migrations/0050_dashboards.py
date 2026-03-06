@@ -6,9 +6,9 @@ from django.db import migrations, models, transaction
 
 
 def forwards(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
-    Dashboard = apps.get_model("posthog", "Dashboard")
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    Team = apps.get_model("insights", "Team")
+    Dashboard = apps.get_model("insights", "Dashboard")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
 
     teams = Team.objects.all()
     for team in teams:
@@ -27,7 +27,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0049_delete_funnelstep"),
+        ("insights", "0049_delete_funnelstep"),
     ]
 
     operations = [
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
                 ),
             ],
         ),
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="items",
-                to="posthog.Dashboard",
+                to="insights.Dashboard",
             ),
         ),
         migrations.RunPython(
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                 null=False,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="items",
-                to="posthog.Dashboard",
+                to="insights.Dashboard",
             ),
         ),
     ]

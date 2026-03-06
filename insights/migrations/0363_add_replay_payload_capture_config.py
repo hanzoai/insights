@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0362_alter_experiment_feature_flag"),
+        ("insights", "0362_alter_experiment_feature_flag"),
     ]
 
     operations = [

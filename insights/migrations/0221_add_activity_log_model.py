@@ -11,7 +11,7 @@ import insights.models.activity_logging.activity_log
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0220_backfill_primary_dashboards"),
+        ("insights", "0220_backfill_primary_dashboards"),
     ]
 
     operations = [
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             model_name="activitylog",
             index=models.Index(
                 fields=["team_id", "scope", "item_id"],
-                name="posthog_act_team_id_13a0a8_idx",
+                name="insights_act_team_id_13a0a8_idx",
             ),
         ),
         migrations.AddConstraint(

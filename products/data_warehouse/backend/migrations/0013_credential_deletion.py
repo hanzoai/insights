@@ -26,7 +26,7 @@ BEGIN
 
         INSERT INTO dwh_tmp_creds (credential_id)
             SELECT DISTINCT credential_id
-            FROM posthog_datawarehousetable
+            FROM insights_datawarehousetable
             WHERE external_data_source_id IS NOT NULL
             AND credential_id IS NOT NULL
             LIMIT batch_size;
@@ -34,11 +34,11 @@ BEGIN
         GET DIAGNOSTICS rows_loaded = ROW_COUNT;
         EXIT WHEN rows_loaded = 0;
 
-        UPDATE posthog_datawarehousetable t
+        UPDATE insights_datawarehousetable t
         SET credential_id = NULL
         WHERE t.credential_id IN (SELECT credential_id FROM dwh_tmp_creds);
 
-        DELETE FROM posthog_datawarehousecredential c
+        DELETE FROM insights_datawarehousecredential c
         WHERE c.id IN (SELECT credential_id FROM dwh_tmp_creds);
 
         PERFORM pg_sleep(0.1);

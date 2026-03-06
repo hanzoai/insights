@@ -2,7 +2,7 @@ from django.db import migrations
 
 
 def replace_person_with_person_display_name(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     for team in Team.objects.filter(live_events_columns__contains=["person"]):
         changed = False
         new_columns = []
@@ -18,7 +18,7 @@ def replace_person_with_person_display_name(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0718_eventingestionrestrictionconfig")]
+    dependencies = [("insights", "0718_eventingestionrestrictionconfig")]
 
     operations = [
         migrations.RunPython(replace_person_with_person_display_name, reverse_code=migrations.RunPython.noop),

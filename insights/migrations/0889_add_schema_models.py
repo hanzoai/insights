@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0888_datawarehousemanagedviewset_and_more"),
+        ("insights", "0888_datawarehousemanagedviewset_and_more"),
     ]
 
     operations = [
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "project",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"),
                 ),
                 (
                     "team",
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="schema_property_groups",
                         related_query_name="schema_property_group",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="schemas",
                         related_query_name="schema",
-                        to="posthog.eventdefinition",
+                        to="insights.eventdefinition",
                     ),
                 ),
                 (
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="event_schemas",
                         related_query_name="event_schema",
-                        to="posthog.schemapropertygroup",
+                        to="insights.schemapropertygroup",
                     ),
                 ),
             ],
@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="properties",
                         related_query_name="property",
-                        to="posthog.schemapropertygroup",
+                        to="insights.schemapropertygroup",
                     ),
                 ),
             ],

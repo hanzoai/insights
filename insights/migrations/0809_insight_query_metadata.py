@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0808_add_evaluation_environment_to_feature_flag"),
+        ("insights", "0808_add_evaluation_environment_to_feature_flag"),
     ]
 
     operations = [
@@ -31,12 +31,12 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 migrations.RunSQL(
-                    sql='ALTER TABLE "posthog_dashboarditem" ADD COLUMN IF NOT EXISTS "query_metadata" jsonb NULL;',
-                    reverse_sql='ALTER TABLE "posthog_dashboarditem" DROP COLUMN IF EXISTS "query_metadata";',
+                    sql='ALTER TABLE "insights_dashboarditem" ADD COLUMN IF NOT EXISTS "query_metadata" jsonb NULL;',
+                    reverse_sql='ALTER TABLE "insights_dashboarditem" DROP COLUMN IF EXISTS "query_metadata";',
                 ),
                 migrations.RunSQL(
                     sql=(
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS dashboarditem_query_metadata ON posthog_dashboarditem USING GIN (query_metadata jsonb_ops);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS dashboarditem_query_metadata ON insights_dashboarditem USING GIN (query_metadata jsonb_ops);"
                     ),
                     reverse_sql="DROP INDEX CONCURRENTLY IF EXISTS dashboarditem_query_metadata;",
                 ),

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0969_add_oauth_is_verified"),
+        ("insights", "0969_add_oauth_is_verified"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="agent_memories", to="posthog.team"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="agent_memories", to="insights.team"
                     ),
                 ),
                 (
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "indexes": [models.Index(fields=["team", "id"], name="posthog_ai__team_id_6610ac_idx")],
+                "indexes": [models.Index(fields=["team", "id"], name="insights_ai__team_id_6610ac_idx")],
             },
         ),
     ]

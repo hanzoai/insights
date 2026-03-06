@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0382_user_strapi_id"),
+        ("insights", "0382_user_strapi_id"),
     ]
 
     operations = [
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="externaldataschema",
             name="table",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.datawarehousetable"
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.datawarehousetable"
             ),
         ),
     ]

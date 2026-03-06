@@ -22,7 +22,7 @@ class DuckLakeCatalog(CreatedMetaFields, UpdatedMetaFields, UUIDModel):
     """
 
     team = models.OneToOneField(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="ducklake_catalog",
     )
@@ -49,7 +49,7 @@ class DuckLakeCatalog(CreatedMetaFields, UpdatedMetaFields, UUIDModel):
     )
 
     class Meta:
-        db_table = "posthog_ducklakecatalog"
+        db_table = "insights_ducklakecatalog"
         verbose_name = "DuckLake catalog"
         verbose_name_plural = "DuckLake catalogs"
 

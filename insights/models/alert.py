@@ -28,7 +28,7 @@ ALERT_STATE_CHOICES = [
 # @deprecated("AlertConfiguration should be used instead.")
 class Alert(models.Model):
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
-    insight = models.ForeignKey("posthog.Insight", on_delete=models.CASCADE)
+    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE)
 
     name = models.CharField(max_length=100)
     target_value = models.TextField()
@@ -42,7 +42,7 @@ class Threshold(ModelActivityMixin, CreatedMetaFields, UUIDTModel):
     """
 
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
-    insight = models.ForeignKey("posthog.Insight", on_delete=models.CASCADE)
+    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255, blank=True)
     configuration = models.JSONField(default=dict)
@@ -64,12 +64,12 @@ class AlertConfiguration(ModelActivityMixin, CreatedMetaFields, UUIDTModel):
     ALERTS_ALLOWED_ON_FREE_TIER = 2
 
     team = models.ForeignKey("Team", on_delete=models.CASCADE)
-    insight = models.ForeignKey("posthog.Insight", on_delete=models.CASCADE)
+    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255, blank=True)
     subscribed_users = models.ManyToManyField(
-        "posthog.User",
-        through="posthog.AlertSubscription",
+        "insights.User",
+        through="insights.AlertSubscription",
         through_fields=("alert_configuration", "user"),
         related_name="alert_configurations",
     )

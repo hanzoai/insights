@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0436_alter_proxyrecord_status"),
+        ("insights", "0436_alter_proxyrecord_status"),
     ]
 
     operations = [
@@ -24,14 +24,14 @@ class Migration(migrations.Migration):
             model_name="externaldatajob",
             name="pipeline",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="jobs", to="posthog.externaldatasource"
+                on_delete=django.db.models.deletion.CASCADE, related_name="jobs", to="insights.externaldatasource"
             ),
         ),
         migrations.RunSQL(
             sql="""
-                UPDATE posthog_externaldataschema AS schema
+                UPDATE insights_externaldataschema AS schema
                 SET sync_frequency = source.sync_frequency
-                FROM posthog_externaldatasource AS source
+                FROM insights_externaldatasource AS source
                 WHERE schema.source_id = source.id
             """,
             reverse_sql=migrations.RunSQL.noop,

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0470_integration_google_cloud_storage"),
+        ("insights", "0470_integration_google_cloud_storage"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 "indexes": [],
                 "constraints": [],
             },
-            bases=("posthog.experiment",),
+            bases=("insights.experiment",),
         ),
         migrations.AddField(
             model_name="experiment",

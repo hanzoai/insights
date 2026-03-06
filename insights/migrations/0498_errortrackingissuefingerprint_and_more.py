@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0497_experimentholdout_experiment_holdout"),
+        ("insights", "0497_experimentholdout_experiment_holdout"),
     ]
 
     operations = [
@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
                 ("version", models.BigIntegerField(blank=True, default=0)),
                 (
                     "issue",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackinggroup"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackinggroup"),
                 ),
                 (
                     "team",
-                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),

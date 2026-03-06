@@ -45,7 +45,7 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
         if (pendingTicketSubmission && lastSubmittedTicketId && lastSubmittedTicketId !== ticketIdBeforeSubmission) {
             captureFeedback(conversationId, traceId, 'bad', currentTriggerType, ticketMessageText || undefined)
 
-            posthog.capture('posthog_ai_support_ticket_created', {
+            posthog.capture('insights_ai_support_ticket_created', {
                 $ai_conversation_id: conversationId,
                 $ai_session_id: conversationId,
                 $ai_trace_id: traceId,

@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def make_first_administrators_owners(apps, schema_editor):
-    Organization = apps.get_model("posthog", "Organization")
+    Organization = apps.get_model("insights", "Organization")
     for organization in Organization.objects.all():
         if organization.memberships.filter(level=15).exists():
             continue
@@ -15,13 +15,13 @@ def make_first_administrators_owners(apps, schema_editor):
 
 
 def make_owners_administrators_again(apps, schema_editor):
-    OrganizationMembership = apps.get_model("posthog", "OrganizationMembership")
+    OrganizationMembership = apps.get_model("insights", "OrganizationMembership")
     OrganizationMembership.objects.filter(level=15).update(level=8)
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0100_action_step_max_length"),
+        ("insights", "0100_action_step_max_length"),
     ]
 
     operations = [

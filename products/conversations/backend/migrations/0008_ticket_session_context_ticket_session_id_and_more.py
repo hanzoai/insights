@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="ticket",
-            index=models.Index(fields=["team", "session_id"], name="posthog_con_team_id_1d12a2_idx"),
+            index=models.Index(fields=["team", "session_id"], name="insights_con_team_id_1d12a2_idx"),
         ),
     ]

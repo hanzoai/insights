@@ -176,7 +176,7 @@ class ActivityLog(UUIDTModel):
 
     team_id = models.PositiveIntegerField(null=True)
     organization_id = models.UUIDField(null=True)
-    user = models.ForeignKey("posthog.User", null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey("insights.User", null=True, on_delete=models.SET_NULL)
     was_impersonated = models.BooleanField(null=True)
     # If truthy, user can be unset and this indicates a 'system' user made activity asynchronously
     is_system = models.BooleanField(null=True)

@@ -10,27 +10,27 @@ from django.db import migrations, models
 # --
 # -- Remove constraint exactly_one_related_object from model taggeditem
 # --
-# ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
 # --
 # -- Alter unique_together for taggeditem (0 constraint(s))
 # --
-# ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT "posthog_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
+# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
 # --
 # -- Add field experiment_saved_metric to taggeditem
 # --
-# ALTER TABLE "posthog_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "posthog_taggeditem_experiment_saved_met_b6af2199_fk_posthog_e" REFERENCES "posthog_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "posthog_taggeditem_experiment_saved_met_b6af2199_fk_posthog_e" IMMEDIATE;
+# ALTER TABLE "insights_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" REFERENCES "insights_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" IMMEDIATE;
 # --
 # -- Alter unique_together for taggeditem (1 constraint(s))
 # --
-# ALTER TABLE "posthog_taggeditem" ADD CONSTRAINT "posthog_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" UNIQUE ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id", "experiment_saved_metric_id");
+# ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" UNIQUE ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id", "experiment_saved_metric_id");
 # --
 # -- Create constraint unique_experiment_saved_metric_tagged_item on model taggeditem
 # --
-# CREATE UNIQUE INDEX "unique_experiment_saved_metric_tagged_item" ON "posthog_taggeditem" ("tag_id", "experiment_saved_metric_id") WHERE "experiment_saved_metric_id" IS NOT NULL;
+# CREATE UNIQUE INDEX "unique_experiment_saved_metric_tagged_item" ON "insights_taggeditem" ("tag_id", "experiment_saved_metric_id") WHERE "experiment_saved_metric_id" IS NOT NULL;
 # --
 # -- Create constraint exactly_one_related_object on model taggeditem
 # --
-# ALTER TABLE "posthog_taggeditem"
+# ALTER TABLE "insights_taggeditem"
 # ADD CONSTRAINT "exactly_one_related_object"
 # CHECK ((
 #     ("dashboard_id" IS NOT NULL AND "insight_id" IS NULL AND "event_definition_id" IS NULL AND "property_definition_id" IS NULL AND "action_id" IS NULL AND "feature_flag_id" IS NULL AND "experiment_saved_metric_id" IS NULL) OR
@@ -41,14 +41,14 @@ from django.db import migrations, models
 #     ("dashboard_id" IS NULL AND "insight_id" IS NULL AND "event_definition_id" IS NULL AND "property_definition_id" IS NULL AND "action_id" IS NULL AND "feature_flag_id" IS NOT NULL AND "experiment_saved_metric_id" IS NULL) OR
 #     ("dashboard_id" IS NULL AND "insight_id" IS NULL AND "event_definition_id" IS NULL AND "property_definition_id" IS NULL AND "action_id" IS NULL AND "feature_flag_id" IS NULL AND "experiment_saved_metric_id" IS NOT NULL)
 # ));
-# CREATE INDEX "posthog_taggeditem_experiment_saved_metric_id_b6af2199" ON "posthog_taggeditem" ("experiment_saved_metric_id");
+# CREATE INDEX "insights_taggeditem_experiment_saved_metric_id_b6af2199" ON "insights_taggeditem" ("experiment_saved_metric_id");
 # COMMIT;
 
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0556_add_execution_order_to_insights_functions"),
+        ("insights", "0556_add_execution_order_to_insights_functions"),
     ]
 
     operations = [
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="tagged_items",
-                        to="posthog.experimentsavedmetric",
+                        to="insights.experimentsavedmetric",
                     ),
                 ),
                 migrations.AlterUniqueTogether(
@@ -172,24 +172,24 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "posthog_taggeditem_experiment_saved_met_b6af2199_fk_posthog_e" REFERENCES "posthog_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_taggeditem_experiment_saved_met_b6af2199_fk_posthog_e" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" REFERENCES "insights_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_taggeditem" DROP COLUMN IF EXISTS "experiment_saved_metric_id";
+                        ALTER TABLE "insights_taggeditem" DROP COLUMN IF EXISTS "experiment_saved_metric_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_taggeditem_experiment_saved_metric_id_b6af2199" ON "posthog_taggeditem" ("experiment_saved_metric_id");
+                    CREATE INDEX CONCURRENTLY "insights_taggeditem_experiment_saved_metric_id_b6af2199" ON "insights_taggeditem" ("experiment_saved_metric_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_taggeditem_experiment_saved_metric_id_b6af2199";
+                        DROP INDEX IF EXISTS "insights_taggeditem_experiment_saved_metric_id_b6af2199";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE UNIQUE INDEX CONCURRENTLY "unique_experiment_saved_metric_tagged_item" ON "posthog_taggeditem" ("tag_id", "experiment_saved_metric_id") WHERE "experiment_saved_metric_id" IS NOT NULL; -- not-null-ignore
+                    CREATE UNIQUE INDEX CONCURRENTLY "unique_experiment_saved_metric_tagged_item" ON "insights_taggeditem" ("tag_id", "experiment_saved_metric_id") WHERE "experiment_saved_metric_id" IS NOT NULL; -- not-null-ignore
                     """,
                     reverse_sql="""
                         DROP INDEX IF EXISTS "unique_experiment_saved_metric_tagged_item";
@@ -197,8 +197,8 @@ class Migration(migrations.Migration):
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
-                    ALTER TABLE "posthog_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
+                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+                    ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
                             (
                                 (dashboard_id IS NOT NULL AND insight_id IS NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL AND experiment_saved_metric_id IS NULL) OR /* -- not-null-ignore */
                                 (dashboard_id IS NULL AND insight_id IS NOT NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL AND experiment_saved_metric_id IS NULL) OR /* -- not-null-ignore */
@@ -211,8 +211,8 @@ class Migration(migrations.Migration):
                         ) NOT VALID;
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
-                        ALTER TABLE "posthog_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
+                        ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+                        ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
                             (
                                 (dashboard_id IS NOT NULL AND insight_id IS NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL) OR /* -- not-null-ignore */
                                 (dashboard_id IS NULL AND insight_id IS NOT NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL) OR /* -- not-null-ignore */
@@ -226,29 +226,29 @@ class Migration(migrations.Migration):
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT IF EXISTS "posthog_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
+                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
                     """,
                     # Intentially swapped with below because these three statements go together.
                     reverse_sql="""
-                        ALTER TABLE "posthog_taggeditem" ADD CONSTRAINT "posthog_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" UNIQUE USING INDEX "posthog_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq"; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" UNIQUE USING INDEX "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq"; -- existing-table-constraint-ignore
                     """,
                 ),
                 # This statement doesn't need to be reversed because it's always the middle of the three statements.
                 migrations.RunSQL(
                     """
-                    CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "posthog_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" ON "posthog_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id", "experiment_saved_metric_id");
+                    CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" ON "insights_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id", "experiment_saved_metric_id");
                     """,
                     reverse_sql="""
-                        CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "posthog_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" ON "posthog_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id");
+                        CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" ON "insights_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id");
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_taggeditem" ADD CONSTRAINT "posthog_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" UNIQUE USING INDEX "posthog_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq"; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" UNIQUE USING INDEX "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq"; -- existing-table-constraint-ignore
                     """,
                     # Intentially swapped with above because these three statements go together.
                     reverse_sql="""
-                        ALTER TABLE "posthog_taggeditem" DROP CONSTRAINT IF EXISTS "posthog_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq";
+                        ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq";
                     """,
                 ),
             ],

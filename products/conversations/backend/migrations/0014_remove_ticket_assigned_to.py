@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 # Drop FK constraint to avoid TransactionTestCase TRUNCATE failures
                 migrations.RunSQL(
-                    sql="ALTER TABLE posthog_conversations_ticket DROP CONSTRAINT IF EXISTS posthog_conversation_assigned_to_id_50d79da9_fk_posthog_u",
+                    sql="ALTER TABLE insights_conversations_ticket DROP CONSTRAINT IF EXISTS insights_conversation_assigned_to_id_50d79da9_fk_insights_u",
                     reverse_sql=migrations.RunSQL.noop,
                 ),
                 # TODO: drop column in a later migration after this is deployed

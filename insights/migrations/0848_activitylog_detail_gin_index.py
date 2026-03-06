@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0847_alter_batchexportrun_status"),
+        ("insights", "0847_alter_batchexportrun_status"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS activitylog_detail_gin ON posthog_activitylog USING GIN (detail jsonb_ops);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS activitylog_detail_gin ON insights_activitylog USING GIN (detail jsonb_ops);"
                     ],
                     reverse_sql=["DROP INDEX IF EXISTS activitylog_detail_gin;"],
                 ),

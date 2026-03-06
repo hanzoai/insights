@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False  # Cannot create index concurrently atomically
 
     dependencies = [
-        ("posthog", "0351_team_surveys_opt_in"),
+        ("insights", "0351_team_surveys_opt_in"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
             CREATE UNIQUE INDEX CONCURRENTLY idx_messagingrecord_unique_on_email_hash_campaign_key_campaign_count
-            ON posthog_messagingrecord (email_hash, campaign_key, campaign_count);
+            ON insights_messagingrecord (email_hash, campaign_key, campaign_count);
             """,
             reverse_sql="""
             DROP INDEX CONCURRENTLY "idx_messagingrecord_unique_on_email_hash_campaign_key_campaign_count";

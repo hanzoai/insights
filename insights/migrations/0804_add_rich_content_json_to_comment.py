@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0803_move_recording_annotation_to_comments"),
+        ("insights", "0803_move_recording_annotation_to_comments"),
     ]
 
     operations = [

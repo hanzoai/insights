@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0892_alter_integration_kind"),
+        ("insights", "0892_alter_integration_kind"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -84,17 +84,17 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="desktop_recordings",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
             options={
-                "db_table": "posthog_desktop_recording",
+                "db_table": "insights_desktop_recording",
                 "ordering": ["-started_at"],
                 "indexes": [
-                    models.Index(fields=["team", "-started_at"], name="posthog_des_team_id_1db4f6_idx"),
-                    models.Index(fields=["created_by", "-started_at"], name="posthog_des_created_e2ddfc_idx"),
-                    models.Index(fields=["status"], name="posthog_des_status_365bd7_idx"),
+                    models.Index(fields=["team", "-started_at"], name="insights_des_team_id_1db4f6_idx"),
+                    models.Index(fields=["created_by", "-started_at"], name="insights_des_created_e2ddfc_idx"),
+                    models.Index(fields=["status"], name="insights_des_status_365bd7_idx"),
                 ],
             },
         ),

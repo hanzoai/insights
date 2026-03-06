@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0714_alter_team_session_recording_minimum_duration_milliseconds"),
+        ("insights", "0714_alter_team_session_recording_minimum_duration_milliseconds"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         primary_key=True,
                         serialize=False,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 (

@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0090_org_live"),
+        ("insights", "0090_org_live"),
     ]
 
     operations = [

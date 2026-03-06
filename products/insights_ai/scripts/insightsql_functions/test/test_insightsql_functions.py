@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from products.posthog_ai.scripts.insightsql_functions import insightsql_functions
+from products.insights_ai.scripts.insightsql_functions import insightsql_functions
 
 
 def test_returns_sorted_list() -> None:

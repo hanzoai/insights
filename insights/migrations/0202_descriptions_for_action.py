@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0201_remove_property_type_format_constraint"),
+        ("insights", "0201_remove_property_type_format_constraint"),
     ]
 
     operations = [

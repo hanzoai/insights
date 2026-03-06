@@ -107,7 +107,7 @@ export interface DataNodeLogicProps {
     /** Override the maximum pagination limit. */
     maxPaginationLimit?: number
     /** Limit context sent to the /query endpoint */
-    limitContext?: 'posthog_ai'
+    limitContext?: 'insights_ai'
 }
 
 export const AUTOLOAD_INTERVAL = 30000

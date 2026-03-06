@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0963_add_azure_blob_destination"),
+        ("insights", "0963_add_azure_blob_destination"),
     ]
 
     operations = [

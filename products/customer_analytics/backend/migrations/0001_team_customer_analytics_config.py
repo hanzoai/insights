@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0904_alter_dashboard_creation_mode"),
+        ("insights", "0904_alter_dashboard_creation_mode"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         primary_key=True,
                         serialize=False,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 ("activity_event", models.JSONField(default=dict)),

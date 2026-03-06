@@ -10,7 +10,7 @@ If users ran the old version of this, they will be ok to run 0007, if not, they 
 class Migration(AsyncMigrationDefinition):
     description = "No-op migration"
 
-    posthog_max_version = "1.41.99"
+    insights_max_version = "1.41.99"
 
     depends_on = "0005_person_replacing_by_version"
 

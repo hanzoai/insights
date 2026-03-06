@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1013_eventdefinition_enforcement_mode_db_default"),
+        ("insights", "1013_eventdefinition_enforcement_mode_db_default"),
         ("conversations", "0014_remove_ticket_assigned_to"),
     ]
 
@@ -23,20 +23,20 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=models.CASCADE, related_name="conversation_restore_tokens", to="posthog.team"
+                        on_delete=models.CASCADE, related_name="conversation_restore_tokens", to="insights.team"
                     ),
                 ),
             ],
             options={
-                "db_table": "posthog_conversations_restore_token",
+                "db_table": "insights_conversations_restore_token",
             },
         ),
         migrations.AddIndex(
             model_name="conversationrestoretoken",
-            index=models.Index(fields=["team", "recipient_email"], name="posthog_crt_team_email_idx"),
+            index=models.Index(fields=["team", "recipient_email"], name="insights_crt_team_email_idx"),
         ),
         migrations.AddIndex(
             model_name="conversationrestoretoken",
-            index=models.Index(fields=["expires_at"], name="posthog_crt_expires_idx"),
+            index=models.Index(fields=["expires_at"], name="insights_crt_expires_idx"),
         ),
     ]

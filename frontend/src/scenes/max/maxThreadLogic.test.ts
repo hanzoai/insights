@@ -532,7 +532,7 @@ describe('maxThreadLogic', () => {
                 max_queue_messages: 2,
             })
             featureFlagLogic.actions.setFeatureFlags([], {
-                [FEATURE_FLAGS.POSTHOG_AI_QUEUE_MESSAGES_SYSTEM]: true,
+                [FEATURE_FLAGS.INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM]: true,
             })
         })
 

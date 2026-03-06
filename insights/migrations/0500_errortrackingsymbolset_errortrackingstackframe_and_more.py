@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0499_insights_function_type"),
+        ("insights", "0499_insights_function_type"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ("ref", models.TextField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("storage_ptr", models.TextField(null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.CreateModel(
@@ -43,15 +43,15 @@ class Migration(migrations.Migration):
                 (
                     "symbol_set",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingsymbolset"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingsymbolset"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.AddIndex(
             model_name="errortrackingsymbolset",
-            index=models.Index(fields=["team_id", "ref"], name="posthog_err_team_id_927574_idx"),
+            index=models.Index(fields=["team_id", "ref"], name="insights_err_team_id_927574_idx"),
         ),
         migrations.AddConstraint(
             model_name="errortrackingsymbolset",
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="errortrackingstackframe",
-            index=models.Index(fields=["team_id", "raw_id"], name="posthog_err_team_id_dc6a7f_idx"),
+            index=models.Index(fields=["team_id", "raw_id"], name="insights_err_team_id_dc6a7f_idx"),
         ),
         migrations.AddConstraint(
             model_name="errortrackingstackframe",

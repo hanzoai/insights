@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0406_survey_responses_limit"),
+        ("insights", "0406_survey_responses_limit"),
     ]
 
     operations = [

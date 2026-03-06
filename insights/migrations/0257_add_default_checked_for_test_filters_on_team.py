@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0256_add_async_deletion_model"),
+        ("insights", "0256_add_async_deletion_model"),
     ]
 
     operations = [

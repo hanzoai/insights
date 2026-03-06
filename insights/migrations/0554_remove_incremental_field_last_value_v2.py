@@ -5,14 +5,14 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0553_feature_flag_config"),
+        ("insights", "0553_feature_flag_config"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql=[
                 """
-                 UPDATE posthog_externaldataschema
+                 UPDATE insights_externaldataschema
                  SET sync_type_config = sync_type_config - 'incremental_field_last_value_v2'
                  WHERE sync_type_config ? 'incremental_field_last_value_v2'
                  """

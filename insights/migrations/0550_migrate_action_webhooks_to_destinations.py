@@ -15,7 +15,7 @@ def migrate_action_webhooks_backward(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0549_add_revenue_tracking_config_to_team"),
+        ("insights", "0549_add_revenue_tracking_config_to_team"),
     ]
 
     operations = [

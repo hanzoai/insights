@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0672_resave_customFns_from_token_refresh_incident"),
+        ("insights", "0672_resave_customFns_from_token_refresh_incident"),
     ]
 
     operations = [

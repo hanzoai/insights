@@ -13,7 +13,7 @@ import products.data_warehouse.backend.models.modeling
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0462_change_replay_team_setting_defaults"),
+        ("insights", "0462_change_replay_team_setting_defaults"),
     ]
 
     operations = [
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                         default=None,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.datawarehousesavedquery",
+                        to="insights.datawarehousesavedquery",
                     ),
                 ),
                 (
@@ -51,10 +51,10 @@ class Migration(migrations.Migration):
                         default=None,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.datawarehousetable",
+                        to="insights.datawarehousetable",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "indexes": [

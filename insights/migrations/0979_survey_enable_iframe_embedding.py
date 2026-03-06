@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0978_add_user_passkeys_enabled_for_2fa"),
+        ("insights", "0978_add_user_passkeys_enabled_for_2fa"),
     ]
 
     operations = [
