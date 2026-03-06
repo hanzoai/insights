@@ -1,6 +1,6 @@
 import re
 
-from common.hogvm.python.objects import is_hog_callable, is_hog_closure, is_hog_date, is_hog_datetime, is_hog_error
+from common.scriptvm.python.objects import is_hog_callable, is_hog_closure, is_hog_date, is_hog_datetime, is_hog_error
 
 # Copied from clickhouse_driver.util.escape, adapted only from single quotes to backquotes.
 escape_chars_map = {

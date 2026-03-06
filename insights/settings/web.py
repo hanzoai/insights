@@ -188,6 +188,7 @@ SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
 SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
 SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
+SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
 AUTH_USER_MODEL = "posthog.User"
 
