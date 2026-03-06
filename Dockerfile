@@ -286,6 +286,7 @@ COPY --from=insights-build --chown=posthog:posthog /python-runtime /python-runti
 
 # Copy ANTLR4 C++ runtime shared library (required by insightsql-parser at runtime)
 COPY --from=insights-build /usr/lib/libantlr4-runtime.so* /usr/lib/
+RUN ldconfig
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime
 
