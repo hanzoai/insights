@@ -434,7 +434,7 @@ fn test_decode_request_form_urlencoded() {
 
 #[test]
 fn test_decode_form_data_kludges() {
-    // see https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L686-L708
+    // see https://github.com/hanzoai/insights/blob/main/posthog/utils.py#L686-L708
     // for the list of kludges we need to support
     let test_cases = vec![
         // No padding needed

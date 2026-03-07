@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

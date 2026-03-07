@@ -8,17 +8,17 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/core"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 var funFacts = []string{
-	"PostHog was founded in January 2020 during Y Combinator",
+	"Hanzo AI was founded in 2017 during Techstars",
 	"The hedgehog mascot is named Max",
-	"PostHog is 100% open source - check out github.com/PostHog/posthog",
-	"PostHog supports 40+ data integrations out of the box",
-	"You can run SQL queries directly on your PostHog data",
-	"PostHog was built by engineers, for engineers",
+	"Insights is 100% open source - check out github.com/PostHog/posthog",
+	"Insights supports 40+ data integrations out of the box",
+	"You can run SQL queries directly on your Insights data",
+	"Insights was built by engineers, for engineers",
 	"Hedgehogs can run up to 6 miles per hour!",
 }
 
@@ -29,7 +29,7 @@ type WelcomeModel struct {
 }
 
 func NewWelcomeModel() WelcomeModel {
-	isUpgrade := core.DirExists("posthog")
+	isUpgrade := core.DirExists("insights")
 	n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(funFacts))))
 	return WelcomeModel{
 		isUpgrade: isUpgrade,
@@ -139,7 +139,7 @@ func (m WelcomeModel) View() string {
 
 func (m WelcomeModel) getActionTitle() string {
 	if m.isUpgrade {
-		return "Upgrade PostHog"
+		return "Upgrade Insights"
 	}
 	return "Install PostHog"
 }

@@ -1,17 +1,17 @@
 package core
 
 import (
-	"github.com/posthog/posthog-go"
+	"github.com/hanzoai/insights-go"
 )
 
-const posthogAPIKey = "sTMFPsFhdP1Ssg"
-const endpoint = "https://us.i.posthog.com"
+const insightsAPIKey = "sTMFPsFhdP1Ssg"
+const endpoint = "https://us.i.insights.hanzo.ai"
 
-var client posthog.Client
+var client insights_go.Client
 
 func init() {
 	var err error
-	client, err = posthog.NewWithConfig(posthogAPIKey, posthog.Config{
+	client, err = insights_go.NewWithConfig(insightsAPIKey, insights_go.Config{
 		Endpoint: endpoint,
 	})
 	if err != nil {
@@ -32,10 +32,10 @@ func sendEvent(domain, eventName string) {
 		return
 	}
 
-	_ = client.Enqueue(posthog.Capture{
+	_ = client.Enqueue(insights_go.Capture{
 		DistinctId: domain,
 		Event:      eventName,
-		Properties: posthog.NewProperties().Set("domain", domain),
+		Properties: insights_go.NewProperties().Set("domain", domain),
 	})
 }
 

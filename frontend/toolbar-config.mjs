@@ -26,7 +26,7 @@ const deniedPatterns = [
 
 const denylistPlugin = {
     /**
-     * The toolbar includes many parts of the main posthog app,
+     * The toolbar includes many parts of the main insights app,
      * but we don't want to include everything in the toolbar bundle.
      * Partly because it would be too big, and partly because some things
      * in the main app cause problems for people using CSPs on their sites.
@@ -59,7 +59,7 @@ const denylistPlugin = {
                 contents: `
                                 module.exports = new Proxy({}, {
                                     get: function() {
-                                        const shouldLog = window?.posthog?.config?.debug
+                                        const shouldLog = window?.insights?.config?.debug
                                         if (shouldLog) {
                                             console.warn('[TOOLBAR] Attempted to use denied module:', ${JSON.stringify(
                                                 args.path
@@ -80,13 +80,13 @@ const denylistPlugin = {
 export function getToolbarBuildConfig(dirname) {
     return {
         name: 'Toolbar',
-        globalName: 'posthogToolbar',
+        globalName: 'insightsToolbar',
         entryPoints: ['src/toolbar/index.tsx'],
         format: 'iife',
         outfile: path.resolve(dirname, 'dist', 'toolbar.js'),
-        banner: { js: 'var posthogToolbar = (function () { var define = undefined;' },
-        footer: { js: 'return posthogToolbar })();' },
-        publicPath: isDev ? '/static/' : 'https://us.posthog.com/static/',
+        banner: { js: 'var insightsToolbar = (function () { var define = undefined;' },
+        footer: { js: 'return insightsToolbar })();' },
+        publicPath: isDev ? '/static/' : 'https://us.insights.hanzo.ai/static/',
         writeMetaFile: true,
         extraPlugins: [denylistPlugin],
     }

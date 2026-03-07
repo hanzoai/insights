@@ -82,7 +82,7 @@
             "plugin_type": "custom",
             "name": "Customer.io",
             "description": "Send event data and emails into Customer.io.",
-            "url": "https://github.com/PostHog/customerio-plugin",
+            "url": "https://github.com/hanzoai/customerio-plugin",
             "icon": null,
             "config_schema": [
                 {
@@ -152,7 +152,7 @@
             "plugin_type": "custom",
             "name": "BigQuery Export",
             "description": "Sends events to a BigQuery database on ingestion.",
-            "url": "https://github.com/PostHog/bigquery-plugin",
+            "url": "https://github.com/hanzoai/bigquery-plugin",
             "icon": null,
             "config_schema": [
                 {

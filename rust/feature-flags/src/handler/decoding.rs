@@ -211,7 +211,7 @@ pub fn decode_form_data(
         })?;
 
     // Extract base64 part, handling both with and without 'data=' prefix
-    // see https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L693-L699
+    // see https://github.com/hanzoai/insights/blob/main/posthog/utils.py#L693-L699
     let base64_str = if decoded_form.starts_with("data=") {
         decoded_form.split('=').nth(1).unwrap_or("")
     } else {
@@ -230,7 +230,7 @@ pub fn decode_form_data(
     };
 
     // Remove whitespace and add padding if necessary
-    // https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L701-L705
+    // https://github.com/hanzoai/insights/blob/main/posthog/utils.py#L701-L705
     let mut cleaned_base64 = base64_str.replace(' ', "");
     let padding_needed = cleaned_base64.len() % 4;
     if padding_needed > 0 {

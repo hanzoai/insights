@@ -1,4 +1,4 @@
-module github.com/posthog/posthog/bin/hobby-installer
+module github.com/hanzoai/insights/bin/hobby-installer
 
 go 1.26
 

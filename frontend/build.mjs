@@ -21,7 +21,7 @@ startDevServer(__dirname)
 copyPublicFolder(path.resolve(__dirname, 'public'), path.resolve(__dirname, 'dist'))
 
 copyPublicFolder(
-    path.resolve(__dirname, 'node_modules', '@posthog', 'hedgehog-mode', 'assets'),
+    path.resolve(__dirname, 'node_modules', '@hanzo', 'mascot-mode', 'assets'),
     path.resolve(__dirname, 'dist', 'hedgehog-mode')
 )
 copySnappyWASMFile(__dirname)
@@ -40,8 +40,8 @@ const common = {
 await buildInParallel(
     [
         {
-            name: 'PostHog App',
-            globalName: 'posthogApp',
+            name: 'Insights App',
+            globalName: 'insightsApp',
             entryPoints: ['src/index.tsx'],
             splitting: true,
             format: 'esm',
@@ -57,7 +57,7 @@ await buildInParallel(
         },
         {
             name: 'Exporter',
-            globalName: 'posthogExporter',
+            globalName: 'insightsExporter',
             entryPoints: ['src/exporter/index.tsx'],
             format: 'iife',
             outfile: path.resolve(__dirname, 'dist', 'exporter.js'),
@@ -65,7 +65,7 @@ await buildInParallel(
         },
         {
             name: 'Render Query',
-            globalName: 'posthogRenderQuery',
+            globalName: 'insightsRenderQuery',
             entryPoints: ['src/render-query/index.tsx'],
             format: 'iife',
             outfile: path.resolve(__dirname, 'dist', 'render-query.js'),
@@ -84,14 +84,14 @@ await buildInParallel(
 
             const { chunks, entrypoints } = buildResponse
 
-            if (config.name === 'PostHog App') {
+            if (config.name === 'Insights App') {
                 if (Object.keys(chunks).length === 0) {
-                    console.error('Could not get chunk metadata for bundle "PostHog App."')
-                    throw new Error('Could not get chunk metadata for bundle "PostHog App."')
+                    console.error('Could not get chunk metadata for bundle "Insights App."')
+                    throw new Error('Could not get chunk metadata for bundle "Insights App."')
                 }
                 if (!isDev && Object.keys(entrypoints).length === 0) {
-                    console.error('Could not get entrypoint for bundle "PostHog App."')
-                    throw new Error('Could not get entrypoint for bundle "PostHog App."')
+                    console.error('Could not get entrypoint for bundle "Insights App."')
+                    throw new Error('Could not get entrypoint for bundle "Insights App."')
                 }
                 writeIndexHtml(chunks, entrypoints)
             }

@@ -38,12 +38,12 @@ func GetVolumeWarning() string {
 	return `WARNING: POTENTIAL DATA LOSS
 
 We were unable to find named clickhouse and postgres volumes.
-If you created your PostHog stack PRIOR TO August 12th, 2022 / v1.39.0,
+If you created your Insights stack PRIOR TO August 12th, 2022 / v1.39.0,
 the Postgres and Clickhouse containers did NOT have persistent named volumes by default.
 
 If you choose to upgrade, you will likely lose data contained in these anonymous volumes.
 
-See: https://github.com/PostHog/posthog/pull/11256
+See: https://github.com/hanzoai/insights/pull/11256
 
 WE STRONGLY RECOMMEND YOU:
 • Stop and back up your entire environment
@@ -52,7 +52,7 @@ WE STRONGLY RECOMMEND YOU:
 }
 
 func checkPostgres12InCompose() bool {
-	data, err := os.ReadFile("posthog/docker-compose.hobby.yml")
+	data, err := os.ReadFile("insights/docker-compose.hobby.yml")
 	if err != nil {
 		return false
 	}
@@ -107,7 +107,7 @@ func RestorePostgres15(backupFile string) error {
 	}
 
 	cmd, args := GetDockerComposeCommand()
-	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "posthog", "-c", "ALTER USER posthog WITH PASSWORD 'posthog';")
+	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "insights", "-c", "ALTER USER insights WITH PASSWORD 'posthog';")
 	_, _ = RunCommand(cmd, fullArgs...) // Best-effort password reset
 
 	return nil

@@ -197,7 +197,7 @@ impl PHClient {
     fn build_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert("Content-Type", HeaderValue::from_static("application/json"));
-        headers.insert("User-Agent", HeaderValue::from_static("posthog-cli"));
+        headers.insert("User-Agent", HeaderValue::from_static("insights-cli"));
         headers
     }
 

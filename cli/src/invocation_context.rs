@@ -36,7 +36,7 @@ pub fn init_context(host: Option<String>, skip_ssl: bool, rate_limit: Option<usi
     let token = get_token()?;
     let config = InvocationConfig {
         api_key: token.token.clone(),
-        host: host.unwrap_or(token.host.unwrap_or("https://us.i.posthog.com".into())),
+        host: host.unwrap_or(token.host.unwrap_or("https://us.i.insights.hanzo.ai".into())),
         env_id: token.env_id.clone(),
         skip_ssl,
         rate_limit: rate_limit.unwrap_or(480),
@@ -49,15 +49,15 @@ pub fn init_context(host: Option<String>, skip_ssl: bool, rate_limit: Option<usi
     INVOCATION_CONTEXT.get_or_init(|| InvocationContext::new(config, client));
 
     // This is pulled at compile time, not runtime - we set it at build.
-    if let Some(token) = option_env!("POSTHOG_API_TOKEN") {
+    if let Some(token) = option_env!("INSIGHTS_API_TOKEN") {
         let ph_config = insights_rs::ClientOptionsBuilder::default()
             .api_key(token.to_string())
             .request_timeout_seconds(5) // It's a CLI, 5 seconds is an eternity
             .build()
             .expect("Building PH config succeeds");
-        insights_rs::init_global(ph_config).expect("Initializing PostHog client");
+        insights_rs::init_global(ph_config).expect("Initializing Insights client");
     } else {
-        warn!("Posthog api token not set at build time - is this a debug build?");
+        warn!("Insights api token not set at build time - is this a debug build?");
     };
 
     Ok(())
@@ -111,7 +111,7 @@ impl InvocationContext {
 
     pub fn capture_command_invoked(&self, command: &str) {
         let env_id = self.client.get_env_id();
-        let event_name = "posthog cli command run".to_string();
+        let event_name = "insights cli command run".to_string();
         let mut event = Event::new_anon(event_name);
 
         event

@@ -7,10 +7,10 @@ export DEBIAN_FRONTEND=noninteractive
 # Automatically restart without asking.
 # this gets around needrestart command halting for user input
 export RESTART_MODE=l
-export POSTHOG_APP_TAG="${POSTHOG_APP_TAG:-latest}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest}"
 
-POSTHOG_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
-export POSTHOG_SECRET
+INSIGHTS_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
+export INSIGHTS_SECRET
 
 ENCRYPTION_SALT_KEYS=$(openssl rand -hex 16)
 export ENCRYPTION_SALT_KEYS
@@ -26,17 +26,17 @@ echo ""
 
 if [ -n "$1" ]
 then
-    export POSTHOG_APP_TAG=$1
+    export INSIGHTS_APP_TAG=$1
 else
     echo "What version of PostHog would you like to install? (We default to 'latest')"
     echo "You can check out available versions here: https://hub.docker.com/r/posthog/posthog/tags"
-    read -r POSTHOG_APP_TAG_READ
-    if [ -z "$POSTHOG_APP_TAG_READ" ]
+    read -r INSIGHTS_APP_TAG_READ
+    if [ -z "$INSIGHTS_APP_TAG_READ" ]
     then
-        echo "Using default and installing $POSTHOG_APP_TAG"
+        echo "Using default and installing $INSIGHTS_APP_TAG"
     else
-        export POSTHOG_APP_TAG=$POSTHOG_APP_TAG_READ
-        echo "Using provided tag: $POSTHOG_APP_TAG"
+        export INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG_READ
+        echo "Using provided tag: $INSIGHTS_APP_TAG"
     fi
 fi
 
@@ -87,14 +87,14 @@ sudo apt install -y git
 git clone --filter=blob:none https://github.com/PostHog/posthog.git &> /dev/null || true
 cd posthog
 
-if [[ "$POSTHOG_APP_TAG" = "latest-release" ]]
+if [[ "$INSIGHTS_APP_TAG" = "latest-release" ]]
 then
     git fetch --tags
     latestReleaseTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     echo "Checking out latest PostHog release: $latestReleaseTag"
     echo "Warning PostHog don't create tagged releases anymore. It's way better to use 'latest' than 'latest-release'"
     git checkout "$latestReleaseTag"
-elif [[ "$POSTHOG_APP_TAG" = "latest" ]]
+elif [[ "$INSIGHTS_APP_TAG" = "latest" ]]
 then
     echo "Fetching latest changes from origin"
     git fetch origin
@@ -106,12 +106,12 @@ then
         echo "On detached HEAD: $(git rev-parse --short HEAD)"
     fi
     echo "Now on commit: $(git rev-parse --short HEAD)"
-elif [[ "$POSTHOG_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
+elif [[ "$INSIGHTS_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
 then
-    echo "Checking out specific commit hash: $POSTHOG_APP_TAG"
-    git checkout "$POSTHOG_APP_TAG"
+    echo "Checking out specific commit hash: $INSIGHTS_APP_TAG"
+    git checkout "$INSIGHTS_APP_TAG"
 else
-    releaseTag="${POSTHOG_APP_TAG/release-/""}"
+    releaseTag="${INSIGHTS_APP_TAG/release-/""}"
     git fetch --tags
     echo "Checking out PostHog release: $releaseTag"
     git checkout "$releaseTag"
@@ -133,14 +133,14 @@ fi
 
 # Write .env file
 cat > .env <<EOF
-POSTHOG_SECRET=$POSTHOG_SECRET
+INSIGHTS_SECRET=$INSIGHTS_SECRET
 ENCRYPTION_SALT_KEYS=$ENCRYPTION_SALT_KEYS
 DOMAIN=$DOMAIN
 TLS_BLOCK=$TLS_BLOCK
 REGISTRY_URL=$REGISTRY_URL
 CADDY_TLS_BLOCK=$TLS_BLOCK
 CADDY_HOST="$DOMAIN, http://, https://"
-POSTHOG_APP_TAG=$POSTHOG_APP_TAG
+INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG
 EOF
 
 # Download GeoLite2-City.mmdb if it doesn't exist

@@ -73,7 +73,7 @@ export function copyIndexHtml(
     //
     // `JS_URL` is expected to be injected into the html as part of Django html
     // template rendering. We do not know what JS_URL should be at runtime, as,
-    // for instance, on PostHog Cloud, we want to use the official PostHog
+    // for instance, on Insights Cloud, we want to use the official Insights
     // Docker image, but serve the js and it's dependencies from e.g. CloudFront
     const buildId = new Date().valueOf()
 
@@ -283,7 +283,7 @@ export async function buildInParallel(configs, { onBuildStart, onBuildComplete }
 function getBuiltEntryPoints(config, result) {
     let outfiles = []
     if (config.outdir) {
-        // convert "src/index.tsx" --> /a/posthog/frontend/dist/index.js
+        // convert "src/index.tsx" --> /a/insights/frontend/dist/index.js
         outfiles = config.entryPoints.map((file) =>
             path
                 .resolve(config.absWorkingDir, file)

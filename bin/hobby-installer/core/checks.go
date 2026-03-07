@@ -161,8 +161,8 @@ func checkNetwork() CheckResult {
 func checkDockerVolumes() CheckResult {
 	logger := GetLogger()
 
-	if !DirExists("posthog") {
-		logger.Debug("posthog directory not found, skipping volume check")
+	if !DirExists("insights") {
+		logger.Debug("insights directory not found, skipping volume check")
 		logger.WriteString("New installation, skipping volume check\n")
 		return CheckResult{Passed: true, Detail: "new install"}
 	}

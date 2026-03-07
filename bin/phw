@@ -96,7 +96,7 @@ phw() {
     
     # Auto-cd to worktree after successful command execution
     if [[ -n "$branch" ]]; then
-        local worktree_base="${POSTHOG_WORKTREE_BASE:-$HOME/.worktrees/posthog}"
+        local worktree_base="${INSIGHTS_WORKTREE_BASE:-$HOME/.worktrees/insights}"
         local worktree_path=""
         
         case "$command" in

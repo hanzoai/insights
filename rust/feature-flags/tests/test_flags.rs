@@ -5020,7 +5020,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
     )
-    .bind("Non-Admin PostHog Users")
+    .bind("Non-Admin Insights Users")
     .bind("Matches @posthog.com but NOT admin")
     .bind(team.id)
     .bind(main_cohort_filters)

@@ -11,9 +11,9 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	"github.com/posthog/posthog/livestream/configs"
-	"github.com/posthog/posthog/livestream/geo"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/configs"
+	"github.com/hanzoai/insights/livestream/geo"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -192,7 +192,7 @@ func (c *PostHogKafkaConsumer) Consume() {
 				}
 			}
 			log.Printf("Error consuming message: %v", err)
-			// TODO capture error to PostHog
+			// TODO capture error to Insights
 			continue
 		}
 
@@ -276,7 +276,7 @@ func parse(geolocator geo.GeoLocator, kafkaMessage []byte) PostHogEvent {
 
 func (c *PostHogKafkaConsumer) Close() {
 	if err := c.consumer.Close(); err != nil {
-		// TODO capture error to PostHog
+		// TODO capture error to Insights
 		log.Printf("Failed to close consumer: %v", err)
 	}
 	close(c.incoming)

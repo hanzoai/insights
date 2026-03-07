@@ -1,6 +1,6 @@
 {
     "name": "Hubspot",
-    "url": "https://github.com/PostHog/hubspot-plugin",
+    "url": "https://github.com/hanzoai/hubspot-plugin",
     "description": "Send contact data to Hubspot on Insights identify events.",
     "main": "index.ts",
     "config": [

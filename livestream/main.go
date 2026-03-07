@@ -13,12 +13,12 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/posthog/posthog/livestream/auth"
-	"github.com/posthog/posthog/livestream/configs"
-	"github.com/posthog/posthog/livestream/events"
-	"github.com/posthog/posthog/livestream/geo"
-	"github.com/posthog/posthog/livestream/handlers"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/auth"
+	"github.com/hanzoai/insights/livestream/configs"
+	"github.com/hanzoai/insights/livestream/events"
+	"github.com/hanzoai/insights/livestream/geo"
+	"github.com/hanzoai/insights/livestream/handlers"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -28,13 +28,13 @@ func main() {
 
 	config, err := configs.LoadConfig()
 	if err != nil {
-		// TODO capture error to PostHog
+		// TODO capture error to Insights
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
 	geolocator, err := geo.NewMaxMindGeoLocator(config.MMDB.Path)
 	if err != nil {
-		// TODO capture error to PostHog
+		// TODO capture error to Insights
 		log.Fatalf("Failed to open MMDB: %v", err)
 	}
 

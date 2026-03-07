@@ -36,8 +36,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Worktree base directory (configurable via POSTHOG_WORKTREE_BASE)
-WORKTREE_BASE="${POSTHOG_WORKTREE_BASE:-${HOME}/.worktrees/posthog}"
+# Worktree base directory (configurable via INSIGHTS_WORKTREE_BASE)
+WORKTREE_BASE="${INSIGHTS_WORKTREE_BASE:-${HOME}/.worktrees/insights}"
 
 # Copy helper that uses copy-on-write clones when available (APFS/Btrfs)
 # Returns 0 on success, 1 if CoW not available and require_cow is true
@@ -406,8 +406,8 @@ case "$COMMAND" in
         echo "  - Use standard 'bin/start' command within each worktree"
         echo ""
         echo "Configuration:"
-        echo "  - Set POSTHOG_WORKTREE_BASE to customize worktree location"
-        echo "  - Default: ~/.worktrees/posthog"
+        echo "  - Set INSIGHTS_WORKTREE_BASE to customize worktree location"
+        echo "  - Default: ~/.worktrees/insights"
         echo ""
         print_color yellow "💡 For auto-cd functionality, add to ~/.zshrc or ~/.bashrc:"
         print_color yellow "   source $(dirname "$0")/phw"

@@ -4761,7 +4761,7 @@ mod tests {
             "Match reason should be SuperConditionValue"
         );
 
-        // Test PostHog user
+        // Test Insights user
         let router2 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
             "posthog_user".to_string(),
@@ -4779,7 +4779,7 @@ mod tests {
             .unwrap();
 
         let result = matcher.get_match(&flag, None, None, &None).unwrap();
-        assert!(!result.matches, "PostHog user should not match");
+        assert!(!result.matches, "Insights user should not match");
         assert_eq!(
             result.reason,
             FeatureFlagMatchReason::SuperConditionValue,

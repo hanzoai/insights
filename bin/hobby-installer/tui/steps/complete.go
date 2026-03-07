@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 type CompleteModel struct {
@@ -53,7 +53,7 @@ func (m CompleteModel) successView() string {
 			lipgloss.Center,
 			ui.SuccessStyle.Render("🎉 Installation Complete! 🎉"),
 			"",
-			ui.DefaultStyle.Render("PostHog is now running at:"),
+			ui.DefaultStyle.Render("Insights is now running at:"),
 			"",
 			ui.BoldStyle.Foreground(ui.ColorPrimary).Render(fmt.Sprintf("https://%s", m.domain)),
 		))
@@ -62,8 +62,8 @@ func (m CompleteModel) successView() string {
 		lipgloss.Left,
 		ui.SubtitleStyle.Render("Useful commands:"),
 		"",
-		ui.MutedStyle.Render("  Stop PostHog:    ")+"docker-compose stop",
-		ui.MutedStyle.Render("  Start PostHog:   ")+"docker-compose start",
+		ui.MutedStyle.Render("  Stop Insights:    ")+"docker-compose stop",
+		ui.MutedStyle.Render("  Start Insights:   ")+"docker-compose start",
 		ui.MutedStyle.Render("  View logs:       ")+"docker-compose logs -f",
 		ui.MutedStyle.Render("  Upgrade:         ")+"./hobby-installer",
 		"",
@@ -110,7 +110,7 @@ func (m CompleteModel) errorView() string {
 		ui.MutedStyle.Render("  • Check memory: ")+"free -h",
 		"",
 		ui.MutedStyle.Render("  • Delete everything and try again:"),
-		"    rm -rf posthog docker-compose.yml .env",
+		"    rm -rf insights docker-compose.yml .env",
 		"    ./hobby-installer",
 	)
 

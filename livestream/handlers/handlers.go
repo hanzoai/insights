@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/posthog/posthog/livestream/auth"
-	"github.com/posthog/posthog/livestream/events"
+	"github.com/hanzoai/insights/livestream/auth"
+	"github.com/hanzoai/insights/livestream/events"
 )
 
 func Index(c echo.Context) error {
@@ -144,7 +144,7 @@ func StreamEventsHandler(log echo.Logger, subChan chan events.Subscription, filt
 			case payload := <-subscription.EventChan:
 				jsonData, err := json.Marshal(payload)
 				if err != nil {
-					// TODO capture error to PostHog
+					// TODO capture error to Insights
 					log.Errorf("Error marshalling payload: %w", err)
 					continue
 				}

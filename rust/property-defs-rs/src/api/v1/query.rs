@@ -36,7 +36,7 @@ impl Manager {
         params: &'args Params,
     ) -> Query<'args, Postgres, PgArguments> {
         /* The original Django query formulation we're duplicating
-                 * https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L279-L289
+                 * https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L279-L289
 
         SELECT count(*) as full_count
         FROM {self.table}
@@ -54,7 +54,7 @@ impl Manager {
 
                 * Also, the conditionally-applied join on event properties table applied above as
                 * self._join_on_event_property()
-                * https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L293-L305
+                * https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L293-L305
                 */
 
         // build & render the query
@@ -108,7 +108,7 @@ impl Manager {
         params: &'args Params,
     ) -> Query<'args, Postgres, PgArguments> {
         /* The original Django query we're duplicating
-                 * https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L262-L275
+                 * https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L262-L275
 
         SELECT {self.property_definition_fields}, {self.event_property_field} AS is_seen_on_filtered_events
         FROM {self.table}
@@ -131,7 +131,7 @@ impl Manager {
 
                 * Also, the conditionally-applied join on event properties table applied above as
                 * self._join_on_event_property()
-                * https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L293-L305
+                * https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L293-L305
                 */
 
         self.gen_prop_defs_select_clause(qb, params.use_enterprise_taxonomy);
@@ -224,7 +224,7 @@ impl Manager {
 
     fn gen_from_clause(&self, qb: &mut QueryBuilder<Postgres>, use_enterprise_taxonomy: bool) {
         // conditionally apply JOIN on enterprise prop defs if request param flag is set
-        // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L505-L506
+        // https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L505-L506
         let from_clause = if use_enterprise_taxonomy {
             format!(
                 " FROM {PROPERTY_DEFS_TABLE} FULL OUTER JOIN {ENTERPRISE_PROP_DEFS_TABLE} ON {PROPERTY_DEFS_TABLE}.\"id\"={ENTERPRISE_PROP_DEFS_TABLE}.\"propertydefinition_ptr_id\" "
@@ -299,7 +299,7 @@ impl Manager {
         // conditionally filter on excluded_properties
         // NOTE: excluded_properties is also passed to the Django API as JSON,
         // but may not matter when passed to this service. TBD. See below:
-        // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L241
+        // https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L241
         if self.is_parent_type_event(parent_type) {
             qb.push(format!(" AND NOT {PROPERTY_DEFS_TABLE}.\"name\" = ANY("));
 
@@ -336,8 +336,8 @@ impl Manager {
         is_numerical: bool,
     ) {
         // conditionally filter for numerical-valued properties:
-        // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L493-L499
-        // https://github.com/PostHog/posthog/blob/master/posthog/filters.py#L61-L84
+        // https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L493-L499
+        // https://github.com/hanzoai/insights/blob/main/posthog/filters.py#L61-L84
         if is_numerical {
             qb.push(format!(
                 " AND {PROPERTY_DEFS_TABLE}.\"is_numerical\" = true AND NOT {PROPERTY_DEFS_TABLE}.\"name\" = ANY(ARRAY['distinct_id', 'timestamp']) ",
@@ -353,10 +353,10 @@ impl Manager {
         filter_initial_props: bool,
     ) {
         // conditionally apply search term matching; skip this if possible, it's not cheap!
-        // logic: https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L493-L499
+        // logic: https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L493-L499
         if !search_terms.is_empty() {
             // step 1: identify property def "aliases" to enrich our fuzzy matching; see also:
-            // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L309-L324
+            // https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L309-L324
 
             // attempt to enrich basic search terms using a heuristic:
             // if the description associated with any std PostHog event properties
@@ -390,7 +390,7 @@ impl Manager {
             };
 
             // step 2: filter "initial" prop defs if the user wants "latest"
-            // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L326-L339
+            // https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L326-L339
             let screening_clause = if filter_initial_props {
                 format!(" OR NOT name ILIKE '%{SEARCH_SCREEN_WORD}%' ")
             } else {
@@ -402,7 +402,7 @@ impl Manager {
 
             // step 3: generate the search fuzzy-matching SQL clause
             // Original Django monolith query construction step is here:
-            // https://github.com/PostHog/posthog/blob/master/posthog/filters.py#L61-L84
+            // https://github.com/hanzoai/insights/blob/main/posthog/filters.py#L61-L84
             if !search_fields.is_empty() && !search_terms.is_empty() {
                 // outer loop: one AND clause for every search term supplied by caller.
                 // each of these clauses may be enriched with "search_extras" suffix

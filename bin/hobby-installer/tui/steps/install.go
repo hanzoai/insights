@@ -6,8 +6,8 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/core"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 type installStatus int
@@ -183,7 +183,7 @@ func (m InstallModel) View() string {
 		lines = append(lines, line)
 	}
 
-	title := "Setting up PostHog"
+	title := "Setting up Insights"
 
 	var footer string
 	if m.currentStep >= len(m.coreSteps) {
