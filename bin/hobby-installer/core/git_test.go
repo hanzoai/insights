@@ -98,7 +98,7 @@ func TestUpdateInsights(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "master\n", nil)
+		mock.on("insights:git branch --show-current", "main\n", nil)
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
 
@@ -154,7 +154,7 @@ func TestUpdateInsights(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "master\n", nil)
+		mock.on("insights:git branch --show-current", "main\n", nil)
 		mock.on("insights:git pull", "", fmt.Errorf("merge conflict"))
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
@@ -212,7 +212,7 @@ func TestCheckoutVersion(t *testing.T) {
 		defer cleanupDir()
 
 		mock := newMockRunner()
-		mock.on("insights:git branch --show-current", "master\n", nil)
+		mock.on("insights:git branch --show-current", "main\n", nil)
 		cleanupMock := setupMock(t, mock)
 		defer cleanupMock()
 
@@ -221,7 +221,7 @@ func TestCheckoutVersion(t *testing.T) {
 			t.Fatalf("expected no error, got: %v", err)
 		}
 		mock.assertCalled(t, "insights:git fetch origin")
-		mock.assertCalled(t, "insights:git reset --hard origin/master")
+		mock.assertCalled(t, "insights:git reset --hard origin/main")
 	})
 
 	t.Run("latest-release checks out described tag", func(t *testing.T) {
