@@ -1,4 +1,4 @@
-"""Dagster job for backfilling posthog_persons data from source to destination Postgres database."""
+"""Dagster job for backfilling insights_persons data from source to destination Postgres database."""
 
 import os
 import time
@@ -19,8 +19,8 @@ class PersonsNewBackfillConfig(dagster.Config):
 
     chunk_size: int = 1_000_000  # ID range per chunk
     batch_size: int = 100_000  # Records per batch insert
-    source_table: str = "posthog_persons"
-    destination_table: str = "posthog_persons_new"
+    source_table: str = "insights_persons"
+    destination_table: str = "insights_persons_new"
     min_id: int | None = None  # Optional override for min ID to resume from partial state
     max_id: int | None = None  # Optional override for max ID to resume from partial state
 
@@ -32,7 +32,7 @@ def get_id_range_for_pnb(
     database: dagster.ResourceParam[psycopg2.extensions.connection],
 ) -> tuple[int, int]:
     """
-    Query source database for MIN(id) and optionally MAX(id) from posthog_persons table.
+    Query source database for MIN(id) and optionally MAX(id) from insights_persons table.
     If max_id is provided in config, uses that instead of querying.
     Returns tuple (min_id, max_id).
     """
@@ -162,7 +162,7 @@ def copy_chunk(
     try:
         with database.cursor() as cursor:
             # Set session-level settings once for the entire chunk
-            cursor.execute("SET application_name = 'backfill_posthog_persons_to_posthog_persons_new'")
+            cursor.execute("SET application_name = 'backfill_insights_persons_to_insights_persons_new'")
             cursor.execute("SET lock_timeout = '5s'")
             cursor.execute("SET statement_timeout = '30min'")
             cursor.execute("SET maintenance_work_mem = '12GB'")
@@ -396,7 +396,7 @@ def postgres_env_check(context: dagster.AssetExecutionContext) -> None:
 )
 def persons_new_backfill_job():
     """
-    Backfill posthog_persons data from source to destination Postgres database.
+    Backfill insights_persons data from source to destination Postgres database.
     Divides the ID space into chunks and processes them in parallel.
     """
     id_range = get_id_range_for_pnb()

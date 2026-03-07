@@ -18,8 +18,8 @@ export const surveysSdkLogic = kea<surveysSdkLogicType>([
 
                 for (const [sdkType, sdkInfo] of Object.entries(sdkDoctorData ?? {})) {
                     if (sdkInfo?.allReleases?.length) {
-                        // sdk doctor uses 'web' but we use 'posthog-js' in SURVEY_SDK_REQUIREMENTS
-                        const key = sdkType === 'web' ? 'posthog-js' : sdkType
+                        // sdk doctor uses 'web' but we use 'insights-js' in SURVEY_SDK_REQUIREMENTS
+                        const key = sdkType === 'web' ? 'insights-js' : sdkType
                         versions[key as keyof TeamSdkVersions] = sdkInfo.allReleases[0]?.version ?? null
                     }
                 }

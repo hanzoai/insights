@@ -18,21 +18,21 @@ export const getSvelteClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -55,13 +55,13 @@ export const getSvelteClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'javascript',
                                 file: 'src/routes/+layout.js',
                                 code: dedent`
-                                    import posthog from 'posthog-js'
+                                    import insights from '@hanzo/insights'
                                     import { browser } from '$app/environment';
                                     import { onMount } from 'svelte';
 
                                     export const load = async () => {
                                       if (browser) {
-                                        posthog.init(
+                                        insights.init(
                                           '<ph_project_api_key>',
                                           {
                                             api_host: '<ph_client_api_host>',
@@ -97,35 +97,35 @@ export const getSvelteServerSteps = (ctx: OnboardingComponentsContext): StepDefi
             badge: 'optional',
             content: (
                 <>
-                    <Markdown>Install `posthog-node` using your package manager:</Markdown>
+                    <Markdown>Install `insights-node` using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-node --save
+                                    npm install insights-node --save
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-node
+                                    yarn add insights-node
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-node
+                                    pnpm add insights-node
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Bun',
                                 code: dedent`
-                                    bun add posthog-node
+                                    bun add insights-node
                                 `,
                             },
                         ]}
@@ -140,17 +140,17 @@ export const getSvelteServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'javascript',
                                 file: 'routes/+page.server.js',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node';
+                                    import { Insights } from 'insights-node';
 
                                     export async function load() {
-                                      const posthog = new Insights('<ph_project_api_key>', { host: '<ph_client_api_host>' });
+                                      const insights = new Insights('<ph_project_api_key>', { host: '<ph_client_api_host>' });
 
-                                      posthog.capture({
+                                      insights.capture({
                                         distinctId: 'distinct_id_of_the_user',
                                         event: 'event_name',
                                       })
 
-                                      await posthog.shutdown()
+                                      await insights.shutdown()
                                     }
                                 `,
                             },
@@ -158,7 +158,7 @@ export const getSvelteServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                     />
                     <CalloutBox type="fyi" title="Note">
                         <Markdown>
-                            Make sure to always call `posthog.shutdown()` after capturing events from the server-side.
+                            Make sure to always call `insights.shutdown()` after capturing events from the server-side.
                             Insights queues events into larger batches, and this call forces all batched events to be
                             flushed immediately.
                         </Markdown>

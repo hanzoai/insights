@@ -264,7 +264,7 @@ class TestUserAPI(APIBaseTest):
         )
 
         # Create a new user
-        new_user = create_user(email="test@posthog.com", password="1234", organization=self.organization)
+        new_user = create_user(email="test@hanzo.ai", password="1234", organization=self.organization)
         new_personal_api_key = generate_random_token_personal()
         PersonalAPIKey.objects.create(label="X", user=new_user, secure_value=hash_key_value(new_personal_api_key))
         self.client.force_login(new_user)
@@ -279,7 +279,7 @@ class TestUserAPI(APIBaseTest):
 
         # Create a new team
         new_team = create_team(organization=self.organization)
-        new_user = create_user(email="test2@posthog.com", password="1234", organization=self.organization)
+        new_user = create_user(email="test2@hanzo.ai", password="1234", organization=self.organization)
         new_personal_api_key = generate_random_token_personal()
         PersonalAPIKey.objects.create(label="X", user=new_user, secure_value=hash_key_value(new_personal_api_key))
 

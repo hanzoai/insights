@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { Group } from 'kea-forms'
 import { memo, useEffect, useState } from 'react'
 
-import { IconArrowRight, IconEllipsis, IconFilter, IconPlus } from '@posthog/icons'
+import { IconArrowRight, IconEllipsis, IconFilter, IconPlus } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -14,7 +14,7 @@ import {
     LemonSelect,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

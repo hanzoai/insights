@@ -1,4 +1,4 @@
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { identifierToHuman } from 'lib/utils'

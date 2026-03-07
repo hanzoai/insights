@@ -1,4 +1,4 @@
-import type { PostHog } from 'posthog-js'
+import type { Insights } from '~/lib/insights-browser'
 import snappyInit, { decompress_raw } from 'snappy-wasm'
 
 import type { DecompressionRequest, DecompressionResponse } from './decompressionWorker'
@@ -16,7 +16,7 @@ export class DecompressionWorkerManager {
     private pendingRequests = new Map<number, PendingRequest>()
     private workerInitFailed = false
 
-    constructor(private readonly posthog?: PostHog) {
+    constructor(private readonly insights?: Insights) {
         this.readyPromise = this.initWorker()
     }
 
@@ -83,8 +83,8 @@ export class DecompressionWorkerManager {
             this.workerInitFailed = true
             this.worker = null
             await this.initSnappy()
-            if (this.posthog) {
-                this.posthog.capture('replay_worker_init_failed', {
+            if (this.insights) {
+                this.insights.capture('replay_worker_init_failed', {
                     error: this.getErrorMessage(error),
                 })
             }
@@ -126,8 +126,8 @@ export class DecompressionWorkerManager {
 
     private reportWorkerFailure(error: unknown, dataSize: number, isParallel?: boolean): void {
         console.warn('[DecompressionWorkerManager] Worker decompression failed, falling back to main thread:', error)
-        if (this.posthog) {
-            this.posthog.capture('replay_worker_decompression_failed', {
+        if (this.insights) {
+            this.insights.capture('replay_worker_decompression_failed', {
                 error: this.getErrorMessage(error),
                 dataSize,
                 isParallel,
@@ -207,18 +207,18 @@ export class DecompressionWorkerManager {
 }
 
 let workerManager: DecompressionWorkerManager | null = null
-let currentPosthog: PostHog | undefined
+let currentInsights: Insights | undefined
 
-export function getDecompressionWorkerManager(posthog?: PostHog): DecompressionWorkerManager {
-    const configChanged = currentPosthog !== posthog
+export function getDecompressionWorkerManager(insights?: Insights): DecompressionWorkerManager {
+    const configChanged = currentInsights !== insights
 
     if (configChanged && workerManager) {
         terminateDecompressionWorker()
     }
 
     if (!workerManager) {
-        workerManager = new DecompressionWorkerManager(posthog)
-        currentPosthog = posthog
+        workerManager = new DecompressionWorkerManager(insights)
+        currentInsights = insights
     }
     return workerManager
 }
@@ -228,7 +228,7 @@ export function terminateDecompressionWorker(): void {
         workerManager.terminate()
         workerManager = null
     }
-    currentPosthog = undefined
+    currentInsights = undefined
 }
 
 /**

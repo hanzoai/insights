@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconFeatures, IconHelmet, IconMap, IconWarning } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconFeatures, IconHelmet, IconMap, IconWarning } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -154,7 +154,7 @@ const SupportResponseTimesTable = ({
             current_plan: currentPlan === 'free',
             features: [{ note: 'Community support only' }],
             plan_key: BillingPlan.Free,
-            link: 'https://posthog.com/questions',
+            link: 'https://hanzo.ai/questions',
         },
         {
             name: 'Pay-as-you-go',
@@ -444,7 +444,7 @@ export function SidePanelSupport(): JSX.Element {
                                     type="secondary"
                                     fullWidth
                                     center
-                                    to="https://posthog.com/questions"
+                                    to="https://hanzo.ai/questions"
                                     targetBlank
                                     className="mt-2"
                                 >
@@ -472,7 +472,7 @@ export function SidePanelSupport(): JSX.Element {
                                         <LemonButton
                                             type="secondary"
                                             status="alt"
-                                            to="https://posthog.com/wip"
+                                            to="https://hanzo.ai/wip"
                                             icon={<IconHelmet />}
                                             targetBlank
                                         >
@@ -483,7 +483,7 @@ export function SidePanelSupport(): JSX.Element {
                                         <LemonButton
                                             type="secondary"
                                             status="alt"
-                                            to="https://posthog.com/roadmap"
+                                            to="https://hanzo.ai/roadmap"
                                             icon={<IconMap />}
                                             targetBlank
                                         >
@@ -494,7 +494,7 @@ export function SidePanelSupport(): JSX.Element {
                                         <LemonButton
                                             type="secondary"
                                             status="alt"
-                                            to="https://github.com/PostHog/posthog/issues/new?&labels=enhancement&template=feature_request.yml"
+                                            to="https://github.com/hanzoai/insights/issues/new?&labels=enhancement&template=feature_request.yml"
                                             icon={<IconFeatures />}
                                             targetBlank
                                         >

@@ -78,7 +78,7 @@ mod test {
 
     use chrono::Utc;
     use mockall::predicate;
-    use posthog_symbol_data::write_symbol_data;
+    use insights_symbol_data::write_symbol_data;
     use sqlx::PgPool;
     use uuid::Uuid;
 
@@ -102,7 +102,7 @@ mod test {
         let mut config = Config::init_with_defaults().unwrap();
         config.object_storage_bucket = "test-bucket".to_string();
 
-        let map_id = "com.posthog.android.sample@3.0+3".to_string();
+        let map_id = "com.hanzo.insights.android.sample@3.0+3".to_string();
 
         let mut record = SymbolSetRecord {
             id: Uuid::now_v7(),
@@ -184,14 +184,14 @@ mod test {
 
         assert_eq!(
             result.module,
-            Some("com.posthog.android.sample".to_string()),
+            Some("com.hanzo.insights.android.sample".to_string()),
         );
 
         assert_eq!(result.exception_type, "MyCustomException3".to_string(),);
     }
 
     fn get_symbol_data_bytes() -> Vec<u8> {
-        write_symbol_data(posthog_symbol_data::ProguardMapping {
+        write_symbol_data(insights_symbol_data::ProguardMapping {
             content: PROGUARD_MAP.to_string(),
         })
         .unwrap()

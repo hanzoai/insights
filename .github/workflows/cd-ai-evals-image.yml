@@ -1,7 +1,7 @@
 #
 # Build and push Insights container images for AI evaluations to AWS ECR
 #
-# - posthog_ai_evals_build: build and push the Insights container image to AWS ECR
+# - insights_ai_evals_build: build and push the Insights container image to AWS ECR
 #
 name: AI Evals Container Images CD
 
@@ -17,7 +17,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    posthog_ai_evals_build:
+    insights_ai_evals_build:
         name: Build and push container image
         if: |
             github.repository == 'hanzoai/insights' && (
@@ -61,6 +61,6 @@ jobs:
                   file: ./Dockerfile.ai-evals
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('{0}/posthog-ai-evals:master,{0}/posthog-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/posthog-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/master' && format('{0}/insights-ai-evals:master,{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             # Ensure the DB itself enforces the default for non-Django writers
-            # (e.g. property-defs-rs). See: https://github.com/PostHog/posthog/pull/46104
+            # (e.g. property-defs-rs). See: https://github.com/hanzoai/insights/pull/46104
             sql="ALTER TABLE insights_eventdefinition ALTER COLUMN enforcement_mode SET DEFAULT 'allow'",
             reverse_sql="ALTER TABLE insights_eventdefinition ALTER COLUMN enforcement_mode DROP DEFAULT",
         ),

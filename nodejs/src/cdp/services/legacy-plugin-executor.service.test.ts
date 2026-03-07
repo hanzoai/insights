@@ -61,7 +61,7 @@ describe('LegacyPluginExecutorService', () => {
         // Create a plugin in the database
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO posthog_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
+            `INSERT INTO insights_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
              VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13::jsonb)
              RETURNING *`,
             [
@@ -86,7 +86,7 @@ describe('LegacyPluginExecutorService', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'INSERT INTO posthog_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
+            'INSERT INTO insights_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
             [
                 pluginConfigId,
                 team.id,

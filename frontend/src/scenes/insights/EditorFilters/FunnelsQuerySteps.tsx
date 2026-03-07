@@ -2,7 +2,7 @@ import './FunnelsQuerySteps.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { Tooltip } from '@posthog/lemon-ui'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -57,7 +57,7 @@ export function FunnelsQuerySteps({ insightProps }: EditorFilterProps): JSX.Elem
             <div className="flex justify-between items-center">
                 <LemonLabel>Query Steps</LemonLabel>
 
-                <Tooltip docLink="https://posthog.com/docs/product-analytics/funnels#graph-type">
+                <Tooltip docLink="https://hanzo.ai/docs/product-analytics/funnels#graph-type">
                     <div className="flex items-center gap-2">
                         <span className="text-secondary">Graph type</span>
                         <FunnelVizType insightProps={insightProps} />
@@ -92,7 +92,7 @@ export function FunnelsQuerySteps({ insightProps }: EditorFilterProps): JSX.Elem
                         TaxonomicFilterGroupType.SessionProperties,
                         TaxonomicFilterGroupType.InsightsQLExpression,
                     ]}
-                    addFilterDocLink="https://posthog.com/docs/product-analytics/trends/filters"
+                    addFilterDocLink="https://hanzo.ai/docs/product-analytics/trends/filters"
                     actionsTaxonomicGroupTypes={[
                         TaxonomicFilterGroupType.Events,
                         TaxonomicFilterGroupType.Actions,

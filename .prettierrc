@@ -11,7 +11,7 @@
         "\\.mocks?$",
         "\\.spy$",
         "<THIRD_PARTY_MODULES>",
-        "^@posthog.*$",
+        "^@hanzo.*$",
         "^lib/(.*)$|^scenes/(.*)$",
         "^~/(.*)$",
         "^@/(.*)$",

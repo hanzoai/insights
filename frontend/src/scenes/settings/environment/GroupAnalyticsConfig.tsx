@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, Link } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -31,7 +31,7 @@ export function openDeleteGroupTypeDialog({ onConfirm, groupTypeName }: DeleteGr
                 <br />
                 <br />
                 For more information about groups, see{' '}
-                <Link to="https://posthog.com/docs/product-analytics/group-analytics" target="_blank">
+                <Link to="https://hanzo.ai/docs/product-analytics/group-analytics" target="_blank">
                     the docs
                 </Link>
             </div>
@@ -130,7 +130,7 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
                 <LemonBanner type="info" className="mb-4">
                     Group types will show up here after you send your first event associated with a group. Take a look
                     at{' '}
-                    <Link to="https://posthog.com/docs/product-analytics/group-analytics" target="_blank">
+                    <Link to="https://hanzo.ai/docs/product-analytics/group-analytics" target="_blank">
                         this guide
                     </Link>{' '}
                     for more information on getting started.

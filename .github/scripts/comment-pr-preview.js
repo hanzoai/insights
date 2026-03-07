@@ -39,13 +39,13 @@ module.exports = async ({github, context, prNumber, triggerStatus, deploymentUrl
   let message = '';
 
   if (triggerStatus === 'success') {
-    const previewUrl = deploymentUrl || 'https://posthog.com';
-    const inspectorUrl = deploymentId ? `https://vercel.com/post-hog/posthog/${deploymentId}` : 'https://vercel.com/post-hog/posthog';
+    const previewUrl = deploymentUrl || 'https://hanzo.ai';
+    const inspectorUrl = deploymentId ? `https://vercel.com/post-hog/insights/${deploymentId}` : 'https://vercel.com/post-hog/insights';
 
-    message = `${commentHash}\nDocs from this PR will be published at posthog.com\n\n` +
+    message = `${commentHash}\nDocs from this PR will be published at hanzo.ai\n\n` +
               `| Project | Deployment | Preview | Updated (UTC) |\n` +
               `| :--- | :----- | :------ | :------ |\n` +
-              `| [posthog.com](${inspectorUrl}) | 🤷 Unknown | [Preview](${previewUrl}) | ${timestamp} |\n\n` +
+              `| [hanzo.ai](${inspectorUrl}) | 🤷 Unknown | [Preview](${previewUrl}) | ${timestamp} |\n\n` +
               `*Preview will be ready in ~10 minutes. Click Preview link above to access docs at \`/handbook/engineering/\`*`;
   } else {
     message = `${commentHash}\n⚠️ **Docs Preview Build Failed**\n\n` +

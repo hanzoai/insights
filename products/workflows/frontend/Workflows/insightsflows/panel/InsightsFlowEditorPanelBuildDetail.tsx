@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal, IconPlay, IconPlus, IconX } from '@posthog/icons'
+import { IconExternal, IconPlay, IconPlus, IconX } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonBanner,
@@ -11,7 +11,7 @@ import {
     LemonInput,
     LemonLabel,
     LemonSelect,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { LemonField } from 'lib/lemon-ui/LemonField/LemonField'

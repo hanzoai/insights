@@ -19,12 +19,12 @@ Key takeaways:
 Key takeaways:
 
 1. If a Python exception has been raised, the module method that was called from Python must stop execution and return `NULL` immediately.
-   > In `HogQLParseTreeConverter`, we are able to use C++ exceptions: throwing `SyntaxException`,
+   > In `InsightsQLParseTreeConverter`, we are able to use C++ exceptions: throwing `SyntaxException`,
    > `NotImplementedException`, or `ParsingException` results in the same exception being raised in Python as
    > expected. Note that if a `visitAsFoo` call throws an exception and there are `PyObject*`s in scope, we have to
    > remember about cleaning up their refcounts. At such call sites, a `try {} catch (...) {}` block is appropriate.
 1. For all Python/C API calls returning `PyObject*`, make sure `NULL` wasn't returned - if it was, then something failed and the Python runtime has already set an exception (e.g. a `MemoryError`). The same applies to calls returning `int` - there the error value is `-1`. Exception: in `PyArg_Foo` functions failure is signaled by `0` and success by `1`.
-   > In `HogQLParseTreeConverter`, these internal Python failures are handled simply by throwing
+   > In `InsightsQLParseTreeConverter`, these internal Python failures are handled simply by throwing
    > `PyInternalException`.
 
 ### [Building Values](https://docs.python.org/3/c-api/arg.html#building-values)
@@ -66,7 +66,7 @@ Key takeaways:
 3. If you now run tests, the locally-built version of `insightsql_parser` will be used:
 
    ```bash
-   pytest posthog/insightsql/
+   pytest insights/insightsql/
    ```
 
 ## How to install dependencies on Ubuntu
@@ -115,7 +115,7 @@ pnpm --filter=@hanzo/insightsql-parser build:make
 
 This will generate the following files in `common/insightsql_parser/dist/`:
 
-- `hogql_parser_wasm.js` - ES module with embedded WASM
+- `insightsql_parser_wasm.js` - ES module with embedded WASM
 - `index.cjs` - CommonJS wrapper
 - `index.d.ts` - TypeScript type definitions
 
@@ -124,9 +124,9 @@ This will generate the following files in `common/insightsql_parser/dist/`:
 The frontend uses this as a workspace dependency. After building, the parser can be used:
 
 ```typescript
-import createHogQLParser from '@hanzo/insightsql-parser'
+import createInsightsQLParser from '@hanzo/insightsql-parser'
 
-createHogQLParser().then((parser) => {
+createInsightsQLParser().then((parser) => {
   const ast = JSON.parse(parser.parseExpr('1 + 2'))
 })
 ```

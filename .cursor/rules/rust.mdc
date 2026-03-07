@@ -1,5 +1,5 @@
 ---
-description: Rules for writing Rust services at PostHog.  Focuses on writing async Rust with Tokio and encoding general Rust best practices from the Rust book and docs.
+description: Rules for writing Rust services at Insights.  Focuses on writing async Rust with Tokio and encoding general Rust best practices from the Rust book and docs.
 globs: *.rs, rust/
 ---
 

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDatabase, IconPlus, IconRefresh } from '@posthog/icons'
+import { IconDatabase, IconPlus, IconRefresh } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
@@ -166,7 +166,7 @@ export function MaterializedColumns(): JSX.Element {
                 <p>Only users with staff access can manage materialized columns. Please contact your instance admin.</p>
                 <p>
                     If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the
-                    PostgreSQL <code>posthog_user</code> table.
+                    PostgreSQL <code>insights_user</code> table.
                 </p>
                 <SceneDivider />
             </SceneContent>

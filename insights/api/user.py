@@ -78,8 +78,8 @@ from insights.tasks.email import (
 )
 from insights.user_permissions import UserPermissions
 
-REDIRECT_TO_SITE_COUNTER = Counter("posthog_redirect_to_site", "Redirect to site")
-REDIRECT_TO_SITE_FAILED_COUNTER = Counter("posthog_redirect_to_site_failed", "Redirect to site failed")
+REDIRECT_TO_SITE_COUNTER = Counter("insights_redirect_to_site", "Redirect to site")
+REDIRECT_TO_SITE_FAILED_COUNTER = Counter("insights_redirect_to_site_failed", "Redirect to site failed")
 
 NUM_2FA_BACKUP_CODES = 10
 
@@ -880,13 +880,13 @@ def redirect_to_site(request):
         params["distinctId"] = request.user.distinct_id
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/PostHog/posthog/issues/9671
+    # see https://github.com/Hanzo Insights/insights/issues/9671
     state = urllib.parse.quote(json.dumps(params), safe="")
 
     if str(request.GET.get("generateOnly")) in ["1", "yes", "true"]:
         return JsonResponse({"toolbarParams": state})
     else:
-        return redirect("{}#__posthog={}".format(app_url, state))
+        return redirect("{}#__insights={}".format(app_url, state))
 
 
 @session_auth_required
@@ -912,7 +912,7 @@ def redirect_to_website(request):
     if request.user.strapi_id is None:
         response = requests.request(
             "POST",
-            "https://squeak.posthog.cc/api/auth/local/register",
+            "https://squeak.insights.cc/api/auth/local/register",
             json={
                 "username": request.user.email,
                 "email": request.user.email,
@@ -932,7 +932,7 @@ def redirect_to_website(request):
         else:
             error_message = response.json()["error"]["message"]
             if response.text and error_message == "Email or Username are already taken":
-                return redirect("https://posthog.com/auth?error=emailIsTaken")
+                return redirect("https://hanzo.ai/auth?error=emailIsTaken")
     else:
         token = jwt.encode(
             {
@@ -945,10 +945,10 @@ def redirect_to_website(request):
         )
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/PostHog/posthog/issues/9671
+    # see https://github.com/Hanzo Insights/insights/issues/9671
     userData = urllib.parse.quote(json.dumps({"jwt": token}), safe="")
 
-    return redirect("{}?userData={}&redirect={}".format("https://posthog.com/auth", userData, app_url))
+    return redirect("{}?userData={}&redirect={}".format("https://hanzo.ai/auth", userData, app_url))
 
 
 @require_http_methods(["POST"])

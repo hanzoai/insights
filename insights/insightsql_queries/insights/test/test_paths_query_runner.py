@@ -57,7 +57,7 @@ class TestPaths(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["person_1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         events.append(
             _create_event(

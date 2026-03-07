@@ -115,14 +115,14 @@ describe('generateStepHtml', () => {
                         content: [
                             {
                                 type: 'text',
-                                marks: [{ type: 'link', attrs: { href: 'https://posthog.com' } }],
+                                marks: [{ type: 'link', attrs: { href: 'https://hanzo.ai' } }],
                                 text: 'Insights',
                             },
                         ],
                     },
                 ],
             },
-            '<p><a href="https://posthog.com">Insights</a></p>',
+            '<p><a href="https://hanzo.ai">Insights</a></p>',
         ],
         [
             'bold text',
@@ -205,14 +205,14 @@ describe('generateStepHtml', () => {
                         content: [
                             {
                                 type: 'text',
-                                marks: [{ type: 'bold' }, { type: 'link', attrs: { href: 'https://posthog.com' } }],
+                                marks: [{ type: 'bold' }, { type: 'link', attrs: { href: 'https://hanzo.ai' } }],
                                 text: 'Click here',
                             },
                         ],
                     },
                 ],
             },
-            '<p><a href="https://posthog.com"><strong>Click here</strong></a></p>',
+            '<p><a href="https://hanzo.ai"><strong>Click here</strong></a></p>',
         ],
     ])('handles %s', (_name, content, expected) => {
         expect(generateStepHtml(content as JSONContent | null)).toBe(expected)

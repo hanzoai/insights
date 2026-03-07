@@ -1,13 +1,13 @@
 ---
-title: Writing HogQL queries in Python
+title: Writing InsightsQL queries in Python
 sidebar: Handbook
 showTitle: true
 ---
 
 > ❗️ This guide is intended only for development of Insights itself.
-> If you're looking for documentation on writing HogQL (or SQL) queries, go to the [SQL](https://posthog.com/docs/sql) docs.
+> If you're looking for documentation on writing InsightsQL (or SQL) queries, go to the [SQL](https://hanzo.ai/docs/sql) docs.
 
-HogQL is our layer on top of ClickHouse SQL which provides nice features such as:
+InsightsQL is our layer on top of ClickHouse SQL which provides nice features such as:
 
 - Automatic person/group/etc property joins depending on the team/context
 - Customisable database schema per team
@@ -15,14 +15,14 @@ HogQL is our layer on top of ClickHouse SQL which provides nice features such as
 
 ## Query templates
 
-HogQL queries are built up from AST (Abstract Syntax Tree) nodes.
+InsightsQL queries are built up from AST (Abstract Syntax Tree) nodes.
 
-You can build the nodes yourself, or use the helpers `parse_expr` and `parse_select` to convert HogQL strings into AST nodes:
+You can build the nodes yourself, or use the helpers `parse_expr` and `parse_select` to convert InsightsQL strings into AST nodes:
 
 ```py
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
-from posthog.hogql.parser import parse_expr, parse_select
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.parser import parse_expr, parse_select
 
 num_last_days = 2
 
@@ -36,7 +36,7 @@ stmt = parse_select(
     }
 )
 
-query_result = execute_hogql_query(query=stmt, team=team, query_type="used in logs")
+query_result = execute_insightsql_query(query=stmt, team=team, query_type="used in logs")
 query_result.results == [...]
 query_result.columns == ['event', 'timestamp']  # might be useful if you select '*'
 ```
@@ -52,9 +52,9 @@ Few things to note:
 If you want more control, you can build the AST nodes directly. The same query above can be written as:
 
 ```py
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
-from posthog.hogql.parser import parse_expr
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.parser import parse_expr
 
 num_last_days = 2
 
@@ -68,7 +68,7 @@ stmt = ast.SelectQuery(
     limit=ast.Constant(value=100),
 )
 
-query_result = execute_hogql_query(query=stmt, team=team, query_type="used in logs")
+query_result = execute_insightsql_query(query=stmt, team=team, query_type="used in logs")
 query_result.results == [...]
 query_result.columns == ['event', 'timestamp']  # might be useful if you select '*'
 ```
@@ -77,9 +77,9 @@ You can mix and match `parse_expr` and `ast` nodes as you please. The example ab
 
 ## Database schema and features
 
-The HogQL database schema is in flux. You will soon be able to explore it in the [Insights app itself](https://github.com/PostHog/posthog/pull/14591).
+The InsightsQL database schema is in flux. You will soon be able to explore it in the [Insights app itself](https://github.com/Hanzo Insights/insights/pull/14591).
 
-The most up to date resource is [hogql/database.py](https://github.com/PostHog/posthog/blob/master/posthog/hogql/database.py) on Github. At the time of writing, these tables were available:
+The most up to date resource is [insightsql/database.py](https://github.com/Hanzo Insights/insights/blob/master/insights/insightsql/database.py) on Github. At the time of writing, these tables were available:
 
 ```python
 class Database(BaseModel):
@@ -117,7 +117,7 @@ class EventsTable(Table):
     person_id: FieldTraverser = FieldTraverser(chain=["pdi", "person_id"])
 ```
 
-If you access `pdi.person.properties.$browser`, we make a join via `persons` (this is a HogQL table name, not ClickHouse name). We do a bunch of `argmax` magic in the join, and inline all accessed properties within the subquery for performance. For the user, it looks just like simple property access.
+If you access `pdi.person.properties.$browser`, we make a join via `persons` (this is a InsightsQL table name, not ClickHouse name). We do a bunch of `argmax` magic in the join, and inline all accessed properties within the subquery for performance. For the user, it looks just like simple property access.
 
 If you access `poe.properties.$browser`, we will actually access the field `person_properties` on the events table.
 

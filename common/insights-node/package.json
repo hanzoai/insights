@@ -1,9 +1,9 @@
 {
-    "name": "hanzo-insights-node",
-    "version": "1.0.0",
+    "name": "@hanzo/insights-node",
+    "version": "6.0.0",
     "description": "Hanzo Insights Node.js SDK",
-    "author": "Hanzo AI <engineering@hanzo.ai>",
-    "repository": "https://github.com/hanzoai/insights",
+    "author": "Hanzo AI <dev@hanzo.ai>",
+    "repository": "https://github.com/hanzo-js/insights-node",
     "license": "MIT",
     "types": "index.d.ts",
     "main": "index.js",
@@ -12,6 +12,6 @@
         "index.d.ts"
     ],
     "dependencies": {
-        "posthog-node": "5.10.4"
+        "insights-node": "5.10.4"
     }
 }

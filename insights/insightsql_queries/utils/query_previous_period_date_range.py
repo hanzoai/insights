@@ -8,7 +8,7 @@ from insights.models.team import Team
 from insights.utils import get_compare_period_dates, relative_date_parse_with_delta_mapping
 
 
-# Originally similar to posthog/queries/query_date_range.py but rewritten to be used in InsightsQL queries
+# Originally similar to insights/queries/query_date_range.py but rewritten to be used in InsightsQL queries
 class QueryPreviousPeriodDateRange(QueryDateRange):
     """Translation of the raw `date_from` and `date_to` filter values to datetimes."""
 

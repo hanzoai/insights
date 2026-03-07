@@ -3,7 +3,7 @@ from typing import NamedTuple, Union
 from django.conf import settings
 from django.core.cache import BaseCache, cache, caches
 
-import posthoganalytics
+import hanzoanalytics
 from django_redis import get_redis_connection
 from redis import Redis, RedisCluster
 
@@ -24,7 +24,7 @@ class QueryCacheSelection(NamedTuple):
 def use_cluster_cache(team_id: int) -> bool:
     if QUERY_CACHE_ALIAS not in settings.CACHES:
         return False
-    return posthoganalytics.feature_enabled(
+    return hanzoanalytics.feature_enabled(
         "query-cache-cluster-migration",
         str(team_id),
         only_evaluate_locally=True,

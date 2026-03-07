@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconArrowLeft } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconArrowLeft } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 

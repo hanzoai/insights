@@ -224,7 +224,7 @@ def map_plugin_config_to_destination(plugin_config: PluginConfig) -> tuple[str, 
             "schema": "",
             "host": raw_config["host"],
             "port": int(raw_config["port"]),
-            "table_name": plugin_config.config.get("tableName", "posthog_event"),
+            "table_name": plugin_config.config.get("tableName", "insights_event"),
             "has_self_signed_cert": has_self_signed_cert,
             "exclude_events": plugin_config.config.get("eventsToIgnore", "").split(",") or None,
         }
@@ -240,7 +240,7 @@ def map_plugin_config_to_destination(plugin_config: PluginConfig) -> tuple[str, 
             "port": int(
                 plugin_config.config.get("clusterPort", "5439"),
             ),
-            "table_name": plugin_config.config.get("tableName", "posthog_event"),
+            "table_name": plugin_config.config.get("tableName", "insights_event"),
             "exclude_events": plugin_config.config.get("eventsToIgnore", "").split(",") or None,
             "properties_data_type": plugin_config.config.get("propertiesDataType", "varchar"),
         }

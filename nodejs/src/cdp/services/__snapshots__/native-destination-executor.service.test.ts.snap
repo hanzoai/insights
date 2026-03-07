@@ -4,12 +4,12 @@ exports[`NativeDestinationExecutorService native plugins should call the plugin 
 [
   {
     "level": "debug",
-    "message": "config, {"url":"https://posthog.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
+    "message": "config, {"url":"https://insights.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
     "level": "debug",
-    "message": "endpoint, https://posthog.com/webhook",
+    "message": "endpoint, https://insights.com/webhook",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
@@ -19,7 +19,7 @@ exports[`NativeDestinationExecutorService native plugins should call the plugin 
   },
   {
     "level": "debug",
-    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"PostHog.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
+    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"Insights.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
@@ -39,12 +39,12 @@ exports[`NativeDestinationExecutorService native plugins should handle non retry
 [
   {
     "level": "debug",
-    "message": "config, {"url":"https://posthog.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
+    "message": "config, {"url":"https://insights.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
     "level": "debug",
-    "message": "endpoint, https://posthog.com/webhook",
+    "message": "endpoint, https://insights.com/webhook",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
@@ -54,7 +54,7 @@ exports[`NativeDestinationExecutorService native plugins should handle non retry
   },
   {
     "level": "debug",
-    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"PostHog.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
+    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"Insights.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
@@ -74,12 +74,12 @@ exports[`NativeDestinationExecutorService native plugins should retry retryable 
 [
   {
     "level": "debug",
-    "message": "config, {"url":"https://posthog.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
+    "message": "config, {"url":"https://insights.com/webhook","method":"POST","body":{"event_name":"$pageview"},"headers":{"Authorization":"Bearer abc"},"debug_mode":true}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
     "level": "debug",
-    "message": "endpoint, https://posthog.com/webhook",
+    "message": "endpoint, https://insights.com/webhook",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {
@@ -89,7 +89,7 @@ exports[`NativeDestinationExecutorService native plugins should retry retryable 
   },
   {
     "level": "debug",
-    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"PostHog.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
+    "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"Insights.com/1.0","Authorization":"Bearer abc","Content-Type":"application/json"},"body":"{\\"event_name\\":\\"$pageview\\"}"}",
     "timestamp": "2025-01-01T00:00:00.000Z",
   },
   {

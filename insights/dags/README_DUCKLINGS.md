@@ -145,10 +145,10 @@ If multiple partitions for the same team run concurrently, they may race to crea
 
 ## File Locations
 
-- **Job definition**: `posthog/dags/events_backfill_to_duckling.py`
-- **Tests**: `posthog/dags/test_events_backfill_to_duckling.py`
-- **Dagster registration**: `posthog/dags/locations/data_stack.py`
-- **DuckLakeCatalog model**: `posthog/ducklake/models.py`
+- **Job definition**: `insights/dags/events_backfill_to_duckling.py`
+- **Tests**: `insights/dags/test_events_backfill_to_duckling.py`
+- **Dagster registration**: `insights/dags/locations/data_stack.py`
+- **DuckLakeCatalog model**: `insights/ducklake/models.py`
 
 ## S3 Path Structure
 

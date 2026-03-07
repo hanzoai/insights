@@ -2,7 +2,7 @@
 
 ## Variables
 
-Variables enable dynamic value injection in HogQL queries using `{variables.<code_name>}` syntax.
+Variables enable dynamic value injection in InsightsQL queries using `{variables.<code_name>}` syntax.
 
 ### Schema (`system.insight_variables`)
 
@@ -60,7 +60,7 @@ SELECT * FROM system.insight_variables WHERE code_name = 'event_names'
 
 ## Filter Placeholders
 
-Dashboard/query-level filters injected into HogQL queries.
+Dashboard/query-level filters injected into InsightsQL queries.
 
 ### Available Placeholders
 

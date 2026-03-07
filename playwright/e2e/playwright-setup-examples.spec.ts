@@ -35,7 +35,7 @@ testWithWorkspace('test with pre-created workspace', async ({ page, workspace, p
 test('test with API calls', async ({ page, playwrightSetup }) => {
     const workspace = await playwrightSetup.createWorkspace('API Integration Tests')
 
-    await expect(workspace.personal_api_key).toMatch(/^phx_/)
+    await expect(workspace.personal_api_key).toMatch(/^hix_/)
     const apiKey = workspace.personal_api_key
 
     const response = await page.request.get(`/api/projects/${workspace.team_id}/`, {

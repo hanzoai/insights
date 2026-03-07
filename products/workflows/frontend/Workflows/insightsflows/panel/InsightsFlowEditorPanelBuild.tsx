@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useState } from 'react'
 
-import { IconDrag } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonDropdown, LemonInput, SpinnerOverlay } from '@posthog/lemon-ui'
+import { IconDrag } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonDropdown, LemonInput, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { insightsFunctionTemplateListLogic } from 'scenes/insights-functions/list/insightsFunctionTemplateListLogic'
@@ -110,30 +110,30 @@ export const LOGIC_NODES_TO_SHOW: CreateActionType[] = [
     },
 ]
 
-export const POSTHOG_NODES_TO_SHOW: CreateActionType[] = [
+export const INSIGHTS_NODES_TO_SHOW: CreateActionType[] = [
     {
         type: 'function',
         name: 'Set variable',
         description: 'Set a workflow variable.',
-        config: { template_id: 'template-posthog-set-variable', inputs: {} },
+        config: { template_id: 'template-insights-set-variable', inputs: {} },
     },
     {
         type: 'function',
         name: 'Capture event',
         description: 'Capture an event to Insights.',
-        config: { template_id: 'template-posthog-capture', inputs: {} },
+        config: { template_id: 'template-insights-capture', inputs: {} },
     },
     {
         type: 'function',
         name: 'Update person property',
         description: 'Set properties of a person in Insights.',
-        config: { template_id: 'template-posthog-update-person-properties', inputs: {} },
+        config: { template_id: 'template-insights-update-person-properties', inputs: {} },
     },
     {
         type: 'function',
         name: 'Set group property',
         description: 'Set properties of a group in Insights.',
-        config: { template_id: 'template-posthog-group-identify', inputs: {} },
+        config: { template_id: 'template-insights-group-identify', inputs: {} },
     },
 ]
 
@@ -141,7 +141,7 @@ const TEMPLATE_IDS_AT_TOP_LEVEL: string[] = [
     ...ACTION_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...DELAY_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...LOGIC_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
-    ...POSTHOG_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
+    ...INSIGHTS_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...getRegisteredActionNodeCategories().flatMap((cat) =>
         cat.nodes.map((action) => (action.config as any).template_id)
     ),
@@ -306,7 +306,7 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
                 Insights actions <LemonDivider className="flex-1" />
             </span>
-            {POSTHOG_NODES_TO_SHOW.map((action, index) => (
+            {INSIGHTS_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 

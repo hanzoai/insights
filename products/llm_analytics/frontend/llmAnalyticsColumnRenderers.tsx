@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconFilter } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconFilter } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'

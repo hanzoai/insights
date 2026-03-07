@@ -1,4 +1,4 @@
-import { LemonInput, LemonInputSelect, LemonSegmentedButton, LemonSelect } from '@posthog/lemon-ui'
+import { LemonInput, LemonInputSelect, LemonSegmentedButton, LemonSelect } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 

@@ -3,8 +3,8 @@ import './SidePanel.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconBook, IconEllipsis, IconGear, IconInfo, IconLock, IconLogomark, IconNotebook } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonMenuItems, LemonModal } from '@posthog/lemon-ui'
+import { IconBook, IconEllipsis, IconGear, IconInfo, IconLock, IconLogomark, IconNotebook } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonMenuItems, LemonModal } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { Resizer } from 'lib/components/Resizer/Resizer'

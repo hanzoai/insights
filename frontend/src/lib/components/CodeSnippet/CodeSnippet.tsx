@@ -27,7 +27,7 @@ import swift from 'react-syntax-highlighter/dist/esm/languages/prism/swift'
 import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
 import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml'
 
-import { IconCollapse, IconCopy, IconExpand } from '@posthog/icons'
+import { IconCollapse, IconCopy, IconExpand } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

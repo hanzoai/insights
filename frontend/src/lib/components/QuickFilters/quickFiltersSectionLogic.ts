@@ -1,5 +1,5 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { quickFiltersLogic } from 'lib/components/QuickFilters'
 
@@ -81,7 +81,7 @@ export const quickFiltersSectionLogic = kea<quickFiltersSectionLogicType>([
             }
         },
         setQuickFilterValue: ({ propertyName, option }) => {
-            posthog.capture(QuickFiltersEvents.QuickFilterSelected, {
+            insights.capture(QuickFiltersEvents.QuickFilterSelected, {
                 name: values.quickFilters.find((f) => f.property_name === propertyName)?.name,
                 property_name: propertyName,
                 label: option.label,

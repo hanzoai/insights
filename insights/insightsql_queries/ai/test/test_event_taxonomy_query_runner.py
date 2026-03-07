@@ -271,7 +271,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "us.posthog.com"},
+            properties={"$host": "insights.hanzo.ai"},
             team=self.team,
         )
 
@@ -287,7 +287,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
             _create_event(
                 event="event1",
                 distinct_id="person2",
-                properties={"$host": "eu.posthog.com"},
+                properties={"$host": "insights.hanzo.ai"},
                 team=self.team,
             )
 
@@ -296,7 +296,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].property, "$host")
-        self.assertEqual(response.results[0].sample_values, ["insights.com", "eu.posthog.com", "us.posthog.com"])
+        self.assertEqual(response.results[0].sample_values, ["insights.com", "insights.hanzo.ai", "insights.hanzo.ai"])
         self.assertEqual(response.results[0].sample_count, 3)
 
     def test_property_taxonomy_filters_events_by_event_name(self):
@@ -314,7 +314,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "us.posthog.com", "$browser": "Chrome"},
+            properties={"$host": "insights.hanzo.ai", "$browser": "Chrome"},
             team=self.team,
         )
 
@@ -338,7 +338,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].property, "$host")
-        self.assertEqual(response.results[0].sample_values, ["us.posthog.com"])
+        self.assertEqual(response.results[0].sample_values, ["insights.hanzo.ai"])
         self.assertEqual(response.results[0].sample_count, 1)
 
     def test_property_taxonomy_handles_multiple_properties_in_query(self):
@@ -356,7 +356,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "us.posthog.com", "$browser": "Chrome"},
+            properties={"$host": "insights.hanzo.ai", "$browser": "Chrome"},
             team=self.team,
         )
 
@@ -383,7 +383,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.results[0].sample_values, ["10"])
         self.assertEqual(response.results[0].sample_count, 1)
         self.assertEqual(response.results[1].property, "$host")
-        self.assertEqual(response.results[1].sample_values, ["insights.com", "us.posthog.com"])
+        self.assertEqual(response.results[1].sample_values, ["insights.com", "insights.hanzo.ai"])
         self.assertEqual(response.results[1].sample_count, 2)
 
     def test_property_taxonomy_includes_events_with_partial_property_matches(self):
@@ -395,7 +395,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_event(
             event="event1",
             distinct_id="person1",
-            properties={"$host": "us.posthog.com"},
+            properties={"$host": "insights.hanzo.ai"},
             team=self.team,
         )
         _create_event(
@@ -413,7 +413,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.results[0].sample_values, ["10"])
         self.assertEqual(response.results[0].sample_count, 1)
         self.assertEqual(response.results[1].property, "$host")
-        self.assertEqual(response.results[1].sample_values, ["us.posthog.com"])
+        self.assertEqual(response.results[1].sample_values, ["insights.hanzo.ai"])
         self.assertEqual(response.results[1].sample_count, 1)
 
     def test_query_count(self):

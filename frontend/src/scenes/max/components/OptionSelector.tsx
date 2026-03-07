@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { LemonButton, LemonInput, Spinner } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
 import { cn } from 'lib/utils/css-classes'

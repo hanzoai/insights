@@ -1,6 +1,6 @@
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -205,7 +205,7 @@ export const addSavedInsightsModalLogic = kea<addSavedInsightsModalLogicType>([
 
             if (newFilters.search !== undefined && newFilters.search !== oldFilters.search) {
                 await breakpoint(1000)
-                posthog.capture('insight dashboard modal searched', {
+                insights.capture('insight dashboard modal searched', {
                     search_term: newFilters.search,
                 })
             }

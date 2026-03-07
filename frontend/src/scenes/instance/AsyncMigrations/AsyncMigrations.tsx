@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconDatabase, IconRefresh } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconDatabase, IconRefresh } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -78,7 +78,7 @@ export function AsyncMigrations(): JSX.Element {
         title: 'Migration',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const link =
-                'https://github.com/PostHog/posthog/blob/master/insights/async_migrations/migrations/' +
+                'https://github.com/hanzoai/insights/blob/master/insights/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
             return <LemonTableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
@@ -210,13 +210,13 @@ export function AsyncMigrations(): JSX.Element {
     const minVersionColumn: AsyncMigrationColumnType = {
         title: 'Minimum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
-            return <div>{asyncMigration.posthog_min_version}</div>
+            return <div>{asyncMigration.insights_min_version}</div>
         },
     }
     const maxVersionColumn: AsyncMigrationColumnType = {
         title: 'Maximum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
-            return <div>{asyncMigration.posthog_max_version}</div>
+            return <div>{asyncMigration.insights_max_version}</div>
         },
     }
 
@@ -279,7 +279,7 @@ export function AsyncMigrations(): JSX.Element {
                     />
                     <p>
                         Read about async migrations on our{' '}
-                        <Link to="https://posthog.com/docs/self-host/configure/async-migrations/overview">
+                        <Link to="https://hanzo.ai/docs/self-host/configure/async-migrations/overview">
                             dedicated docs page
                         </Link>
                         .
@@ -327,7 +327,7 @@ export function AsyncMigrations(): JSX.Element {
                 <>
                     <SceneTitleSection
                         name="Async Migrations"
-                        description="Only users with staff access can manage async migrations. Please contact your instance admin. If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the PostgreSQL <code>posthog_user</code> table."
+                        description="Only users with staff access can manage async migrations. Please contact your instance admin. If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the PostgreSQL <code>insights_user</code> table."
                         resourceType={{
                             type: 'async_migrations',
                             forceIcon: <IconDatabase />,
@@ -336,7 +336,7 @@ export function AsyncMigrations(): JSX.Element {
                     <p>Only users with staff access can manage async migrations. Please contact your instance admin.</p>
                     <p>
                         If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the
-                        PostgreSQL <code>posthog_user</code> table.
+                        PostgreSQL <code>insights_user</code> table.
                     </p>
                     <SceneDivider />
                 </>

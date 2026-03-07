@@ -18,7 +18,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 pytestmark = pytest.mark.skipif(not ANTHROPIC_API_KEY, reason="ANTHROPIC_API_KEY not set")
 
-TEST_IMAGE_URL = "https://posthog.com/brand/posthog-logo.png"
+TEST_IMAGE_URL = "https://hanzo.ai/brand/insights-logo.png"
 
 
 class TestAnthropicMessages:

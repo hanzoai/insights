@@ -1,4 +1,4 @@
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { ExperimentFunnelsQuery, ExperimentMetric, ExperimentTrendsQuery } from '~/queries/schema/schema-general'
 import type { Experiment } from '~/types'

@@ -1,12 +1,13 @@
 import { LogicWrapper } from 'kea'
-import type { PostHog, PropertyMatchType, SupportedWebVitalsMetrics } from 'posthog-js'
+import type { Insights } from '~/lib/insights-browser'
+import type { PropertyMatchType, SupportedWebVitalsMetrics } from '@hanzo/insights'
 import { ReactNode } from 'react'
 import { Layout } from 'react-grid-layout'
 
-import { LemonTableColumns } from '@posthog/lemon-ui'
-import { PluginConfigSchema } from '@posthog/plugin-scaffold'
-import { LogLevel } from '@posthog/rrweb-plugin-console-record'
-import { eventWithTime } from '@posthog/rrweb-types'
+import { LemonTableColumns } from '@hanzo/lemon-ui'
+import { PluginConfigSchema } from '@hanzo/plugin-scaffold'
+import { LogLevel } from '@hanzo/rrweb-plugin-console-record'
+import { eventWithTime } from '@hanzo/rrweb-types'
 
 import { ChartDataset, ChartType, InteractionItem } from 'lib/Chart'
 import { PaginatedResponse } from 'lib/api'
@@ -125,7 +126,7 @@ export enum AvailableFeature {
     REPLAY_FILTER_PERSON_PROPERTIES = 'replay_filter_person_properties',
     REPLAY_FILTER_EVENTS = 'replay_filter_events',
     REPLAY_DOM_EXPLORER = 'replay_dom_explorer',
-    WORKS_WITH_POSTHOG_JS = 'works_with_posthog_js',
+    WORKS_WITH_INSIGHTS_JS = 'works_with_insights_js',
     REPLAY_AUTOMATIC_PLAYLISTS = 'replay_automatic_playlists',
     MOBILE_REPLAY = 'mobile_replay',
     GROUP_ANALYTICS = 'group_analytics',
@@ -768,11 +769,11 @@ export type ToolbarVersion = 'toolbar'
 
 export type ExperimentIdType = number | 'new' | 'web'
 
-/* sync with posthog-js */
+/* sync with insights-js */
 export interface ToolbarParams {
-    /** @deprecated, not needed if `posthog` is passed as prop instead */
+    /** @deprecated, not needed if `insights` is passed as prop instead */
     apiURL?: string
-    token?: string /** public posthog-js token */
+    token?: string /** public insights-js token */
     temporaryToken?: string /** private temporary user token */
     actionId?: number
     experimentId?: ExperimentIdType
@@ -788,7 +789,7 @@ export interface ToolbarParams {
 }
 
 export interface ToolbarProps extends ToolbarParams {
-    posthog?: PostHog
+    insights?: Insights
     disableExternalStyles?: boolean
 }
 
@@ -1472,7 +1473,7 @@ export interface CohortGroupType {
     name?: string
 }
 
-// Synced with `posthog/models/property.py`
+// Synced with `insights/models/property.py`
 export interface CohortCriteriaType {
     id: string // Criteria filter id
     key: string
@@ -1547,7 +1548,7 @@ export interface SavedFunnel extends InsightHistory {
 
 export type BinCountValue = number | typeof BIN_COUNT_AUTO
 
-// https://github.com/PostHog/posthog/blob/master/posthog/constants.py#L106
+// https://github.com/hanzoai/insights/blob/master/insights/constants.py#L106
 export enum StepOrderValue {
     STRICT = 'strict',
     UNORDERED = 'unordered',
@@ -3043,7 +3044,7 @@ export interface FunnelConversionWindow {
     funnelWindowInterval?: number
 }
 
-// https://github.com/PostHog/posthog/blob/master/posthog/models/filters/mixins/funnel.py#L100
+// https://github.com/hanzoai/insights/blob/master/insights/models/filters/mixins/funnel.py#L100
 export enum FunnelConversionWindowTimeUnit {
     Second = 'second',
     Minute = 'minute',
@@ -4753,7 +4754,7 @@ export enum EventDefinitionType {
     Event = 'event',
     EventInternal = 'event_internal',
     EventCustom = 'event_custom',
-    EventInsights = 'event_posthog',
+    EventInsights = 'event_insights',
 }
 
 export const INTEGRATION_KINDS = [
@@ -5098,7 +5099,7 @@ export type PromptFlag = {
     tooltipCSS?: Partial<CSSStyleDeclaration>
 }
 
-// Should be kept in sync with "posthog/models/activity_logging/activity_log.py"
+// Should be kept in sync with "insights/models/activity_logging/activity_log.py"
 export enum ActivityScope {
     ACTION = 'Action',
     ALERT_CONFIGURATION = 'AlertConfiguration',

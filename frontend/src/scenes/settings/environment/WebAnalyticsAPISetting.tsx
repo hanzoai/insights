@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

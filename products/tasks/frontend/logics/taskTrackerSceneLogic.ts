@@ -3,7 +3,7 @@ import { actions, connect, events, kea, listeners, path, reducers, selectors } f
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { Params } from 'scenes/sceneTypes'

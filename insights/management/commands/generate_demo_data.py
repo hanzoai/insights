@@ -66,8 +66,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--email",
             type=str,
-            default="test@posthog.com",
-            help="Email of the demo user (default: test@posthog.com)",
+            default="test@hanzo.ai",
+            help="Email of the demo user (default: test@hanzo.ai)",
         )
         parser.add_argument(
             "--password",

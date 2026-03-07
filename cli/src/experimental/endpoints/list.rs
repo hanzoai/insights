@@ -12,7 +12,7 @@ pub fn list_endpoints(args: &ListArgs) -> Result<()> {
     let env_id = client.get_env_id();
 
     println!();
-    println!("Fetching endpoints from PostHog...");
+    println!("Fetching endpoints from Insights...");
     println!();
 
     let endpoint_list = fetch_all_endpoints(args.debug)?;
@@ -21,7 +21,7 @@ pub fn list_endpoints(args: &ListArgs) -> Result<()> {
         println!("No endpoints found in project {env_id}.");
         println!();
         println!("Create an endpoint by pushing a YAML file:");
-        println!("  posthog-cli exp endpoints push my-endpoint.yaml");
+        println!("  insights-cli exp endpoints push my-endpoint.yaml");
         return Ok(());
     }
 

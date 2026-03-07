@@ -190,7 +190,7 @@ class MyNotificationsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                             SELECT to_timestamp(floor(Extract(epoch FROM created_at) / extract(epoch FROM interval '5 min')) *
                                                 extract(epoch FROM interval '5 min')) AS five_minute_window,
                                    activity, item_id, scope, id, created_at
-                            FROM posthog_activitylog
+                            FROM insights_activitylog
                             WHERE team_id = %s
                             -- we only really care about de-duplicating Notebook changes,
                             -- as multiple actual activities are logged for one logical activity

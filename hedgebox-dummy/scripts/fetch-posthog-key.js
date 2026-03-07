@@ -4,13 +4,13 @@ const { Client } = require('pg')
 const fs = require('fs')
 const path = require('path')
 
-async function fetchPostHogKey() {
+async function fetchInsightsKey() {
     const client = new Client({
         host: process.env.PGHOST || 'localhost',
         port: parseInt(process.env.PGPORT || '5432'),
-        database: process.env.PGDATABASE || 'posthog',
-        user: process.env.PGUSER || 'posthog',
-        password: process.env.PGPASSWORD || 'posthog',
+        database: process.env.PGDATABASE || 'insights',
+        user: process.env.PGUSER || 'insights',
+        password: process.env.PGPASSWORD || 'insights',
         connectionTimeoutMillis: 3000, // A brief timeout to avoid waiting forever
     })
 
@@ -20,8 +20,8 @@ async function fetchPostHogKey() {
         // Query for the latest team's API token (or you can specify a team_id)
         const result = await client.query(
             process.env.DEMO_TEAM_ID
-                ? 'SELECT id, api_token, created_at FROM posthog_team WHERE id = $1'
-                : 'SELECT id, api_token, created_at FROM posthog_team ORDER BY created_at DESC LIMIT 1',
+                ? 'SELECT id, api_token, created_at FROM insights_team WHERE id = $1'
+                : 'SELECT id, api_token, created_at FROM insights_team ORDER BY created_at DESC LIMIT 1',
             process.env.DEMO_TEAM_ID ? [process.env.DEMO_TEAM_ID] : []
         )
 
@@ -29,7 +29,7 @@ async function fetchPostHogKey() {
             console.warn(
                 `⚠ ${process.env.DEMO_TEAM_ID ? `No team found with ID ${process.env.DEMO_TEAM_ID}` : 'No team found'}`
             )
-            console.warn('  Continuing without PostHog API key...\n')
+            console.warn('  Continuing without Insights API key...\n')
             return
         }
 
@@ -37,8 +37,8 @@ async function fetchPostHogKey() {
         teamApiToken = result.rows[0].api_token
         teamCreatedAt = result.rows[0].created_at
     } catch (error) {
-        console.warn('⚠ Error fetching PostHog key:', error.message)
-        console.warn('  Continuing without PostHog API key...\n')
+        console.warn('⚠ Error fetching Insights key:', error.message)
+        console.warn('  Continuing without Insights API key...\n')
         return
     } finally {
         await client.end()
@@ -49,9 +49,9 @@ async function fetchPostHogKey() {
     // Check if .env.local already exists with a valid key
     if (fs.existsSync(envPath) && !process.env.FORCE_FETCH_KEY) {
         const envContent = fs.readFileSync(envPath, 'utf-8')
-        const keyMatch = envContent.match(/NEXT_PUBLIC_POSTHOG_KEY=(.+) # (.+)/)
+        const keyMatch = envContent.match(/NEXT_PUBLIC_INSIGHTS_KEY=(.+) # (.+)/)
         if (keyMatch && keyMatch[1] && keyMatch[1].trim() && keyMatch[2].trim() === teamCreatedAt.toISOString()) {
-            console.info(`✓ PostHog API key already exists in .env.local for team created at ${teamCreatedAt.toISOString()}`)
+            console.info(`✓ Insights API key already exists in .env.local for team created at ${teamCreatedAt.toISOString()}`)
             console.info('  `rm hedgebox-dummy/.env.local` or `export FORCE_FETCH_KEY=1` to fetch anew\n')
             return
         }
@@ -60,11 +60,11 @@ async function fetchPostHogKey() {
     // Write to .env.local file
     fs.writeFileSync(
         path.join(__dirname, '..', '.env.local'),
-        `NEXT_PUBLIC_POSTHOG_KEY=${teamApiToken} # ${teamCreatedAt.toISOString()}\n`
+        `NEXT_PUBLIC_INSIGHTS_KEY=${teamApiToken} # ${teamCreatedAt.toISOString()}\n`
     )
-    console.info(`✓ PostHog API key fetched and written to .env.local`)
+    console.info(`✓ Insights API key fetched and written to .env.local`)
     console.info(`  Team ID: ${teamId}`)
     console.info(`  API token: ${teamApiToken}\n`)
 }
 
-fetchPostHogKey()
+fetchInsightsKey()

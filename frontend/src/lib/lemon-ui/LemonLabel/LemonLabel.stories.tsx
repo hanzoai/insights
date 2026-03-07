@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 import { LemonLabel, LemonLabelProps } from './LemonLabel'
 

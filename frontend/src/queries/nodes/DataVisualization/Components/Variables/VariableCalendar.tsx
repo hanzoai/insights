@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonCalendarSelect } from '@posthog/lemon-ui'
+import { LemonCalendarSelect } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 

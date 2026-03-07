@@ -36,7 +36,7 @@ class TestCloneRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "PostHog/posthog-js")
+            context = self._create_context(github_integration, "Hanzo Insights/insights-js")
             input_data = CloneRepositoryInput(context=context, sandbox_id=sandbox.id)
 
             with patch(
@@ -47,10 +47,10 @@ class TestCloneRepositoryActivity:
                 result = async_to_sync(activity_environment.run)(clone_repository, input_data)
 
                 assert result is not None
-                assert "posthog-js" in result
+                assert "insights-js" in result
 
-                check_result = sandbox.execute("ls -la /tmp/workspace/repos/posthog/")
-                assert "posthog-js" in check_result.stdout
+                check_result = sandbox.execute("ls -la /tmp/workspace/repos/insights/")
+                assert "insights-js" in check_result.stdout
 
         finally:
             if sandbox:
@@ -66,7 +66,7 @@ class TestCloneRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "PostHog/posthog-js")
+            context = self._create_context(github_integration, "Hanzo Insights/insights-js")
             input_data = CloneRepositoryInput(context=context, sandbox_id=sandbox.id)
 
             with patch(
@@ -77,12 +77,12 @@ class TestCloneRepositoryActivity:
                 result1 = async_to_sync(activity_environment.run)(clone_repository, input_data)
                 assert result1 is not None
 
-                sandbox.execute("echo 'test' > /tmp/workspace/repos/posthog/posthog-js/test_file.txt")
+                sandbox.execute("echo 'test' > /tmp/workspace/repos/hanzoai/insights-js/test_file.txt")
 
                 result2 = async_to_sync(activity_environment.run)(clone_repository, input_data)
                 assert result2 is not None
 
-                check_file = sandbox.execute("ls /tmp/workspace/repos/posthog/posthog-js/test_file.txt 2>&1")
+                check_file = sandbox.execute("ls /tmp/workspace/repos/hanzoai/insights-js/test_file.txt 2>&1")
                 assert "No such file" in check_file.stdout or check_file.exit_code != 0
 
         finally:
@@ -116,7 +116,7 @@ class TestCloneRepositoryActivity:
 
     @pytest.mark.django_db
     def test_clone_repository_sandbox_not_found(self, activity_environment, github_integration):
-        context = self._create_context(github_integration, "posthog/posthog-js")
+        context = self._create_context(github_integration, "hanzoai/insights-js")
         input_data = CloneRepositoryInput(context=context, sandbox_id="non-existent-sandbox-id")
 
         with patch(

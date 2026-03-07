@@ -9,13 +9,13 @@ BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" serial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" serial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
 BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" serial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" serial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
 """
     should_fail = validate_migration_sql(sql_for_model_with_int32)
@@ -28,13 +28,13 @@ BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" bigserial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" bigserial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
 BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" bigserial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" bigserial NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_for_model_with_int64)
@@ -47,13 +47,13 @@ BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" uuid NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" uuid NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
 BEGIN;
 --
 -- Create model StrawMan
 --
-CREATE TABLE "posthog_strawman" ("id" uuid NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
+CREATE TABLE "insights_strawman" ("id" uuid NOT NULL PRIMARY KEY, "name" varchar(400) NULL);
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_for_model_with_uuid)
@@ -63,7 +63,7 @@ COMMIT;
 def test_unique_indexes_can_apply_only_to_not_null_values() -> None:
     sql_for_unique_index_with_where = """
 BEGIN;
-CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_unique_idx ON posthog_team (secret_api_token) WHERE secret_api_token IS NOT NULL;
+CREATE UNIQUE INDEX CONCURRENTLY team_secret_api_token_unique_idx ON insights_team (secret_api_token) WHERE secret_api_token IS NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_for_unique_index_with_where)
@@ -76,8 +76,8 @@ BEGIN;
 --
 -- Add field default_experiment_stats_method to organization
 --
-ALTER TABLE "posthog_organization" ADD COLUMN "default_experiment_stats_method" varchar(20) DEFAULT 'bayesian' NOT NULL;
-ALTER TABLE "posthog_organization" ALTER COLUMN "default_experiment_stats_method" DROP DEFAULT;
+ALTER TABLE "insights_organization" ADD COLUMN "default_experiment_stats_method" varchar(20) DEFAULT 'bayesian' NOT NULL;
+ALTER TABLE "insights_organization" ALTER COLUMN "default_experiment_stats_method" DROP DEFAULT;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_constant_string_default)
@@ -87,7 +87,7 @@ COMMIT;
 def test_add_column_with_constant_number_default_is_safe() -> None:
     sql_with_constant_number_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "max_items" integer DEFAULT 100 NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "max_items" integer DEFAULT 100 NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_constant_number_default)
@@ -97,7 +97,7 @@ COMMIT;
 def test_add_column_with_constant_boolean_default_is_safe() -> None:
     sql_with_constant_boolean_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "is_enabled" boolean DEFAULT TRUE NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "is_enabled" boolean DEFAULT TRUE NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_constant_boolean_default)
@@ -107,7 +107,7 @@ COMMIT;
 def test_add_column_with_now_function_default_is_safe() -> None:
     sql_with_now_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "created_at" timestamp DEFAULT NOW() NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "created_at" timestamp DEFAULT NOW() NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_now_default)
@@ -117,7 +117,7 @@ COMMIT;
 def test_add_column_with_volatile_function_default_is_unsafe() -> None:
     sql_with_volatile_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "expires_at" timestamp DEFAULT NOW() + INTERVAL '1 day' NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "expires_at" timestamp DEFAULT NOW() + INTERVAL '1 day' NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_volatile_default)
@@ -127,7 +127,7 @@ COMMIT;
 def test_add_column_with_no_default_not_null_is_unsafe() -> None:
     sql_with_no_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "required_field" varchar(20) NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "required_field" varchar(20) NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_no_default)
@@ -137,7 +137,7 @@ COMMIT;
 def test_add_column_with_nullable_field_is_safe() -> None:
     sql_with_nullable_field = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "optional_field" varchar(20) NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "optional_field" varchar(20) NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_nullable_field)
@@ -147,7 +147,7 @@ COMMIT;
 def test_add_column_with_random_function_default_is_unsafe() -> None:
     sql_with_random_default = """
 BEGIN;
-ALTER TABLE "posthog_organization" ADD COLUMN "random_value" float DEFAULT random() NOT NULL;
+ALTER TABLE "insights_organization" ADD COLUMN "random_value" float DEFAULT random() NOT NULL;
 COMMIT;
     """
     should_fail = validate_migration_sql(sql_with_random_default)
@@ -168,9 +168,9 @@ def test_migration_path_regex_handles_products_structure() -> None:
     assert products_match == [("early_access_features", "0001_initial")]
 
     products_match = re.findall(
-        r"products/([a-z_]+)/backend/migrations/([a-zA-Z_0-9]+)\.py", "posthog/migrations/0770_something.py"
+        r"products/([a-z_]+)/backend/migrations/([a-zA-Z_0-9]+)\.py", "insights/migrations/0770_something.py"
     )
     assert products_match == []
 
-    posthog_match = re.findall(r"([a-z]+)\/migrations\/([a-zA-Z_0-9]+)\.py", "posthog/migrations/0770_something.py")
-    assert posthog_match == [("posthog", "0770_something")]
+    insights_match = re.findall(r"([a-z]+)\/migrations\/([a-zA-Z_0-9]+)\.py", "insights/migrations/0770_something.py")
+    assert insights_match == [("insights", "0770_something")]

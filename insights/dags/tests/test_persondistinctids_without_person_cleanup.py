@@ -1,4 +1,4 @@
-"""Tests for the posthog_persons without distinct_ids in posthog_persondistinctid cleanup job."""
+"""Tests for the insights_persons without distinct_ids in insights_persondistinctid cleanup job."""
 
 from unittest.mock import MagicMock, patch
 
@@ -297,10 +297,10 @@ class TestScanDeleteChunkForPdwp:
         assert execute_calls.count("COMMIT") >= 1
 
         # Verify DELETE...RETURNING query format
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_persondistinctid" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_persondistinctid" in call]
         assert len(delete_calls) == 1
         delete_query = delete_calls[0]
-        assert "DELETE FROM posthog_persondistinctid" in delete_query
+        assert "DELETE FROM insights_persondistinctid" in delete_query
         assert "WHERE pd.id >=" in delete_query
         assert "AND pd.id <=" in delete_query
         assert "NOT EXISTS" in delete_query
@@ -350,7 +350,7 @@ class TestScanDeleteChunkForPdwp:
         assert execute_calls.count("COMMIT") >= 3
 
         # Verify DELETE...RETURNING called 3 times (one per batch)
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_persondistinctid" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_persondistinctid" in call]
         assert len(delete_calls) == 3
 
     def test_scan_delete_chunk_serialization_failure_retry(self):
@@ -373,7 +373,7 @@ class TestScanDeleteChunkForPdwp:
 
         # First DELETE query raises SerializationFailure, second succeeds
         def execute_side_effect(query, *args):
-            if "DELETE FROM posthog_persondistinctid" in query:
+            if "DELETE FROM insights_persondistinctid" in query:
                 delete_attempts[0] += 1
                 if delete_attempts[0] == 1:
                     # First attempt raises error
@@ -401,7 +401,7 @@ class TestScanDeleteChunkForPdwp:
         assert "ROLLBACK" in execute_calls
 
         # Verify retry succeeded (should have DELETE called twice - once failed, once succeeded)
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_persondistinctid" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_persondistinctid" in call]
         assert len(delete_calls) >= 2  # At least one failed attempt and one successful
 
     def test_scan_delete_chunk_deadlock_retry(self):
@@ -424,7 +424,7 @@ class TestScanDeleteChunkForPdwp:
 
         # First DELETE query raises deadlock, second succeeds
         def execute_side_effect(query, *args):
-            if "DELETE FROM posthog_persondistinctid" in query:
+            if "DELETE FROM insights_persondistinctid" in query:
                 delete_attempts[0] += 1
                 if delete_attempts[0] == 1:
                     # First attempt raises error
@@ -452,7 +452,7 @@ class TestScanDeleteChunkForPdwp:
         assert "ROLLBACK" in execute_calls
 
         # Verify retry succeeded (should have DELETE called twice - once failed, once succeeded)
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_persondistinctid" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_persondistinctid" in call]
         assert len(delete_calls) >= 2  # At least one failed attempt and one successful
 
     def test_scan_delete_chunk_error_handling_and_rollback(self):
@@ -472,7 +472,7 @@ class TestScanDeleteChunkForPdwp:
 
         # Raise generic error on DELETE query (non-retryable error)
         def execute_side_effect(query, *args):
-            if "DELETE FROM posthog_persondistinctid" in query:
+            if "DELETE FROM insights_persondistinctid" in query:
                 raise Exception("Connection lost")
 
         cursor.execute.side_effect = execute_side_effect
@@ -528,11 +528,11 @@ class TestScanDeleteChunkForPdwp:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
 
         # Find DELETE...RETURNING query
-        delete_query = next((call for call in execute_calls if "DELETE FROM posthog_persondistinctid" in call), None)
+        delete_query = next((call for call in execute_calls if "DELETE FROM insights_persondistinctid" in call), None)
         assert delete_query is not None
 
         # Verify DELETE...RETURNING query components
-        assert "DELETE FROM posthog_persondistinctid pd" in delete_query
+        assert "DELETE FROM insights_persondistinctid pd" in delete_query
         assert "WHERE pd.id >=" in delete_query
         assert "AND pd.id <=" in delete_query
         assert "NOT EXISTS" in delete_query
@@ -617,9 +617,9 @@ class TestGetIdRangeForPdwp:
         min_queries = [call for call in execute_calls if "MIN(id)" in call]
         assert len(min_queries) == 0, "Should not query for min_id when override is provided"
 
-        # Verify max_id query WAS executed (queries posthog_person)
-        max_queries = [call for call in execute_calls if "MAX(id)" in call and "posthog_person" in call]
-        assert len(max_queries) == 1, "Should query for max_id from posthog_person when override is not provided"
+        # Verify max_id query WAS executed (queries insights_person)
+        max_queries = [call for call in execute_calls if "MAX(id)" in call and "insights_person" in call]
+        assert len(max_queries) == 1, "Should query for max_id from insights_person when override is not provided"
 
     def test_get_id_range_uses_max_id_override(self):
         """Test that max_id override is honored when provided."""
@@ -676,10 +676,10 @@ class TestGetIdRangeForPdwp:
 
         assert result == (1, 5000)
 
-        # Verify max_id query was executed (queries posthog_person)
+        # Verify max_id query was executed (queries insights_person)
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
-        max_queries = [call for call in execute_calls if "MAX(id)" in call and "posthog_person" in call]
-        assert len(max_queries) == 1, "Should query for max_id from posthog_person when override is not provided"
+        max_queries = [call for call in execute_calls if "MAX(id)" in call and "insights_person" in call]
+        assert len(max_queries) == 1, "Should query for max_id from insights_person when override is not provided"
 
     def test_get_id_range_validates_max_id_greater_than_min_id(self):
         """Test that validation fails when max_id < min_id."""

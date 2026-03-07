@@ -3,7 +3,7 @@
 # Docker image for the LLM Analytics Temporal worker.
 #
 # Includes ML dependencies (transformers, ONNX Runtime, torch) that are too
-# large (~2GB) for the shared PostHog image. These deps live in the `sentiment`
+# large (~2GB) for the shared Insights image. These deps live in the `sentiment`
 # dependency group in pyproject.toml and are installed via `uv sync --group sentiment`.
 #
 
@@ -66,7 +66,7 @@ COPY bin/temporal-django-worker bin/temporal-django-worker
 
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime \
-    POSTHOG_SENTIMENT_MODEL_CACHE=/opt/posthog-sentiment-model
+    INSIGHTS_SENTIMENT_MODEL_CACHE=/opt/insights-sentiment-model
 
 # Pre-bake the sentiment ONNX model so workers don't download from HuggingFace on startup.
 # Downloads from a pinned HuggingFace revision, exports to ONNX, verifies file integrity
@@ -91,7 +91,7 @@ EXPECTED_HASHES = {
     'tokenizer.json': '727009a8214ddfa5af1deedf1006d4d06e8e51e54aa5f03566263d4e19bfcdce',
 }
 
-cache_dir = os.environ['POSTHOG_SENTIMENT_MODEL_CACHE']
+cache_dir = os.environ['INSIGHTS_SENTIMENT_MODEL_CACHE']
 os.makedirs(cache_dir, exist_ok=True)
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, revision=MODEL_REVISION)

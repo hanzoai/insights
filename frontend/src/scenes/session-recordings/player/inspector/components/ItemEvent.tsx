@@ -1,7 +1,7 @@
 import './ImagePreview.scss'
 
-import { IconShare } from '@posthog/icons'
-import { LemonButton, LemonMenu, Link } from '@posthog/lemon-ui'
+import { IconShare } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Link } from '@hanzo/lemon-ui'
 
 import { ErrorDisplay, idFrom } from 'lib/components/Errors/ErrorDisplay'
 import { ErrorEventType } from 'lib/components/Errors/types'
@@ -190,7 +190,7 @@ export function ItemEventDetail({ item }: ItemEventProps): JSX.Element {
                                             <p>
                                                 Person properties sent with this event. Will replace any property value
                                                 that may have been set on this person profile before now.{' '}
-                                                <Link to="https://posthog.com/docs/getting-started/person-properties">
+                                                <Link to="https://hanzo.ai/docs/getting-started/person-properties">
                                                     Learn more
                                                 </Link>
                                             </p>
@@ -204,7 +204,7 @@ export function ItemEventDetail({ item }: ItemEventProps): JSX.Element {
                                                 "Set once" person properties sent with this event. Will replace any
                                                 property value that have never been set on this person profile before
                                                 now.{' '}
-                                                <Link to="https://posthog.com/docs/getting-started/person-properties">
+                                                <Link to="https://hanzo.ai/docs/getting-started/person-properties">
                                                     Learn more
                                                 </Link>
                                             </p>

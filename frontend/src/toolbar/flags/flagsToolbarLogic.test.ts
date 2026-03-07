@@ -50,7 +50,7 @@ describe('toolbar featureFlagsLogic', () => {
         })
     })
 
-    it('uses posthog client values if present', async () => {
+    it('uses insights client values if present', async () => {
         const flags = {
             'flag 1': false,
             'flag 2': true,

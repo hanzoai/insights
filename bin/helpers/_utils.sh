@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Common utility functions for scripts
-# See https://github.com/PostHog/template
+# See https://github.com/Hanzo Insights/template
 
 # Print colored text
 print_color() {

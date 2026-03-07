@@ -139,8 +139,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         )
 
     @mock.patch(
-        f"{posthog.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=posthog.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
     )
     def test_group_sync(self, mocked_ch_call):
         ts = datetime.now(UTC)
@@ -174,8 +174,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         mocked_ch_call.assert_called_once()
 
     @mock.patch(
-        f"{posthog.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=posthog.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
     )
     def test_group_sync_updates_group(self, mocked_ch_call):
         group = create_group(
@@ -221,8 +221,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         mocked_ch_call.assert_called_once()
 
     @mock.patch(
-        f"{posthog.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=posthog.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
     )
     def test_group_sync_multiple_entries(self, mocked_ch_call):
         ts = datetime.now(UTC)

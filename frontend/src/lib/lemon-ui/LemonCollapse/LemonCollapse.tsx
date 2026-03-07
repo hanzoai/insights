@@ -6,7 +6,7 @@ import { Transition } from 'react-transition-group'
 import { ENTERED, ENTERING } from 'react-transition-group/Transition'
 import useResizeObserver from 'use-resize-observer'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
 
 import { LemonButton, LemonButtonProps } from '../LemonButton'
 

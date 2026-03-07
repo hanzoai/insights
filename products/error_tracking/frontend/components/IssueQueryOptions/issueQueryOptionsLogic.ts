@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal'
 import { actions, kea, key, listeners, path, props, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog, { Properties } from 'posthog-js'
+import insights, { Properties } from '@hanzo/insights'
 
 import { Params } from 'scenes/sceneTypes'
 
@@ -97,13 +97,13 @@ export const issueQueryOptionsLogic = kea<issueQueryOptionsLogicType>([
 
     listeners(({ values }) => ({
         setOrderBy: ({ orderBy }) => {
-            posthog.capture(
+            insights.capture(
                 'error_tracking_issues_sorted',
                 issueSortedCaptureProperties(orderBy, values.orderDirection, values.revenueEntity)
             )
         },
         setOrderDirection: ({ orderDirection }) => {
-            posthog.capture(
+            insights.capture(
                 'error_tracking_issues_sorted',
                 issueSortedCaptureProperties(values.orderBy, orderDirection, values.revenueEntity)
             )

@@ -11,7 +11,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     category=["Email Marketing"],
     code_language="fn",
     code="""
-let base_uri := 'https://incoming.userlist.com/posthog'
+let base_uri := 'https://incoming.userlist.com/insights'
 
 fun compact(obj) {
     let result := {}

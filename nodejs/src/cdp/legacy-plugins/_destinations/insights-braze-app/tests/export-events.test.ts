@@ -1,4 +1,4 @@
-import { RetryError } from '@posthog/plugin-scaffold'
+import { RetryError } from '@hanzo/plugin-scaffold'
 
 import { BrazePluginMeta, onEvent } from '../index'
 

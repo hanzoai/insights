@@ -150,7 +150,7 @@ class OnboardingViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
         if description:
             user_parts.append(f"User's goal: {description}")
         if browsing_history:
-            user_parts.append(f"Pages they browsed on posthog.com: {', '.join(browsing_history)}")
+            user_parts.append(f"Pages they browsed on hanzo.ai: {', '.join(browsing_history)}")
 
         user_message = "\n".join(user_parts)
 

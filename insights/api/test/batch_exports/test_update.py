@@ -39,7 +39,7 @@ def test_can_put_config(client: HttpClient, temporal, organization, team, user):
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -117,7 +117,7 @@ def test_can_patch_config(client: HttpClient, interval, temporal, organization, 
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -152,7 +152,7 @@ def test_can_patch_config(client: HttpClient, interval, temporal, organization, 
         "config": {
             "bucket_name": "my-new-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
         },
     }
 
@@ -389,7 +389,7 @@ def test_can_patch_schedule_configuration(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -469,7 +469,7 @@ def test_can_patch_config_with_invalid_old_values(client: HttpClient, interval, 
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "invalid_key": "invalid_value",
@@ -500,7 +500,7 @@ def test_can_patch_config_with_invalid_old_values(client: HttpClient, interval, 
         "config": {
             "bucket_name": "my-new-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
         },
     }
 
@@ -534,7 +534,7 @@ def test_can_patch_insightsql_query(client: HttpClient, temporal, organization, 
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -623,7 +623,7 @@ def test_patch_returns_error_on_unsupported_insightsql_query(client: HttpClient,
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -814,7 +814,7 @@ def databricks_integration_2(team, user):
 def enable_databricks(team):
     """Enable the Databricks batch exports feature flag to be able to run the test."""
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=True,
     ):
         yield
@@ -962,7 +962,7 @@ def test_can_patch_redshift_batch_export(client: HttpClient, temporal, organizat
             "copy_inputs": {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
             },

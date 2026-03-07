@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconDownload, IconGear, IconRevert } from '@posthog/icons'
+import { IconDownload, IconGear, IconRevert } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -10,7 +10,7 @@ import {
     LemonLabel,
     LemonSkeleton,
     LemonTag,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'

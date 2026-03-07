@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -28,13 +28,13 @@ function SvelteAppClientCodeSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import posthog from 'posthog-js'
+            {`import insights from '@hanzo/insights'
 import { browser } from '$app/environment';
 import { onMount } from 'svelte';
 
 export const load = async () => {
   if (browser) {
-    posthog.init(
+    insights.init(
       '${currentTeam?.api_token}',
       {
         ${options.join(',\n        ')}
@@ -52,7 +52,7 @@ export function SDKInstallSvelteJSInstructions({ hideWizard }: { hideWizard?: bo
     return (
         <>
             <SetupWizardBanner integrationName="Svelte" hide={hideWizard} />
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
 
             <h3>Initialize</h3>

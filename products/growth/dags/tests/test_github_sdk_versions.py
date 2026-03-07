@@ -29,17 +29,17 @@ from products.growth.dags.github_sdk_versions import (
 # RELEASES = FIXTURES / "releases"
 #
 # releases = {
-#     "posthog_js_releases.json": "https://api.github.com/repos/Insights/posthog-js/releases?per_page=25",
-#     "posthog_js_lite_releases.json": "https://api.github.com/repos/Insights/posthog-js-lite/releases?per_page=25",
-#     "posthog_python_releases.json": "https://api.github.com/repos/Insights/posthog-python/releases?per_page=10",
-#     "posthog_flutter_releases.json": "https://api.github.com/repos/Insights/posthog-flutter/releases?per_page=10",
-#     "posthog_ios_releases.json": "https://api.github.com/repos/Insights/posthog-ios/releases?per_page=10",
-#     "posthog_android_releases.json": "https://api.github.com/repos/Insights/posthog-android/releases?per_page=10",
-#     "posthog_go_releases.json": "https://api.github.com/repos/Insights/posthog-go/releases?per_page=10",
-#     "posthog_dotnet_releases.json": "https://api.github.com/repos/Insights/posthog-dotnet/releases?per_page=10",
-#     "posthog_elixir_releases.json": "https://api.github.com/repos/Insights/posthog-elixir/releases?per_page=10",
-#     "posthog_ruby_releases.json": "https://api.github.com/repos/Insights/posthog-ruby/releases?per_page=10",
-#     "posthog_php_releases.json": "https://api.github.com/repos/Insights/posthog-php/releases?per_page=10",
+#     "insights_js_releases.json": "https://api.github.com/repos/Insights/insights-js/releases?per_page=25",
+#     "insights_js_lite_releases.json": "https://api.github.com/repos/Insights/insights-js-lite/releases?per_page=25",
+#     "insights_python_releases.json": "https://api.github.com/repos/Insights/hanzo-insights/releases?per_page=10",
+#     "insights_flutter_releases.json": "https://api.github.com/repos/Insights/insights-flutter/releases?per_page=10",
+#     "insights_ios_releases.json": "https://api.github.com/repos/Insights/insights-ios/releases?per_page=10",
+#     "insights_android_releases.json": "https://api.github.com/repos/Insights/insights-android/releases?per_page=10",
+#     "insights_go_releases.json": "https://api.github.com/repos/Insights/insights-go/releases?per_page=10",
+#     "insights_dotnet_releases.json": "https://api.github.com/repos/Insights/insights-dotnet/releases?per_page=10",
+#     "insights_elixir_releases.json": "https://api.github.com/repos/Insights/insights-elixir/releases?per_page=10",
+#     "insights_ruby_releases.json": "https://api.github.com/repos/Insights/insights-ruby/releases?per_page=10",
+#     "insights_php_releases.json": "https://api.github.com/repos/Insights/insights-php/releases?per_page=10",
 # }
 #
 #
@@ -89,7 +89,7 @@ class TestFetchSdkDataBase:
 class TestFetchWebSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_web_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_js_releases.json")
+        releases_data = self.load_releases("insights_js_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_web_sdk_data()
@@ -117,7 +117,7 @@ class TestFetchWebSdkData(TestFetchSdkDataBase):
 class TestFetchPythonSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_python_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_python_releases.json")
+        releases_data = self.load_releases("insights_python_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_python_sdk_data()
@@ -133,7 +133,7 @@ class TestFetchPythonSdkData(TestFetchSdkDataBase):
 class TestFetchNodeSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_node_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_js_releases.json")
+        releases_data = self.load_releases("insights_js_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_node_sdk_data()
@@ -143,16 +143,16 @@ class TestFetchNodeSdkData(TestFetchSdkDataBase):
         assert len(result["releaseDates"]) > 0
         assert "5.14.0" in result["releaseDates"]
         assert result["releaseDates"]["5.14.0"] == "2025-11-24T10:24:59Z"
-        assert mock_get.call_count == 3  # Assert that it attempted to paginate + 1 for `posthog-js-lite`
+        assert mock_get.call_count == 3  # Assert that it attempted to paginate + 1 for `insights-js-lite`
 
-        # `posthog-js-lite` included a leading `v` prefix on some tags, let's make sure it's removed
+        # `insights-js-lite` included a leading `v` prefix on some tags, let's make sure it's removed
         assert not any(version.startswith("v") for version in result["releaseDates"].keys())
 
 
 class TestFetchReactNativeSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_react_native_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_js_releases.json")
+        releases_data = self.load_releases("insights_js_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_react_native_sdk_data()
@@ -162,16 +162,16 @@ class TestFetchReactNativeSdkData(TestFetchSdkDataBase):
         assert len(result["releaseDates"]) > 0
         assert "4.14.0" in result["releaseDates"]
         assert result["releaseDates"]["4.14.0"] == "2025-11-26T13:26:49Z"
-        assert mock_get.call_count == 3  # Assert that it attempted to paginate + 1 for `posthog-js-lite`
+        assert mock_get.call_count == 3  # Assert that it attempted to paginate + 1 for `insights-js-lite`
 
-        # `posthog-js-lite` included a leading `v` prefix on some tags, let's make sure it's removed
+        # `insights-js-lite` included a leading `v` prefix on some tags, let's make sure it's removed
         assert not any(version.startswith("v") for version in result["releaseDates"].keys())
 
 
 class TestFetchFlutterSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_flutter_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_flutter_releases.json")
+        releases_data = self.load_releases("insights_flutter_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_flutter_sdk_data()
@@ -190,7 +190,7 @@ class TestFetchFlutterSdkData(TestFetchSdkDataBase):
 class TestFetchIosSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_ios_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_ios_releases.json")
+        releases_data = self.load_releases("insights_ios_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_ios_sdk_data()
@@ -206,7 +206,7 @@ class TestFetchIosSdkData(TestFetchSdkDataBase):
 class TestFetchAndroidSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_android_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_android_releases.json")
+        releases_data = self.load_releases("insights_android_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_android_sdk_data()
@@ -222,7 +222,7 @@ class TestFetchAndroidSdkData(TestFetchSdkDataBase):
 class TestFetchGoSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_go_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_go_releases.json")
+        releases_data = self.load_releases("insights_go_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_go_sdk_data()
@@ -238,7 +238,7 @@ class TestFetchGoSdkData(TestFetchSdkDataBase):
 class TestFetchPhpSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_php_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_php_releases.json")
+        releases_data = self.load_releases("insights_php_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_php_sdk_data()
@@ -254,7 +254,7 @@ class TestFetchPhpSdkData(TestFetchSdkDataBase):
 class TestFetchRubySdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_ruby_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_ruby_releases.json")
+        releases_data = self.load_releases("insights_ruby_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_ruby_sdk_data()
@@ -270,7 +270,7 @@ class TestFetchRubySdkData(TestFetchSdkDataBase):
 class TestFetchElixirSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_elixir_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_elixir_releases.json")
+        releases_data = self.load_releases("insights_elixir_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_elixir_sdk_data()
@@ -286,7 +286,7 @@ class TestFetchElixirSdkData(TestFetchSdkDataBase):
 class TestFetchDotnetSdkData(TestFetchSdkDataBase):
     @patch("products.growth.dags.github_sdk_versions.requests.get")
     def test_fetch_dotnet_sdk_data_success(self, mock_get):
-        releases_data = self.load_releases("posthog_dotnet_releases.json")
+        releases_data = self.load_releases("insights_dotnet_releases.json")
         self.setup_ok_json_mock(mock_get, releases_data)
 
         result = fetch_dotnet_sdk_data()

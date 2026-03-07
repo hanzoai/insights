@@ -17,7 +17,7 @@ class TestCorsResponse(TestCase):
             ("https://my-amazing.site/", "https://my-amazing.site"),
             ("https://my-amazing.site/my/path", "https://my-amazing.site"),
             ("http://my-amazing.site/my/path", "http://my-amazing.site"),
-            ("https://us.posthog.com/decide", "https://us.posthog.com"),
+            ("https://insights.hanzo.ai/decide", "https://insights.hanzo.ai"),
             ("my-amazing.site", "*"),
             ("my-amazing.site/path", "*"),
             ("null", "*"),

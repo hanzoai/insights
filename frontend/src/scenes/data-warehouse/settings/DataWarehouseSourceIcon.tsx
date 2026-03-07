@@ -1,14 +1,14 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconWrench } from '@posthog/icons'
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { IconWrench } from '@hanzo/icons'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { Link } from 'lib/lemon-ui/Link'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { getDataWarehouseSourceUrl } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 
-import IconInsights from 'public/posthog-icon.svg'
+import IconInsights from 'public/insights-icon.svg'
 import IconAwsS3 from 'public/services/aws-s3.png'
 import Iconazure from 'public/services/azure.png'
 import IconCloudflare from 'public/services/cloudflare.png'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@posthog/icons'
-import { LemonSelect } from '@posthog/lemon-ui'
+import { IconCalendar } from '@hanzo/icons'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { DateFilter } from '../DateFilter/DateFilter'
 import { appMetricsLogic } from './appMetricsLogic'

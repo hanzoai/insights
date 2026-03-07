@@ -21,7 +21,7 @@ describe('dashboardHclExporter test', () => {
 
             const hcl = generateDashboardHCL(dashboard).hcl
 
-            expect(hcl).toContain(`resource "posthog_dashboard" "${expected}"`)
+            expect(hcl).toContain(`resource "insights_dashboard" "${expected}"`)
         })
     })
 
@@ -38,7 +38,7 @@ describe('dashboardHclExporter test', () => {
             const result = generateDashboardHCL(dashboard)
             const hcl = result.hcl
 
-            expect(hcl).toContain('resource "posthog_dashboard" "my_test_dashboard"')
+            expect(hcl).toContain('resource "insights_dashboard" "my_test_dashboard"')
             expect(hcl).toContain('name = "My Test Dashboard"')
             expect(hcl).toContain('description = "A test dashboard for unit testing"')
             expect(hcl).toContain('pinned = true')
@@ -57,7 +57,7 @@ describe('dashboardHclExporter test', () => {
             const hcl = result.hcl
 
             expect(hcl).toContain('import {')
-            expect(hcl).toContain('to = posthog_dashboard.saved_dashboard')
+            expect(hcl).toContain('to = insights_dashboard.saved_dashboard')
             expect(hcl).toContain('id = "1/456"')
 
             expect(result.warnings).toHaveLength(0)
@@ -107,7 +107,7 @@ describe('dashboardHclExporter test', () => {
 
             const hcl = generateDashboardHCL(dashboard).hcl
 
-            expect(hcl).toMatch(/# Compatible with posthog provider v\d+\.\d+/)
+            expect(hcl).toMatch(/# Compatible with insights provider v\d+\.\d+/)
         })
     })
 

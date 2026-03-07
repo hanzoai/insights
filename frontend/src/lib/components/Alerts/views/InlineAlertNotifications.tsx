@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSelect, LemonSkeleton, LemonTag } from '@posthog/lemon-ui'
+import { IconExternal, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSelect, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
 
 import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { slackIntegrationLogic } from 'lib/integrations/slackIntegrationLogic'

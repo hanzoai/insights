@@ -76,7 +76,7 @@ def fetch_backup_entries_paginated(
             properties, properties_last_updated_at, properties_last_operation, version,
             is_identified, created_at, is_user_id,
             properties_after, properties_last_updated_at_after, properties_last_operation_after, version_after
-        FROM posthog_person_reconciliation_backup
+        FROM insights_person_reconciliation_backup
         WHERE job_id = %s
     """
 
@@ -138,7 +138,7 @@ def fetch_person_by_id(cursor, team_id: int, person_id: int) -> dict | None:
             is_identified,
             created_at,
             is_user_id
-        FROM posthog_person
+        FROM insights_person
         WHERE team_id = %s AND id = %s
         """,
         (team_id, person_id),
@@ -172,7 +172,7 @@ def fetch_persons_by_ids(cursor, team_id: int, person_ids: list[int]) -> dict[in
             is_identified,
             created_at,
             is_user_id
-        FROM posthog_person
+        FROM insights_person
         WHERE team_id = %s AND id = ANY(%s)
         """,
         (team_id, person_ids),
@@ -202,7 +202,7 @@ def compute_restore_diff(
     Compute what properties to restore.
 
     Args:
-        current_person: Current state from posthog_person table
+        current_person: Current state from insights_person table
         backup_before: "Before" state from backup (what we want to restore TO)
         backup_after: "After" state from backup (what reconciliation changed it TO)
         conflict_resolution: How to handle conflicts
@@ -337,7 +337,7 @@ def restore_person_with_version_check(
 
         cursor.execute(
             """
-            UPDATE posthog_person SET
+            UPDATE insights_person SET
                 properties = %s,
                 properties_last_updated_at = %s,
                 properties_last_operation = %s,

@@ -7,7 +7,7 @@ from django.db.models import Case, DurationField, ExpressionWrapper, F, Q, Query
 from django.utils import timezone
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from celery import chain, current_task, shared_task
 from dateutil.relativedelta import relativedelta
 from prometheus_client import Counter, Gauge, Histogram
@@ -296,9 +296,9 @@ def _enqueue_single_cohort_calculation(cohort: Cohort, initiating_user: Optional
 
 @shared_task(ignore_result=True, max_retries=2, queue=CeleryQueue.LONG_RUNNING.value)
 def calculate_cohort_ch(cohort_id: int, pending_version: int, initiating_user_id: Optional[int] = None) -> None:
-    with posthoganalytics.new_context():
-        posthoganalytics.tag("feature", Feature.COHORT.value)
-        posthoganalytics.tag("cohort_id", cohort_id)
+    with hanzoanalytics.new_context():
+        hanzoanalytics.tag("feature", Feature.COHORT.value)
+        hanzoanalytics.tag("cohort_id", cohort_id)
 
         cohort: Cohort = Cohort.objects.get(pk=cohort_id)
 
@@ -312,7 +312,7 @@ def calculate_cohort_ch(cohort_id: int, pending_version: int, initiating_user_id
             )
             return
 
-        posthoganalytics.tag("team_id", cohort.team.id)
+        hanzoanalytics.tag("team_id", cohort.team.id)
 
         staleness_hours = 0.0
         if cohort.last_calculation is not None:

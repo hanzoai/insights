@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal'
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { lazyLoaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -237,7 +237,7 @@ export const tableViewLogic = kea<tableViewLogicType>([
         },
 
         saveCurrentAsViewFailure: (error) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Error saving view')
         },
 
@@ -250,7 +250,7 @@ export const tableViewLogic = kea<tableViewLogicType>([
         },
 
         updateViewFailure: (error) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Error updating view')
         },
 
@@ -259,12 +259,12 @@ export const tableViewLogic = kea<tableViewLogicType>([
         },
 
         deleteViewFailure: (error) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Error deleting view')
         },
 
         loadViewsFailure: (error) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Error loading views')
         },
 
@@ -273,7 +273,7 @@ export const tableViewLogic = kea<tableViewLogicType>([
         },
 
         submitNewViewFormFailure: (error) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Error creating view')
         },
     })),

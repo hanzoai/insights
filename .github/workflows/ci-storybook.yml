@@ -75,7 +75,7 @@ jobs:
               uses: ./.github/actions/setup-emsdk
 
             - name: Install dependencies
-              run: pnpm --filter=@posthog/storybook... install --frozen-lockfile
+              run: pnpm --filter=@hanzo/storybook... install --frozen-lockfile
 
             - name: Restore webpack build cache
               uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -88,8 +88,8 @@ jobs:
               env:
                   NODE_OPTIONS: --max-old-space-size=32768
               run: |
-                  bin/turbo --filter=@posthog/storybook prepare
-                  pnpm --filter=@posthog/storybook build --test
+                  bin/turbo --filter=@hanzo/storybook prepare
+                  pnpm --filter=@hanzo/storybook build --test
 
             - name: Save webpack build cache
               if: github.ref == 'refs/heads/master'
@@ -138,7 +138,7 @@ jobs:
                     if [[ "$IS_TRUSTED" == "true" ]]; then
                       echo "mode=update" >> $GITHUB_OUTPUT
                       echo "::notice::🔄 Trusted bot '$AUTHOR' - running in UPDATE mode"
-                    elif [[ "$AUTHOR" == *"github-actions"* ]] || [[ "$AUTHOR" == *"[bot]"* ]] || [[ "$AUTHOR" == "posthog-bot" ]]; then
+                    elif [[ "$AUTHOR" == *"github-actions"* ]] || [[ "$AUTHOR" == *"[bot]"* ]] || [[ "$AUTHOR" == "insights-bot" ]]; then
                       echo "mode=check" >> $GITHUB_OUTPUT
                       echo "::notice::🔍 Running in CHECK mode - snapshots must match exactly"
                     else
@@ -250,7 +250,7 @@ jobs:
               uses: ./.github/actions/setup-emsdk
 
             - name: Install package.json dependencies with pnpm
-              run: pnpm --filter=@posthog/storybook... install --frozen-lockfile
+              run: pnpm --filter=@hanzo/storybook... install --frozen-lockfile
 
             - name: Install CI utilities with pnpm
               run: pnpm install http-server wait-on -g
@@ -318,7 +318,7 @@ jobs:
                   for attempt in $(seq 1 $MAX_VERIFY_ATTEMPTS); do
                     echo "Attempt $attempt/$MAX_VERIFY_ATTEMPTS: Running @storybook/test-runner (verify)"
                     set -o pipefail
-                    pnpm --filter=@posthog/storybook test:visual:ci:verify --browsers ${{ matrix.browser }} --shard ${{ matrix.shard }}/${{ matrix.shard_count }} 2>&1 | tee /tmp/test-output-${{ matrix.browser }}-${{ matrix.shard }}-attempt${attempt}.log
+                    pnpm --filter=@hanzo/storybook test:visual:ci:verify --browsers ${{ matrix.browser }} --shard ${{ matrix.shard }}/${{ matrix.shard_count }} 2>&1 | tee /tmp/test-output-${{ matrix.browser }}-${{ matrix.shard }}-attempt${attempt}.log
                     EXIT_CODE=$?
                     set +o pipefail
 
@@ -343,7 +343,7 @@ jobs:
                     if [ "${{ needs.detect-snapshot-mode.outputs.mode }}" == "update" ] && grep -Eqi "(snapshot.*(failed|was not written)|Expected image to)" "$LAST_LOG" 2>/dev/null; then
                       echo "Snapshot failure confirmed - updating snapshots"
                       set -o pipefail
-                      pnpm --filter=@posthog/storybook test:visual:ci:update --browsers ${{ matrix.browser }} --shard ${{ matrix.shard }}/${{ matrix.shard_count }} 2>&1 | tee /tmp/test-output-${{ matrix.browser }}-${{ matrix.shard }}-update.log
+                      pnpm --filter=@hanzo/storybook test:visual:ci:update --browsers ${{ matrix.browser }} --shard ${{ matrix.shard }}/${{ matrix.shard_count }} 2>&1 | tee /tmp/test-output-${{ matrix.browser }}-${{ matrix.shard }}-update.log
                       EXIT_CODE=$?
                       set +o pipefail
                     fi
@@ -448,8 +448,8 @@ jobs:
               id: app-token
               uses: getsentry/action-github-app-token@d4b5da6c5e37703f8c3b3e43abb5705b46e159cc # v3.0.0
               with:
-                  app_id: ${{ secrets.GH_APP_POSTHOG_TESTS_APP_ID }}
-                  private_key: ${{ secrets.GH_APP_POSTHOG_TESTS_PRIVATE_KEY }}
+                  app_id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private_key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - uses: actions/checkout@v6
               with:

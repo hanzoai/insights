@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { Fragment } from 'react'
 
-import { IconCopy, IconFlag, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonInput, LemonLabel, LemonSelect, LemonSnack, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCopy, IconFlag, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonInput, LemonLabel, LemonSelect, LemonSnack, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -272,7 +272,7 @@ export function FeatureFlagReleaseConditions({
                             These properties aren't immediately available on first page load for unidentified persons.
                             This feature flag requires that at least one event is sent prior to becoming available to
                             your product or website.{' '}
-                            <Link to="https://posthog.com/docs/feature-flags/bootstrapping" target="_blank">
+                            <Link to="https://hanzo.ai/docs/feature-flags/bootstrapping" target="_blank">
                                 {' '}
                                 Learn more about how to make feature flags available instantly.
                             </Link>

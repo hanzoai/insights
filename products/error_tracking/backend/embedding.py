@@ -9,7 +9,7 @@ from insights.clickhouse.kafka_engine import (
 from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
 
-DOCUMENT_EMBEDDINGS = "posthog_document_embeddings"
+DOCUMENT_EMBEDDINGS = "insights_document_embeddings"
 SHARDED_DOCUMENT_EMBEDDINGS = f"sharded_{DOCUMENT_EMBEDDINGS}"
 PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS = f"partitioned_sharded_{DOCUMENT_EMBEDDINGS}"
 DISTRIBUTED_DOCUMENT_EMBEDDINGS = f"distributed_{DOCUMENT_EMBEDDINGS}"

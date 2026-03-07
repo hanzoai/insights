@@ -17,7 +17,7 @@ OBJECT_STORAGE_ENDPOINT=http://localhost:19000 \
     MYSQL_USER=root \
     MYSQL_PASSWORD=root \
     MYSQL_DATABASE=test \
-    pytest posthog/temporal/tests/data_imports/test_mysql_source.py
+    pytest insights/temporal/tests/data_imports/test_mysql_source.py
 ```
 
 """

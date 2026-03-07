@@ -1,4 +1,4 @@
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 /**
  * Handle 409 Approval Required errors from API calls.

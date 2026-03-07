@@ -80,7 +80,7 @@ def append_random(url: str) -> str:
 def snowflake_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="Snowflake Export",
-        url=append_random("https://github.com/PostHog/snowflake-export-plugin"),
+        url=append_random("https://github.com/Hanzo Insights/snowflake-export-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -92,7 +92,7 @@ def snowflake_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def s3_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="S3 Export Plugin",
-        url=append_random("https://github.com/PostHog/s3-export-plugin"),
+        url=append_random("https://github.com/Hanzo Insights/s3-export-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -104,7 +104,7 @@ def s3_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def bigquery_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="BigQuery Export",
-        url=append_random("https://github.com/PostHog/bigquery-plugin"),
+        url=append_random("https://github.com/Hanzo Insights/bigquery-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -116,7 +116,7 @@ def bigquery_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def postgres_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="PostgreSQL Export Plugin",
-        url=append_random("https://github.com/PostHog/postgres-plugin"),
+        url=append_random("https://github.com/Hanzo Insights/postgres-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -128,7 +128,7 @@ def postgres_plugin(organization) -> typing.Generator[Plugin, None, None]:
 def redshift_plugin(organization) -> typing.Generator[Plugin, None, None]:
     plugin = Plugin.objects.create(
         name="Redshift Export Plugin",
-        url=append_random("https://github.com/PostHog/postgres-plugin"),
+        url=append_random("https://github.com/Hanzo Insights/postgres-plugin"),
         plugin_type="custom",
         organization=organization,
     )
@@ -151,7 +151,7 @@ test_s3_config: dict[str, typing.Any] = {
     "awsSecretAccessKey": "secret-access-key",
     "s3BucketName": "test-bucket",
     "awsRegion": "eu-central-1",
-    "prefix": "posthog/",
+    "prefix": "insights/",
     "compression": "gzip",
     "eventsToIgnore": "$feature_flag_called",
 }
@@ -176,7 +176,7 @@ test_postgres_config: dict[str, typing.Any] = {
     "host": "localhost",
     "port": "5432",
     "dbName": "dev",
-    "tableName": "posthog_event",
+    "tableName": "insights_event",
     "dbPassword": "password",
     "dbUsername": "username",
     "databaseUrl": "",
@@ -187,7 +187,7 @@ test_postgres_config_with_database_url: dict[str, typing.Any] = {
     "port": "54322",
     "dbName": "prod",
     "host": "localhost",
-    "tableName": "posthog_event",
+    "tableName": "insights_event",
     "dbPassword": "password_in_url",
     "dbUsername": "username_in_url",
     "databaseUrl": "postgres://username_in_url:password_in_url@localhost:54322/prod",
@@ -198,7 +198,7 @@ test_redshift_config: dict[str, typing.Any] = {
     "clusterHost": "localhost",
     "clusterPort": "5439",
     "dbName": "dev",
-    "tableName": "posthog_event",
+    "tableName": "insights_event",
     "dbPassword": "password",
     "dbUsername": "username",
     "eventsToIgnore": "$feature_flag_called",

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
+import { IconPlus } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonButton,
@@ -9,7 +9,7 @@ import {
     type LemonSelectOption,
     ProfilePicture,
     Spinner,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
 

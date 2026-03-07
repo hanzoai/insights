@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -122,7 +122,7 @@ export const groupLogic = kea<groupLogicType>([
                         }
                     } catch (error) {
                         // Silently fall back to group properties
-                        posthog.captureException(error, { tag: 'group_revenue_analytics_data_query_failed' })
+                        insights.captureException(error, { tag: 'group_revenue_analytics_data_query_failed' })
                         return null
                     }
                 },

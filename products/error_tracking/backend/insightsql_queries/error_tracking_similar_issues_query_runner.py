@@ -124,11 +124,11 @@ class ErrorTrackingSimilarIssuesQueryRunner(AnalyticsQueryRunner[ErrorTrackingQu
                     FROM (
                         SELECT DISTINCT ON (fingerprint)
                             fingerprint, issue_id, version, first_seen
-                        FROM posthog_errortrackingissuefingerprintv2
+                        FROM insights_errortrackingissuefingerprintv2
                         WHERE fingerprint = ANY(%s)
                         ORDER BY fingerprint, version DESC
                     ) AS fingerprints
-                    INNER JOIN posthog_errortrackingissue as issues ON issues.id = fingerprints.issue_id
+                    INNER JOIN insights_errortrackingissue as issues ON issues.id = fingerprints.issue_id
                     WHERE issues.team_id = %s
                 """,
                 [fingerprint_strs, self.team.id],

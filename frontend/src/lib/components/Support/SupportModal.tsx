@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { LemonModal } from 'lib/lemon-ui/LemonModal/LemonModal'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

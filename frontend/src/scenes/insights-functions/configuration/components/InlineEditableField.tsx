@@ -8,7 +8,7 @@ import {
     LemonInput,
     LemonInputPropsText,
     LemonTextArea,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 

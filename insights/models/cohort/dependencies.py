@@ -15,7 +15,7 @@ DEPENDENCY_CACHE_TIMEOUT = 7 * 24 * 60 * 60  # 1 week
 
 # Prometheus metrics for cache hit/miss tracking
 COHORT_DEPENDENCY_CACHE_COUNTER = Counter(
-    "posthog_cohort_dependency_cache_requests_total",
+    "insights_cohort_dependency_cache_requests_total",
     "Total number of cohort dependency cache requests",
     labelnames=["cache_type", "result"],
 )

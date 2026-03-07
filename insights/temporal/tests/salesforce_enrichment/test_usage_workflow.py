@@ -26,11 +26,11 @@ class TestSalesforceOrgMapping(TestCase):
     def test_create_mapping(self):
         mapping = SalesforceOrgMapping(
             salesforce_account_id="001ABC123",
-            posthog_org_id="550e8400-e29b-41d4-a716-446655440000",
+            insights_org_id="550e8400-e29b-41d4-a716-446655440000",
         )
 
         assert mapping.salesforce_account_id == "001ABC123"
-        assert mapping.posthog_org_id == "550e8400-e29b-41d4-a716-446655440000"
+        assert mapping.insights_org_id == "550e8400-e29b-41d4-a716-446655440000"
 
 
 class TestSalesforceUsageUpdate(TestCase):
@@ -85,14 +85,14 @@ class TestPrepareSalesforceUpdateRecord(TestCase):
         record = prepare_salesforce_update_record("001ABC123", signals)
 
         assert record["Id"] == "001ABC123"
-        assert record["posthog_total_events_7d__c"] == 10000
-        assert record["posthog_events_avg_daily_7d__c"] == 1428.57
-        assert record["posthog_products_7d__c"] == "analytics,recordings"
-        assert record["posthog_events_7d_momentum__c"] == 15.5
-        assert record["posthog_total_events_30d__c"] == 50000
-        assert record["posthog_events_avg_daily_30d__c"] == 1666.67
-        assert record["posthog_products_30d__c"] == "analytics,feature_flags,recordings"
-        assert record["posthog_events_30d_momentum__c"] == -5.0
+        assert record["insights_total_events_7d__c"] == 10000
+        assert record["insights_events_avg_daily_7d__c"] == 1428.57
+        assert record["insights_products_7d__c"] == "analytics,recordings"
+        assert record["insights_events_7d_momentum__c"] == 15.5
+        assert record["insights_total_events_30d__c"] == 50000
+        assert record["insights_events_avg_daily_30d__c"] == 1666.67
+        assert record["insights_products_30d__c"] == "analytics,feature_flags,recordings"
+        assert record["insights_events_30d_momentum__c"] == -5.0
 
     def test_none_values_excluded(self):
         signals = UsageSignals(
@@ -104,9 +104,9 @@ class TestPrepareSalesforceUpdateRecord(TestCase):
         record = prepare_salesforce_update_record("001ABC123", signals)
 
         assert record["Id"] == "001ABC123"
-        assert record["posthog_total_events_7d__c"] == 10000
-        assert "posthog_events_avg_daily_7d__c" not in record
-        assert "posthog_events_7d_momentum__c" not in record
+        assert record["insights_total_events_7d__c"] == 10000
+        assert "insights_events_avg_daily_7d__c" not in record
+        assert "insights_events_7d_momentum__c" not in record
 
     def test_empty_products_list(self):
         signals = UsageSignals(
@@ -116,8 +116,8 @@ class TestPrepareSalesforceUpdateRecord(TestCase):
 
         record = prepare_salesforce_update_record("001ABC123", signals)
 
-        assert record["posthog_products_7d__c"] == ""
-        assert record["posthog_products_30d__c"] == ""
+        assert record["insights_products_7d__c"] == ""
+        assert record["insights_products_30d__c"] == ""
 
     def test_zero_events_included(self):
         signals = UsageSignals(
@@ -127,8 +127,8 @@ class TestPrepareSalesforceUpdateRecord(TestCase):
 
         record = prepare_salesforce_update_record("001ABC123", signals)
 
-        assert record["posthog_total_events_7d__c"] == 0
-        assert record["posthog_total_events_30d__c"] == 0
+        assert record["insights_total_events_7d__c"] == 0
+        assert record["insights_total_events_30d__c"] == 0
 
 
 class TestWorkflowParseInputs(TestCase):
@@ -183,9 +183,9 @@ class TestCacheOrgMappingsActivity(TestCase):
         mock_sf = MagicMock()
         mock_sf.query_all.return_value = {
             "records": [
-                {"Id": "001ABC", "Posthog_Org_ID__c": "org-uuid-1"},
-                {"Id": "001DEF", "Posthog_Org_ID__c": "org-uuid-2"},
-                {"Id": "001GHI", "Posthog_Org_ID__c": None},  # Should be filtered out
+                {"Id": "001ABC", "Insights_Org_ID__c": "org-uuid-1"},
+                {"Id": "001DEF", "Insights_Org_ID__c": "org-uuid-2"},
+                {"Id": "001GHI", "Insights_Org_ID__c": None},  # Should be filtered out
             ]
         }
         mock_sf_client.return_value = mock_sf
@@ -200,8 +200,8 @@ class TestCacheOrgMappingsActivity(TestCase):
         mock_store.assert_called_once()
         stored_mappings = mock_store.call_args[0][0]
         assert len(stored_mappings) == 2
-        assert stored_mappings[0]["posthog_org_id"] == "org-uuid-1"
-        assert stored_mappings[1]["posthog_org_id"] == "org-uuid-2"
+        assert stored_mappings[0]["insights_org_id"] == "org-uuid-1"
+        assert stored_mappings[1]["insights_org_id"] == "org-uuid-2"
 
 
 class TestUpdateSalesforceUsageActivity(TestCase):

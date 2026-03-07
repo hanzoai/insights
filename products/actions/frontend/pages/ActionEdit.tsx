@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { NotFound } from 'lib/components/NotFound'
@@ -238,7 +238,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                     description={
                         <>
                             Your action will be triggered whenever <b>any of your match groups</b> are received.
-                            <Link to="https://posthog.com/docs/data/actions" target="_blank">
+                            <Link to="https://hanzo.ai/docs/data/actions" target="_blank">
                                 <IconInfo className="ml-1 text-secondary text-xl" />
                             </Link>
                         </>

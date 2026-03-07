@@ -57,9 +57,9 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Configure Insights by setting your project API key and host as well as adding `posthog` to your
+                        Configure Insights by setting your project API key and host as well as adding `insights` to your
                         LLM callback handlers. You can find your API key in [your project
-                        settings](https://app.posthog.com/settings/project).
+                        settings](https://insights.hanzo.ai/settings/project).
                     </Markdown>
 
                     <CodeBlock
@@ -72,12 +72,12 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     import llm
 
                                     # Set environment variables
-                                    os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
-                                    os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://app.posthog.com
+                                    os.environ["INSIGHTS_API_KEY"] = "<ph_project_api_key>"
+                                    os.environ["INSIGHTS_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://insights.hanzo.ai
 
                                     # Enable Insights callbacks
-                                    llm.success_callback = ["posthog"]
-                                    llm.failure_callback = ["posthog"]  # Optional: also log failures
+                                    llm.success_callback = ["insights"]
+                                    llm.failure_callback = ["insights"]  # Optional: also log failures
                                 `,
                             },
                             {
@@ -91,12 +91,12 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                         model: gpt-4o-mini
 
                                     llm_settings:
-                                      success_callback: ["posthog"]
-                                      failure_callback: ["posthog"]  # Optional: also log failures
+                                      success_callback: ["insights"]
+                                      failure_callback: ["insights"]  # Optional: also log failures
 
                                     environment_variables:
-                                      POSTHOG_API_KEY: "<ph_project_api_key>"
-                                      POSTHOG_API_URL: "<ph_client_api_host>"  # Optional
+                                      INSIGHTS_API_KEY: "<ph_project_api_key>"
+                                      INSIGHTS_API_URL: "<ph_client_api_host>"  # Optional
                                 `,
                             },
                         ]}
@@ -167,7 +167,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 - To disable logging for specific requests, add \`{"no-log": true}\` to metadata.
                                 - If you want to capture LLM events anonymously, **don't** pass a \`user_id\` in metadata.
 
-                                See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                                See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                             `}
                         </Markdown>
                     </Blockquote>

@@ -25,7 +25,7 @@ class MatViewCredentialDeletionMigrationTest(NonAtomicTestMigrations):
         return "data_warehouse"
 
     def setUp(self):
-        """Override to specify posthog migration state alongside data_warehouse migration"""
+        """Override to specify insights migration state alongside data_warehouse migration"""
         from django.db import connection
         from django.db.migrations.executor import MigrationExecutor
 

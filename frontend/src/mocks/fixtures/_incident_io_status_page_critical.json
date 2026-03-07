@@ -1,11 +1,11 @@
 {
   "page_title": "Insights",
-  "page_url": "https://www.posthogstatus.com/",
+  "page_url": "https://www.insightsstatus.com/",
   "ongoing_incidents": [
     {
       "name": "Major service outage",
       "status": "identified",
-      "url": "https://www.posthogstatus.com//incidents/01KA9JH0ZB14TFA8VD4CFC3AYN",
+      "url": "https://www.insightsstatus.com//incidents/01KA9JH0ZB14TFA8VD4CFC3AYN",
       "id": "01KA9JH0ZB14TFA8VD4CFC3AYN",
       "current_worst_impact": "full_outage",
       "affected_components": [

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconGear, IconLetter, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconGear, IconLetter, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { EmailIntegrationDomainGroupedType, IntegrationType } from '~/types'
 

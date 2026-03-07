@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def _get_hash_key(team_id: int) -> str:
-    return f"posthog:data_warehouse_row_tracking:{team_id}"
+    return f"insights:data_warehouse_row_tracking:{team_id}"
 
 
 @asynccontextmanager

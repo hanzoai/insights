@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBalance, IconCheckCircle, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, Spinner } from '@posthog/lemon-ui'
+import { IconBalance, IconCheckCircle, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, Spinner } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SceneTags } from 'lib/components/Scenes/SceneTags'

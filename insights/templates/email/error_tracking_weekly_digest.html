@@ -1,6 +1,6 @@
 {% extends "email/base.html" %}
-{% load posthog_assets %}
-{% load posthog_filters %}
+{% load insights_assets %}
+{% load insights_filters %}
 
 {% block head %}
 <style type="text/css">
@@ -185,12 +185,12 @@
 {% endblock %}
 
 {% block footer %}
-You can <a href="{% absolute_uri '/settings/user-notifications' %}" style="color: #f54e00;">manage these notifications in PostHog</a>.
+You can <a href="{% absolute_uri '/settings/user-notifications' %}" style="color: #f54e00;">manage these notifications in Hanzo Insights</a>.
 <br /><br />
 Need help?
-<a href="https://posthog.com/questions?{{ utm_tags }}"
+<a href="https://hanzo.ai/questions?{{ utm_tags }}"
     target="_blank" style="color: #f54e00;"><b>Visit support</b></a>
 or
-<a href="https://posthog.com/docs?{{ utm_tags }}"
+<a href="https://hanzo.ai/docs?{{ utm_tags }}"
     target="_blank" style="color: #f54e00;"><b>read our documentation</b></a>.
 {% endblock %}

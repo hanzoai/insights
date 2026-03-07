@@ -74,12 +74,12 @@ def collect_existing_tests(segment: str | None = None) -> set[str]:
     # Build pytest command based on segment
     cmd = [
         "pytest",
-        "posthog",
+        "insights",
         "products",
         "-m",
         "not async_migrations",
-        "--ignore=posthog/temporal",
-        "--ignore=posthog/dags",
+        "--ignore=insights/temporal",
+        "--ignore=insights/dags",
         "--ignore=products/**/dags",
         "--ignore=products/batch_exports/backend/tests/temporal",
         "--ignore=common/scriptvm/python/test",
@@ -91,7 +91,7 @@ def collect_existing_tests(segment: str | None = None) -> set[str]:
     if segment == "Temporal":
         cmd = [
             "pytest",
-            "posthog/temporal",
+            "insights/temporal",
             "products/batch_exports/backend/tests/temporal",
             "-m",
             "not async_migrations",

@@ -1,4 +1,4 @@
-import * as packageIcons from '@posthog/icons'
+import * as packageIcons from '@hanzo/icons'
 
 import { ELEMENTS, OBJECTS, TEAMS_AND_COMPANIES, TECHNOLOGY } from './categories'
 

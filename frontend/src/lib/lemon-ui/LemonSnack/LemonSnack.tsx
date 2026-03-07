@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import React, { forwardRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 export interface LemonSnackProps {
     type?: 'regular' | 'pill'

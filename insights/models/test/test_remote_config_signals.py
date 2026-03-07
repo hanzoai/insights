@@ -1,5 +1,5 @@
 """
-Tests for signal handlers in posthog/models/remote_config.py.
+Tests for signal handlers in insights/models/remote_config.py.
 """
 
 from unittest.mock import MagicMock, patch

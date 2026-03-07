@@ -285,7 +285,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     ) -> None:
         from insights.models import User
 
-        mentioned_user = User.objects.create_and_join(self.organization, "mentioned@posthog.com", None)
+        mentioned_user = User.objects.create_and_join(self.organization, "mentioned@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -320,7 +320,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     ) -> None:
         from insights.models import User
 
-        mentioned_user = User.objects.create_and_join(self.organization, "mentioned_update@posthog.com", None)
+        mentioned_user = User.objects.create_and_join(self.organization, "mentioned_update@hanzo.ai", None)
 
         existing = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -360,8 +360,8 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     ) -> None:
         from insights.models import User
 
-        mentioned_user_1 = User.objects.create_and_join(self.organization, "explicit_user1@posthog.com", None)
-        mentioned_user_2 = User.objects.create_and_join(self.organization, "explicit_user2@posthog.com", None)
+        mentioned_user_1 = User.objects.create_and_join(self.organization, "explicit_user1@hanzo.ai", None)
+        mentioned_user_2 = User.objects.create_and_join(self.organization, "explicit_user2@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -393,7 +393,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     ) -> None:
         from insights.models import User
 
-        mentioned_user = User.objects.create_and_join(self.organization, "duplicate@posthog.com", None)
+        mentioned_user = User.objects.create_and_join(self.organization, "duplicate@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -431,7 +431,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     ) -> None:
         from insights.models import User
 
-        valid_user = User.objects.create_and_join(self.organization, "valid@posthog.com", None)
+        valid_user = User.objects.create_and_join(self.organization, "valid@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -464,7 +464,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     def test_passes_slug_parameter_when_provided(self, mock_send_email) -> None:
         from insights.models import User
 
-        mentioned_user = User.objects.create_and_join(self.organization, "slug_test@posthog.com", None)
+        mentioned_user = User.objects.create_and_join(self.organization, "slug_test@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -495,7 +495,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     def test_slug_defaults_to_empty_string_when_not_provided(self, mock_send_email) -> None:
         from insights.models import User
 
-        mentioned_user = User.objects.create_and_join(self.organization, "no_slug@posthog.com", None)
+        mentioned_user = User.objects.create_and_join(self.organization, "no_slug@hanzo.ai", None)
 
         response = self.client.post(
             f"/api/projects/{self.team.id}/comments",
@@ -572,7 +572,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         from insights.models import User
 
         mentioned_user = User.objects.create_and_join(
-            self.organization, "event_mention@posthog.com", None, first_name="MentionedUser"
+            self.organization, "event_mention@hanzo.ai", None, first_name="MentionedUser"
         )
 
         self.client.post(
@@ -603,7 +603,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         from insights.models import User
 
         mentioned_user = User.objects.create_and_join(
-            self.organization, "update_mention@posthog.com", None, first_name="MentionedUser"
+            self.organization, "update_mention@hanzo.ai", None, first_name="MentionedUser"
         )
 
         existing = self.client.post(
@@ -646,7 +646,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         from insights.models import User
 
         mentioned_user = User.objects.create_and_join(
-            self.organization, "data_test@posthog.com", None, first_name="TestUser"
+            self.organization, "data_test@hanzo.ai", None, first_name="TestUser"
         )
 
         self.client.post(
@@ -665,7 +665,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         person = call_args.kwargs["person"]
 
         assert event.properties["mentioned_user_id"] == mentioned_user.id
-        assert event.properties["mentioned_user_email"] == "data_test@posthog.com"
+        assert event.properties["mentioned_user_email"] == "data_test@hanzo.ai"
         assert event.properties["mentioned_user_name"] == "TestUser"
         assert event.properties["commenter_user_id"] == self.user.id
         assert event.properties["commenter_user_email"] == self.user.email

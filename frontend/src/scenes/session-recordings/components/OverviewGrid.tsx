@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { ReactNode } from 'react'
 
-import { IconFilter } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconFilter } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 interface OverviewItemBase {
     icon?: ReactNode

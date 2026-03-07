@@ -1,4 +1,4 @@
-import { IconRocket } from '@posthog/icons'
+import { IconRocket } from '@hanzo/icons'
 
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 

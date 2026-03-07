@@ -11,7 +11,7 @@ import {
     IconFlask,
     IconFunnels,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconLifecycle,
     IconLineGraph,
     IconLive,
@@ -29,8 +29,8 @@ import {
     IconUserPaths,
     IconVideoCamera,
     IconWarning,
-} from '@posthog/icons'
-import { LemonSelectOptions } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -104,35 +104,35 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         description: 'Visualize and break down how actions or events vary over time.',
         icon: IconTrends,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/trends/overview',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/trends/overview',
     },
     [NodeKind.FunnelsQuery]: {
         name: 'Funnel',
         description: 'Discover how many users complete or drop out of a sequence of actions.',
         icon: IconFunnels,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/funnels',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/funnels',
     },
     [NodeKind.RetentionQuery]: {
         name: 'Retention',
         description: 'See how many users return on subsequent days after an initial action.',
         icon: IconRetention,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/retention',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/retention',
     },
     [NodeKind.PathsQuery]: {
         name: 'Paths',
         description: 'Trace the journeys users take within your product and where they drop off.',
         icon: IconUserPaths,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/paths',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/paths',
     },
     [NodeKind.StickinessQuery]: {
         name: 'Stickiness',
         description: 'See what keeps users coming back by viewing the interval between repeated actions.',
         icon: IconStickiness,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/stickiness',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/stickiness',
     },
     [NodeKind.LifecycleQuery]: {
         name: 'Lifecycle',
@@ -140,7 +140,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         tooltipDescription: 'Understand growth by breaking down new, resurrected, returning and dormant users.',
         icon: IconLifecycle,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/product-analytics/lifecycle',
+        tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/lifecycle',
     },
     [NodeKind.FunnelCorrelationQuery]: {
         name: 'Funnel Correlation',
@@ -277,19 +277,19 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     [NodeKind.InsightsQLMetadata]: {
         name: 'SQL Metadata',
         description: 'Metadata for a SQL query.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [NodeKind.InsightsQLAutocomplete]: {
         name: 'SQL Autocomplete',
         description: 'Autocomplete for the SQL query editor.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.DatabaseSchemaQuery]: {
         name: 'Database Schema',
         description: 'Introspect the Insights database schema.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [NodeKind.RevenueAnalyticsMetricsQuery]: {
@@ -373,7 +373,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     [NodeKind.ScriptQuery]: {
         name: 'Script',
         description: 'Custom query.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [NodeKind.SessionAttributionExplorerQuery]: {
@@ -474,23 +474,23 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.TeamTaxonomyQuery]: {
         name: 'Team Taxonomy',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.EventTaxonomyQuery]: {
         name: 'Event Taxonomy',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.SuggestedQuestionsQuery]: {
         name: 'AI Suggested Questions',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.ActorsPropertyTaxonomyQuery]: {
         name: 'Actor Property Taxonomy',
         description: "View the taxonomy of the actor's property.",
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.TracesQuery]: {
@@ -516,7 +516,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.VectorSearchQuery]: {
         name: 'Vector Search',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.LogsQuery]: {
@@ -541,17 +541,17 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.MarketingAnalyticsTableQuery]: {
         name: 'Marketing Analytics Table',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.MarketingAnalyticsAggregatedQuery]: {
         name: 'Marketing Analytics Aggregated',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.NonIntegratedConversionsTableQuery]: {
         name: 'Non-Integrated Conversions Table',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.UsageMetricsQuery]: {
@@ -586,9 +586,9 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
     [InsightType.SQL]: {
         name: 'SQL',
         description: 'Use SQL to query your data.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
-        tooltipDocLink: 'https://posthog.com/docs/data-warehouse/sql',
+        tooltipDocLink: 'https://hanzo.ai/docs/data-warehouse/sql',
     },
     [InsightType.JSON]: {
         name: 'Custom',
@@ -599,7 +599,7 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
     [InsightType.SCRIPT]: {
         name: 'Script',
         description: 'Use scripts to query your data.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [InsightType.WEB_ANALYTICS]: {

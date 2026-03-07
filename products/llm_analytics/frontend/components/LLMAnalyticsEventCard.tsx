@@ -1,5 +1,5 @@
-import { IconChevronDown, IconChevronRight } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { EventDetails } from '~/scenes/activity/explore/EventDetails'
 import { EventType } from '~/types'

@@ -1,5 +1,5 @@
 import { actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import type { resizerLogicType } from './resizerLogicType'
 
@@ -138,7 +138,7 @@ export const resizerLogic = kea<resizerLogicType>([
                                 actions.setDesiredSize(event.desiredSize)
                             }
 
-                            posthog.capture('element resized', {
+                            insights.capture('element resized', {
                                 key: props.logicKey,
                                 newWidth: event.desiredSize,
                                 originalWidth: originContainerBounds.width,

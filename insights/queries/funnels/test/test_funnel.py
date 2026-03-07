@@ -580,7 +580,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                         "properties": [
                             {
                                 "key": "email",
-                                "value": "hello@posthog.com",
+                                "value": "hello@hanzo.ai",
                                 "type": "person",
                             }
                         ],
@@ -598,7 +598,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["with_property"],
                 team_id=self.team.pk,
-                properties={"email": "hello@posthog.com"},
+                properties={"email": "hello@hanzo.ai"},
             )
             self._signup_event(distinct_id="with_property")
             self._pay_event(distinct_id="with_property")
@@ -667,7 +667,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["person1"],
                 team_id=self.team.pk,
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
             )
             person_factory(distinct_ids=["person2"], team_id=self.team.pk)
             event_factory(distinct_id="person1", event="event1", team=self.team)
@@ -691,7 +691,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["person1"],
                 team_id=self.team.pk,
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
             )
             person_factory(
                 distinct_ids=["person2"],
@@ -733,7 +733,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["person1"],
                 team_id=self.team.pk,
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
             )
             person_factory(
                 distinct_ids=["person2"],
@@ -3544,7 +3544,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["user"],
                 team_id=self.team.pk,
-                properties={"email": "lembitu@posthog.com", "common_prop": "yes"},
+                properties={"email": "lembitu@hanzo.ai", "common_prop": "yes"},
             )
             self._signup_event(distinct_id="user", properties={"$session_id": "1"})
             self._add_to_cart_event(distinct_id="user", properties={"$session_id": "1"})
@@ -3557,7 +3557,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             person_factory(
                 distinct_ids=["second"],
                 team_id=self.team.pk,
-                properties={"email": "toomas@posthog.com", "common_prop": "yes"},
+                properties={"email": "toomas@hanzo.ai", "common_prop": "yes"},
             )
             self._signup_event(distinct_id="second", properties={"$session_id": "3"})
 

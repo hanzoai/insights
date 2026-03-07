@@ -1,7 +1,7 @@
 import './UnsubscribeSurveyModal.scss'
 
 import { useActions, useValues } from 'kea'
-import { SurveyEventProperties } from 'posthog-js'
+import { SurveyEventProperties } from '@hanzo/insights'
 import { useState } from 'react'
 
 import {
@@ -14,7 +14,7 @@ import {
     LemonTextArea,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -229,7 +229,7 @@ export const UnsubscribeSurveyModal = ({
                             <p>
                                 {'Are you looking to control your costs? Learn about ways to '}
                                 <Link
-                                    to="https://posthog.com/docs/billing/estimating-usage-costs#how-to-reduce-your-posthog-costs"
+                                    to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs"
                                     target="_blank"
                                     onClick={() => {
                                         reportSurveyDismissed(surveyID)
@@ -252,7 +252,7 @@ export const UnsubscribeSurveyModal = ({
                                     <>
                                         {', or '}
                                         <Link
-                                            to="mailto:sales@posthog.com?subject=Joining%session%replay%controls%20beta"
+                                            to="mailto:sales@hanzo.ai?subject=Joining%session%replay%controls%20beta"
                                             target="_blank"
                                             onClick={() => {
                                                 reportSurveyDismissed(surveyID)

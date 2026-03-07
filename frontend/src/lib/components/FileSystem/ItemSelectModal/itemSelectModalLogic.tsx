@@ -1,7 +1,7 @@
 import { actions, connect, kea, path, reducers } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

@@ -58,8 +58,8 @@ test.describe('Signup', () => {
     })
 
     test('Cannot create account with existing email', async ({ page, request }) => {
-        await ensureExistingUser(request, 'test@posthog.com')
-        await submitEmailAndExpectExistingAccount(page, 'test@posthog.com')
+        await ensureExistingUser(request, 'test@hanzo.ai')
+        await submitEmailAndExpectExistingAccount(page, 'test@hanzo.ai')
     })
 
     test('Cannot signup without required attributes', async ({ page }) => {
@@ -72,7 +72,7 @@ test.describe('Signup', () => {
         await page.locator('[data-attr=signup-start]').click()
         await expect(page.getByText('Please enter your email to continue')).toBeVisible()
 
-        const email = `new_user+${Math.floor(Math.random() * 10000)}@posthog.com`
+        const email = `new_user+${Math.floor(Math.random() * 10000)}@hanzo.ai`
         await page.locator('[data-attr=signup-email]').fill(email)
         await expect(page.locator('[data-attr=signup-email]')).toHaveValue(email)
         await page.locator('[data-attr=signup-start]').click()
@@ -95,7 +95,7 @@ test.describe('Signup', () => {
             await route.continue()
         })
 
-        const email = `new_user+${Math.floor(Math.random() * 10000)}@posthog.com`
+        const email = `new_user+${Math.floor(Math.random() * 10000)}@hanzo.ai`
         await startSignupFlow(page, email, VALID_PASSWORD)
         await page.locator('[data-attr=signup-name]').fill('Alice Bob')
         await expect(page.locator('[data-attr=signup-name]')).toHaveValue('Alice Bob')
@@ -116,7 +116,7 @@ test.describe('Signup', () => {
 
     test('Can submit the signup form multiple times if there is a generic email set', async ({ page }) => {
         let signupRequestBody: string | null = null
-        const email = `new_user+generic_error_test_${Math.floor(Math.random() * 10000)}@posthog.com`
+        const email = `new_user+generic_error_test_${Math.floor(Math.random() * 10000)}@hanzo.ai`
 
         await page.route('/api/signup/', async (route) => {
             signupRequestBody = route.request().postData()
@@ -146,7 +146,7 @@ test.describe('Signup', () => {
         await submitEmailAndExpectExistingAccount(page, email)
 
         // Update email to generic email and retry
-        const newEmail = `new_user+${Math.floor(Math.random() * 10000)}@posthog.com`
+        const newEmail = `new_user+${Math.floor(Math.random() * 10000)}@hanzo.ai`
         await startSignupFlow(page, newEmail, VALID_PASSWORD)
         await page.locator('[data-attr=signup-name]').fill('Alice Bob')
         await expect(page.locator('[data-attr=signup-name]')).toHaveValue('Alice Bob')
@@ -170,7 +170,7 @@ test.describe('Signup', () => {
             await route.continue()
         })
 
-        const email = `new_user+${Math.floor(Math.random() * 10000)}@posthog.com`
+        const email = `new_user+${Math.floor(Math.random() * 10000)}@hanzo.ai`
         await startSignupFlow(page, email, VALID_PASSWORD)
         await page.locator('[data-attr=signup-name]').fill('Alice')
         await expect(page.locator('[data-attr=signup-name]')).toHaveValue('Alice')
@@ -194,9 +194,9 @@ test.describe('Signup', () => {
     test('Can fill out all the fields on social login', async ({ page }) => {
         await page.goto('/logout')
         await expect(page).toHaveURL(/.*\/login/)
-        await page.goto('/organization/confirm-creation?organization_name=&first_name=Test&email=test%40posthog.com')
+        await page.goto('/organization/confirm-creation?organization_name=&first_name=Test&email=test%40hanzo.ai')
 
-        await expect(page.locator('[name=email]')).toHaveValue('test@posthog.com')
+        await expect(page.locator('[name=email]')).toHaveValue('test@hanzo.ai')
         await expect(page.locator('[name=first_name]')).toHaveValue('Test')
         await page.locator('[name=organization_name]').fill('Hogflix SpinOff')
         await expect(page.locator('[name=organization_name]')).toHaveValue('Hogflix SpinOff')
@@ -210,7 +210,7 @@ test.describe('Signup', () => {
     })
 
     // TODO un-skip.
-    // Skipping test as it was failing on master, see https://posthog.slack.com/archives/C0113360FFV/p1749742204672659
+    // Skipping test as it was failing on master, see https://insights.slack.com/archives/C0113360FFV/p1749742204672659
     test.skip('Shows redirect notice if redirecting for maintenance', async ({ page }) => {
         // Equivalent to setupFeatureFlags in Playwright
         await page.route('**/flags/*', async (route) => {
@@ -234,7 +234,7 @@ test.describe('Signup', () => {
 
         // Inject cloud = true into the context
         await page.evaluate(() => {
-            const context = window['POSTHOG_APP_CONTEXT']
+            const context = window['INSIGHTS_APP_CONTEXT']
             if (context && context.preflight) {
                 context.preflight.cloud = true
             }
@@ -249,7 +249,7 @@ test.describe('Signup', () => {
         // Start signup with next parameter
         await page.goto('/signup?next=/custom_path')
 
-        const email = `new_user+${Math.floor(Math.random() * 10000)}@posthog.com`
+        const email = `new_user+${Math.floor(Math.random() * 10000)}@hanzo.ai`
         await startSignupFlow(page, email, VALID_PASSWORD)
         await page.locator('[data-attr=signup-name]').fill('Alice Bob')
         await expect(page.locator('[data-attr=signup-name]')).toHaveValue('Alice Bob')

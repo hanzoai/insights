@@ -21,7 +21,7 @@ def test_debugger_loads_batch_exports_for_team(team):
         config={
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "use_virtual_style_addressing": True,
@@ -54,7 +54,7 @@ def test_debugger_sets_working_batch_export_with_name(team):
         config={
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "use_virtual_style_addressing": True,
@@ -84,7 +84,7 @@ def test_debugger_sets_working_batch_export_with_uuid(team):
         config={
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "use_virtual_style_addressing": True,
@@ -173,7 +173,7 @@ def test_debugger_get_latest_run(team):
         config={
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "use_virtual_style_addressing": True,

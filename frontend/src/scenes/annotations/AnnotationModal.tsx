@@ -10,7 +10,7 @@ import {
     LemonSelectOptions,
     LemonTextAreaMarkdown,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { shortTimeZone } from 'lib/utils'

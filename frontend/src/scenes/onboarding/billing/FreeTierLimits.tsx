@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import * as Icons from '@posthog/icons'
+import * as Icons from '@hanzo/icons'
 
 import { billingLogic } from 'scenes/billing/billingLogic'
 

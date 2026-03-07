@@ -19,7 +19,7 @@ export function RecordingNotFound(): JSX.Element {
                     age, or recording may not be enabled. Please check your{' '}
                     <Link to={urls.settings('project-replay')}>project settings</Link> to ensure that recording is
                     turned on and enabled for the relevant domain. You can also refer to the{' '}
-                    <Link to="https://posthog.com/docs/session-replay/troubleshooting#recording-not-found">
+                    <Link to="https://hanzo.ai/docs/session-replay/troubleshooting#recording-not-found">
                         troubleshooting guide
                     </Link>{' '}
                     for more information.

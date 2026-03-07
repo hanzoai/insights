@@ -49,7 +49,7 @@ if IS_BEHIND_PROXY:
             """
                 You indicated your instance is behind a proxy (IS_BEHIND_PROXY env var),
                 but you haven't configured any trusted proxies. See
-                https://posthog.com/docs/configuring-posthog/running-behind-proxy for details.
+                https://hanzo.ai/docs/configuring-insights/running-behind-proxy for details.
             """
         )
 

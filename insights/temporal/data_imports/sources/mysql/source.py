@@ -41,7 +41,7 @@ class MySQLSource(SimpleSource[MySQLSourceConfig], SSHTunnelMixin, ValidateDatab
             name=SchemaExternalDataSourceType.MY_SQL,
             caption="Enter your MySQL/MariaDB credentials to automatically pull your MySQL data into the Insights Data warehouse.",
             iconPath="/static/services/mysql.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/mysql",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/mysql",
             fields=cast(
                 list[FieldType],
                 [

@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useCallback, useMemo } from 'react'
 
-import { IconBell } from '@posthog/icons'
+import { IconBell } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonButton,
@@ -13,7 +13,7 @@ import {
     LemonTag,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'

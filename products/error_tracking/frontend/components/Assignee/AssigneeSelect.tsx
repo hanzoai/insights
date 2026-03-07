@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 

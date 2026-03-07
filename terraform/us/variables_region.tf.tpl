@@ -1,5 +1,5 @@
-variable "posthog_api_key" {
+variable "insights_api_key" {
   type        = string
   sensitive   = true
-  description = "PostHog API key"
+  description = "Insights API key"
 }

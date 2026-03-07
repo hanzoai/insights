@@ -11,7 +11,7 @@ import {
     IconPencil,
     IconPlusSmall,
     IconShortcut,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { itemSelectModalLogic } from 'lib/components/FileSystem/ItemSelectModal/itemSelectModalLogic'
 import { dayjs } from 'lib/dayjs'

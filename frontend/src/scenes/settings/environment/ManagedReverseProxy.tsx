@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconEllipsis, IconInfo } from '@posthog/icons'
+import { IconEllipsis, IconInfo } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,7 +15,7 @@ import {
     LemonTabs,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
@@ -292,7 +292,7 @@ function CreateRecordForm(): JSX.Element {
                             <li>
                                 <strong>Do not use</strong> subdomains containing words related to tracking, analytics,
                                 or advertising (e.g. <code>analytics.mydomain.com</code>,{' '}
-                                <code>posthog.mydomain.com</code>). These are commonly blocked by ad-blockers and will
+                                <code>insights.mydomain.com</code>). These are commonly blocked by ad-blockers and will
                                 cause data loss.
                             </li>
                             <li>

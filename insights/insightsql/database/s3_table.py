@@ -71,7 +71,7 @@ def build_function_call(
             escaped_structure = add_param(structure, False)
 
         if use_s3_cluster:
-            expr = f"s3Cluster('posthog', {escaped_url}"
+            expr = f"s3Cluster('insights', {escaped_url}"
         else:
             expr = f"s3({escaped_url}"
 
@@ -145,7 +145,7 @@ def build_function_call(
         escaped_structure = add_param(structure, False)
 
     if use_s3_cluster:
-        expr = f"s3Cluster('posthog', {escaped_url}"
+        expr = f"s3Cluster('insights', {escaped_url}"
     else:
         expr = f"s3({escaped_url}"
 

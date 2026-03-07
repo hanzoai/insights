@@ -126,7 +126,7 @@ class InsightAdmin(admin.ModelAdmin):
     def team_link(self, insight: Insight):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[insight.team.pk]),
+            reverse("admin:insights_team_change", args=[insight.team.pk]),
             insight.team.name,
         )
 
@@ -134,6 +134,6 @@ class InsightAdmin(admin.ModelAdmin):
     def organization_link(self, insight: Insight):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_organization_change", args=[insight.team.organization.pk]),
+            reverse("admin:insights_organization_change", args=[insight.team.organization.pk]),
             insight.team.organization.name,
         )

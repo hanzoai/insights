@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCard } from '@posthog/lemon-ui'
+import { LemonCard } from '@hanzo/lemon-ui'
 
 import { StopSignHog } from 'lib/components/mascots'
 import { SupportModalButton } from 'scenes/authentication/SupportModalButton'

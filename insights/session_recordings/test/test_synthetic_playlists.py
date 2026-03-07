@@ -302,7 +302,7 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         sync_execute("TRUNCATE TABLE sharded_session_replay_events")
 
         # Mock the feature flag to return "test" string directly
-        self.feature_flag_patcher = patch("posthoganalytics.get_feature_flag")
+        self.feature_flag_patcher = patch("hanzoanalytics.get_feature_flag")
         mock_get_feature_flag = self.feature_flag_patcher.start()
         mock_get_feature_flag.return_value = "test"
 
@@ -514,13 +514,13 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
 
         # Create recordings with URLs containing different numeric IDs
         self._produce_replay_with_urls(
-            "session-1", ["https://app.posthog.com/project/1/settings"], now_time - timedelta(days=1)
+            "session-1", ["https://insights.hanzo.ai/project/1/settings"], now_time - timedelta(days=1)
         )
         self._produce_replay_with_urls(
-            "session-2", ["https://app.posthog.com/project/2/settings"], now_time - timedelta(days=2)
+            "session-2", ["https://insights.hanzo.ai/project/2/settings"], now_time - timedelta(days=2)
         )
         self._produce_replay_with_urls(
-            "session-3", ["https://app.posthog.com/project/999/settings"], now_time - timedelta(days=3)
+            "session-3", ["https://insights.hanzo.ai/project/999/settings"], now_time - timedelta(days=3)
         )
 
         new_url_playlists = self._get_new_url_playlists()
@@ -543,12 +543,12 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         # Create recordings with URLs containing different UUIDs
         self._produce_replay_with_urls(
             "session-1",
-            ["https://app.posthog.com/order/550e8400-e29b-41d4-a716-446655440000/details"],
+            ["https://insights.hanzo.ai/order/550e8400-e29b-41d4-a716-446655440000/details"],
             now_time - timedelta(days=1),
         )
         self._produce_replay_with_urls(
             "session-2",
-            ["https://app.posthog.com/order/123e4567-e89b-12d3-a456-426614174000/details"],
+            ["https://insights.hanzo.ai/order/123e4567-e89b-12d3-a456-426614174000/details"],
             now_time - timedelta(days=2),
         )
 
@@ -571,18 +571,18 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
 
         # Create recordings with same path but different query params
         self._produce_replay_with_urls(
-            "session-1", ["https://app.posthog.com/billing?id=1"], now_time - timedelta(days=1)
+            "session-1", ["https://insights.hanzo.ai/billing?id=1"], now_time - timedelta(days=1)
         )
         self._produce_replay_with_urls(
-            "session-2", ["https://app.posthog.com/billing?id=2&foo=bar"], now_time - timedelta(days=2)
+            "session-2", ["https://insights.hanzo.ai/billing?id=2&foo=bar"], now_time - timedelta(days=2)
         )
-        self._produce_replay_with_urls("session-3", ["https://app.posthog.com/billing"], now_time - timedelta(days=3))
+        self._produce_replay_with_urls("session-3", ["https://insights.hanzo.ai/billing"], now_time - timedelta(days=3))
 
         new_url_playlists = self._get_new_url_playlists()
 
         # Should have only 1 playlist (query params are stripped)
         assert len(new_url_playlists) == 1
-        assert new_url_playlists[0]["name"] == "New URL: https://app.posthog.com/billing"
+        assert new_url_playlists[0]["name"] == "New URL: https://insights.hanzo.ai/billing"
 
         # Should contain all 3 sessions
         assert new_url_playlists[0]["recordings_counts"]["collection"]["count"] == 3
@@ -597,13 +597,13 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
 
         # Create recordings with different paths (even though they have similar IDs)
         self._produce_replay_with_urls(
-            "session-1", ["https://app.posthog.com/project/1/settings"], now_time - timedelta(days=1)
+            "session-1", ["https://insights.hanzo.ai/project/1/settings"], now_time - timedelta(days=1)
         )
         self._produce_replay_with_urls(
-            "session-2", ["https://app.posthog.com/project/1/billing"], now_time - timedelta(days=2)
+            "session-2", ["https://insights.hanzo.ai/project/1/billing"], now_time - timedelta(days=2)
         )
         self._produce_replay_with_urls(
-            "session-3", ["https://app.posthog.com/user/1/settings"], now_time - timedelta(days=3)
+            "session-3", ["https://insights.hanzo.ai/user/1/settings"], now_time - timedelta(days=3)
         )
 
         new_url_playlists = self._get_new_url_playlists()
@@ -612,9 +612,9 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         assert len(new_url_playlists) == 3
 
         playlist_names = {p["name"] for p in new_url_playlists}
-        assert "New URL: https://app.posthog.com/project/{id}/settings" in playlist_names
-        assert "New URL: https://app.posthog.com/project/{id}/billing" in playlist_names
-        assert "New URL: https://app.posthog.com/user/{id}/settings" in playlist_names
+        assert "New URL: https://insights.hanzo.ai/project/{id}/settings" in playlist_names
+        assert "New URL: https://insights.hanzo.ai/project/{id}/billing" in playlist_names
+        assert "New URL: https://insights.hanzo.ai/user/{id}/settings" in playlist_names
 
         # Each should have 1 session
         for playlist in new_url_playlists:
@@ -631,15 +631,15 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         # Simulate a realistic scenario with various URL patterns
         urls_and_sessions = [
             # Project settings with different IDs (should group)
-            ("session-1", ["https://app.posthog.com/project/123/settings"]),
-            ("session-2", ["https://app.posthog.com/project/456/settings"]),
+            ("session-1", ["https://insights.hanzo.ai/project/123/settings"]),
+            ("session-2", ["https://insights.hanzo.ai/project/456/settings"]),
             # Same project, different tab (should be separate)
-            ("session-3", ["https://app.posthog.com/project/789/insights"]),
+            ("session-3", ["https://insights.hanzo.ai/project/789/insights"]),
             # Recording with hash ID (should group with session-5)
-            ("session-4", ["https://app.posthog.com/recording/abc123def456ghi789jkl"]),
-            ("session-5", ["https://app.posthog.com/recording/xyz999uuu888vvv777www"]),
+            ("session-4", ["https://insights.hanzo.ai/recording/abc123def456ghi789jkl"]),
+            ("session-5", ["https://insights.hanzo.ai/recording/xyz999uuu888vvv777www"]),
             # Static pages (should remain separate)
-            ("session-6", ["https://app.posthog.com/dashboard"]),
+            ("session-6", ["https://insights.hanzo.ai/dashboard"]),
         ]
 
         for session_id, urls in urls_and_sessions:
@@ -657,19 +657,19 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         # Verify counts
         playlist_by_name = {p["name"]: p for p in new_url_playlists}
 
-        settings_playlist = playlist_by_name.get("New URL: https://app.posthog.com/project/{id}/settings")
+        settings_playlist = playlist_by_name.get("New URL: https://insights.hanzo.ai/project/{id}/settings")
         assert settings_playlist is not None
         assert settings_playlist["recordings_counts"]["collection"]["count"] == 2
 
-        insights_playlist = playlist_by_name.get("New URL: https://app.posthog.com/project/{id}/insights")
+        insights_playlist = playlist_by_name.get("New URL: https://insights.hanzo.ai/project/{id}/insights")
         assert insights_playlist is not None
         assert insights_playlist["recordings_counts"]["collection"]["count"] == 1
 
-        recording_playlist = playlist_by_name.get("New URL: https://app.posthog.com/recording/{hash}")
+        recording_playlist = playlist_by_name.get("New URL: https://insights.hanzo.ai/recording/{hash}")
         assert recording_playlist is not None
         assert recording_playlist["recordings_counts"]["collection"]["count"] == 2
 
-        dashboard_playlist = playlist_by_name.get("New URL: https://app.posthog.com/dashboard")
+        dashboard_playlist = playlist_by_name.get("New URL: https://insights.hanzo.ai/dashboard")
         assert dashboard_playlist is not None
         assert dashboard_playlist["recordings_counts"]["collection"]["count"] == 1
 

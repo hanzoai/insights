@@ -50,7 +50,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=invalid_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
         assert response.status_code == 422
         assert expected_field in str(response.json())
@@ -70,7 +70,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200
@@ -107,7 +107,7 @@ class TestChatCompletionsEndpoint:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == error_status

@@ -16,7 +16,7 @@
             "resource_attributes": {
                 "service.name": "api-service"
             },
-            "instrumentation_scope": "posthog.api",
+            "instrumentation_scope": "insights.api",
             "event_name": "log"
         },
         {
@@ -36,7 +36,7 @@
             "resource_attributes": {
                 "service.name": "api-service"
             },
-            "instrumentation_scope": "posthog.db",
+            "instrumentation_scope": "insights.db",
             "event_name": "log"
         },
         {
@@ -55,7 +55,7 @@
             "resource_attributes": {
                 "service.name": "web-frontend"
             },
-            "instrumentation_scope": "posthog.events",
+            "instrumentation_scope": "insights.events",
             "event_name": "log"
         }
     ],

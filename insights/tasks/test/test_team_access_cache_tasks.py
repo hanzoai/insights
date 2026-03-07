@@ -24,14 +24,14 @@ class TestWarmUserTeamsCacheSync(TestCase):
     @patch("insights.tasks.team_access_cache_tasks.get_teams_for_user_personal_api_keys")
     def test_warm_user_teams_cache_sync_success(self, mock_get_teams: MagicMock, mock_warm: MagicMock) -> None:
         """Test successful synchronous cache warming for user deactivation."""
-        mock_get_teams.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_get_teams.return_value = ["his_team1_123", "his_team2_456"]
 
         result = warm_user_teams_cache_sync(user_id=42)
 
         mock_get_teams.assert_called_once_with(42)
         assert mock_warm.call_count == 2
-        mock_warm.assert_any_call("phs_team1_123")
-        mock_warm.assert_any_call("phs_team2_456")
+        mock_warm.assert_any_call("his_team1_123")
+        mock_warm.assert_any_call("his_team2_456")
 
         assert result["status"] == "success"
         assert result["user_id"] == 42
@@ -60,14 +60,14 @@ class TestWarmUserTeamsCacheTask(TestCase):
     @patch("insights.tasks.team_access_cache_tasks.get_teams_for_user_personal_api_keys")
     def test_warm_user_teams_cache_task_success(self, mock_get_teams: MagicMock, mock_warm: MagicMock) -> None:
         """Test successful cache warming for all teams a user has access to."""
-        mock_get_teams.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_get_teams.return_value = ["his_team1_123", "his_team2_456"]
 
         result = warm_user_teams_cache_task(user_id=42)
 
         mock_get_teams.assert_called_once_with(42)
         assert mock_warm.call_count == 2
-        mock_warm.assert_any_call("phs_team1_123")
-        mock_warm.assert_any_call("phs_team2_456")
+        mock_warm.assert_any_call("his_team1_123")
+        mock_warm.assert_any_call("his_team2_456")
 
         assert result["status"] == "success"
         assert result["user_id"] == 42
@@ -92,10 +92,10 @@ class TestWarmUserTeamsCacheTask(TestCase):
     @patch("insights.tasks.team_access_cache_tasks.get_teams_for_user_personal_api_keys")
     def test_warm_user_teams_cache_task_partial_failure(self, mock_get_teams: MagicMock, mock_warm: MagicMock) -> None:
         """Test cache warming handles individual team failures gracefully."""
-        mock_get_teams.return_value = ["phs_team1_123", "phs_team2_456", "phs_team3_789"]
+        mock_get_teams.return_value = ["his_team1_123", "his_team2_456", "his_team3_789"]
 
         def warm_side_effect(project_api_key: str) -> bool:
-            if project_api_key == "phs_team2_456":
+            if project_api_key == "his_team2_456":
                 raise Exception("Cache warming failed for team 2")
             return True
 
@@ -132,7 +132,7 @@ class TestWarmPersonalApiKeyTeamsCacheTask(TestCase):
         self, mock_get_teams: MagicMock, mock_warm: MagicMock
     ) -> None:
         """Test successful cache warming after PersonalAPIKey change."""
-        mock_get_teams.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_get_teams.return_value = ["his_team1_123", "his_team2_456"]
 
         result = warm_personal_api_key_teams_cache_task(user_id=42)
 
@@ -167,7 +167,7 @@ class TestWarmPersonalApiKeyDeletedCacheTask(TestCase):
         self, mock_team: MagicMock, mock_warm: MagicMock
     ) -> None:
         """Test cache warming for scoped key deletion."""
-        mock_team.objects.filter.return_value.values_list.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_team.objects.filter.return_value.values_list.return_value = ["his_team1_123", "his_team2_456"]
 
         result = warm_personal_api_key_deleted_cache_task(user_id=42, scoped_team_ids=[1, 2])
 
@@ -184,7 +184,7 @@ class TestWarmPersonalApiKeyDeletedCacheTask(TestCase):
     ) -> None:
         """Test cache warming for unscoped key deletion."""
         mock_membership.objects.filter.return_value.values_list.return_value = ["org-uuid-1"]
-        mock_team.objects.filter.return_value.values_list.return_value = ["phs_team1_123"]
+        mock_team.objects.filter.return_value.values_list.return_value = ["his_team1_123"]
 
         result = warm_personal_api_key_deleted_cache_task(user_id=42, scoped_team_ids=None)
 
@@ -202,7 +202,7 @@ class TestWarmOrganizationTeamsCacheTask(TestCase):
     @patch("insights.models.team.team.Team")
     def test_warm_organization_teams_cache_task_success(self, mock_team: MagicMock, mock_warm: MagicMock) -> None:
         """Test successful cache warming for organization teams."""
-        mock_team.objects.filter.return_value.values_list.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_team.objects.filter.return_value.values_list.return_value = ["his_team1_123", "his_team2_456"]
 
         result = warm_organization_teams_cache_task(
             organization_id="org-uuid", user_id=42, action="added to organization"
@@ -235,10 +235,10 @@ class TestWarmOrganizationTeamsCacheTask(TestCase):
         self, mock_team: MagicMock, mock_warm: MagicMock
     ) -> None:
         """Test cache warming handles individual team failures gracefully."""
-        mock_team.objects.filter.return_value.values_list.return_value = ["phs_team1_123", "phs_team2_456"]
+        mock_team.objects.filter.return_value.values_list.return_value = ["his_team1_123", "his_team2_456"]
 
         def warm_side_effect(project_api_key: str) -> bool:
-            if project_api_key == "phs_team1_123":
+            if project_api_key == "his_team1_123":
                 raise Exception("Cache warming failed")
             return True
 
@@ -261,7 +261,7 @@ class TestWarmTeamCacheTask(TestCase):
         """Test successful cache warming for a team."""
         mock_warm.return_value = True
 
-        project_api_key = "phs_test_team_123"
+        project_api_key = "his_test_team_123"
 
         result = warm_team_cache_task(project_api_key)
 
@@ -275,7 +275,7 @@ class TestWarmTeamCacheTask(TestCase):
         """Test that cache warming failure does not trigger retry."""
         mock_warm.return_value = False
 
-        project_api_key = "phs_test_team_123"
+        project_api_key = "his_test_team_123"
 
         result = warm_team_cache_task(project_api_key)
 
@@ -308,8 +308,8 @@ class TestWarmAllTeamsCachesTask(TestCase):
     ) -> None:
         """Test that teams are processed in configured batches."""
         # Setup mock teams - more than batch size, split across pages
-        page1 = ["phs_team1_123", "phs_team2_456"]
-        page2 = ["phs_team3_789", "phs_team4_012"]
+        page1 = ["his_team1_123", "his_team2_456"]
+        page2 = ["his_team3_789", "his_team4_012"]
         mock_get_teams_paginated.return_value = iter([page1, page2])
 
         result = warm_all_team_access_caches_task()
@@ -332,12 +332,12 @@ class TestWarmAllTeamsCachesTask(TestCase):
     ) -> None:
         """Test that batch warming handles individual team failures gracefully."""
         # Setup mocks - single page of teams
-        mock_teams = ["phs_team1_123", "phs_team2_456", "phs_team3_789"]
+        mock_teams = ["his_team1_123", "his_team2_456", "his_team3_789"]
         mock_get_teams_paginated.return_value = iter([mock_teams])
 
         # Make delay fail for the second team only
         def delay_side_effect(project_api_key: str) -> None:
-            if project_api_key == "phs_team2_456":
+            if project_api_key == "his_team2_456":
                 raise Exception("Task scheduling failed for team 2")
             return None
 
@@ -350,9 +350,9 @@ class TestWarmAllTeamsCachesTask(TestCase):
 
         # Verify all teams were attempted
         assert mock_delay.call_count == 3
-        mock_delay.assert_any_call("phs_team1_123")
-        mock_delay.assert_any_call("phs_team2_456")
-        mock_delay.assert_any_call("phs_team3_789")
+        mock_delay.assert_any_call("his_team1_123")
+        mock_delay.assert_any_call("his_team2_456")
+        mock_delay.assert_any_call("his_team3_789")
 
         # Verify result shows partial success
         assert result["status"] == "success"
@@ -387,7 +387,7 @@ class TestTaskIntegration(TestCase):
     def test_complete_cache_refresh_flow(self, mock_get_teams_paginated: MagicMock, mock_warm: MagicMock) -> None:
         """Test the complete flow from batch task to individual warming."""
         # Setup mocks - single page with one team
-        mock_teams = ["phs_team1_123"]
+        mock_teams = ["his_team1_123"]
         mock_get_teams_paginated.return_value = iter([mock_teams])
         mock_warm.return_value = True
 
@@ -396,10 +396,10 @@ class TestTaskIntegration(TestCase):
             batch_result = warm_all_team_access_caches_task()
 
             # Verify batch task scheduled individual task
-            mock_delay.assert_called_once_with("phs_team1_123")
+            mock_delay.assert_called_once_with("his_team1_123")
 
         # Simulate individual task execution
-        individual_result = warm_team_cache_task("phs_team1_123")
+        individual_result = warm_team_cache_task("his_team1_123")
 
         # Verify both tasks succeeded
         assert batch_result["status"] == "success"
@@ -408,4 +408,4 @@ class TestTaskIntegration(TestCase):
         assert batch_result["failed_teams"] == 0
 
         assert individual_result["status"] == "success"
-        assert individual_result["project_api_key"] == "phs_team1_123"
+        assert individual_result["project_api_key"] == "his_team1_123"

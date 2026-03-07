@@ -79,7 +79,7 @@ impl AppContext {
 
     pub async fn get_token_for_team_id(&self, team_id: i32) -> Result<String, Error> {
         Ok(
-            sqlx::query_scalar!("SELECT api_token FROM posthog_team WHERE id = $1", team_id)
+            sqlx::query_scalar!("SELECT api_token FROM insights_team WHERE id = $1", team_id)
                 .fetch_one(&self.db)
                 .await?,
         )

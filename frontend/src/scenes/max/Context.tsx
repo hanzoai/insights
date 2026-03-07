@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 import React from 'react'
 
-import { IconAtSign, IconDashboard, IconGraph, IconPageChart } from '@posthog/icons'
-import { LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconAtSign, IconDashboard, IconGraph, IconPageChart } from '@hanzo/icons'
+import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { IconAction, IconEvent } from 'lib/lemon-ui/icons'

@@ -1,6 +1,6 @@
 {
     "name": "Laudspeaker",
-    "url": "https://github.com/laudspeaker/laudspeaker-posthog-plugin/",
+    "url": "https://github.com/laudspeaker/laudspeaker-insights-plugin/",
     "description": "Send event data to Laudspeaker",
     "main": "index.js",
     "config": [
@@ -9,7 +9,7 @@
             "hint": "Provide Laudspeaker API URL.",
             "name": "Laudspeaker API URL",
             "type": "string",
-            "default": "https://api.laudspeaker.com/events/posthog",
+            "default": "https://api.laudspeaker.com/events/insights",
             "required": true
         },
         {

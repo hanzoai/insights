@@ -28,9 +28,9 @@ class TestTeamAccessTokenCache(TestCase):
     def setUp(self):
         """Set up test data."""
         self.cache = TeamAccessTokenCache(ttl=300)
-        self.project_api_key = "phs_test_project_key_123"
+        self.project_api_key = "his_test_project_key_123"
         self.team_id = 42
-        self.access_token = "phx_test_access_token_456"
+        self.access_token = "hix_test_access_token_456"
         self.hashed_token = hash_key_value(self.access_token, mode="sha256")
 
         # Clear cache before each test
@@ -47,8 +47,8 @@ class TestTeamAccessTokenCache(TestCase):
     def test_update_team_tokens(self):
         """Test updating team token list using HyperCache."""
         tokens = [
-            hash_key_value("phx_token_one_123", mode="sha256"),
-            hash_key_value("phx_token_two_456", mode="sha256"),
+            hash_key_value("hix_token_one_123", mode="sha256"),
+            hash_key_value("hix_token_two_456", mode="sha256"),
         ]
 
         self.cache.update_team_tokens(self.project_api_key, self.team_id, tokens)
@@ -107,7 +107,7 @@ class TestTeamAccessCacheIntegration(TestCase):
         team = Team.objects.create(
             organization=organization,
             name=f"Test Team {scope_suffix}",
-            api_token=f"phc_test_{scope_suffix}_123",
+            api_token=f"hi_test_{scope_suffix}_123",
             secret_api_token=f"phsk_secret_{scope_suffix}_123",
             secret_api_token_backup=f"phsk_backup_{scope_suffix}_456",
         )
@@ -178,7 +178,7 @@ class TestTeamAccessCacheIntegration(TestCase):
         team = Team.objects.create(
             organization=organization,
             name="Test Team All Access",
-            api_token="phc_test_all_access_123",
+            api_token="hi_test_all_access_123",
         )
 
         # Create user with org membership
@@ -222,7 +222,7 @@ class TestTeamAccessCacheIntegration(TestCase):
         team = Team.objects.create(
             organization=organization,
             name="Test Team Scoped All Access",
-            api_token="phc_test_scoped_all_access_123",
+            api_token="hi_test_scoped_all_access_123",
         )
 
         # Create user with org membership
@@ -277,7 +277,7 @@ class TestTeamAccessCacheIntegration(TestCase):
         organization = Organization.objects.create(name="Test Organization")
         teams = []
         for i in range(7):  # 7 teams total
-            team = Team.objects.create(organization=organization, name=f"Team {i}", api_token=f"phs_team_{i:03d}")
+            team = Team.objects.create(organization=organization, name=f"Team {i}", api_token=f"his_team_{i:03d}")
             teams.append(team)
 
         # Mock cache to return None for all teams (all need refresh)
@@ -296,7 +296,7 @@ class TestTeamAccessCacheIntegration(TestCase):
         assert set(all_teams_from_batches) == set(expected_teams)
 
         # All our test teams should be included (since mock returns None for all)
-        expected_api_keys = {f"phs_team_{i:03d}" for i in range(7)}
+        expected_api_keys = {f"his_team_{i:03d}" for i in range(7)}
         # At least our test teams should be present
         assert expected_api_keys.issubset(set(all_teams_from_batches))
 
@@ -329,7 +329,7 @@ class TestCacheWarmingWithUnscopedKeys(TestCase):
         team = Team.objects.create(
             organization=organization,
             name="Test Team",
-            api_token="phc_test_project_key",
+            api_token="hi_test_project_key",
             secret_api_token="phsk_secret_token_123",
         )
 
@@ -394,7 +394,7 @@ class TestCacheWarmingWithUnscopedKeys(TestCase):
 
         # Create real test data with only scoped keys
         organization = Organization.objects.create(name="Test Organization")
-        team = Team.objects.create(organization=organization, name="Test Team", api_token="phc_test_project_key")
+        team = Team.objects.create(organization=organization, name="Test Team", api_token="hi_test_project_key")
 
         # Create user with only scoped key (no unscoped key)
         user1 = User.objects.create(email="user1@test.com", is_active=True)
@@ -432,7 +432,7 @@ class TestCacheWarmingWithUnscopedKeys(TestCase):
 
         # Create real test data - scenario where same user might have key that could match both scoped/unscoped
         organization = Organization.objects.create(name="Test Organization")
-        team = Team.objects.create(organization=organization, name="Test Team", api_token="phc_test_project_key")
+        team = Team.objects.create(organization=organization, name="Test Team", api_token="hi_test_project_key")
 
         # Create user
         user1 = User.objects.create(email="user1@test.com", is_active=True)
@@ -482,9 +482,9 @@ class TestGetTeamsForPersonalAPIKey(TestCase):
 
         # Create real test data
         organization = Organization.objects.create(name="Test Organization")
-        team1 = Team.objects.create(organization=organization, name="Team 1", api_token="phs_team1_123")
-        team2 = Team.objects.create(organization=organization, name="Team 2", api_token="phs_team2_456")
-        team3 = Team.objects.create(organization=organization, name="Team 3", api_token="phs_team3_789")
+        team1 = Team.objects.create(organization=organization, name="Team 1", api_token="his_team1_123")
+        team2 = Team.objects.create(organization=organization, name="Team 2", api_token="his_team2_456")
+        team3 = Team.objects.create(organization=organization, name="Team 3", api_token="his_team3_789")
 
         # Create user and add to organization
         user = User.objects.create(email="test@example.com", is_active=True)
@@ -518,10 +518,10 @@ class TestGetTeamsForPersonalAPIKey(TestCase):
         org3 = Organization.objects.create(name="Organization 3")
 
         # Create teams in different organizations
-        team1 = Team.objects.create(organization=org1, name="Team 1", api_token="phs_team1_123")
-        team2 = Team.objects.create(organization=org1, name="Team 2", api_token="phs_team2_456")
-        team3 = Team.objects.create(organization=org2, name="Team 3", api_token="phs_team3_789")
-        team4 = Team.objects.create(organization=org3, name="Team 4", api_token="phs_team4_abc")  # User not in this org
+        team1 = Team.objects.create(organization=org1, name="Team 1", api_token="his_team1_123")
+        team2 = Team.objects.create(organization=org1, name="Team 2", api_token="his_team2_456")
+        team3 = Team.objects.create(organization=org2, name="Team 3", api_token="his_team3_789")
+        team4 = Team.objects.create(organization=org3, name="Team 4", api_token="his_team4_abc")  # User not in this org
 
         # Create user and add to org1 and org2 only
         user = User.objects.create(email="test@example.com", is_active=True)
@@ -551,7 +551,7 @@ class TestGetTeamsForPersonalAPIKey(TestCase):
 
         # Create real test data
         organization = Organization.objects.create(name="Test Organization")
-        team = Team.objects.create(organization=organization, name="Team 1", api_token="phs_team1_123")
+        team = Team.objects.create(organization=organization, name="Team 1", api_token="his_team1_123")
 
         # Create user and add to organization
         user = User.objects.create(email="test@example.com", is_active=True)
@@ -897,9 +897,9 @@ class TestWarmUserTeamsCacheTask(TestCase):
 
         # Create organization with multiple teams
         org = Organization.objects.create(name="Test Org for Removal")
-        team1 = Team.objects.create(organization=org, name="Team 1", api_token="phc_removal_team1")
-        team2 = Team.objects.create(organization=org, name="Team 2", api_token="phc_removal_team2")
-        team3 = Team.objects.create(organization=org, name="Team 3", api_token="phc_removal_team3")
+        team1 = Team.objects.create(organization=org, name="Team 1", api_token="hi_removal_team1")
+        team2 = Team.objects.create(organization=org, name="Team 2", api_token="hi_removal_team2")
+        team3 = Team.objects.create(organization=org, name="Team 3", api_token="hi_removal_team3")
 
         # Create users
         user_to_remove = User.objects.create(email="remove_me@example.com", is_active=True)
@@ -967,12 +967,12 @@ class TestWarmUserTeamsCacheTask(TestCase):
 
         # Create organization with multiple teams
         org = Organization.objects.create(name="Test Org for Key Deletion")
-        team1 = Team.objects.create(organization=org, name="Team 1", api_token="phc_key_del_team1")
-        team2 = Team.objects.create(organization=org, name="Team 2", api_token="phc_key_del_team2")
+        team1 = Team.objects.create(organization=org, name="Team 1", api_token="hi_key_del_team1")
+        team2 = Team.objects.create(organization=org, name="Team 2", api_token="hi_key_del_team2")
 
         # Create another org with a team to ensure we don't affect other orgs
         other_org = Organization.objects.create(name="Other Org")
-        other_team = Team.objects.create(organization=other_org, name="Other Team", api_token="phc_key_del_other")
+        other_team = Team.objects.create(organization=other_org, name="Other Team", api_token="hi_key_del_other")
 
         # Create users
         user1 = User.objects.create(email="user1@example.com", is_active=True)
@@ -1142,8 +1142,8 @@ class TestWarmUserTeamsCacheTask(TestCase):
 
         # Create organization with teams
         org = Organization.objects.create(name="Test Org for User Deletion")
-        team1 = Team.objects.create(organization=org, name="Team 1", api_token="phc_user_del_team1")
-        team2 = Team.objects.create(organization=org, name="Team 2", api_token="phc_user_del_team2")
+        team1 = Team.objects.create(organization=org, name="Team 1", api_token="hi_user_del_team1")
+        team2 = Team.objects.create(organization=org, name="Team 2", api_token="hi_user_del_team2")
 
         # Create users
         user_to_delete = User.objects.create(email="delete_me@example.com", is_active=True)
@@ -1430,7 +1430,7 @@ class TestSignalHandlerCacheWarming(TestCase):
         # Create mock Team
         mock_team = MagicMock()
         mock_team.pk = 123
-        mock_team.api_token = "phs_team_token_123"
+        mock_team.api_token = "his_team_token_123"
         mock_team._state = MagicMock()
         mock_team._state.adding = False  # Not being created
 
@@ -1438,7 +1438,7 @@ class TestSignalHandlerCacheWarming(TestCase):
         update_team_authentication_cache(instance=mock_team, created=False)
 
         # Verify cache warming was called (not just invalidation)
-        mock_warm_cache.assert_called_once_with("phs_team_token_123")
+        mock_warm_cache.assert_called_once_with("his_team_token_123")
 
         # Test that it doesn't warm cache for new teams (created=True)
         mock_warm_cache.reset_mock()
@@ -1461,10 +1461,10 @@ class TestSignalHandlerCacheWarming(TestCase):
         team_to_delete = Team.objects.create(
             organization=org,
             name="Team to Delete",
-            api_token="phc_team_delete_1",
+            api_token="hi_team_delete_1",
             secret_api_token="phsk_team_secret_delete",
         )
-        team_to_keep = Team.objects.create(organization=org, name="Team to Keep", api_token="phc_team_keep_1")
+        team_to_keep = Team.objects.create(organization=org, name="Team to Keep", api_token="hi_team_keep_1")
 
         # Create users and add to organization
         user1 = User.objects.create(email="user1@example.com", is_active=True)
@@ -1579,12 +1579,12 @@ class TestSignalHandlerCacheWarming(TestCase):
             team = Team.objects.create(
                 organization=org_to_delete,
                 name=f"Team {i} to Delete",
-                api_token=f"phc_org_del_team{i}",
+                api_token=f"hi_org_del_team{i}",
                 secret_api_token=f"phsk_org_del_secret{i}",
             )
             teams_to_delete.append(team)
 
-        team_to_keep = Team.objects.create(organization=org_to_keep, name="Team to Keep", api_token="phc_org_keep_team")
+        team_to_keep = Team.objects.create(organization=org_to_keep, name="Team to Keep", api_token="hi_org_keep_team")
 
         # Create users
         user1 = User.objects.create(email="user1@example.com", is_active=True)
@@ -1692,9 +1692,9 @@ class TestSignalHandlerCacheWarming(TestCase):
 
         # Create organization and teams
         org = Organization.objects.create(name="Test Org")
-        team1 = Team.objects.create(organization=org, name="Team 1", api_token="phc_orphan_team1")
-        team2 = Team.objects.create(organization=org, name="Team 2", api_token="phc_orphan_team2")
-        team3_to_delete = Team.objects.create(organization=org, name="Team 3 to Delete", api_token="phc_orphan_team3")
+        team1 = Team.objects.create(organization=org, name="Team 1", api_token="hi_orphan_team1")
+        team2 = Team.objects.create(organization=org, name="Team 2", api_token="hi_orphan_team2")
+        team3_to_delete = Team.objects.create(organization=org, name="Team 3 to Delete", api_token="hi_orphan_team3")
 
         # Create user and add to organization
         user = User.objects.create(email="user@example.com", is_active=True)
@@ -1905,7 +1905,7 @@ class TestSignalHandlerCacheWarming(TestCase):
         # Create mock Team
         mock_team = MagicMock()
         mock_team.pk = 123
-        mock_team.api_token = "phs_team_token_123"
+        mock_team.api_token = "his_team_token_123"
         mock_team._state = MagicMock()
         mock_team._state.adding = adding_state
 
@@ -1914,7 +1914,7 @@ class TestSignalHandlerCacheWarming(TestCase):
 
         # Verify cache warming behavior
         if should_warm_cache:
-            mock_warm_cache.assert_called_once_with("phs_team_token_123")
+            mock_warm_cache.assert_called_once_with("his_team_token_123")
         else:
             mock_warm_cache.assert_not_called()
 

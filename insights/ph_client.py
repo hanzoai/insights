@@ -7,10 +7,10 @@ from insights.cloud_utils import is_cloud
 from insights.utils import get_instance_region
 
 PH_US_API_KEY = "sTMFPsFhdP1Ssg"
-PH_US_HOST = "https://us.i.posthog.com"
+PH_US_HOST = "https://us.i.hanzo.ai"
 
-PH_EU_API_KEY = "phc_dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF"
-PH_EU_HOST = "https://eu.i.posthog.com"
+PH_EU_API_KEY = "hi_dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF"
+PH_EU_HOST = "https://eu.i.hanzo.ai"
 
 logger = structlog.get_logger(__name__)
 
@@ -42,7 +42,7 @@ def ph_scoped_capture():
 
 
 def get_client(region: str = "US", **kwargs: Any):
-    from posthoganalytics import Posthog
+    from hanzoanalytics import Insights
 
     api_key = None
     host = None
@@ -55,4 +55,4 @@ def get_client(region: str = "US", **kwargs: Any):
     else:
         return
 
-    return Posthog(api_key, host=host, super_properties={"region": region}, **kwargs)
+    return Insights(api_key, host=host, super_properties={"region": region}, **kwargs)

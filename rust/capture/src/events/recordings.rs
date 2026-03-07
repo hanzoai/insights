@@ -407,7 +407,7 @@ fn snapshot_library_fallback_from(user_agent: Option<&String>) -> Option<String>
         .split('/')
         .next()
         .map(|s| s.to_string())
-        .filter(|s| s.contains("posthog"))
+        .filter(|s| s.contains("insights"))
         .or(Some("web".to_string()))
 }
 

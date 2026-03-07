@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonSkeleton, Link } from '@posthog/lemon-ui'
+import { LemonBanner, LemonSkeleton, Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -110,7 +110,7 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
                 {feedbackBanner}
                 <LemonBanner type="info">
                     You can enable marketing analytics in the feature preview settings{' '}
-                    <Link to="https://app.posthog.com/settings/user-feature-previews#marketing-analytics">here</Link>.
+                    <Link to="https://insights.hanzo.ai/settings/user-feature-previews#marketing-analytics">here</Link>.
                 </LemonBanner>
             </>
         )

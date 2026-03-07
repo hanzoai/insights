@@ -233,7 +233,7 @@ def test_create_external_job_activity_emit_signals_respects_ai_consent(
     inputs = CreateExternalDataJobModelActivityInputs(
         team_id=team.id, source_id=new_source.pk, schema_id=schema.id, billable=True
     )
-    with mock.patch("posthoganalytics.feature_enabled", return_value=True):
+    with mock.patch("hanzoanalytics.feature_enabled", return_value=True):
         result = activity_environment.run(create_external_data_job_model_activity, inputs)
     assert result.emit_signals_enabled is expected
 
@@ -769,10 +769,10 @@ async def test_run_postgres_job(
     activity_environment, team, minio_client, postgres_connection, postgres_config, **kwargs
 ):
     await postgres_connection.execute(
-        "CREATE TABLE IF NOT EXISTS {schema}.posthog_test (id integer)".format(schema=postgres_config["schema"])
+        "CREATE TABLE IF NOT EXISTS {schema}.insights_test (id integer)".format(schema=postgres_config["schema"])
     )
     await postgres_connection.execute(
-        "INSERT INTO {schema}.posthog_test (id) VALUES (1)".format(schema=postgres_config["schema"])
+        "INSERT INTO {schema}.insights_test (id) VALUES (1)".format(schema=postgres_config["schema"])
     )
     await postgres_connection.commit()
 
@@ -795,14 +795,14 @@ async def test_run_postgres_job(
             },
         )
 
-        posthog_test_schema = await sync_to_async(_create_schema)("posthog_test", new_source, team)
+        insights_test_schema = await sync_to_async(_create_schema)("insights_test", new_source, team)
 
         new_job: ExternalDataJob = await sync_to_async(ExternalDataJob.objects.create)(
             team_id=team.id,
             pipeline_id=new_source.pk,
             status=ExternalDataJob.Status.RUNNING,
             rows_synced=0,
-            schema=posthog_test_schema,
+            schema=insights_test_schema,
             pipeline_version=ExternalDataJob.PipelineVersion.V1,
         )
 
@@ -811,7 +811,7 @@ async def test_run_postgres_job(
         )()
 
         inputs = ImportDataActivityInputs(
-            team_id=team.id, run_id=str(new_job.pk), source_id=new_source.pk, schema_id=posthog_test_schema.id
+            team_id=team.id, run_id=str(new_job.pk), source_id=new_source.pk, schema_id=insights_test_schema.id
         )
 
         return new_job, inputs
@@ -829,5 +829,5 @@ async def test_run_postgres_job(
         await activity_environment.run(import_data_activity_sync, job_1_inputs)
 
         folder_path = await sync_to_async(job_1.folder_path)()
-        job_1_team_objects = minio_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix=f"{folder_path}/posthog_test/")
+        job_1_team_objects = minio_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix=f"{folder_path}/insights_test/")
         assert len(job_1_team_objects["Contents"]) == 3

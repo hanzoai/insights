@@ -1,4 +1,4 @@
-# manually copied from github.com/posthog/proxy-provisioner
+# manually copied from github.com/insights/proxy-provisioner
 # IMPORTANT: import path needed to be fixed manually
 # ruff: noqa
 # fmt: off

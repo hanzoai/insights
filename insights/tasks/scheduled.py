@@ -282,7 +282,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     # Verify that persons data is in sync every day at 4 AM UTC
     sender.add_periodic_task(crontab(hour="4", minute="0"), verify_persons_data_in_sync.s())
 
-    # Every 30 minutes, send decide request counts to the main posthog instance
+    # Every 30 minutes, send decide request counts to the main insights instance
     sender.add_periodic_task(
         crontab(minute="*/30"),
         calculate_decide_usage.s(),

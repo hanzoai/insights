@@ -19,7 +19,7 @@ pub async fn resolve_fingerprint(
     team_id: TeamId,
     props: &RawErrProps,
 ) -> Result<Fingerprint, UnhandledError> {
-    let mut conn = ctx.posthog_pool.acquire().await?;
+    let mut conn = ctx.insights_pool.acquire().await?;
     let team_manager = &ctx.team_manager;
     if let Some(rule) = try_grouping_rules(&mut conn, team_id, team_manager, props).await? {
         Ok(Fingerprint::from_rule(rule))

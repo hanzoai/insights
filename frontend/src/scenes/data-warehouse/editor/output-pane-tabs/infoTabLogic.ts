@@ -27,7 +27,7 @@ export const infoTabLogic = kea<infoTabLogicType>([
             sqlEditorLogic({ tabId: props.tabId }),
             ['metadata'],
             databaseTableListLogic,
-            ['posthogTablesMap', 'dataWarehouseTablesMap'],
+            ['insightsTablesMap', 'dataWarehouseTablesMap'],
             dataWarehouseViewsLogic,
             ['dataWarehouseSavedQueryMap'],
         ],

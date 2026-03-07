@@ -16,7 +16,7 @@ describe('liveDebuggerLogic', () => {
     const mockBreakpoints: Breakpoint[] = [
         {
             id: 'bp-1',
-            repository: 'Insights/posthog',
+            repository: 'Insights/insights',
             filename: 'capture_event.py',
             line_number: 100,
             enabled: true,
@@ -25,7 +25,7 @@ describe('liveDebuggerLogic', () => {
         },
         {
             id: 'bp-2',
-            repository: 'Insights/posthog',
+            repository: 'Insights/insights',
             filename: 'capture_event.py',
             line_number: 200,
             enabled: true,
@@ -84,7 +84,7 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['startPollingBreakpoints'])
 
             expect(logic.values).toMatchObject({
-                currentRepository: 'Insights/posthog',
+                currentRepository: 'Insights/insights',
                 selectedFilePath: '',
                 selectedInstanceId: null,
                 selectedLineForHits: null,
@@ -107,7 +107,7 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess', 'loadBreakpointInstancesSuccess'])
 
             expect(api.get).toHaveBeenCalledWith(
-                'api/projects/@current/live_debugger_breakpoints/?repository=Insights%2Fposthog&filename=test.py'
+                'api/projects/@current/live_debugger_breakpoints/?repository=Insights%2Finsights&filename=test.py'
             )
         })
 
@@ -212,11 +212,11 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess'])
 
             await expectLogic(logic, () => {
-                logic.actions.toggleBreakpoint('test.py', 50, 'Insights/posthog')
+                logic.actions.toggleBreakpoint('test.py', 50, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint', 'loadBreakpoints', 'loadBreakpointInstances'])
 
             expect(api.create).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/', {
-                repository: 'Insights/posthog',
+                repository: 'Insights/insights',
                 filename: 'test.py',
                 line_number: 50,
                 enabled: true,
@@ -239,7 +239,7 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess'])
 
             await expectLogic(logic, () => {
-                logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/posthog')
+                logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint'])
 
             expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-1/')
@@ -287,11 +287,11 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess'])
 
             await expectLogic(logic, () => {
-                logic.actions.toggleBreakpointForFile('test.py', 50, 'Insights/posthog')
+                logic.actions.toggleBreakpointForFile('test.py', 50, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpointForFile', 'loadBreakpoints', 'loadBreakpointInstances'])
 
             expect(api.create).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/', {
-                repository: 'Insights/posthog',
+                repository: 'Insights/insights',
                 filename: 'test.py',
                 line_number: 50,
                 enabled: true,
@@ -559,7 +559,7 @@ describe('liveDebuggerLogic', () => {
                 // Mock API to return only breakpoints for the current repo when file is selected
                 jest.spyOn(api, 'get').mockResolvedValue({
                     results: mockBreakpoints.filter(
-                        (bp) => bp.repository === 'Insights/posthog' && bp.filename === 'capture_event.py'
+                        (bp) => bp.repository === 'Insights/insights' && bp.filename === 'capture_event.py'
                     ),
                     count: 2,
                     has_more: false,
@@ -588,7 +588,7 @@ describe('liveDebuggerLogic', () => {
             it('returns breakpoints indexed by line number for selected file', async () => {
                 jest.spyOn(api, 'get').mockResolvedValue({
                     results: mockBreakpoints.filter(
-                        (bp) => bp.repository === 'Insights/posthog' && bp.filename === 'capture_event.py'
+                        (bp) => bp.repository === 'Insights/insights' && bp.filename === 'capture_event.py'
                     ),
                     count: 2,
                     has_more: false,
@@ -724,9 +724,9 @@ describe('liveDebuggerLogic', () => {
 
     describe('multi-repository edge cases', () => {
         it('distinguishes breakpoints by repository when toggling', async () => {
-            // Mock breakpoints for Insights/posthog repo only
+            // Mock breakpoints for Insights/insights repo only
             jest.spyOn(api, 'get').mockResolvedValue({
-                results: mockBreakpoints.filter((bp) => bp.repository === 'Insights/posthog'),
+                results: mockBreakpoints.filter((bp) => bp.repository === 'Insights/insights'),
                 count: 2,
                 has_more: false,
             })
@@ -739,9 +739,9 @@ describe('liveDebuggerLogic', () => {
             logic.actions.setSelectedFilePath('capture_event.py')
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess'])
 
-            // Delete Insights/posthog breakpoint
+            // Delete Insights/insights breakpoint
             await expectLogic(logic, () => {
-                logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/posthog')
+                logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint'])
 
             expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-1/')
@@ -761,7 +761,7 @@ describe('liveDebuggerLogic', () => {
                     // File A has 2 breakpoints
                     return Promise.resolve({
                         results: mockBreakpoints.filter(
-                            (bp) => bp.filename === 'capture_event.py' && bp.repository === 'Insights/posthog'
+                            (bp) => bp.filename === 'capture_event.py' && bp.repository === 'Insights/insights'
                         ),
                         count: 2,
                         has_more: false,
@@ -797,7 +797,7 @@ describe('liveDebuggerLogic', () => {
             const fileABreakpoints: Breakpoint[] = [
                 {
                     id: 'bp-a1',
-                    repository: 'Insights/posthog',
+                    repository: 'Insights/insights',
                     filename: 'fileA.py',
                     line_number: 10,
                     enabled: true,
@@ -806,7 +806,7 @@ describe('liveDebuggerLogic', () => {
                 },
                 {
                     id: 'bp-a2',
-                    repository: 'Insights/posthog',
+                    repository: 'Insights/insights',
                     filename: 'fileA.py',
                     line_number: 20,
                     enabled: true,
@@ -818,7 +818,7 @@ describe('liveDebuggerLogic', () => {
             const fileBBreakpoints: Breakpoint[] = [
                 {
                     id: 'bp-b1',
-                    repository: 'Insights/posthog',
+                    repository: 'Insights/insights',
                     filename: 'fileB.py',
                     line_number: 30,
                     enabled: true,

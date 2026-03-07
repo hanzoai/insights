@@ -170,7 +170,7 @@ def _check(paths: Sequence[str], *, from_hook: bool = False) -> int:
 
 def _sync(paths: Sequence[str]) -> int:
     # Check all Python directories if no paths specified
-    targets = list(paths) if paths else ["posthog", "ee", "common", "dags"]
+    targets = list(paths) if paths else ["insights", "ee", "common", "dags"]
     ty_result = _run_ty(targets)
     normalized = _normalize_ty_output(ty_result.output)
 

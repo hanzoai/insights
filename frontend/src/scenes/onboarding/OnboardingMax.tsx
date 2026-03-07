@@ -11,8 +11,8 @@ import {
     IconMessage,
     IconRewindPlay,
     IconWarning,
-} from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { Thread } from 'scenes/max/Thread'
 import { SidebarQuestionInput } from 'scenes/max/components/SidebarQuestionInput'
@@ -241,7 +241,7 @@ export function OnboardingMax(): JSX.Element {
 
     const handleContinueToSetup = (): void => {
         if (selectedProducts.length > 0) {
-            window.posthog?.capture('ai chat onboarding discovery complete', {
+            window.insights?.capture('ai chat onboarding discovery complete', {
                 products_selected: selectedProducts,
                 products_recommended: recommendedProducts,
             })

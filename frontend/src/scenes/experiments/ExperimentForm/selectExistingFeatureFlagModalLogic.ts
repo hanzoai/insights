@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { PaginationManual } from '@posthog/lemon-ui'
+import { PaginationManual } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { toParams } from 'lib/utils'

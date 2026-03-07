@@ -22,7 +22,7 @@ pub struct TestContext {
 impl TestContext {
     pub async fn new() -> Self {
         let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
-            "postgres://posthog:posthog@localhost:5432/posthog_persons".to_string()
+            "postgres://insights:insights@localhost:5432/insights_persons".to_string()
         });
 
         let pool = PgPool::connect(&database_url)
@@ -49,7 +49,7 @@ impl TestContext {
         let properties = properties.unwrap_or_else(|| serde_json::json!({}));
 
         sqlx::query(
-            r#"INSERT INTO posthog_person
+            r#"INSERT INTO insights_person
             (id, uuid, team_id, properties, properties_last_updated_at,
              properties_last_operation, created_at, version, is_identified, is_user_id)
             VALUES ($1, $2, $3, $4, '{}', '{}', NOW(), 0, false, NULL)
@@ -63,7 +63,7 @@ impl TestContext {
         .await?;
 
         sqlx::query(
-            r#"INSERT INTO posthog_persondistinctid
+            r#"INSERT INTO insights_persondistinctid
             (distinct_id, person_id, team_id, version)
             VALUES ($1, $2, $3, 0)
             ON CONFLICT DO NOTHING"#,
@@ -89,7 +89,7 @@ impl TestContext {
         let properties = properties.unwrap_or_else(|| serde_json::json!({}));
 
         sqlx::query(
-            r#"INSERT INTO posthog_group
+            r#"INSERT INTO insights_group
             (team_id, group_type_index, group_key, group_properties, created_at, version)
             VALUES ($1, $2, $3, $4, NOW(), 0)
             ON CONFLICT DO NOTHING"#,
@@ -113,7 +113,7 @@ impl TestContext {
         group_type_index: i32,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
-            r#"INSERT INTO posthog_grouptypemapping
+            r#"INSERT INTO insights_grouptypemapping
             (team_id, project_id, group_type, group_type_index, name_singular, name_plural)
             VALUES ($1, $2, $3, $4, NULL, NULL)
             ON CONFLICT DO NOTHING"#,
@@ -151,7 +151,7 @@ impl TestContext {
         cohort_id: i64,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
-            r#"INSERT INTO posthog_cohortpeople
+            r#"INSERT INTO insights_cohortpeople
             (person_id, cohort_id, version)
             VALUES ($1, $2, 1)
             ON CONFLICT DO NOTHING"#,
@@ -171,7 +171,7 @@ impl TestContext {
         hash_key: &str,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
-            r#"INSERT INTO posthog_featureflaghashkeyoverride
+            r#"INSERT INTO insights_featureflaghashkeyoverride
             (team_id, person_id, feature_flag_key, hash_key)
             VALUES ($1, $2, $3, $4)
             ON CONFLICT DO NOTHING"#,
@@ -192,7 +192,7 @@ impl TestContext {
         distinct_id: &str,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
-            r#"INSERT INTO posthog_persondistinctid
+            r#"INSERT INTO insights_persondistinctid
             (distinct_id, person_id, team_id, version)
             VALUES ($1, $2, $3, 0)
             ON CONFLICT DO NOTHING"#,
@@ -207,34 +207,34 @@ impl TestContext {
     }
 
     pub async fn cleanup(&self) -> Result<(), sqlx::Error> {
-        sqlx::query("DELETE FROM posthog_featureflaghashkeyoverride WHERE team_id = $1")
+        sqlx::query("DELETE FROM insights_featureflaghashkeyoverride WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;
 
         sqlx::query(
-            "DELETE FROM posthog_cohortpeople WHERE person_id IN (SELECT id FROM posthog_person WHERE team_id = $1)",
+            "DELETE FROM insights_cohortpeople WHERE person_id IN (SELECT id FROM insights_person WHERE team_id = $1)",
         )
         .bind(self.team_id)
         .execute(&self.pool)
         .await?;
 
-        sqlx::query("DELETE FROM posthog_persondistinctid WHERE team_id = $1")
+        sqlx::query("DELETE FROM insights_persondistinctid WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;
 
-        sqlx::query("DELETE FROM posthog_person WHERE team_id = $1")
+        sqlx::query("DELETE FROM insights_person WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;
 
-        sqlx::query("DELETE FROM posthog_group WHERE team_id = $1")
+        sqlx::query("DELETE FROM insights_group WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;
 
-        sqlx::query("DELETE FROM posthog_grouptypemapping WHERE team_id = $1")
+        sqlx::query("DELETE FROM insights_grouptypemapping WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;

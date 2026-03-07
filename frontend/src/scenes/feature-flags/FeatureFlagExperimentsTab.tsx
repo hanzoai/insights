@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconArrowRight } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTable, Link } from '@posthog/lemon-ui'
+import { IconArrowRight } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTable, Link } from '@hanzo/lemon-ui'
 
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'

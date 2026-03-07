@@ -408,20 +408,20 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
             sdks = [
                 "web",
                 "js",
-                "posthog-node",
-                "posthog-android",
-                "posthog-flutter",
-                "posthog-ios",
-                "posthog-go",
-                "posthog-java",
-                "posthog-server",
-                "posthog-react-native",
-                "posthog-ruby",
-                "posthog-python",
-                "posthog-php",
-                "posthog-dotnet",
-                "posthog-elixir",
-                "posthog-unity",
+                "insights-node",
+                "insights-android",
+                "insights-flutter",
+                "insights-ios",
+                "insights-go",
+                "insights-java",
+                "insights-server",
+                "insights-react-native",
+                "insights-ruby",
+                "hanzo-insights",
+                "insights-php",
+                "insights-dotnet",
+                "insights-elixir",
+                "insights-unity",
             ]
 
             for sdk in sdks:
@@ -517,7 +517,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
         PluginConfig.objects.create(plugin=plugin, enabled=enabled, order=1)
 
     def _test_usage_report(self) -> list[dict]:
-        with self.settings(SITE_URL="http://test.posthog.com"):
+        with self.settings(SITE_URL="http://test.hanzo.ai"):
             self._create_sample_usage_data(include_mobile_replay=True)
             self._create_plugin("Installed but not enabled", False)
             self._create_plugin("Installed and enabled", True)
@@ -533,8 +533,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
             )
 
             assert report["table_sizes"]
-            assert report["table_sizes"]["posthog_event"] < 10**7  # <10MB
-            assert report["table_sizes"]["posthog_sessionrecordingevent"] < 10**7  # <10MB
+            assert report["table_sizes"]["insights_event"] < 10**7  # <10MB
+            assert report["table_sizes"]["insights_sessionrecordingevent"] < 10**7  # <10MB
 
             assert len(all_reports) == 2
 
@@ -546,7 +546,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                         "start_inclusive": "2022-01-09T00:00:00+00:00",
                         "end_inclusive": "2022-01-09T23:59:59.999999+00:00",
                     },
-                    "site_url": "http://test.posthog.com",
+                    "site_url": "http://test.hanzo.ai",
                     "product": "open source",
                     "helm": {},
                     "clickhouse_version": report["clickhouse_version"],
@@ -764,7 +764,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                         "start_inclusive": "2022-01-09T00:00:00+00:00",
                         "end_inclusive": "2022-01-09T23:59:59.999999+00:00",
                     },
-                    "site_url": "http://test.posthog.com",
+                    "site_url": "http://test.hanzo.ai",
                     "product": "open source",
                     "helm": {},
                     "clickhouse_version": report["clickhouse_version"],
@@ -944,10 +944,10 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
         mock_get_sqs_producer.return_value = MagicMock()
         mockresponse.status_code = 200
         mockresponse.json = lambda: {}
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
 
-        with self.settings(SITE_URL="http://test.posthog.com", EE_AVAILABLE=False):
+        with self.settings(SITE_URL="http://test.hanzo.ai", EE_AVAILABLE=False):
             send_all_org_usage_reports()
 
         # Check calls to other services
@@ -970,8 +970,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
         #     ),
         # ]
 
-        # assert mock_posthog.capture.call_count == 2
-        # mock_posthog.capture.assert_has_calls(calls, any_order=True)
+        # assert mock_analytics.capture.call_count == 2
+        # mock_analytics.capture.assert_has_calls(calls, any_order=True)
 
 
 @freeze_time("2022-01-09T00:01:00Z")
@@ -1057,7 +1057,7 @@ class TestReplayUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyT
             first_timestamp=timestamp,
             last_timestamp=timestamp,
             snapshot_source="mobile",
-            snapshot_library="posthog-ios",
+            snapshot_library="insights-ios",
         )
         produce_replay_summary(
             team_id=self.team.pk,
@@ -1066,7 +1066,7 @@ class TestReplayUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyT
             first_timestamp=timestamp,
             last_timestamp=timestamp,
             snapshot_source="mobile",
-            snapshot_library="posthog-android",
+            snapshot_library="insights-android",
         )
         # This will be ignored
         produce_replay_summary(
@@ -1207,7 +1207,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
     @snapshot_clickhouse_queries
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_usage_report_decide_requests(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_usage_report_decide_requests(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
         for i in range(10):
             _create_event(
@@ -1286,7 +1286,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_usage_report_local_evaluation_requests(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
         for i in range(10):
@@ -1368,7 +1368,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_active_hog_destinations_and_transformations_per_team(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         from insights.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
 
@@ -1467,7 +1467,7 @@ class TestSurveysUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseT
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_usage_report_survey_responses(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_usage_report_survey_responses(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
         for i in range(10):
             _create_event(
@@ -1546,7 +1546,7 @@ class TestSurveysUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseT
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_survey_events_are_not_double_charged(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
         for i in range(5):
@@ -1604,7 +1604,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_free_period_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         with freeze_time("2025-11-01T00:00:00Z"):
             self._setup_teams()
@@ -1667,7 +1667,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_after_free_period_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -1742,7 +1742,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_before_free_period_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         with freeze_time("2025-10-28T23:59:00Z"):
             self._setup_teams()
@@ -1805,7 +1805,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -1863,7 +1863,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_free_historical_rows_synced_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -1933,7 +1933,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_active_external_data_schemas_in_period(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         # created at doesn't matter. just what's running or completed at run time
         self._setup_teams()
@@ -1976,7 +1976,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_active_batch_exports_in_period(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         # created at doesn't matter. just what's running or completed at run time
         self._setup_teams()
@@ -2022,7 +2022,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_batch_export_rows_exported_in_period(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2065,7 +2065,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_failed_jobs(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2123,7 +2123,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_external_data_rows_synced_response_with_v2_jobs(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2200,7 +2200,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_data_in_s3_response(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_data_in_s3_response(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
 
         source = ExternalDataSource.objects.create(team_id=3, source_type="Stripe")
@@ -2242,7 +2242,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_data_in_s3_response_with_deleted_tables(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2288,7 +2288,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_data_in_s3_response_with_no_source_tables(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2332,7 +2332,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_data_in_s3_response_with_mat_views(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2390,7 +2390,7 @@ class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, C
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_insights_function_usage_metrics(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_insights_function_usage_metrics(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
 
         create_app_metric2(
@@ -2451,7 +2451,7 @@ class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, C
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_workflow_usage_metrics(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_workflow_usage_metrics(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
 
         # Create workflow metrics for org 1 team 1
@@ -2544,7 +2544,7 @@ class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, C
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_logs_usage_metrics(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_logs_usage_metrics(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
         self._setup_teams()
 
         # Create logs metrics for org 1 team 1: 1.5 GB
@@ -2621,8 +2621,8 @@ class TestErrorTrackingUsageReport(ClickhouseDestroyTablesMixin, TestCase, Click
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_posthog_exceptions_captured_response(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+    def test_insights_exceptions_captured_response(
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2705,7 +2705,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_llm_observability_usage_metrics(
-        self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
+        self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         self._setup_teams()
 
@@ -2763,7 +2763,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_input_cost_usd": 0.01,
                 "$ai_output_cost_usd": 0.01,
                 "$ai_total_cost_usd": 0.02,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
             timestamp=now() - relativedelta(days=2),
             team=self.org_1_team_1,
@@ -2823,7 +2823,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -2838,7 +2838,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable",
                 "$ai_total_cost_usd": 1.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -2883,7 +2883,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -2898,7 +2898,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_free",
                 "$ai_total_cost_usd": 2.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -2942,7 +2942,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -2957,7 +2957,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_summarize",
                 "$ai_total_cost_usd": 2.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3002,7 +3002,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3016,7 +3016,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_mixed_excluded",
                 "$ai_total_cost_usd": 2.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3064,7 +3064,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3078,7 +3078,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_mixed_billable",
                 "$ai_total_cost_usd": 1.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3124,7 +3124,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3139,7 +3139,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable_search",
                 "$ai_total_cost_usd": 0.5,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3202,7 +3202,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         },
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3218,7 +3218,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_multi_turn",
                 "$ai_total_cost_usd": 1.5,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3253,7 +3253,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
             properties={
                 "$ai_trace_id": "trace_billable",
                 "$ai_output_state": {"messages": [{"tool_calls": [{"name": "query_executor"}]}]},
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3268,7 +3268,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable",
                 "$ai_total_cost_usd": 0.5,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3283,7 +3283,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable",
                 "$ai_total_cost_usd": 1.0,
                 "$ai_billable": False,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3298,7 +3298,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable",
                 "$ai_total_cost_usd": 0.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3313,7 +3313,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_billable",
                 "$ai_total_cost_usd": -1.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3355,7 +3355,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                         }
                     ]
                 },
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3370,7 +3370,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_no_tools",
                 "$ai_total_cost_usd": 0.5,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3412,7 +3412,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
             properties={
                 "$ai_trace_id": "trace_us",
                 "$ai_output_state": {"messages": [{"tool_calls": [{"name": "query_executor"}]}]},
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3425,7 +3425,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
             properties={
                 "$ai_trace_id": "trace_eu_in_us",
                 "$ai_output_state": {"messages": [{"tool_calls": [{"name": "query_executor"}]}]},
-                "$group_1": "https://eu.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3440,7 +3440,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_us",
                 "$ai_total_cost_usd": 1.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3455,7 +3455,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_eu_in_us",
                 "$ai_total_cost_usd": 5.0,
                 "$ai_billable": True,
-                "$group_1": "https://eu.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3497,7 +3497,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
             properties={
                 "$ai_trace_id": "trace_eu",
                 "$ai_output_state": {"messages": [{"tool_calls": [{"name": "query_executor"}]}]},
-                "$group_1": "https://eu.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3510,7 +3510,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
             properties={
                 "$ai_trace_id": "trace_us_in_eu",
                 "$ai_output_state": {"messages": [{"tool_calls": [{"name": "query_executor"}]}]},
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3525,7 +3525,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_eu",
                 "$ai_total_cost_usd": 2.0,
                 "$ai_billable": True,
-                "$group_1": "https://eu.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3540,7 +3540,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
                 "$ai_trace_id": "trace_us_in_eu",
                 "$ai_total_cost_usd": 3.0,
                 "$ai_billable": True,
-                "$group_1": "https://us.posthog.com",
+                "$group_1": "https://insights.hanzo.ai",
             },
         )
 
@@ -3644,8 +3644,8 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
         mockresponse = Mock()
         mockresponse.status_code = 200
         mockresponse.json = lambda: self._usage_report_response()
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
 
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
@@ -3679,7 +3679,7 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
             message_body=compressed_b64,
         )
 
-        # mock_posthog.capture.assert_any_call(
+        # mock_analytics.capture.assert_any_call(
         #     get_machine_id(),
         #     "organization usage report",
         #     {**full_report_as_dict, "scope": "machine"},
@@ -3695,8 +3695,8 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
             mockresponse = Mock()
             mockresponse.status_code = 200
             mockresponse.json = lambda: self._usage_report_response()
-            mock_posthog = MagicMock()
-            mock_client.return_value = mock_posthog
+            mock_analytics = MagicMock()
+            mock_client.return_value = mock_analytics
 
             mock_producer = MagicMock()
             mock_get_sqs_producer.return_value = mock_producer
@@ -3733,7 +3733,7 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
                 message_body=compressed_b64,
             )
 
-            # mock_posthog.capture.assert_any_call(
+            # mock_analytics.capture.assert_any_call(
             #     self.user.distinct_id,
             #     "organization usage report",
             #     {**full_report_as_dict, "scope": "user"},
@@ -3761,18 +3761,18 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
     #             mock_get_sqs_producer.return_value = MagicMock()
     #             mockresponse.status_code = 200
     #             mockresponse.json = lambda: self._usage_report_response()
-    #             mock_posthog = MagicMock()
-    #             mock_client.return_value = mock_posthog
+    #             mock_analytics = MagicMock()
+    #             mock_client.return_value = mock_analytics
     #             send_all_org_usage_reports(dry_run=False)
     #     assert mock_capture_exception.call_count == 1
 
     @patch("insights.tasks.usage_report.get_ph_client")
     def test_capture_event_called_with_string_timestamp(self, mock_client: MagicMock) -> None:
         organization = Organization.objects.create()
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         capture_event(
-            pha_client=mock_client,
+            hia_client=mock_client,
             name="test event",
             organization_id=organization.id,
             properties={"prop1": "val1"},
@@ -3786,7 +3786,7 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
         mock_client = MagicMock()
 
         capture_event(
-            pha_client=mock_client,
+            hia_client=mock_client,
             name="test event",
             organization_id=str(organization.id),
             properties={"prop1": "val1"},
@@ -3804,8 +3804,8 @@ class TestSendNoUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTe
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("requests.post")
     def test_usage_not_sent_if_zero(self, mock_post: MagicMock, mock_client: MagicMock) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
 
         send_all_org_usage_reports(dry_run=False)
 
@@ -3916,8 +3916,8 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("ee.sqs.SQSProducer.get_sqs_producer")
     def test_filter_to_single_organization(self, mock_get_sqs_producer: MagicMock, mock_client: MagicMock) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
 
@@ -3936,7 +3936,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
         assert data["usage_report"]["organization_id"] == str(self.organization.id)
 
         capture_calls = [
-            call for call in mock_posthog.capture.call_args_list if call[1].get("event") == "usage reports complete"
+            call for call in mock_analytics.capture.call_args_list if call[1].get("event") == "usage reports complete"
         ]
         assert len(capture_calls) == 1
         properties = capture_calls[0][1]["properties"]
@@ -3948,8 +3948,8 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("ee.sqs.SQSProducer.get_sqs_producer")
     def test_filter_to_multiple_organizations(self, mock_get_sqs_producer: MagicMock, mock_client: MagicMock) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
 
@@ -3970,7 +3970,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
         assert set(sent_org_ids) == set(org_ids)
 
         capture_calls = [
-            call for call in mock_posthog.capture.call_args_list if call[1].get("event") == "usage reports complete"
+            call for call in mock_analytics.capture.call_args_list if call[1].get("event") == "usage reports complete"
         ]
         properties = capture_calls[0][1]["properties"]
         assert properties["filtered"] is True
@@ -3981,8 +3981,8 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("ee.sqs.SQSProducer.get_sqs_producer")
     def test_filter_with_missing_organization(self, mock_get_sqs_producer: MagicMock, mock_client: MagicMock) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
 
@@ -3994,7 +3994,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
         mock_producer.send_message.assert_not_called()
 
         capture_calls = [
-            call for call in mock_posthog.capture.call_args_list if call[1].get("event") == "usage reports complete"
+            call for call in mock_analytics.capture.call_args_list if call[1].get("event") == "usage reports complete"
         ]
         assert len(capture_calls) == 1
         properties = capture_calls[0][1]["properties"]
@@ -4008,8 +4008,8 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
     def test_filter_with_mix_of_found_and_missing(
         self, mock_get_sqs_producer: MagicMock, mock_client: MagicMock
     ) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
 
@@ -4038,7 +4038,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
         assert set(sent_org_ids) == {str(self.organization.id), str(self.org2.id)}
 
         capture_calls = [
-            call for call in mock_posthog.capture.call_args_list if call[1].get("event") == "usage reports complete"
+            call for call in mock_analytics.capture.call_args_list if call[1].get("event") == "usage reports complete"
         ]
         properties = capture_calls[0][1]["properties"]
         assert properties["filtered"] is True
@@ -4051,8 +4051,8 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
     def test_no_filter_processes_all_organizations(
         self, mock_get_sqs_producer: MagicMock, mock_client: MagicMock
     ) -> None:
-        mock_posthog = MagicMock()
-        mock_client.return_value = mock_posthog
+        mock_analytics = MagicMock()
+        mock_client.return_value = mock_analytics
         mock_producer = MagicMock()
         mock_get_sqs_producer.return_value = mock_producer
 
@@ -4063,7 +4063,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
 
         # Verify telemetry shows unfiltered
         capture_calls = [
-            call for call in mock_posthog.capture.call_args_list if call[1].get("event") == "usage reports complete"
+            call for call in mock_analytics.capture.call_args_list if call[1].get("event") == "usage reports complete"
         ]
         properties = capture_calls[0][1]["properties"]
         assert properties["filtered"] is False

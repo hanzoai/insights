@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
-import { IconDocument } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { IconDocument } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -45,7 +45,7 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
         if (pendingTicketSubmission && lastSubmittedTicketId && lastSubmittedTicketId !== ticketIdBeforeSubmission) {
             captureFeedback(conversationId, traceId, 'bad', currentTriggerType, ticketMessageText || undefined)
 
-            posthog.capture('insights_ai_support_ticket_created', {
+            insights.capture('insights_ai_support_ticket_created', {
                 $ai_conversation_id: conversationId,
                 $ai_session_id: conversationId,
                 $ai_trace_id: traceId,

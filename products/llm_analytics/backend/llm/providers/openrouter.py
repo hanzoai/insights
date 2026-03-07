@@ -24,7 +24,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 # For App Attribution
 OPENROUTER_HEADERS = {
-    "HTTP-Referer": "https://posthog.com",
+    "HTTP-Referer": "https://hanzo.ai",
     "X-Title": "Insights",
 }
 

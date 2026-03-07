@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { SupermanHog } from 'lib/components/mascots'

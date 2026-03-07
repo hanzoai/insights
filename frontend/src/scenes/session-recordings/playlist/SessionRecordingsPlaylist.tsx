@@ -218,7 +218,7 @@ function PlayerWrapper({
                         title="No recording selected"
                         description="Please select a recording from the list on the left"
                         buttonText="Learn more about recordings"
-                        buttonTo="https://posthog.com/docs/user-guides/recordings"
+                        buttonTo="https://hanzo.ai/docs/user-guides/recordings"
                     />
                 </div>
             )}

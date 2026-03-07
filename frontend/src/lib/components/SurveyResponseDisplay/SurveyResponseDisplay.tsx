@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArchive } from '@posthog/icons'
-import { LemonTag, Link } from '@posthog/lemon-ui'
+import { IconArchive } from '@hanzo/icons'
+import { LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { IconLink } from 'lib/lemon-ui/icons'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'

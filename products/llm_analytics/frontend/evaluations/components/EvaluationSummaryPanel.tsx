@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconChevronDown, IconMinus, IconX } from '@posthog/icons'
-import { LemonButton, LemonSegmentedButton, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconChevronDown, IconMinus, IconX } from '@hanzo/icons'
+import { LemonButton, LemonSegmentedButton, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

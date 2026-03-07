@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneExport } from 'scenes/sceneTypes'

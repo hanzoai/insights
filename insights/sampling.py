@@ -7,8 +7,8 @@ def clamp_to_range(
     value, min_val: float, max_val: float, label: str | None = None, fallback_value: float | None = None
 ) -> float:
     """
-    Clamps a value to a range. This has been ported from posthog-js.
-    https://github.com/PostHog/posthog-js/blob/9de949e26c560535122c50d7fcf9e74d4361ecef/src/utils/number-utils.ts#L4-L33
+    Clamps a value to a range. This has been ported from insights-js.
+    https://github.com/Hanzo Insights/insights-js/blob/9de949e26c560535122c50d7fcf9e74d4361ecef/src/utils/number-utils.ts#L4-L33
 
     Args:
         value: The value to clamp
@@ -53,12 +53,12 @@ def simple_hash(s: str | None) -> int:
     if s is None:
         return hash_val
     for char in s:
-        # we could probably use a 64bit in the backend but let's keep it as posthog-js
+        # we could probably use a 64bit in the backend but let's keep it as insights-js
         hash_val = (hash_val * 31 + ord(char)) & 0xFFFFFFFF  # 32-bit unsigned
     return hash_val
 
 
-# This is the same as posthog-js, prop here is any string value that we want to sample on
+# This is the same as insights-js, prop here is any string value that we want to sample on
 def sample_on_property(prop: str, percent: float) -> bool:
     """
     Uses the hash function to determine whether a property should be included

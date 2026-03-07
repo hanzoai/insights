@@ -159,7 +159,7 @@ class GitProviderFileLinksViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
         url = None
 
-        # Try with posthogs token first (public repos)
+        # Try with insightss token first (public repos)
         if settings.GITHUB_TOKEN:
             url = get_github_file_url(
                 code_sample=code_sample,

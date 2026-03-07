@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                 # If table has FKs to frequently-truncated tables (User, Team, Organization),
                 # drop those FK constraints to avoid blocking TransactionTestCase teardown.
                 # migrations.RunSQL(
-                #     sql="ALTER TABLE posthog_oldfeature DROP CONSTRAINT IF EXISTS posthog_oldfeature_team_id_fkey",
+                #     sql="ALTER TABLE insights_oldfeature DROP CONSTRAINT IF EXISTS insights_oldfeature_team_id_fkey",
                 # ),
             ],
         ),
@@ -135,7 +135,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            sql="DROP TABLE IF EXISTS posthog_oldfeature",
+            sql="DROP TABLE IF EXISTS insights_oldfeature",
             reverse_sql=migrations.RunSQL.noop,
         ),
     ]

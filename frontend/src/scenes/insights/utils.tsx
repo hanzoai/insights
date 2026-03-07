@@ -1,8 +1,8 @@
 import isEqual from 'lodash.isequal'
 import { ReactNode } from 'react'
 
-import { IconWarning } from '@posthog/icons'
-import { LemonButtonProps } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { LemonButtonProps } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { DataColorTheme, DataColorToken } from 'lib/colors'
@@ -250,10 +250,10 @@ export function formatAggregationValue(
 }
 
 // NB! Sync this with breakdown_values.py
-export const BREAKDOWN_OTHER_STRING_LABEL = '$$_posthog_breakdown_other_$$'
+export const BREAKDOWN_OTHER_STRING_LABEL = '$$_insights_breakdown_other_$$'
 export const BREAKDOWN_OTHER_NUMERIC_LABEL = 9007199254740991 // pow(2, 53) - 1
 export const BREAKDOWN_OTHER_DISPLAY = 'Other (i.e. all remaining values)'
-export const BREAKDOWN_NULL_STRING_LABEL = '$$_posthog_breakdown_null_$$'
+export const BREAKDOWN_NULL_STRING_LABEL = '$$_insights_breakdown_null_$$'
 export const BREAKDOWN_NULL_NUMERIC_LABEL = 9007199254740990 // pow(2, 53) - 2
 export const BREAKDOWN_NULL_DISPLAY = 'None (i.e. no value)'
 

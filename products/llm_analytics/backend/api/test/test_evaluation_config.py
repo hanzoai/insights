@@ -21,14 +21,14 @@ def _setup_team():
         test_account_filters=[
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
         ],
         has_completed_onboarding_for={"product_analytics": True},
     )
-    User.objects.create_and_join(org, f"test-eval-config-{uuid4()}@posthog.com", "testpassword123")
+    User.objects.create_and_join(org, f"test-eval-config-{uuid4()}@hanzo.ai", "testpassword123")
     return team
 
 

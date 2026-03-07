@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { Suspense, lazy } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonTag, Spinner, SpinnerOverlay, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonTag, Spinner, SpinnerOverlay, Tooltip } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'

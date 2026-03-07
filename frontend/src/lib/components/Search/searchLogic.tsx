@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { IconClock, IconDownload } from '@posthog/icons'
+import { IconClock, IconDownload } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { commandLogic } from 'lib/components/Command/commandLogic'

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { workflowLogic } from '../../../workflowLogic'
 import { insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'

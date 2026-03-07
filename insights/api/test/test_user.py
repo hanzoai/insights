@@ -135,7 +135,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
 
-        user = self._create_user("newtest@posthog.com")
+        user = self._create_user("newtest@hanzo.ai")
         response = self.client.get(f"/api/users/{user.uuid}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -202,7 +202,7 @@ class TestUserAPI(APIBaseTest):
         """
         count = User.objects.count()
 
-        response = self.client.post("/api/users/", {"first_name": "James", "email": "test+james@posthog.com"})
+        response = self.client.post("/api/users/", {"first_name": "James", "email": "test+james@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(response.json(), self.method_not_allowed_response("POST"))
 
@@ -211,11 +211,11 @@ class TestUserAPI(APIBaseTest):
     # UPDATING USER
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_update_current_user(self, mock_capture, mock_identify_task):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
-        user = self._create_user("old@posthog.com", password="12345678")
+        user = self._create_user("old@hanzo.ai", password="12345678")
         self.client.force_login(user)
         response = self.client.patch(
             "/api/users/@me/",
@@ -276,7 +276,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_can_cancel_own_email_change_request(self, _mock_capture, _mock_identify_task):
         self.user.pending_email = "another@email.com"
         self.user.save()
@@ -288,7 +288,7 @@ class TestUserAPI(APIBaseTest):
         assert response_data["pending_email"] is None
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_cannot_cancel_email_change_request_if_it_doesnt_exist(self, _mock_capture, _mock_identify_task):
         # Fire a call to the endpoint without priming the User with a pending_email field
 
@@ -297,7 +297,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_be_in_current_team(
         self, _mock_capture, _mock_identify_task
     ):
@@ -318,7 +318,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture, _mock_identify_task):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
@@ -328,7 +328,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture, _mock_identify_task):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
@@ -338,7 +338,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_set_scene_personalisation_for_user_must_send_scene(self, _mock_capture, _mock_identify_task):
         dashboard_one = Dashboard.objects.create(team=self.team, name="Dashboard 1")
 
@@ -354,11 +354,11 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_set_scene_personalisation_for_user(self, _mock_capture, _mock_identify_task):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
-        user = self._create_user("the-user@posthog.com", password="12345678")
+        user = self._create_user("the-user@hanzo.ai", password="12345678")
         user.current_team = another_team
         user.save()
         self.client.force_login(user)
@@ -534,7 +534,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.is_staff, False)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_can_update_current_organization(self, mock_capture, mock_identify):
         response = self.client.patch("/api/users/@me/", {"set_current_organization": str(self.new_org.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -562,7 +562,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_can_update_current_project(self, mock_capture, mock_identify):
         team = Team.objects.create(name="Local Team", organization=self.new_org)
         response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
@@ -702,7 +702,7 @@ class TestUserAPI(APIBaseTest):
         """
         # Create a brand new user that belongs to no organizations or teams
         new_user = User.objects.create_user(
-            email="newuser@posthog.com", password="testpass123", first_name="New", last_name="User"
+            email="newuser@hanzo.ai", password="testpass123", first_name="New", last_name="User"
         )
 
         # Clear the cached properties to force re-evaluation
@@ -752,7 +752,7 @@ class TestUserAPI(APIBaseTest):
         """
         # Create a brand new user that belongs to no organizations or teams
         new_user = User.objects.create_user(
-            email="newuser2@posthog.com", password="testpass123", first_name="New", last_name="User"
+            email="newuser2@hanzo.ai", password="testpass123", first_name="New", last_name="User"
         )
 
         # Access the organization property - this should NOT trigger a save since no organizations exist
@@ -796,10 +796,10 @@ class TestUserAPI(APIBaseTest):
             self.assertEqual(self.user.current_organization, result_organization)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
     def test_user_can_update_password(self, mock_send_password_changed_email, mock_capture, mock_identify):
-        user = self._create_user("bob@posthog.com", password="A12345678")
+        user = self._create_user("bob@hanzo.ai", password="A12345678")
         self.client.force_login(user)
 
         response = self.client.patch(
@@ -808,7 +808,7 @@ class TestUserAPI(APIBaseTest):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertEqual(response_data["email"], "bob@posthog.com")
+        self.assertEqual(response_data["email"], "bob@hanzo.ai")
         self.assertNotIn("password", response_data)
         self.assertNotIn("current_password", response_data)
 
@@ -832,19 +832,19 @@ class TestUserAPI(APIBaseTest):
         )
 
         # User can log in with new password
-        response = self.client.post("/api/login", {"email": "bob@posthog.com", "password": "a_new_password"})
+        response = self.client.post("/api/login", {"email": "bob@hanzo.ai", "password": "a_new_password"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Assert password changed email was sent
         mock_send_password_changed_email.assert_called_once_with(user.id)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
     def test_user_with_no_password_set_can_set_password(
         self, mock_send_password_changed_email, mock_capture, mock_identify
     ):
-        user = self._create_user("no_password@posthog.com", password=None)
+        user = self._create_user("no_password@hanzo.ai", password=None)
         self.client.force_login(user)
 
         response = self.client.patch(
@@ -853,7 +853,7 @@ class TestUserAPI(APIBaseTest):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertEqual(response_data["email"], "no_password@posthog.com")
+        self.assertEqual(response_data["email"], "no_password@hanzo.ai")
         self.assertNotIn("password", response_data)
         self.assertNotIn("current_password", response_data)
 
@@ -879,7 +879,7 @@ class TestUserAPI(APIBaseTest):
         # User can log in with new password
         response = self.client.post(
             "/api/login",
-            {"email": "no_password@posthog.com", "password": "a_new_password"},
+            {"email": "no_password@hanzo.ai", "password": "a_new_password"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -888,7 +888,7 @@ class TestUserAPI(APIBaseTest):
 
     @patch("insights.tasks.email.send_password_changed_email.delay")
     def test_user_with_unusable_password_set_can_set_password(self, mock_send_password_changed_email):
-        user = self._create_user("no_password@posthog.com", password="123456789")
+        user = self._create_user("no_password@hanzo.ai", password="123456789")
         user.set_unusable_password()
         user.save()
         self.client.force_login(user)
@@ -905,7 +905,7 @@ class TestUserAPI(APIBaseTest):
         self.assertTrue(user.check_password("a_new_password"))
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_cannot_update_to_insecure_password(self, mock_capture, mock_identify):
         response = self.client.patch(
             "/api/users/@me/",
@@ -991,7 +991,7 @@ class TestUserAPI(APIBaseTest):
             "/api/users/@me/",
             {
                 "id": str(self.user.uuid),
-                "email": "new@posthog.com",
+                "email": "new@hanzo.ai",
                 "password": "hijacked",
                 "current_password": self.CONFIG_PASSWORD,
             },
@@ -1000,7 +1000,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response.json(), self.unauthenticated_response())
 
         self.user.refresh_from_db()
-        self.assertNotEqual(self.user.email, "new@posthog.com")
+        self.assertNotEqual(self.user.email, "new@hanzo.ai")
         self.assertFalse(self.user.check_password("hijacked"))
 
     def test_user_cannot_update_password_with_incorrect_current_password_and_ratelimit_to_prevent_attacks(self):
@@ -1041,7 +1041,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_delete_user_with_organization_memberships(self):
-        user = self._create_user("activeorgmemberships@posthog.com", password="test")
+        user = self._create_user("activeorgmemberships@hanzo.ai", password="test")
 
         self.client.force_login(user)
 
@@ -1052,9 +1052,9 @@ class TestUserAPI(APIBaseTest):
         response = self.client.delete(f"/api/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_can_delete_user_with_no_organization_memberships(self, mock_capture):
-        user = self._create_user("noactiveorgmemberships@posthog.com", password="test")
+        user = self._create_user("noactiveorgmemberships@hanzo.ai", password="test")
 
         self.client.force_login(user)
 
@@ -1077,9 +1077,9 @@ class TestUserAPI(APIBaseTest):
         )
 
     def test_cannot_delete_another_user_with_no_org_memberships(self):
-        user = self._create_user("deleteanotheruser@posthog.com", password="test")
+        user = self._create_user("deleteanotheruser@hanzo.ai", password="test")
 
-        user_with_no_org_memberships = self._create_user("userwithnoorgmemberships@posthog.com", password="test")
+        user_with_no_org_memberships = self._create_user("userwithnoorgmemberships@hanzo.ai", password="test")
 
         OrganizationMembership.objects.filter(user=user_with_no_org_memberships).delete()
 
@@ -1092,9 +1092,9 @@ class TestUserAPI(APIBaseTest):
         assert User.objects.filter(uuid=user_with_no_org_memberships.uuid).exists()
 
     def test_forbidden_to_delete_another_user_with_org_memberships(self):
-        user = self._create_user("deleteanotheruser@posthog.com", password="test")
+        user = self._create_user("deleteanotheruser@hanzo.ai", password="test")
 
-        user_with_org_memberships = self._create_user("userwithorgmemberships@posthog.com", password="test")
+        user_with_org_memberships = self._create_user("userwithorgmemberships@hanzo.ai", password="test")
 
         assert OrganizationMembership.objects.filter(user=user_with_org_memberships).exists()
 
@@ -1139,7 +1139,7 @@ class TestUserAPI(APIBaseTest):
         self.maxDiff = None
         assert (
             unquote(locationHeader)
-            == 'http://127.0.0.1:8010#__posthog={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
+            == 'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": null, "productTourId": null, "userIntent": "add-action", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}'
         )
 
     @patch("insights.api.user.secrets.token_urlsafe")
@@ -1186,7 +1186,7 @@ class TestUserAPI(APIBaseTest):
         self.maxDiff = None
         self.assertEqual(
             unquote(locationHeader),
-            'http://127.0.0.1:8010#__posthog={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": "12", "productTourId": null, "userIntent": "edit-experiment", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}',
+            'http://127.0.0.1:8010#__insights={"action": "ph_authorize", "token": "token123", "temporaryToken": "tokenvalue", "actionId": null, "experimentId": "12", "productTourId": null, "userIntent": "edit-experiment", "toolbarVersion": "toolbar", "apiURL": "http://testserver", "dataAttributes": ["data-attr"]}',
         )
 
     @patch("insights.api.user.secrets.token_urlsafe")
@@ -1204,7 +1204,7 @@ class TestUserAPI(APIBaseTest):
             response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
             location = cast(str | None, response.headers.get("location")) or ""
             self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-            self.assertTrue(f"{url}#__posthog=" in location)
+            self.assertTrue(f"{url}#__insights=" in location)
 
         def assert_forbidden_url(url):
             response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
@@ -1605,7 +1605,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
 
     def test_update_staff_user(self):
-        user = self._create_user("newuser@posthog.com", password="12345678")
+        user = self._create_user("newuser@hanzo.ai", password="12345678")
         self.assertEqual(user.is_staff, False)
 
         # User becomes staff
@@ -1625,7 +1625,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, False)
 
     def test_only_staff_user_can_update_staff_prop(self):
-        user = self._create_user("newuser@posthog.com", password="12345678")
+        user = self._create_user("newuser@hanzo.ai", password="12345678")
 
         self.user.is_staff = False
         self.user.save()
@@ -1657,16 +1657,16 @@ class TestEmailVerificationAPI(APIBaseTest):
 
         set_instance_setting("EMAIL_HOST", "localhost")
 
-        self.other_user = self._create_user("otheruser@posthog.com", password="12345678")
+        self.other_user = self._create_user("otheruser@hanzo.ai", password="12345678")
         assert not self.other_user.is_email_verified
         assert not self.other_user.is_email_verified
 
     # Email verification request
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_can_request_verification_email(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
             response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.content.decode(), '{"success":true}')
@@ -1678,12 +1678,12 @@ class TestEmailVerificationAPI(APIBaseTest):
         html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
         self.validate_basic_html(
             html_message,
-            "https://my.posthog.net",
+            "https://my.insights.net",
             preheader="Please follow the link inside to verify your account.",
         )
-        link_index = html_message.find("https://my.posthog.net/verify_email")
+        link_index = html_message.find("https://my.insights.net/verify_email")
         reset_link = html_message[link_index : html_message.find('"', link_index)]
-        token = reset_link.replace("https://my.posthog.net/verify_email/", "").replace(f"{self.user.uuid}/", "")
+        token = reset_link.replace("https://my.insights.net/verify_email/", "").replace(f"{self.user.uuid}/", "")
 
         response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1737,7 +1737,7 @@ class TestEmailVerificationAPI(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
 
         for i in range(7):
-            with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+            with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
                 response = self.client.post(
                     f"/api/users/request_email_verification/",
                     {"uuid": self.user.uuid},
@@ -1874,19 +1874,19 @@ class TestEmailVerificationAPI(APIBaseTest):
         self.client.logout()
 
         token = email_verification_token_generator.make_token(self.user)
-        self.user.pending_email = "new@posthog.com"
+        self.user.pending_email = "new@hanzo.ai"
         self.user.save()
 
         response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert self.user.email != "new@posthog.com"
-        assert self.user.pending_email == "new@posthog.com"
+        assert self.user.email != "new@hanzo.ai"
+        assert self.user.pending_email == "new@hanzo.ai"
 
         token = email_verification_token_generator.make_token(self.user)
         response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
         assert response.status_code == status.HTTP_200_OK
         self.user.refresh_from_db()
-        assert self.user.email == "new@posthog.com"
+        assert self.user.email == "new@hanzo.ai"
         assert self.user.pending_email is None
 
 

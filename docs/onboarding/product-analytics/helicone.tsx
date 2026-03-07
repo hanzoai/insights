@@ -24,7 +24,7 @@ export const getHeliconeSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     <Markdown>
                         Similar to how you add a [Helicone-Auth
                         header](https://docs.helicone.ai/helicone-headers/header-directory#supported-headers) when
-                        installing Helicone, add two new headers **Helicone-Posthog-Key** and **Helicone-Posthog-Host**
+                        installing Helicone, add two new headers **Helicone-Insights-Key** and **Helicone-Insights-Host**
                         with your Insights details:
                     </Markdown>
                     <CodeBlock
@@ -40,8 +40,8 @@ export const getHeliconeSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                     base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
                                     default_headers={
                                         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-                                        "Helicone-Posthog-Key": "<ph_project_api_key>",
-                                        "Helicone-Posthog-Host": "<ph_client_api_host>",
+                                        "Helicone-Insights-Key": "<ph_project_api_key>",
+                                        "Helicone-Insights-Host": "<ph_client_api_host>",
                                     }
                                 )
                             `,

@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { PaginationManual, lemonToast } from '@posthog/lemon-ui'
+import { PaginationManual, lemonToast } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { delay } from 'lib/utils'

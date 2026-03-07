@@ -1,9 +1,9 @@
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -569,7 +569,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 actions.submitSourceConnectionDetails()
             } else if (values.currentStep === 2 && values.isManualLinkFormVisible) {
                 dataWarehouseTableLogic.actions.submitTable()
-                posthog.capture('source created', { sourceType: 'Manual' })
+                insights.capture('source created', { sourceType: 'Manual' })
             }
 
             if (values.currentStep === 3 && values.selectedConnector?.name) {
@@ -648,7 +648,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                             actions.setIsLoading(true)
                             actions.createSource()
                             if (values.selectedConnector) {
-                                posthog.capture('source created', { sourceType: values.selectedConnector.name })
+                                insights.capture('source created', { sourceType: values.selectedConnector.name })
                             }
                         },
                         size: 'small',
@@ -769,7 +769,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 const errorMessage = e.data?.message ?? e.message
                 lemonToast.error(errorMessage)
 
-                posthog.capture('warehouse credentials invalid', {
+                insights.capture('warehouse credentials invalid', {
                     sourceType: values.selectedConnector.name,
                     errorMessage,
                 })

@@ -7,7 +7,7 @@ import { organizationLogic } from 'scenes/organizationLogic'
 import supportedLanguagesJson from '../../shared/supported_languages.json'
 import type { messageActionsMenuLogicType } from './messageActionsMenuLogicType'
 
-const STORAGE_KEY = 'posthog-translate-language'
+const STORAGE_KEY = 'insights-translate-language'
 export const MAX_TRANSLATE_LENGTH = 10000
 
 /** Simple string hash for generating unique keys from content */

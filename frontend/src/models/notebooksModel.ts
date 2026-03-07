@@ -1,7 +1,7 @@
 import { BuiltLogic, actions, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { EditorFocusPosition, JSONContent } from 'lib/components/RichContentEditor/types'
@@ -102,7 +102,7 @@ export const notebooksModel = kea<notebooksModelType>([
                         onCreate?.(logic)
                     })
 
-                    posthog.capture(`notebook created`, {
+                    insights.capture(`notebook created`, {
                         short_id: notebook.short_id,
                     })
 

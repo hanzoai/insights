@@ -218,11 +218,11 @@ class TestPythonGenerator(APIBaseTest):
         self.assertIn("GENERATED FILE - DO NOT EDIT", code)
         self.assertNotIn("from datetime import datetime", code)
         self.assertIn(
-            '''class PosthogTyped(Posthog):
+            '''class InsightsTyped(Insights):
     """
     A type-safe Insights client with per-event capture methods.
 
-    Drop-in replacement for Posthog that provides IDE autocomplete
+    Drop-in replacement for Insights that provides IDE autocomplete
     and type checking via capture_<event_name>() methods.
     """
 
@@ -249,7 +249,7 @@ class TestPythonGenerator(APIBaseTest):
 
         self.assertIn("GENERATED FILE - DO NOT EDIT", code)
         self.assertIn("from datetime import datetime", code)
-        self.assertIn("class PosthogTyped(Posthog):", code)
+        self.assertIn("class InsightsTyped(Insights):", code)
 
         self.assertIn(
             '''def capture_simple_event(
@@ -354,8 +354,8 @@ class TestPythonGeneratorAPI(APIBaseTest):
         self.assertIn("generator_version", data)
 
         code = data["content"]
-        self.assertIn("from insights import Posthog", code)
-        self.assertIn("class PosthogTyped(Posthog):", code)
+        self.assertIn("from insights import Insights", code)
+        self.assertIn("class InsightsTyped(Insights):", code)
         self.assertIn("def capture_file_downloaded(", code)
         self.assertIn("def capture_user_signed_up(", code)
 
@@ -380,8 +380,8 @@ class TestPythonGeneratorAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["event_count"], 0)
-        self.assertIn("from insights import Posthog", data["content"])
-        self.assertIn("class PosthogTyped(Posthog):", data["content"])
+        self.assertIn("from insights import Insights", data["content"])
+        self.assertIn("class InsightsTyped(Insights):", data["content"])
 
         self._test_telemetry_called(mock_report)
 
@@ -426,7 +426,7 @@ class TestPythonGeneratorAPI(APIBaseTest):
             python_content = response.json()["content"]
 
             # Write generated types
-            types_file = tmpdir_path / "posthog_typed.py"
+            types_file = tmpdir_path / "insights_typed.py"
             types_file.write_text(python_content)
 
             # Create pyproject.toml for mypy config
@@ -441,7 +441,7 @@ strict = false
 """
             )
 
-            # Create a virtual environment and install the posthog SDK
+            # Create a virtual environment and install the insights SDK
             # This ensures mypy can find the real SDK
             import sys
 
@@ -450,23 +450,23 @@ strict = false
             venv_pip = venv_path / "bin" / "pip"
             venv_python = venv_path / "bin" / "python"
 
-            # Install posthog SDK and mypy in the venv
+            # Install insights SDK and mypy in the venv
             install_result = subprocess.run(
-                [str(venv_pip), "install", "posthog", "mypy"],
+                [str(venv_pip), "install", "insights", "mypy"],
                 capture_output=True,
                 text=True,
                 timeout=120,
             )
             if install_result.returncode != 0:
                 self.fail(
-                    f"Failed to install posthog SDK:\nSTDOUT: {install_result.stdout}\nSTDERR: {install_result.stderr}"
+                    f"Failed to install insights SDK:\nSTDOUT: {install_result.stdout}\nSTDERR: {install_result.stderr}"
                 )
 
             # Define test cases: name -> (code, should_pass, expected_error_text)
             test_cases = {
                 "full_event_with_all_properties": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_file_downloaded(
     file_name="document.pdf",
     file_size=1024.0,
@@ -480,7 +480,7 @@ client.capture_file_downloaded(
                 ),
                 "event_with_only_required_properties": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_user_signed_up(
     email="user@example.com",
     plan="free",
@@ -492,7 +492,7 @@ client.capture_user_signed_up(
                 ),
                 "distinct_id_is_optional": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_file_downloaded(
     file_name="document.pdf",
     file_size=1024.0,
@@ -504,7 +504,7 @@ client.capture_file_downloaded(
                 ),
                 "missing_required_property_file_size": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_file_downloaded(
     file_name="document.pdf",
     downloaded_at=datetime.now(),
@@ -516,7 +516,7 @@ client.capture_file_downloaded(
                 ),
                 "wrong_type_string_instead_of_float": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_file_downloaded(
     file_name="document.pdf",
     file_size="not a number",
@@ -529,7 +529,7 @@ client.capture_file_downloaded(
                 ),
                 "extra_properties_allowed": (
                     """
-client = PosthogTyped("fake_key", host="http://localhost")
+client = InsightsTyped("fake_key", host="http://localhost")
 client.capture_file_downloaded(
     file_name="document.pdf",
     file_size=1024.0,
@@ -548,7 +548,7 @@ client.capture_file_downloaded(
 
             for name, (code, should_pass, expected_error) in test_cases.items():
                 test_content = f"""from datetime import datetime
-from posthog_typed import PosthogTyped
+from insights_typed import InsightsTyped
 {code}"""
                 test_file.write_text(test_content)
 

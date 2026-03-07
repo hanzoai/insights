@@ -18,7 +18,7 @@ use crate::{
         run_query, HogQLQueryErrorResponse, HogQLQueryResponse, HogQLQueryResult,
     },
     invocation_context::context,
-    utils::homedir::posthog_home_dir,
+    utils::homedir::insights_home_dir,
 };
 
 pub struct QueryTui {
@@ -69,7 +69,7 @@ impl QueryTui {
             .split(area);
 
         let mut top_title =
-            "Posthog Query Editor - Ctrl+R to run query, ESC to quit, Ctrl+F to switch focus"
+            "Insights Query Editor - Ctrl+R to run query, ESC to quit, Ctrl+F to switch focus"
                 .to_string();
         if self.bg_query_handle.is_some() {
             top_title.push_str(" (Running query, Ctrl+C to cancel)");
@@ -98,7 +98,7 @@ impl QueryTui {
         if !self.state_dirty {
             return Ok(());
         }
-        let home_dir = posthog_home_dir();
+        let home_dir = insights_home_dir();
         let editor_state_path = home_dir.join("editor_state.json");
         let state = PersistedEditorState {
             lines,
@@ -111,7 +111,7 @@ impl QueryTui {
     }
 
     fn load_editor_state(&mut self) -> Result<Vec<String>, Error> {
-        let home_dir = posthog_home_dir();
+        let home_dir = insights_home_dir();
         let editor_state_path = home_dir.join("editor_state.json");
         if !editor_state_path.exists() {
             return Ok(vec![]);

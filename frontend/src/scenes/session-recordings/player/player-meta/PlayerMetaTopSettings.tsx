@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { IconRabbit, IconSearch, IconTortoise } from '@posthog/icons'
-import { LemonButton, LemonDialog, Link } from '@posthog/lemon-ui'
+import { IconRabbit, IconSearch, IconTortoise } from '@hanzo/icons'
+import { LemonButton, LemonDialog, Link } from '@hanzo/lemon-ui'
 
 import { SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS } from 'lib/constants'
 import { IconHeatmap } from 'lib/lemon-ui/icons'
@@ -72,7 +72,7 @@ function TTLWarning(): JSX.Element | null {
 
     useEffect(() => {
         if (lowTtl) {
-            posthog.capture('recording viewed with very low TTL', sessionPlayerMetaData)
+            insights.capture('recording viewed with very low TTL', sessionPlayerMetaData)
         }
     }, [sessionPlayerMetaData, lowTtl])
 
@@ -106,7 +106,7 @@ function TTLWarning(): JSX.Element | null {
                                 <br />
                                 Refer to{' '}
                                 <Link
-                                    to="https://posthog.com/docs/session-replay/data-retention"
+                                    to="https://hanzo.ai/docs/session-replay/data-retention"
                                     disableClientSideRouting
                                     disableDocsPanel
                                     target="_blank"

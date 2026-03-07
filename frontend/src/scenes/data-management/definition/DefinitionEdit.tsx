@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { createRef } from 'react'
 
-import { IconImage } from '@posthog/icons'
-import { LemonSkeleton, LemonTag } from '@posthog/lemon-ui'
+import { IconImage } from '@hanzo/icons'
+import { LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
 
 import { PropertyStatusControl } from 'lib/components/DefinitionPopover/DefinitionPopoverContents'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'

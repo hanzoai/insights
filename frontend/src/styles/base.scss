@@ -283,30 +283,30 @@
     --color-neutral-900: hsl(0deg 0% 10%);
     --color-neutral-950: hsl(0deg 0% 5%);
 
-    // Hanzo 3000 (neutral greys) — replaced warm PostHog yellows with pure neutral scale
-    --color-posthog-3000-25: hsl(0deg 0% 96.5%);
-    --color-posthog-3000-50: hsl(0deg 0% 95%);
-    --color-posthog-3000-100: hsl(0deg 0% 93%);
-    --color-posthog-3000-150: hsl(0deg 0% 89%);
-    --color-posthog-3000-200: hsl(0deg 0% 85%);
-    --color-posthog-3000-250: hsl(0deg 0% 80%);
-    --color-posthog-3000-300: hsl(0deg 0% 76%);
-    --color-posthog-3000-350: hsl(0deg 0% 71%);
-    --color-posthog-3000-400: hsl(0deg 0% 65%);
-    --color-posthog-3000-450: hsl(0deg 0% 60%);
-    --color-posthog-3000-500: hsl(0deg 0% 55%);
+    // Hanzo 3000 (neutral greys) — replaced warm Insights yellows with pure neutral scale
+    --color-insights-3000-25: hsl(0deg 0% 96.5%);
+    --color-insights-3000-50: hsl(0deg 0% 95%);
+    --color-insights-3000-100: hsl(0deg 0% 93%);
+    --color-insights-3000-150: hsl(0deg 0% 89%);
+    --color-insights-3000-200: hsl(0deg 0% 85%);
+    --color-insights-3000-250: hsl(0deg 0% 80%);
+    --color-insights-3000-300: hsl(0deg 0% 76%);
+    --color-insights-3000-350: hsl(0deg 0% 71%);
+    --color-insights-3000-400: hsl(0deg 0% 65%);
+    --color-insights-3000-450: hsl(0deg 0% 60%);
+    --color-insights-3000-500: hsl(0deg 0% 55%);
 
     // Hanzo brand colors (monochrome)
     // //////////////////////////////////////////////////////////
-    --color-posthog-brand-orange-hue: 0;
-    --color-posthog-brand-orange-saturation: 0%;
-    --color-posthog-brand-orange-lightness: 20%;
-    --color-posthog-brand-blue-hue: 228;
-    --color-posthog-brand-blue-saturation: 100%;
-    --color-posthog-brand-blue-lightness: 56%;
-    --color-posthog-brand-yellow-hue: 0;
-    --color-posthog-brand-yellow-saturation: 0%;
-    --color-posthog-brand-yellow-lightness: 80%;
+    --color-insights-brand-orange-hue: 0;
+    --color-insights-brand-orange-saturation: 0%;
+    --color-insights-brand-orange-lightness: 20%;
+    --color-insights-brand-blue-hue: 228;
+    --color-insights-brand-blue-saturation: 100%;
+    --color-insights-brand-blue-lightness: 56%;
+    --color-insights-brand-yellow-hue: 0;
+    --color-insights-brand-yellow-saturation: 0%;
+    --color-insights-brand-yellow-lightness: 80%;
 
     // Product specific colors
     --color-product-data-pipeline-light: rgb(46 162 211);
@@ -359,12 +359,12 @@
     // Generic brand color assignments
     // Change these to change the brand colors
     // //////////////////////////////////////////////////////////
-    --color-brand-primary-hue: var(--color-posthog-brand-orange-hue);
-    --color-brand-primary-saturation: var(--color-posthog-brand-orange-saturation);
-    --color-brand-primary-lightness: var(--color-posthog-brand-orange-lightness);
-    --color-brand-secondary-hue: var(--color-posthog-brand-blue-hue);
-    --color-brand-secondary-saturation: var(--color-posthog-brand-blue-saturation);
-    --color-brand-secondary-lightness: var(--color-posthog-brand-blue-lightness);
+    --color-brand-primary-hue: var(--color-insights-brand-orange-hue);
+    --color-brand-primary-saturation: var(--color-insights-brand-orange-saturation);
+    --color-brand-primary-lightness: var(--color-insights-brand-orange-lightness);
+    --color-brand-secondary-hue: var(--color-insights-brand-blue-hue);
+    --color-brand-secondary-saturation: var(--color-insights-brand-blue-saturation);
+    --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
 
     // AI
     --color-ai: oklch(0.67 0.26 359.84deg);
@@ -378,9 +378,9 @@
         var(--color-brand-primary-lightness)
     );
     --color-accent-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        var(--color-posthog-brand-yellow-lightness)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        var(--color-insights-brand-yellow-lightness)
     );
     --color-accent-hover: hsl(
         var(--color-brand-primary-hue),
@@ -388,9 +388,9 @@
         calc(var(--color-brand-primary-lightness) + 10%)
     );
     --color-accent-hover-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        calc(var(--color-posthog-brand-yellow-lightness) + 10%)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        calc(var(--color-insights-brand-yellow-lightness) + 10%)
     );
     --color-accent-active: hsl(
         var(--color-brand-primary-hue),
@@ -398,9 +398,9 @@
         calc(var(--color-brand-primary-lightness) + 15%)
     );
     --color-accent-active-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        calc(var(--color-posthog-brand-yellow-lightness) + 15%)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        calc(var(--color-insights-brand-yellow-lightness) + 15%)
     );
     --color-accent-highlight-primary: hsla(
         var(--color-brand-primary-hue),
@@ -430,16 +430,16 @@
     // Backgrounds
     // Behind surfaces, large areas: app scenes, etc.
     // //////////////////////////////////////////////////////////
-    --color-bg-primary: var(--color-posthog-3000-50);
+    --color-bg-primary: var(--color-insights-3000-50);
 
     /* Most prominent/used background (replaces --color-bg-3000) */
     --color-bg-surface-primary: var(--color-white);
 
     /* Most prominent surface (Cards, tables, etc.) */
-    --color-bg-surface-secondary: var(--color-posthog-3000-100);
+    --color-bg-surface-secondary: var(--color-insights-3000-100);
 
     /* Second most prominent surface (Toolbars) */
-    --color-bg-surface-tertiary: var(--color-posthog-3000-150);
+    --color-bg-surface-tertiary: var(--color-insights-3000-150);
 
     /* Most prominent surface (Cards, tables, etc.) */
     --color-bg-surface-tooltip: var(--color-neutral-cool-850);
@@ -451,8 +451,8 @@
     // Small colourful areas: banners, pills, buttons, etc.
     // //////////////////////////////////////////////////////////
     --color-bg-fill-primary: var(--color-white);
-    --color-bg-fill-secondary: var(--color-posthog-3000-25);
-    --color-bg-fill-tertiary: var(--color-posthog-3000-50);
+    --color-bg-fill-secondary: var(--color-insights-3000-25);
+    --color-bg-fill-tertiary: var(--color-insights-3000-50);
     --color-bg-fill-highlight-25: color-mix(in oklab, var(--color-black) 2.5%, transparent);
     --color-bg-fill-highlight-50: color-mix(in oklab, var(--color-black) 5%, transparent);
     --color-bg-fill-highlight-75: color-mix(in oklab, var(--color-black) 7.5%, transparent);
@@ -502,8 +502,8 @@
 
     // Borders (Useful for single pixel backgrounds to mimic borders)
     // //////////////////////////////////////////////////////////
-    --color-bg-border-primary: var(--color-posthog-3000-200);
-    --color-bg-border-secondary: var(--color-posthog-3000-400);
+    --color-bg-border-primary: var(--color-insights-3000-200);
+    --color-bg-border-secondary: var(--color-insights-3000-400);
 
     // Content (text, icons)
     // //////////////////////////////////////////////////////////
@@ -519,8 +519,8 @@
     // Borders
     // Borders for surfaces/fills (TODO: perhaps we need to do border-fill-primary, border-fill-warning, etc.)
     // //////////////////////////////////////////////////////////
-    --color-border-primary: var(--color-posthog-3000-200);
-    --color-border-secondary: var(--color-posthog-3000-400);
+    --color-border-primary: var(--color-insights-3000-200);
+    --color-border-secondary: var(--color-insights-3000-400);
     --color-border-info: var(--color-blue-400);
     --color-border-warning: var(--color-yellow-400);
     --color-border-error: var(--color-red-400);
@@ -877,9 +877,9 @@
 [theme='dark'] {
     // Brand colors (dark mode)
     // //////////////////////////////////////////////////////////
-    --color-brand-primary-hue: var(--color-posthog-brand-yellow-hue);
-    --color-brand-primary-saturation: var(--color-posthog-brand-yellow-saturation);
-    --color-brand-primary-lightness: var(--color-posthog-brand-yellow-lightness);
+    --color-brand-primary-hue: var(--color-insights-brand-yellow-hue);
+    --color-brand-primary-saturation: var(--color-insights-brand-yellow-saturation);
+    --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
 
     // AI colors (dark mode)
     --color-ai: oklch(0.69 0.29 341.57deg);
@@ -892,9 +892,9 @@
         var(--color-brand-primary-lightness)
     );
     --color-accent-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        var(--color-posthog-brand-orange-lightness)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        var(--color-insights-brand-orange-lightness)
     );
     --color-accent-hover: hsl(
         var(--color-brand-primary-hue),
@@ -902,9 +902,9 @@
         calc(var(--color-brand-primary-lightness) + 10%)
     );
     --color-accent-hover-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        calc(var(--color-posthog-brand-orange-lightness) + 10%)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        calc(var(--color-insights-brand-orange-lightness) + 10%)
     );
     --color-accent-active: hsl(
         var(--color-brand-primary-hue),
@@ -912,9 +912,9 @@
         calc(var(--color-brand-primary-lightness) + 15%)
     );
     --color-accent-active-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        calc(var(--color-posthog-brand-orange-lightness) + 15%)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        calc(var(--color-insights-brand-orange-lightness) + 15%)
     );
 
     // Used for highlighting search results, and other subtle accent sitations
@@ -1056,7 +1056,7 @@
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
     --color-bg-table: #232429;
-    --brand-key: #fff; // In dark mode the black in PostHog's logo is replaced with white for proper contrast
+    --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
     --primary-3000-frame-bg: var(--primary-3000-frame-bg-dark);
@@ -1228,7 +1228,7 @@
         h1,
         h2,
         // Note: .thank-you-message is excluded in h3 below to prevent the survey thank you message to be styled,
-        // as these styles are only for PostHog main app. It's important to use :where() to avoid increased specificity
+        // as these styles are only for Insights main app. It's important to use :where() to avoid increased specificity
         h3:where(:not(.thank-you-message)),
         h4,
         h5 {

@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -51,7 +51,7 @@ function getCurrentLocationLink(): string {
 }
 
 function getSessionReplayLink(): string {
-    const replayUrl = posthog
+    const replayUrl = insights
         .get_session_replay_url({ withTimestamp: true, timestampLookBack: 30 })
         .replace(window.location.origin + '/replay/', 'http://go/session/')
     return `\nSession: ${replayUrl}`
@@ -61,7 +61,7 @@ function getErrorTrackingLink(uuid?: string): string {
     const values = [
         {
             key: '$session_id',
-            value: [posthog.get_session_id()],
+            value: [insights.get_session_id()],
             operator: 'exact',
             type: 'event',
         },
@@ -87,7 +87,7 @@ function getErrorTrackingLink(uuid?: string): string {
         })
     )
 
-    return `\nExceptions: https://us.posthog.com/project/2/error_tracking?filterGroup=${filterGroup}`
+    return `\nExceptions: https://insights.hanzo.ai/project/2/error_tracking?filterGroup=${filterGroup}`
 }
 
 function getDjangoAdminLink(
@@ -99,7 +99,7 @@ function getDjangoAdminLink(
     if (!user || !cloudRegion) {
         return ''
     }
-    const link = `https://${cloudRegion.toLowerCase()}.posthog.com/admin/posthog/user/${user.id}/change/`
+    const link = `https://${cloudRegion.toLowerCase()}.hanzo.ai/admin/insights/user/${user.id}/change/`
     return `\nAdmin: ${link} (organization ID ${currentOrganization?.id}: ${currentOrganization?.name}, project ID ${currentTeam?.id}: ${currentTeam?.name})`
 }
 
@@ -662,7 +662,7 @@ export const supportLogic = kea<supportLogicType>([
                         },
                         {
                             id: 22129191462555,
-                            value: posthog.get_distinct_id(),
+                            value: insights.get_distinct_id(),
                         },
                         {
                             id: 27242745654043,
@@ -722,7 +722,7 @@ export const supportLogic = kea<supportLogicType>([
                 const zendeskRequestBody = JSON.stringify(payload, undefined, 4)
 
                 // First attempt with standard fetch (unchanged from original)
-                const response = await fetch('https://posthoghelp.zendesk.com/api/v2/requests.json', {
+                const response = await fetch('https://insightshelp.zendesk.com/api/v2/requests.json', {
                     method: 'POST',
                     body: zendeskRequestBody,
                     headers: { 'Content-Type': 'application/json' },
@@ -737,7 +737,7 @@ export const supportLogic = kea<supportLogicType>([
 
                     // Try Beacon API
                     const beaconSuccess = navigator.sendBeacon(
-                        'https://posthoghelp.zendesk.com/api/v2/requests.json',
+                        'https://insightshelp.zendesk.com/api/v2/requests.json',
                         zendeskRequestBody
                     )
 
@@ -751,7 +751,7 @@ export const supportLogic = kea<supportLogicType>([
                             submission_method: 'beacon',
                             browser: isFirefox ? 'firefox' : 'other',
                         }
-                        posthog.capture('support_ticket', properties)
+                        insights.capture('support_ticket', properties)
                         lemonToast.success(
                             "Got the message! If we have follow-up information for you, we'll reply via email."
                         )
@@ -775,7 +775,7 @@ export const supportLogic = kea<supportLogicType>([
                             body_size: body?.length,
                         },
                     }
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         ...extra,
                         ...contexts,
                     })
@@ -790,7 +790,7 @@ export const supportLogic = kea<supportLogicType>([
                 const json = await response.json()
 
                 const zendesk_ticket_id = json.request.id
-                const zendesk_ticket_link = `https://posthoghelp.zendesk.com/agent/tickets/${zendesk_ticket_id}`
+                const zendesk_ticket_link = `https://insightshelp.zendesk.com/agent/tickets/${zendesk_ticket_id}`
                 const properties = {
                     zendesk_ticket_uuid,
                     kind,
@@ -799,7 +799,7 @@ export const supportLogic = kea<supportLogicType>([
                     zendesk_ticket_id,
                     zendesk_ticket_link,
                 }
-                posthog.capture('support_ticket', properties)
+                insights.capture('support_ticket', properties)
                 lemonToast.success("Got the message! If we have follow-up information for you, we'll reply via email.")
 
                 actions.ensureZendeskOrganization()
@@ -809,7 +809,7 @@ export const supportLogic = kea<supportLogicType>([
                 actions.closeSupportForm()
                 actions.resetSendSupportRequest()
             } catch (e) {
-                posthog.captureException(e)
+                insights.captureException(e)
 
                 // More helpful error message
                 // Use the same error message regardless of browser
@@ -846,7 +846,7 @@ export const supportLogic = kea<supportLogicType>([
                     organization_name: currentOrganization.name,
                 })
             } catch (error) {
-                posthog.captureException(error, {
+                insights.captureException(error, {
                     context: 'zendesk_organization_creation',
                     organization_id: organizationLogic.values.currentOrganization?.id,
                     organization_name: organizationLogic.values.currentOrganization?.name,

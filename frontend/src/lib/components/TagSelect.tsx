@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonButtonProps, LemonDropdown, LemonDropdownProps, LemonInput } from '@posthog/lemon-ui'
+import { LemonButton, LemonButtonProps, LemonDropdown, LemonDropdownProps, LemonInput } from '@hanzo/lemon-ui'
 
 import { tagSelectLogic } from './tagSelectLogic'
 

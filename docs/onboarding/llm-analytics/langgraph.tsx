@@ -24,14 +24,14 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -77,7 +77,7 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a LangChain `CallbackHandler`.
+                        settings](https://insights.hanzo.ai/settings/project), then create a LangChain `CallbackHandler`.
                     </Markdown>
 
                     <CodeBlock
@@ -86,16 +86,16 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog.ai.langchain import CallbackHandler
-                                    from posthog import Posthog
+                                    from insights.ai.langchain import CallbackHandler
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
 
                                     callback_handler = CallbackHandler(
-                                        client=posthog,
+                                        client=insights,
                                         distinct_id="user_123", # optional
                                         trace_id="trace_456", # optional
                                         properties={"conversation_id": "abc123"}, # optional
@@ -108,8 +108,8 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node';
-                                    import { LangChainCallbackHandler } from '@posthog/ai';
+                                    import { Insights } from 'insights-node';
+                                    import { LangChainCallbackHandler } from '@hanzo/ai';
 
                                     const phClient = new Insights(
                                       '<ph_project_api_key>',

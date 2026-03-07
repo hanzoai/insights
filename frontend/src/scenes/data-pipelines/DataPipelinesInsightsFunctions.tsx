@@ -78,7 +78,7 @@ export function DataPipelinesInsightsFunctions({
                     thingName={humanizedKind}
                     productKey={productInfoMapping.key}
                     description={productInfoMapping.description}
-                    docsURL="https://posthog.com/docs/cdp"
+                    docsURL="https://hanzo.ai/docs/cdp"
                     actionElementOverride={action}
                     isEmpty={insightsFunctions.length === 0 && !loading}
                 />

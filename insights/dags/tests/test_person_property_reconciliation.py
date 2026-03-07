@@ -1,7 +1,7 @@
 """Tests for the person property reconciliation job.
 
 For comprehensive documentation including architecture diagrams and example configs, see:
-    posthog/dags/PERSON_PROPERTY_RECONCILIATION.md
+    insights/dags/PERSON_PROPERTY_RECONCILIATION.md
 """
 
 import os
@@ -703,14 +703,14 @@ class TestUpdatePersonWithVersionCheck:
         assert result_data["properties"]["existing"] == "value"
 
         # Verify UPDATE was executed
-        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE posthog_person" in str(call)]
+        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE insights_person" in str(call)]
         assert len(update_calls) == 1
 
         # Verify backup INSERT was executed
         backup_calls = [
             call
             for call in cursor.execute.call_args_list
-            if "INSERT INTO posthog_person_reconciliation_backup" in str(call)
+            if "INSERT INTO insights_person_reconciliation_backup" in str(call)
         ]
         assert len(backup_calls) == 1
 
@@ -763,14 +763,14 @@ class TestUpdatePersonWithVersionCheck:
         assert result_data is None  # No data returned for Kafka in dry run
 
         # Verify UPDATE was NOT executed
-        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE posthog_person" in str(call)]
+        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE insights_person" in str(call)]
         assert len(update_calls) == 0
 
         # Verify backup INSERT was STILL executed (for audit trail)
         backup_calls = [
             call
             for call in cursor.execute.call_args_list
-            if "INSERT INTO posthog_person_reconciliation_backup" in str(call)
+            if "INSERT INTO insights_person_reconciliation_backup" in str(call)
         ]
         assert len(backup_calls) == 1
 
@@ -840,7 +840,7 @@ class TestUpdatePersonWithVersionCheck:
         update_attempt = [0]
 
         def execute_side_effect(query, *args):
-            if "UPDATE posthog_person" in query:
+            if "UPDATE insights_person" in query:
                 update_attempt[0] += 1
                 # First attempt fails, second succeeds
                 cursor.rowcount = 1 if update_attempt[0] > 1 else 0
@@ -1199,7 +1199,7 @@ class TestBackupFunctionality:
         backup_calls = [
             call
             for call in cursor.execute.call_args_list
-            if "INSERT INTO posthog_person_reconciliation_backup" in str(call)
+            if "INSERT INTO insights_person_reconciliation_backup" in str(call)
         ]
         assert len(backup_calls) == 1
 
@@ -1256,7 +1256,7 @@ class TestBackupFunctionality:
         backup_calls = [
             call
             for call in cursor.execute.call_args_list
-            if "INSERT INTO posthog_person_reconciliation_backup" in str(call)
+            if "INSERT INTO insights_person_reconciliation_backup" in str(call)
         ]
         assert len(backup_calls) == 1
 
@@ -1321,12 +1321,12 @@ class TestBackupFunctionality:
         backup_calls = [
             call
             for call in cursor.execute.call_args_list
-            if "INSERT INTO posthog_person_reconciliation_backup" in str(call)
+            if "INSERT INTO insights_person_reconciliation_backup" in str(call)
         ]
         assert len(backup_calls) == 0
 
         # But UPDATE should still happen
-        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE posthog_person" in str(call)]
+        update_calls = [call for call in cursor.execute.call_args_list if "UPDATE insights_person" in str(call)]
         assert len(update_calls) == 1
 
     def test_backup_created_return_value_true_when_enabled(self):
@@ -1393,7 +1393,7 @@ class TestBackupFunctionality:
         def execute_side_effect(*args, **kwargs):
             call_count[0] += 1
             query = args[0] if args else ""
-            if "INSERT INTO posthog_person_reconciliation_backup" in query:
+            if "INSERT INTO insights_person_reconciliation_backup" in query:
                 # Simulate ON CONFLICT DO NOTHING - no row inserted
                 cursor.rowcount = 0
             else:

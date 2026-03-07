@@ -40,14 +40,14 @@ pub fn pull_endpoints(args: &PullArgs) -> Result<()> {
     context().capture_command_invoked("endpoints_pull");
 
     println!();
-    println!("Fetching endpoints from PostHog...");
+    println!("Fetching endpoints from Insights...");
     println!();
 
     // Fetch all remote endpoints
     let remote_list = fetch_all_endpoints(args.debug)?;
 
     if remote_list.results.is_empty() {
-        println!("No endpoints found in PostHog.");
+        println!("No endpoints found in Insights.");
         return Ok(());
     }
 
@@ -68,7 +68,7 @@ pub fn pull_endpoints(args: &PullArgs) -> Result<()> {
         // Check for missing endpoints
         for name in &args.names {
             if !remote_list.results.iter().any(|e| &e.name == name) {
-                println!("{} Endpoint '{}' not found in PostHog", "⚠".yellow(), name);
+                println!("{} Endpoint '{}' not found in Insights", "⚠".yellow(), name);
             }
         }
 
@@ -82,8 +82,8 @@ pub fn pull_endpoints(args: &PullArgs) -> Result<()> {
         println!("Specify endpoint name(s) to pull, or use --all to pull all endpoints.");
         println!();
         println!("Usage:");
-        println!("  posthog-cli exp endpoints pull <name>...");
-        println!("  posthog-cli exp endpoints pull --all");
+        println!("  insights-cli exp endpoints pull <name>...");
+        println!("  insights-cli exp endpoints pull --all");
         return Ok(());
     };
 

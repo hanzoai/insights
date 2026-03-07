@@ -70,7 +70,7 @@ lint:
 
 # Show help
 help:
-	@echo "PostHog Hobby Installer - Build Targets"
+	@echo "Insights Hobby Installer - Build Targets"
 	@echo ""
 	@echo "  make build             Build for current platform (development binary)"
 	@echo "  make build-linux       Build Linux/Ubuntu amd64 binary (production)"

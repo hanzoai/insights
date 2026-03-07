@@ -72,7 +72,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                             language: 'ruby',
                                             file: 'Ruby',
                                             code: dedent`
-                                                posthog.capture({
+                                                insights.capture({
                                                     distinct_id: 'distinct_id_of_your_user',
                                                     event: 'event_name',
                                                     send_feature_flags: true,
@@ -94,7 +94,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                             language: 'ruby',
                                             file: 'Ruby',
                                             code: dedent`
-                                                posthog.capture({
+                                                insights.capture({
                                                     distinct_id: 'distinct_id_of_your_user',
                                                     event: 'event_name',
                                                     properties: {

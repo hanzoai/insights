@@ -1,4 +1,4 @@
-"""Dagster job for deleting posthog_persons rows that have no associated posthog_persondistinctid rows."""
+"""Dagster job for deleting insights_persons rows that have no associated insights_persondistinctid rows."""
 
 import time
 from typing import Any
@@ -23,7 +23,7 @@ class PersonsNoDistinctIdsCleanupConfig(dagster.Config):
     batch_size: int = 1000  # Records to scan for a parent person or delete in a single transaction
     max_id: int | None = None  # Optional override for max ID to resume from partial state
     min_id: int | None = None  # Optional override for min ID to resume from partial state
-    persons_table: str = "posthog_persons_new"  # Override once the table name swap is complete!
+    persons_table: str = "insights_persons_new"  # Override once the table name swap is complete!
 
 
 @dagster.op
@@ -33,7 +33,7 @@ def get_id_range_for_pwdc(
     database: dagster.ResourceParam[psycopg2.extensions.connection],
 ) -> tuple[int, int]:
     """
-    Query source database for MIN(id) and MAX(id) from posthog_person table.
+    Query source database for MIN(id) and MAX(id) from insights_person table.
     If min_id or max_id is provided in config, uses that instead of querying.
     Returns tuple (min_id, max_id).
     """
@@ -44,7 +44,7 @@ def get_id_range_for_pwdc(
             context.log.info(f"Using configured min_id override: {config.min_id}")
         else:
             # Always query for min_id
-            min_query = f"SELECT MIN(id) as min_id FROM posthog_person"
+            min_query = f"SELECT MIN(id) as min_id FROM insights_person"
             context.log.info(f"Querying min ID: {min_query}")
             cursor.execute(min_query)
             min_result = cursor.fetchone()
@@ -61,15 +61,15 @@ def get_id_range_for_pwdc(
             max_id = config.max_id
             context.log.info(f"Using configured max_id override: {max_id}")
         else:
-            max_query = f"SELECT MAX(id) as max_id FROM posthog_person"
+            max_query = f"SELECT MAX(id) as max_id FROM insights_person"
             context.log.info(f"Querying max ID: {max_query}")
             cursor.execute(max_query)
             max_result = cursor.fetchone()
 
             if max_result is None or max_result["max_id"] is None:
-                context.log.exception("posthog_person table has no valid max ID")
+                context.log.exception("insights_person table has no valid max ID")
                 # Note: No metrics client here as this is get_id_range_for_pwdc op, not copy_chunk
-                raise dagster.Failure("posthog_person table has no valid max ID")
+                raise dagster.Failure("insights_person table has no valid max ID")
 
             max_id = int(max_result["max_id"])
 
@@ -141,8 +141,8 @@ def scan_delete_chunk_for_pwdc(
     cluster: dagster.ResourceParam[ClickhouseCluster],
 ) -> dict[str, Any]:
     """
-    Scan posthog_person_new table for records that have no associated posthog_persondistinctid row,
-    and deletes the corresponding posthog_person_new row.
+    Scan insights_person_new table for records that have no associated insights_persondistinctid row,
+    and deletes the corresponding insights_person_new row.
     Processes in batches of batch_size records.
     """
     chunk_min, chunk_max = chunk
@@ -195,14 +195,14 @@ def scan_delete_chunk_for_pwdc(
                     # Begin transaction (settings already applied at session level)
                     cursor.execute("BEGIN")
 
-                    # Execute DELETE FROM posthog_person_new with NOT EXISTS check on
-                    # associated posthog_persondistinctid rows
+                    # Execute DELETE FROM insights_person_new with NOT EXISTS check on
+                    # associated insights_persondistinctid rows
                     scan_delete_query = f"""
 DELETE FROM {config.persons_table} AS p
 WHERE p.id >= %s AND p.id <= %s
   AND NOT EXISTS (
     SELECT 1
-    FROM posthog_persondistinctid AS pd
+    FROM insights_persondistinctid AS pd
     WHERE pd.person_id = p.id
       AND pd.team_id = p.team_id
   )
@@ -414,8 +414,8 @@ ORDER BY p.id DESC
 )
 def persons_without_distinct_ids_cleanup_job():
     """
-    Scan posthog_person table for records that have no associated posthog_persondistinctid
-    rows, deleting the corresponding posthog_person rows.
+    Scan insights_person table for records that have no associated insights_persondistinctid
+    rows, deleting the corresponding insights_person rows.
     Divides the ID space into chunks and processes them in parallel.
     """
     id_range = get_id_range_for_pwdc()

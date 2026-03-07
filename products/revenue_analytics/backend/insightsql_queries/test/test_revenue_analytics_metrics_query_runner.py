@@ -49,11 +49,11 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
     STRIPE_SUBSCRIPTION_COLUMNS,
 )
 
-SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_subscriptions"
-PRODUCTS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_products"
-CUSTOMERS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_customers"
-INVOICES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_invoices"
-CHARGES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_charges"
+SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_subscriptions"
+PRODUCTS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_products"
+CUSTOMERS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_customers"
+INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_invoices"
+CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_charges"
 
 ALL_MONTHS_LABELS = [
     "Nov 2024",
@@ -123,7 +123,7 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     distinct_ids=[distinct_id],
                     properties={
                         "name": distinct_id,
-                        **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                        **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                     },
                 )
             event_ids: list[str] = []
@@ -342,97 +342,97 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             results,
             [
                 {
-                    "label": "Subscription Count | stripe.posthog_test",
+                    "label": "Subscription Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 3, 6, 6, 6, 6, 3, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Subscription Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Subscription Count | stripe.posthog_test",
-                        "name": "Subscription Count | stripe.posthog_test",
+                        "id": "Subscription Count | stripe.insights_test",
+                        "name": "Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Subscription Count | stripe.posthog_test",
+                    "label": "New Subscription Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Subscription Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "New Subscription Count | stripe.posthog_test",
-                        "name": "New Subscription Count | stripe.posthog_test",
+                        "id": "New Subscription Count | stripe.insights_test",
+                        "name": "New Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Subscription Count | stripe.posthog_test",
+                    "label": "Churned Subscription Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Subscription Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Churned Subscription Count | stripe.posthog_test",
-                        "name": "Churned Subscription Count | stripe.posthog_test",
+                        "id": "Churned Subscription Count | stripe.insights_test",
+                        "name": "Churned Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Customer Count | stripe.posthog_test",
+                    "label": "Customer Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 3, 6, 6, 6, 6, 3, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Customer Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Customer Count | stripe.posthog_test",
-                        "name": "Customer Count | stripe.posthog_test",
+                        "id": "Customer Count | stripe.insights_test",
+                        "name": "Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Customer Count | stripe.posthog_test",
+                    "label": "New Customer Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Customer Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "New Customer Count | stripe.posthog_test",
-                        "name": "New Customer Count | stripe.posthog_test",
+                        "id": "New Customer Count | stripe.insights_test",
+                        "name": "New Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Customer Count | stripe.posthog_test",
+                    "label": "Churned Customer Count | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Customer Count",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Churned Customer Count | stripe.posthog_test",
-                        "name": "Churned Customer Count | stripe.posthog_test",
+                        "id": "Churned Customer Count | stripe.insights_test",
+                        "name": "Churned Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "ARPU | stripe.posthog_test",
+                    "label": "ARPU | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -457,17 +457,17 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                     ],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "ARPU",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "ARPU | stripe.posthog_test",
-                        "name": "ARPU | stripe.posthog_test",
+                        "id": "ARPU | stripe.insights_test",
+                        "name": "ARPU | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "LTV | stripe.posthog_test",
+                    "label": "LTV | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -492,13 +492,13 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                     ],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "LTV",
                     },
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "LTV | stripe.posthog_test",
-                        "name": "LTV | stripe.posthog_test",
+                        "id": "LTV | stripe.insights_test",
+                        "name": "LTV | stripe.insights_test",
                     },
                 },
             ],
@@ -526,7 +526,7 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
     # NOTE: This can be removed once `managed-viewsets` feature flag is rolled out to all teams
     def test_with_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             # Use huge date range to collect all data
@@ -538,97 +538,97 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 results,
                 [
                     {
-                        "label": "Subscription Count | stripe.posthog_test",
+                        "label": "Subscription Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 3, 6, 6, 6, 6, 3, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "Subscription Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "Subscription Count | stripe.posthog_test",
-                            "name": "Subscription Count | stripe.posthog_test",
+                            "id": "Subscription Count | stripe.insights_test",
+                            "name": "Subscription Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "New Subscription Count | stripe.posthog_test",
+                        "label": "New Subscription Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "New Subscription Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "New Subscription Count | stripe.posthog_test",
-                            "name": "New Subscription Count | stripe.posthog_test",
+                            "id": "New Subscription Count | stripe.insights_test",
+                            "name": "New Subscription Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "Churned Subscription Count | stripe.posthog_test",
+                        "label": "Churned Subscription Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "Churned Subscription Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "Churned Subscription Count | stripe.posthog_test",
-                            "name": "Churned Subscription Count | stripe.posthog_test",
+                            "id": "Churned Subscription Count | stripe.insights_test",
+                            "name": "Churned Subscription Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "Customer Count | stripe.posthog_test",
+                        "label": "Customer Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 3, 6, 6, 6, 6, 3, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "Customer Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "Customer Count | stripe.posthog_test",
-                            "name": "Customer Count | stripe.posthog_test",
+                            "id": "Customer Count | stripe.insights_test",
+                            "name": "Customer Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "New Customer Count | stripe.posthog_test",
+                        "label": "New Customer Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "New Customer Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "New Customer Count | stripe.posthog_test",
-                            "name": "New Customer Count | stripe.posthog_test",
+                            "id": "New Customer Count | stripe.insights_test",
+                            "name": "New Customer Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "Churned Customer Count | stripe.posthog_test",
+                        "label": "Churned Customer Count | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "Churned Customer Count",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "Churned Customer Count | stripe.posthog_test",
-                            "name": "Churned Customer Count | stripe.posthog_test",
+                            "id": "Churned Customer Count | stripe.insights_test",
+                            "name": "Churned Customer Count | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "ARPU | stripe.posthog_test",
+                        "label": "ARPU | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [
@@ -653,17 +653,17 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             0,
                         ],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "ARPU",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "ARPU | stripe.posthog_test",
-                            "name": "ARPU | stripe.posthog_test",
+                            "id": "ARPU | stripe.insights_test",
+                            "name": "ARPU | stripe.insights_test",
                         },
                     },
                     {
-                        "label": "LTV | stripe.posthog_test",
+                        "label": "LTV | stripe.insights_test",
                         "days": ALL_MONTHS_DAYS,
                         "labels": ALL_MONTHS_LABELS,
                         "data": [
@@ -688,13 +688,13 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             0,
                         ],
                         "breakdown": {
-                            "property": "stripe.posthog_test",
+                            "property": "stripe.insights_test",
                             "kind": "LTV",
                         },
                         "action": {
                             "days": ALL_MONTHS_FAKEDATETIMES,
-                            "id": "LTV | stripe.posthog_test",
-                            "name": "LTV | stripe.posthog_test",
+                            "id": "LTV | stripe.insights_test",
+                            "name": "LTV | stripe.insights_test",
                         },
                     },
                 ],
@@ -733,97 +733,97 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             results,
             [
                 {
-                    "label": "Subscription Count | stripe.posthog_test",
+                    "label": "Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [6, 6, 3, 2],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Subscription Count | stripe.posthog_test",
-                        "name": "Subscription Count | stripe.posthog_test",
+                        "id": "Subscription Count | stripe.insights_test",
+                        "name": "Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Subscription Count | stripe.posthog_test",
+                    "label": "New Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "New Subscription Count | stripe.posthog_test",
-                        "name": "New Subscription Count | stripe.posthog_test",
+                        "id": "New Subscription Count | stripe.insights_test",
+                        "name": "New Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Subscription Count | stripe.posthog_test",
+                    "label": "Churned Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0, 0, 3, 1],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Churned Subscription Count | stripe.posthog_test",
-                        "name": "Churned Subscription Count | stripe.posthog_test",
+                        "id": "Churned Subscription Count | stripe.insights_test",
+                        "name": "Churned Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Customer Count | stripe.posthog_test",
+                    "label": "Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [6, 6, 3, 2],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Customer Count | stripe.posthog_test",
-                        "name": "Customer Count | stripe.posthog_test",
+                        "id": "Customer Count | stripe.insights_test",
+                        "name": "Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Customer Count | stripe.posthog_test",
+                    "label": "New Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0, 0, 0, 0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "New Customer Count | stripe.posthog_test",
-                        "name": "New Customer Count | stripe.posthog_test",
+                        "id": "New Customer Count | stripe.insights_test",
+                        "name": "New Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Customer Count | stripe.posthog_test",
+                    "label": "Churned Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0, 0, 3, 1],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Churned Customer Count | stripe.posthog_test",
-                        "name": "Churned Customer Count | stripe.posthog_test",
+                        "id": "Churned Customer Count | stripe.insights_test",
+                        "name": "Churned Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "ARPU | stripe.posthog_test",
+                    "label": "ARPU | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [
@@ -833,28 +833,28 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Decimal("10.2225131665"),
                     ],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "ARPU",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "ARPU | stripe.posthog_test",
-                        "name": "ARPU | stripe.posthog_test",
+                        "id": "ARPU | stripe.insights_test",
+                        "name": "ARPU | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "LTV | stripe.posthog_test",
+                    "label": "LTV | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [None, None, Decimal("6.8150087777"), Decimal("20.445026333")],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "LTV",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "LTV | stripe.posthog_test",
-                        "name": "LTV | stripe.posthog_test",
+                        "id": "LTV | stripe.insights_test",
+                        "name": "LTV | stripe.insights_test",
                     },
                 },
             ],
@@ -874,123 +874,123 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             results,
             [
                 {
-                    "label": "Subscription Count | stripe.posthog_test",
+                    "label": "Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Subscription Count | stripe.posthog_test",
-                        "name": "Subscription Count | stripe.posthog_test",
+                        "id": "Subscription Count | stripe.insights_test",
+                        "name": "Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Subscription Count | stripe.posthog_test",
+                    "label": "New Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "New Subscription Count | stripe.posthog_test",
-                        "name": "New Subscription Count | stripe.posthog_test",
+                        "id": "New Subscription Count | stripe.insights_test",
+                        "name": "New Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Subscription Count | stripe.posthog_test",
+                    "label": "Churned Subscription Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Subscription Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Churned Subscription Count | stripe.posthog_test",
-                        "name": "Churned Subscription Count | stripe.posthog_test",
+                        "id": "Churned Subscription Count | stripe.insights_test",
+                        "name": "Churned Subscription Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Customer Count | stripe.posthog_test",
+                    "label": "Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Customer Count | stripe.posthog_test",
-                        "name": "Customer Count | stripe.posthog_test",
+                        "id": "Customer Count | stripe.insights_test",
+                        "name": "Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "New Customer Count | stripe.posthog_test",
+                    "label": "New Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "New Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "New Customer Count | stripe.posthog_test",
-                        "name": "New Customer Count | stripe.posthog_test",
+                        "id": "New Customer Count | stripe.insights_test",
+                        "name": "New Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "Churned Customer Count | stripe.posthog_test",
+                    "label": "Churned Customer Count | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "Churned Customer Count",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "Churned Customer Count | stripe.posthog_test",
-                        "name": "Churned Customer Count | stripe.posthog_test",
+                        "id": "Churned Customer Count | stripe.insights_test",
+                        "name": "Churned Customer Count | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "ARPU | stripe.posthog_test",
+                    "label": "ARPU | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "ARPU",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "ARPU | stripe.posthog_test",
-                        "name": "ARPU | stripe.posthog_test",
+                        "id": "ARPU | stripe.insights_test",
+                        "name": "ARPU | stripe.insights_test",
                     },
                 },
                 {
-                    "label": "LTV | stripe.posthog_test",
+                    "label": "LTV | stripe.insights_test",
                     "days": days,
                     "labels": labels,
                     "data": [0],
                     "breakdown": {
-                        "property": "stripe.posthog_test",
+                        "property": "stripe.insights_test",
                         "kind": "LTV",
                     },
                     "action": {
                         "days": action_days,
-                        "id": "LTV | stripe.posthog_test",
-                        "name": "LTV | stripe.posthog_test",
+                        "id": "LTV | stripe.insights_test",
+                        "name": "LTV | stripe.insights_test",
                     },
                 },
             ],
@@ -1006,12 +1006,12 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             [(result["data"], result["label"]) for result in results],
             [
-                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product A"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product A"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product A"),
-                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product A"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product A"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product A"),
+                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product A"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product A"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product A"),
+                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product A"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.insights_test - Product A"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product A"),
                 (
                     [
                         0,
@@ -1022,15 +1022,15 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Decimal("4.1397346665"),
                         Decimal("22.9631447238"),
                     ],
-                    "ARPU | stripe.posthog_test - Product A",
+                    "ARPU | stripe.insights_test - Product A",
                 ),
-                ([0, 0, None, None, None, None, None], "LTV | stripe.posthog_test - Product A"),
-                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product B"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product B"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product B"),
-                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product B"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product B"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product B"),
+                ([0, 0, None, None, None, None, None], "LTV | stripe.insights_test - Product A"),
+                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product B"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product B"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product B"),
+                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product B"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.insights_test - Product B"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product B"),
                 (
                     [
                         0,
@@ -1041,15 +1041,15 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Decimal("16.3052916666"),
                         Decimal("40.8052916666"),
                     ],
-                    "ARPU | stripe.posthog_test - Product B",
+                    "ARPU | stripe.insights_test - Product B",
                 ),
-                ([0, 0, None, None, None, None, None], "LTV | stripe.posthog_test - Product B"),
-                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product C"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product C"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product C"),
-                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product C"),
-                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product C"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product C"),
+                ([0, 0, None, None, None, None, None], "LTV | stripe.insights_test - Product B"),
+                ([0, 0, 1, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product C"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product C"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product C"),
+                ([0, 0, 1, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product C"),
+                ([0, 0, 1, 0, 0, 0, 0], "New Customer Count | stripe.insights_test - Product C"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product C"),
                 (
                     [
                         0,
@@ -1060,42 +1060,42 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Decimal("691.377575"),
                         Decimal("1546.59444"),
                     ],
-                    "ARPU | stripe.posthog_test - Product C",
+                    "ARPU | stripe.insights_test - Product C",
                 ),
-                ([0, 0, None, None, None, None, None], "LTV | stripe.posthog_test - Product C"),
-                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product D"),
+                ([0, 0, None, None, None, None, None], "LTV | stripe.insights_test - Product C"),
+                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product D"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product D"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product D"),
+                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product D"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.insights_test - Product D"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product D"),
                 (
                     [0, 0, 0, Decimal("85.47825"), Decimal("85.47825"), Decimal("83.16695"), 0],
-                    "ARPU | stripe.posthog_test - Product D",
+                    "ARPU | stripe.insights_test - Product D",
                 ),
-                ([0, 0, 0, None, None, None, None], "LTV | stripe.posthog_test - Product D"),
-                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product E"),
+                ([0, 0, 0, None, None, None, None], "LTV | stripe.insights_test - Product D"),
+                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product E"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product E"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product E"),
+                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product E"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.insights_test - Product E"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product E"),
                 (
                     [0, 0, 0, Decimal("273.57025"), Decimal("273.57025"), Decimal("43.82703"), 0],
-                    "ARPU | stripe.posthog_test - Product E",
+                    "ARPU | stripe.insights_test - Product E",
                 ),
-                ([0, 0, 0, None, None, None, None], "LTV | stripe.posthog_test - Product E"),
-                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.posthog_test - Product F"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.posthog_test - Product F"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.posthog_test - Product F"),
-                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.posthog_test - Product F"),
-                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.posthog_test - Product F"),
-                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.posthog_test - Product F"),
+                ([0, 0, 0, None, None, None, None], "LTV | stripe.insights_test - Product E"),
+                ([0, 0, 0, 1, 1, 1, 1], "Subscription Count | stripe.insights_test - Product F"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Subscription Count | stripe.insights_test - Product F"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Subscription Count | stripe.insights_test - Product F"),
+                ([0, 0, 0, 1, 1, 1, 1], "Customer Count | stripe.insights_test - Product F"),
+                ([0, 0, 0, 1, 0, 0, 0], "New Customer Count | stripe.insights_test - Product F"),
+                ([0, 0, 0, 0, 0, 0, 0], "Churned Customer Count | stripe.insights_test - Product F"),
                 (
                     [0, 0, 0, Decimal("668.67503"), Decimal("668.67503"), Decimal("1459.02008"), 0],
-                    "ARPU | stripe.posthog_test - Product F",
+                    "ARPU | stripe.insights_test - Product F",
                 ),
-                ([0, 0, 0, None, None, None, None], "LTV | stripe.posthog_test - Product F"),
+                ([0, 0, 0, None, None, None, None], "LTV | stripe.insights_test - Product F"),
             ],
         )
 
@@ -1148,7 +1148,7 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([result["data"] for result in results], expected_data)
 
         labels = [result["label"] for result in results]
-        self.assertIn("Subscription Count | stripe.posthog_test - Product C", labels)
+        self.assertIn("Subscription Count | stripe.insights_test - Product C", labels)
 
     def test_with_multiple_products_filter(self):
         results = self._run_revenue_analytics_metrics_query(
@@ -1360,7 +1360,7 @@ class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
     # NOTE: This can be removed once `managed-viewsets` feature flag is rolled out to all teams
     def test_with_events_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             s1 = str(uuid7("2024-12-02"))
             s2 = str(uuid7("2025-01-03"))
             s3 = str(uuid7("2025-02-04"))

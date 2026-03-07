@@ -39,7 +39,7 @@ class EnterpriseFeatureException(APIException):
                 + (
                     "To use it, subscribe to Insights Cloud with a generous free tier."
                     if is_cloud()
-                    else "Self-hosted licenses are no longer available for purchase. Please contact sales@posthog.com to discuss options."
+                    else "Self-hosted licenses are no longer available for purchase. Please contact sales@hanzo.ai to discuss options."
                 )
             )
         )
@@ -118,7 +118,7 @@ def generate_exception_response(
     from statshog.defaults.django import statsd
 
     statsd.incr(
-        f"posthog_cloud_raw_endpoint_exception",
+        f"insights_cloud_raw_endpoint_exception",
         tags={"endpoint": endpoint, "code": code, "type": type, "attr": attr},
     )
     return JsonResponse({"type": type, "code": code, "detail": detail, "attr": attr}, status=status_code)

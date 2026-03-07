@@ -1,11 +1,11 @@
 -- Backup table for person property reconciliation job
 -- Stores original person state before updates for audit/rollback
 
-CREATE TABLE IF NOT EXISTS posthog_person_reconciliation_backup (
+CREATE TABLE IF NOT EXISTS insights_person_reconciliation_backup (
     job_id TEXT NOT NULL,
     team_id INTEGER NOT NULL,
     person_id BIGINT NOT NULL,
-    -- Full row backup of posthog_person columns (BEFORE state)
+    -- Full row backup of insights_person columns (BEFORE state)
     uuid UUID NOT NULL,
     properties JSONB NOT NULL,
     properties_last_updated_at JSONB,
@@ -27,4 +27,4 @@ CREATE TABLE IF NOT EXISTS posthog_person_reconciliation_backup (
 );
 
 CREATE INDEX IF NOT EXISTS person_reconciliation_backup_team_person
-    ON posthog_person_reconciliation_backup (team_id, person_id);
+    ON insights_person_reconciliation_backup (team_id, person_id);

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { useLayoutEffect, useMemo, useState } from 'react'
 
 import {
@@ -21,7 +21,7 @@ import {
     IconWarning,
     IconWrench,
     IconX,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonButton,
     LemonButtonPropsBase,
@@ -30,7 +30,7 @@ import {
     LemonInput,
     LemonSkeleton,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import {
     InsightBreakdownSummary,
@@ -1415,7 +1415,7 @@ function SuccessActions({
             return // Already rated
         }
         setRatingForTraceId({ traceId, rating: newRating })
-        posthog.captureTraceMetric(traceId, 'quality', newRating)
+        insights.captureTraceMetric(traceId, 'quality', newRating)
         if (newRating === 'bad') {
             setFeedbackInputStatus('pending')
         }
@@ -1425,7 +1425,7 @@ function SuccessActions({
         if (!feedback || !traceId) {
             return // Input is empty
         }
-        posthog.captureTraceFeedback(traceId, feedback)
+        insights.captureTraceFeedback(traceId, feedback)
         setFeedbackInputStatus('submitted')
     }
 
@@ -1470,7 +1470,7 @@ function SuccessActions({
                 )}
                 {(user?.is_staff || isDev) && traceId && (
                     <LemonButton
-                        to={`${preflight?.region === Region.EU ? 'https://us.posthog.com/project/2' : ''}${urls.llmAnalyticsTrace(traceId)}`}
+                        to={`${preflight?.region === Region.EU ? 'https://insights.hanzo.ai/project/2' : ''}${urls.llmAnalyticsTrace(traceId)}`}
                         icon={<IconEye />}
                         type="tertiary"
                         size="xsmall"

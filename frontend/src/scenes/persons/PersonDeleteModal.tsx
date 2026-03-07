@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonCheckbox, LemonDivider, LemonInput, LemonModal, Link } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonCheckbox, LemonDivider, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { personDeleteModalLogic } from 'scenes/persons/personDeleteModalLogic'
 
@@ -50,7 +50,7 @@ export function PersonDeleteModal(): JSX.Element | null {
                     <LemonBanner type="warning">
                         If you opt to delete events and/or recordings, they will not be immediately removed. Instead
                         they are deleted on a set schedule during non-peak usage times.{' '}
-                        <Link to="https://posthog.com/docs/privacy/data-deletion" target="_blank" className="font-bold">
+                        <Link to="https://hanzo.ai/docs/privacy/data-deletion" target="_blank" className="font-bold">
                             Learn more
                         </Link>
                     </LemonBanner>

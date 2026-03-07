@@ -13,7 +13,7 @@ class TestFeatureFlagDefaultEnvironments(APIBaseTest):
         self.feature_flag_url = "/api/projects/@current/feature_flags/"
 
         # Mock FLAG_EVALUATION_TAGS feature flag to be enabled by default
-        self.feature_flag_patcher = patch("posthoganalytics.feature_enabled")
+        self.feature_flag_patcher = patch("hanzoanalytics.feature_enabled")
         self.mock_feature_enabled = self.feature_flag_patcher.start()
         # Enable the feature flag by default
         self.mock_feature_enabled.return_value = True

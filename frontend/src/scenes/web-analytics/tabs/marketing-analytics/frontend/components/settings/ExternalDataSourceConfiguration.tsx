@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear, IconPencil, IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconGear, IconPencil, IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'

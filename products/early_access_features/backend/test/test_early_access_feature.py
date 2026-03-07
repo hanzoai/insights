@@ -739,7 +739,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         feature_flag = FeatureFlag.objects.create(
@@ -798,7 +798,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         # This is precisely what the `set_team_in_cache()` would have set on Dec 9, 2024
@@ -856,7 +856,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         # Slightly dirty to use the actual implementation of `set_team_in_cache()` here, but this tests how things are
@@ -902,7 +902,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         feature_flag = FeatureFlag.objects.create(
@@ -997,7 +997,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         feature_flag = FeatureFlag.objects.create(

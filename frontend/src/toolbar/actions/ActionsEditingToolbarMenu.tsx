@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Field, Form, Group } from 'kea-forms'
 
-import { IconPencil, IconPlus, IconSearch, IconTrash } from '@posthog/icons'
-import { LemonDivider, LemonTag } from '@posthog/lemon-ui'
+import { IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
+import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
@@ -12,7 +12,7 @@ import { StepField } from '~/toolbar/actions/StepField'
 import { actionsTabLogic } from '~/toolbar/actions/actionsTabLogic'
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 import { SelectorQualityWarning } from '~/toolbar/elements/SelectorQualityWarning'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 
 export const ActionsEditingToolbarMenu = (): JSX.Element => {
     const {
@@ -35,7 +35,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                 startingSelector={editingSelectorValue}
                 onChange={(selector) => {
                     if (selector && editingSelector !== null) {
-                        toolbarPosthogJS.capture('toolbar_manual_selector_applied', {
+                        toolbarInsightsJS.capture('toolbar_manual_selector_applied', {
                             chosenSelector: selector,
                         })
                         setElementSelector(selector, editingSelector)
@@ -122,7 +122,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                                     icon={<IconPencil />}
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        toolbarPosthogJS.capture(
+                                                        toolbarInsightsJS.capture(
                                                             'toolbar_manual_selector_modal_opened',
                                                             {
                                                                 selector: step?.selector ?? null,

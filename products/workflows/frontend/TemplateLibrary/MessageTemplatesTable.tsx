@@ -3,7 +3,7 @@ import './MessageTemplatesGrid.scss'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconTrash } from '@posthog/icons'
+import { IconTrash } from '@hanzo/icons'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -33,7 +33,7 @@ export function MessageTemplatesTable(): JSX.Element {
                     productName="Message template"
                     thingName="message template"
                     description="Create and manage reusable message templates for your workflows."
-                    docsURL="https://posthog.com/docs/workflows"
+                    docsURL="https://hanzo.ai/docs/workflows"
                     action={() => {
                         router.actions.push(urls.workflowsLibraryTemplateNew())
                     }}

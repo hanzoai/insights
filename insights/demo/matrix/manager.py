@@ -327,7 +327,7 @@ class MatrixManager:
                 subject.take_snapshot_at_now()
 
             create_person(
-                uuid=str(subject.in_posthog_id),
+                uuid=str(subject.in_insights_id),
                 team_id=team.pk,
                 properties=subject.properties_at_now,
                 version=0,
@@ -339,7 +339,7 @@ class MatrixManager:
                 create_person_distinct_id(
                     team_id=team.pk,
                     distinct_id=str(distinct_id),
-                    person_id=str(subject.in_posthog_id),
+                    person_id=str(subject.in_insights_id),
                 )
             self._save_past_sim_events(team, subject.past_events)
 

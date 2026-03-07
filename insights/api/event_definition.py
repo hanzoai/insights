@@ -57,15 +57,15 @@ def create_event_definitions_sql(
     }
 
     enterprise_join = (
-        "FULL OUTER JOIN ee_enterpriseeventdefinition ON posthog_eventdefinition.id=ee_enterpriseeventdefinition.eventdefinition_ptr_id"
+        "FULL OUTER JOIN ee_enterpriseeventdefinition ON insights_eventdefinition.id=ee_enterpriseeventdefinition.eventdefinition_ptr_id"
         if is_enterprise
         else ""
     )
 
     if event_type == EventDefinitionType.EVENT_CUSTOM:
-        conditions += " AND posthog_eventdefinition.name NOT LIKE %(is_posthog_event)s"
-    if event_type == EventDefinitionType.EVENT_POSTHOG:
-        conditions += " AND posthog_eventdefinition.name LIKE %(is_posthog_event)s"
+        conditions += " AND insights_eventdefinition.name NOT LIKE %(is_insights_event)s"
+    if event_type == EventDefinitionType.EVENT_INSIGHTS:
+        conditions += " AND insights_eventdefinition.name LIKE %(is_insights_event)s"
 
     additional_ordering = []
     for order_expression, order_direction in order_expressions:
@@ -76,7 +76,7 @@ def create_event_definitions_sql(
 
     return f"""
             SELECT {",".join(event_definition_fields)}
-            FROM posthog_eventdefinition
+            FROM insights_eventdefinition
             {enterprise_join}
             WHERE (project_id = %(project_id)s OR (project_id IS NULL AND team_id = %(project_id)s))
             {conditions}
@@ -194,7 +194,7 @@ class EventDefinitionViewSet(
         search = self.request.GET.get("search", None)
         search_query, search_kwargs = term_search_filter_sql(self.search_fields, search)
 
-        params = {"project_id": self.project_id, "is_posthog_event": "$%", **search_kwargs}
+        params = {"project_id": self.project_id, "is_insights_event": "$%", **search_kwargs}
         order_expressions = self._ordering_params_from_request()
 
         event_definition_object_manager: Manager

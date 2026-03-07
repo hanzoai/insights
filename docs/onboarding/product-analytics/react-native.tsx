@@ -18,14 +18,14 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'Expo',
                                 code: dedent`
-                                    npx expo install posthog-react-native expo-file-system expo-application expo-device expo-localization
+                                    npx expo install insights-react-native expo-file-system expo-application expo-device expo-localization
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize
+                                    yarn add insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize
 
                                     # for iOS
                                     cd ios && pod install
@@ -35,7 +35,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm i -s posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize
+                                    npm i -s insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize
 
                                     # for iOS
                                     cd ios && pod install
@@ -52,7 +52,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <>
                     <Markdown>
-                        Insights is most easily used via the `PostHogProvider` component. Wrap your app with the
+                        Insights is most easily used via the `InsightsProvider` component. Wrap your app with the
                         provider:
                     </Markdown>
                     <CodeBlock
@@ -61,18 +61,18 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'App.tsx',
                                 code: dedent`
-                                    import { PostHogProvider } from 'posthog-react-native'
+                                    import { InsightsProvider } from 'insights-react-native'
 
                                     export function MyApp() {
                                         return (
-                                            <PostHogProvider
+                                            <InsightsProvider
                                                 apiKey="<ph_project_api_key>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
                                                 }}
                                             >
                                                 <RestOfApp />
-                                            </PostHogProvider>
+                                            </InsightsProvider>
                                         )
                                     }
                                 `,
@@ -97,13 +97,13 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { useInsights } from 'posthog-react-native'
+                                    import { useInsights } from 'insights-react-native'
 
                                     function MyComponent() {
-                                        const posthog = useInsights()
+                                        const insights = useInsights()
 
                                         const handlePress = () => {
-                                            posthog.capture('button_pressed', {
+                                            insights.capture('button_pressed', {
                                                 button_name: 'signup'
                                             })
                                         }

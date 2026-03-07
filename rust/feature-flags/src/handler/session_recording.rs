@@ -7,10 +7,10 @@ use regex;
 use serde_json::{json, Value};
 
 const AUTHORIZED_MOBILE_CLIENTS: &[&str] = &[
-    "posthog-android",
-    "posthog-ios",
-    "posthog-react-native",
-    "posthog-flutter",
+    "insights-android",
+    "insights-ios",
+    "insights-react-native",
+    "insights-flutter",
 ];
 
 // Hard-coded values set for the session recording beta, still haven't come up with more sensible

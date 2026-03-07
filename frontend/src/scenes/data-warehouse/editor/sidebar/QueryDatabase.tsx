@@ -12,8 +12,8 @@ import {
     IconCode2,
     IconDatabase,
     IconPlusSmall,
-} from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonTree, LemonTreeRef, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
 import { TreeNodeDisplayIcon } from 'lib/lemon-ui/LemonTree/LemonTreeUtils'
@@ -165,7 +165,7 @@ export const QueryDatabase = (): JSX.Element => {
                     case 'data_warehouse':
                         // Return "" to not clutter the interface
                         return ''
-                    case 'posthog':
+                    case 'insights':
                         // Return "" to not clutter the interface
                         return ''
                     case 'system':

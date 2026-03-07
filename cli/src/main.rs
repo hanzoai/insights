@@ -1,4 +1,4 @@
-use posthog_cli::cmd;
+use insights_cli::cmd;
 use rayon::ThreadPoolBuilder;
 use tracing::info;
 

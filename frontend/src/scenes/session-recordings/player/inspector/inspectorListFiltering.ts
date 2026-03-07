@@ -82,7 +82,7 @@ const eventsMatch = (
     } else if (isPageviewOrScreen(item)) {
         return miniFiltersByKey['events-pageview']
     } else if (isInsightsEvent(item)) {
-        return miniFiltersByKey['events-posthog']
+        return miniFiltersByKey['events-insights']
     } else if (!isInsightsEvent(item)) {
         return miniFiltersByKey['events-custom']
     }

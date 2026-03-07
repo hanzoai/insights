@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied
 from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAdminUser
 from rest_framework.request import Request
@@ -700,13 +700,13 @@ class InsightsFeatureFlagPermission(BasePermission):
     def has_permission(self, request, view) -> bool:
         user = cast(User, request.user)
         organization = get_organization_from_view(view)
-        flag = getattr(view, "posthog_feature_flag", None)
+        flag = getattr(view, "insights_feature_flag", None)
 
         config = {}
 
         if not flag:
             raise ImproperlyConfigured(
-                "InsightsFeatureFlagPermission requires the view to define the posthog_feature_flag attribute."
+                "InsightsFeatureFlagPermission requires the view to define the insights_feature_flag attribute."
             )
 
         if isinstance(flag, str):
@@ -718,7 +718,7 @@ class InsightsFeatureFlagPermission(BasePermission):
             if "*" in actions or view.action in actions:
                 org_id = str(organization.id)
 
-                enabled = posthoganalytics.feature_enabled(
+                enabled = hanzoanalytics.feature_enabled(
                     required_flag,
                     user.distinct_id,
                     groups={"organization": org_id},

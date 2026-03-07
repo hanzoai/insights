@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT property_type, is_numerical FROM posthog_propertydefinition WHERE name = 'test_prop'",
+  "query": "SELECT property_type, is_numerical FROM insights_propertydefinition WHERE name = 'test_prop'",
   "describe": {
     "columns": [
       {

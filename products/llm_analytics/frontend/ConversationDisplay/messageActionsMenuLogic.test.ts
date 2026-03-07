@@ -123,11 +123,11 @@ describe('messageActionsMenuLogic', () => {
                     targetLanguage: 'es',
                 })
 
-                expect(localStorage.getItem('posthog-translate-language')).toBe('es')
+                expect(localStorage.getItem('insights-translate-language')).toBe('es')
             })
 
             it('falls back to en for invalid stored language', () => {
-                localStorage.setItem('posthog-translate-language', 'invalid')
+                localStorage.setItem('insights-translate-language', 'invalid')
 
                 const logic = messageActionsMenuLogic({ content: mockContent })
                 logic.mount()
@@ -420,7 +420,7 @@ describe('messageActionsMenuLogic', () => {
                 expect(logic.values.targetLanguage).toBe('es')
 
                 // Set a different language in localStorage
-                localStorage.setItem('posthog-translate-language', 'de')
+                localStorage.setItem('insights-translate-language', 'de')
 
                 // Open popover - should sync from localStorage
                 await expectLogic(logic, () => {

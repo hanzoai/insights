@@ -45,7 +45,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=invalid_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
         assert response.status_code == 422
         assert expected_field in str(response.json())
@@ -65,7 +65,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200
@@ -101,7 +101,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == error_status
@@ -122,7 +122,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             "/wizard/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200
@@ -152,7 +152,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             f"/{product}/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200
@@ -174,7 +174,7 @@ class TestAnthropicMessagesEndpoint:
         response = authenticated_client.post(
             f"/{product}/v1/messages",
             json=valid_request_body,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 400

@@ -36,7 +36,7 @@ class TestSetupRepositoryActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "posthog/posthog-js")
+            context = self._create_context(github_integration, "hanzoai/insights-js")
 
             setup_input = SetupRepositoryInput(context=context, sandbox_id=sandbox.id)
             result = async_to_sync(activity_environment.run)(setup_repository, setup_input)
@@ -49,7 +49,7 @@ class TestSetupRepositoryActivity:
 
     @pytest.mark.django_db
     def test_setup_repository_sandbox_not_found(self, activity_environment, github_integration):
-        context = self._create_context(github_integration, "posthog/posthog-js")
+        context = self._create_context(github_integration, "hanzoai/insights-js")
         setup_input = SetupRepositoryInput(context=context, sandbox_id="non-existent-sandbox-id")
 
         with pytest.raises(SandboxNotFoundError):

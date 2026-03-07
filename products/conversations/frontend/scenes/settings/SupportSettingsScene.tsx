@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil, IconPlus, IconTrash } from '@posthog/icons'
+import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -11,7 +11,7 @@ import {
     LemonSelect,
     LemonSwitch,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'

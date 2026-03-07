@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconCloud } from '@posthog/icons'
-import { LemonBadgeProps, Tooltip } from '@posthog/lemon-ui'
+import { IconCloud } from '@hanzo/icons'
+import { LemonBadgeProps, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconWithBadge } from 'lib/lemon-ui/icons'
 

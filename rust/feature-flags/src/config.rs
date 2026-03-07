@@ -151,16 +151,16 @@ pub struct Config {
     #[envconfig(default = "127.0.0.1:3001")]
     pub address: SocketAddr,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub write_database_url: String,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub read_database_url: String,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog_persons")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights_persons")]
     pub persons_write_database_url: String,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog_persons")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights_persons")]
     pub persons_read_database_url: String,
 
     #[envconfig(default = "1000")]
@@ -212,7 +212,7 @@ pub struct Config {
     pub flags_redis_enabled: FlexBool,
 
     // S3 configuration for HyperCache fallback
-    #[envconfig(default = "posthog")]
+    #[envconfig(default = "insights")]
     pub object_storage_bucket: String,
 
     #[envconfig(default = "us-east-1")]
@@ -394,7 +394,7 @@ pub struct Config {
     #[envconfig(from = "OTEL_TRACES_SAMPLER_ARG", default = "0.001")]
     pub otel_sampling_rate: f64,
 
-    #[envconfig(from = "OTEL_SERVICE_NAME", default = "posthog-feature-flags")]
+    #[envconfig(from = "OTEL_SERVICE_NAME", default = "insights-feature-flags")]
     pub otel_service_name: String,
 
     #[envconfig(from = "OTEL_LOG_LEVEL", default = "info")]
@@ -529,12 +529,12 @@ impl Config {
             flags_redis_enabled: FlexBool(false),
             redis_response_timeout_ms: 100,
             redis_connection_timeout_ms: 5000,
-            write_database_url: "postgres://posthog:posthog@localhost:5432/test_posthog"
+            write_database_url: "postgres://insights:insights@localhost:5432/test_insights"
                 .to_string(),
-            read_database_url: "postgres://posthog:posthog@localhost:5432/test_posthog".to_string(),
-            persons_write_database_url: "postgres://posthog:posthog@localhost:5432/posthog_persons"
+            read_database_url: "postgres://insights:insights@localhost:5432/test_insights".to_string(),
+            persons_write_database_url: "postgres://insights:insights@localhost:5432/insights_persons"
                 .to_string(),
-            persons_read_database_url: "postgres://posthog:posthog@localhost:5432/posthog_persons"
+            persons_read_database_url: "postgres://insights:insights@localhost:5432/insights_persons"
                 .to_string(),
             max_concurrency: 1000,
             max_pg_connections: 10,
@@ -574,9 +574,9 @@ impl Config {
             flag_definitions_rate_limits: FlagDefinitionsRateLimits::default(),
             otel_url: None,
             otel_sampling_rate: 1.0,
-            otel_service_name: "posthog-feature-flags".to_string(),
+            otel_service_name: "insights-feature-flags".to_string(),
             otel_log_level: Level::ERROR,
-            object_storage_bucket: "posthog".to_string(),
+            object_storage_bucket: "insights".to_string(),
             object_storage_region: "us-east-1".to_string(),
             object_storage_endpoint: "".to_string(),
             flags_rate_limit_enabled: FlexBool(false),
@@ -707,11 +707,11 @@ mod tests {
         );
         assert_eq!(
             config.write_database_url,
-            "postgres://posthog:posthog@localhost:5432/posthog"
+            "postgres://insights:insights@localhost:5432/insights"
         );
         assert_eq!(
             config.read_database_url,
-            "postgres://posthog:posthog@localhost:5432/posthog"
+            "postgres://insights:insights@localhost:5432/insights"
         );
         assert_eq!(config.max_concurrency, 1000);
         assert_eq!(config.max_pg_connections, 10);
@@ -740,11 +740,11 @@ mod tests {
         assert_eq!(config.address, SocketAddr::from_str("127.0.0.1:0").unwrap());
         assert_eq!(
             config.write_database_url,
-            "postgres://posthog:posthog@localhost:5432/test_posthog"
+            "postgres://insights:insights@localhost:5432/test_insights"
         );
         assert_eq!(
             config.read_database_url,
-            "postgres://posthog:posthog@localhost:5432/test_posthog"
+            "postgres://insights:insights@localhost:5432/test_insights"
         );
         assert_eq!(config.max_concurrency, 1000);
         assert_eq!(config.max_pg_connections, 10);
@@ -770,11 +770,11 @@ mod tests {
         assert_eq!(config.address, SocketAddr::from_str("127.0.0.1:0").unwrap());
         assert_eq!(
             config.write_database_url,
-            "postgres://posthog:posthog@localhost:5432/test_posthog"
+            "postgres://insights:insights@localhost:5432/test_insights"
         );
         assert_eq!(
             config.read_database_url,
-            "postgres://posthog:posthog@localhost:5432/test_posthog"
+            "postgres://insights:insights@localhost:5432/test_insights"
         );
         assert_eq!(config.max_concurrency, 1000);
         assert_eq!(config.max_pg_connections, 10);

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconSparkles } from '@posthog/icons'
-import { LemonButton, LemonButtonProps } from '@posthog/lemon-ui'
+import { IconSparkles } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { useOpenAi } from 'scenes/max/useOpenAi'

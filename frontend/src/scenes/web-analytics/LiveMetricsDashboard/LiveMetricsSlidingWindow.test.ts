@@ -474,7 +474,7 @@ describe('LiveMetricsSlidingWindow', () => {
 
         it('counts cookieless users as separate devices when they have different distinct_ids', () => {
             const window = new LiveMetricsSlidingWindow(WINDOW_SIZE_MINUTES)
-            const COOKIELESS_DEVICE_ID = '$posthog_cookieless'
+            const COOKIELESS_DEVICE_ID = '$insights_cookieless'
 
             window.addDataPoint(toUnixSeconds(relativeTime(-5 * MINUTE)), 'user-1', {
                 pageviews: 1,

@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import type { editor as importedEditor } from 'monaco-editor'
 import { memo, useMemo } from 'react'
 
-import { IconBook, IconDownload, IconInfo, IconPlayFilled } from '@posthog/icons'
-import { LemonDivider, Spinner } from '@posthog/lemon-ui'
+import { IconBook, IconDownload, IconInfo, IconPlayFilled } from '@hanzo/icons'
+import { LemonDivider, Spinner } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

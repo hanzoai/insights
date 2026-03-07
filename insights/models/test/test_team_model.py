@@ -112,7 +112,7 @@ class TestTeam(BaseTest):
     def test_all_users_with_access_simple_org_membership(self):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        another_user = User.objects.create_and_join(self.organization, "test2@posthog.com", None)
+        another_user = User.objects.create_and_join(self.organization, "test2@hanzo.ai", None)
 
         all_user_with_access_ids = list(self.team.all_users_with_access().values_list("id", flat=True))
 
@@ -121,7 +121,7 @@ class TestTeam(BaseTest):
     def test_all_users_with_access_simple_org_membership_and_redundant_team_one(self):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        another_user = User.objects.create_and_join(self.organization, "test2@posthog.com", None)
+        another_user = User.objects.create_and_join(self.organization, "test2@hanzo.ai", None)
         ExplicitTeamMembership.objects.create(team=self.team, parent_membership=self.organization_membership)
 
         all_user_with_access_ids = list(self.team.all_users_with_access().values_list("id", flat=True))
@@ -136,7 +136,7 @@ class TestTeam(BaseTest):
         # Create another user as a member
         member_user = User.objects.create_and_join(
             self.organization,
-            email="member@posthog.com",
+            email="member@hanzo.ai",
             first_name="first_name",
             password=None,
             level=OrganizationMembership.Level.MEMBER,
@@ -164,7 +164,7 @@ class TestTeam(BaseTest):
         # Create another user as a member
         User.objects.create_and_join(
             self.organization,
-            email="member@posthog.com",
+            email="member@hanzo.ai",
             first_name="first_name",
             password=None,
             level=OrganizationMembership.Level.MEMBER,
@@ -196,7 +196,7 @@ class TestTeam(BaseTest):
         # Create another user as a member
         member_user = User.objects.create_and_join(
             self.organization,
-            email="member@posthog.com",
+            email="member@hanzo.ai",
             first_name="first_name",
             password=None,
             level=OrganizationMembership.Level.MEMBER,
@@ -238,7 +238,7 @@ class TestTeam(BaseTest):
         # Create another user as a member
         member_user = User.objects.create_and_join(
             self.organization,
-            email="member@posthog.com",
+            email="member@hanzo.ai",
             first_name="first_name",
             password=None,
             level=OrganizationMembership.Level.MEMBER,

@@ -2,9 +2,9 @@ import FuseClass from 'fuse.js'
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, combineUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS, FeatureFlagKey } from 'lib/constants'
@@ -238,7 +238,7 @@ export const insightsFunctionTemplateListLogic = kea<insightsFunctionTemplateLis
                             return null
                         }
 
-                        return `https://posthog.com/docs/cdp/${template.type}s/${template.id}`
+                        return `https://hanzo.ai/docs/cdp/${template.type}s/${template.id}`
                     }
 
                     // TRICKY: Hacky place but this is where we handle "nonInsightsFunctionTemplates" to modify the linked url
@@ -282,7 +282,7 @@ export const insightsFunctionTemplateListLogic = kea<insightsFunctionTemplateLis
 
     listeners(({ values }) => ({
         registerInterest: ({ template }) => {
-            posthog.capture('notify_me_pipeline', {
+            insights.capture('notify_me_pipeline', {
                 name: template.name,
                 type: template.type,
                 email: values.user?.email,

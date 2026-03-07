@@ -39,7 +39,7 @@ class HubspotSource(SimpleSource[HubspotSourceConfig | HubspotSourceOldConfig], 
             name=SchemaExternalDataSourceType.HUBSPOT,
             caption="Select an existing Hubspot account to link to Insights or create a new connection",
             iconPath="/static/services/hubspot.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/hubspot",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/hubspot",
             featured=True,
             fields=cast(
                 list[FieldType],

@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import {
     EventType,
@@ -10,7 +10,7 @@ import {
     metaEvent,
     mutationData,
     removedNodeMutation,
-} from '@posthog/rrweb-types'
+} from '@hanzo/rrweb-types'
 
 import { isObject } from 'lib/utils'
 import { PLACEHOLDER_SVG_DATA_IMAGE_URL } from 'scenes/session-recordings/player/rrweb'
@@ -155,7 +155,7 @@ export const makeCustomEvent = (
                     },
                 })
             } else {
-                posthog.captureException(new Error('Failed to create keyboard placeholder'), { mobileCustomEvent })
+                insights.captureException(new Error('Failed to create keyboard placeholder'), { mobileCustomEvent })
             }
         } else {
             removes.push({

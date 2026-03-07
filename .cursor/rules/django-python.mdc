@@ -1,5 +1,5 @@
 ---
-description: Rules for writing Python services at PostHog (Python servers powered by the Django framework)
+description: Rules for writing Python services at Insights (Python servers powered by the Django framework)
 globs: *.py
 alwaysApply: false
 ---
@@ -49,7 +49,7 @@ Performance Optimization
 
 Logging
   - As a general rule, we should have logs for every expected and unexpected actions of the application, using the appropriate log level.
-  - We should also be logging these exceptions to error tracking with the PostHog Python SDK. Python exceptions should almost always be captured automatically without extra instrumentation, but custom ones (such as failed requests to external services, query errors, or Celery task failures) can be tracked using capture_exception().
+  - We should also be logging these exceptions to error tracking with the Insights Python SDK. Python exceptions should almost always be captured automatically without extra instrumentation, but custom ones (such as failed requests to external services, query errors, or Celery task failures) can be tracked using capture_exception().
 
 Log Levels
   - A log level or log severity is a piece of information telling how important a given log message is:
@@ -73,7 +73,7 @@ Logging Format
   will produce:
 
   ```sh
-  2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [posthog.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
+  2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [insights.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
   As you can see above, the log contains all the information needed to understand the app behaviour.
   ```
 

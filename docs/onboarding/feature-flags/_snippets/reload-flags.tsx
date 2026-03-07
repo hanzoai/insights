@@ -6,7 +6,7 @@ export const ReloadFlagsSnippet = memo(({ language = 'javascript' }: { language?
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            posthog.reloadFeatureFlags()
+            insights.reloadFeatureFlags()
         `,
         'node.js': dedent`
             // Feature flags are evaluated on each call, no reload needed
@@ -24,7 +24,7 @@ export const ReloadFlagsSnippet = memo(({ language = 'javascript' }: { language?
             // Feature flags are evaluated on each call, no reload needed
         `,
         'react-native': dedent`
-            posthog.reloadFeatureFlagsAsync().then((refreshedFlags) => console.log(refreshedFlags))
+            insights.reloadFeatureFlagsAsync().then((refreshedFlags) => console.log(refreshedFlags))
         `,
         android: dedent`
             Insights.reloadFeatureFlags()
@@ -33,7 +33,7 @@ export const ReloadFlagsSnippet = memo(({ language = 'javascript' }: { language?
             InsightsSDK.shared.reloadFeatureFlags()
         `,
         flutter: dedent`
-            await Posthog().reloadFeatureFlags()
+            await Insights().reloadFeatureFlags()
         `,
     }
 

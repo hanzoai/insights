@@ -42,7 +42,7 @@ pub struct AppContext {
     pub kafka_consumer: SingleTopicConsumer,
     pub transactional_producer: Mutex<TransactionalProducer<KafkaContext>>,
     pub immediate_producer: FutureProducer<KafkaContext>,
-    pub posthog_pool: PgPool,
+    pub insights_pool: PgPool,
     pub persons_pool: PgPool,
     pub catalog: Arc<Catalog>,
     pub symbol_resolver: Arc<dyn SymbolResolver>,
@@ -61,7 +61,7 @@ impl AppContext {
     pub async fn from_config(config: &Config) -> Result<Self, UnhandledError> {
         let options = PgPoolOptions::new().max_connections(config.max_pg_connections);
         let persons_options = options.clone();
-        let posthog_pool = options.connect(&config.database_url).await?;
+        let insights_pool = options.connect(&config.database_url).await?;
         let persons_pool = persons_options.connect(&config.persons_url).await?;
 
         let s3_client = aws_sdk_s3::Client::from_conf(get_aws_config(config).await);
@@ -109,7 +109,7 @@ impl AppContext {
         AppContext::new(
             config,
             s3_client,
-            posthog_pool,
+            insights_pool,
             persons_pool,
             redis_client,
             issue_buckets_redis_client,
@@ -120,7 +120,7 @@ impl AppContext {
     pub async fn new(
         config: &Config,
         s3_client: Arc<dyn BlobClient>,
-        posthog_pool: PgPool,
+        insights_pool: PgPool,
         persons_pool: PgPool,
         redis_client: Arc<dyn RedisClientTrait + Send + Sync>,
         issue_buckets_redis_client: Arc<dyn RedisClientTrait + Send + Sync>,
@@ -160,12 +160,12 @@ impl AppContext {
         let smp_chunk = ChunkIdFetcher::new(
             smp,
             s3_client.clone(),
-            posthog_pool.clone(),
+            insights_pool.clone(),
             config.object_storage_bucket.clone(),
         );
         let smp_saving = Saving::new(
             smp_chunk,
-            posthog_pool.clone(),
+            insights_pool.clone(),
             s3_client.clone(),
             config.object_storage_bucket.clone(),
             config.ss_prefix.clone(),
@@ -180,7 +180,7 @@ impl AppContext {
         let hmp_chunk = ChunkIdFetcher::new(
             HermesMapProvider {},
             s3_client.clone(),
-            posthog_pool.clone(),
+            insights_pool.clone(),
             config.object_storage_bucket.clone(),
         );
         let hmp_caching = Caching::new(hmp_chunk, ss_cache.clone());
@@ -189,7 +189,7 @@ impl AppContext {
         let pgp_chunk = ChunkIdFetcher::new(
             ProguardProvider {},
             s3_client.clone(),
-            posthog_pool.clone(),
+            insights_pool.clone(),
             config.object_storage_bucket.clone(),
         );
         let pgp_caching = Caching::new(pgp_chunk, ss_cache.clone());
@@ -232,7 +232,7 @@ impl AppContext {
         let symbol_resolver = Arc::new(LocalSymbolResolver::new(
             config,
             catalog.clone(),
-            posthog_pool.clone(),
+            insights_pool.clone(),
         ));
 
         Ok(Self {
@@ -241,7 +241,7 @@ impl AppContext {
             kafka_consumer,
             transactional_producer: Mutex::new(transactional_producer),
             immediate_producer,
-            posthog_pool,
+            insights_pool,
             persons_pool,
             catalog,
             config: config.clone(),

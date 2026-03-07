@@ -16,7 +16,7 @@ from django.db.models.signals import post_delete, post_save
 
 import pytz
 import pydantic
-import posthoganalytics
+import hanzoanalytics
 
 from insights.clickhouse.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
@@ -78,7 +78,7 @@ DEFAULT_CURRENCY = CurrencyCode.USD.value
 ASYNC_USER_PRODUCT_LIST_SYNC_THRESHOLD = 100
 
 
-# keep in sync with posthog/frontend/src/scenes/project/Settings/ExtraTeamSettings.tsx
+# keep in sync with insights/frontend/src/scenes/project/Settings/ExtraTeamSettings.tsx
 class AvailableExtraSettings:
     pass
 
@@ -143,7 +143,7 @@ class TeamManager(models.Manager):
 
         if team.extra_settings is None:
             team.extra_settings = {}
-        team.extra_settings.setdefault("recorder_script", "posthog-recorder")
+        team.extra_settings.setdefault("recorder_script", "insights-recorder")
 
         # Create default dashboards
         dashboard = Dashboard.objects.db_manager(self.db).create(name="My App Dashboard", pinned=True, team=team)
@@ -235,7 +235,7 @@ class TeamManager(models.Manager):
 
         Use only when actually neeeded to avoid wasting sequence values."""
         cursor = connection.cursor()
-        cursor.execute("SELECT nextval('posthog_team_id_seq')")
+        cursor.execute("SELECT nextval('insights_team_id_seq')")
         result = cursor.fetchone()
         return result[0]
 
@@ -512,7 +512,7 @@ class Team(UUIDTClassicModel):
     # Environment-level default InsightsQL query modifiers
     modifiers = models.JSONField(null=True, blank=True)
 
-    # This is meant to be used as a stopgap until https://github.com/PostHog/meta/pull/39 gets implemented
+    # This is meant to be used as a stopgap until https://github.com/Hanzo Insights/meta/pull/39 gets implemented
     # Switches _most_ queries to using distinct_id as aggregator instead of person_id
     @property
     def aggregate_users_by_distinct_id(self) -> bool:
@@ -600,7 +600,7 @@ class Team(UUIDTClassicModel):
         help_text="Whether this project serves B2B or B2C customers, used to optimize the UI layout.",
     )
 
-    # Before adding new fields here, read posthog/models/team/README.md
+    # Before adding new fields here, read insights/models/team/README.md
     # Domain-specific config should use a Team Extension model instead.
 
     # TRANSITIONAL: These accessors exist for backward compat with existing
@@ -672,7 +672,7 @@ class Team(UUIDTClassicModel):
 
         # on Insights Cloud, use the feature flag
         if is_cloud():
-            return posthoganalytics.feature_enabled(
+            return hanzoanalytics.feature_enabled(
                 "persons-on-events-person-id-no-override-properties-on-events",
                 str(self.uuid),
                 groups={"project": str(self.id)},
@@ -697,7 +697,7 @@ class Team(UUIDTClassicModel):
 
         # on Insights Cloud, use the feature flag
         if is_cloud():
-            return posthoganalytics.feature_enabled(
+            return hanzoanalytics.feature_enabled(
                 "persons-on-events-v2-reads-enabled",
                 str(self.uuid),
                 groups={"organization": str(self.organization_id)},

@@ -27,7 +27,7 @@ uuid2 = str(UUID("7ba7b810-9dad-11d1-80b4-00c04fd430c8"))
 class TestAsyncDeletion(ClickhouseTestMixin, ClickhouseDestroyTablesMixin, BaseTest):
     def setUp(self):
         super().setUp()
-        self.user = User.objects.create(email="test@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
         self.teams = [
             self.team,
             Team.objects.create(organization=self.organization),

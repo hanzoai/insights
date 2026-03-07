@@ -3,8 +3,8 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonTab, LemonTabs, Link, ProfilePicture } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonTab, LemonTabs, Link, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
 

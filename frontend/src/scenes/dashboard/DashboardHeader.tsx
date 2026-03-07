@@ -13,7 +13,7 @@ import {
     IconScreen,
     IconShare,
     IconTrash,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -404,7 +404,7 @@ export function DashboardHeader(): JSX.Element | null {
                                 setScenePanelOpen(false)
                             }}
                             menuItem
-                            data-attr="open-insights-in-new-posthog-tabs"
+                            data-attr="open-insights-in-new-insights-tabs"
                             disabledReasons={{
                                 'Cannot open insights when editing dashboard': dashboardMode === DashboardMode.Edit,
                                 'Dashboard has no insights': tiles.length === 0,
