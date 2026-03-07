@@ -1,6 +1,6 @@
 {
     "name": "RudderStack",
-    "url": "https://github.com/rudderlabs/rudderstack-posthog-plugin",
+    "url": "https://github.com/rudderlabs/rudderstack-insights-plugin",
     "description": "Send event data to RudderStack",
     "main": "index.js",
     "config": [

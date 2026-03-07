@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
     initial_viewport_height AggregateFunction(argMin, Int64, DateTime64(6, 'UTC')),
 
     -- geoip
-    -- only store the properties we actually use, as there's tons, see https://posthog.com/docs/cdp/geoip-enrichment
+    -- only store the properties we actually use, as there's tons, see https://hanzo.ai/docs/cdp/geoip-enrichment
     initial_geoip_country_code AggregateFunction(argMin, String, DateTime64(6, 'UTC')),
     initial_geoip_subdivision_1_code AggregateFunction(argMin, String, DateTime64(6, 'UTC')),
     initial_geoip_subdivision_1_name AggregateFunction(argMin, String, DateTime64(6, 'UTC')),

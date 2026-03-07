@@ -66,23 +66,23 @@ class TestAbsoluteUrls(TestCase):
             ),
             (
                 regression_11204,
-                "https://app.posthog.com",
-                f"https://app.posthog.com/{regression_11204}",
+                "https://insights.hanzo.ai",
+                f"https://insights.hanzo.ai/{regression_11204}",
             ),
             (
-                "https://app.posthog.com",
-                "https://app.posthog.com",
-                "https://app.posthog.com",
+                "https://insights.hanzo.ai",
+                "https://insights.hanzo.ai",
+                "https://insights.hanzo.ai",
             ),
             (
-                "https://app.posthog.com/some/path?=something",
-                "https://app.posthog.com",
-                "https://app.posthog.com/some/path?=something",
+                "https://insights.hanzo.ai/some/path?=something",
+                "https://insights.hanzo.ai",
+                "https://insights.hanzo.ai/some/path?=something",
             ),
             (
-                "an.external.domain.com/something-outside-posthog",
-                "https://app.posthog.com",
-                "https://app.posthog.com/an.external.domain.com/something-outside-posthog",
+                "an.external.domain.com/something-outside-insights",
+                "https://insights.hanzo.ai",
+                "https://insights.hanzo.ai/an.external.domain.com/something-outside-insights",
             ),
             ("/api/path", "", "/api/path"),  # current behavior whether correct or not
             (
@@ -101,19 +101,19 @@ class TestAbsoluteUrls(TestCase):
                     )
 
     def test_absolute_uri_can_not_escape_out_host(self) -> None:
-        with self.settings(SITE_URL="https://app.posthog.com"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai"):
             with pytest.raises(PotentialSecurityProblemException):
-                (absolute_uri("https://an.external.domain.com/something-outside-posthog"),)
+                (absolute_uri("https://an.external.domain.com/something-outside-insights"),)
 
     def test_absolute_uri_can_not_escape_out_host_on_different_scheme(self) -> None:
-        with self.settings(SITE_URL="https://app.posthog.com"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai"):
             with pytest.raises(PotentialSecurityProblemException):
-                (absolute_uri("ftp://an.external.domain.com/something-outside-posthog"),)
+                (absolute_uri("ftp://an.external.domain.com/something-outside-insights"),)
 
     def test_absolute_uri_can_not_escape_out_host_when_site_url_is_the_empty_string(self) -> None:
         with self.settings(SITE_URL=""):
             with pytest.raises(PotentialSecurityProblemException):
-                (absolute_uri("https://an.external.domain.com/something-outside-posthog"),)
+                (absolute_uri("https://an.external.domain.com/something-outside-insights"),)
 
 
 class TestFormatUrls(TestCase):
@@ -368,8 +368,8 @@ class TestLoadDataFromRequest(TestCase):
         post_request = rf.post("/e/?ver=1.20.0", "content", "text/plain", False, **headers)
         return post_request
 
-    @patch("posthoganalytics.tag")
-    @patch("posthoganalytics.new_context")
+    @patch("hanzoanalytics.tag")
+    @patch("hanzoanalytics.new_context")
     def test_pushes_debug_information_into_context_from_origin_header(self, patched_context, patched_tag):
         origin = "potato.io"
         referer = "https://" + origin
@@ -388,8 +388,8 @@ class TestLoadDataFromRequest(TestCase):
             ]
         )
 
-    @patch("posthoganalytics.tag")
-    @patch("posthoganalytics.new_context")
+    @patch("hanzoanalytics.tag")
+    @patch("hanzoanalytics.new_context")
     def test_pushes_debug_information_into_context_when_origin_header_not_present(self, patched_context, patched_tag):
         origin = "potato.io"
         referer = "https://" + origin
@@ -408,8 +408,8 @@ class TestLoadDataFromRequest(TestCase):
             ]
         )
 
-    @patch("posthoganalytics.tag")
-    @patch("posthoganalytics.new_context")
+    @patch("hanzoanalytics.tag")
+    @patch("hanzoanalytics.new_context")
     def test_still_tags_context_even_when_debug_signal_is_not_available(self, patched_context, patched_tag):
         rf = RequestFactory()
         post_request = rf.post("/s/", "content", "text/plain")
@@ -548,7 +548,7 @@ class TestUtilities(TestCase):
         decoded = base64_decode(encoded_data)
         decoded_json = json.loads(decoded)
 
-        self.assertEqual(decoded_json["token"], "phc_G4AFfCmEbWIvWKNFZUKihi5tHhcISQXwlUazK2nLvA4")
+        self.assertEqual(decoded_json["token"], "hi_G4AFfCmEbWIvWKNFZUKihi5tHhcISQXwlUazK2nLvA4")
         self.assertEqual(decoded_json["distinct_id"], "01912bc1-bcfd-7046-9443-065cf8cc52c5")
         self.assertEqual(decoded_json["groups"], {})
 
@@ -556,7 +556,7 @@ class TestUtilities(TestCase):
         decoded = base64_decode(encoded_data)
         decoded_json = json.loads(decoded)
 
-        self.assertEqual(decoded_json["token"], "phc_I7xIcObtskp1VsaEcJOtHrq8kXlkuX7ljpvqVh3ICFz")
+        self.assertEqual(decoded_json["token"], "hi_I7xIcObtskp1VsaEcJOtHrq8kXlkuX7ljpvqVh3ICFz")
         self.assertEqual(decoded_json["distinct_id"], "01912e77-a260-795c-b0fc-e9a87291eb70")
         self.assertEqual(decoded_json["groups"], {})
 

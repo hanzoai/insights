@@ -53,8 +53,8 @@ export function AuthorizedUrlForm({
                     autoFocus
                     placeholder={
                         allowWildCards
-                            ? 'Enter a URL or wildcard subdomain (e.g. https://*.posthog.com)'
-                            : 'Enter a URL (e.g. https://posthog.com)'
+                            ? 'Enter a URL or wildcard subdomain (e.g. https://*.hanzo.ai)'
+                            : 'Enter a URL (e.g. https://hanzo.ai)'
                     }
                     data-attr="url-input"
                 />

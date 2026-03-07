@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Field } from 'kea-forms'
 
-import { LemonTag, LemonTextArea } from '@posthog/lemon-ui'
+import { LemonTag, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { llmEvaluationLogic } from '../llmEvaluationLogic'
 

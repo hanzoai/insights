@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconPlus, IconTrash, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
 import { humanFriendlyDetailedTime } from 'lib/utils'

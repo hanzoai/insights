@@ -20,7 +20,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                         ]}
@@ -42,9 +42,9 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog import Posthog
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         project_api_key='<ph_project_api_key>',
                                         host='<ph_client_api_host>'
                                     )
@@ -55,7 +55,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <CalloutBox type="fyi" title="Django integration">
                         <Markdown>
                             If you're using Django, check out our [Django
-                            integration](https://posthog.com/docs/libraries/django) for automatic request tracking.
+                            integration](https://hanzo.ai/docs/libraries/django) for automatic request tracking.
                         </Markdown>
                     </CalloutBox>
                 </>

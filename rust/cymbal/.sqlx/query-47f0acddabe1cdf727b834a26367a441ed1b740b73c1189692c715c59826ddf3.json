@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT id, team_id, user_id, role_id, order_key, bytecode, created_at, updated_at\n                FROM posthog_errortrackingassignmentrule\n                WHERE team_id = $1 AND disabled_data IS NULL\n            ",
+  "query": "\n                SELECT id, team_id, user_id, role_id, order_key, bytecode, created_at, updated_at\n                FROM insights_errortrackingassignmentrule\n                WHERE team_id = $1 AND disabled_data IS NULL\n            ",
   "describe": {
     "columns": [
       {

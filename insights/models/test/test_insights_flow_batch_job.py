@@ -11,7 +11,7 @@ from products.workflows.backend.models.insights_flow_batch_job import InsightsFl
 class TestInsightsFlowBatchJob(TestCase):
     def setUp(self):
         super().setUp()
-        org, team, user = User.objects.bootstrap("Test org", "ben@posthog.com", None)
+        org, team, user = User.objects.bootstrap("Test org", "ben@hanzo.ai", None)
         self.team = team
         self.user = user
         self.org = org
@@ -111,7 +111,7 @@ class TestInsightsFlowBatchJob(TestCase):
         variables = [
             {"key": "first_name", "value": "John"},
             {"key": "last_name", "value": "Doe"},
-            {"key": "email", "value": "john@posthog.com"},
+            {"key": "email", "value": "john@hanzo.ai"},
         ]
         batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=self.insights_flow, variables=variables)
 

@@ -5,7 +5,7 @@
 # for more info.
 #
 # Insights has sunset support for self-hosted K8s deployments.
-# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-posthog
+# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-insights
 #
 
 services:
@@ -27,7 +27,7 @@ services:
     datastore:
         #
         # Note: please keep the default version in sync across
-        #       `posthog` and the `charts-clickhouse` repos
+        #       `insights` and the `charts-clickhouse` repos
         #
         extends:
             file: docker-compose.base.yml
@@ -36,13 +36,13 @@ services:
         depends_on:
             - kafka
         volumes:
-            - ./posthog/insights/idl:/idl
-            - ./posthog/docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./posthog/docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
-            - ./posthog/docker/clickhouse/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./posthog/docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
-            - ./posthog/docker/clickhouse/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
-            - ./posthog/insights/user_scripts:/var/lib/clickhouse/user_scripts
+            - ./insights/insights/idl:/idl
+            - ./insights/docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./insights/docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
+            - ./insights/docker/clickhouse/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
+            - ./insights/docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+            - ./insights/docker/clickhouse/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./insights/insights/user_scripts:/var/lib/clickhouse/user_scripts
             - clickhouse-data:/var/lib/clickhouse
 
     kafka:
@@ -62,7 +62,7 @@ services:
             service: worker
         environment:
             SITE_URL: https://$DOMAIN
-            SECRET_KEY: $POSTHOG_SECRET
+            SECRET_KEY: $INSIGHTS_SECRET
             OBJECT_STORAGE_ACCESS_KEY_ID: 'object_storage_root_user'
             OBJECT_STORAGE_SECRET_ACCESS_KEY: 'object_storage_root_password'
             OBJECT_STORAGE_ENDPOINT: http://objectstorage:19000
@@ -72,8 +72,8 @@ services:
             OBJECT_STORAGE_ENABLED: true
             RECORDING_API_URL: http://plugins:6738
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
-            POSTHOG_SKIP_MIGRATION_CHECKS: '1'
-        image: $REGISTRY_URL:$POSTHOG_APP_TAG
+            INSIGHTS_SKIP_MIGRATION_CHECKS: '1'
+        image: $REGISTRY_URL:$INSIGHTS_APP_TAG
         depends_on:
             db:
                 condition: service_healthy
@@ -92,11 +92,11 @@ services:
         command: /compose/start
         volumes:
             - ./compose:/compose
-        image: $REGISTRY_URL:$POSTHOG_APP_TAG
+        image: $REGISTRY_URL:$INSIGHTS_APP_TAG
         environment:
             SITE_URL: https://$DOMAIN
             LIVESTREAM_HOST: 'https://${DOMAIN}/livestream'
-            SECRET_KEY: $POSTHOG_SECRET
+            SECRET_KEY: $INSIGHTS_SECRET
             OBJECT_STORAGE_ACCESS_KEY_ID: 'object_storage_root_user'
             OBJECT_STORAGE_SECRET_ACCESS_KEY: 'object_storage_root_password'
             SESSION_RECORDING_V2_S3_ACCESS_KEY_ID: 'any'
@@ -106,7 +106,7 @@ services:
             OBJECT_STORAGE_ENABLED: true
             RECORDING_API_URL: http://plugins:6738
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
-            OTEL_SERVICE_NAME: 'posthog'
+            OTEL_SERVICE_NAME: 'insights'
             OTEL_EXPORTER_OTLP_ENDPOINT: ''
             OTEL_SDK_DISABLED: 'true'
             USE_GRANIAN: 'true'
@@ -125,10 +125,10 @@ services:
         extends:
             file: docker-compose.base.yml
             service: plugins
-        image: ${REGISTRY_URL}-node:${POSTHOG_NODE_TAG:-latest}
+        image: ${REGISTRY_URL}-node:${INSIGHTS_NODE_TAG:-latest}
         environment:
             SITE_URL: https://$DOMAIN
-            SECRET_KEY: $POSTHOG_SECRET
+            SECRET_KEY: $INSIGHTS_SECRET
             OBJECT_STORAGE_ACCESS_KEY_ID: 'object_storage_root_user'
             OBJECT_STORAGE_SECRET_ACCESS_KEY: 'object_storage_root_password'
             SESSION_RECORDING_V2_S3_ACCESS_KEY_ID: 'any'
@@ -145,9 +145,9 @@ services:
             LOGS_REDIS_PORT: 6379
             LOGS_REDIS_TLS: 'false'
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
-            CYCLOTRON_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            PERSONS_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            CYCLOTRON_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            PERSONS_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             OTEL_EXPORTER_OTLP_ENDPOINT: ''
         volumes:
             - ./share:/share
@@ -200,7 +200,7 @@ services:
                     'CMD',
                     'sh',
                     '-c',
-                    "echo 's3.bucket.list' | /usr/bin/weed shell -master=localhost:9333 2>&1 | grep -q posthog",
+                    "echo 's3.bucket.list' | /usr/bin/weed shell -master=localhost:9333 2>&1 | grep -q insights",
                 ]
             interval: 5s
             timeout: 10s
@@ -211,10 +211,10 @@ services:
         extends:
             file: docker-compose.base.yml
             service: asyncmigrationscheck
-        image: $REGISTRY_URL:$POSTHOG_APP_TAG
+        image: $REGISTRY_URL:$INSIGHTS_APP_TAG
         environment:
             SITE_URL: https://$DOMAIN
-            SECRET_KEY: $POSTHOG_SECRET
+            SECRET_KEY: $INSIGHTS_SECRET
             SKIP_ASYNC_MIGRATIONS_SETUP: 0
 
     # Temporal containers
@@ -227,7 +227,7 @@ services:
         ports:
             - 7233:7233
         volumes:
-            - ./posthog/docker/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+            - ./insights/docker/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
     elasticsearch:
         extends:
             file: docker-compose.base.yml
@@ -256,10 +256,10 @@ services:
             service: temporal-django-worker
         volumes:
             - ./compose:/compose
-        image: $REGISTRY_URL:$POSTHOG_APP_TAG
+        image: $REGISTRY_URL:$INSIGHTS_APP_TAG
         environment:
             SITE_URL: https://$DOMAIN
-            SECRET_KEY: $POSTHOG_SECRET
+            SECRET_KEY: $INSIGHTS_SECRET
         depends_on:
             - db
             - kv
@@ -274,9 +274,9 @@ services:
             file: docker-compose.base.yml
             service: cyclotron-janitor
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             KAFKA_HOSTS: 'kafka:9092'
         depends_on:
             db:
@@ -286,21 +286,21 @@ services:
 
     capture:
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
         extends:
             file: docker-compose.base.yml
             service: capture
 
     replay-capture:
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
         extends:
             file: docker-compose.base.yml
             service: replay-capture
 
     property-defs-rs:
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
         extends:
             file: docker-compose.base.yml
             service: property-defs-rs
@@ -315,13 +315,13 @@ services:
             file: docker-compose.base.yml
             service: livestream
         environment:
-            - LIVESTREAM_JWT_SECRET=${POSTHOG_SECRET}
+            - LIVESTREAM_JWT_SECRET=${INSIGHTS_SECRET}
         volumes:
-            - ./posthog/docker/livestream/configs-hobby.yml:/configs/configs.yml
+            - ./insights/docker/livestream/configs-hobby.yml:/configs/configs.yml
 
     feature-flags:
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
         extends:
             file: docker-compose.base.yml
             service: feature-flags
@@ -375,9 +375,9 @@ services:
                 condition: service_healthy
 
     cymbal:
-        image: ghcr.i./posthog/insights/cymbal:master
+        image: ghcr.i./insights/insights/cymbal:master
         build:
-            context: ./posthog/rust
+            context: ./insights/rust
             args:
                 BIN: cymbal
         restart: on-failure
@@ -387,15 +387,15 @@ services:
             KAFKA_HOSTS: 'kafka:9092'
             KAFKA_CONSUMER_GROUP: cymbal
             KAFKA_CONSUMER_TOPIC: exceptions_ingestion
-            OBJECT_STORAGE_BUCKET: posthog
+            OBJECT_STORAGE_BUCKET: insights
             OBJECT_STORAGE_ACCESS_KEY_ID: 'any'
             OBJECT_STORAGE_SECRET_ACCESS_KEY: 'any'
             OBJECT_STORAGE_ENDPOINT: 'http://seaweedfs:8333'
             OBJECT_STORAGE_FORCE_PATH_STYLE: 'true'
             BIND_HOST: '0.0.0.0'
             BIND_PORT: '3302'
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            PERSONS_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            PERSONS_URL: 'postgres://insights:insights@db:5432/insights'
             MAXMIND_DB_PATH: '/share/GeoLite2-City.mmdb'
             REDIS_URL: 'redis://kv:6379/'
             ISSUE_BUCKETS_REDIS_URL: 'redis://kv:6379/'

@@ -16,7 +16,7 @@ export const JSEventCapture = (): JSX.Element => {
                         language: 'javascript',
                         file: 'JavaScript',
                         code: dedent`
-                            posthog.capture('my_custom_event', { property: 'value' })
+                            insights.capture('my_custom_event', { property: 'value' })
                         `,
                     },
                 ]}

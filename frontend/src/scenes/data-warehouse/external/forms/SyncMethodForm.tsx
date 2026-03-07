@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSelect, LemonTag, lemonToast } from '@posthog/lemon-ui'
+import { LemonButton, LemonSelect, LemonTag, lemonToast } from '@hanzo/lemon-ui'
 
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
 

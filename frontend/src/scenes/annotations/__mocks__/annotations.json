@@ -14,7 +14,7 @@
                 "uuid": "017bcbcf-2391-0000-1868-14fb987285c5",
                 "distinct_id": "PqMBBFBfKo638PwvjCWTSZ6dnswYzJ3RtH8VIHCBWAy",
                 "first_name": "Paul",
-                "email": "paul@posthog.com"
+                "email": "paul@hanzo.ai"
             },
             "created_at": "2022-08-23T19:59:32.953086Z",
             "updated_at": "2022-08-23T19:59:32.953338Z",
@@ -32,7 +32,7 @@
                 "uuid": "017988e7-efbd-0000-5de3-64c3fa7c042f",
                 "distinct_id": "AiVYZJnINIPSkMJKJUFWf8uHqy40kpIFsMgDClDEoOk",
                 "first_name": "Joe",
-                "email": "joe@posthog.com"
+                "email": "joe@hanzo.ai"
             },
             "created_at": "2022-08-22T14:04:44.095170Z",
             "updated_at": "2022-08-22T14:04:44.095461Z",
@@ -50,7 +50,7 @@
                 "uuid": "0178a3fc-a4fd-0000-8737-3a39858bda96",
                 "distinct_id": "TA_6gJ8SG4qFhLdHyEqY4Zr-h_onL66Grkp76fVAi4I",
                 "first_name": "Cory Watilo",
-                "email": "cory@posthog.com"
+                "email": "cory@hanzo.ai"
             },
             "created_at": "2022-08-16T18:31:14.043100Z",
             "updated_at": "2022-08-16T18:31:14.043387Z",
@@ -59,7 +59,7 @@
         },
         {
             "id": 113666,
-            "content": "posthog.com -> app.posthog.com tracking fixed",
+            "content": "hanzo.ai -> insights.hanzo.ai tracking fixed",
             "date_marker": "2022-07-27T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": null,
@@ -68,7 +68,7 @@
                 "uuid": "0178a3fc-a51f-0000-936f-6498686f968b",
                 "distinct_id": "0xbG68iGeFo5brkG5j__Nd0Z73N6qQe5Vz4nsL9jgBE",
                 "first_name": "Tim",
-                "email": "tim@posthog.com"
+                "email": "tim@hanzo.ai"
             },
             "created_at": "2022-07-28T10:46:57.624728Z",
             "updated_at": "2022-07-28T10:46:57.625036Z",
@@ -86,7 +86,7 @@
                 "uuid": "0178a3fc-a4fd-0000-8737-3a39858bda96",
                 "distinct_id": "TA_6gJ8SG4qFhLdHyEqY4Zr-h_onL66Grkp76fVAi4I",
                 "first_name": "Cory Watilo",
-                "email": "cory@posthog.com"
+                "email": "cory@hanzo.ai"
             },
             "created_at": "2022-07-08T18:44:46.703636Z",
             "updated_at": "2022-07-08T18:44:46.703996Z",
@@ -104,7 +104,7 @@
                 "uuid": "0178a3fc-a5b5-0000-3013-f7e3ed1f11e6",
                 "distinct_id": "NId7pWwaXFUqsXGFwCHWQZB9AGjLJ4fQH3s8qedkrfs",
                 "first_name": "James",
-                "email": "james@posthog.com"
+                "email": "james@hanzo.ai"
             },
             "created_at": "2022-06-28T15:01:14.996646Z",
             "updated_at": "2022-06-28T15:01:14.996908Z",
@@ -122,7 +122,7 @@
                 "uuid": "017bcbcf-2391-0000-1868-14fb987285c5",
                 "distinct_id": "PqMBBFBfKo638PwvjCWTSZ6dnswYzJ3RtH8VIHCBWAy",
                 "first_name": "Paul",
-                "email": "paul@posthog.com"
+                "email": "paul@hanzo.ai"
             },
             "created_at": "2022-05-09T15:02:58.409491Z",
             "updated_at": "2022-05-09T15:02:58.409918Z",
@@ -140,7 +140,7 @@
                 "uuid": "017988e7-efbd-0000-5de3-64c3fa7c042f",
                 "distinct_id": "AiVYZJnINIPSkMJKJUFWf8uHqy40kpIFsMgDClDEoOk",
                 "first_name": "Joe",
-                "email": "joe@posthog.com"
+                "email": "joe@hanzo.ai"
             },
             "created_at": "2022-04-19T10:52:51.392771Z",
             "updated_at": "2022-04-19T10:52:51.393107Z",
@@ -158,7 +158,7 @@
                 "uuid": "0178a3fc-a362-0000-f70e-0d3fe83fb8ba",
                 "distinct_id": "C8UGS3uhn4QTfUiZr1RyqTmtJ31AokcbotSpX2rafCQ",
                 "first_name": "Eric",
-                "email": "eric@posthog.com"
+                "email": "eric@hanzo.ai"
             },
             "created_at": "2022-04-15T01:28:56.811154Z",
             "updated_at": "2022-04-15T01:35:08.177308Z",
@@ -176,7 +176,7 @@
                 "uuid": "017992c4-f078-0000-7c28-af6f71ad0aa5",
                 "distinct_id": "oH0cTDMmOgRg2m_oM7pcFamBRrVFUzeLRyNB-ZWqWt4",
                 "first_name": "Alex Kim",
-                "email": "alex@posthog.com"
+                "email": "alex@hanzo.ai"
             },
             "created_at": "2022-03-21T15:59:44.652015Z",
             "updated_at": "2022-03-21T15:59:44.652350Z",
@@ -194,7 +194,7 @@
                 "uuid": "017992c4-f078-0000-7c28-af6f71ad0aa5",
                 "distinct_id": "oH0cTDMmOgRg2m_oM7pcFamBRrVFUzeLRyNB-ZWqWt4",
                 "first_name": "Alex Kim",
-                "email": "alex@posthog.com"
+                "email": "alex@hanzo.ai"
             },
             "created_at": "2022-03-19T17:06:03.160296Z",
             "updated_at": "2022-03-19T17:06:03.160664Z",
@@ -212,7 +212,7 @@
                 "uuid": "017b8357-1ebe-0000-13fe-af0b89c76dde",
                 "distinct_id": "Yuez61iB6o2eVicbpuAlkDwW6L6zNrszbvTF5OZZ6hg",
                 "first_name": "Rick",
-                "email": "rick@posthog.com"
+                "email": "rick@hanzo.ai"
             },
             "created_at": "2022-03-17T16:28:28.382964Z",
             "updated_at": "2022-03-17T16:29:09.411806Z",
@@ -230,7 +230,7 @@
                 "uuid": "017f307a-0fea-0000-9e2d-452ab15f7bac",
                 "distinct_id": "Y1EO5ZYuE8KU6Q6ei0cO8m6M6UIQaCq2uE6uOU8WWmU",
                 "first_name": "Plugins API User [Bot]",
-                "email": "61023742@posthogbot.user"
+                "email": "61023742@insightsbot.user"
             },
             "created_at": "2022-03-12T00:00:02.169957Z",
             "updated_at": "2022-03-12T00:00:02.170295Z",
@@ -248,7 +248,7 @@
                 "uuid": "017f307a-0fea-0000-9e2d-452ab15f7bac",
                 "distinct_id": "Y1EO5ZYuE8KU6Q6ei0cO8m6M6UIQaCq2uE6uOU8WWmU",
                 "first_name": "Plugins API User [Bot]",
-                "email": "61023742@posthogbot.user"
+                "email": "61023742@insightsbot.user"
             },
             "created_at": "2022-03-12T00:00:01.935068Z",
             "updated_at": "2022-03-12T00:00:01.935402Z",
@@ -266,7 +266,7 @@
                 "uuid": "017988e7-efbd-0000-5de3-64c3fa7c042f",
                 "distinct_id": "AiVYZJnINIPSkMJKJUFWf8uHqy40kpIFsMgDClDEoOk",
                 "first_name": "Joe",
-                "email": "joe@posthog.com"
+                "email": "joe@hanzo.ai"
             },
             "created_at": "2022-02-15T17:41:57.843020Z",
             "updated_at": "2022-02-15T17:41:57.843473Z",
@@ -284,7 +284,7 @@
                 "uuid": "0178a3fc-a4fd-0000-8737-3a39858bda96",
                 "distinct_id": "TA_6gJ8SG4qFhLdHyEqY4Zr-h_onL66Grkp76fVAi4I",
                 "first_name": "Cory Watilo",
-                "email": "cory@posthog.com"
+                "email": "cory@hanzo.ai"
             },
             "created_at": "2022-02-12T12:36:34.506266Z",
             "updated_at": "2022-02-12T12:36:34.506634Z",
@@ -302,7 +302,7 @@
                 "uuid": "0179e620-588a-0000-5025-65cc61e14621",
                 "distinct_id": "33YFL8bEgMwv4_ncZsQQlDfer40iVXZM_xIJjhduKfs",
                 "first_name": "Marcus",
-                "email": "marcus@posthog.com"
+                "email": "marcus@hanzo.ai"
             },
             "created_at": "2022-02-01T15:50:04.571705Z",
             "updated_at": "2022-02-01T15:50:04.572046Z",
@@ -311,7 +311,7 @@
         },
         {
             "id": 3359,
-            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/PostHog/posthog/pull/7439",
+            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/Hanzo Insights/insights/pull/7439",
             "date_marker": "2021-11-29T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": null,
@@ -320,7 +320,7 @@
                 "uuid": "0178a3fc-a5b7-0000-d3c4-6649af36c611",
                 "distinct_id": "lS0jjcVhpYFSFfFnm_HyWLkLBz9JpfMPUQItGR66v7Q",
                 "first_name": "Michael",
-                "email": "michael@posthog.com"
+                "email": "michael@hanzo.ai"
             },
             "created_at": "2021-12-01T11:05:12.984200Z",
             "updated_at": "2021-12-01T11:05:12.984574Z",
@@ -329,7 +329,7 @@
         },
         {
             "id": 3307,
-            "content": "Published Supabase/Next.js signup funnel tutorial https://posthog.com/docs/tutorials/nextjs-supabase-signup-funnel",
+            "content": "Published Supabase/Next.js signup funnel tutorial https://hanzo.ai/docs/tutorials/nextjs-supabase-signup-funnel",
             "date_marker": "2021-10-27T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": 435115,
@@ -338,7 +338,7 @@
                 "uuid": "0179f65d-1090-0000-2a9c-4e8901b967bb",
                 "distinct_id": "iKhtqFI4F13Pec0wp-uUM6bG7vpKbsXbrmpehJWKTtk",
                 "first_name": "Phil",
-                "email": "phil@posthog.com"
+                "email": "phil@hanzo.ai"
             },
             "created_at": "2021-11-16T22:35:07.299138Z",
             "updated_at": "2021-11-16T22:35:07.299481Z",
@@ -356,7 +356,7 @@
                 "uuid": "0179373a-e177-0000-7486-78c1ecf7900b",
                 "distinct_id": "SHCqo6_5LgQMRMzKMqJ84kVnYv84vo0jurPuM4xlsgU",
                 "first_name": "Neil",
-                "email": "neil@posthog.com"
+                "email": "neil@hanzo.ai"
             },
             "created_at": "2021-11-10T12:51:12.052797Z",
             "updated_at": "2021-11-10T12:51:12.053326Z",
@@ -374,7 +374,7 @@
                 "uuid": "0178a3fc-9220-0000-8666-cd4802048561",
                 "distinct_id": "Y1sEwjhxB65vP_2Yj_Ogg1r_HLJtcqS2liBG0ZiuXKg",
                 "first_name": "Marius",
-                "email": "marius@posthog.com"
+                "email": "marius@hanzo.ai"
             },
             "created_at": "2021-11-04T08:42:10.189374Z",
             "updated_at": "2021-11-04T08:42:10.189702Z",
@@ -392,7 +392,7 @@
                 "uuid": "0179e620-588a-0000-5025-65cc61e14621",
                 "distinct_id": "33YFL8bEgMwv4_ncZsQQlDfer40iVXZM_xIJjhduKfs",
                 "first_name": "Marcus",
-                "email": "marcus@posthog.com"
+                "email": "marcus@hanzo.ai"
             },
             "created_at": "2021-10-12T08:34:47.650504Z",
             "updated_at": "2021-10-12T08:34:47.650858Z",
@@ -401,7 +401,7 @@
         },
         {
             "id": 3121,
-            "content": "KDnuggets sponsored blog post published and promoted https://www.kdnuggets.com/2021/09/posthog-open-source-product-analytics-platform.html",
+            "content": "KDnuggets sponsored blog post published and promoted https://www.kdnuggets.com/2021/09/insights-open-source-product-analytics-platform.html",
             "date_marker": "2021-09-22T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": 415718,
@@ -410,7 +410,7 @@
                 "uuid": "0179f65d-1090-0000-2a9c-4e8901b967bb",
                 "distinct_id": "iKhtqFI4F13Pec0wp-uUM6bG7vpKbsXbrmpehJWKTtk",
                 "first_name": "Phil",
-                "email": "phil@posthog.com"
+                "email": "phil@hanzo.ai"
             },
             "created_at": "2021-09-24T08:48:40.144081Z",
             "updated_at": "2021-09-24T08:48:40.144528Z",

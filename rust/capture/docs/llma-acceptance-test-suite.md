@@ -154,10 +154,10 @@ The acceptance test suite is implemented in Python using pytest to test against 
 
 ```bash
 # Insights Instance (defaults to http://localhost:8010 if not set)
-export POSTHOG_TEST_BASE_URL="http://localhost:8010"
+export INSIGHTS_TEST_BASE_URL="http://localhost:8010"
 
 # Personal API Key (required - no default)
-export POSTHOG_PERSONAL_API_KEY="your_personal_api_key_here"
+export INSIGHTS_PERSONAL_API_KEY="your_personal_api_key_here"
 ```
 
 **Creating a Personal API Key:**
@@ -168,7 +168,7 @@ export POSTHOG_PERSONAL_API_KEY="your_personal_api_key_here"
 4. Configure the key:
    - **Organization & project access**: Set to **All** (to avoid permission issues)
    - **Scopes**: Set to **All access** (required for creating/deleting test organizations and projects)
-5. Copy the generated key and set it as `POSTHOG_PERSONAL_API_KEY`
+5. Copy the generated key and set it as `INSIGHTS_PERSONAL_API_KEY`
 
 **Note**: The test suite automatically creates temporary organizations and projects for each test class and cleans them up after tests complete. S3 configuration is handled by the Insights instance itself.
 

@@ -11,11 +11,11 @@ type InsightsNodeOptions = {
 export function NodeInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Bash}>
-            {`npm install posthog-node
+            {`npm install insights-node
 # OR
-yarn add posthog-node
+yarn add insights-node
 # OR
-pnpm add posthog-node`}
+pnpm add insights-node`}
         </CodeSnippet>
     )
 }
@@ -31,7 +31,7 @@ export function NodeSetupSnippet({ enableExceptionAutocapture = false }: Insight
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import { Insights } from 'posthog-node'
+            {`import { Insights } from 'insights-node'
 
 const client = new Insights(
     '${currentTeam?.api_token}',

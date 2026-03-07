@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { windowValues } from 'kea-window-values'
-import { PostHog } from 'posthog-js'
+import { Insights } from '~/lib/insights-browser'
 
 import { InsightsAppToolbarEvent } from 'lib/components/IframedToolbarBrowser/utils'
 
@@ -21,7 +21,7 @@ import type { toolbarLogicType } from './toolbarLogicType'
 
 const MARGIN = 2
 
-const PII_MASKING_STYLESHEET_ID = 'posthog-pii-masking-styles'
+const PII_MASKING_STYLESHEET_ID = 'insights-pii-masking-styles'
 
 export type MenuState =
     | 'none'
@@ -52,7 +52,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
     connect(() => ({
         values: [
             toolbarConfigLogic,
-            ['posthog'],
+            ['insights'],
             heatmapToolbarMenuLogic,
             ['elementStatsLoading', 'rawHeatmapLoading', 'isRefreshing'],
             actionsLogic,
@@ -336,36 +336,36 @@ export const toolbarLogic = kea<toolbarLogicType>([
         ],
 
         piiWarning: [
-            (s) => [s.posthog, s.piiMaskingEnabled],
-            (posthog: PostHog | null, piiMaskingEnabled: boolean) => {
-                if (!posthog || !piiMaskingEnabled) {
+            (s) => [s.insights, s.piiMaskingEnabled],
+            (insights: Insights | null, piiMaskingEnabled: boolean) => {
+                if (!insights || !piiMaskingEnabled) {
                     return null
                 }
 
                 const warnings: string[] = []
-                if (posthog.sessionRecording?.status === 'active') {
+                if (insights.sessionRecording?.status === 'active') {
                     if (
-                        posthog.config.session_recording?.blockClass !== undefined &&
-                        typeof posthog.config.session_recording?.blockClass !== 'string'
+                        insights.config.session_recording?.blockClass !== undefined &&
+                        typeof insights.config.session_recording?.blockClass !== 'string'
                     ) {
                         warnings.push(
-                            "The toolbar's PII masking tool doesn't support non-string `session_recording.blockClass`. If you want to use PII masking, please set it to a string. Or, reach out to support@posthog.com to file a feature request."
+                            "The toolbar's PII masking tool doesn't support non-string `session_recording.blockClass`. If you want to use PII masking, please set it to a string. Or, reach out to support@hanzo.ai to file a feature request."
                         )
                     }
                     if (
-                        posthog.config.session_recording?.maskTextClass !== undefined &&
-                        typeof posthog.config.session_recording?.maskTextClass !== 'string'
+                        insights.config.session_recording?.maskTextClass !== undefined &&
+                        typeof insights.config.session_recording?.maskTextClass !== 'string'
                     ) {
                         warnings.push(
-                            "The toolbar's PII masking tool doesn't support non-string `session_recording.maskTextClass`. If you want to use PII masking, please set it to a string. Or, reach out to support@posthog.com to file a feature request."
+                            "The toolbar's PII masking tool doesn't support non-string `session_recording.maskTextClass`. If you want to use PII masking, please set it to a string. Or, reach out to support@hanzo.ai to file a feature request."
                         )
                     }
                     if (
-                        posthog.config.session_recording?.maskTextSelector !== undefined &&
-                        typeof posthog.config.session_recording?.maskTextSelector !== 'string'
+                        insights.config.session_recording?.maskTextSelector !== undefined &&
+                        typeof insights.config.session_recording?.maskTextSelector !== 'string'
                     ) {
                         warnings.push(
-                            "The toolbar's PII masking tool doesn't support non-string `session_recording.maskTextSelector`. If you want to use PII masking, please set it to a string. Or, reach out to support@posthog.com to file a feature request."
+                            "The toolbar's PII masking tool doesn't support non-string `session_recording.maskTextSelector`. If you want to use PII masking, please set it to a string. Or, reach out to support@hanzo.ai to file a feature request."
                         )
                     }
                 }
@@ -517,7 +517,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
             const styleElement = document.getElementById(PII_MASKING_STYLESHEET_ID) as HTMLStyleElement | null
 
             if (values.piiMaskingEnabled) {
-                const css = generatePiiMaskingCSS(values.piiMaskingColor, values.posthog)
+                const css = generatePiiMaskingCSS(values.piiMaskingColor, values.insights)
                 if (!styleElement) {
                     const newStyleElement = document.createElement('style')
                     newStyleElement.id = PII_MASKING_STYLESHEET_ID
@@ -536,7 +536,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
             const styleElement = document.getElementById(PII_MASKING_STYLESHEET_ID) as HTMLStyleElement | null
 
             if (styleElement && values.piiMaskingEnabled) {
-                styleElement.textContent = generatePiiMaskingCSS(color, values.posthog)
+                styleElement.textContent = generatePiiMaskingCSS(color, values.insights)
             }
         },
         startGracefulExit: () => {
@@ -589,7 +589,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
                     styleElement.id = PII_MASKING_STYLESHEET_ID
                     document.head.appendChild(styleElement)
                 }
-                styleElement.textContent = generatePiiMaskingCSS(values.piiMaskingColor, values.posthog)
+                styleElement.textContent = generatePiiMaskingCSS(values.piiMaskingColor, values.insights)
             }
 
             return () => {
@@ -600,7 +600,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
             }
         }, 'piiMasking')
 
-        // the toolbar can be run within the posthog parent app
+        // the toolbar can be run within the insights parent app
         // if it is then it listens to parent messages
         const isInIframe = window !== window.parent
 

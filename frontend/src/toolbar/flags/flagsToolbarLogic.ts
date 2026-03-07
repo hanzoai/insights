@@ -2,12 +2,12 @@ import Fuse from 'fuse.js'
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { encodeParams } from 'kea-router'
-import type { PostHog } from 'posthog-js'
+import type { Insights } from '~/lib/insights-browser'
 
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { CombinedFeatureFlagAndValueType } from '~/types'
 
 import type { flagsToolbarLogicType } from './flagsToolbarLogicType'
@@ -22,7 +22,7 @@ type EvaluationReasonsResponse = Record<
 export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
     path(['toolbar', 'flags', 'flagsToolbarLogic']),
     connect(() => ({
-        values: [toolbarConfigLogic, ['posthog']],
+        values: [toolbarConfigLogic, ['insights']],
         actions: [toolbarConfigLogic, ['logout', 'tokenExpired']],
     })),
     actions({
@@ -63,7 +63,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
             {
                 getUserFlags: async (_, breakpoint) => {
                     const params = {
-                        groups: getGroups(values.posthog),
+                        groups: getGroups(values.insights),
                     }
                     const response = await toolbarFetch(
                         `/api/projects/@current/feature_flags/my_flags${encodeParams(params, '?')}`
@@ -91,7 +91,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
                 setSearchTerm: (_, { searchTerm }) => searchTerm,
             },
         ],
-        posthogClientFlagValues: [
+        insightsClientFlagValues: [
             {} as Record<string, string | boolean>,
             {
                 setFeatureFlagValueFromInsightsClient: (_, { variants }) => {
@@ -190,17 +190,17 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
             (s) => [
                 s.userFlags,
                 s.localOverrides,
-                s.posthogClientFlagValues,
+                s.insightsClientFlagValues,
                 s.payloadOverrides,
                 s.impersonatedFlagValues,
             ],
-            (userFlags, localOverrides, posthogClientFlagValues, payloadOverrides, impersonatedFlagValues) => {
+            (userFlags, localOverrides, insightsClientFlagValues, payloadOverrides, impersonatedFlagValues) => {
                 return userFlags.map((flag) => {
                     const hasVariants = (flag.feature_flag.filters?.multivariate?.variants?.length || 0) > 0
 
                     const baseValue = impersonatedFlagValues
                         ? (impersonatedFlagValues[flag.feature_flag.key] ?? false)
-                        : (posthogClientFlagValues[flag.feature_flag.key] ?? flag.value)
+                        : (insightsClientFlagValues[flag.feature_flag.key] ?? flag.value)
 
                     const currentValue =
                         flag.feature_flag.key in localOverrides ? localOverrides[flag.feature_flag.key] : baseValue
@@ -232,7 +232,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
     }),
     listeners(({ actions, values }) => {
         const clearFeatureFlagOverrides = (): void => {
-            const clientInsights = values.posthog
+            const clientInsights = values.insights
             if (clientInsights) {
                 clientInsights.featureFlags.overrideFeatureFlags(false)
                 clientInsights.featureFlags.reloadFeatureFlags()
@@ -242,21 +242,21 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
 
         return {
             checkLocalOverrides: () => {
-                const clientInsights = values.posthog
+                const clientInsights = values.insights
                 if (clientInsights) {
                     const locallyOverrideFeatureFlags = clientInsights.get_property('$override_feature_flags') || {}
                     actions.storeLocalOverrides(locallyOverrideFeatureFlags)
                 }
             },
             setOverriddenUserFlag: ({ flagKey, overrideValue, payloadOverride }) => {
-                const clientInsights = values.posthog
+                const clientInsights = values.insights
                 if (clientInsights) {
                     const payloads = payloadOverride ? { [flagKey]: payloadOverride } : undefined
                     clientInsights.featureFlags.overrideFeatureFlags({
                         flags: { ...values.localOverrides, [flagKey]: overrideValue },
                         payloads: payloads,
                     })
-                    toolbarPosthogJS.capture('toolbar feature flag overridden')
+                    toolbarInsightsJS.capture('toolbar feature flag overridden')
                     actions.checkLocalOverrides()
                     if (payloadOverride) {
                         actions.setPayloadOverride(flagKey, payloadOverride)
@@ -265,7 +265,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
                 }
             },
             deleteOverriddenUserFlag: ({ flagKey }) => {
-                const clientInsights = values.posthog
+                const clientInsights = values.insights
                 if (clientInsights) {
                     const updatedFlags = { ...values.localOverrides }
                     delete updatedFlags[flagKey]
@@ -274,7 +274,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
                     } else {
                         clientInsights.featureFlags.overrideFeatureFlags(false)
                     }
-                    toolbarPosthogJS.capture('toolbar feature flag override removed')
+                    toolbarInsightsJS.capture('toolbar feature flag override removed')
                     actions.checkLocalOverrides()
                     clientInsights.featureFlags.reloadFeatureFlags()
                 }
@@ -318,12 +318,12 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
                 actions.setImpersonatedFlagValues(flagValues)
 
                 // Apply as overrides so the page actually re-renders with these flags
-                const clientInsights = values.posthog
+                const clientInsights = values.insights
                 if (clientInsights) {
                     clientInsights.featureFlags.overrideFeatureFlags({ flags: flagValues })
                     actions.checkLocalOverrides()
                 }
-                toolbarPosthogJS.capture('toolbar flags impersonated', { distinct_id: distinctId })
+                toolbarInsightsJS.capture('toolbar flags impersonated', { distinct_id: distinctId })
             },
             clearImpersonation: () => {
                 clearFeatureFlagOverrides()
@@ -342,9 +342,9 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
     permanentlyMount(),
 ])
 
-function getGroups(posthogInstance: PostHog | null): Record<string, any> {
+function getGroups(insightsInstance: Insights | null): Record<string, any> {
     try {
-        return posthogInstance?.getGroups() || {}
+        return insightsInstance?.getGroups() || {}
     } catch {
         return {}
     }

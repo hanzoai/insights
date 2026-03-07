@@ -81,106 +81,106 @@ class TestPersonWhereClauseExtractor(ClickhouseTestMixin, APIBaseTest):
         return prepare_and_print_ast(node=_select(query), context=context, dialect="clickhouse", pretty=False)[0]
 
     def test_person_properties(self):
-        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com'")
-        expected = _expr("properties.email = 'jimmy@posthog.com'")
+        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_1(self):
-        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' or false")
-        expected = _expr("properties.email = 'jimmy@posthog.com'")
+        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or false")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_2(self):
-        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' and false")
+        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' and false")
         assert actual is None
 
     def test_person_properties_andor_3(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' and person.properties.email = 'timmy@posthog.com'"
+            "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' and person.properties.email = 'timmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com' and properties.email = 'timmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai' and properties.email = 'timmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_4(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' or person.properties.email = 'timmy@posthog.com'"
+            "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or person.properties.email = 'timmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com' or properties.email = 'timmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_5(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' or (1 and person.properties.email = 'timmy@posthog.com')"
+            "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or (1 and person.properties.email = 'timmy@hanzo.ai')"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com' or properties.email = 'timmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_6(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' or (0 or person.properties.email = 'timmy@posthog.com')"
+            "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or (0 or person.properties.email = 'timmy@hanzo.ai')"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com' or properties.email = 'timmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai' or properties.email = 'timmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_7(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE person.properties.email = 'jimmy@posthog.com' or (1 or person.properties.email = 'timmy@posthog.com')"
+            "SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai' or (1 or person.properties.email = 'timmy@hanzo.ai')"
         )
         assert actual is None
 
     def test_person_properties_andor_8(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE event == '$pageview' and person.properties.email = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE event == '$pageview' and person.properties.email = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_andor_9(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE event == '$pageview' or person.properties.email = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE event == '$pageview' or person.properties.email = 'jimmy@hanzo.ai'"
         )
         assert actual is None
 
     def test_person_properties_andor_10(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE properties.email = 'bla@posthog.com' or person.properties.email = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' or person.properties.email = 'jimmy@hanzo.ai'"
         )
         assert actual is None
 
     def test_person_properties_andor_11(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE properties.email = 'bla@posthog.com' and person.properties.email = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and person.properties.email = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("properties.email = 'jimmy@posthog.com'")
+        expected = _expr("properties.email = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_array(self):
-        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email IN ['jimmy@posthog.com']")
-        expected = _expr("properties.email IN ['jimmy@posthog.com']")
+        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email IN ['jimmy@hanzo.ai']")
+        expected = _expr("properties.email IN ['jimmy@hanzo.ai']")
         assert actual == expected
 
     def test_person_properties_function_calls(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE properties.email = 'bla@posthog.com' and toString(person.properties.email) = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and toString(person.properties.email) = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("toString(properties.email) = 'jimmy@posthog.com'")
+        expected = _expr("toString(properties.email) = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_function_call_args(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE properties.email = 'bla@posthog.com' and substring(person.properties.email, 10) = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and substring(person.properties.email, 10) = 'jimmy@hanzo.ai'"
         )
-        expected = _expr("substring(properties.email, 10) = 'jimmy@posthog.com'")
+        expected = _expr("substring(properties.email, 10) = 'jimmy@hanzo.ai'")
         assert actual == expected
 
     def test_person_properties_function_call_args_complex(self):
         actual = self.get_clause(
-            "SELECT * FROM events WHERE properties.email = 'bla@posthog.com' and substring(person.properties.email, event = 'bla') = 'jimmy@posthog.com'"
+            "SELECT * FROM events WHERE properties.email = 'bla@hanzo.ai' and substring(person.properties.email, event = 'bla') = 'jimmy@hanzo.ai'"
         )
         assert actual is None
 
     def test_left_join_with_negation(self):
-        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email != 'jimmy@posthog.com'")
+        actual = self.get_clause("SELECT * FROM events WHERE person.properties.email != 'jimmy@hanzo.ai'")
         assert actual is None
 
     def test_subquery(self):

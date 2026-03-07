@@ -3,7 +3,7 @@ import './Cohorts.scss'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { LemonDialog, LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -281,7 +281,7 @@ export function Cohorts(): JSX.Element {
                 thingName="cohort"
                 description="Use cohorts to group people together, such as users who used your app in the last week, or people who viewed the signup page but didn't convert."
                 isEmpty={shouldShowEmptyState}
-                docsURL="https://posthog.com/docs/data/cohorts"
+                docsURL="https://hanzo.ai/docs/data/cohorts"
                 action={() => router.actions.push(urls.cohort('new'))}
                 customHog={ListHog}
             />

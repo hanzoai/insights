@@ -15,7 +15,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    Before proceeding, enable debug and call \`posthog.capture('test_event')\` to make sure you can capture events.
+                    Before proceeding, enable debug and call \`insights.capture('test_event')\` to make sure you can capture events.
                 `}
             </Markdown>
         ),
@@ -37,8 +37,8 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'python',
                             file: 'Python',
                             code: dedent`
-                                from posthog import Posthog
-                                posthog = Posthog("<ph_project_api_key>", enable_exception_autocapture=True, ...)
+                                from insights import Insights
+                                insights = Insights("<ph_project_api_key>", enable_exception_autocapture=True, ...)
                             `,
                         },
                     ]}
@@ -70,7 +70,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'python',
                             file: 'Python',
                             code: dedent`
-                                posthog.capture_exception(e, distinct_id="user_distinct_id", properties=additional_properties)
+                                insights.capture_exception(e, distinct_id="user_distinct_id", properties=additional_properties)
                             `,
                         },
                     ]}
@@ -93,7 +93,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
@@ -130,7 +130,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         code: dedent`
                                             MIDDLEWARE = [
                                                 # ... other middleware
-                                                'posthog.integrations.django.PosthogContextMiddleware',
+                                                'insights.integrations.django.InsightsContextMiddleware',
                                                 # ... other middleware
                                             ]
                                         `,
@@ -139,7 +139,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             />
                             <Markdown>
                                 {dedent`
-                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`POSTHOG_MW_CAPTURE_EXCEPTIONS = False\`. Use \`POSTHOG_MW_EXTRA_TAGS\`, \`POSTHOG_MW_REQUEST_FILTER\`, and \`POSTHOG_MW_TAG_MAP\` to customize. See the [Django integration docs](/docs/libraries/django) for full configuration.
+                                    By default, the middleware captures exceptions and sends them to Insights. Disable with \`INSIGHTS_MW_CAPTURE_EXCEPTIONS = False\`. Use \`INSIGHTS_MW_EXTRA_TAGS\`, \`INSIGHTS_MW_REQUEST_FILTER\`, and \`INSIGHTS_MW_TAG_MAP\` to customize. See the [Django integration docs](/docs/libraries/django) for full configuration.
                                 `}
                             </Markdown>
                         </Tab.Panel>
@@ -151,11 +151,11 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         file: 'Python',
                                         code: dedent`
                                             from flask import Flask, jsonify
-                                            from posthog import Posthog
-                                            posthog = Posthog('<ph_project_api_key>', host='https://us.i.posthog.com')
+                                            from insights import Insights
+                                            insights = Insights('<ph_project_api_key>', host='https://us.i.hanzo.ai')
                                             @app.errorhandler(Exception)
                                             def handle_exception(e):
-                                                event_id = posthog.capture_exception(e)
+                                                event_id = insights.capture_exception(e)
                                                 response = jsonify({'message': str(e), 'error_id': event_id})
                                                 response.status_code = 500
                                                 return response
@@ -172,11 +172,11 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         file: 'Python',
                                         code: dedent`
                                             from fastapi.responses import JSONResponse
-                                            from posthog import Posthog
-                                            posthog = Posthog('<ph_project_api_key>', host='https://us.i.posthog.com')
+                                            from insights import Insights
+                                            insights = Insights('<ph_project_api_key>', host='https://us.i.hanzo.ai')
                                             @app.exception_handler(Exception)
                                             async def http_exception_handler(request, exc):
-                                                posthog.capture_exception(exc)
+                                                insights.capture_exception(exc)
                                                 return JSONResponse(status_code=500, content={'message': str(exc)})
                                         `,
                                     },

@@ -2,7 +2,7 @@ import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path,
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { v4 as uuidv4 } from 'uuid'
 
 import api from 'lib/api'
@@ -370,7 +370,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                                 operation_type: cohort.id === 'new' ? 'create' : 'update',
                                 is_static: cohort.is_static,
                             })
-                            posthog.captureException(error, {
+                            insights.captureException(error, {
                                 cohort_operation: 'Cohort creation failed unexpectedly',
                                 // Cohort context (most valuable)
                                 cohort_name: cohort.name,

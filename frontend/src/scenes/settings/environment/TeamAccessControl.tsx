@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTestTube } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconTestTube } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

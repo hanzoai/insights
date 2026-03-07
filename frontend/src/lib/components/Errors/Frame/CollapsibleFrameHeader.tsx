@@ -1,12 +1,12 @@
 import './CollapsibleFrameHeader.scss'
 
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useRef } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { IconBox, IconEllipsis, IconSpinner, IconWarning } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconBox, IconEllipsis, IconSpinner, IconWarning } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { CollapsiblePrimitiveTrigger } from 'lib/ui/CollapsiblePrimitive/CollapsiblePrimitive'
@@ -101,7 +101,7 @@ export function CollapsibleFrameHeader({
 
 function NoContextIcon({ lang, raw_id }: { lang: string; raw_id: string }): JSX.Element {
     useEffect(() => {
-        posthog.capture('error_tracking_frame_missing_content', {
+        insights.capture('error_tracking_frame_missing_content', {
             lang,
             raw_id,
         })
@@ -150,7 +150,7 @@ function UnresolvedIcon({ resolve_failure }: { resolve_failure: string | null })
                     <p className="text-xs text-secondary">{resolve_failure}</p>
                 </>
             }
-            docLink="https://posthog.com/docs/error-tracking/upload-source-maps"
+            docLink="https://hanzo.ai/docs/error-tracking/upload-source-maps"
         >
             <IconWarning className="text-secondary" fontSize={15} />
         </Tooltip>

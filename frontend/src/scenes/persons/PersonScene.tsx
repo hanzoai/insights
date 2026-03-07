@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { IconChevronDown, IconCopy, IconInfo, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonDivider, LemonMenu, LemonSelect, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconChevronDown, IconCopy, IconInfo, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonDivider, LemonMenu, LemonSelect, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -96,7 +96,7 @@ function PersonCaption({ person }: { person: PersonType }): JSX.Element {
             </div>
             <div className="flex items-center gap-1">
                 <span className="text-secondary">Merge restrictions:</span> {person.is_identified ? 'applied' : 'none'}
-                <Link to="https://posthog.com/docs/data/identify#alias-assigning-multiple-distinct-ids-to-the-same-user">
+                <Link to="https://hanzo.ai/docs/data/identify#alias-assigning-multiple-distinct-ids-to-the-same-user">
                     <Tooltip
                         title={
                             <>
@@ -374,7 +374,7 @@ export function PersonScene(): JSX.Element | null {
                                                               <div>
                                                                   This option may depend on your specific setup and
                                                                   isn't always suitable. Read more in the{' '}
-                                                                  <Link to="https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps">
+                                                                  <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps">
                                                                       documentation.
                                                                   </Link>
                                                               </div>

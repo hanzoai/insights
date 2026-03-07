@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useAsyncActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconTrash } from '@posthog/icons'
+import { IconInfo, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -12,7 +12,7 @@ import {
     LemonSelectProps,
     LemonTable,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'

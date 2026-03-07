@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonSwitch } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { browserNotificationLogic } from '../../browserNotificationLogic'
 

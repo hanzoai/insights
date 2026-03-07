@@ -139,16 +139,16 @@ def reset_clickhouse_tables():
 
 
 def run_persons_sqlx_migrations(keepdb: bool = False):
-    """Run sqlx migrations for persons tables in separate test_posthog_persons database.
+    """Run sqlx migrations for persons tables in separate test_insights_persons database.
 
-    This creates posthog_person_new and related tables needed for dual-table
+    This creates insights_person_new and related tables needed for dual-table
     person model migration. Mirrors production migrations in rust/persons_migrations/.
     Uses a separate database to mirror production setup where persons live in their own DB.
 
     Args:
         keepdb: If True, reuse existing database (only create if missing). If False, drop and recreate.
     """
-    # Build database URL for test_posthog_persons (separate from main test_posthog)
+    # Build database URL for test_insights_persons (separate from main test_insights)
     db_config = settings.DATABASES["default"]
     # Use separate persons database name to mirror production
     persons_db_name = db_config["NAME"] + "_persons"
@@ -162,7 +162,7 @@ def run_persons_sqlx_migrations(keepdb: bool = False):
     database_url = f"postgres://{db_user}{password_part}@{db_host}:{db_port}/{persons_db_name}"
 
     # Get path to migrations (relative to this file)
-    # conftest.py is at posthog/conftest.py, go up one level to repo root
+    # conftest.py is at insights/conftest.py, go up one level to repo root
     migrations_path = os.path.join(os.path.dirname(__file__), "..", "rust", "persons_migrations")
     migrations_path = os.path.abspath(migrations_path)
 
@@ -229,22 +229,22 @@ def _django_db_setup(django_db_keepdb, django_db_blocker):
     # These tables will exist in the persons_db_writer database via sqlx migrations
     with django_db_blocker.unblock():
         with connection.cursor() as cursor:
-            # Drop all FK constraints pointing to posthog_person, regardless of naming convention
+            # Drop all FK constraints pointing to insights_person, regardless of naming convention
             # This is needed because:
-            # 1. Django creates FKs with hash suffix: posthog_persondistin_person_id_5d655bba_fk_posthog_p
-            # 2. sqlx migration tries to drop: posthog_persondistinctid_person_id_fkey
+            # 1. Django creates FKs with hash suffix: insights_persondistin_person_id_5d655bba_fk_insights_p
+            # 2. sqlx migration tries to drop: insights_persondistinctid_person_id_fkey
             # 3. Mismatch means FK remains and blocks dual-table writes
             cursor.execute("""
                 DO $$
                 DECLARE r RECORD;
                 BEGIN
-                    -- Only drop if posthog_person table exists
-                    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'posthog_person') THEN
+                    -- Only drop if insights_person table exists
+                    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'insights_person') THEN
                         FOR r IN
                             SELECT conname, conrelid::regclass AS table_name
                             FROM pg_constraint
                             WHERE contype = 'f'
-                            AND confrelid = 'posthog_person'::regclass
+                            AND confrelid = 'insights_person'::regclass
                         LOOP
                             EXECUTE format('ALTER TABLE %s DROP CONSTRAINT IF EXISTS %I', r.table_name, r.conname);
                         END LOOP;
@@ -256,20 +256,20 @@ def _django_db_setup(django_db_keepdb, django_db_blocker):
             # These will exist in the persons_db_writer database via sqlx migrations
             # Drop in correct order: dependent tables first, then referenced tables
             cursor.execute("""
-                DROP TABLE IF EXISTS posthog_cohortpeople CASCADE;
-                DROP TABLE IF EXISTS posthog_featureflaghashkeyoverride CASCADE;
-                DROP TABLE IF EXISTS posthog_group CASCADE;
-                DROP TABLE IF EXISTS posthog_grouptypemapping CASCADE;
-                DROP TABLE IF EXISTS posthog_persondistinctid CASCADE;
-                DROP TABLE IF EXISTS posthog_personlessdistinctid CASCADE;
-                DROP TABLE IF EXISTS posthog_personoverride CASCADE;
-                DROP TABLE IF EXISTS posthog_pendingpersonoverride CASCADE;
-                DROP TABLE IF EXISTS posthog_flatpersonoverride CASCADE;
-                DROP TABLE IF EXISTS posthog_personoverridemapping CASCADE;
-                DROP TABLE IF EXISTS posthog_person CASCADE;
+                DROP TABLE IF EXISTS insights_cohortpeople CASCADE;
+                DROP TABLE IF EXISTS insights_featureflaghashkeyoverride CASCADE;
+                DROP TABLE IF EXISTS insights_group CASCADE;
+                DROP TABLE IF EXISTS insights_grouptypemapping CASCADE;
+                DROP TABLE IF EXISTS insights_persondistinctid CASCADE;
+                DROP TABLE IF EXISTS insights_personlessdistinctid CASCADE;
+                DROP TABLE IF EXISTS insights_personoverride CASCADE;
+                DROP TABLE IF EXISTS insights_pendingpersonoverride CASCADE;
+                DROP TABLE IF EXISTS insights_flatpersonoverride CASCADE;
+                DROP TABLE IF EXISTS insights_personoverridemapping CASCADE;
+                DROP TABLE IF EXISTS insights_person CASCADE;
             """)
 
-    # Run sqlx migrations to create posthog_person_new and related tables
+    # Run sqlx migrations to create insights_person_new and related tables
     run_persons_sqlx_migrations(keepdb=django_db_keepdb)
 
     database = Database(

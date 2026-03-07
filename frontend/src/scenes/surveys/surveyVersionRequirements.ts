@@ -15,11 +15,11 @@ import {
 import { SURVEY_RATING_SCALE } from './constants'
 
 export type SurveySdkType =
-    | 'posthog-js'
-    | 'posthog-react-native'
-    | 'posthog-ios'
-    | 'posthog-android'
-    | 'posthog_flutter'
+    | 'insights-js'
+    | 'insights-react-native'
+    | 'insights-ios'
+    | 'insights-android'
+    | 'insights_flutter'
 
 export type SdkVersionRequirements = Partial<Record<SurveySdkType, string>>
 
@@ -59,34 +59,34 @@ export type SurveyFeatureRequirement = {
 export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     {
         feature: 'URL targeting with regex',
-        sdkVersions: { 'posthog-js': '1.82.0' },
+        sdkVersions: { 'insights-js': '1.82.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: false },
-            { sdk: 'posthog-ios', issue: false },
-            { sdk: 'posthog-android', issue: false },
-            { sdk: 'posthog_flutter', issue: false },
+            { sdk: 'insights-react-native', issue: false },
+            { sdk: 'insights-ios', issue: false },
+            { sdk: 'insights-android', issue: false },
+            { sdk: 'insights_flutter', issue: false },
         ],
         check: (s) => !!s.conditions?.url && s.conditions?.urlMatchType === SurveyMatchType.Regex,
     },
     {
         feature: 'URL targeting with exact match',
-        sdkVersions: { 'posthog-js': '1.82.0' },
+        sdkVersions: { 'insights-js': '1.82.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: false },
-            { sdk: 'posthog-ios', issue: false },
-            { sdk: 'posthog-android', issue: false },
-            { sdk: 'posthog_flutter', issue: false },
+            { sdk: 'insights-react-native', issue: false },
+            { sdk: 'insights-ios', issue: false },
+            { sdk: 'insights-android', issue: false },
+            { sdk: 'insights_flutter', issue: false },
         ],
         check: (s) => !!s.conditions?.url && s.conditions?.urlMatchType === SurveyMatchType.Exact,
     },
     {
         feature: 'Device types targeting',
         sdkVersions: {
-            'posthog-js': '1.214.0',
-            'posthog-react-native': '4.3.0',
-            'posthog-ios': '3.22.0',
-            'posthog-android': '3.21.0',
-            posthog_flutter: '5.1.0', // delegate; first version to require posthog-ios >= 3.22
+            'insights-js': '1.214.0',
+            'insights-react-native': '4.3.0',
+            'insights-ios': '3.22.0',
+            'insights-android': '3.21.0',
+            insights_flutter: '5.1.0', // delegate; first version to require insights-ios >= 3.22
         },
         unsupportedSdks: [],
         check: (s) => (s.conditions?.deviceTypes?.length ?? 0) > 0,
@@ -94,37 +94,37 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     {
         feature: 'Custom font selection',
         sdkVersions: {
-            'posthog-js': '1.223.4',
-            'posthog-ios': '3.22.0',
+            'insights-js': '1.223.4',
+            'insights-ios': '3.22.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-android', issue: false }, // delegate pattern - no built-in UI
-            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2959' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/258' },
+            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
+            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2959' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/258' },
         ],
         check: (s) => s.appearance?.fontFamily !== undefined && s.appearance?.fontFamily !== 'inherit',
     },
     {
         feature: 'Repeated survey activation (show every time)',
         sdkVersions: {
-            'posthog-js': '1.234.11',
-            'posthog-react-native': '4.27.0',
+            'insights-js': '1.234.11',
+            'insights-react-native': '4.27.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/446' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/389' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/260' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/446' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/389' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/260' },
         ],
         check: (s) => s.schedule === SurveySchedule.Always,
     },
     {
         feature: 'Feedback button surveys',
-        sdkVersions: { 'posthog-js': '1.294.0' },
+        sdkVersions: { 'insights-js': '1.294.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: false },
-            { sdk: 'posthog-ios', issue: false },
-            { sdk: 'posthog-android', issue: false },
-            { sdk: 'posthog_flutter', issue: false },
+            { sdk: 'insights-react-native', issue: false },
+            { sdk: 'insights-ios', issue: false },
+            { sdk: 'insights-android', issue: false },
+            { sdk: 'insights_flutter', issue: false },
         ],
         check: (s) =>
             s.appearance?.position === SurveyPosition.NextToTrigger ||
@@ -132,25 +132,25 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     },
     {
         feature: 'Partial response collection',
-        sdkVersions: { 'posthog-js': '1.240.0' },
+        sdkVersions: { 'insights-js': '1.240.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2962' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/447' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/390' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/261' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2962' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/447' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/390' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/261' },
         ],
         check: (s) => s.enable_partial_responses === true,
     },
     {
         feature: 'Auto-submit on selection',
         sdkVersions: {
-            'posthog-js': '1.244.0',
-            'posthog-react-native': '4.26.0',
+            'insights-js': '1.244.0',
+            'insights-react-native': '4.26.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/448' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/391' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/262' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/448' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/391' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/262' },
         ],
         check: (s) =>
             s.questions.some(
@@ -164,23 +164,23 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     {
         feature: 'Link to specific feature flag variant',
         sdkVersions: {
-            'posthog-js': '1.259.0',
-            'posthog-react-native': '4.4.0',
+            'insights-js': '1.259.0',
+            'insights-react-native': '4.4.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/445' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/388' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/259' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/445' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/388' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/259' },
         ],
         check: (s) => !!s.conditions?.linkedFlagVariant,
     },
     {
         feature: 'Event trigger property filters',
-        sdkVersions: { 'posthog-js': '1.268.0', 'posthog-react-native': '4.16.0' },
+        sdkVersions: { 'insights-js': '1.268.0', 'insights-react-native': '4.16.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/449' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/392' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/263' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/449' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/392' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/263' },
         ],
         check: (s) =>
             (s.conditions?.events?.values?.length ?? 0) > 0 &&
@@ -188,62 +188,62 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     },
     {
         feature: 'Cancellation events',
-        sdkVersions: { 'posthog-js': '1.299.0' },
+        sdkVersions: { 'insights-js': '1.299.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2964' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/450' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/393' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/264' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2964' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/450' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/393' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/264' },
         ],
         check: (s) => (s.conditions?.cancelEvents?.values?.length ?? 0) > 0,
     },
     {
         feature: 'Targeting with actions',
-        sdkVersions: { 'posthog-js': '1.301.0' },
+        sdkVersions: { 'insights-js': '1.301.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2965' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/451' },
-            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/394' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/265' },
+            { sdk: 'insights-react-native', issue: 'https://github.com/hanzoai/insights-js/issues/2965' },
+            { sdk: 'insights-ios', issue: 'https://github.com/hanzoai/insights-ios/issues/451' },
+            { sdk: 'insights-android', issue: 'https://github.com/hanzoai/insights-android/issues/394' },
+            { sdk: 'insights_flutter', issue: 'https://github.com/hanzoai/insights-flutter/issues/265' },
         ],
         check: (s) => (s.conditions?.actions?.values?.length ?? 0) > 0,
     },
     {
         feature: 'Styling input appearance',
         sdkVersions: {
-            'posthog-js': '1.300.0',
-            'posthog-react-native': '4.15.0',
-            'posthog-ios': '3.38.0',
-            posthog_flutter: '5.13.0',
+            'insights-js': '1.300.0',
+            'insights-react-native': '4.15.0',
+            'insights-ios': '3.38.0',
+            insights_flutter: '5.13.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-android', issue: false }, // delegate pattern - no built-in UI
+            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
         ],
         check: (s) => s.appearance?.inputBackground !== undefined || s.appearance?.inputTextColor !== undefined,
     },
     {
         feature: 'Custom text colors',
         sdkVersions: {
-            'posthog-js': '1.310.1',
-            'posthog-react-native': '4.17.0',
-            'posthog-ios': '3.38.0',
-            posthog_flutter: '5.13.0',
+            'insights-js': '1.310.1',
+            'insights-react-native': '4.17.0',
+            'insights-ios': '3.38.0',
+            insights_flutter: '5.13.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-android', issue: false }, // delegate pattern - no built-in UI
+            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
         ],
         check: (s) => s.appearance?.textColor !== undefined || s.appearance?.submitButtonTextColor !== undefined,
     },
     {
         feature: 'Thumbs up/down question',
         sdkVersions: {
-            'posthog-js': '1.326.0',
-            'posthog-react-native': '4.19.0',
-            'posthog-ios': '3.38.0',
-            posthog_flutter: '5.13.0',
+            'insights-js': '1.326.0',
+            'insights-react-native': '4.19.0',
+            'insights-ios': '3.38.0',
+            insights_flutter: '5.13.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-android', issue: false }, // delegate pattern - no built-in UI
+            { sdk: 'insights-android', issue: false }, // delegate pattern - no built-in UI
         ],
         check: (s) =>
             s.questions.some(
@@ -252,11 +252,11 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
     },
     {
         feature: 'Response length validation',
-        sdkVersions: { 'posthog-js': '1.344.0', 'posthog-react-native': '4.31.0' },
+        sdkVersions: { 'insights-js': '1.344.0', 'insights-react-native': '4.31.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: false },
-            { sdk: 'posthog-android', issue: false },
-            { sdk: 'posthog_flutter', issue: false },
+            { sdk: 'insights-ios', issue: false },
+            { sdk: 'insights-android', issue: false },
+            { sdk: 'insights_flutter', issue: false },
         ],
         check: (s) =>
             s.questions.some(

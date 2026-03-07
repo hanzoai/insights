@@ -27,7 +27,7 @@ logger = structlog.get_logger(__name__)
 
 def get_dag_id(team_id: int) -> str:
     """Return the standard dag_id for a team."""
-    return f"posthog_{team_id}"
+    return f"insights_{team_id}"
 
 
 def get_conflict_dag_id(team_id: int) -> str:
@@ -101,7 +101,7 @@ def resolve_dependency_to_node(
         dag_id_text=dag_id,
         name=dependency_name,
         type=NodeType.TABLE,
-        defaults={"properties": {"origin": "posthog"}},
+        defaults={"properties": {"origin": "insights"}},
     )
     return node
 

@@ -7,7 +7,7 @@
             "created_at": "2022-11-25T09:02:59.900000Z",
             "properties": {
                 "$os": "Mac OS X",
-                "email": "marius@posthog.com",
+                "email": "marius@hanzo.ai",
                 "$browser": "Chrome",
                 "$referrer": "http://localhost:8000/events",
                 "$initial_os": "Mac OS X",
@@ -44,7 +44,7 @@
                 "$initial_geoip_subdivision_1_name": "New South Wales"
             },
             "is_identified": true,
-            "name": "marius@posthog.com",
+            "name": "marius@hanzo.ai",
             "distinct_ids": [
                 "184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c",
                 "FXFWiYV3IHFXVo2DuWESQmHvywBwAEIJpvr0KrHiM2J"

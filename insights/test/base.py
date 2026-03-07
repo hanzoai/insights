@@ -273,8 +273,8 @@ def clean_varying_query_parts(query, replace_all_numbers):
 
     # replace arrays like "survey_id in ['017e12ef-9c00-0000-59bf-43ddb0bddea6', '017e12ef-9c00-0001-6df6-2cf1f217757f']"
     query = re.sub(
-        r"\"posthog_survey_actions\"\.\"survey_id\" IN \('[^']+'::uuid(, '[^']+'::uuid)*\)",
-        r"'posthog_survey_actions'.'survey_id' IN ('00000000-0000-0000-0000-000000000000'::uuid, '00000000-0000-0000-0000-000000000001'::uuid, /* ... */])",
+        r"\"insights_survey_actions\"\.\"survey_id\" IN \('[^']+'::uuid(, '[^']+'::uuid)*\)",
+        r"'insights_survey_actions'.'survey_id' IN ('00000000-0000-0000-0000-000000000000'::uuid, '00000000-0000-0000-0000-000000000001'::uuid, /* ... */])",
         query,
     )
 
@@ -343,20 +343,20 @@ def clean_varying_query_parts(query, replace_all_numbers):
 
     # Replace organization_id and notebook_id lookups, for postgres
     query = re.sub(
-        rf"""("organization_id"|"posthog_organization"\."id"|"posthog_notebook"."id") = '[^']+'::uuid""",
+        rf"""("organization_id"|"insights_organization"\."id"|"insights_notebook"."id") = '[^']+'::uuid""",
         r"""\1 = '00000000-0000-0000-0000-000000000000'::uuid""",
         query,
     )
     query = re.sub(
-        rf"""("organization_id"|"posthog_organization"\."id"|"posthog_notebook"."id") IN \('[^']+'::uuid\)""",
+        rf"""("organization_id"|"insights_organization"\."id"|"insights_notebook"."id") IN \('[^']+'::uuid\)""",
         r"""\1 IN ('00000000-0000-0000-0000-000000000000'::uuid)""",
         query,
     )
 
     # Replace notebook short_id lookups, for postgres
     query = re.sub(
-        r"\"posthog_notebook\".\"short_id\" = '[a-zA-Z0-9]{8}'",
-        '"posthog_notebook"."short_id" = \'00000000\'',
+        r"\"insights_notebook\".\"short_id\" = '[a-zA-Z0-9]{8}'",
+        '"insights_notebook"."short_id" = \'00000000\'',
         query,
     )
 
@@ -393,7 +393,7 @@ def clean_varying_query_parts(query, replace_all_numbers):
 
     # Replace tag id lookups for postgres
     query = re.sub(
-        rf"""("posthog_tag"\."id") IN \(('[^']+'::uuid)+(, ('[^']+'::uuid)+)*\)""",
+        rf"""("insights_tag"\."id") IN \(('[^']+'::uuid)+(, ('[^']+'::uuid)+)*\)""",
         r"""\1 IN ('00000000-0000-0000-0000-000000000000'::uuid, '00000000-0000-0000-0000-000000000000'::uuid, '00000000-0000-0000-0000-000000000000'::uuid /* ... */)""",
         query,
     )
@@ -418,8 +418,8 @@ def clean_varying_query_parts(query, replace_all_numbers):
 
     # insight cache key varies with team id
     query = re.sub(
-        r"WHERE \(\"posthog_insightcachingstate\".\"cache_key\" = 'cache_\w{32}'",
-        """WHERE ("posthog_insightcachingstate"."cache_key" = 'cache_THE_CACHE_KEY'""",
+        r"WHERE \(\"insights_insightcachingstate\".\"cache_key\" = 'cache_\w{32}'",
+        """WHERE ("insights_insightcachingstate"."cache_key" = 'cache_THE_CACHE_KEY'""",
         query,
     )
 
@@ -493,7 +493,7 @@ def setup_test_organization_team_and_user(
         test_account_filters=[
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -608,7 +608,7 @@ class ErrorResponsesMixin:
 
 class InsightsTestCase(SimpleTestCase):
     CONFIG_ORGANIZATION_NAME: str = "Test"
-    CONFIG_EMAIL: Optional[str] = "user1@posthog.com"
+    CONFIG_EMAIL: Optional[str] = "user1@hanzo.ai"
     CONFIG_PASSWORD: Optional[str] = "testpassword12345"
     CONFIG_API_TOKEN: str = "token123"
     CONFIG_AUTO_LOGIN: bool = True
@@ -666,7 +666,7 @@ class InsightsTestCase(SimpleTestCase):
 
     def validate_basic_html(self, html_message, site_url, preheader=None):
         # absolute URLs are used
-        self.assertIn(f"{site_url}/static/posthog-logo.png", html_message)
+        self.assertIn(f"{site_url}/static/insights-logo.png", html_message)
 
         # CSS is inlined
         self.assertIn('style="display: none;', html_message)
@@ -1153,7 +1153,7 @@ def snapshot_postgres_queries_context(
             and "SELECT" in query
             and "django_session" not in query
             and not re.match(r"^\s*INSERT", query)
-            and 'FROM "posthog_instancesetting"' not in query
+            and 'FROM "insights_instancesetting"' not in query
         ):
             testcase.assertQueryMatchesSnapshot(query, replace_all_numbers=replace_all_numbers)
 
@@ -1351,7 +1351,7 @@ def _create_action(**kwargs):
 
 class ClickhouseTestMixin(QueryMatchingTest):
     RUN_MATERIALIZED_COLUMN_TESTS = True
-    # overrides the basetest in posthog/test/base.py
+    # overrides the basetest in insights/test/base.py
     # this way the team id will increment so we don't have to destroy all clickhouse tables on each test
     CLASS_DATA_LEVEL_SETUP = False
 
@@ -1403,7 +1403,7 @@ def run_clickhouse_statement_in_parallel(statements: list[str]):
             try:
                 future.result()
             except Exception as exc:
-                if hasattr(exc, "code") and exc.code == 60 and "posthog_test" in str(exc):
+                if hasattr(exc, "code") and exc.code == 60 and "insights_test" in str(exc):
                     continue
                 exceptions.append(exc)
 

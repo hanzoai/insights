@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 
-import { IconArrowRight } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArrowRight } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { CouponRedemption } from 'scenes/coupons/CouponRedemption'
 import { parseCouponCampaign } from 'scenes/coupons/utils'

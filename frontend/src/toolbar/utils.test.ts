@@ -4,39 +4,39 @@ describe('utils', () => {
     describe('joinWithUiHost', () => {
         const testCases: Array<{ uiHost: string; path: string; expected: string }> = [
             {
-                uiHost: 'https://us.posthog.com',
+                uiHost: 'https://insights.hanzo.ai',
                 path: '/settings/project',
-                expected: 'https://us.posthog.com/settings/project',
+                expected: 'https://insights.hanzo.ai/settings/project',
             },
             {
-                uiHost: 'https://us.posthog.com/',
+                uiHost: 'https://insights.hanzo.ai/',
                 path: '/settings/project',
-                expected: 'https://us.posthog.com/settings/project',
+                expected: 'https://insights.hanzo.ai/settings/project',
             },
             {
-                uiHost: 'https://us.posthog.com///',
+                uiHost: 'https://insights.hanzo.ai///',
                 path: 'settings/project',
-                expected: 'https://us.posthog.com/settings/project',
+                expected: 'https://insights.hanzo.ai/settings/project',
             },
             {
-                uiHost: 'https://us.posthog.com',
+                uiHost: 'https://insights.hanzo.ai',
                 path: 'settings/project',
-                expected: 'https://us.posthog.com/settings/project',
+                expected: 'https://insights.hanzo.ai/settings/project',
             },
             {
-                uiHost: 'https://us.posthog.com/',
+                uiHost: 'https://insights.hanzo.ai/',
                 path: '///settings/project',
-                expected: 'https://us.posthog.com/settings/project',
+                expected: 'https://insights.hanzo.ai/settings/project',
             },
             {
-                uiHost: 'https://us.posthog.com',
+                uiHost: 'https://insights.hanzo.ai',
                 path: `${'/settings/project'}#heatmaps`,
-                expected: 'https://us.posthog.com/settings/project#heatmaps',
+                expected: 'https://insights.hanzo.ai/settings/project#heatmaps',
             },
-            { uiHost: 'https://us.posthog.com', path: '?a=1', expected: 'https://us.posthog.com/?a=1' },
-            { uiHost: 'https://us.posthog.com', path: '#hash', expected: 'https://us.posthog.com/#hash' },
-            { uiHost: 'https://us.posthog.com', path: 'https://example.com/x', expected: 'https://example.com/x' },
-            { uiHost: 'https://us.posthog.com', path: '//example.com/x', expected: '//example.com/x' },
+            { uiHost: 'https://insights.hanzo.ai', path: '?a=1', expected: 'https://insights.hanzo.ai/?a=1' },
+            { uiHost: 'https://insights.hanzo.ai', path: '#hash', expected: 'https://insights.hanzo.ai/#hash' },
+            { uiHost: 'https://insights.hanzo.ai', path: 'https://example.com/x', expected: 'https://example.com/x' },
+            { uiHost: 'https://insights.hanzo.ai', path: '//example.com/x', expected: '//example.com/x' },
             { uiHost: '', path: '/settings/project', expected: '/settings/project' },
         ]
 

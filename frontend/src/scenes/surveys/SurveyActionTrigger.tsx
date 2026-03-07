@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -18,7 +18,7 @@ export function SurveyActionTrigger(): JSX.Element {
     return (
         <LemonField.Pure
             label="User performs actions"
-            info="These actions are only observed in the current user session. Requires at least posthog-js v1.301.0, and is supported only for web surveys."
+            info="These actions are only observed in the current user session. Requires at least insights-js v1.301.0, and is supported only for web surveys."
         >
             <EventSelect
                 filterGroupTypes={[TaxonomicFilterGroupType.Actions]}

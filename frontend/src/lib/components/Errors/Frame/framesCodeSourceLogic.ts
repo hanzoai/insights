@@ -5,7 +5,7 @@ import { match } from 'ts-pattern'
 import {
     GitMetadataParser,
     supportedProviders,
-} from '@posthog/products-error-tracking/frontend/components/ReleasesPreview/gitMetadataParser'
+} from '@hanzo/products-error-tracking/frontend/components/ReleasesPreview/gitMetadataParser'
 
 import api from 'lib/api'
 

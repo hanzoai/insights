@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconRewindPlay } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconRewindPlay } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 

@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconCheck, IconCornerDownRight, IconGear, IconPlusSmall } from '@posthog/icons'
-import { LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { IconCheck, IconCornerDownRight, IconGear, IconPlusSmall } from '@hanzo/icons'
+import { LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo'

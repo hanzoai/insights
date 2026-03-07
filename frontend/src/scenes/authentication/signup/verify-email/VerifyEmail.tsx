@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonModal, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonCheckbox, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -58,7 +58,7 @@ export const VerifyEmailHelpLinks = (): JSX.Element => {
     const checklist = [
         'Wait 5 minutes. Sometimes it takes a bit for email providers to deliver emails.',
         'Check your spam folder and any firewalls you may have active',
-        'Ask your company IT department to allow any emails from @posthog.com',
+        'Ask your company IT department to allow any emails from @hanzo.ai',
         'Take another peek at your inbox',
     ]
 

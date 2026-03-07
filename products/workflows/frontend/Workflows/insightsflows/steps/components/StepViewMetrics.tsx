@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheck, IconFilter, IconX } from '@posthog/icons'
-import { LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
+import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { humanFriendlyLargeNumber } from 'lib/utils'
 

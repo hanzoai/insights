@@ -7,7 +7,7 @@ from django.db.models import Q
 
 import requests
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -37,10 +37,10 @@ GITHUB_KEYS_URI = "https://api.github.com/meta/public_keys/secret_scanning"
 TWENTY_FOUR_HOURS = 60 * 60 * 24
 
 # GitHub sends swapped type names - these constants clarify the mismatch
-GITHUB_TYPE_FOR_PERSONAL_API_KEY = "posthog_feature_flags_secure_api_key"
-GITHUB_TYPE_FOR_PROJECT_SECRET = "posthog_personal_api_key"
-GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN = "posthog_oauth_access_token"
-GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN = "posthog_oauth_refresh_token"
+GITHUB_TYPE_FOR_PERSONAL_API_KEY = "insights_feature_flags_secure_api_key"
+GITHUB_TYPE_FOR_PROJECT_SECRET = "insights_personal_api_key"
+GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN = "insights_oauth_access_token"
+GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN = "insights_oauth_refresh_token"
 
 
 class SignatureVerificationError(Exception):
@@ -69,14 +69,14 @@ def relay_to_eu(raw_body: str, kid: str, sig: str) -> list[dict] | None:
             timeout=15,
         )
         resp.raise_for_status()
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=None,
             event="github_secret_alert_relay_success",
         )
         return resp.json()
     except Exception as e:
         logger.warning("Failed to relay GitHub secret alert to EU", error=str(e))
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=None,
             event="github_secret_alert_relay_failure",
             properties={"error": str(e)},
@@ -193,7 +193,7 @@ class SecretAlert(APIView):
         try:
             verify_github_signature(raw_body, kid, sig)
         except SignatureVerificationError:
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=None,
                 event="github_secret_alert_invalid_signature",
                 properties={
@@ -367,7 +367,7 @@ class SecretAlert(APIView):
                 elif event_data["found"]:
                     event_data["key_found_region"] = get_instance_region()
 
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     distinct_id=None,
                     event="github_secret_alert",
                     properties=event_data,

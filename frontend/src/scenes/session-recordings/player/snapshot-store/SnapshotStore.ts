@@ -1,4 +1,4 @@
-import { EventType, eventWithTime } from '@posthog/rrweb-types'
+import { EventType, eventWithTime } from '@hanzo/rrweb-types'
 
 import { RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'
 

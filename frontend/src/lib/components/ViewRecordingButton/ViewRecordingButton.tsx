@@ -2,8 +2,8 @@ import classNames from 'classnames'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useEffect } from 'react'
 
-import { IconWarning } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, Link, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { Dayjs, dayjs } from 'lib/dayjs'
 import { IconPlayCircle } from 'lib/lemon-ui/icons'
@@ -178,7 +178,7 @@ export const recordingDisabledReason = (
         return (
             <>
                 No session ID associated with this event.{' '}
-                <Link to="https://posthog.com/docs/data/sessions#automatically-sending-session-ids">Learn how</Link> to
+                <Link to="https://hanzo.ai/docs/data/sessions#automatically-sending-session-ids">Learn how</Link> to
                 set it on all events.
             </>
         )
@@ -186,7 +186,7 @@ export const recordingDisabledReason = (
         return (
             <>
                 Replay was not active when capturing this event.{' '}
-                <Link to="https://posthog.com/docs/session-replay/troubleshooting#recordings-are-not-being-captured">
+                <Link to="https://hanzo.ai/docs/session-replay/troubleshooting#recordings-are-not-being-captured">
                     Learn why
                 </Link>{' '}
                 not all recordings are captured.

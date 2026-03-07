@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconCheck, IconMinus, IconRefresh, IconWarning, IconX } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconMinus, IconRefresh, IconWarning, IconX } from '@hanzo/icons'
+import { LemonButton, LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'

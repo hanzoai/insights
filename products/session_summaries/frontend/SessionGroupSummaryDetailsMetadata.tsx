@@ -1,4 +1,4 @@
-import { IconClock } from '@posthog/icons'
+import { IconClock } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { colonDelimitedDuration } from 'lib/utils'

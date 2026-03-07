@@ -27,8 +27,8 @@ def build_function_call(postgres_table_name: str, context: Optional[InsightsQLCo
     if settings.DEBUG or settings.TEST:
         databases = settings.DATABASES
         # Determine which database to use based on table name
-        # Extract model name from postgres table name (e.g., "posthog_group" -> "group")
-        model_name = postgres_table_name.replace("posthog_", "")
+        # Extract model name from postgres table name (e.g., "insights_group" -> "group")
+        model_name = postgres_table_name.replace("insights_", "")
         db_name = "persons_db_writer" if model_name in PERSONS_DB_MODELS else "default"
         database = databases[db_name]
 

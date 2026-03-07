@@ -27,7 +27,7 @@ PROGRESS_LOG_BATCH_INTERVAL = 20
 
 # Prometheus counter for tracking fixes during scheduled verification
 HYPERCACHE_VERIFY_FIX_COUNTER = Counter(
-    "posthog_hypercache_verify_fixes_total",
+    "insights_hypercache_verify_fixes_total",
     "Cache entries fixed during scheduled verification",
     labelnames=["cache_type", "issue_type"],
 )

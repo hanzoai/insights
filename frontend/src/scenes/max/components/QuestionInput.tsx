@@ -3,11 +3,11 @@ import './QuestionInput.scss'
 import { offset } from '@floating-ui/react'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconArrowRight, IconCheck, IconPencil, IconStopFilled, IconTrash, IconX } from '@posthog/icons'
-import { LemonButton, LemonSwitch, LemonTextArea } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCheck, IconPencil, IconStopFilled, IconTrash, IconX } from '@hanzo/icons'
+import { LemonButton, LemonSwitch, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
@@ -177,7 +177,7 @@ export const QuestionInput = React.forwardRef<HTMLDivElement, QuestionInputProps
     useEffect(() => {
         const isSlashCommand = question[0] === '/'
         if (isSlashCommand && !showAutocomplete) {
-            posthog.capture('Max slash command autocomplete shown')
+            insights.capture('Max slash command autocomplete shown')
         }
         setShowAutocomplete(isSlashCommand)
     }, [question, showAutocomplete])

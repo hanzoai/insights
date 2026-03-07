@@ -938,7 +938,7 @@ def postgres_source(
             offset = 0
             try:
                 with get_connection() as connection:
-                    with connection.cursor(name=f"posthog_{team_id}_{schema}.{table_name}") as cursor:
+                    with connection.cursor(name=f"insights_{team_id}_{schema}.{table_name}") as cursor:
                         query = _build_query(
                             schema,
                             table_name,

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useEffect } from 'react'
 
-import { IconQuestion } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSkeleton, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconQuestion } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSkeleton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'

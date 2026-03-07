@@ -1,1 +1,1 @@
-declare module 'posthog-js/dist/surveys-preview'
+declare module 'insights-js/dist/surveys-preview'

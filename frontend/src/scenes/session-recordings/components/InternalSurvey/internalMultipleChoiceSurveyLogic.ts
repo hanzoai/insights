@@ -1,5 +1,5 @@
 import { actions, afterMount, kea, key, listeners, path, props, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { Survey } from '~/types'
 
@@ -63,7 +63,7 @@ export const internalMultipleChoiceSurveyLogic = kea<internalMultipleChoiceSurve
         handleSurveys: ({ surveys }) => {
             const survey = surveys.find((s: Survey) => s.id === props.surveyId)
             if (survey) {
-                posthog.capture('survey shown', {
+                insights.capture('survey shown', {
                     $survey_id: props.surveyId,
                 })
                 actions.setSurvey(survey)
@@ -82,7 +82,7 @@ export const internalMultipleChoiceSurveyLogic = kea<internalMultipleChoiceSurve
             if (values.openChoice) {
                 payload.$survey_response.push(values.openChoice)
             }
-            posthog.capture('survey sent', payload)
+            insights.capture('survey sent', payload)
 
             actions.setShowThankYouMessage(true)
             setTimeout(() => actions.setSurvey(null as unknown as Survey), 5000)
@@ -90,6 +90,6 @@ export const internalMultipleChoiceSurveyLogic = kea<internalMultipleChoiceSurve
     })),
     afterMount(({ actions }) => {
         /** When the logic is mounted, set the surveyId from the props */
-        posthog.getSurveys((surveys) => actions.handleSurveys(surveys as unknown as Survey[]))
+        insights.getSurveys((surveys) => actions.handleSurveys(surveys as unknown as Survey[]))
     }),
 ])

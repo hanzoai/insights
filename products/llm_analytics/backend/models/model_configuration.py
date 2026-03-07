@@ -6,7 +6,7 @@ from insights.models.utils import UUIDTModel
 from .provider_keys import LLMProvider
 
 # Cost-controlled models for Insights default keys
-POSTHOG_ALLOWED_MODELS: dict[str, list[str]] = {
+INSIGHTS_ALLOWED_MODELS: dict[str, list[str]] = {
     "openai": ["gpt-5-mini"],
     "anthropic": ["claude-haiku-4-5"],
     "gemini": ["gemini-2.0-flash-lite"],
@@ -57,7 +57,7 @@ class LLMModelConfiguration(UUIDTModel):
 
             api_key = self.provider_key.encrypted_config.get("api_key")
             return Client.list_models(self.provider, api_key)
-        return POSTHOG_ALLOWED_MODELS.get(self.provider, [])
+        return INSIGHTS_ALLOWED_MODELS.get(self.provider, [])
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()

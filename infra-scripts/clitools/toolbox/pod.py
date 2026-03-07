@@ -31,9 +31,9 @@ def get_toolbox_pod(user: str, check_claimed: bool = True) -> tuple[str, bool]:
                     "get",
                     "pods",
                     "-n",
-                    "posthog",
+                    "insights",
                     "-l",
-                    "app.kubernetes.io/name=posthog-toolbox-django",
+                    "app.kubernetes.io/name=insights-toolbox-django",
                     "-o",
                     "json",
                 ],
@@ -105,7 +105,7 @@ def claim_pod(pod_name: str, user_labels: dict, timestamp: int):
     try:
         # Get current labels
         result = subprocess.run(
-            ["kubectl", "get", "pod", "-n", "posthog", pod_name, "-o", "jsonpath={.metadata.labels}"],
+            ["kubectl", "get", "pod", "-n", "insights", pod_name, "-o", "jsonpath={.metadata.labels}"],
             capture_output=True,
             text=True,
             check=True,
@@ -117,7 +117,7 @@ def claim_pod(pod_name: str, user_labels: dict, timestamp: int):
         for label_name in current_labels.keys():
             if label_name != "app.kubernetes.io/name":
                 subprocess.run(
-                    ["kubectl", "label", "pod", "-n", "posthog", pod_name, f"{label_name}-"],
+                    ["kubectl", "label", "pod", "-n", "insights", pod_name, f"{label_name}-"],
                     check=True,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
@@ -130,7 +130,7 @@ def claim_pod(pod_name: str, user_labels: dict, timestamp: int):
                 "annotate",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 pod_name,
                 "karpenter.sh/do-not-disrupt=true",
                 "--overwrite=true",
@@ -142,13 +142,13 @@ def claim_pod(pod_name: str, user_labels: dict, timestamp: int):
         label_args = [f"{key}={value}" for key, value in {**user_labels, "terminate-after": str(timestamp)}.items()]
 
         # Add new labels
-        subprocess.run(["kubectl", "label", "pod", "-n", "posthog", pod_name, *label_args], check=True)
+        subprocess.run(["kubectl", "label", "pod", "-n", "insights", pod_name, *label_args], check=True)
 
         # Wait for pod to be ready
         print("⏳ Waiting for pod to be ready")  # noqa: T201
         try:
             subprocess.run(
-                ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "posthog", "pod", pod_name],
+                ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "insights", "pod", pod_name],
                 check=True,
             )
         except subprocess.CalledProcessError:
@@ -166,7 +166,7 @@ def connect_to_pod(pod_name: str):
         pod_name: Name of the pod to connect to
     """
     print(f"🚀 Connecting to pod {pod_name}...")  # noqa: T201
-    subprocess.run(["kubectl", "exec", "-it", "-n", "posthog", pod_name, "--", "bash"])
+    subprocess.run(["kubectl", "exec", "-it", "-n", "insights", pod_name, "--", "bash"])
 
 
 def delete_pod(pod_name: str):
@@ -185,7 +185,7 @@ def delete_pod(pod_name: str):
                     "delete",
                     "pod",
                     "-n",
-                    "posthog",
+                    "insights",
                     pod_name,
                     "--wait=false",  # Don't wait for pod deletion to complete
                 ],

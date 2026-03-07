@@ -1,7 +1,7 @@
 import { actions, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { DashboardCompatibleScenes } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
@@ -168,24 +168,24 @@ export const userLogic = kea<userLogicType>([
     }),
     listeners(({ actions, values }) => ({
         logout: () => {
-            posthog.reset()
+            insights.reset()
             window.location.href = '/logout'
         },
         loadUserSuccess: ({ user }) => {
             if (user && user.uuid) {
-                if (posthog) {
-                    posthog.identify(user.distinct_id)
-                    posthog.people.set({
+                if (insights) {
+                    insights.identify(user.distinct_id)
+                    insights.people.set({
                         email: user.anonymize_data ? null : user.email,
                         realm: user.realm,
                     })
 
-                    posthog.register({
+                    insights.register({
                         is_demo_project: user.team?.is_demo,
                     })
 
                     if (user.team) {
-                        posthog.group('project', user.team.uuid, {
+                        insights.group('project', user.team.uuid, {
                             id: user.team.id,
                             uuid: user.team.uuid,
                             name: user.team.name,
@@ -197,7 +197,7 @@ export const userLogic = kea<userLogicType>([
                     }
 
                     if (user.organization) {
-                        posthog.group('organization', user.organization.id, {
+                        insights.group('organization', user.organization.id, {
                             id: user.organization.id,
                             name: user.organization.name,
                             slug: user.organization.slug,
@@ -207,7 +207,7 @@ export const userLogic = kea<userLogicType>([
                         })
 
                         if (user.organization.customer_id) {
-                            posthog.group('customer', user.organization.customer_id)
+                            insights.group('customer', user.organization.customer_id)
                         }
                     }
                 }

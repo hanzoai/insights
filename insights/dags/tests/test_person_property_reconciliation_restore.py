@@ -41,7 +41,7 @@ def create_backup_entry(
     """Helper to insert a backup entry directly into the backup table."""
     cursor.execute(
         """
-        INSERT INTO posthog_person_reconciliation_backup (
+        INSERT INTO insights_person_reconciliation_backup (
             job_id, team_id, person_id, uuid,
             properties, properties_last_updated_at, properties_last_operation,
             version, is_identified, created_at, is_user_id,
@@ -554,7 +554,7 @@ class TestRestoreIntegration:
         persons_conn = get_persons_db_connection()
         with persons_conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS posthog_person_reconciliation_backup (
+                CREATE TABLE IF NOT EXISTS insights_person_reconciliation_backup (
                     job_id TEXT NOT NULL,
                     team_id INTEGER NOT NULL,
                     person_id BIGINT NOT NULL,
@@ -1051,7 +1051,7 @@ class TestRestoreJobEndToEnd:
         persons_conn = get_persons_db_connection()
         with persons_conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS posthog_person_reconciliation_backup (
+                CREATE TABLE IF NOT EXISTS insights_person_reconciliation_backup (
                     job_id TEXT NOT NULL,
                     team_id INTEGER NOT NULL,
                     person_id BIGINT NOT NULL,

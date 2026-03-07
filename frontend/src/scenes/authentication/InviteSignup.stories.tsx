@@ -25,7 +25,7 @@ const meta: Meta = {
                     200,
                     {
                         id: '1234',
-                        target_email: 'b*@posthog.com',
+                        target_email: 'b*@hanzo.ai',
                         first_name: 'Jane Doe',
                         organization_name: 'Insights',
                     },
@@ -132,7 +132,7 @@ export const LoggedIn = (): JSX.Element => {
             '/api/users/@me': () => [
                 200,
                 {
-                    email: 'ben@posthog.com',
+                    email: 'ben@hanzo.ai',
                     first_name: 'Ben White',
                     organization: {
                         name: 'Other org',
@@ -162,7 +162,7 @@ export const LoggedInWrongUser = (): JSX.Element => {
             '/api/users/@me': () => [
                 200,
                 {
-                    email: 'ben@posthog.com',
+                    email: 'ben@hanzo.ai',
                     first_name: 'Ben White',
                     organization: {
                         name: 'Other org',

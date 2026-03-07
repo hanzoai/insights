@@ -28,7 +28,7 @@ jobs:
             pull-requests: read
         # Set job outputs to values from filter step
         outputs:
-            hog: ${{ steps.filter.outputs.hog || 'true' }}
+            hog: ${{ steps.filter.outputs.iql || 'true' }}
         steps:
             # For pull requests it's not necessary to checkout the code, but we
             # also want this to run on master so we need to checkout
@@ -42,7 +42,7 @@ jobs:
                       hog:
                         # Avoid running tests for irrelevant changes
                         - 'common/scriptvm/**/*'
-                        - 'insights/hogql/**/*'
+                        - 'insights/insightsql/**/*'
                         - 'bin/hog'
                         - 'bin/hoge'
                         - 'package.json'
@@ -55,7 +55,7 @@ jobs:
         timeout-minutes: 30
         name: Hog tests
         runs-on: ubuntu-24.04
-        if: needs.changes.outputs.hog == 'true'
+        if: needs.changes.outputs.iql == 'true'
 
         steps:
             - uses: actions/checkout@v6
@@ -132,14 +132,14 @@ jobs:
 
             - name: Run HogVM TypeScript tests
               run: |
-                  pnpm --filter=@insights/scriptvm install --frozen-lockfile
-                  pnpm --filter=@insights/scriptvm test
+                  pnpm --filter=@hanzo/scriptvm install --frozen-lockfile
+                  pnpm --filter=@hanzo/scriptvm test
 
             - name: Run Hog tests
               run: |
-                  pnpm --filter=@insights/scriptvm install --frozen-lockfile
-                  pnpm --filter=@insights/scriptvm compile:stl
-                  bin/turbo --filter=@insights/scriptvm build
+                  pnpm --filter=@hanzo/scriptvm install --frozen-lockfile
+                  pnpm --filter=@hanzo/scriptvm compile:stl
+                  bin/turbo --filter=@hanzo/scriptvm build
                   cd common/scriptvm
                   ./test.sh && git diff --exit-code
               env:
@@ -148,7 +148,7 @@ jobs:
     check-package-version:
         name: Check HogVM TypeScript package version and detect an update
         needs: hog-tests
-        if: needs.hog-tests.result == 'success' && needs.changes.outputs.hog == 'true'
+        if: needs.hog-tests.result == 'success' && needs.changes.outputs.iql == 'true'
         runs-on: ubuntu-24.04
         outputs:
             committed-version: ${{ steps.check-package-version.outputs.committed-version }}
@@ -167,7 +167,7 @@ jobs:
         name: Release new HogVM TypeScript version
         runs-on: ubuntu-24.04
         needs: check-package-version
-        if: needs.changes.outputs.hog == 'true' && needs.check-package-version.outputs.is-new-version == 'true'
+        if: needs.changes.outputs.iql == 'true' && needs.check-package-version.outputs.is-new-version == 'true'
         permissions:
             contents: read
             id-token: write
@@ -184,14 +184,14 @@ jobs:
               with:
                   python-version-file: 'pyproject.toml'
             - name: Install uv
-              id: setup-uv-hogql-python
+              id: setup-uv-insightsql-python
               uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
                   save-cache: ${{ github.ref == 'refs/heads/master' }}
             - name: Install SAML (python3-saml) dependencies
-              if: steps.setup-uv-hogql-python.outputs.cache-hit != 'true'
+              if: steps.setup-uv-insightsql-python.outputs.cache-hit != 'true'
               run: |
                   sudo apt-get update
                   sudo apt-get install libxml2-dev libxmlsec1 libxmlsec1-dev libxmlsec1-openssl
@@ -209,6 +209,6 @@ jobs:
                   cache: 'pnpm'
                   registry-url: https://registry.npmjs.org
             - name: Install package.json dependencies
-              run: pnpm --filter=@insights/scriptvm install --frozen-lockfile
+              run: pnpm --filter=@hanzo/scriptvm install --frozen-lockfile
             - name: Publish the package in the npm registry
               run: cd common/scriptvm/typescript && npm publish --access public

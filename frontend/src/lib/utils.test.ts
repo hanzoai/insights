@@ -127,9 +127,9 @@ describe('lib/utils', () => {
 
     describe('isURL()', () => {
         it('recognizes URLs properly', () => {
-            expect(isURL('https://www.posthog.com')).toEqual(true)
-            expect(isURL('http://www.posthog.com')).toEqual(true)
-            expect(isURL('http://www.posthog.com:8000/images')).toEqual(true)
+            expect(isURL('https://www.hanzo.ai')).toEqual(true)
+            expect(isURL('http://www.hanzo.ai')).toEqual(true)
+            expect(isURL('http://www.hanzo.ai:8000/images')).toEqual(true)
             expect(isURL('http://localhost:8000/login?next=/insights')).toEqual(true)
             expect(isURL('http://localhost:8000/activity/explore?properties=%5B%5D')).toEqual(true)
             expect(isURL('https://apple.com/')).toEqual(true)
@@ -144,9 +144,9 @@ describe('lib/utils', () => {
 
         it('recognizes non-URLs properly', () => {
             expect(isURL('1234567890')).toEqual(false)
-            expect(isURL('www.posthog')).toEqual(false)
-            expect(isURL('-.posthog')).toEqual(false)
-            expect(isURL('posthog.3')).toEqual(false)
+            expect(isURL('www.insights')).toEqual(false)
+            expect(isURL('-.insights')).toEqual(false)
+            expect(isURL('insights.3')).toEqual(false)
             expect(isURL(1)).toEqual(false)
             expect(isURL(true)).toEqual(false)
             expect(isURL(null)).toEqual(false)
@@ -171,9 +171,9 @@ describe('lib/utils', () => {
 
     describe('isExternalLink()', () => {
         it('recognizes external links properly', () => {
-            expect(isExternalLink('http://www.posthog.com')).toEqual(true)
-            expect(isExternalLink('https://www.posthog.com')).toEqual(true)
-            expect(isExternalLink('mailto:ben@posthog.com')).toEqual(true)
+            expect(isExternalLink('http://www.hanzo.ai')).toEqual(true)
+            expect(isExternalLink('https://www.hanzo.ai')).toEqual(true)
+            expect(isExternalLink('mailto:ben@hanzo.ai')).toEqual(true)
         })
 
         it('recognizes non-external links properly', () => {
@@ -1107,23 +1107,23 @@ describe('lib/utils', () => {
 
     describe('getRelativeNextPath', () => {
         const location = {
-            origin: 'https://us.posthog.com',
+            origin: 'https://insights.hanzo.ai',
             protocol: 'https:',
-            host: 'us.posthog.com',
-            hostname: 'us.posthog.com',
-            href: 'https://us.posthog.com/',
+            host: 'insights.hanzo.ai',
+            hostname: 'insights.hanzo.ai',
+            href: 'https://insights.hanzo.ai/',
         } as Location
 
         it('returns relative path for same-origin absolute URL', () => {
-            expect(getRelativeNextPath('https://us.posthog.com/test', location)).toBe('/test')
+            expect(getRelativeNextPath('https://insights.hanzo.ai/test', location)).toBe('/test')
         })
 
         it('returns relative path for same-origin absolute URL with query and hash', () => {
-            expect(getRelativeNextPath('https://us.posthog.com/test?foo=bar#baz', location)).toBe('/test?foo=bar#baz')
+            expect(getRelativeNextPath('https://insights.hanzo.ai/test?foo=bar#baz', location)).toBe('/test?foo=bar#baz')
         })
 
         it('returns relative path for encoded same-origin absolute URL', () => {
-            expect(getRelativeNextPath('https%3A%2F%2Fus.posthog.com%2Ftest', location)).toBe('/test')
+            expect(getRelativeNextPath('https%3A%2F%2Finsights.hanzo.ai%2Ftest', location)).toBe('/test')
         })
 
         it('returns relative path for root-relative path', () => {

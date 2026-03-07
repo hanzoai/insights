@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { IconCopy, IconMinusSquare, IconPlusSquare } from '@posthog/icons'
-import { LemonButton, LemonDropdown } from '@posthog/lemon-ui'
+import { IconCopy, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
+import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
 
 import { IconTableChart } from 'lib/lemon-ui/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

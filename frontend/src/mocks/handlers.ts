@@ -56,11 +56,11 @@ const insightsFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
 
 // this really returns MaybePromise<ResponseFunction<any>>
 // but MSW doesn't export MaybePromise 🤷
-function posthogCORSResponse(req: RestRequest, res: ResponseComposition, ctx: RestContext): any {
+function insightsCORSResponse(req: RestRequest, res: ResponseComposition, ctx: RestContext): any {
     return res(
         ctx.status(200),
         ctx.json('ok'),
-        // some of our tests try to make requests via posthog-js e.g. userLogic calls identify
+        // some of our tests try to make requests via insights-js e.g. userLogic calls identify
         // they have to have CORS allowed, or they pass but print noise to the console
         ctx.set('Access-Control-Allow-Origin', req.referrer.length ? req.referrer : 'http://localhost'),
         ctx.set('Access-Control-Allow-Credentials', 'true'),
@@ -168,9 +168,9 @@ export const defaultMocks: Mocks = {
             exception: "[ErrorDetail(string='Sentry integration not configured', code='invalid')]",
         },
         // We don't want to show the "new version available" banner in tests
-        'https://api.github.com/repos/posthog/posthog-js/tags': () => [200, []],
+        'https://api.github.com/repos/insights/insights-js/tags': () => [200, []],
         'https://www.gravatar.com/avatar/:gravatar_id': () => [404, ''],
-        'https://us.i.posthog.com/api/early_access_features': {
+        'https://us.i.hanzo.ai/api/early_access_features': {
             earlyAccessFeatures: [],
         },
         '/api/billing/': {
@@ -226,13 +226,13 @@ export const defaultMocks: Mocks = {
         '/api/environments/:team_id/endpoints/': EMPTY_PAGINATED_RESPONSE,
     },
     post: {
-        'https://us.i.posthog.com/e/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/e/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/flags/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/flags/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/engage/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/e/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/e/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/flags/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/flags/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/engage/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
         '/api/environments/:team_id/insights/viewed/': (): MockSignature => [201, null],
         'api/environments/:team_id/query': [200, { results: [] }],
         '/api/environments/:team_id/file_system/log_view/': {},
@@ -243,7 +243,7 @@ export const defaultMocks: Mocks = {
         '/api/environments/:team_id/': MOCK_DEFAULT_TEAM,
     },
     options: {
-        'https://us.i.posthog.com/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
     },
 }
 export const handlers = mocksToHandlers(defaultMocks)

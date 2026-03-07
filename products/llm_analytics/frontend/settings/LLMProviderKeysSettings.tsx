@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPlus, IconRefresh, IconTrash } from '@posthog/icons'
+import { IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -11,7 +11,7 @@ import {
     LemonTable,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'

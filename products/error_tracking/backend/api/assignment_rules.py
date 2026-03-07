@@ -1,5 +1,5 @@
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
 
@@ -80,7 +80,7 @@ class ErrorTrackingAssignmentRuleViewSet(TeamAndOrgViewSetMixin, viewsets.ModelV
             role_id=None if assignee["type"] != "role" else assignee["id"],
         )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "error_tracking_assignment_rule_created",
             groups=groups(self.team.organization, self.team),
         )

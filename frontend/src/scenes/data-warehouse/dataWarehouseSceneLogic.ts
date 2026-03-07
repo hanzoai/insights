@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -274,7 +274,7 @@ export const dataWarehouseSceneLogic = kea<dataWarehouseSceneLogicType>([
 
                 actions.loadRunningActivityResponseSuccess(newResponse)
             } catch (error) {
-                posthog.captureException(error)
+                insights.captureException(error)
             }
         },
         loadMoreCompletedActivity: async () => {
@@ -290,7 +290,7 @@ export const dataWarehouseSceneLogic = kea<dataWarehouseSceneLogicType>([
 
                 actions.loadCompletedActivityResponseSuccess(newResponse)
             } catch (error) {
-                posthog.captureException(error)
+                insights.captureException(error)
             }
         },
         loadSourcesSuccess: () => {

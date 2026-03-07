@@ -39,7 +39,7 @@ const playlist = (playlistId: string): SessionRecordingPlaylistType => {
             uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
             distinct_id: 'qs3Sp9pxE3nC827IbjDB6qNW6pD22X4tmGWwonM20p7',
             first_name: 'paul',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
             is_email_verified: true,
         },
         deleted: false,
@@ -63,7 +63,7 @@ const playlist = (playlistId: string): SessionRecordingPlaylistType => {
             uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
             distinct_id: 'qs3Sp9pxE3nC827IbjDB6qNW6pD22X4tmGWwonM20p7',
             first_name: 'paul',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
             is_email_verified: true,
         },
         recordings_counts: {

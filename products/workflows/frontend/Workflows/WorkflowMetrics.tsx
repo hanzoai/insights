@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { getColorVar } from 'lib/colors'
 import { AppMetricSummary } from 'lib/components/AppMetrics/AppMetricSummary'

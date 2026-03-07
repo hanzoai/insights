@@ -14,7 +14,7 @@ from rest_framework import status
 from insights.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from insights.cdp.templates.helpers import mock_transpile
 from insights.cdp.templates.insights_function_template import sync_template_to_db
-from insights.constants import FROZEN_POSTHOG_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models import Plugin, PluginConfig, PluginSourceFile
 from insights.models.insights_functions.insights_function import InsightsFunction
 from insights.models.organization import Organization, OrganizationMembership
@@ -65,14 +65,14 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
     def _create_plugin(
         self, additional_params: Optional[dict] = None, expected_status: int = status.HTTP_201_CREATED
     ) -> dict:
-        params = {"url": "https://github.com/PostHog/helloworldplugin"}
+        params = {"url": "https://github.com/Hanzo Insights/helloworldplugin"}
 
         if additional_params:
             params.update(additional_params)
 
         response = self.client.post(
             "/api/organizations/@current/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
 
         assert response.status_code == expected_status, response.json()
@@ -80,7 +80,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
 
     @freeze_time("2021-08-25T22:09:14.252Z")
     def test_create_plugin_auth(self, mock_get, mock_reload):
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
 
         for level in (
             Organization.PluginsAccessLevel.NONE,
@@ -107,7 +107,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assert_plugin_activity(
             [
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "installed",
                     "created_at": "2021-08-25T22:09:14.252000Z",
                     "scope": "Plugin",
@@ -131,7 +131,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         )
 
     def test_create_plugin_auth_globally_managed(self, mock_get, mock_reload):
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
 
         for level in (
             Organization.PluginsAccessLevel.NONE,
@@ -177,7 +177,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         )
         OrganizationMembership.objects.create(user=self.user, organization=other_org)
 
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         install_response = self.client.post(f"/api/organizations/{my_org.id}/plugins/", {"url": repo_url})
         self.assertEqual(
             install_response.status_code,
@@ -240,7 +240,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         )
         OrganizationMembership.objects.create(user=self.user, organization=other_org)
 
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         install_response = self.client.post(
             f"/api/organizations/{my_org.id}/plugins/",
             {"url": repo_url, "is_global": True},
@@ -271,7 +271,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         )
 
     def test_update_plugin_auth_to_globally_managed(self, mock_get, mock_reload):
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         install_response = self.client.post("/api/organizations/@current/plugins/", {"url": repo_url})
         self.assertEqual(install_response.status_code, 201)
 
@@ -350,7 +350,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
     def test_update_plugin_auth(self, mock_sync_from_plugin_archive, mock_get, mock_reload):
         self.assertEqual(mock_reload.call_count, 0)
         self.assertEqual(mock_sync_from_plugin_archive.call_count, 0)
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         response = self.client.post("/api/organizations/@current/plugins/", {"url": repo_url})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(mock_sync_from_plugin_archive.call_count, 1)  # Source files are extracted
@@ -380,7 +380,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
 
     def test_delete_plugin_auth(self, mock_get, mock_reload):
         with freeze_time("2021-08-25T22:09:14.252Z"):
-            repo_url = "https://github.com/PostHog/helloworldplugin"
+            repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
             response = self.client.post("/api/organizations/@current/plugins/", {"url": repo_url})
             self.assertEqual(response.status_code, 201)
 
@@ -405,7 +405,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assert_plugin_activity(
             [
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "uninstalled",
                     "created_at": "2021-08-25T22:09:14.253000Z",
                     "scope": "Plugin",
@@ -419,7 +419,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                     },
                 },
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "installed",
                     "created_at": "2021-08-25T22:09:14.252000Z",
                     "scope": "Plugin",
@@ -441,7 +441,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         )
         OrganizationMembership.objects.create(organization=other_org, user=self.user)
 
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         response = self.client.post(f"/api/organizations/@current/plugins/", {"url": repo_url})
 
         self.assertEqual(response.status_code, 201)
@@ -455,7 +455,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.status_code, 404)
 
     def test_cannot_delete_global_plugin(self, mock_get, mock_reload):
-        repo_url = "https://github.com/PostHog/helloworldplugin"
+        repo_url = "https://github.com/Hanzo Insights/helloworldplugin"
         response = self.client.post(
             f"/api/organizations/@current/plugins/",
             {"url": repo_url, "is_global": True},
@@ -476,7 +476,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(mock_reload.call_count, 0)
         response = self.client.post(
             "/api/organizations/@current/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
@@ -486,7 +486,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "plugin_type": "custom",
                 "name": "helloworldplugin",
                 "description": "Greet the World and Foo a Bar, JS edition!",
-                "url": "https://github.com/PostHog/helloworldplugin",
+                "url": "https://github.com/Hanzo Insights/helloworldplugin",
                 "icon": None,
                 "config_schema": {
                     "bar": {
@@ -521,7 +521,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(mock_reload.call_count, 0)
         response = self.client.post(
             "/api/organizations/@current/plugins/",
-            {"url": f"https://github.com/PostHog/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}"},
+            {"url": f"https://github.com/Hanzo Insights/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}"},
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
@@ -531,7 +531,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "plugin_type": "custom",
                 "name": "helloworldplugin",
                 "description": "Greet the World and Foo a Bar, JS edition!",
-                "url": f"https://github.com/PostHog/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}",
+                "url": f"https://github.com/Hanzo Insights/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}",
                 "icon": None,
                 "config_schema": {
                     "bar": {
@@ -560,7 +560,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         response2 = self.client.post(
             "/api/organizations/@current/plugins/",
             {
-                "url": "https://github.com/PostHog/helloworldplugin/commit/{}".format(
+                "url": "https://github.com/Hanzo Insights/helloworldplugin/commit/{}".format(
                     HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]
                 )
             },
@@ -573,7 +573,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "plugin_type": "custom",
                 "name": "helloworldplugin",
                 "description": "Greet the World and Foo a Bar, JS edition, vol 2!",
-                "url": f"https://github.com/PostHog/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]}",
+                "url": f"https://github.com/Hanzo Insights/helloworldplugin/commit/{HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]}",
                 "icon": None,
                 "config_schema": {
                     "bar": {
@@ -606,7 +606,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/posthog-plugin/version-equals/commit/{FROZEN_POSTHOG_VERSION}"},
+                {"url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_INSIGHTS_VERSION}"},
             )
             self.assertEqual(response.status_code, 201)
 
@@ -615,20 +615,20 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/posthog-plugin/version-equals/commit/{FROZEN_POSTHOG_VERSION.next_minor()}"
+                    "url": f"https://github.com/insights-plugin/version-equals/commit/{FROZEN_INSIGHTS_VERSION.next_minor()}"
                 },
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTHOG_VERSION} does not match this plugin\'s semantic version requirement "{FROZEN_POSTHOG_VERSION.next_minor()}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "{FROZEN_INSIGHTS_VERSION.next_minor()}".',
             )
 
     def test_create_plugin_version_range_gt_current(self, mock_get, mock_reload):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/posthog-plugin/version-greater-than/commit/0.0.0"},
+                {"url": f"https://github.com/insights-plugin/version-greater-than/commit/0.0.0"},
             )
             self.assertEqual(response.status_code, 201)
 
@@ -637,25 +637,25 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/posthog-plugin/version-greater-than/commit/{FROZEN_POSTHOG_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTHOG_VERSION} does not match this plugin\'s semantic version requirement ">= {FROZEN_POSTHOG_VERSION.next_major()}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement ">= {FROZEN_INSIGHTS_VERSION.next_major()}".',
             )
 
     def test_create_plugin_version_range_lt_current(self, mock_get, mock_reload):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/posthog-plugin/version-less-than/commit/{FROZEN_POSTHOG_VERSION}"},
+                {"url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_INSIGHTS_VERSION}"},
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
                 cast(dict[str, str], response.json())["detail"],
-                f'Currently running Insights version {FROZEN_POSTHOG_VERSION} does not match this plugin\'s semantic version requirement "< {FROZEN_POSTHOG_VERSION}".',
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "< {FROZEN_INSIGHTS_VERSION}".',
             )
 
     def test_create_plugin_version_range_lt_next_major(self, mock_get, mock_reload):
@@ -663,7 +663,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/posthog-plugin/version-less-than/commit/{FROZEN_POSTHOG_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-less-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 201)
@@ -672,7 +672,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         with self.is_cloud(False):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
-                {"url": f"https://github.com/posthog-plugin/version-less-than/commit/..."},
+                {"url": f"https://github.com/insights-plugin/version-less-than/commit/..."},
             )
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
@@ -685,7 +685,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response = self.client.post(
                 "/api/organizations/@current/plugins/",
                 {
-                    "url": f"https://github.com/posthog-plugin/version-greater-than/commit/{FROZEN_POSTHOG_VERSION.next_major()}"
+                    "url": f"https://github.com/insights-plugin/version-greater-than/commit/{FROZEN_INSIGHTS_VERSION.next_major()}"
                 },
             )
             self.assertEqual(response.status_code, 201)
@@ -841,18 +841,18 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             response.json(),
             [
                 {
-                    "name": "posthog-currency-normalization-plugin",
-                    "url": "https://github.com/posthog/posthog-currency-normalization-plugin",
+                    "name": "insights-currency-normalization-plugin",
+                    "url": "https://github.com/insights/insights-currency-normalization-plugin",
                     "description": "Normalise monerary values into a base currency",
-                    "icon": "https://raw.githubusercontent.com/posthog/posthog-currency-normalization-plugin/main/logo.png",
+                    "icon": "https://raw.githubusercontent.com/insights/insights-currency-normalization-plugin/main/logo.png",
                     "verified": False,
                     "maintainer": "official",
                 },
                 {
                     "name": "helloworldplugin",
-                    "url": "https://github.com/posthog/helloworldplugin",
+                    "url": "https://github.com/insights/helloworldplugin",
                     "description": "Greet the World and Foo a Bar",
-                    "icon": "https://raw.githubusercontent.com/posthog/helloworldplugin/main/logo.png",
+                    "icon": "https://raw.githubusercontent.com/insights/helloworldplugin/main/logo.png",
                     "verified": True,
                     "maintainer": "community",
                 },
@@ -885,7 +885,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         with freeze_time(fake_date.isoformat()):
             response = self.client.post(
                 f"/api/organizations/{my_org.id}/plugins/",
-                {"url": "https://github.com/PostHog/helloworldplugin"},
+                {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
             )
             self.assertEqual(response.status_code, 201)
             self.assertEqual(Plugin.objects.count(), 1)
@@ -895,7 +895,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
 
         response = self.client.post(
             f"/api/organizations/{my_org.id}/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Plugin.objects.count(), 1)
@@ -903,7 +903,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         # try to save it for another org
         response = self.client.post(
             f"/api/organizations/{other_org.id}/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         # Fails due to org membership
         self.assertEqual(response.status_code, 403)
@@ -913,7 +913,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
 
         response = self.client.post(
             f"/api/organizations/{other_org.id}/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         # Fails since the plugin already exists
         self.assertEqual(response.status_code, 400)
@@ -976,7 +976,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(mock_reload.call_count, 0)
         response = self.client.post(
             "/api/organizations/@current/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Plugin.objects.count(), 1)
@@ -1094,7 +1094,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             plugin_type="local",
             name="GeoIP",
             description="Get the GeoIP of the user",
-            url="https://github.com/PostHog/posthog-plugin-geoip",
+            url="https://github.com/Hanzo Insights/insights-plugin-geoip",
         )
 
         response = self.client.post(
@@ -1113,7 +1113,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         assert PluginConfig.objects.count() == 0
         insights_function = InsightsFunction.objects.all()
         assert insights_function.count() == 1
-        assert insights_function[0].template_id == "plugin-posthog-plugin-geoip"
+        assert insights_function[0].template_id == "plugin-insights-plugin-geoip"
         assert insights_function[0].type == "transformation"
         assert insights_function[0].name == "GeoIP"
         assert insights_function[0].description == "Enrich events with GeoIP data"
@@ -1121,7 +1121,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             "source": "events",
             "bytecode": ["_H", 1, 29],
         }  # Assert the compiled bytecode for empty filter
-        assert insights_function[0].hog == "return event"
+        assert insights_function[0].iql == "return event"
         assert insights_function[0].enabled
         assert insights_function[0].team == self.team
         assert insights_function[0].created_by == self.user
@@ -1136,7 +1136,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             plugin_type="local",
             name="Taxonomy",
             description="",
-            url="https://github.com/PostHog/taxonomy-plugin",
+            url="https://github.com/Hanzo Insights/taxonomy-plugin",
         )
 
         response = self.client.post(
@@ -1166,7 +1166,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
     def test_check_for_updates_plugins_reload_not_called(self, _, mock_reload):
         response = self.client.post(
             "/api/organizations/@current/plugins/",
-            {"url": "https://github.com/PostHog/helloworldplugin"},
+            {"url": "https://github.com/Hanzo Insights/helloworldplugin"},
         )
         self.assertEqual(mock_reload.call_count, 1)
 

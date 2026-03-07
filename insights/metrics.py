@@ -25,13 +25,13 @@ LABEL_RESOURCE_TYPE = "resource_type"
 LABEL_TEAM_ID = "team_id"
 
 KLUDGES_COUNTER = Counter(
-    "posthog_kludges_total",
+    "insights_kludges_total",
     "Tracking code paths eligible for deletion if they are not used.",
     labelnames=["kludge"],
 )
 
 TOMBSTONE_COUNTER = Counter(
-    "posthog_tombstone_total",
+    "insights_tombstone_total",
     "Rare anomalous events that should almost never occur. Used to track edge cases, cleanup operations finding stale data, and other scenarios that indicate potential bugs or race conditions. Details (team_id, flag_id, etc.) are logged separately to avoid high-cardinality labels.",
     labelnames=["namespace", "operation", "component"],
 )

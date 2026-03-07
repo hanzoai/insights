@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from '~/lib/api'
 
@@ -9,7 +9,7 @@ import * as insightHclExporter from './insightHclExporter'
 import { TerraformExportResource, useTerraformExport } from './useTerraformExport'
 
 jest.mock('~/lib/api')
-jest.mock('posthog-js')
+jest.mock('insights-js')
 jest.mock('kea', () => ({
     ...jest.requireActual('kea'),
     useValues: jest.fn(),
@@ -101,7 +101,7 @@ describe('useTerraformExport', () => {
                 expect(result.current.loading).toBe(false)
             })
 
-            expect(posthog.captureException).toHaveBeenCalledWith(
+            expect(insights.captureException).toHaveBeenCalledWith(
                 expect.objectContaining({
                     message: 'Failed to generate HCL for insight "Tracked Insight" (789): Test error for tracking',
                 }),
@@ -151,7 +151,7 @@ describe('useTerraformExport', () => {
             }
 
             const mockResult = {
-                hcl: 'resource "posthog_insight" "working_insight" {}',
+                hcl: 'resource "insights_insight" "working_insight" {}',
                 warnings: [],
                 resourceCounts: { dashboards: 0, insights: 1, alerts: 0, insightsFunctions: 0 },
             }

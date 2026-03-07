@@ -11,18 +11,18 @@ import type { ContextMillManifest, ResourceManifest } from './manifest-types'
  * Contains manifest.json + individual resource ZIPs
  */
 export const CONTEXT_MILL_URL =
-    'https://github.com/PostHog/context-mill/releases/latest/download/skills-mcp-resources.zip'
+    'https://github.com/hanzoai/context-mill/releases/latest/download/skills-mcp-resources.zip'
 
 // Cache for context-mill resources ZIP contents
 let cachedResources: Unzipped | null = null
 
 /**
  * Fetches and caches the context-mill resources ZIP
- * For local testing, set POSTHOG_MCP_LOCAL_SKILLS_URL to a local HTTP URL
+ * For local testing, set INSIGHTS_MCP_LOCAL_SKILLS_URL to a local HTTP URL
  */
 async function fetchContextMillResources(context: Context): Promise<Unzipped> {
     // Check for local URL override in environment (for testing)
-    const localUrlRaw = (context.env as Record<string, string | undefined>)?.POSTHOG_MCP_LOCAL_SKILLS_URL
+    const localUrlRaw = (context.env as Record<string, string | undefined>)?.INSIGHTS_MCP_LOCAL_SKILLS_URL
     const localUrl = localUrlRaw && localUrlRaw.trim() !== '' ? localUrlRaw : undefined
     const url = localUrl || CONTEXT_MILL_URL
 

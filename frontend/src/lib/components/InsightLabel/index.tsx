@@ -3,7 +3,7 @@ import './InsightLabel.scss'
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

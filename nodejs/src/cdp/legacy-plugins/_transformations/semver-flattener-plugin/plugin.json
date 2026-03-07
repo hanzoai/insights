@@ -1,6 +1,6 @@
 {
-    "name": "posthog-semver-flattener",
-    "url": "https://github.com/PostHog/semver-flattener-plugin",
+    "name": "insights-semver-flattener",
+    "url": "https://github.com/Hanzo Insights/semver-flattener-plugin",
     "main": "index.ts",
     "config": [
         {

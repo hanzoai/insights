@@ -1,4 +1,4 @@
-import { EventType, IncrementalSource } from '@posthog/rrweb-types'
+import { EventType, IncrementalSource } from '@hanzo/rrweb-types'
 
 import { RecordingSnapshot } from '~/types'
 

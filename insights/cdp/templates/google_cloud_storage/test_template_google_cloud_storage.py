@@ -18,8 +18,8 @@ class TestTemplateMigration(BaseTest):
 
     @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     def test_integration(self, mock_credentials):
-        mock_credentials.return_value.project_id = "posthog-616"
-        mock_credentials.return_value.service_account_email = "posthog@"
+        mock_credentials.return_value.project_id = "insights-616"
+        mock_credentials.return_value.service_account_email = "insights@"
         mock_credentials.return_value.token = "ACCESS_TOKEN"
         mock_credentials.return_value.expiry = datetime.fromtimestamp(1704110400 + 3600)
         mock_credentials.return_value.refresh = lambda _: None
@@ -58,8 +58,8 @@ class TestTemplateMigration(BaseTest):
 
     @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     def test_ignore_events(self, mock_credentials):
-        mock_credentials.return_value.project_id = "posthog-616"
-        mock_credentials.return_value.service_account_email = "posthog@"
+        mock_credentials.return_value.project_id = "insights-616"
+        mock_credentials.return_value.service_account_email = "insights@"
         mock_credentials.return_value.token = "ACCESS_TOKEN"
         mock_credentials.return_value.expiry = datetime.fromtimestamp(1704110400 + 3600)
         mock_credentials.return_value.refresh = lambda _: None

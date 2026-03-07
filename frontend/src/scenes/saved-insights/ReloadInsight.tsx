@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { parseDraftQueryFromLocalStorage } from 'scenes/insights/utils'
 import { teamLogic } from 'scenes/teamLogic'

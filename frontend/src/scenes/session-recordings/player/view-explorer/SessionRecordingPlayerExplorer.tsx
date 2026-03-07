@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { IconRevert, IconX } from '@posthog/icons'
+import { IconRevert, IconX } from '@hanzo/icons'
 
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'

@@ -37,13 +37,13 @@ from insights.temporal.common.clickhouse import update_query_tags_with_temporal_
 from insights.utils import generate_short_id, patchable
 
 QUERY_STARTED_COUNTER = Counter(
-    "posthog_clickhouse_query_sent",
+    "insights_clickhouse_query_sent",
     "Number of queries sent to ClickHouse to be run.",
     labelnames=["team_id", "access_method", "chargeable"],
 )
 
 QUERY_FINISHED_COUNTER = Counter(
-    "posthog_clickhouse_query_finished",
+    "insights_clickhouse_query_finished",
     "Number of queries finished successfully.",
     labelnames=["team_id", "access_method", "chargeable"],
 )

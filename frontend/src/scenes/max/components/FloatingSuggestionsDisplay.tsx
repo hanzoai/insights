@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 import { removeProjectIdIfPresent } from 'lib/utils/router-utils'

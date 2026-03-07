@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { LemonSelect, SpinnerOverlay } from '@posthog/lemon-ui'
+import { LemonSelect, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'
 import { dayjs } from 'lib/dayjs'

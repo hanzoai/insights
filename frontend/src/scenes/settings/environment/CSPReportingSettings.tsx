@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonCheckbox, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonCheckbox, Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { domainFor, proxyLogic } from 'scenes/settings/environment/proxyLogic'
@@ -56,7 +56,7 @@ export function CSPReportingSettings(): JSX.Element {
                         <div>
                             We accept some additional parameters on the report URL. These require that you add
                             information when adding the URL to your pages.{' '}
-                            <Link to="https://posthog.com/docs/csp-tracking">See our docs for some examples.</Link>
+                            <Link to="https://hanzo.ai/docs/csp-tracking">See our docs for some examples.</Link>
                         </div>
                     </div>
                 </LemonBanner>

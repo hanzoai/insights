@@ -59,7 +59,7 @@ class TestValidatedRequestDecorator(APIBaseTest):
         mock_request.data = {
             "event": "$pageview",
             "distinct_id": "user_123",
-            "properties": {"$current_url": "https://posthog.com"},
+            "properties": {"$current_url": "https://hanzo.ai"},
         }
 
         response = mock_endpoint(view_instance, mock_request)
@@ -502,7 +502,7 @@ class TestValidatedRequestDecorator(APIBaseTest):
         mock_request.data = {
             "event": "$pageview",
             "distinct_id": "user_123",
-            "properties": {"$current_url": "https://posthog.com"},
+            "properties": {"$current_url": "https://hanzo.ai"},
         }
 
         # Should work normally with valid data

@@ -1,9 +1,9 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { PaginationManual, Sorting } from '@posthog/lemon-ui'
+import { PaginationManual, Sorting } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -260,7 +260,7 @@ export const cohortsSceneLogic = kea<cohortsSceneLogicType>([
                     }
                 } catch (error: any) {
                     console.error('Failed to parse sorting', error, { sorting })
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         extra: {
                             context: 'Failed to parse sorting',
                             sorting: sorting,

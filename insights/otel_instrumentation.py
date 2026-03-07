@@ -58,7 +58,7 @@ def initialize_otel():
     # --- END FORCED OTEL DEBUG LOGGING ---
 
     if os.environ.get("OTEL_SDK_DISABLED", "false").lower() != "true":
-        service_name = os.environ.get("OTEL_SERVICE_NAME", "posthog-django-default")
+        service_name = os.environ.get("OTEL_SERVICE_NAME", "insights-django-default")
         resource = Resource.create(attributes={"service.name": service_name})
 
         # Let OpenTelemetry SDK handle sampling configuration via OTEL_TRACES_SAMPLER and OTEL_TRACES_SAMPLER_ARG

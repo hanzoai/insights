@@ -9,7 +9,7 @@ from rest_framework import status
 from insights.schema import EventsQuery
 
 from insights.api.personal_api_key import PersonalAPIKeySerializer
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models.insight import Insight
 from insights.models.organization import Organization
 from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
@@ -42,7 +42,7 @@ class TestPersonalAPIKeysAPI(APIBaseTest):
             "value": data["value"],
             "mask_value": data["mask_value"],
         }
-        assert data["value"].startswith("phx_")  # Personal API key prefix
+        assert data["value"].startswith("hix_")  # Personal API key prefix
 
     def test_create_too_many_api_keys(self):
         for i in range(0, 10):
@@ -261,7 +261,7 @@ class TestPersonalAPIKeysAPI(APIBaseTest):
 
         # changed fields
         assert data["value"] != original_value
-        assert data["value"].startswith("phx_")  # Personal API key prefix
+        assert data["value"].startswith("hix_")  # Personal API key prefix
         assert data["last_rolled_at"] is not None
         assert data["mask_value"] != original_key.mask_value
 
@@ -299,21 +299,21 @@ class TestPersonalAPIKeysAPIAuthentication(PersonalAPIKeysBaseTest):
         self.key_390000 = PersonalAPIKey.objects.create(
             label="Test", user=self.user, secure_value=hash_key_value(self.value_390000, "pbkdf2", iterations=390000)
         )
-        self.value_hardcoded = "phx_0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p"
+        self.value_hardcoded = "hix_0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p"
         self.key_hardcoded = PersonalAPIKey.objects.create(
             label="Test",
             user=self.user,
-            secure_value="pbkdf2_sha256$260000$posthog_personal_api_key$dUOOjl6bYdigHd+QfhYzN6P2vM01ZbFROS8dm9KRK7Y=",
+            secure_value="pbkdf2_sha256$260000$insights_personal_api_key$dUOOjl6bYdigHd+QfhYzN6P2vM01ZbFROS8dm9KRK7Y=",
         )
 
     @parameterized.expand(
         [
             ("sha256", None, "sha256$45af89b510a3279a817f851de5d3f95b73485d58ec2672a39e52d8aeeb014059"),
-            ("pbkdf2", 1, "pbkdf2_sha256$1$posthog_personal_api_key$vzzA4fHFTiUipScUeDJ4+NjuXwAWWu2AFRbk/JUs6Ck="),
+            ("pbkdf2", 1, "pbkdf2_sha256$1$insights_personal_api_key$vzzA4fHFTiUipScUeDJ4+NjuXwAWWu2AFRbk/JUs6Ck="),
             (
                 "pbkdf2",
                 260000,
-                "pbkdf2_sha256$260000$posthog_personal_api_key$eeRy21dbVoEzYND0NVLfjXxgNeO67SeBRrwQr6bbhK4=",
+                "pbkdf2_sha256$260000$insights_personal_api_key$eeRy21dbVoEzYND0NVLfjXxgNeO67SeBRrwQr6bbhK4=",
             ),
         ]
     )
@@ -397,7 +397,7 @@ class TestPersonalAPIKeysAPIAuthentication(PersonalAPIKeysBaseTest):
         impersonated_access_token = encode_jwt(
             {"id": self.user.id},
             timedelta(minutes=15),
-            PosthogJwtAudience.IMPERSONATED_USER,
+            InsightsJwtAudience.IMPERSONATED_USER,
         )
 
         response = self.client.get(
@@ -749,7 +749,7 @@ class TestPersonalAPIKeyAPIAccess(APIBaseTest):
 
 
 class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
-    @patch("insights.api.personal_api_key.posthoganalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
     def test_create_llm_gateway_scope_blocked_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -766,7 +766,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         }
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.posthoganalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
     def test_create_llm_gateway_scope_allowed_when_flag_enabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = True
 
@@ -778,7 +778,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         assert response.json()["scopes"] == ["llm_gateway:read"]
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.posthoganalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
     def test_update_existing_key_with_llm_gateway_scope_allowed_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -798,7 +798,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         assert response.json()["scopes"] == ["llm_gateway:read"]
         mock_feature_enabled.assert_not_called()
 
-    @patch("insights.api.personal_api_key.posthoganalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
     def test_update_adding_llm_gateway_scope_blocked_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -822,7 +822,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         }
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.posthoganalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
     def test_create_other_scopes_unaffected_by_flag(self, mock_feature_enabled):
         response = self.client.post(
             "/api/personal_api_keys",

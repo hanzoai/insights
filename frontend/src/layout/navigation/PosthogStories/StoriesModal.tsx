@@ -1,10 +1,10 @@
 import './StoriesModal.scss'
 
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { useWindowSize } from 'lib/hooks/useWindowSize'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
@@ -139,7 +139,7 @@ export const StoriesModal = (): JSX.Element | null => {
                         : undefined,
                 ...extraProps,
             }
-            posthog.capture('posthog_story_ended', props)
+            insights.capture('insights_story_ended', props)
         },
         [activeGroup, activeStoryIndex, activeStory]
     )
@@ -150,7 +150,7 @@ export const StoriesModal = (): JSX.Element | null => {
 
             sendStoryEndEvent(forceClose ? 'force_close' : 'natural_close')
 
-            posthog.capture('posthog_story_closed', {
+            insights.capture('insights_story_closed', {
                 reason: forceClose ? 'force_close' : 'natural_close',
                 story_id: activeGroup?.stories[activeStoryIndex].id,
                 story_title: activeGroup?.stories[activeStoryIndex].title,
@@ -186,7 +186,7 @@ export const StoriesModal = (): JSX.Element | null => {
     const handleStoryStart = useCallback(
         (index: number) => {
             storyStartTimeRef.current = Date.now()
-            posthog.capture('posthog_story_started', {
+            insights.capture('insights_story_started', {
                 event: 'started',
                 story_id: activeGroup?.stories[index].id,
                 story_title: activeGroup?.stories[index].title,

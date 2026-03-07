@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
-import { IconCheck, IconWarning, IconX } from '@posthog/icons'
-import { LemonDivider, LemonTabs, Spinner } from '@posthog/lemon-ui'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
+import { LemonDivider, LemonTabs, Spinner } from '@hanzo/lemon-ui'
 
 import { DangerousOperationResponse, MultiQuestionForm } from '~/queries/schema/schema-assistant-messages'
 

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { PipelineResultType, isOkResult } from '~/ingestion/pipelines/results'
 import { BatchWritingPersonsStore } from '~/worker/ingestion/persons/batch-writing-person-store'

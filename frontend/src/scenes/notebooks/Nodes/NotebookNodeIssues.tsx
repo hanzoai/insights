@@ -1,7 +1,7 @@
 import { BindLogic, BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { PropsWithChildren } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 

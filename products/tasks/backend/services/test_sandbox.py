@@ -13,7 +13,7 @@ class TestSandboxIntegration:
 
     def test_create_execute_destroy_lifecycle(self):
         config = SandboxConfig(
-            name="posthog-test-lifecycle",
+            name="insights-test-lifecycle",
             template=SandboxTemplate.DEFAULT_BASE,
         )
 
@@ -40,7 +40,7 @@ class TestSandboxIntegration:
         ],
     )
     def test_command_execution(self, command, expected_exit_code, expected_in_stdout):
-        config = SandboxConfig(name="posthog-test-commands")
+        config = SandboxConfig(name="insights-test-commands")
 
         with Sandbox.create(config) as sandbox:
             result = sandbox.execute(command)
@@ -48,7 +48,7 @@ class TestSandboxIntegration:
             assert expected_in_stdout in result.stdout
 
     def test_error_command_handling(self):
-        config = SandboxConfig(name="posthog-test-error")
+        config = SandboxConfig(name="insights-test-error")
 
         with Sandbox.create(config) as sandbox:
             result = sandbox.execute("nonexistent-command")
@@ -56,7 +56,7 @@ class TestSandboxIntegration:
             assert "command not found" in result.stderr.lower()
 
     def test_working_directory_navigation(self):
-        config = SandboxConfig(name="posthog-test-workdir")
+        config = SandboxConfig(name="insights-test-workdir")
 
         with Sandbox.create(config) as sandbox:
             setup_result = sandbox.execute("mkdir -p /tmp/test_dir && echo 'content' > /tmp/test_dir/file.txt")
@@ -68,7 +68,7 @@ class TestSandboxIntegration:
             assert "content" in result.stdout
 
     def test_timeout_handling(self):
-        config = SandboxConfig(name="posthog-test-timeout")
+        config = SandboxConfig(name="insights-test-timeout")
 
         with Sandbox.create(config) as sandbox:
             result = sandbox.execute("sleep 2 && echo 'completed'", timeout_seconds=5)
@@ -76,7 +76,7 @@ class TestSandboxIntegration:
             assert "completed" in result.stdout
 
     def test_get_by_id(self):
-        config = SandboxConfig(name="posthog-test-get-id")
+        config = SandboxConfig(name="insights-test-get-id")
         original = Sandbox.create(config)
 
         try:
@@ -88,7 +88,7 @@ class TestSandboxIntegration:
             original.destroy()
 
     def test_context_manager_auto_cleanup(self):
-        config = SandboxConfig(name="posthog-test-context")
+        config = SandboxConfig(name="insights-test-context")
 
         with Sandbox.create(config) as sandbox:
             assert sandbox.is_running()

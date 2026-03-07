@@ -205,7 +205,7 @@ class TestCopyChunk:
     def test_copy_chunk_single_batch_success(self):
         """Test successful copy of a single batch within a chunk."""
         config = PersonsNewBackfillConfig(
-            chunk_size=1000, batch_size=100, source_table="posthog_persons", destination_table="posthog_persons_new"
+            chunk_size=1000, batch_size=100, source_table="insights_persons", destination_table="insights_persons_new"
         )
         chunk = (1, 100)  # Single batch covers entire chunk
 
@@ -228,7 +228,7 @@ class TestCopyChunk:
 
         # Verify SET statements called once (session-level, before loop)
         set_statements = [
-            "SET application_name = 'backfill_posthog_persons_to_posthog_persons_new'",
+            "SET application_name = 'backfill_insights_persons_to_insights_persons_new'",
             "SET lock_timeout = '5s'",
             "SET statement_timeout = '30min'",
             "SET maintenance_work_mem = '12GB'",
@@ -254,9 +254,9 @@ class TestCopyChunk:
         insert_calls = [call for call in execute_calls if "INSERT INTO" in call]
         assert len(insert_calls) == 1
         insert_query = insert_calls[0]
-        assert "INSERT INTO posthog_persons_new" in insert_query
+        assert "INSERT INTO insights_persons_new" in insert_query
         assert "SELECT s.*" in insert_query
-        assert "FROM posthog_persons s" in insert_query
+        assert "FROM insights_persons s" in insert_query
         assert "WHERE s.id >" in insert_query
         assert "AND s.id <=" in insert_query
         assert "NOT EXISTS" in insert_query
@@ -265,7 +265,7 @@ class TestCopyChunk:
     def test_copy_chunk_multiple_batches(self):
         """Test copy with multiple batches in a chunk."""
         config = PersonsNewBackfillConfig(
-            chunk_size=1000, batch_size=100, source_table="posthog_persons", destination_table="posthog_persons_new"
+            chunk_size=1000, batch_size=100, source_table="insights_persons", destination_table="insights_persons_new"
         )
         chunk = (1, 250)  # 3 batches: (1,100), (100,200), (200,250)
 
@@ -318,7 +318,7 @@ class TestCopyChunk:
     def test_copy_chunk_duplicate_key_violation_retry(self):
         """Test that duplicate key violation triggers retry."""
         config = PersonsNewBackfillConfig(
-            chunk_size=1000, batch_size=100, source_table="posthog_persons", destination_table="posthog_persons_new"
+            chunk_size=1000, batch_size=100, source_table="insights_persons", destination_table="insights_persons_new"
         )
         chunk = (1, 100)
 
@@ -367,7 +367,7 @@ class TestCopyChunk:
     def test_copy_chunk_error_handling_and_rollback(self):
         """Test error handling and rollback on non-duplicate errors."""
         config = PersonsNewBackfillConfig(
-            chunk_size=1000, batch_size=100, source_table="posthog_persons", destination_table="posthog_persons_new"
+            chunk_size=1000, batch_size=100, source_table="insights_persons", destination_table="insights_persons_new"
         )
         chunk = (1, 100)
 
@@ -446,7 +446,7 @@ class TestCopyChunk:
     def test_copy_chunk_session_settings_applied_once(self):
         """Test that SET statements are applied once at session level before batch loop."""
         config = PersonsNewBackfillConfig(
-            chunk_size=1000, batch_size=50, source_table="posthog_persons", destination_table="posthog_persons_new"
+            chunk_size=1000, batch_size=50, source_table="insights_persons", destination_table="insights_persons_new"
         )
         chunk = (1, 150)  # 3 batches
 
@@ -495,7 +495,7 @@ class TestGetIdRangeForPnb:
 
     def test_get_id_range_uses_min_id_override(self):
         """Test that min_id override is honored when provided."""
-        config = PersonsNewBackfillConfig(min_id=100, max_id=None, source_table="posthog_persons")
+        config = PersonsNewBackfillConfig(min_id=100, max_id=None, source_table="insights_persons")
         mock_db = create_mock_database_resource()
 
         cursor = mock_db.cursor.return_value.__enter__.return_value
@@ -519,7 +519,7 @@ class TestGetIdRangeForPnb:
 
     def test_get_id_range_uses_max_id_override(self):
         """Test that max_id override is honored when provided."""
-        config = PersonsNewBackfillConfig(min_id=None, max_id=5000, source_table="posthog_persons")
+        config = PersonsNewBackfillConfig(min_id=None, max_id=5000, source_table="insights_persons")
         mock_db = create_mock_database_resource()
 
         cursor = mock_db.cursor.return_value.__enter__.return_value
@@ -543,7 +543,7 @@ class TestGetIdRangeForPnb:
 
     def test_get_id_range_uses_both_overrides(self):
         """Test that both min_id and max_id overrides are honored when provided."""
-        config = PersonsNewBackfillConfig(min_id=100, max_id=5000, source_table="posthog_persons")
+        config = PersonsNewBackfillConfig(min_id=100, max_id=5000, source_table="insights_persons")
         mock_db = create_mock_database_resource()
 
         cursor = mock_db.cursor.return_value.__enter__.return_value
@@ -565,7 +565,7 @@ class TestGetIdRangeForPnb:
 
     def test_get_id_range_queries_database_when_no_overrides(self):
         """Test that database is queried when no overrides are provided."""
-        config = PersonsNewBackfillConfig(min_id=None, max_id=None, source_table="posthog_persons")
+        config = PersonsNewBackfillConfig(min_id=None, max_id=None, source_table="insights_persons")
         mock_db = create_mock_database_resource()
 
         cursor = mock_db.cursor.return_value.__enter__.return_value
@@ -587,7 +587,7 @@ class TestGetIdRangeForPnb:
 
     def test_get_id_range_validates_max_id_greater_than_min_id(self):
         """Test that validation fails when max_id < min_id."""
-        config = PersonsNewBackfillConfig(min_id=5000, max_id=100, source_table="posthog_persons")
+        config = PersonsNewBackfillConfig(min_id=5000, max_id=100, source_table="insights_persons")
         mock_db = create_mock_database_resource()
 
         context = build_op_context(resources={"database": mock_db})

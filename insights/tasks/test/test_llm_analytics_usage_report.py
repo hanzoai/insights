@@ -160,7 +160,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
                 "$ai_model": "gpt-4o-mini",
                 "$ai_provider": "openai",
                 "$ai_framework": "langchain",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -172,7 +172,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "claude-3-opus",
                 "$ai_provider": "anthropic",
-                "$lib": "posthog-node",
+                "$lib": "insights-node",
             },
         )
 
@@ -184,7 +184,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "text-embedding-ada-002",
                 "$ai_provider": "openai",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -212,8 +212,8 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
         assert breakdowns.framework_breakdown.get("none") == 8  # 5 + 3 (events without framework)
 
         # Verify library breakdown
-        assert breakdowns.library_breakdown.get("posthog-python") == 13  # 10 + 3
-        assert breakdowns.library_breakdown.get("posthog-node") == 5
+        assert breakdowns.library_breakdown.get("hanzo-insights") == 13  # 10 + 3
+        assert breakdowns.library_breakdown.get("insights-node") == 5
 
     def test_get_all_ai_cost_model_breakdowns(self) -> None:
         """Test that we correctly get cost model breakdowns."""
@@ -387,7 +387,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
                 "$ai_model": "gpt-4o-mini",
                 "$ai_provider": "openai",
                 "$ai_framework": "langchain",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
                 "$ai_model_cost_used": "openai/gpt-4o-mini",
                 "$ai_cost_model_source": "openrouter",
                 "$ai_cost_model_provider": "openai",
@@ -447,7 +447,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
         assert org_1_report["model_breakdown"] == {"gpt-4o-mini": 3}
         assert org_1_report["provider_breakdown"] == {"openai": 3}
         assert org_1_report["framework_breakdown"] == {"langchain": 3, "none": 15}
-        assert org_1_report["library_breakdown"] == {"posthog-python": 3}
+        assert org_1_report["library_breakdown"] == {"hanzo-insights": 3}
         assert org_1_report["cost_model_used_breakdown"] == {"openai/gpt-4o-mini": 3}
         assert org_1_report["cost_model_source_breakdown"] == {"openrouter": 3}
         assert org_1_report["cost_model_provider_breakdown"] == {"openai": 3}
@@ -466,7 +466,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("posthoganalytics.feature_enabled", return_value=False)
+    @patch("hanzoanalytics.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports(
         self,
         mock_feature_enabled: MagicMock,
@@ -583,7 +583,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
                 "$ai_model": "gpt-4o-mini",
                 "$ai_provider": "openai",
                 "$ai_framework": "langchain",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -595,7 +595,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "gpt-4",
                 "$ai_provider": "openai",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -609,7 +609,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
                 "$ai_model": "claude-3-opus",
                 "$ai_provider": "anthropic",
                 "$ai_framework": "langchain",
-                "$lib": "posthog-node",
+                "$lib": "insights-node",
             },
         )
 
@@ -622,7 +622,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "gpt-4o-mini",
                 "$ai_provider": "openai",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -647,8 +647,8 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
         assert org_report["framework_breakdown"]["none"] == 8  # 5 + 3
 
         # Verify library breakdown is aggregated
-        assert org_report["library_breakdown"]["posthog-python"] == 18  # 10 + 5 + 3
-        assert org_report["library_breakdown"]["posthog-node"] == 7
+        assert org_report["library_breakdown"]["hanzo-insights"] == 18  # 10 + 5 + 3
+        assert org_report["library_breakdown"]["insights-node"] == 7
 
     def test_dimension_breakdowns_filter_empty_values(self) -> None:
         """Test that dimension breakdowns correctly filter out empty and whitespace-only values."""
@@ -666,7 +666,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "gpt-4o-mini",
                 "$ai_provider": "openai",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -679,7 +679,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "",
                 "$ai_provider": "anthropic",
-                "$lib": "posthog-node",
+                "$lib": "insights-node",
             },
         )
 
@@ -692,7 +692,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
             properties={
                 "$ai_model": "claude-3-opus",
                 "$ai_provider": "   ",
-                "$lib": "posthog-python",
+                "$lib": "hanzo-insights",
             },
         )
 
@@ -744,8 +744,8 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
         assert breakdowns.provider_breakdown.get("   ") is None
 
         # Verify library breakdown - should only have valid libraries
-        assert breakdowns.library_breakdown.get("posthog-python") == 7  # 5 + 2
-        assert breakdowns.library_breakdown.get("posthog-node") == 3
+        assert breakdowns.library_breakdown.get("hanzo-insights") == 7  # 5 + 2
+        assert breakdowns.library_breakdown.get("insights-node") == 3
         assert "" not in breakdowns.library_breakdown  # Empty string should be filtered out
         assert breakdowns.library_breakdown.get("") is None
 
@@ -838,7 +838,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("posthoganalytics.feature_enabled", return_value=False)
+    @patch("hanzoanalytics.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports_dry_run(
         self,
         mock_feature_enabled: MagicMock,
@@ -860,8 +860,8 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report._get_all_llm_analytics_reports")
-    @patch("posthoganalytics.capture_exception")
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_send_llm_analytics_usage_reports_disabled_by_feature_flag(
         self,
         mock_feature_enabled: MagicMock,
@@ -887,7 +887,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("posthoganalytics.feature_enabled", return_value=False)
+    @patch("hanzoanalytics.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports_with_at_parameter(
         self,
         mock_feature_enabled: MagicMock,

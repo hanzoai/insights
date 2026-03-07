@@ -25,7 +25,7 @@ from insights.schema import QuerySchemaRoot
 from insights.api.services.query import process_query_dict
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_runner import ExecutionMode
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models.exported_asset import ExportedAsset, save_content_from_file
 from insights.utils import absolute_uri
 
@@ -194,7 +194,7 @@ def _get_breakdown_info(
 ) -> tuple[list[str | int | None], list[dict], bool]:
     """Extract breakdown info from query results.
 
-    Supports both breakdown formats from BreakdownFilter (posthog/schema.py)
+    Supports both breakdown formats from BreakdownFilter (insights/schema.py)
     """
     breakdown_values: list[str | int | None] = []
     breakdowns: list[dict] = []
@@ -393,7 +393,7 @@ def get_from_insights_api(exported_asset: ExportedAsset, limit: int, resource: d
     access_token = encode_jwt(
         {"id": exported_asset.created_by_id},
         datetime.timedelta(minutes=15),
-        PosthogJwtAudience.IMPERSONATED_USER,
+        InsightsJwtAudience.IMPERSONATED_USER,
     )
     total = 0
     while total < CSV_EXPORT_LIMIT:

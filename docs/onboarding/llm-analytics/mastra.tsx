@@ -19,7 +19,7 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            npm install @posthog/ai posthog-node
+                            npm install @hanzo/ai insights-node
                         `}
                     />
                 </>
@@ -45,7 +45,7 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         <Markdown>
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the background to send the data.
 
-                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
+                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -57,15 +57,15 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Initialize Insights with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then use `withTracing` from `@posthog/ai` to wrap the model you pass to your Mastra agent.
+                        Initialize Insights with your project API key and host from [your project settings](https://insights.hanzo.ai/settings/project), then use `withTracing` from `@hanzo/ai` to wrap the model you pass to your Mastra agent.
                     </Markdown>
 
                     <CodeBlock
                         language="typescript"
                         code={dedent`
                             import { Agent } from "@mastra/core/agent";
-                            import { Insights } from "posthog-node";
-                            import { withTracing } from "@posthog/ai";
+                            import { Insights } from "insights-node";
+                            import { withTracing } from "@hanzo/ai";
                             import { createOpenAI } from "@ai-sdk/openai";
 
                             const phClient = new Insights(
@@ -82,11 +82,11 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
                               name: "my-agent",
                               instructions: "You are a helpful assistant.",
                               model: withTracing(openaiClient("gpt-4o"), phClient, {
-                                posthogDistinctId: "user_123", // optional
-                                posthogTraceId: "trace_123", // optional
-                                posthogProperties: { conversationId: "abc123" }, // optional
-                                posthogPrivacyMode: false, // optional
-                                posthogGroups: { company: "companyIdInYourDb" }, // optional
+                                insightsDistinctId: "user_123", // optional
+                                insightsTraceId: "trace_123", // optional
+                                insightsProperties: { conversationId: "abc123" }, // optional
+                                insightsPrivacyMode: false, // optional
+                                insightsGroups: { company: "companyIdInYourDb" }, // optional
                               }),
                             });
                         `}
@@ -120,7 +120,7 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
 

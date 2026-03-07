@@ -31,8 +31,8 @@ from insights.dags.backups import (
     "path",
     [
         "invalid/path",
-        "posthog/noshard/unknown-20240101075404/",
-        "posthog/table/noshard/20240101075404/",
+        "insights/noshard/unknown-20240101075404/",
+        "insights/table/noshard/20240101075404/",
         "",
     ],
 )
@@ -44,13 +44,13 @@ def test_get_latest_backups_skips_unparseable_paths():
     mock_s3 = MagicMock()
     mock_s3.get_client().list_objects_v2.return_value = {
         "CommonPrefixes": [
-            {"Prefix": "posthog/test/noshard/full-20240101075404/"},
-            {"Prefix": "posthog/test/noshard/garbage/"},
-            {"Prefix": "posthog/test/noshard/inc-20240201075404/"},
+            {"Prefix": "insights/test/noshard/full-20240101075404/"},
+            {"Prefix": "insights/test/noshard/garbage/"},
+            {"Prefix": "insights/test/noshard/inc-20240201075404/"},
         ]
     }
 
-    config = BackupConfig(database="posthog", table="test", incremental=True)
+    config = BackupConfig(database="insights", table="test", incremental=True)
     context = dagster.build_op_context()
     result = get_latest_backups(context=context, config=config, s3=mock_s3)
 
@@ -63,7 +63,7 @@ def test_get_latest_backup_empty():
     mock_s3 = MagicMock()
     mock_s3.get_client().list_objects_v2.return_value = {}
 
-    config = BackupConfig(database="posthog", table="dummy", incremental=True)
+    config = BackupConfig(database="insights", table="dummy", incremental=True)
     context = dagster.build_op_context()
     result = get_latest_backups(context=context, config=config, s3=mock_s3)
 
@@ -75,42 +75,42 @@ def test_get_latest_backup(table: str):
     mock_s3 = MagicMock()
     mock_s3.get_client().list_objects_v2.return_value = {
         "CommonPrefixes": [
-            {"Prefix": f"posthog/{f'{table}/' if table else ''}noshard/full-20230101075404/"},
-            {"Prefix": f"posthog/{f'{table}/' if table else ''}noshard/full-20240101075404/"},
-            {"Prefix": f"posthog/{f'{table}/' if table else ''}noshard/inc-20240301075404/"},
-            {"Prefix": f"posthog/{f'{table}/' if table else ''}noshard/inc-20230301075404/"},
-            {"Prefix": f"posthog/{f'{table}/' if table else ''}noshard/inc-20240201075404/"},
+            {"Prefix": f"insights/{f'{table}/' if table else ''}noshard/full-20230101075404/"},
+            {"Prefix": f"insights/{f'{table}/' if table else ''}noshard/full-20240101075404/"},
+            {"Prefix": f"insights/{f'{table}/' if table else ''}noshard/inc-20240301075404/"},
+            {"Prefix": f"insights/{f'{table}/' if table else ''}noshard/inc-20230301075404/"},
+            {"Prefix": f"insights/{f'{table}/' if table else ''}noshard/inc-20240201075404/"},
         ]
     }
 
-    config = BackupConfig(database="posthog", table=table, incremental=True)
+    config = BackupConfig(database="insights", table=table, incremental=True)
     context = dagster.build_op_context()
     result = get_latest_backups(context=context, config=config, s3=mock_s3)
 
     assert isinstance(result, list)
     assert len(result) == 5
 
-    assert result[0].database == "posthog"
+    assert result[0].database == "insights"
     assert result[0].date == "20240301075404"
     assert result[0].incremental is True
     assert result[0].base_backup is None
 
-    assert result[1].database == "posthog"
+    assert result[1].database == "insights"
     assert result[1].date == "20240201075404"
     assert result[1].incremental is True
     assert result[1].base_backup is None
 
-    assert result[2].database == "posthog"
+    assert result[2].database == "insights"
     assert result[2].date == "20240101075404"
     assert result[2].incremental is False
     assert result[2].base_backup is None
 
-    assert result[3].database == "posthog"
+    assert result[3].database == "insights"
     assert result[3].date == "20230301075404"
     assert result[3].incremental is True
     assert result[3].base_backup is None
 
-    assert result[4].database == "posthog"
+    assert result[4].database == "insights"
     assert result[4].date == "20230101075404"
     assert result[4].incremental is False
     assert result[4].base_backup is None
@@ -121,14 +121,14 @@ def test_get_latest_backup(table: str):
 
 
 def test_get_latest_successful_backup_returns_latest_backup():
-    config = BackupConfig(database="posthog", table="test", incremental=True)
-    backup1 = Backup(database="posthog", date="20240201075404", incremental=True, table="test")
+    config = BackupConfig(database="insights", table="test", incremental=True)
+    backup1 = Backup(database="insights", date="20240201075404", incremental=True, table="test")
     backup1.is_done = MagicMock(return_value=True)  # type: ignore
     backup1.status = MagicMock(  # type: ignore
         return_value=BackupStatus(hostname="test", status="CREATING_BACKUP", event_time_microseconds=datetime.now())
     )
 
-    backup2 = Backup(database="posthog", date="20240101075404", incremental=False, table="test")
+    backup2 = Backup(database="insights", date="20240101075404", incremental=False, table="test")
     backup2.is_done = MagicMock(return_value=True)  # type: ignore
     backup2.status = MagicMock(  # type: ignore
         return_value=BackupStatus(hostname="test", status="BACKUP_CREATED", event_time_microseconds=datetime.now())
@@ -154,8 +154,8 @@ def test_get_latest_successful_backup_returns_latest_backup():
 
 
 def test_get_latest_successful_backup_fails():
-    config = BackupConfig(database="posthog", table="test", incremental=True)
-    backup1 = Backup(database="posthog", date="20240201075404", incremental=True, table="test")
+    config = BackupConfig(database="insights", table="test", incremental=True)
+    backup1 = Backup(database="insights", date="20240201075404", incremental=True, table="test")
     backup1.status = MagicMock(  # type: ignore
         return_value=BackupStatus(hostname="test", status="CREATING_BACKUP", event_time_microseconds=datetime.now())
     )

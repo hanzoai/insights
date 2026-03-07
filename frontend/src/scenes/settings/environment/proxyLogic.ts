@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { LemonDialog } from '@posthog/lemon-ui'
+import { LemonDialog } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SetupTaskId } from 'lib/components/ProductSetup'
@@ -37,7 +37,7 @@ export function domainFor(proxyRecord: ProxyRecord | undefined): string {
     return domain
 }
 
-const RISKY_DOMAIN_PATTERNS = /posthog|analytics|tracking|tracker|pixel|telemetry|measure|collect|beacon/i
+const RISKY_DOMAIN_PATTERNS = /insights|analytics|tracking|tracker|pixel|telemetry|measure|collect|beacon/i
 
 function isRiskyDomain(domain: string): boolean {
     return RISKY_DOMAIN_PATTERNS.test(domain)

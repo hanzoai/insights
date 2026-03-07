@@ -64,7 +64,7 @@
         "uuid": "017f7913-c1ee-0000-faff-0fe5ace3849a",
         "distinct_id": "Q1OD2NmnqqbqrLR45mYm2p1VNNbSO9DBFsMig90GWkK",
         "first_name": "Marius",
-        "email": "marius@posthog.com"
+        "email": "marius@hanzo.ai"
     },
     "description": "",
     "updated_at": "2022-03-15T21:38:08.043665Z",
@@ -77,7 +77,7 @@
         "uuid": "017f7913-c1ee-0000-faff-0fe5ace3849a",
         "distinct_id": "Q1OD2NmnqqbqrLR45mYm2p1VNNbSO9DBFsMig90GWkK",
         "first_name": "Marius",
-        "email": "marius@posthog.com"
+        "email": "marius@hanzo.ai"
     },
     "is_sample": false,
     "query": {

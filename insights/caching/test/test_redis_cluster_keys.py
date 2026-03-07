@@ -38,9 +38,9 @@ class TestRedisClusterKeySlots(BaseTest):
     def test_non_cluster_keys_use_old_format(self, _name: str, team_id: int):
         tracker = TeamCacheSizeTracker(team_id)
 
-        self.assertEqual(tracker.entries_key, f"posthog:cache_sizes:{team_id}")
-        self.assertEqual(tracker.sizes_key, f"posthog:cache_entry_sizes:{team_id}")
-        self.assertEqual(tracker.total_key, f"posthog:cache_total:{team_id}")
+        self.assertEqual(tracker.entries_key, f"insights:cache_sizes:{team_id}")
+        self.assertEqual(tracker.sizes_key, f"insights:cache_entry_sizes:{team_id}")
+        self.assertEqual(tracker.total_key, f"insights:cache_total:{team_id}")
 
     @parameterized.expand(
         [
@@ -55,6 +55,6 @@ class TestRedisClusterKeySlots(BaseTest):
 
         tracker = TeamCacheSizeTracker(team_id, cache_backend=mock_cache, redis_client=mock_redis, is_cluster=True)
 
-        self.assertEqual(tracker.entries_key, f"posthog:cache_sizes:{{{team_id}}}")
-        self.assertEqual(tracker.sizes_key, f"posthog:cache_entry_sizes:{{{team_id}}}")
-        self.assertEqual(tracker.total_key, f"posthog:cache_total:{{{team_id}}}")
+        self.assertEqual(tracker.entries_key, f"insights:cache_sizes:{{{team_id}}}")
+        self.assertEqual(tracker.sizes_key, f"insights:cache_entry_sizes:{{{team_id}}}")
+        self.assertEqual(tracker.total_key, f"insights:cache_total:{{{team_id}}}")

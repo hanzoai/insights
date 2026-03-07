@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFlag } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonModal, LemonTable, LemonTableColumns, LemonTag } from '@posthog/lemon-ui'
+import { IconFlag } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonModal, LemonTable, LemonTableColumns, LemonTag } from '@hanzo/lemon-ui'
 
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'

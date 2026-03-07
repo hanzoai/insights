@@ -1,5 +1,5 @@
-import { IconGear, IconTrash } from '@posthog/icons'
-import { LemonColorGlyph, LemonColorPicker, LemonLabel, LemonMenu, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { IconGear, IconTrash } from '@hanzo/icons'
+import { LemonColorGlyph, LemonColorPicker, LemonLabel, LemonMenu, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { getSeriesColorPalette } from 'lib/colors'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

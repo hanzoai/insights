@@ -148,7 +148,7 @@ class Event(models.Model):
             # Separately managed:
             # models.Index(fields=["created_at"]),
             # NOTE: The below index has been added as a manual migration in
-            # `posthog/migrations/0024_add_event_distinct_id_index.py, but I'm
+            # `insights/migrations/0024_add_event_distinct_id_index.py, but I'm
             # adding this here to improve visibility.
             # models.Index(fields=["distinct_id"], name="idx_distinct_id"),
         ]

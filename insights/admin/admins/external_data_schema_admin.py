@@ -29,7 +29,7 @@ class ExternalDataSchemaAdmin(admin.ModelAdmin):
     def team_link(self, schema: ExternalDataSchema):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[schema.team.pk]),
+            reverse("admin:insights_team_change", args=[schema.team.pk]),
             schema.team.name,
         )
 

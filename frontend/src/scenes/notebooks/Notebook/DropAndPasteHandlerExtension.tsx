@@ -2,9 +2,9 @@ import { JSONContent } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Extension } from '@tiptap/react'
 import Papa from 'papaparse'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { NotebookNodeType } from '../types'
 
@@ -93,8 +93,8 @@ export const DropAndPasteHandlerExtension = Extension.create({
                                         .insertContent({ type: node, attrs: JSON.parse(properties) })
                                         .run()
 
-                                    // We report this case, the pasted version is handled by the posthogNodePasteRule
-                                    posthog.capture('notebook node dropped', { node_type: node })
+                                    // We report this case, the pasted version is handled by the insightsNodePasteRule
+                                    insights.capture('notebook node dropped', { node_type: node })
                                 } else {
                                     this.editor?.chain().focus().setTextSelection(coordinates.pos).run()
                                     view.pasteText(text)
@@ -134,7 +134,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                                     .setTextSelection(coordinates.pos)
                                     .insertContent(contentToAdd)
                                     .run()
-                                posthog.capture('notebook files dropped', {
+                                insights.capture('notebook files dropped', {
                                     file_types: fileList.map((x) => x.type),
                                 })
 
@@ -166,7 +166,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                             const rows = tableContent.content?.length ?? 0
                             const cols = tableContent.content?.[0]?.content?.length ?? 0
                             this.editor.chain().focus().insertContent(tableContent).run()
-                            posthog.capture('notebook table pasted', {
+                            insights.capture('notebook table pasted', {
                                 rows,
                                 cols,
                                 source: format,
@@ -191,7 +191,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                             }
 
                             this.editor.chain().focus().insertContent(contentToAdd).run()
-                            posthog.capture('notebook files pasted', {
+                            insights.capture('notebook files pasted', {
                                 file_types: fileList.map((x) => x.type),
                             })
 

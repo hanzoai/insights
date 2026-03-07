@@ -48,11 +48,11 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
     STRIPE_SUBSCRIPTION_COLUMNS,
 )
 
-CHARGES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_charges"
-INVOICES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_invoices"
-PRODUCTS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_products"
-CUSTOMERS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_customers"
-SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_subscriptions"
+CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_charges"
+INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_invoices"
+PRODUCTS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_products"
+CUSTOMERS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_customers"
+SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_subscriptions"
 
 ALL_MONTHS_LABELS = [
     "Nov 2024",
@@ -122,7 +122,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
                     distinct_ids=[distinct_id],
                     properties={
                         "name": distinct_id,
-                        **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                        **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                     },
                 )
             event_ids: list[str] = []
@@ -349,7 +349,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(
             results[0],
             {
-                "label": "stripe.posthog_test",
+                "label": "stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -375,15 +375,15 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
                 ],
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "stripe.posthog_test",
-                    "name": "stripe.posthog_test",
+                    "id": "stripe.insights_test",
+                    "name": "stripe.insights_test",
                 },
             },
         )
 
     # NOTE: This can be removed once `managed-viewsets` feature flag is rolled out to all teams
     def test_with_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             # Use huge date range to collect all data
@@ -396,7 +396,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
             self.assertEqual(
                 results[0],
                 {
-                    "label": "stripe.posthog_test",
+                    "label": "stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -422,8 +422,8 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
                     ],
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "stripe.posthog_test",
-                        "name": "stripe.posthog_test",
+                        "id": "stripe.insights_test",
+                        "name": "stripe.insights_test",
                     },
                 },
             )
@@ -438,7 +438,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(
             results[0],
             {
-                "label": "stripe.posthog_test",
+                "label": "stripe.insights_test",
                 "days": ["2025-02-01", "2025-03-01", "2025-04-01", "2025-05-01"],
                 "labels": ["Feb 2025", "Mar 2025", "Apr 2025", "May 2025"],
                 "data": [
@@ -447,7 +447,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
                     Decimal("2668.3175004797"),
                     0,
                 ],
-                "action": {"days": [ANY] * 4, "id": "stripe.posthog_test", "name": "stripe.posthog_test"},
+                "action": {"days": [ANY] * 4, "id": "stripe.insights_test", "name": "stripe.insights_test"},
             },
         )
 
@@ -465,7 +465,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(
             results[0],
             {
-                "label": "stripe.posthog_test",
+                "label": "stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -491,8 +491,8 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
                 ],
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "stripe.posthog_test",
-                    "name": "stripe.posthog_test",
+                    "id": "stripe.insights_test",
+                    "name": "stripe.insights_test",
                 },
             },
         )
@@ -512,13 +512,13 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(len(results), 7)
 
         expected_products = [
-            "stripe.posthog_test - Product F",
-            "stripe.posthog_test - Product B",
-            "stripe.posthog_test - Product D",
-            "stripe.posthog_test - Product A",
-            "stripe.posthog_test - <none>",
-            "stripe.posthog_test - Product C",
-            "stripe.posthog_test - Product E",
+            "stripe.insights_test - Product F",
+            "stripe.insights_test - Product B",
+            "stripe.insights_test - Product D",
+            "stripe.insights_test - Product A",
+            "stripe.insights_test - <none>",
+            "stripe.insights_test - Product C",
+            "stripe.insights_test - Product E",
         ]
         self.assertEqual([result["label"] for result in results], expected_products)
 
@@ -603,19 +603,19 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(len(results), 13)
 
         expected_breakdowns = [
-            "stripe.posthog_test - 2025-01 - Product F",
-            "stripe.posthog_test - 2025-02 - Product B",
-            "stripe.posthog_test - 2025-02 - Product F",
-            "stripe.posthog_test - 2025-01 - Product D",
-            "stripe.posthog_test - 2025-02 - Product D",
-            "stripe.posthog_test - 2025-01 - <none>",
-            "stripe.posthog_test - 2025-01 - Product A",
-            "stripe.posthog_test - 2025-01 - Product B",
-            "stripe.posthog_test - 2025-02 - Product A",
-            "stripe.posthog_test - 2025-02 - Product C",
-            "stripe.posthog_test - 2025-01 - Product C",
-            "stripe.posthog_test - 2025-01 - Product E",
-            "stripe.posthog_test - 2025-02 - Product E",
+            "stripe.insights_test - 2025-01 - Product F",
+            "stripe.insights_test - 2025-02 - Product B",
+            "stripe.insights_test - 2025-02 - Product F",
+            "stripe.insights_test - 2025-01 - Product D",
+            "stripe.insights_test - 2025-02 - Product D",
+            "stripe.insights_test - 2025-01 - <none>",
+            "stripe.insights_test - 2025-01 - Product A",
+            "stripe.insights_test - 2025-01 - Product B",
+            "stripe.insights_test - 2025-02 - Product A",
+            "stripe.insights_test - 2025-02 - Product C",
+            "stripe.insights_test - 2025-01 - Product C",
+            "stripe.insights_test - 2025-01 - Product E",
+            "stripe.insights_test - 2025-02 - Product E",
         ]
         self.assertEqual([result["label"] for result in results], expected_breakdowns)
         self.assertEqual(
@@ -709,7 +709,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result["label"] for result in results], ["stripe.posthog_test"])
+        self.assertEqual([result["label"] for result in results], ["stripe.insights_test"])
         self.assertEqual([result["data"] for result in results], expected_data)
 
         # When grouping results should be exactly the same, just the label changes
@@ -725,7 +725,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result["label"] for result in results], ["stripe.posthog_test - Product C"])
+        self.assertEqual([result["label"] for result in results], ["stripe.insights_test - Product C"])
         self.assertEqual([result["data"] for result in results], expected_data)
 
     def test_with_country_filter(self):
@@ -740,7 +740,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result["label"] for result in results], ["stripe.posthog_test"])
+        self.assertEqual([result["label"] for result in results], ["stripe.insights_test"])
         self.assertEqual(
             [result["data"] for result in results],
             [
@@ -817,7 +817,7 @@ class TestRevenueAnalyticsGrossRevenueQueryRunner(ClickhouseTestMixin, APIBaseTe
         )
 
     def test_with_events_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             s1 = str(uuid7("2025-01-25"))
             s2 = str(uuid7("2025-02-03"))
             s3 = str(uuid7("2025-02-05"))

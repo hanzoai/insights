@@ -1,9 +1,9 @@
 import { useAsyncActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { IconCheck, IconPencil, IconX } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, LemonTag, LemonTextAreaMarkdown } from '@posthog/lemon-ui'
+import { IconCheck, IconPencil, IconX } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, LemonTag, LemonTextAreaMarkdown } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
@@ -90,7 +90,7 @@ export function UserInterview(): JSX.Element {
                                             .then(() => {
                                                 setSummaryInEditing(null)
                                             })
-                                            .catch((e) => posthog.captureException(e))
+                                            .catch((e) => insights.captureException(e))
                                     }}
                                     loading={userInterviewLoading}
                                 />

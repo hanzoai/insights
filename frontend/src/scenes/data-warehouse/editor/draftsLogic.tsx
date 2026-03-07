@@ -1,8 +1,8 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { ApiError, PaginatedResponse } from 'lib/api'
 
@@ -96,7 +96,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft save failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         updateDraft: async ({ draft }) => {
@@ -110,7 +110,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft update failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         deleteDraft: async ({ draftId, viewName }) => {
@@ -126,7 +126,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft delete failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         renameDraft: async ({ draftId, name }) => {
@@ -147,7 +147,7 @@ export const draftsLogic = kea<draftsLogicType>([
                     if (apiError) {
                         lemonToast.error(`Draft update failed: ${apiError.message}`)
                     }
-                    posthog.captureException(e)
+                    insights.captureException(e)
                 }
             } else {
                 const existingDrafts = await api.dataWarehouseSavedQueryDrafts.list()

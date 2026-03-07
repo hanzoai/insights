@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconLock, IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonTag, lemonToast } from '@posthog/lemon-ui'
+import { IconLock, IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonDialog, LemonTag, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -550,7 +550,7 @@ export function OverViewTab({
                 productKey={ProductKey.FEATURE_FLAGS}
                 thingName="feature flag"
                 description="Use feature flags to safely deploy and roll back new features in an easy-to-manage way. Roll variants out to certain groups, a percentage of users, or everyone all at once."
-                docsURL="https://posthog.com/docs/feature-flags/manual"
+                docsURL="https://hanzo.ai/docs/feature-flags/manual"
                 action={() => router.actions.push(newFeatureFlagUrl)}
                 isEmpty={shouldShowEmptyState}
                 customHog={FeatureFlagHog}

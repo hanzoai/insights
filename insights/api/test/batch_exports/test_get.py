@@ -33,7 +33,7 @@ def test_can_get_exports_for_your_organizations(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -79,7 +79,7 @@ def test_can_get_exports_for_your_organizations(
     assert batch_export["destination"]["config"] == {
         "bucket_name": "my-production-s3-bucket",
         "region": "us-east-1",
-        "prefix": "posthog-events/",
+        "prefix": "insights-events/",
     }
 
 
@@ -89,7 +89,7 @@ def test_cannot_get_exports_for_other_organizations(client: HttpClient, temporal
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -126,7 +126,7 @@ def test_batch_exports_are_partitioned_by_team(client: HttpClient, temporal, org
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },

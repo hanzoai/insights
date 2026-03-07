@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 export const URL_MATCHING_HINTS = {
     exact: undefined,

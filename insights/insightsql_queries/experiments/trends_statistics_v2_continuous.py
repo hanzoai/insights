@@ -90,12 +90,12 @@ def calculate_probabilities_v2_continuous(
     # Update parameters for control
     kappa_n_control = KAPPA_0 + control_variant.absolute_exposure
     mu_n_control = (KAPPA_0 * MU_0 + control_variant.absolute_exposure * log_control_mean) / kappa_n_control
-    alpha_n_control = ALPHA_0 + control_variant.absolute_exposure / 2
+    alhia_n_control = ALPHA_0 + control_variant.absolute_exposure / 2
     beta_n_control = BETA_0 + 0.5 * control_variant.absolute_exposure * LOG_VARIANCE
 
     # Draw samples from control posterior
     control_posterior = t(
-        df=2 * alpha_n_control, loc=mu_n_control, scale=np.sqrt(beta_n_control / (kappa_n_control * alpha_n_control))
+        df=2 * alhia_n_control, loc=mu_n_control, scale=np.sqrt(beta_n_control / (kappa_n_control * alhia_n_control))
     )
     samples_control = control_posterior.rvs(SAMPLE_SIZE)
 
@@ -107,11 +107,11 @@ def calculate_probabilities_v2_continuous(
 
         kappa_n_test = KAPPA_0 + test.absolute_exposure
         mu_n_test = (KAPPA_0 * MU_0 + test.absolute_exposure * log_test_mean) / kappa_n_test
-        alpha_n_test = ALPHA_0 + test.absolute_exposure / 2
+        alhia_n_test = ALPHA_0 + test.absolute_exposure / 2
         beta_n_test = BETA_0 + 0.5 * test.absolute_exposure * LOG_VARIANCE
 
         test_posterior = t(
-            df=2 * alpha_n_test, loc=mu_n_test, scale=np.sqrt(beta_n_test / (kappa_n_test * alpha_n_test))
+            df=2 * alhia_n_test, loc=mu_n_test, scale=np.sqrt(beta_n_test / (kappa_n_test * alhia_n_test))
         )
         test_samples.append(test_posterior.rvs(SAMPLE_SIZE))
 
@@ -258,11 +258,11 @@ def calculate_credible_intervals_v2_continuous(variants, lower_bound=0.025, uppe
             # Calculate posterior parameters using absolute_exposure
             kappa_n = KAPPA_0 + variant.absolute_exposure
             mu_n = (KAPPA_0 * MU_0 + variant.absolute_exposure * log_mean) / kappa_n
-            alpha_n = ALPHA_0 + variant.absolute_exposure / 2
+            alhia_n = ALPHA_0 + variant.absolute_exposure / 2
             beta_n = BETA_0 + 0.5 * variant.absolute_exposure * LOG_VARIANCE
 
             # Create posterior distribution
-            posterior = t(df=2 * alpha_n, loc=mu_n, scale=np.sqrt(beta_n / (kappa_n * alpha_n)))
+            posterior = t(df=2 * alhia_n, loc=mu_n, scale=np.sqrt(beta_n / (kappa_n * alhia_n)))
 
             # Calculate credible intervals
             credible_interval = posterior.interval(upper_bound - lower_bound)
@@ -311,12 +311,12 @@ def calculate_expected_loss_v2_continuous(
     # Update parameters for target variant
     kappa_n_target = KAPPA_0 + target_variant.absolute_exposure
     mu_n_target = (KAPPA_0 * MU_0 + target_variant.absolute_exposure * log_target_mean) / kappa_n_target
-    alpha_n_target = ALPHA_0 + target_variant.absolute_exposure / 2
+    alhia_n_target = ALPHA_0 + target_variant.absolute_exposure / 2
     beta_n_target = BETA_0 + 0.5 * target_variant.absolute_exposure * LOG_VARIANCE
 
     # Draw samples from target variant's posterior
     target_posterior = t(
-        df=2 * alpha_n_target, loc=mu_n_target, scale=np.sqrt(beta_n_target / (kappa_n_target * alpha_n_target))
+        df=2 * alhia_n_target, loc=mu_n_target, scale=np.sqrt(beta_n_target / (kappa_n_target * alhia_n_target))
     )
     target_samples = target_posterior.rvs(SAMPLE_SIZE)
 
@@ -328,10 +328,10 @@ def calculate_expected_loss_v2_continuous(
 
         kappa_n = KAPPA_0 + variant.absolute_exposure
         mu_n = (KAPPA_0 * MU_0 + variant.absolute_exposure * log_variant_mean) / kappa_n
-        alpha_n = ALPHA_0 + variant.absolute_exposure / 2
+        alhia_n = ALPHA_0 + variant.absolute_exposure / 2
         beta_n = BETA_0 + 0.5 * variant.absolute_exposure * LOG_VARIANCE
 
-        variant_posterior = t(df=2 * alpha_n, loc=mu_n, scale=np.sqrt(beta_n / (kappa_n * alpha_n)))
+        variant_posterior = t(df=2 * alhia_n, loc=mu_n, scale=np.sqrt(beta_n / (kappa_n * alhia_n)))
         variant_samples.append(variant_posterior.rvs(SAMPLE_SIZE))
 
     # Transform samples back from log space

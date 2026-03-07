@@ -7,7 +7,7 @@ from pprint import pprint
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-import posthoganalytics
+import hanzoanalytics
 
 from insights.utils import get_helm_info_env, get_machine_id
 
@@ -26,13 +26,13 @@ class Command(BaseCommand):
         pprint(report)
 
         if not options["dry_run"]:
-            posthoganalytics.api_key = "sTMFPsFhdP1Ssg"
-            disabled = posthoganalytics.disabled
-            posthoganalytics.disabled = False
-            posthoganalytics.capture(
+            hanzoanalytics.api_key = "sTMFPsFhdP1Ssg"
+            disabled = hanzoanalytics.disabled
+            hanzoanalytics.disabled = False
+            hanzoanalytics.capture(
                 distinct_id=get_machine_id(),
                 event="helm_install",
                 properties=report,
                 groups={"instance": settings.SITE_URL},
             )
-            posthoganalytics.disabled = disabled
+            hanzoanalytics.disabled = disabled

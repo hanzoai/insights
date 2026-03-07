@@ -48,7 +48,7 @@ from insights.utils import convert_property_value, flatten, generate_short_id, r
 tracer = trace.get_tracer(__name__)
 
 EVENT_VALUES_COUNTER = Counter(
-    "posthog_event_values_request",
+    "insights_event_values_request",
     "Requests to the events/values endpoint",
     labelnames=["has_event_name", "auth"],
 )
@@ -229,7 +229,7 @@ class EventViewSet(
                 OpenApiTypes.INT,
                 description=(
                     "Allows to skip first offset rows. Will fail for value larger than 100000. "
-                    "Read about proper way of paginating: https://posthog.com/docs/api/queries#5-use-timestamp-based-pagination-instead-of-offset"
+                    "Read about proper way of paginating: https://hanzo.ai/docs/api/queries#5-use-timestamp-based-pagination-instead-of-offset"
                 ),
                 deprecated=True,
             ),
@@ -369,12 +369,12 @@ class EventViewSet(
                 next_url = self._build_next_url(request, query_result[limit - 1]["timestamp"], order_by)
             headers = None
             if settings.PATCH_EVENT_LIST_MAX_OFFSET > 0:
-                headers = {"X-Insights-Warn": "https://posthog.com/docs/api/events"}
+                headers = {"X-Insights-Warn": "https://hanzo.ai/docs/api/events"}
             elif deprecate_offset and offset:
                 headers = {
                     "X-Insights-Warn": (
                         "offset is deprecated. "
-                        "Use: https://posthog.com/docs/api/queries#5-use-timestamp-based-pagination-instead-of-offset"
+                        "Use: https://hanzo.ai/docs/api/queries#5-use-timestamp-based-pagination-instead-of-offset"
                     )
                 }
             return response.Response({"next": next_url, "results": result}, headers=headers)

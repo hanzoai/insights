@@ -61,7 +61,7 @@ class Backfill:
                 # nosemgrep: python.django.security.audit.raw-query.avoid-raw-sql (parameterized, admin-only management command)
                 Team.objects.raw(
                     """
-                    UPDATE posthog_team
+                    UPDATE insights_team
                     SET extra_settings = COALESCE(extra_settings, '{}'::jsonb) || '{"distinct_id_overrides_backfilled": true}'::jsonb
                     WHERE id = %s
                     RETURNING *

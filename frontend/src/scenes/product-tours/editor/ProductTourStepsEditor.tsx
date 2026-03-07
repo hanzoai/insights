@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronDown, IconCursorClick, IconEye, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonModal } from '@posthog/lemon-ui'
+import { IconChevronDown, IconCursorClick, IconEye, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonModal } from '@hanzo/lemon-ui'
 
 import { PositionSelector } from 'scenes/surveys/survey-appearance/SurveyAppearancePositionSelector'
 

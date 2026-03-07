@@ -13,28 +13,28 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install [`posthog-js`](https://github.com/posthog/posthog-js) and `@posthog/react` using your package manager:</Markdown>
+                    <Markdown>Install [`insights-js`](https://github.com/insights/insights-js) and `@hanzo/react` using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js @posthog/react
+                                    npm install insights-js @hanzo/react
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js @posthog/react
+                                    yarn add insights-js @hanzo/react
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js @posthog/react
+                                    pnpm add insights-js @hanzo/react
                                 `,
                             },
                         ]}
@@ -57,8 +57,8 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'bash',
                                 file: '.env',
                                 code: dedent`
-                                    VITE_PUBLIC_POSTHOG_KEY=<ph_project_api_key>
-                                    VITE_PUBLIC_POSTHOG_HOST=<ph_client_api_host>
+                                    VITE_PUBLIC_INSIGHTS_KEY=<ph_project_api_key>
+                                    VITE_PUBLIC_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
                         ]}
@@ -72,7 +72,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
+                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
                         `main.tsx` if you're using Vite):
                     </Markdown>
                     <CodeBlock
@@ -85,18 +85,18 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { PostHogProvider } from '@posthog/react'
+                                    import { InsightsProvider } from '@hanzo/react'
 
                                     const options = {
-                                      api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+                                      api_host: import.meta.env.VITE_PUBLIC_INSIGHTS_HOST,
                                       defaults: '2026-01-30',
                                     } as const
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_INSIGHTS_KEY} options={options}>
                                           <App />
-                                        </PostHogProvider>
+                                        </InsightsProvider>
                                       </StrictMode>
                                     )
                                 `,
@@ -106,7 +106,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
                             The `defaults` option automatically configures Insights with recommended settings for new
-                            projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for
+                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for
                             details.
                         </Markdown>
                     </CalloutBox>
@@ -120,7 +120,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                 <>
                     <Markdown>
                         Use the `useInsights` hook to access the Insights instance in any component wrapped by
-                        `PostHogProvider`:
+                        `InsightsProvider`:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -128,13 +128,13 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'tsx',
                                 file: 'MyComponent.tsx',
                                 code: dedent`
-                                    import { useInsights } from '@posthog/react'
+                                    import { useInsights } from '@hanzo/react'
 
                                     function MyComponent() {
-                                        const posthog = useInsights()
+                                        const insights = useInsights()
 
                                         function handleClick() {
-                                            posthog.capture('button_clicked', { button_name: 'signup' })
+                                            insights.capture('button_clicked', { button_name: 'signup' })
                                         }
 
                                         return <button onClick={handleClick}>Sign up</button>
@@ -143,17 +143,17 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             },
                         ]}
                     />
-                    <Markdown>You can also import `posthog` directly for non-React code or utility functions:</Markdown>
+                    <Markdown>You can also import `insights` directly for non-React code or utility functions:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'tsx',
                                 file: 'utils/analytics.ts',
                                 code: dedent`
-                                    import posthog from 'posthog-js'
+                                    import insights from '@hanzo/insights'
 
                                     export function trackPurchase(amount: number) {
-                                        posthog.capture('purchase_completed', { amount })
+                                        insights.capture('purchase_completed', { amount })
                                     }
                                 `,
                             },

@@ -4,7 +4,7 @@
     "calculation_trigger": null,
     "error": null,
     "hasMore": false,
-    "hogql": null,
+    "insightsql": null,
     "is_cached": false,
     "last_refresh": "2025-04-18T15:08:34.498483Z",
     "modifiers": {
@@ -76,7 +76,7 @@
                 "custom_name": "Gross revenue",
                 "math": "sum",
                 "math_property": "amount",
-                "math_hogql": null,
+                "math_insightsql": null,
                 "math_group_type_index": null,
                 "properties": {}
             }

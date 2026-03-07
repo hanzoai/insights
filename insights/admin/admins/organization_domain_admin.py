@@ -39,7 +39,7 @@ class OrganizationDomainAdmin(admin.ModelAdmin):
     def organization_link(self, obj):
         """Link to the organization admin page"""
         if obj.organization:
-            url = reverse("admin:posthog_organization_change", args=[obj.organization.pk])
+            url = reverse("admin:insights_organization_change", args=[obj.organization.pk])
             return format_html('<a href="{}">{}</a>', url, obj.organization.name)
         return "-"
 

@@ -43,7 +43,7 @@ class BreakpointHitsRequestSerializer(serializers.Serializer):
 
 class ActiveBreakpointsRequestSerializer(serializers.Serializer):
     repository = serializers.CharField(
-        required=False, help_text="Filter breakpoints for specific repository (e.g., 'Insights/posthog')"
+        required=False, help_text="Filter breakpoints for specific repository (e.g., 'Insights/insights')"
     )
     filename = serializers.CharField(required=False, help_text="Filter breakpoints for specific file")
     enabled = serializers.BooleanField(required=False, default=True, help_text="Only return enabled breakpoints")
@@ -75,7 +75,7 @@ class ActiveBreakpointSerializer(serializers.Serializer):
 
     id = serializers.UUIDField(help_text="Unique identifier for the breakpoint")
     repository = serializers.CharField(
-        required=False, allow_null=True, help_text="Repository identifier (e.g., 'Insights/posthog')"
+        required=False, allow_null=True, help_text="Repository identifier (e.g., 'Insights/insights')"
     )
     filename = serializers.CharField(help_text="File path where the breakpoint is set")
     line_number = serializers.IntegerField(help_text="Line number of the breakpoint")
@@ -199,14 +199,14 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
             "This endpoint allows external client applications (like Python scripts, Node.js apps, etc.) "
             "to fetch the list of active breakpoints so they can instrument their code accordingly. "
             "\n\nAuthentication: Requires a Project API Key in the Authorization header: "
-            "`Authorization: Bearer phs_<your-project-api-key>`. "
+            "`Authorization: Bearer his_<your-project-api-key>`. "
             "You can find your Project API Key in Insights at: Settings → Project → Project API Key"
         ),
         parameters=[
             OpenApiParameter(
                 "repository",
                 OpenApiTypes.STR,
-                description="Filter breakpoints for a specific repository (e.g., 'Insights/posthog')",
+                description="Filter breakpoints for a specific repository (e.g., 'Insights/insights')",
                 required=False,
             ),
             OpenApiParameter(
@@ -247,12 +247,12 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         to fetch the list of active breakpoints so they can instrument their code accordingly.
 
         Authentication: Requires a Project API Key in the Authorization header:
-        Authorization: Bearer phs_<your-project-api-key>
+        Authorization: Bearer his_<your-project-api-key>
 
         You can find your Project API Key in Insights at: Settings → Project → Project API Key
 
         Query parameters:
-        - repository (optional): Filter breakpoints for specific repository (e.g., 'Insights/posthog')
+        - repository (optional): Filter breakpoints for specific repository (e.g., 'Insights/insights')
         - filename (optional): Filter breakpoints for specific file
         - enabled (default: true): Only return enabled breakpoints
 
@@ -261,7 +261,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
             "results": [
                 {
                     "id": "uuid",
-                    "repository": "PostHog/posthog",
+                    "repository": "Hanzo Insights/insights",
                     "filename": "capture_event.py",
                     "line_number": 123,
                     "enabled": true,

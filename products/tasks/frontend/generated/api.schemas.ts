@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - generated
@@ -431,10 +431,10 @@ export interface ScanEvidenceApi {
     detectedFilesCount: number
     /** Number of distinct event names found */
     eventNameCount: number
-    /** Whether posthog.init() was found in scanned files */
-    foundPosthogInit: boolean
-    /** Whether posthog.capture() was found in scanned files */
-    foundPosthogCapture: boolean
+    /** Whether insights.init() was found in scanned files */
+    foundInsightsInit: boolean
+    /** Whether insights.capture() was found in scanned files */
+    foundInsightsCapture: boolean
     /** Whether error tracking signals were found in scanned files */
     foundErrorSignal: boolean
 }

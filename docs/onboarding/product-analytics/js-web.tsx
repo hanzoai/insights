@@ -20,21 +20,21 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -54,9 +54,9 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'javascript',
                                 file: 'JavaScript',
                                 code: dedent`
-                                    import posthog from 'posthog-js'
+                                    import insights from '@hanzo/insights'
 
-                                    posthog.init('<ph_project_api_key>', {
+                                    insights.init('<ph_project_api_key>', {
                                         api_host: '<ph_client_api_host>',
                                         defaults: '2026-01-30'
                                     })

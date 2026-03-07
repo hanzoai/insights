@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconInfo, IconLock, IconTrash, IconWarning } from '@posthog/icons'
+import { IconCheckCircle, IconInfo, IconLock, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { RestrictionScope } from 'lib/components/RestrictedArea'

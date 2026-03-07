@@ -4,8 +4,8 @@ This document summarizes the automated checks executed after every DuckLake copy
 
 | Workflow      | Verification Activity                                                                                                  | Config File          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Data Modeling | `verify_ducklake_copy_activity` in `posthog/temporal/data_modeling/ducklake_copy_workflow.py`                          | `data_modeling.yaml` |
-| Data Imports  | `verify_data_imports_ducklake_copy_activity` in `posthog/temporal/data_imports/ducklake_copy_data_imports_workflow.py` | `data_imports.yaml`  |
+| Data Modeling | `verify_ducklake_copy_activity` in `insights/temporal/data_modeling/ducklake_copy_workflow.py`                          | `data_modeling.yaml` |
+| Data Imports  | `verify_data_imports_ducklake_copy_activity` in `insights/temporal/data_imports/ducklake_copy_data_imports_workflow.py` | `data_imports.yaml`  |
 
 ## How verification works
 
@@ -40,9 +40,9 @@ Additionally, YAML-defined checks (like `row_count_delta_vs_ducklake`) can be co
 ## Customizing checks
 
 - Add or update parameterized verifications by editing the appropriate YAML file:
-  - `posthog/ducklake/verification/data_modeling.yaml` for data modeling workflow
-  - `posthog/ducklake/verification/data_imports.yaml` for data imports workflow
-- Each YAML file feeds into `DuckLakeCopyVerificationQuery` objects (see `posthog/ducklake/verification/config.py`), which are passed to the verification activity. The workflow renders the SQL, binds any listed parameters, and records the single numeric value returned by the query.
+  - `insights/ducklake/verification/data_modeling.yaml` for data modeling workflow
+  - `insights/ducklake/verification/data_imports.yaml` for data imports workflow
+- Each YAML file feeds into `DuckLakeCopyVerificationQuery` objects (see `insights/ducklake/verification/config.py`), which are passed to the verification activity. The workflow renders the SQL, binds any listed parameters, and records the single numeric value returned by the query.
 - Each query may declare both an `expected` value and a `tolerance`. During runtime the workflow compares the observed value to `expected` and considers the query passing when `abs(observed - expected) <= tolerance`. If you omit either field, the runtime defaults to `0.0`, so set a tolerance whenever you expect minor drift.
 - Built-in checks (schema hash, partition counts) are intentionally hardcoded in the workflow files and always run after the YAML queries. They rely on metadata detected from each model, so changing their behavior still requires Python changes today.
 

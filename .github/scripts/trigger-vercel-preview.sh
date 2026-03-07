@@ -11,11 +11,11 @@ fi
 
 PR_BRANCH="$1"
 
-echo "📢 Triggering Vercel deployment for posthog.com@master (gatsby-source-git)"
+echo "📢 Triggering Vercel deployment for insights.com@master (gatsby-source-git)"
 echo "   Monorepo branch: $PR_BRANCH (per-deployment env)"
 
 PAYLOAD='{
-  "name": "posthog-com",
+  "name": "insights-com",
   "project": "'"$VERCEL_PROJECT_ID"'",
   "gitSource": {
     "type": "github",
@@ -24,7 +24,7 @@ PAYLOAD='{
   },
   "build": {
     "env": {
-      "GATSBY_POSTHOG_BRANCH": "'"$PR_BRANCH"'"
+      "GATSBY_INSIGHTS_BRANCH": "'"$PR_BRANCH"'"
     }
   }
 }'

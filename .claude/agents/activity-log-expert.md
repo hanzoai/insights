@@ -13,7 +13,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **ActivityLog Model & Database Schema:**
 
-- ActivityLog model (`posthog/models/activity_logging/activity_log.py:112`) with UUID primary keys and optimized PostgreSQL indexing
+- ActivityLog model (`insights/models/activity_logging/activity_log.py:112`) with UUID primary keys and optimized PostgreSQL indexing
 - Database constraints: must have team_id OR organization_id (not both null)
 - Specialized indexes: team_id+scope+item_id, organization scoped indexes with conditions, GIN indexes for JSONB detail field
 - UUID-based primary key with created_at timestamp and activity detail JSON storage
@@ -29,15 +29,15 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **Signal-Based Capture System:**
 
-- ModelActivityMixin (`posthog/models/activity_logging/model_activity.py:27`) for automatic activity tracking
-- model_activity_signal (`posthog/models/signals.py:14`) for centralized signal handling
-- Thread-local storage via ActivityLoggingStorage (`posthog/models/activity_logging/utils.py:12`) for user context
+- ModelActivityMixin (`insights/models/activity_logging/model_activity.py:27`) for automatic activity tracking
+- model_activity_signal (`insights/models/signals.py:14`) for centralized signal handling
+- Thread-local storage via ActivityLoggingStorage (`insights/models/activity_logging/utils.py:12`) for user context
 - Transaction-aware logging with automatic commit hooks when ACTIVITY_LOG_TRANSACTION_MANAGEMENT=True
 - Support for impersonation tracking and system-generated activities
 
 **Change Detection & Field Management:**
 
-- Sophisticated changes_between function (`posthog/models/activity_logging/activity_log.py:499`) comparing model instances
+- Sophisticated changes_between function (`insights/models/activity_logging/activity_log.py:499`) comparing model instances
 - dict_changes_between function for dictionary comparisons with optional field exclusions
 - safely_get_field_value helper handling related objects and preventing lazy loading issues
 - Field exclusion hierarchies: common_field_exclusions, field_exclusions per scope, signal_exclusions
@@ -55,7 +55,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **Batch Operations & Performance:**
 
-- mute_selected_signals() context manager (`posthog/models/signals.py:34`) for bulk operations
+- mute_selected_signals() context manager (`insights/models/signals.py:34`) for bulk operations
 - @mutable_receiver decorator for signal handlers that can be temporarily disabled
 - Transaction management to batch multiple changes into single database operations
 - get_changed_fields_local function for efficient field comparison without database queries
@@ -91,7 +91,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **API Integration Patterns:**
 
-- ActivityLogViewSet (`posthog/api/advanced_activity_logs/viewset.py`) with team/org filtering and scope support
+- ActivityLogViewSet (`insights/api/advanced_activity_logs/viewset.py`) with team/org filtering and scope support
 - Two main endpoints: `/api/projects/@current/activity_log/` (basic) and `/api/projects/@current/advanced_activity_logs/` (full-featured)
 - ActivityLogSerializer with user details and unread status calculation
 - Advanced activity logs API with field discovery, export functionality (CSV and XLSX formats)
@@ -109,7 +109,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 
 **Testing Patterns:**
 
-- Comprehensive test suites in posthog/test/activity_logging/ for each model type
+- Comprehensive test suites in insights/test/activity_logging/ for each model type
 - changes_between function testing with various field change scenarios
 - Activity logging integration tests verifying signal flow and database persistence
 - Performance testing with mute_selected_signals for bulk operations
@@ -139,7 +139,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 - These events can trigger data pipeline destinations (Slack, email, webhooks, etc.)
 - Notifications are configured via HogFunctions with the `activity-log` sub-template
 - Organization-level notifications only sent if `receive_org_level_activity_logs` is enabled for the project
-- Celery task (`posthog/tasks/activity_log.py`) broadcasts org-scoped logs to subscribed teams
+- Celery task (`insights/tasks/activity_log.py`) broadcasts org-scoped logs to subscribed teams
 
 **Custom Activity Types & Extensions:**
 

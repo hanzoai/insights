@@ -11,7 +11,7 @@ import psycopg2
 import requests
 import tenacity
 import psycopg2.extras
-import posthoganalytics
+import hanzoanalytics
 from clickhouse_driver.errors import Error, ErrorCodes
 
 from insights.clickhouse.cluster import ClickhouseCluster, ExponentialBackoff, RetryPolicy, get_cluster
@@ -113,13 +113,13 @@ class InsightsAnalyticsResource(dagster.ConfigurableResource):
 
         context.log.info("Initializing InsightsAnalyticsResource")
 
-        if not (self.personal_api_key or "").strip() and not (posthoganalytics.personal_api_key or "").strip():
+        if not (self.personal_api_key or "").strip() and not (hanzoanalytics.personal_api_key or "").strip():
             context.log.warning(
                 "Personal API key not set on the InsightsAnalyticsResource. Local feature flag evaluation will not work."
             )
 
         asyncio.run(initialize_self_capture_api_token())
-        posthoganalytics.personal_api_key = self.personal_api_key
+        hanzoanalytics.personal_api_key = self.personal_api_key
 
         return None
 

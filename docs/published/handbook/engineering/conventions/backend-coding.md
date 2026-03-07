@@ -7,7 +7,7 @@ sidebar: Handbook
 
 As a general rule, we should have logs for every expected and unexpected actions of the application, using the appropriate _log level_.
 
-We should also be logging these exceptions to Posthog. Python exceptions should almost always be captured automatically without extra instrumentation, but custom ones (such as failed requests to external services, query errors, or Celery task failures) can be tracked using `capture_exception()`.
+We should also be logging these exceptions to Insights. Python exceptions should almost always be captured automatically without extra instrumentation, but custom ones (such as failed requests to external services, query errors, or Celery task failures) can be tracked using `capture_exception()`.
 
 ##### Levels
 
@@ -36,21 +36,21 @@ logger.debug("event_sent_to_kafka", event_uuid=str(event_uuid), kafka_topic=topi
 will produce:
 
 ```console
-2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [posthog.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
+2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [insights.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
 ```
 
 As you can see above, the log contains all the information needed to understand the app behavior.
 
 ##### Enabling INFO logs for your module
 
-By default, most `posthog.*` loggers only output WARNING and above. This keeps production logs clean but means your `logger.info()` calls won't appear.
+By default, most `insights.*` loggers only output WARNING and above. This keeps production logs clean but means your `logger.info()` calls won't appear.
 
-To enable INFO logging for a specific module, add it to `posthog/settings/logs.py`:
+To enable INFO logging for a specific module, add it to `insights/settings/logs.py`:
 
 ```python
 "loggers": {
     # ... existing loggers ...
-    "posthog.tasks.my_module": {"level": "INFO", "handlers": ["console"], "propagate": False},
+    "insights.tasks.my_module": {"level": "INFO", "handlers": ["console"], "propagate": False},
 }
 ```
 
@@ -100,26 +100,26 @@ A good test should:
 
 ### Querying ClickHouse
 
-**Always use HogQL instead of raw ClickHouse queries in product code.**
+**Always use InsightsQL instead of raw ClickHouse queries in product code.**
 
 Querying ClickHouse directly from product code is a bad idea for several reasons:
 
-1. **Data safety**: HogQL automatically scopes queries to the current team, preventing accidental cross-team data access. Raw queries that fetch data for multiple teams and separate it in code are risky—even if correct now, future changes could introduce data breaches.
+1. **Data safety**: InsightsQL automatically scopes queries to the current team, preventing accidental cross-team data access. Raw queries that fetch data for multiple teams and separate it in code are risky—even if correct now, future changes could introduce data breaches.
 
-2. **Consistency**: HogQL handles property access, person mapping, and other Insights-specific concerns correctly and consistently.
+2. **Consistency**: InsightsQL handles property access, person mapping, and other Insights-specific concerns correctly and consistently.
 
-3. **Query attribution**: If you must query ClickHouse directly for a valid reason, ensure you [tag your queries appropriately](https://posthog.com/handbook/engineering/clickhouse/query-attribution) with the right product tag and ClickHouse user.
+3. **Query attribution**: If you must query ClickHouse directly for a valid reason, ensure you [tag your queries appropriately](https://hanzo.ai/handbook/engineering/clickhouse/query-attribution) with the right product tag and ClickHouse user.
 
 The only case where raw ClickHouse queries might be justified is cross-team queries, but even then consider alternatives:
 
 - Can you detect what you need via PostgreSQL instead? (e.g., checking feature usage via team settings)
-- Can you use one simple ClickHouse query to get team IDs, then run HogQL queries per-team for the actual data?
+- Can you use one simple ClickHouse query to get team IDs, then run InsightsQL queries per-team for the actual data?
 - Can you leverage existing cross-team infrastructure like usage reports?
 
 ### To ee or not to ee?
 
-We default to open but when adding a new feature we should consider if it should be MIT licensed or Enterprise edition licensed. Everything in the `ee` folder is covered by [a different license](https://github.com/PostHog/posthog/blob/master/ee/LICENSE). It's easy to move things from `ee` to open, but not the other way.
+We default to open but when adding a new feature we should consider if it should be MIT licensed or Enterprise edition licensed. Everything in the `ee` folder is covered by [a different license](https://github.com/Hanzo Insights/insights/blob/master/ee/LICENSE). It's easy to move things from `ee` to open, but not the other way.
 
-All the open source code is copied to [the posthog-foss repo](https://github.com/posthog/posthog-foss) with the `ee` code stripped out. You need to consider whether your code will work if imports to `ee` are unavailable.
+All the open source code is copied to [the insights-foss repo](https://github.com/insights/insights-foss) with the `ee` code stripped out. You need to consider whether your code will work if imports to `ee` are unavailable.
 
-> Sync note: This file is also copied to posthog/posthog/.claude/commands/conventions.md for Claude Code. When updating this file, please also update the copy there.
+> Sync note: This file is also copied to insights/insights/.claude/commands/conventions.md for Claude Code. When updating this file, please also update the copy there.

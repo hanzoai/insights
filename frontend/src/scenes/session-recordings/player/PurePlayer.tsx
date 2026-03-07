@@ -2,10 +2,10 @@ import './SessionRecordingPlayer.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { BuilderHog2 } from 'lib/components/mascots'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
@@ -113,7 +113,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
     useEffect(
         () => {
             if (isRecentAndInvalid) {
-                posthog.capture('session loaded recent and invalid', {
+                insights.capture('session loaded recent and invalid', {
                     viewedSessionRecording: sessionRecordingId,
                     recordingStartTime: sessionPlayerData?.start,
                 })
@@ -126,7 +126,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
     // Track if the recording has ended to be able to reliably get it from the BE and stop the recording
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            ;(window as any).__POSTHOG_RECORDING_ENDED__ = endReached
+            ;(window as any).__INSIGHTS_RECORDING_ENDED__ = endReached
         }
     }, [endReached])
 

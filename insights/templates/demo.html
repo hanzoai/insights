@@ -36,11 +36,11 @@
 
 <body>
     <script nonce="{{ request.csp_nonce }}">
-        posthog.init('{{api_token}}', {
+        insights.init('{{api_token}}', {
             api_host: window.location.origin,
-            loaded: (posthog) => {
-                posthog.onFeatureFlags(() => {
-                    if (posthog.isFeatureEnabled('sign-up-cta') && document.getElementById('sign-up-cta')) {
+            loaded: (insights) => {
+                insights.onFeatureFlags(() => {
+                    if (insights.isFeatureEnabled('sign-up-cta') && document.getElementById('sign-up-cta')) {
                         document.getElementById('sign-up-cta').innerText = 'Get started now'
                     }
                 })
@@ -131,7 +131,7 @@
                 </div>
             </aside>
             <aside>
-                <img src='https://posthog-static-files.s3.us-east-2.amazonaws.com/Product-Assets/Big_buck_bunny_poster_big.jpg'
+                <img src='https://insights-static-files.s3.us-east-2.amazonaws.com/Product-Assets/Big_buck_bunny_poster_big.jpg'
                     class='card-img-top' />
                 <div class='card-body'><br />
                     <h5 class='card-title'>Big Buck Bunny (2008)</h5>
@@ -153,7 +153,7 @@
                 <div>
                     <video id="my-video" class="video-js" controls preload="auto" data-setup="{}">
                         <source
-                            src="https://posthog-static-files.s3.us-east-2.amazonaws.com/Product-Assets/BigBuckBunny.mp4"
+                            src="https://insights-static-files.s3.us-east-2.amazonaws.com/Product-Assets/BigBuckBunny.mp4"
                             type="video/mp4" />
                         <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a
                             web
@@ -210,7 +210,7 @@
 
         if (document.getElementById('my-video')) {
             document.getElementById('my-video').addEventListener('play', () => {
-                posthog.capture('played_movie', { title: "Big Buck Bunny" })
+                insights.capture('played_movie', { title: "Big Buck Bunny" })
             })
         }
     </script>

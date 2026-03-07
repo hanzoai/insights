@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonTabs, Link } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonTabs, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
@@ -136,7 +136,7 @@ export function RevenueAnalyticsSettings(): JSX.Element {
 
                                     <span className="text-xs text-muted-alt">
                                         Only Stripe is supported currently. <br />
-                                        <Link to="https://github.com/PostHog/posthog/issues/new?assignees=&labels=enhancement,feature/revenue-analytics%2C+feature&projects=&template=feature_request.yml&title=New%20revenue%20source:%20%3Cinsert%20source%3E">
+                                        <Link to="https://github.com/hanzoai/insights/issues/new?assignees=&labels=enhancement,feature/revenue-analytics%2C+feature&projects=&template=feature_request.yml&title=New%20revenue%20source:%20%3Cinsert%20source%3E">
                                             Request more revenue integrations.
                                         </Link>
                                     </span>

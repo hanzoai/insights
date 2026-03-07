@@ -10,7 +10,7 @@ ALLOW_DENORMALIZED_PROPS_IN_LISTING = get_from_env("ALLOW_DENORMALIZED_PROPS_IN_
 
 REPLAY_MESSAGE_TOO_LARGE_SAMPLE_RATE = get_from_env("REPLAY_MESSAGE_TOO_LARGE_SAMPLE_RATE", 0, type_cast=float)
 REPLAY_MESSAGE_TOO_LARGE_SAMPLE_BUCKET = get_from_env(
-    "REPLAY_MESSAGE_TOO_LARGE_SAMPLE_BUCKET", "posthog-cloud-prod-us-east-1-k8s-replay-samples"
+    "REPLAY_MESSAGE_TOO_LARGE_SAMPLE_BUCKET", "insights-cloud-prod-us-east-1-k8s-replay-samples"
 )
 
 # NB if you want to set a compression you need to install it... the producer compresses not kafka

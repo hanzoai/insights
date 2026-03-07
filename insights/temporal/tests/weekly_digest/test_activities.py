@@ -424,12 +424,12 @@ async def test_generate_filter_lookup(mock_redis, common_input, digest):
     # Mock playlist count data
     mock_django_redis = MockRedis()
     await mock_django_redis.setex(
-        "posthog:1:playlist:abc123:count",
+        "insights:1:playlist:abc123:count",
         3600,
         '{"session_ids": ["session1", "session2"], "has_more": false, "previous_ids": null, "refreshed_at": "2024-01-01T00:00:00Z", "error_count": 0, "errored_at": null}',
     )
     await mock_django_redis.setex(
-        "posthog:1:playlist:def456:count",
+        "insights:1:playlist:def456:count",
         3600,
         '{"session_ids": ["session3"], "has_more": true, "previous_ids": null, "refreshed_at": "2024-01-01T00:00:00Z", "error_count": 0, "errored_at": null}',
     )

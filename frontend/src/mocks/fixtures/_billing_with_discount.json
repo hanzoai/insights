@@ -140,7 +140,7 @@
             "note": null
         },
         {
-            "key": "graphs_trends",
+            "key": "grahis_trends",
             "name": "Graphs & trends",
             "description": "Plot any number of events or actions over time.",
             "unit": null,
@@ -341,8 +341,8 @@
             "price_description": null,
             "usage_key": "events",
             "icon_key": "IconGraph",
-            "image_url": "https://posthog.com/images/product/product-icons/product-analytics.svg",
-            "docs_url": "https://posthog.com/docs/product-analytics",
+            "image_url": "https://hanzo.ai/images/product/product-icons/product-analytics.svg",
+            "docs_url": "https://hanzo.ai/docs/product-analytics",
             "subscribed": true,
             "plans": [
                 {
@@ -350,8 +350,8 @@
                     "product_key": "product_analytics",
                     "name": "Product analytics + data stack",
                     "description": "Trends, funnels, path analysis, CDP + more.",
-                    "image_url": "https://posthog.com/images/product/product-icons/product-analytics.svg",
-                    "docs_url": "https://posthog.com/docs/product-analytics",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/product-analytics.svg",
+                    "docs_url": "https://hanzo.ai/docs/product-analytics",
                     "note": null,
                     "unit": "event",
                     "free_allocation": 1000000,
@@ -373,7 +373,7 @@
                             "note": null
                         },
                         {
-                            "key": "graphs_trends",
+                            "key": "grahis_trends",
                             "name": "Graphs & trends",
                             "description": "Plot any number of events or actions over time.",
                             "unit": null,
@@ -398,8 +398,8 @@
                     "product_key": "product_analytics",
                     "name": "Product analytics + data stack",
                     "description": "Trends, funnels, path analysis, CDP + more.",
-                    "image_url": "https://posthog.com/images/product/product-icons/product-analytics.svg",
-                    "docs_url": "https://posthog.com/docs/product-analytics",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/product-analytics.svg",
+                    "docs_url": "https://hanzo.ai/docs/product-analytics",
                     "note": null,
                     "unit": "event",
                     "free_allocation": null,
@@ -421,7 +421,7 @@
                             "note": null
                         },
                         {
-                            "key": "graphs_trends",
+                            "key": "grahis_trends",
                             "name": "Graphs & trends",
                             "description": "Plot any number of events or actions over time.",
                             "unit": null,
@@ -628,9 +628,9 @@
                     "name": "Group analytics",
                     "description": "Understand how groups of users behave.",
                     "price_description": null,
-                    "image_url": "https://posthog.com/images/product/product-icons/group-analytics.svg",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/group-analytics.svg",
                     "icon_key": "IconPeople",
-                    "docs_url": "https://posthog.com/docs/product-analytics/group-analytics",
+                    "docs_url": "https://hanzo.ai/docs/product-analytics/group-analytics",
                     "type": "group_analytics",
                     "tiers": [],
                     "tiered": false,
@@ -655,10 +655,10 @@
             "description": "Session replay helps you diagnose issues and understand user behavior in your product or website.",
             "price_description": null,
             "usage_key": "recordings",
-            "image_url": "https://posthog.com/images/products/session-replay/session-replay.png",
-            "screenshot_url": "https://posthog.com/images/products/session-replay/screenshot-session-replay.png",
+            "image_url": "https://hanzo.ai/images/products/session-replay/session-replay.png",
+            "screenshot_url": "https://hanzo.ai/images/products/session-replay/screenshot-session-replay.png",
             "icon_key": "IconRewindPlay",
-            "docs_url": "https://posthog.com/docs/session-replay",
+            "docs_url": "https://hanzo.ai/docs/session-replay",
             "subscribed": true,
             "plans": [
                 {
@@ -666,8 +666,8 @@
                     "product_key": "session_replay",
                     "name": "Free",
                     "description": "Session replay helps you diagnose issues and understand user behavior in your product or website.",
-                    "image_url": "https://posthog.com/images/products/session-replay/session-replay.png",
-                    "docs_url": "https://posthog.com/docs/session-replay",
+                    "image_url": "https://hanzo.ai/images/products/session-replay/session-replay.png",
+                    "docs_url": "https://hanzo.ai/docs/session-replay",
                     "note": null,
                     "unit": "recording",
                     "flat_rate": false,
@@ -789,8 +789,8 @@
                     "product_key": "session_replay",
                     "name": "Paid",
                     "description": "Session replay helps you diagnose issues and understand user behavior in your product or website.",
-                    "image_url": "https://posthog.com/images/products/session-replay/session-replay.png",
-                    "docs_url": "https://posthog.com/docs/session-replay",
+                    "image_url": "https://hanzo.ai/images/products/session-replay/session-replay.png",
+                    "docs_url": "https://hanzo.ai/docs/session-replay",
                     "note": null,
                     "unit": "recording",
                     "flat_rate": false,
@@ -1048,7 +1048,7 @@
                     "price_description": null,
                     "image_url": "None",
                     "icon_key": "IconRewindPlay",
-                    "docs_url": "https://posthog.com/docs/session-replay",
+                    "docs_url": "https://hanzo.ai/docs/session-replay",
                     "type": "mobile_replay",
                     "tiers": [
                         {
@@ -1122,7 +1122,7 @@
                             "name": "Addon",
                             "description": "Record and replay mobile app sessions.",
                             "image_url": null,
-                            "docs_url": "https://posthog.com/docs/session-replay",
+                            "docs_url": "https://hanzo.ai/docs/session-replay",
                             "note": null,
                             "unit": "mobile recording",
                             "flat_rate": false,
@@ -1152,7 +1152,7 @@
                             "name": "Addon",
                             "description": "Record and replay mobile app sessions.",
                             "image_url": null,
-                            "docs_url": "https://posthog.com/docs/session-replay",
+                            "docs_url": "https://hanzo.ai/docs/session-replay",
                             "note": null,
                             "unit": "mobile recording",
                             "flat_rate": false,
@@ -1269,8 +1269,8 @@
                     "name": "Console logs",
                     "description": "Debug issues faster by browsing the user's console.",
                     "images": {
-                        "light": "https://posthog.com/images/products/session-replay/console.png",
-                        "dark": "https://posthog.com/images/products/session-replay/console-dark.png"
+                        "light": "https://hanzo.ai/images/products/session-replay/console.png",
+                        "dark": "https://hanzo.ai/images/products/session-replay/console-dark.png"
                     },
                     "icon_key": null,
                     "type": "primary"
@@ -1288,8 +1288,8 @@
                     "name": "Network monitor",
                     "description": "Analyze performance and network calls.",
                     "images": {
-                        "light": "https://posthog.com/images/products/session-replay/network.png",
-                        "dark": "https://posthog.com/images/products/session-replay/network-dark.png"
+                        "light": "https://hanzo.ai/images/products/session-replay/network.png",
+                        "dark": "https://hanzo.ai/images/products/session-replay/network-dark.png"
                     },
                     "icon_key": null,
                     "type": "primary"
@@ -1347,8 +1347,8 @@
                     "name": "Event timeline",
                     "description": "See a history of everything that happened in a user's session.",
                     "images": {
-                        "light": "https://posthog.com/images/products/session-replay/timeline.png",
-                        "dark": "https://posthog.com/images/products/session-replay/timeline-dark.png"
+                        "light": "https://hanzo.ai/images/products/session-replay/timeline.png",
+                        "dark": "https://hanzo.ai/images/products/session-replay/timeline-dark.png"
                     },
                     "icon_key": null,
                     "type": "primary"
@@ -1378,7 +1378,7 @@
                     "type": null
                 },
                 {
-                    "key": "works_with_posthog_js",
+                    "key": "works_with_insights_js",
                     "name": "Capture sessions without extra code",
                     "description": "Works with Insights.js",
                     "images": null,
@@ -1400,8 +1400,8 @@
             "description": "Roll out new features to a subset of users.",
             "price_description": null,
             "usage_key": null,
-            "image_url": "https://posthog.com/images/product/product-icons/feature-flags.svg",
-            "docs_url": "https://posthog.com/docs/feature-flags",
+            "image_url": "https://hanzo.ai/images/product/product-icons/feature-flags.svg",
+            "docs_url": "https://hanzo.ai/docs/feature-flags",
             "subscribed": null,
             "plans": [
                 {
@@ -1409,8 +1409,8 @@
                     "product_key": "feature_flags",
                     "name": "Feature flags",
                     "description": "Roll out new features to a subset of users.",
-                    "image_url": "https://posthog.com/images/product/product-icons/feature-flags.svg",
-                    "docs_url": "https://posthog.com/docs/feature-flags",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/feature-flags.svg",
+                    "docs_url": "https://hanzo.ai/docs/feature-flags",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1433,8 +1433,8 @@
                     "product_key": "feature_flags",
                     "name": "Feature flags",
                     "description": "Roll out new features to a subset of users.",
-                    "image_url": "https://posthog.com/images/product/product-icons/feature-flags.svg",
-                    "docs_url": "https://posthog.com/docs/feature-flags",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/feature-flags.svg",
+                    "docs_url": "https://hanzo.ai/docs/feature-flags",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1485,8 +1485,8 @@
             "description": "Test different versions of a feature to see which performs best.",
             "price_description": null,
             "usage_key": null,
-            "image_url": "https://posthog.com/images/product/product-icons/experimentation.svg",
-            "docs_url": "https://posthog.com/docs/experiments",
+            "image_url": "https://hanzo.ai/images/product/product-icons/experimentation.svg",
+            "docs_url": "https://hanzo.ai/docs/experiments",
             "subscribed": null,
             "plans": [
                 {
@@ -1494,8 +1494,8 @@
                     "product_key": "experimentation",
                     "name": "A/B testing",
                     "description": "Test different versions of a feature to see which performs best.",
-                    "image_url": "https://posthog.com/images/product/product-icons/experimentation.svg",
-                    "docs_url": "https://posthog.com/docs/experiments",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/experimentation.svg",
+                    "docs_url": "https://hanzo.ai/docs/experiments",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1538,8 +1538,8 @@
             "description": "Connect Insights to your favorite tools.",
             "price_description": null,
             "usage_key": null,
-            "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
-            "docs_url": "https://posthog.com/docs/apps",
+            "image_url": "https://hanzo.ai/images/product/product-icons/integrations.svg",
+            "docs_url": "https://hanzo.ai/docs/apps",
             "subscribed": null,
             "plans": [
                 {
@@ -1547,8 +1547,8 @@
                     "product_key": "integrations",
                     "name": "Integrations",
                     "description": "Connect Insights to your favorite tools.",
-                    "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
-                    "docs_url": "https://posthog.com/docs/apps",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/integrations.svg",
+                    "docs_url": "https://hanzo.ai/docs/apps",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1603,8 +1603,8 @@
                     "product_key": "integrations",
                     "name": "Integrations",
                     "description": "Connect Insights to your favorite tools.",
-                    "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
-                    "docs_url": "https://posthog.com/docs/apps",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/integrations.svg",
+                    "docs_url": "https://hanzo.ai/docs/apps",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1687,8 +1687,8 @@
             "description": "SSO, permission management, and support.",
             "price_description": null,
             "usage_key": null,
-            "image_url": "https://posthog.com/images/product/product-icons/platform.svg",
-            "docs_url": "https://posthog.com/docs",
+            "image_url": "https://hanzo.ai/images/product/product-icons/platform.svg",
+            "docs_url": "https://hanzo.ai/docs",
             "subscribed": null,
             "plans": [
                 {
@@ -1696,8 +1696,8 @@
                     "product_key": "platform_and_support",
                     "name": "Platform and support",
                     "description": "SSO, permission management, and support.",
-                    "image_url": "https://posthog.com/images/product/product-icons/platform.svg",
-                    "docs_url": "https://posthog.com/docs",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/platform.svg",
+                    "docs_url": "https://hanzo.ai/docs",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1784,8 +1784,8 @@
                     "product_key": "platform_and_support",
                     "name": "Platform and support",
                     "description": "SSO, permission management, and support.",
-                    "image_url": "https://posthog.com/images/product/product-icons/platform.svg",
-                    "docs_url": "https://posthog.com/docs",
+                    "image_url": "https://hanzo.ai/images/product/product-icons/platform.svg",
+                    "docs_url": "https://hanzo.ai/docs",
                     "note": null,
                     "unit": null,
                     "free_allocation": null,
@@ -1987,7 +1987,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "graphs_trends",
+                                    "key": "grahis_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,
@@ -2262,7 +2262,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "graphs_trends",
+                                    "key": "grahis_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,
@@ -2797,7 +2797,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "graphs_trends",
+                                    "key": "grahis_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,

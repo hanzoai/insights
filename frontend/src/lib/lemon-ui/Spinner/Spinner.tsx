@@ -1,10 +1,10 @@
 import './Spinner.scss'
 
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useRef } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
 
-import { IconPencil } from '@posthog/icons'
+import { IconPencil } from '@hanzo/icons'
 
 function useTimingCapture(captureTime: boolean): void {
     const mountTimeRef = useRef<number>(performance.now())
@@ -20,7 +20,7 @@ function useTimingCapture(captureTime: boolean): void {
             if (visibleTimeMs < 100) {
                 return // Don't bother capturing really short loads
             }
-            posthog.capture('spinner_unloaded', {
+            insights.capture('spinner_unloaded', {
                 visible_time_ms: visibleTimeMs,
             })
         }

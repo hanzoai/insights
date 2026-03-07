@@ -19,10 +19,10 @@ When you add a new "insights function" action node, the wiring is:
 
 Concrete end-to-end example:
 
-- Frontend action node uses `template_id: 'template-posthog-get-ticket'`:
+- Frontend action node uses `template_id: 'template-insights-get-ticket'`:
   - products/workflows/frontend/Workflows/hogflows/registry/actions/conversations.ts
-- Backend template defines `id: 'template-posthog-get-ticket'` and calls `postHogGetTicket(...)`:
-  - nodejs/src/cdp/templates/\_destinations/posthog_conversations/posthog-get-ticket.template.ts
+- Backend template defines `id: 'template-insights-get-ticket'` and calls `postHogGetTicket(...)`:
+  - nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-get-ticket.template.ts
 - Backend async function registers `postHogGetTicket`:
   - nodejs/src/cdp/async-functions/conversations.ts
 
@@ -52,7 +52,7 @@ Example implementation:
 Minimal skeleton:
 
 ```tsx
-import { IconBolt } from '@posthog/icons'
+import { IconBolt } from '@hanzo/icons'
 
 import { registerTriggerType } from 'products/workflows/frontend/Workflows/hogflows/registry/triggers/triggerTypeRegistry'
 
@@ -163,16 +163,16 @@ Create a new template under:
 
 Workflows-specific templates live under:
 
-- nodejs/src/cdp/templates/\_destinations/posthog_workflows/
+- nodejs/src/cdp/templates/\_destinations/insights_workflows/
 
 Conversations examples that are used by workflows live under:
 
-- nodejs/src/cdp/templates/\_destinations/posthog_conversations/
+- nodejs/src/cdp/templates/\_destinations/insights_conversations/
 
 Examples:
 
-- nodejs/src/cdp/templates/\_destinations/posthog_conversations/posthog-get-ticket.template.ts
-- nodejs/src/cdp/templates/\_destinations/posthog_conversations/posthog-update-ticket.template.ts
+- nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-get-ticket.template.ts
+- nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-update-ticket.template.ts
 
 Guidelines:
 
@@ -188,7 +188,7 @@ Templates are exported from a central list. Add an import and include it in `HOG
 
 Reference for how existing workflows templates are added:
 
-- Imports: `posthogGetTicketTemplate`, `posthogUpdateTicketTemplate`, `posthogSetHogflowVariableTemplate`
+- Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetHogflowVariableTemplate`
 - List: `HOG_FUNCTION_TEMPLATES_DESTINATIONS`
 
 ## Backend: adding an async function

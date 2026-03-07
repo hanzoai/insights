@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-conversations",
+    "name": "@hanzo/products-conversations",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -8,12 +8,12 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "posthog-js": "catalog:",
+        "insights-js": "catalog:",
         "ts-pattern": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
-        "@posthog/lemon-ui": "*",
+        "@hanzo/icons": "*",
+        "@hanzo/lemon-ui": "*",
         "@tiptap/core": "*",
         "@tiptap/extension-document": "*",
         "@tiptap/extension-image": "*",

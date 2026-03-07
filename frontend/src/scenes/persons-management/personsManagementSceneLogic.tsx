@@ -38,13 +38,13 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
                         key: 'persons',
                         url: urls.persons(),
                         label: 'Users',
-                        tooltipDocLink: 'https://posthog.com/docs/data/persons',
+                        tooltipDocLink: 'https://hanzo.ai/docs/data/persons',
                     },
                     {
                         key: 'cohorts',
                         url: urls.cohorts(),
                         label: 'Cohorts',
-                        tooltipDocLink: 'https://posthog.com/docs/data/cohorts',
+                        tooltipDocLink: 'https://hanzo.ai/docs/data/cohorts',
                     },
                     ...groupTabs,
                 ]

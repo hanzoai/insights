@@ -51,7 +51,7 @@ from common.scriptvm.python.stl import STL
 from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
 ALL_INSIGHTS_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
-MATCH_ANY_CHARACTER = "$$_POSTHOG_ANY_$$"
+MATCH_ANY_CHARACTER = "$$_INSIGHTS_ANY_$$"
 PROPERTY_DEFINITION_LIMIT = 220
 
 
@@ -660,7 +660,7 @@ def get_insightsql_autocomplete(
                 # Handle table names
                 with timings.measure("table_name"):
                     table_names = database.get_all_table_names()
-                    posthog_table_names = database.get_posthog_table_names()
+                    insights_table_names = database.get_insights_table_names()
 
                     if len(node.chain) == 1:
                         extend_responses(
@@ -669,7 +669,7 @@ def get_insightsql_autocomplete(
                             kind=AutocompleteCompletionItemKind.FOLDER,
                             details=["Table"] * len(table_names),
                         )
-                    elif node.chain[0] in posthog_table_names:
+                    elif node.chain[0] in insights_table_names:
                         pass
                     else:
                         node_chain_arr = [str(x) for x in node.chain if x != MATCH_ANY_CHARACTER]

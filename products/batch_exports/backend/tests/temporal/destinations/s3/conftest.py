@@ -58,7 +58,7 @@ def s3_key_prefix(request):
     try:
         return request.param
     except AttributeError:
-        return f"posthog-data-{str(uuid.uuid4())}"
+        return f"insights-data-{str(uuid.uuid4())}"
 
 
 @pytest.fixture

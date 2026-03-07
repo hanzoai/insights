@@ -7,9 +7,9 @@ from typing import Any
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from google.genai import types
-from posthoganalytics.ai.gemini import AsyncClient, genai
+from hanzoanalytics.ai.gemini import AsyncClient, genai
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
@@ -236,7 +236,7 @@ async def _summarize_description(
                 raise ValueError(f"Summary is {len(summary)} characters, must be under {threshold}")
             return dataclasses.replace(output, description=summary)
         except Exception as e:
-            posthoganalytics.capture_exception(
+            hanzoanalytics.capture_exception(
                 e,
                 properties={
                     "tag": "data_warehouse_signals_import",
@@ -353,7 +353,7 @@ async def _check_actionability(
             response_text = (response.text or "").strip().upper()
             return "NOT_ACTION" not in response_text, thoughts
         except Exception as e:
-            posthoganalytics.capture_exception(
+            hanzoanalytics.capture_exception(
                 e,
                 properties={
                     "tag": "data_warehouse_signals_import",

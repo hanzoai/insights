@@ -47,7 +47,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def _create_random_events(self) -> str:
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         _create_person(
-            properties={"sneaky_mail": "tim@posthog.com", "random_uuid": random_uuid},
+            properties={"sneaky_mail": "tim@hanzo.ai", "random_uuid": random_uuid},
             team=self.team,
             distinct_ids=["bla"],
             is_identified=True,
@@ -124,7 +124,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 pretty=False,
             )
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
-            self.assertEqual(response.results, [("tim@posthog.com",)])
+            self.assertEqual(response.results, [("tim@hanzo.ai",)])
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_person_distinct_ids(self):
@@ -173,7 +173,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
             self.assertEqual(response.results[0][2], "bla")
-            self.assertEqual(response.results[0][4], "tim@posthog.com")
+            self.assertEqual(response.results[0][4], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_pdi(self):
@@ -270,13 +270,13 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             )
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "bla")
-            self.assertEqual(response.results[0][1], "tim@posthog.com")
+            self.assertEqual(response.results[0][1], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_events_first_to_persons(self):
         with freeze_time("2020-01-10"):
             _create_person(
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
                 team=self.team,
                 distinct_ids=["person1"],
                 is_identified=True,
@@ -299,13 +299,13 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertTrue(len(response.results) >= 1)
             self.assertEqual(response.results[0][0], "pageview")
-            self.assertEqual(response.results[0][1], "test@posthog.com")
+            self.assertEqual(response.results[0][1], "test@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_lazy_on_both_sides(self):
         with freeze_time("2020-01-10"):
             _create_person(
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
                 team=self.team,
                 distinct_ids=["person1"],
                 is_identified=True,
@@ -340,7 +340,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_query_joins_persons_to_events(self):
         with freeze_time("2020-01-10"):
             _create_person(
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
                 team=self.team,
                 distinct_ids=["person1"],
                 is_identified=True,
@@ -390,7 +390,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
             self.assertEqual(response.results[0][2], "bla")
-            self.assertEqual(response.results[0][3], "tim@posthog.com")
+            self.assertEqual(response.results[0][3], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_events_pdi_e_person_properties(self):
@@ -405,7 +405,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
             self.assertEqual(response.results[0][2], "bla")
-            self.assertEqual(response.results[0][3], "tim@posthog.com")
+            self.assertEqual(response.results[0][3], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_events_person_properties(self):
@@ -419,7 +419,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             )
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
-            self.assertEqual(response.results[0][2], "tim@posthog.com")
+            self.assertEqual(response.results[0][2], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_query_joins_events_person_properties_in_aggregration(self):
@@ -431,7 +431,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 pretty=False,
             )
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
-            self.assertEqual(response.results[0][0], "tim@posthog.com")
+            self.assertEqual(response.results[0][0], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_select_person_on_events(self):
@@ -443,7 +443,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 pretty=False,
             )
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
-            self.assertEqual(response.results[0][0], "tim@posthog.com")
+            self.assertEqual(response.results[0][0], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -459,7 +459,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
             self.assertEqual(response.results[0][2], UUID("00000000-0000-4000-8000-000000000000"))
-            self.assertEqual(response.results[0][3], "tim@posthog.com")
+            self.assertEqual(response.results[0][3], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -475,7 +475,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
             self.assertEqual(response.results[0][0], "random event")
             self.assertEqual(response.results[0][2], UUID("00000000-0000-4000-8000-000000000000"))
-            self.assertEqual(response.results[0][3], "tim@posthog.com")
+            self.assertEqual(response.results[0][3], "tim@hanzo.ai")
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_prop_cohort_basic(self):
@@ -712,7 +712,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_insightsql_groupby_unnecessary_ifnull(self):
-        # https://github.com/PostHog/posthog/issues/23077
+        # https://github.com/Hanzo Insights/insights/issues/23077
         query = """
             select toDate(timestamp) as timestamp, count() as cnt
             from events
@@ -728,7 +728,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_insightsql_unnecessary_ifnull(self):
-        # https://github.com/PostHog/posthog/issues/23077
+        # https://github.com/Hanzo Insights/insights/issues/23077
         query = """
             select
                 toDate(timestamp) as timestamp,
@@ -1468,7 +1468,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             execute_insightsql_query(query, team=self.team)
         self.assertEqual(str(e.exception), "Table function 'numbers' requires at most 2 arguments")
 
-        # Complex subqueries are not supported with `enable_analyzer=0` (see: https://github.com/PostHog/posthog/pull/45000)
+        # Complex subqueries are not supported with `enable_analyzer=0` (see: https://github.com/Hanzo Insights/insights/pull/45000)
         query = "SELECT number from numbers(2 + ifNull((select 2), 1000))"
         with self.assertRaises(InternalCHQueryError):
             execute_insightsql_query(query, team=self.team)

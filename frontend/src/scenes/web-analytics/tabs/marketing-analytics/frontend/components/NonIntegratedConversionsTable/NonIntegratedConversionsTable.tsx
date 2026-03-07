@@ -3,8 +3,8 @@ import '../MarketingAnalyticsTable/MarketingAnalyticsTableStyleOverride.scss'
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconExternal } from '@posthog/icons'
-import { LemonButton, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 import { LearnMorePopover } from 'scenes/web-analytics/WebAnalyticsDashboard'

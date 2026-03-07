@@ -1,4 +1,4 @@
-import { IconDownload } from '@posthog/icons'
+import { IconDownload } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

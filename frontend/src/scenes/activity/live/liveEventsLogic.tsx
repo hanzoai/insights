@@ -1,6 +1,6 @@
 import { actions, connect, events, kea, listeners, path, props, reducers, selectors } from 'kea'
 
-import { Spinner, lemonToast } from '@posthog/lemon-ui'
+import { Spinner, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { liveEventsHostOrigin } from 'lib/utils/apiHost'

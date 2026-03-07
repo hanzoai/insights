@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from typing_extensions import TypeIs
 
 from insights.schema import (

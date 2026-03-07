@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { Sparkline, SparklineTimeSeries } from 'lib/components/Sparkline'
 import { inStorybookTestRunner } from 'lib/utils'

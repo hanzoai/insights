@@ -187,8 +187,8 @@ async def lookup_pg_distinct_ids(inputs: LookupPgDistinctIdsInputs) -> LookupPgD
                 p.uuid::text as person_uuid,
                 pdi.distinct_id,
                 COALESCE(pdi.version, 0) as version
-            FROM posthog_person p
-            JOIN posthog_persondistinctid pdi
+            FROM insights_person p
+            JOIN insights_persondistinctid pdi
                 ON pdi.person_id = p.id
                 AND pdi.team_id = p.team_id
             WHERE p.team_id = %s
@@ -240,7 +240,7 @@ async def lookup_pg_distinct_ids(inputs: LookupPgDistinctIdsInputs) -> LookupPgD
             # Find which of the not-found persons exist in PG (without DIDs)
             categorize_query = """
                 SELECT uuid::text
-                FROM posthog_person
+                FROM insights_person
                 WHERE team_id = %s
                   AND uuid IN (SELECT unnest(%s::uuid[]))
             """

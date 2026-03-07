@@ -92,8 +92,8 @@ pub struct PostgresRouter {
 
 | Tables                                                                              | Pool            |
 | ----------------------------------------------------------------------------------- | --------------- |
-| `posthog_person`, `posthog_persondistinctid`, `posthog_featureflaghashkeyoverride`  | `persons_*`     |
-| `posthog_featureflag`, `posthog_team`, `posthog_grouptypemapping`, `posthog_cohort` | `non_persons_*` |
+| `insights_person`, `insights_persondistinctid`, `insights_featureflaghashkeyoverride`  | `persons_*`     |
+| `insights_featureflag`, `insights_team`, `insights_grouptypemapping`, `insights_cohort` | `non_persons_*` |
 
 ### Usage pattern
 
@@ -101,7 +101,7 @@ pub struct PostgresRouter {
 // Read person data - always include team_id for partition efficiency
 let mut conn = router.get_persons_reader().get_connection().await?;
 let person = sqlx::query(
-    "SELECT * FROM posthog_person WHERE team_id = $1 AND id = $2"
+    "SELECT * FROM insights_person WHERE team_id = $1 AND id = $2"
 )
     .bind(team_id)
     .bind(person_id)
@@ -110,7 +110,7 @@ let person = sqlx::query(
 
 // Read flag definitions
 let mut conn = router.get_non_persons_reader().get_connection().await?;
-let flags = sqlx::query("SELECT * FROM posthog_featureflag WHERE team_id = $1")
+let flags = sqlx::query("SELECT * FROM insights_featureflag WHERE team_id = $1")
     .bind(team_id)
     .fetch_all(&mut *conn)
     .await?;

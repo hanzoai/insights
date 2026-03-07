@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock, IconFilter, IconTrending } from '@posthog/icons'
+import { IconClock, IconFilter, IconTrending } from '@hanzo/icons'
 
 import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

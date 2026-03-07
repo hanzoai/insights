@@ -55,7 +55,7 @@ class TestWebAnalyticsCohortFilter(ClickhouseTestMixin, APIBaseTest):
                     properties={
                         "$session_id": session_id,
                         "$pathname": url,
-                        "$current_url": f"http://posthog.com{url}" if url else None,
+                        "$current_url": f"http://hanzo.ai{url}" if url else None,
                         **properties,
                     },
                 )

@@ -28,7 +28,7 @@ export function FeatureFlagConditionWarning({
         <LemonBanner type="warning" className={className}>
             This flag cannot be locally evaluated by server-side SDKs due to unsupported features: {warning}. The flag
             will still evaluate correctly when not using local evaluation.{' '}
-            <Link to="https://posthog.com/docs/feature-flags/local-evaluation#restriction-on-local-evaluation">
+            <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#restriction-on-local-evaluation">
                 Learn more
             </Link>
         </LemonBanner>

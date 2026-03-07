@@ -132,9 +132,9 @@ class TestGetSandboxForRepositoryActivity:
             check_github = sandbox.execute("echo $GITHUB_TOKEN")
             assert check_github.exit_code == 0
 
-            check_posthog = sandbox.execute("echo $POSTHOG_PERSONAL_API_KEY")
-            assert check_posthog.exit_code == 0
-            assert check_posthog.stdout.strip() != ""
+            check_insights = sandbox.execute("echo $INSIGHTS_PERSONAL_API_KEY")
+            assert check_insights.exit_code == 0
+            assert check_insights.stdout.strip() != ""
 
         finally:
             if sandbox_id:

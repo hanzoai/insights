@@ -296,8 +296,8 @@ class ScanEvidenceSerializer(serializers.Serializer):
     filesScanned = serializers.IntegerField(help_text="Number of files scanned")
     detectedFilesCount = serializers.IntegerField(help_text="Total candidate files detected")
     eventNameCount = serializers.IntegerField(help_text="Number of distinct event names found")
-    foundPosthogInit = serializers.BooleanField(help_text="Whether posthog.init() was found in scanned files")
-    foundPosthogCapture = serializers.BooleanField(help_text="Whether posthog.capture() was found in scanned files")
+    foundInsightsInit = serializers.BooleanField(help_text="Whether insights.init() was found in scanned files")
+    foundInsightsCapture = serializers.BooleanField(help_text="Whether insights.capture() was found in scanned files")
     foundErrorSignal = serializers.BooleanField(help_text="Whether error tracking signals were found in scanned files")
 
 

@@ -14,7 +14,7 @@ import requests
 from dateutil.relativedelta import relativedelta
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from rest_framework import renderers, request, serializers, status, viewsets
 from rest_framework.decorators import renderer_classes
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -49,7 +49,7 @@ from insights.queries.app_metrics.app_metrics import TeamPluginsDeliveryRateQuer
 from insights.utils import format_query_params_absolute_url
 
 # Keep this in sync with: frontend/scenes/plugins/utils.ts
-SECRET_FIELD_VALUE = "**************** POSTHOG SECRET FIELD ****************"
+SECRET_FIELD_VALUE = "**************** INSIGHTS SECRET FIELD ****************"
 
 
 def _update_plugin_attachments(request: request.Request, plugin_config: PluginConfig):
@@ -278,7 +278,7 @@ class PluginSerializer(serializers.ModelSerializer):
         if plugin.organization:
             return plugin.organization.name
         else:
-            return "posthog-inline"
+            return "insights-inline"
 
     def create(self, validated_data: dict, *args: Any, **kwargs: Any) -> Plugin:
         validated_data["url"] = self.initial_data.get("url", None)
@@ -374,7 +374,7 @@ class PluginViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def repository(self, request: request.Request, **kwargs):
-        url = "https://raw.githubusercontent.com/PostHog/integrations-repository/main/plugins.json"
+        url = "https://raw.githubusercontent.com/Hanzo Insights/integrations-repository/main/plugins.json"
         plugins = requests.get(url)
         return Response(json.loads(plugins.text))
 

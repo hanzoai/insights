@@ -36,7 +36,7 @@ from products.tasks.backend.services.sandbox import SandboxConfig, SandboxTempla
 def create_test_task(repository=None):
     with transaction.atomic():
         team = Team.objects.get(id=1)
-        user = User.objects.get(email="test@posthog.com")
+        user = User.objects.get(email="test@hanzo.ai")
 
         if repository:
             parts = repository.split("/")
@@ -44,7 +44,7 @@ def create_test_task(repository=None):
                 raise ValueError("Repository must be in format 'owner/repo'")
             org, repo = parts
         else:
-            org, repo = "posthog", "posthog-js"
+            org, repo = "insights", "insights-js"
 
         feature_flag, created = FeatureFlag.objects.get_or_create(
             team=team,
@@ -134,9 +134,9 @@ def main():
             template=SandboxTemplate.DEFAULT_BASE,
             environment_variables={
                 "GITHUB_TOKEN": github_token or "",
-                "POSTHOG_PERSONAL_API_KEY": api_key_value,
-                "POSTHOG_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
-                "POSTHOG_PROJECT_ID": "1",
+                "INSIGHTS_PERSONAL_API_KEY": api_key_value,
+                "INSIGHTS_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
+                "INSIGHTS_PROJECT_ID": "1",
             },
         )
 

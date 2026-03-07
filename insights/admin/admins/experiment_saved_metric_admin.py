@@ -28,7 +28,7 @@ class ExperimentSavedMetricAdmin(admin.ModelAdmin):
     def team_link(self, saved_metric: ExperimentSavedMetric):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[saved_metric.team.pk]),
+            reverse("admin:insights_team_change", args=[saved_metric.team.pk]),
             saved_metric.team.name,
         )
 
@@ -44,18 +44,18 @@ class ExperimentSavedMetricAdmin(admin.ModelAdmin):
         if saved_metric.metadata and "migrated_from" in saved_metric.metadata:
             return format_html(
                 '<a href="{}">Migrated From: {}</a>',
-                reverse("admin:posthog_experimentsavedmetric_change", args=[saved_metric.metadata["migrated_from"]]),
+                reverse("admin:insights_experimentsavedmetric_change", args=[saved_metric.metadata["migrated_from"]]),
                 saved_metric.metadata["migrated_from"],
             )
         if saved_metric.metadata and "migrated_to" in saved_metric.metadata:
             return format_html(
                 '<a href="{}">Migrated To: {}</a>',
-                reverse("admin:posthog_experimentsavedmetric_change", args=[saved_metric.metadata["migrated_to"]]),
+                reverse("admin:insights_experimentsavedmetric_change", args=[saved_metric.metadata["migrated_to"]]),
                 saved_metric.metadata["migrated_to"],
             )
         return ""
 
-    change_form_template = "admin/posthog/experimentsavedmetric/change_form.html"
+    change_form_template = "admin/insights/experimentsavedmetric/change_form.html"
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -82,7 +82,7 @@ class ExperimentSavedMetricAdmin(admin.ModelAdmin):
 
                 if original.metadata and original.metadata.get("migrated_to"):
                     messages.warning(request, f"Metric already migrated to {original.metadata['migrated_to']}")
-                    return redirect("admin:posthog_experimentsavedmetric_change", original.metadata["migrated_to"])
+                    return redirect("admin:insights_experimentsavedmetric_change", original.metadata["migrated_to"])
 
                 new_metric = ExperimentSavedMetric()
                 new_metric.name = original.name
@@ -98,10 +98,10 @@ class ExperimentSavedMetricAdmin(admin.ModelAdmin):
                 original.save(update_fields=["metadata"])
 
             messages.success(request, "Metric migrated successfully")
-            return redirect("admin:posthog_experimentsavedmetric_change", new_metric.pk)
+            return redirect("admin:insights_experimentsavedmetric_change", new_metric.pk)
         except ExperimentSavedMetric.DoesNotExist:
             messages.error(request, "Metric not found")
-            return redirect("admin:posthog_experimentsavedmetric_changelist")
+            return redirect("admin:insights_experimentsavedmetric_changelist")
         except Exception as e:
             messages.error(request, f"Error migrating metric: {e}")
-            return redirect("admin:posthog_experimentsavedmetric_change", object_id)
+            return redirect("admin:insights_experimentsavedmetric_change", object_id)

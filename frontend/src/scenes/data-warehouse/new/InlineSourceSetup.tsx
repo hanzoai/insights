@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconDatabase, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconDatabase, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 

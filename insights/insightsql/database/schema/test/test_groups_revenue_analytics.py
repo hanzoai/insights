@@ -40,8 +40,8 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
 )
 from products.revenue_analytics.backend.views.schemas.customer import SCHEMA
 
-INVOICES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_invoices"
-CUSTOMERS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_customers"
+INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_invoices"
+CUSTOMERS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_customers"
 
 
 @snapshot_clickhouse_queries
@@ -275,7 +275,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
 
         self.join = DataWarehouseJoin.objects.create(
             team=self.team,
-            source_table_name=f"stripe.posthog_test.{SCHEMA.source_suffix}",
+            source_table_name=f"stripe.insights_test.{SCHEMA.source_suffix}",
             source_table_key="id",
             joining_table_name="groups",
             joining_table_key="key",
@@ -311,7 +311,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_get_revenue_for_events_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_events()
 
             self.team.revenue_analytics_config.events = [
@@ -374,7 +374,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
                 )
 
     def test_get_revenue_for_schema_source_for_id_join_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "id"
             self.join.save()
@@ -445,7 +445,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_get_revenue_for_schema_source_for_email_join_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "email"
             self.join.save()
@@ -521,7 +521,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_get_revenue_for_schema_source_for_metadata_join_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "JSONExtractString(metadata, 'id')"
             self.join.save()
@@ -590,7 +590,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_get_mrr_via_lazy_join_for_schema_source_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "id"
             self.join.save()
@@ -654,7 +654,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_get_mrr_via_lazy_join_for_events_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_events_with_subscriptions()
 
             self.team.revenue_analytics_config.events = [
@@ -717,7 +717,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_query_revenue_analytics_table_sources_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "id"
             self.join.save()
@@ -782,7 +782,7 @@ class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_query_revenue_analytics_table_events_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self.setup_events_with_subscriptions()
 
             self.team.revenue_analytics_config.events = [

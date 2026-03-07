@@ -126,7 +126,7 @@ class TestEventDefinitionTypeScriptGeneration(APIBaseTest):
         This is the core functionality that prevents "excess property checking"
         errors in TypeScript while maintaining type safety for required fields.
 
-        Uses the real posthog-js package to ensure compatibility with actual types.
+        Uses the real insights-js package to ensure compatibility with actual types.
         """
 
         # Mock subprocess.run to skip pnpm install and TypeScript compilation
@@ -147,24 +147,24 @@ class TestEventDefinitionTypeScriptGeneration(APIBaseTest):
 
             # Create minimal package.json to install only required dependencies
             package_json = tmpdir_path / "package.json"
-            package_json.write_text('{"dependencies": {"typescript": "^5.0.0", "posthog-js": "^1.0.0"}}')
+            package_json.write_text('{"dependencies": {"typescript": "^5.0.0", "insights-js": "^1.0.0"}}')
 
-            # Write generated types (using real posthog-js)
-            types_file = tmpdir_path / "posthog-typed.ts"
+            # Write generated types (using real insights-js)
+            types_file = tmpdir_path / "insights-typed.ts"
             types_file.write_text(ts_content)
 
             # Create test file that exercises all type scenarios
             test_file = tmpdir_path / "test.ts"
             test_file.write_text(
                 """
-import posthog, { EventName } from './posthog-typed'
+import insights, { EventName } from './insights-typed'
 
 // ========================================
 // TEST 1: Additional properties are allowed
 // ========================================
 
 // ✅ Should compile: required field + extra properties (CRITICAL TEST)
-posthog.capture('test_event', {
+insights.capture('test_event', {
     required_field: 123,
     optional_field: 'test',
     extra_property: 'this should be allowed',
@@ -173,7 +173,7 @@ posthog.capture('test_event', {
 })
 
 // ✅ Should compile: only required field
-posthog.capture('test_event', {
+insights.capture('test_event', {
     required_field: 456
 })
 
@@ -183,13 +183,13 @@ posthog.capture('test_event', {
 
 // ❌ Should fail: missing required field
 // @ts-expect-error
-posthog.capture('test_event', {
+insights.capture('test_event', {
     optional_field: 'test'
 })
 
 // ❌ Should fail: wrong type for required field
 // @ts-expect-error
-posthog.capture('test_event', {
+insights.capture('test_event', {
     required_field: 'string not allowed'
 })
 
@@ -198,10 +198,10 @@ posthog.capture('test_event', {
 // ========================================
 
 // ✅ Should compile: no properties needed
-posthog.capture('optional_event')
+insights.capture('optional_event')
 
 // ✅ Should compile: with properties
-posthog.capture('optional_event', {
+insights.capture('optional_event', {
     optional_only: 'value',
     extra_field: 123
 })
@@ -211,26 +211,26 @@ posthog.capture('optional_event', {
 // ========================================
 
 // ✅ Should compile: any properties
-posthog.capture('untyped_event', {
+insights.capture('untyped_event', {
     anything: 'goes',
     here: 123
 })
 
 // ✅ Should compile: no properties
-posthog.capture('untyped_event')
+insights.capture('untyped_event')
 
 // ========================================
 // TEST 5: Undefined events work flexibly
 // ========================================
 
 // ✅ Should compile: custom event with properties
-posthog.capture('custom_undefined_event', {
+insights.capture('custom_undefined_event', {
     any: 'properties',
     work: 'here'
 })
 
 // ✅ Should compile: custom event without properties
-posthog.capture('another_custom_event')
+insights.capture('another_custom_event')
 
 // ========================================
 // TEST 6: String variables are blocked
@@ -239,39 +239,39 @@ posthog.capture('another_custom_event')
 // ❌ Should fail: broad string type not allowed
 let stringVar: string = 'test_event'
 // @ts-expect-error
-posthog.capture(stringVar)
+insights.capture(stringVar)
 
 // ✅ Should compile: EventName type works
 let typedVar: EventName = 'test_event'
-posthog.capture(typedVar, { required_field: 789 })
+insights.capture(typedVar, { required_field: 789 })
 
 // ✅ Should compile: const infers literal type
 const constVar = 'test_event'
-posthog.capture(constVar, { required_field: 999 })
+insights.capture(constVar, { required_field: 999 })
 
 // ========================================
 // TEST 7: captureRaw bypasses all checking
 // ========================================
 
 // ✅ Should compile: missing required fields is OK
-posthog.captureRaw('test_event', {
+insights.captureRaw('test_event', {
     optional_field: 'test'
 })
 
 // ✅ Should compile: wrong types are OK
-posthog.captureRaw('test_event', {
+insights.captureRaw('test_event', {
     required_field: 'string is fine here'
 })
 
 // ✅ Should compile: string variables work
-posthog.captureRaw(stringVar, { any: 'data' })
+insights.captureRaw(stringVar, { any: 'data' })
 
 // ========================================
 // TEST 8: Special characters are escaped
 // ========================================
 
 // ✅ Should compile: event and property names with special chars
-posthog.capture("a'a\\\\'b\\"c>?>%}}%%>c<[[?${{%}}cake'", {
+insights.capture("a'a\\\\'b\\"c>?>%}}%%>c<[[?${{%}}cake'", {
     "prop'with\\\\'quotes\\"\\\\slash": 'value'
 })
 """

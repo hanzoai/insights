@@ -1,4 +1,4 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { UserAgentMeta, processEvent } from './index'
 
@@ -37,7 +37,7 @@ describe('useragent-plugin', () => {
     test('should not process event when $userAgent is missing', () => {
         const event = {
             properties: {
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -49,7 +49,7 @@ describe('useragent-plugin', () => {
         const event = {
             properties: {
                 $useragent: '',
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -62,7 +62,7 @@ describe('useragent-plugin', () => {
             properties: {
                 $useragent:
                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -92,7 +92,7 @@ describe('useragent-plugin', () => {
             properties: {
                 '$user-agent':
                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -124,7 +124,7 @@ describe('useragent-plugin', () => {
             properties: {
                 $user_agent:
                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -232,7 +232,7 @@ describe('useragent-plugin', () => {
                 $device: '',
                 $device_type: 'Desktop',
                 $useragent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:82.0) Gecko/20100101 Firefox/82.0',
-                $lib: 'posthog-node',
+                $lib: 'insights-node',
             },
         } as unknown as PluginEvent
 
@@ -254,7 +254,7 @@ describe('useragent-plugin', () => {
                 properties: {
                     segment_userAgent:
                         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
-                    $lib: 'posthog-node',
+                    $lib: 'insights-node',
                 },
             } as unknown as PluginEvent
 

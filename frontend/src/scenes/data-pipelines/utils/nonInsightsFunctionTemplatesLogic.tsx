@@ -1,6 +1,6 @@
 import { connect, kea, path, props, selectors } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS, type FeatureFlagKey } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -33,7 +33,7 @@ function getSourceDisplayStatus(
     const releasedDescriptionEl = (
         <>
             Data will be synced to Insights and regularly refreshed.{' '}
-            <Link to="https://posthog.com/docs/cdp/sources">Learn more</Link>
+            <Link to="https://hanzo.ai/docs/cdp/sources">Learn more</Link>
         </>
     )
     // regardless of release status, those passing the feature flag should see a released source
@@ -117,7 +117,7 @@ export const nonInsightsFunctionTemplatesLogic = kea<nonInsightsFunctionTemplate
                         description: (
                             <>
                                 Data will be queried directly from your data source that you manage.{' '}
-                                <Link to="https://posthog.com/docs/cdp/sources">Learn more</Link>
+                                <Link to="https://hanzo.ai/docs/cdp/sources">Learn more</Link>
                             </>
                         ),
                         code: '',
@@ -138,7 +138,7 @@ export const nonInsightsFunctionTemplatesLogic = kea<nonInsightsFunctionTemplate
             (featureFlags, user): InsightsFunctionTemplateType[] => {
                 // HTTP is currently only used for Cloud to Cloud migrations and shouldn't be accessible to users
                 const httpEnabled =
-                    featureFlags[FEATURE_FLAGS.BATCH_EXPORTS_POSTHOG_HTTP] || user?.is_impersonated || user?.is_staff
+                    featureFlags[FEATURE_FLAGS.BATCH_EXPORTS_INSIGHTS_HTTP] || user?.is_impersonated || user?.is_staff
                 // Databricks is currently behind a feature flag
                 const databricksEnabled = featureFlags[FEATURE_FLAGS.BATCH_EXPORTS_DATABRICKS]
 

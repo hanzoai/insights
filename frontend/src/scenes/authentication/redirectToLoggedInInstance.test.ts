@@ -6,14 +6,14 @@ describe('RedirectToLoggedInInstance cleanedCookieSubdomain', () => {
         ['handles the empty string', '', null],
         ['handles the sneaky string', '         ', null],
         ['handles not URLs', 'yo ho ho', null],
-        ['handles EU', 'https://eu.posthog.com', 'eu'],
-        ['handles app', 'https://app.posthog.com', null],
-        ['handles US', 'https://us.posthog.com', 'us'],
-        ['handles leading quotes', '"https://eu.posthog.com', 'eu'],
-        ['handles trailing quotes', 'https://eu.posthog.com"', 'eu'],
-        ['handles wrapping quotes', '"https://eu.posthog.com"', 'eu'],
-        ['handles ports', 'https://us.posthog.com:8123', 'us'],
-        ['handles longer urls', 'https://eu.posthog.com:1234?query=parameter#hashParam', 'eu'],
+        ['handles EU', 'https://insights.hanzo.ai', 'eu'],
+        ['handles app', 'https://insights.hanzo.ai', null],
+        ['handles US', 'https://insights.hanzo.ai', 'us'],
+        ['handles leading quotes', '"https://insights.hanzo.ai', 'eu'],
+        ['handles trailing quotes', 'https://insights.hanzo.ai"', 'eu'],
+        ['handles wrapping quotes', '"https://insights.hanzo.ai"', 'eu'],
+        ['handles ports', 'https://insights.hanzo.ai:8123', 'us'],
+        ['handles longer urls', 'https://insights.hanzo.ai:1234?query=parameter#hashParam', 'eu'],
     ])('%s', (_name, cookie, expected) => {
         expect(cleanedCookieSubdomain(cookie)).toEqual(expected)
     })

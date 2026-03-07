@@ -16,7 +16,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <CalloutBox type="fyi" title="Client-side configuration only">
                     <Markdown>
                         {dedent`
-                            This configuration is client-side only. Support for remote configuration in the [error tracking settings](https://app.posthog.com/settings/project-error-tracking#exception-autocapture) will be added in a future release.
+                            This configuration is client-side only. Support for remote configuration in the [error tracking settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture) will be added in a future release.
                         `}
                     </Markdown>
                 </CalloutBox>
@@ -38,7 +38,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                               config.errorTrackingConfig.captureIsolateErrors = true;
                               config.errorTrackingConfig.captureNativeExceptions = true;
                               config.errorTrackingConfig.captureSilentFlutterErrors = false;
-                              await Posthog().setup(config);
+                              await Insights().setup(config);
                             `,
                         },
                     ]}
@@ -83,7 +83,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 await someRiskyOperation();
                               } catch (exception, stackTrace) {
                                 // Capture the exception with Insights
-                                await Posthog().captureException(
+                                await Insights().captureException(
                                   error: exception,
                                   stackTrace: stackTrace,
                                   properties: {
@@ -123,7 +123,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                               config.errorTrackingConfig.inAppIncludes.add('package:your_app');
                               config.errorTrackingConfig.inAppExcludes.add('package:third_party_lib');
                               config.errorTrackingConfig.inAppByDefault = true;
-                              await Posthog().setup(config);
+                              await Insights().setup(config);
                             `,
                         },
                     ]}
@@ -154,7 +154,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

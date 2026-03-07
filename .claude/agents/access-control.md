@@ -36,11 +36,11 @@ Users can gain access through:
 
 ### Key Files
 
-- `posthog/rbac/user_access_control.py` - Core access control logic
+- `insights/rbac/user_access_control.py` - Core access control logic
 - `ee/models/rbac/access_control.py` - Database model
 - `ee/api/rbac/access_control.py` - API endpoints and ViewSet mixin
-- `posthog/permissions.py` - Permission classes
-- `posthog/scopes.py` - Resource type definitions
+- `insights/permissions.py` - Permission classes
+- `insights/scopes.py` - Resource type definitions
 
 ### Main Classes
 
@@ -54,7 +54,7 @@ Users can gain access through:
 ### 1. Add Resource to Scopes
 
 ```python
-# posthog/scopes.py
+# insights/scopes.py
 ACCESS_CONTROL_RESOURCES = [
     "feature_flag",
     "dashboard",
@@ -66,9 +66,9 @@ ACCESS_CONTROL_RESOURCES = [
 ### 2. Update ViewSet
 
 ```python
-# posthog/api/your_resource.py
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
-from posthog.permissions import AccessControlPermission
+# insights/api/your_resource.py
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.permissions import AccessControlPermission
 
 class YourResourceViewSet(
     TeamAndOrgViewSetMixin,
@@ -88,8 +88,8 @@ class YourResourceViewSet(
 ### 3. Update Serializer
 
 ```python
-# posthog/api/your_resource.py
-from posthog.rbac.user_access_control import UserAccessControlSerializerMixin
+# insights/api/your_resource.py
+from insights.rbac.user_access_control import UserAccessControlSerializerMixin
 
 class YourResourceSerializer(UserAccessControlSerializerMixin, serializers.ModelSerializer):
     class Meta:
@@ -193,7 +193,7 @@ import { AccessControlResourceType, AccessControlLevel } from '~/types'
 Use resource-level permissions for create operations:
 
 ```tsx
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { getAppContext } from 'lib/utils/getAppContext'
 
@@ -338,8 +338,8 @@ Make sure you've added your new resource to [`common/storybook/.storybook/app-co
 For products that need field-level access controls on related models:
 
 ```python
-# posthog/models/team/team.py
-from posthog.rbac.decorators import field_access_control
+# insights/models/team/team.py
+from insights.rbac.decorators import field_access_control
 
 class Team(models.Model):
     # Other fields...
@@ -364,7 +364,7 @@ The serializer will automatically handle field protection via `UserAccessControl
 If you have related resources that should inherit access controls:
 
 ```python
-# posthog/permissions.py
+# insights/permissions.py
 RESOURCE_INHERITANCE_MAP = {
     "session_recording_playlist": "session_recording",  # Playlists inherit from recordings
 }
@@ -374,7 +374,7 @@ RESOURCE_INHERITANCE_MAP = {
 
 ### Backend
 
-1. Add resource to `ACCESS_CONTROL_RESOURCES` in `posthog/scopes.py`
+1. Add resource to `ACCESS_CONTROL_RESOURCES` in `insights/scopes.py`
 2. Add `AccessControlViewSetMixin` to your ViewSet
 3. Set `scope_object` attribute on ViewSet
 4. Add `AccessControlPermission` to permission classes
@@ -421,7 +421,7 @@ GET    /api/projects/{project_id}/{resource}/{id}/users_with_access/
 ### Checking Access in Code
 
 ```python
-from posthog.rbac.user_access_control import UserAccessControl
+from insights.rbac.user_access_control import UserAccessControl
 
 # In a view or service
 user_access_control = UserAccessControl(user, team)

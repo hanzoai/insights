@@ -36,14 +36,14 @@ class _RemoteConfigBase(BaseTest):
             name="Test project",
         )
         self.team = team
-        self.team.api_token = "phc_12345"  # Easier to test against
+        self.team.api_token = "hi_12345"  # Easier to test against
         self.team.recording_domains = ["https://*.example.com"]
         self.team.session_recording_opt_in = True
         self.team.surveys_opt_in = True
         self.team.test_account_filters = [  # the default test account filters may use a cohort, which aren't supported by site functions (real-time filters)
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -213,7 +213,7 @@ class TestRemoteConfig(_RemoteConfigBase):
 
     def test_session_recording_domains(self):
         self.team.session_recording_opt_in = True
-        self.team.recording_domains = ["https://posthog.com", "https://*.posthog.com"]
+        self.team.recording_domains = ["https://hanzo.ai", "https://*.hanzo.ai"]
         self.team.save()
         self.sync_remote_config()
         assert self.remote_config.config["sessionRecording"]["domains"] == self.team.recording_domains
@@ -227,7 +227,7 @@ class TestRemoteConfig(_RemoteConfigBase):
 
     @parameterized.expand(
         [
-            (True, {"script": "posthog-recorder"}),
+            (True, {"script": "insights-recorder"}),
             (False, None),
         ]
     )
@@ -506,7 +506,7 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
 
         # Ensure the domain and siteAppsJS are removed
         assert config == {
-            "token": "phc_12345",
+            "token": "hi_12345",
             "supportedCompression": ["gzip", "gzip-js"],
             "hasFeatureFlags": False,
             "captureDeadClicks": False,
@@ -528,7 +528,7 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
                 "urlBlocklist": [],
                 "eventTriggers": [],
                 "triggerMatchType": None,
-                "scriptConfig": {"script": "posthog-recorder"},
+                "scriptConfig": {"script": "insights-recorder"},
             },
             "errorTracking": {
                 "autocaptureExceptions": False,
@@ -564,7 +564,7 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
         with self.settings(
             REMOTE_CONFIG_CDN_PURGE_ENDPOINT="https://api.cloudflare.com/client/v4/zones/MY_ZONE_ID/purge_cache",
             REMOTE_CONFIG_CDN_PURGE_TOKEN="MY_TOKEN",
-            REMOTE_CONFIG_CDN_PURGE_DOMAINS=["cdn.posthog.com", "https://cdn2.posthog.com"],
+            REMOTE_CONFIG_CDN_PURGE_DOMAINS=["cdn.hanzo.ai", "https://cdn2.hanzo.ai"],
         ):
             # Force a change to the config
             self.remote_config.config["token"] = "NOT"
@@ -574,12 +574,12 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
                 headers={"Authorization": "Bearer MY_TOKEN"},
                 json={
                     "files": [
-                        {"url": "https://cdn.posthog.com/array/phc_12345/config"},
-                        {"url": "https://cdn.posthog.com/array/phc_12345/config.js"},
-                        {"url": "https://cdn.posthog.com/array/phc_12345/array.js"},
-                        {"url": "https://cdn2.posthog.com/array/phc_12345/config"},
-                        {"url": "https://cdn2.posthog.com/array/phc_12345/config.js"},
-                        {"url": "https://cdn2.posthog.com/array/phc_12345/array.js"},
+                        {"url": "https://cdn.hanzo.ai/array/hi_12345/config"},
+                        {"url": "https://cdn.hanzo.ai/array/hi_12345/config.js"},
+                        {"url": "https://cdn.hanzo.ai/array/hi_12345/array.js"},
+                        {"url": "https://cdn2.hanzo.ai/array/hi_12345/config"},
+                        {"url": "https://cdn2.hanzo.ai/array/hi_12345/config.js"},
+                        {"url": "https://cdn2.hanzo.ai/array/hi_12345/array.js"},
                     ]
                 },
             )

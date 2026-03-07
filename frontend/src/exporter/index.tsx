@@ -14,8 +14,8 @@ import { ErrorBoundary } from '../layout/ErrorBoundary'
 
 // Disable tracking for all exports and embeds.
 // This is explicitly set as to not track our customers' customers data.
-// Without it, embeds of self-hosted iframes will log metrics to app.posthog.com.
-window.JS_POSTHOG_API_KEY = undefined
+// Without it, embeds of self-hosted iframes will log metrics to insights.hanzo.ai.
+window.JS_INSIGHTS_API_KEY = undefined
 
 loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })
@@ -27,7 +27,7 @@ initKea({ replaceInitialPathInWindow: false })
 // Make sure to update the font family in the CSS if you change this.
 polyfillCountryFlagEmojis('Emoji Flags Polyfill')
 
-const exportedData: ExportedData = window.POSTHOG_EXPORTED_DATA
+const exportedData: ExportedData = window.INSIGHTS_EXPORTED_DATA
 
 function renderApp(): void {
     const root = document.getElementById('root')

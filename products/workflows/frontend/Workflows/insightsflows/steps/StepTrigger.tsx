@@ -1,6 +1,6 @@
 import { Node } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import {
     IconBolt,
@@ -11,7 +11,7 @@ import {
     IconPlusSmall,
     IconTarget,
     IconWebhooks,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonButton,
     LemonCalendarSelectInput,
@@ -24,7 +24,7 @@ import {
     Spinner,
     Tooltip,
     lemonToast,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
@@ -743,7 +743,7 @@ function ConversionGoalSection(): JSX.Element {
                             size="small"
                             icon={<IconPlusSmall />}
                             onClick={() => {
-                                posthog.capture('workflows workflow event conversion clicked')
+                                insights.capture('workflows workflow event conversion clicked')
                                 lemonToast.info('Event targeting coming soon!')
                             }}
                         >

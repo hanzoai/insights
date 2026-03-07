@@ -9,7 +9,7 @@ import {
     IconCursor,
     IconFunnels,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconLifecycle,
     IconPeople,
     IconPython,
@@ -20,9 +20,9 @@ import {
     IconTrends,
     IconUpload,
     IconUserPaths,
-} from '@posthog/icons'
-import { IconCode } from '@posthog/icons'
-import { LemonButton, LemonDivider, lemonToast } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { IconCode } from '@hanzo/icons'
+import { LemonButton, LemonDivider, lemonToast } from '@hanzo/lemon-ui'
 
 import { EditorCommands, EditorRange } from 'lib/components/RichContentEditor/types'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -245,7 +245,7 @@ const SLASH_COMMANDS: SlashCommandsItem[] = [
     {
         title: 'SQL',
         search: 'sql',
-        icon: <IconHogQL color="currentColor" />,
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(
                 pos,
@@ -277,7 +277,7 @@ order by count() desc
     {
         title: 'SQL (DuckDB)',
         search: 'duck sql',
-        icon: <IconHogQL color="currentColor" />,
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
                 type: NotebookNodeType.DuckSQL,
@@ -294,7 +294,7 @@ order by count() desc
     {
         title: 'SQL (InsightsQL)',
         search: 'insightsql sql',
-        icon: <IconHogQL color="currentColor" />,
+        icon: <IconInsightsQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
                 type: NotebookNodeType.InsightsQLSQL,

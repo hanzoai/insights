@@ -54,7 +54,7 @@ class Task(DeletedMetaFields, models.Model):
 
     repository = models.CharField(
         max_length=255, null=True, blank=True
-    )  # Format is organization/repo, for example posthog/posthog-js
+    )  # Format is organization/repo, for example hanzoai/insights-js
 
     json_schema = models.JSONField(
         default=None,
@@ -139,7 +139,7 @@ class Task(DeletedMetaFields, models.Model):
         description: str,
         origin_product: "Task.OriginProduct",
         user_id: int,  # Will be used to validate the tasks feature flag and create a personal api key for interacting with Insights.
-        repository: str,  # Format: "organization/repository", e.g. "posthog/posthog-js"
+        repository: str,  # Format: "organization/repository", e.g. "hanzoai/insights-js"
         create_pr: bool = True,
         mode: str = "background",
     ) -> "Task":
@@ -326,7 +326,7 @@ class TaskRun(models.Model):
             "timestamp": timezone.now().isoformat(),
             "notification": {
                 "jsonrpc": "2.0",
-                "method": "_posthog/console",
+                "method": "_insights/console",
                 "params": {
                     "sessionId": str(self.id),
                     "level": level,
@@ -343,7 +343,7 @@ class TaskRun(models.Model):
             "timestamp": timezone.now().isoformat(),
             "notification": {
                 "jsonrpc": "2.0",
-                "method": "_posthog/sandbox_output",
+                "method": "_insights/sandbox_output",
                 "params": {
                     "sessionId": str(self.id),
                     "stdout": stdout,

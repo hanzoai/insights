@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import React, { useCallback, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonBanner,
@@ -16,7 +16,7 @@ import {
     LemonSelect,
     LemonSkeleton,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -525,7 +525,7 @@ export function MissingPersonsAlert({
             {missingActorsCount}{' '}
             <span>{missingActorsCount > 1 ? `${actorLabel.plural} are` : `${actorLabel.singular} is`}</span> not shown
             because they've been merged with those listed, or deleted.{' '}
-            <Link to="https://posthog.com/docs/how-posthog-works/queries#insights-counting-unique-persons">
+            <Link to="https://hanzo.ai/docs/how-insights-works/queries#insights-counting-unique-persons">
                 Learn more.
             </Link>
         </LemonBanner>

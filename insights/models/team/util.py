@@ -68,7 +68,7 @@ def _raw_delete_batch(queryset: Any, batch_size: int = 10000):
     """
     Deletes records in batches to avoid statement timeout on large tables.
 
-    Note: For partitioned tables (like posthog_person_new), preserving filters
+    Note: For partitioned tables (like insights_person_new), preserving filters
     like team_id ensures efficient single-partition deletes instead of scanning
     all partitions.
 

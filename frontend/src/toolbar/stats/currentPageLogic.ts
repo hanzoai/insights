@@ -46,7 +46,7 @@ const autoWildcardHref = (url: string): string => {
     return url
 }
 /**
- * Sometimes we are able to set the href before the posthog init fragment is removed
+ * Sometimes we are able to set the href before the insights init fragment is removed
  * we never want to store it as it will mean the heatmap URL is too specific and doesn't match
  * this ensures we never store it
  */
@@ -59,7 +59,7 @@ export function withoutInsightsInit(href: string): string {
             return href
         }
         return href
-            .replace(/__posthog=\{[^}]*}[^#]*/, '')
+            .replace(/__insights=\{[^}]*}[^#]*/, '')
             .replace('##', '#')
             .replace(/#$/, '')
     } catch {

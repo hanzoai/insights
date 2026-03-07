@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { DOMAIN_REGEX } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -51,7 +51,7 @@ export function AddDomainModal(): JSX.Element {
             }
         >
             <LemonInput
-                placeholder="posthog.com"
+                placeholder="hanzo.ai"
                 autoFocus
                 value={newDomain}
                 onChange={setNewDomain}
@@ -59,7 +59,7 @@ export function AddDomainModal(): JSX.Element {
             />
             {submitted && errored && (
                 <span className="text-danger text-xs">
-                    Please enter a valid domain or subdomain name (e.g. my.posthog.com)
+                    Please enter a valid domain or subdomain name (e.g. my.hanzo.ai)
                 </span>
             )}
         </LemonModal>

@@ -1,6 +1,6 @@
 import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -125,12 +125,12 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
     }),
     listeners(({ actions, values, cache }) => ({
         loadTickets: async () => {
-            if (!values.isEnabled || !posthog.conversations) {
+            if (!values.isEnabled || !insights.conversations) {
                 return
             }
             actions.setTicketsLoading(true)
             try {
-                const response = await posthog.conversations.getTickets({ limit: 50 })
+                const response = await insights.conversations.getTickets({ limit: 50 })
                 if (response) {
                     actions.setTickets(response.results as ConversationTicket[])
                     // Start polling only if user has tickets
@@ -165,7 +165,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
             }
         },
         loadMessages: async ({ ticketId }) => {
-            if (!values.isEnabled || !ticketId || !posthog.conversations) {
+            if (!values.isEnabled || !ticketId || !insights.conversations) {
                 return
             }
             actions.setMessagesLoading(true)
@@ -176,7 +176,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
 
                 // Fetch all pages of messages using `after` timestamp pagination
                 while (hasMore) {
-                    const response = await (posthog.conversations.getMessages as any)(ticketId, after)
+                    const response = await (insights.conversations.getMessages as any)(ticketId, after)
                     // Check if we're still viewing the same ticket (avoid race condition when switching quickly)
                     if (!response || values.currentTicket?.id !== ticketId) {
                         return
@@ -208,7 +208,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
             }
         },
         sendMessage: async ({ content, onSuccess }) => {
-            if (!values.isEnabled || !content.trim() || values.messageSending || !posthog.conversations) {
+            if (!values.isEnabled || !content.trim() || values.messageSending || !insights.conversations) {
                 return
             }
             actions.setMessageSending(true)
@@ -216,7 +216,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                 // If we're in "new" view, force creation of a new ticket
                 const forceNewTicket = values.view === 'new'
 
-                const response = await posthog.conversations.sendMessage(content, {}, forceNewTicket)
+                const response = await insights.conversations.sendMessage(content, {}, forceNewTicket)
                 if (response) {
                     // If we just created a new ticket, set it as current and switch to chat view
                     if (values.view === 'new') {
@@ -244,11 +244,11 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
             }
         },
         markAsRead: async ({ ticketId }) => {
-            if (!values.isEnabled || !ticketId || !posthog.conversations) {
+            if (!values.isEnabled || !ticketId || !insights.conversations) {
                 return
             }
             try {
-                await posthog.conversations.markAsRead(ticketId)
+                await insights.conversations.markAsRead(ticketId)
             } catch (e) {
                 console.error('Failed to mark as read:', e)
             }
@@ -260,7 +260,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
             actions.markAsRead(ticket.id)
         },
         requestRestoreLink: async ({ email }) => {
-            const conversations = posthog.conversations as any
+            const conversations = insights.conversations as any
             if (!conversations?.requestRestoreLink) {
                 return
             }
@@ -278,7 +278,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
             }
         },
         restoreFromUrlToken: async () => {
-            const conversations = posthog.conversations as any
+            const conversations = insights.conversations as any
             if (!conversations?.restoreFromUrlToken) {
                 return
             }

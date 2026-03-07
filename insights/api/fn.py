@@ -18,14 +18,14 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
     scope_object = "INTERNAL"
 
     def create(self, request, *args, **kwargs) -> Response:
-        hog = request.data.get("hog")
+        iql = request.data.get("iql")
         program = parse_program(fn)
         in_repl = request.data.get("in_repl", "false") in ("true", "True", True)
         locals = request.data.get("locals", []) or []
         try:
             compiled = create_bytecode(
                 program,
-                supported_functions={"sleep", "fetch", "postHogCapture", "run"},
+                supported_functions={"sleep", "fetch", "insightsCapture", "run"},
                 in_repl=in_repl,
                 locals=[Local(name=local[0], depth=local[1], is_captured=local[2]) for local in locals],
             )

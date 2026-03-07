@@ -85,10 +85,10 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
         description: 'Import external data and query it alongside your analytics data.',
         price_description: null,
         usage_key: 'rows_synced',
-        image_url: 'https://posthog.com/images/product/product-icons/data-warehouse.svg',
+        image_url: 'https://hanzo.ai/images/product/product-icons/data-warehouse.svg',
         screenshot_url: null,
         icon_key: 'IconBuilding',
-        docs_url: 'https://posthog.com/docs/data-warehouse',
+        docs_url: 'https://hanzo.ai/docs/data-warehouse',
         subscribed: false,
         plans: [
             {
@@ -96,8 +96,8 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
                 product_key: 'data_warehouse',
                 name: 'Free (beta)',
                 description: 'Import external data and query it alongside your analytics data.',
-                image_url: 'https://posthog.com/images/product/product-icons/data-warehouse.svg',
-                docs_url: 'https://posthog.com/docs/data-warehouse',
+                image_url: 'https://hanzo.ai/images/product/product-icons/data-warehouse.svg',
+                docs_url: 'https://hanzo.ai/docs/data-warehouse',
                 note: null,
                 unit: 'row',
                 flat_rate: false,

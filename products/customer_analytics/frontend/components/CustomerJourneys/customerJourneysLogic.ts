@@ -1,6 +1,6 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { LemonSelectOptions } from 'lib/lemon-ui/LemonSelect/LemonSelect'
@@ -84,7 +84,7 @@ export const customerJourneysLogic = kea<customerJourneysLogicType>([
             actions.selectFirstJourneyIfNeeded(journeys)
         },
         addJourneyFailure: ({ error }) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error(error || 'Failed to create customer journey')
         },
         deleteJourneySuccess: ({ journeys }) => {
@@ -92,7 +92,7 @@ export const customerJourneysLogic = kea<customerJourneysLogicType>([
             actions.selectFirstJourneyIfNeeded(journeys)
         },
         deleteJourneyFailure: ({ error }) => {
-            posthog.captureException(error)
+            insights.captureException(error)
             lemonToast.error('Failed to delete customer journey')
         },
         selectFirstJourneyIfNeeded: ({ journeys }) => {

@@ -84,12 +84,12 @@ def refresh_expiring_flags_cache_entries(self: PushGatewayTask) -> None:
 
     # Create metrics gauges for this task run
     successful_gauge = Gauge(
-        "posthog_flags_cache_refresh_successful_count",
+        "insights_flags_cache_refresh_successful_count",
         "Number of flags caches successfully refreshed",
         registry=self.metrics_registry,
     )
     failed_gauge = Gauge(
-        "posthog_flags_cache_refresh_failed_count",
+        "insights_flags_cache_refresh_failed_count",
         "Number of flags caches that failed to refresh",
         registry=self.metrics_registry,
     )
@@ -143,7 +143,7 @@ def cleanup_stale_flags_expiry_tracking_task(self: PushGatewayTask) -> None:
         return
 
     entries_cleaned_gauge = Gauge(
-        "posthog_cleanup_stale_flags_expiry_entries_cleaned",
+        "insights_cleanup_stale_flags_expiry_entries_cleaned",
         "Number of stale expiry tracking entries cleaned up",
         registry=self.metrics_registry,
     )
@@ -169,11 +169,11 @@ def compute_feature_flag_metrics(self: PushGatewayTask) -> None:
     Compute and push feature flag metrics for Grafana dashboards.
 
     Metrics:
-    - posthog_feature_flag_team_flag_count: Top 5 teams by active flag count
-    - posthog_feature_flag_team_largest_flag_bytes: OCTET_LENGTH for top 5 teams (ranked by pg_column_size)
-    - posthog_feature_flag_team_largest_flag_pg_bytes: pg_column_size for top 5 teams
-    - posthog_feature_flag_team_total_size_bytes: OCTET_LENGTH for top 5 teams (ranked by pg_column_size)
-    - posthog_feature_flag_team_total_size_pg_bytes: pg_column_size for top 5 teams
+    - insights_feature_flag_team_flag_count: Top 5 teams by active flag count
+    - insights_feature_flag_team_largest_flag_bytes: OCTET_LENGTH for top 5 teams (ranked by pg_column_size)
+    - insights_feature_flag_team_largest_flag_pg_bytes: pg_column_size for top 5 teams
+    - insights_feature_flag_team_total_size_bytes: OCTET_LENGTH for top 5 teams (ranked by pg_column_size)
+    - insights_feature_flag_team_total_size_pg_bytes: pg_column_size for top 5 teams
 
     Uses a two-phase query approach for size metrics:
     - Phase 1: Fast ranking with pg_column_size to select and rank the top 5 teams
@@ -188,35 +188,35 @@ def compute_feature_flag_metrics(self: PushGatewayTask) -> None:
         return
 
     flag_count_gauge = Gauge(
-        "posthog_feature_flag_team_flag_count",
+        "insights_feature_flag_team_flag_count",
         "Number of active feature flags per team (top 5)",
         labelnames=["rank", "team_id", "team_name"],
         registry=self.metrics_registry,
     )
 
     largest_flag_gauge = Gauge(
-        "posthog_feature_flag_team_largest_flag_bytes",
+        "insights_feature_flag_team_largest_flag_bytes",
         "Text representation size of the largest feature flag filter per team (top 5)",
         labelnames=["rank", "team_id", "team_name"],
         registry=self.metrics_registry,
     )
 
     largest_flag_pg_gauge = Gauge(
-        "posthog_feature_flag_team_largest_flag_pg_bytes",
+        "insights_feature_flag_team_largest_flag_pg_bytes",
         "PostgreSQL storage size of the largest feature flag filter per team (top 5, pg_column_size)",
         labelnames=["rank", "team_id", "team_name"],
         registry=self.metrics_registry,
     )
 
     total_size_gauge = Gauge(
-        "posthog_feature_flag_team_total_size_bytes",
+        "insights_feature_flag_team_total_size_bytes",
         "Total text representation size of all feature flag filters per team (top 5)",
         labelnames=["rank", "team_id", "team_name"],
         registry=self.metrics_registry,
     )
 
     total_size_pg_gauge = Gauge(
-        "posthog_feature_flag_team_total_size_pg_bytes",
+        "insights_feature_flag_team_total_size_pg_bytes",
         "PostgreSQL total storage size of all feature flag filters per team (top 5, pg_column_size)",
         labelnames=["rank", "team_id", "team_name"],
         registry=self.metrics_registry,

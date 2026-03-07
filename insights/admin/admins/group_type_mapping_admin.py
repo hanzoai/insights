@@ -21,6 +21,6 @@ class GroupTypeMappingAdmin(admin.ModelAdmin):
     def team_link(self, group_type_mapping: GroupTypeMapping):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[group_type_mapping.team.pk]),
+            reverse("admin:insights_team_change", args=[group_type_mapping.team.pk]),
             group_type_mapping.team.name,
         )

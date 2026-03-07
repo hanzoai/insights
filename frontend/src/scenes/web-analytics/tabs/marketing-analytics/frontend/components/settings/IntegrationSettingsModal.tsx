@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonModal, LemonTabs } from '@posthog/lemon-ui'
+import { LemonModal, LemonTabs } from '@hanzo/lemon-ui'
 
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 

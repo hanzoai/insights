@@ -1,9 +1,9 @@
-import { PluginConfigChoice, PluginConfigSchema } from '@posthog/plugin-scaffold'
+import { PluginConfigChoice, PluginConfigSchema } from '@hanzo/plugin-scaffold'
 
 import { PluginType } from '~/types'
 
-// Keep this in sync with: posthog/api/plugin.py
-export const SECRET_FIELD_VALUE = '**************** POSTHOG SECRET FIELD ****************'
+// Keep this in sync with: insights/api/plugin.py
+export const SECRET_FIELD_VALUE = '**************** INSIGHTS SECRET FIELD ****************'
 
 export function getConfigSchemaArray(
     configSchema: Record<string, PluginConfigSchema> | PluginConfigSchema[]

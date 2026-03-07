@@ -85,7 +85,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
     def test_login_precheck_returns_webauthn_credentials_for_user_with_verified_passkey(self):
         from insights.models.webauthn_credential import WebauthnCredential
 
-        user = User.objects.create_and_join(self.organization, "passkey_user@posthog.com", self.CONFIG_PASSWORD)
+        user = User.objects.create_and_join(self.organization, "passkey_user@hanzo.ai", self.CONFIG_PASSWORD)
         WebauthnCredential.objects.create(
             user=user,
             credential_id=b"test-credential-id-123",
@@ -97,7 +97,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "passkey_user@posthog.com"})
+        response = self.client.post("/api/login/precheck", {"email": "passkey_user@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -110,7 +110,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
     def test_login_precheck_does_not_return_unverified_webauthn_credentials(self):
         from insights.models.webauthn_credential import WebauthnCredential
 
-        user = User.objects.create_and_join(self.organization, "unverified_passkey@posthog.com", self.CONFIG_PASSWORD)
+        user = User.objects.create_and_join(self.organization, "unverified_passkey@hanzo.ai", self.CONFIG_PASSWORD)
         WebauthnCredential.objects.create(
             user=user,
             credential_id=b"unverified-credential-id",
@@ -122,14 +122,14 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=False,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "unverified_passkey@posthog.com"})
+        response = self.client.post("/api/login/precheck", {"email": "unverified_passkey@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
         self.assertEqual(response_data["webauthn_credentials"], [])
 
     def test_login_precheck_returns_empty_webauthn_credentials_for_unknown_user(self):
-        response = self.client.post("/api/login/precheck", {"email": "nonexistent@posthog.com"})
+        response = self.client.post("/api/login/precheck", {"email": "nonexistent@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -138,7 +138,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
     def test_login_precheck_returns_multiple_webauthn_credentials(self):
         from insights.models.webauthn_credential import WebauthnCredential
 
-        user = User.objects.create_and_join(self.organization, "multi_passkey@posthog.com", self.CONFIG_PASSWORD)
+        user = User.objects.create_and_join(self.organization, "multi_passkey@hanzo.ai", self.CONFIG_PASSWORD)
         WebauthnCredential.objects.create(
             user=user,
             credential_id=b"credential-1",
@@ -160,7 +160,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "multi_passkey@posthog.com"})
+        response = self.client.post("/api/login/precheck", {"email": "multi_passkey@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -176,7 +176,7 @@ class TestLoginAPI(APIBaseTest):
     CONFIG_AUTO_LOGIN = False
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_logs_in_with_email_and_password(self, mock_capture, mock_identify):
         self.user.is_email_verified = True
         self.user.save()
@@ -261,7 +261,7 @@ class TestLoginAPI(APIBaseTest):
         # Assert the email was sent.
         mock_send_email_verification.assert_called_once_with(self.user)
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_cant_login_with_incorrect_password(self, mock_capture):
         invalid_passwords = ["1234", "abcdefgh", "testpassword1234", "😈😈😈"]
 
@@ -278,11 +278,11 @@ class TestLoginAPI(APIBaseTest):
         # Events never get reported
         mock_capture.assert_not_called()
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_cant_login_with_incorrect_email(self, mock_capture):
         response = self.client.post(
             "/api/login",
-            {"email": "user2@posthog.com", "password": self.CONFIG_PASSWORD},
+            {"email": "user2@hanzo.ai", "password": self.CONFIG_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
@@ -319,14 +319,14 @@ class TestLoginAPI(APIBaseTest):
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_login_endpoint_is_protected_against_brute_force_attempts(self):
-        User.objects.create(email="new_user@posthog.com", password="87654321")
+        User.objects.create(email="new_user@hanzo.ai", password="87654321")
 
         # Fill the attempt limit
         with self.settings(AXES_ENABLED=True, AXES_FAILURE_LIMIT=3):
             for _ in range(0, 2):
                 response = self.client.post(
                     "/api/login",
-                    {"email": "new_user@posthog.com", "password": "invalid"},
+                    {"email": "new_user@hanzo.ai", "password": "invalid"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
                 self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
@@ -335,7 +335,7 @@ class TestLoginAPI(APIBaseTest):
                 response = self.client.get("/api/users/@me/")
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-            response = self.client.post("/api/login", {"email": "new_user@posthog.com", "password": "invalid"})
+            response = self.client.post("/api/login", {"email": "new_user@hanzo.ai", "password": "invalid"})
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(
                 response.json(),
@@ -349,21 +349,21 @@ class TestLoginAPI(APIBaseTest):
 
     def test_login_lockout_is_ip_based(self):
         """Verify brute force lockout applies per-IP, not globally"""
-        User.objects.create(email="locktest@posthog.com", password="87654321")
+        User.objects.create(email="locktest@hanzo.ai", password="87654321")
 
         with self.settings(AXES_ENABLED=True, AXES_FAILURE_LIMIT=3):
             # Lock out IP 1.1.1.1 with 3 failed attempts
             for _ in range(3):
                 self.client.post(
                     "/api/login",
-                    {"email": "locktest@posthog.com", "password": "invalid"},
+                    {"email": "locktest@hanzo.ai", "password": "invalid"},
                     REMOTE_ADDR="1.1.1.1",
                 )
 
             # Verify IP 1.1.1.1 is locked (403 even with correct credentials)
             response = self.client.post(
                 "/api/login",
-                {"email": "locktest@posthog.com", "password": "87654321"},
+                {"email": "locktest@hanzo.ai", "password": "87654321"},
                 REMOTE_ADDR="1.1.1.1",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -372,7 +372,7 @@ class TestLoginAPI(APIBaseTest):
             # Verify different IP 2.2.2.2 can still attempt login (not locked)
             response = self.client.post(
                 "/api/login",
-                {"email": "locktest@posthog.com", "password": "87654321"},
+                {"email": "locktest@hanzo.ai", "password": "87654321"},
                 REMOTE_ADDR="2.2.2.2",
             )
             # Second IP is not locked, so can attempt login
@@ -1064,7 +1064,7 @@ class TestTwoFactorAPI(APIBaseTest):
         self.user.save()
 
         # Create another user with their own passkey
-        other_user = User.objects.create_and_join(self.organization, "other_user@posthog.com", self.CONFIG_PASSWORD)
+        other_user = User.objects.create_and_join(self.organization, "other_user@hanzo.ai", self.CONFIG_PASSWORD)
         other_credential = WebauthnCredential.objects.create(
             user=other_user,
             credential_id=b"other-user-credential",
@@ -1114,11 +1114,11 @@ class TestPasswordResetAPI(APIBaseTest):
     # Password reset request
 
     @freeze_time("2021-10-05T12:00:00")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_anonymous_user_can_request_password_reset(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
 
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
             response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content.decode(), "")
@@ -1138,17 +1138,17 @@ class TestPasswordResetAPI(APIBaseTest):
         html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
         self.validate_basic_html(
             html_message,
-            "https://my.posthog.net",
+            "https://my.insights.net",
             preheader="Please follow the link inside to reset your password.",
         )
 
         # validate reset token
-        link_index = html_message.find("https://my.posthog.net/reset")
+        link_index = html_message.find("https://my.insights.net/reset")
         reset_link = html_message[link_index : html_message.find('"', link_index)]
         self.assertTrue(
             password_reset_token_generator.check_token(
                 self.user,
-                reset_link.replace("https://my.posthog.net/reset/", "").replace(f"{self.user.uuid}/", ""),
+                reset_link.replace("https://my.insights.net/reset/", "").replace(f"{self.user.uuid}/", ""),
             )
         )
 
@@ -1170,7 +1170,7 @@ class TestPasswordResetAPI(APIBaseTest):
             extra_data='"{"expires": 3599, "auth_time": 1633412833, "token_type": "Bearer", "access_token": "ya29"}"',
         )
 
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
             response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -1179,29 +1179,29 @@ class TestPasswordResetAPI(APIBaseTest):
         html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
         self.validate_basic_html(
             html_message,
-            "https://my.posthog.net",
+            "https://my.insights.net",
             preheader="Please follow the link inside to reset your password.",
         )
 
         # validate reset token
-        link_index = html_message.find("https://my.posthog.net/reset")
+        link_index = html_message.find("https://my.insights.net/reset")
         reset_link = html_message[link_index : html_message.find('"', link_index)]
         self.assertTrue(
             password_reset_token_generator.check_token(
                 self.user,
-                reset_link.replace(f"https://my.posthog.net/reset/{self.user.uuid}/", ""),
+                reset_link.replace(f"https://my.insights.net/reset/{self.user.uuid}/", ""),
             )
         )
 
         # check we mention SSO providers
         self.assertIn("Google, GitHub", html_message)
-        self.assertIn("https://my.posthog.net/login", html_message)  # CTA link
+        self.assertIn("https://my.insights.net/login", html_message)  # CTA link
 
     def test_success_response_even_on_invalid_email(self):
         set_instance_setting("EMAIL_HOST", "localhost")
 
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
-            response = self.client.post("/api/reset/", {"email": "i_dont_exist@posthog.com"})
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
+            response = self.client.post("/api/reset/", {"email": "i_dont_exist@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # No emails should be sent
@@ -1209,7 +1209,7 @@ class TestPasswordResetAPI(APIBaseTest):
 
     def test_cant_reset_if_email_is_not_configured(self):
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            response = self.client.post("/api/reset/", {"email": "i_dont_exist@posthog.com"})
+            response = self.client.post("/api/reset/", {"email": "i_dont_exist@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1225,7 +1225,7 @@ class TestPasswordResetAPI(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
 
         for i in range(7):
-            with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+            with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
                 response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
             if i < 6:
                 self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -1243,9 +1243,9 @@ class TestPasswordResetAPI(APIBaseTest):
     def test_is_rate_limited_on_email_not_ip(self):
         set_instance_setting("EMAIL_HOST", "localhost")
 
-        for email in ["email@posthog.com", "other-email@posthog.com"]:
+        for email in ["email@hanzo.ai", "other-email@hanzo.ai"]:
             for i in range(7):
-                with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.posthog.net"):
+                with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
                     response = self.client.post("/api/reset/", {"email": email})
                 if i < 6:
                     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -1307,7 +1307,7 @@ class TestPasswordResetAPI(APIBaseTest):
     # Password reset completion
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_user_can_reset_password(self, mock_capture, mock_identify):
         self.client.logout()  # extra precaution to test login
 
@@ -1722,7 +1722,7 @@ class TestTimeSensitivePermissions(APIBaseTest):
 class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
     def setUp(self):
         super().setUp()  # Call the setup from APIBaseTest
-        self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+        self.team.secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
         self.team.save()
         self.factory = APIRequestFactory()  # Use APIRequestFactory instead of RequestFactory
 
@@ -1776,7 +1776,7 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
 
     def test_authenticate_with_invalid_secret_api_key(self):
         # Simulate a request with an invalid secret API key
-        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer phs_NOT_A_VALID_KEY")
+        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer his_NOT_A_VALID_KEY")
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
         authenticator = ProjectSecretAPIKeyAuthentication()
@@ -1858,7 +1858,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_test_access_token_123",
+            token="hia_test_access_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -1882,7 +1882,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
     def test_authenticate_with_invalid_oauth_token(self):
         wsgi_request = self.factory.get(
             "/",
-            headers={"AUTHORIZATION": "Bearer pha_invalid_token_123"},
+            headers={"AUTHORIZATION": "Bearer hia_invalid_token_123"},
         )
         request = Request(wsgi_request)
 
@@ -1897,7 +1897,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         expired_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_expired_token_123",
+            token="hia_expired_token_123",
             expires=timezone.now() - timedelta(hours=1),
             scope="openid profile",
         )
@@ -1991,7 +1991,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         invalid_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=None,  # This will cause a validation error
-            token="pha_invalid_app_token_123",
+            token="hia_invalid_app_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -2016,7 +2016,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         token_without_user = OAuthAccessToken.objects.create(
             user=None,
             application=self.oauth_app,
-            token="pha_no_user_token_123",
+            token="hia_no_user_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -2069,8 +2069,8 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
                 access_method="oauth",
             )
 
-    def test_authenticate_without_pha_prefix_returns_none(self):
-        """Test that tokens without the pha_ prefix are skipped by OAuth authentication,
+    def test_authenticate_without_hia_prefix_returns_none(self):
+        """Test that tokens without the hia_ prefix are skipped by OAuth authentication,
         allowing PersonalAPIKeyAuthentication to handle them."""
         wsgi_request = self.factory.get(
             "/",

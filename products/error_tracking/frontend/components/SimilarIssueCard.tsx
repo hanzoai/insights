@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { ReactNode } from 'react'
 
-import { IconDirectedGraph, IconOpenSidebar } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconDirectedGraph, IconOpenSidebar } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -83,7 +83,7 @@ export function MergeAction({ onClick }: { onClick: () => void }): JSX.Element {
             icon={<IconDirectedGraph />}
             onClick={onClick}
             tooltip="Merge this issue into the current one"
-            tooltipDocLink="https://posthog.com/docs/error-tracking/fingerprints"
+            tooltipDocLink="https://hanzo.ai/docs/error-tracking/fingerprints"
         />
     )
 }

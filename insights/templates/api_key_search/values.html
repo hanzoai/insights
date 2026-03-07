@@ -67,9 +67,9 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><a href="/admin/posthog/personalapikey/{{ personal_api_key_object.id }}/change/">Personal API Key ({{ personal_api_key_hash_mode }})</a></td>
-                            <td><a href="/admin/posthog/personalapikey/{{ personal_api_key_object.id }}/change/">{{ personal_api_key_object.label }}</a></td>
-                            <td><a href="/admin/posthog/user/{{ personal_api_key_object.user.id }}/change/">{{ personal_api_key_object.user.email }}</a></td>
+                            <td><a href="/admin/insights/personalapikey/{{ personal_api_key_object.id }}/change/">Personal API Key ({{ personal_api_key_hash_mode }})</a></td>
+                            <td><a href="/admin/insights/personalapikey/{{ personal_api_key_object.id }}/change/">{{ personal_api_key_object.label }}</a></td>
+                            <td><a href="/admin/insights/user/{{ personal_api_key_object.user.id }}/change/">{{ personal_api_key_object.user.email }}</a></td>
                             <td>{{ personal_api_key_object.scopes }}</td>
                             <td>
                                 {% if personal_api_key_object.scoped_organizations %}
@@ -106,7 +106,7 @@
                                 (Backup)
                                 {% endif %}
                             </td>
-                            <td><a href="/admin/posthog/team/{{ team_object.id }}/change/">{{ team_object.name }}</a></td>
+                            <td><a href="/admin/insights/team/{{ team_object.id }}/change/">{{ team_object.name }}</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -136,17 +136,17 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><a href="/admin/posthog/oauthaccesstoken/{{ oauth_access_token_object.id }}/change/">OAuth Access Token</a></td>
+                            <td><a href="/admin/insights/oauthaccesstoken/{{ oauth_access_token_object.id }}/change/">OAuth Access Token</a></td>
                             <td>
                                 {% if oauth_access_token_object.user %}
-                                <a href="/admin/posthog/user/{{ oauth_access_token_object.user.id }}/change/">{{ oauth_access_token_object.user.email }}</a>
+                                <a href="/admin/insights/user/{{ oauth_access_token_object.user.id }}/change/">{{ oauth_access_token_object.user.email }}</a>
                                 {% else %}
                                 -
                                 {% endif %}
                             </td>
                             <td>
                                 {% if oauth_access_token_object.application %}
-                                <a href="/admin/posthog/oauthapplication/{{ oauth_access_token_object.application.id }}/change/">{{ oauth_access_token_object.application.name }}</a>
+                                <a href="/admin/insights/oauthapplication/{{ oauth_access_token_object.application.id }}/change/">{{ oauth_access_token_object.application.name }}</a>
                                 {% else %}
                                 -
                                 {% endif %}
@@ -180,17 +180,17 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><a href="/admin/posthog/oauthrefreshtoken/{{ oauth_refresh_token_object.id }}/change/">OAuth Refresh Token</a></td>
+                            <td><a href="/admin/insights/oauthrefreshtoken/{{ oauth_refresh_token_object.id }}/change/">OAuth Refresh Token</a></td>
                             <td>
                                 {% if oauth_refresh_token_object.user %}
-                                <a href="/admin/posthog/user/{{ oauth_refresh_token_object.user.id }}/change/">{{ oauth_refresh_token_object.user.email }}</a>
+                                <a href="/admin/insights/user/{{ oauth_refresh_token_object.user.id }}/change/">{{ oauth_refresh_token_object.user.email }}</a>
                                 {% else %}
                                 -
                                 {% endif %}
                             </td>
                             <td>
                                 {% if oauth_refresh_token_object.application %}
-                                <a href="/admin/posthog/oauthapplication/{{ oauth_refresh_token_object.application.id }}/change/">{{ oauth_refresh_token_object.application.name }}</a>
+                                <a href="/admin/insights/oauthapplication/{{ oauth_refresh_token_object.application.id }}/change/">{{ oauth_refresh_token_object.application.name }}</a>
                                 {% else %}
                                 -
                                 {% endif %}

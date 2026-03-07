@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
 

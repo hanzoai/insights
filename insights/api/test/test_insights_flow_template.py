@@ -584,7 +584,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         other_org = Organization.objects.create(name="Other Org")
         other_org_team = Team.objects.create(organization=other_org, name="Other Org Team")
-        other_user = User.objects.create_and_join(other_org, "other-org-user@posthog.com", "testpassword12345")
+        other_user = User.objects.create_and_join(other_org, "other-org-user@hanzo.ai", "testpassword12345")
         self.client.force_login(other_user)
 
         response = self.client.get(f"/api/projects/{other_org_team.id}/insights_flow_templates")
@@ -604,7 +604,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         other_org = Organization.objects.create(name="Other Org")
         other_org_team = Team.objects.create(organization=other_org, name="Other Org Team")
-        other_user = User.objects.create_and_join(other_org, "other-org-user2@posthog.com", "testpassword12345")
+        other_user = User.objects.create_and_join(other_org, "other-org-user2@hanzo.ai", "testpassword12345")
         self.client.force_login(other_user)
 
         update_data = self._create_insights_flow_data()

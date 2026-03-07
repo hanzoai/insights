@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/react'
 import { useRef } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { ScrollableShadows } from './ScrollableShadows'
 

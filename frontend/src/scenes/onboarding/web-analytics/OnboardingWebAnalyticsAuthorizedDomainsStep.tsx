@@ -31,8 +31,8 @@ export const OnboardingWebAnalyticsAuthorizedDomainsStep: OnboardingStepComponen
                 the domains you'll install Insights at. These are also the URLs where our toolbar will be enabled.
             </p>
             <p>
-                <b>Wildcards are not allowed</b> (example: <code>https://*.posthog.com</code>). The domain needs to be
-                something concrete that can be launched (example: <code>https://app.posthog.com</code>).
+                <b>Wildcards are not allowed</b> (example: <code>https://*.hanzo.ai</code>). The domain needs to be
+                something concrete that can be launched (example: <code>https://insights.hanzo.ai</code>).
             </p>
 
             <AuthorizedUrlList

@@ -1,6 +1,6 @@
 import { ItemCategory, ItemRenderer, TimelineItem } from '..'
 
-import { IconGraph } from '@posthog/icons'
+import { IconGraph } from '@hanzo/icons'
 
 import { ErrorTrackingRuntime } from 'lib/components/Errors/types'
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'

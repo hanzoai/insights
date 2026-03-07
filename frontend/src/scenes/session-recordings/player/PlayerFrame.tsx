@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { Handler, viewportResizeDimension } from '@posthog/rrweb-types'
+import { Handler, viewportResizeDimension } from '@hanzo/rrweb-types'
 
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 

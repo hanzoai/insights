@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconWarning } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconWarning } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -503,7 +503,7 @@ export function InsightValidationError({
                 <div className="mt-4">
                     <Link
                         data-attr="insight-funnels-emptystate-help"
-                        to="https://posthog.com/docs/user-guides/funnels?utm_medium=in-product&utm_campaign=funnel-exclusion-filter-state"
+                        to="https://hanzo.ai/docs/user-guides/funnels?utm_medium=in-product&utm_campaign=funnel-exclusion-filter-state"
                         target="_blank"
                     >
                         Learn more about funnels in Insights docs
@@ -635,7 +635,7 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
             <div className="mt-3">
                 <Link
                     data-attr="funnels-single-step-help"
-                    to="https://posthog.com/docs/user-guides/funnels?utm_medium=in-product&utm_campaign=funnel-empty-state"
+                    to="https://hanzo.ai/docs/user-guides/funnels?utm_medium=in-product&utm_campaign=funnel-empty-state"
                     target="_blank"
                     className="flex items-center justify-center"
                     targetBlankIcon

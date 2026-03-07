@@ -1,5 +1,5 @@
-import { IconPlus, IconShortcut } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconPlus, IconShortcut } from '@hanzo/icons'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
 

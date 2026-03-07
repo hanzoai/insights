@@ -1,4 +1,4 @@
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { EndpointVersionType } from '~/types'
 

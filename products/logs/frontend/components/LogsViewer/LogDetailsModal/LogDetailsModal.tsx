@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconX } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonModal, LemonTabs } from '@posthog/lemon-ui'
+import { IconCopy, IconX } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonModal, LemonTabs } from '@hanzo/lemon-ui'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { TZLabel } from 'lib/components/TZLabel'

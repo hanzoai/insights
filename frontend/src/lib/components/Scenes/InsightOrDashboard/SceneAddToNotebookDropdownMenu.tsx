@@ -1,4 +1,4 @@
-import { IconPlusSmall } from '@posthog/icons'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from 'lib/ui/DropdownMenu/DropdownMenu'

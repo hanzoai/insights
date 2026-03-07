@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconChevronRight } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonTag, Spinner } from '@posthog/lemon-ui'
-import { Link } from '@posthog/lemon-ui'
+import { IconChevronRight } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonTag, Spinner } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/stripMarkdown'
@@ -15,7 +15,7 @@ export function TicketsList(): JSX.Element {
     const { tickets, ticketsLoading } = useValues(sidepanelTicketsLogic)
     const { setCurrentTicket, setView } = useActions(sidepanelTicketsLogic)
 
-    if (!posthog.conversations || !posthog.conversations.isAvailable()) {
+    if (!insights.conversations || !insights.conversations.isAvailable()) {
         return (
             <div className="text-center text-muted-alt py-8">
                 <p>Conversations are not available for this team.</p>

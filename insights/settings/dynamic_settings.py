@@ -1,11 +1,11 @@
 from insights.settings.utils import get_from_env, str_to_bool
 
-CONSTANCE_DATABASE_PREFIX = "constance:posthog:"
+CONSTANCE_DATABASE_PREFIX = "constance:insights:"
 
 # Warning: Dynamically updating these settings should only be done through the API.
 # CONSTANCE_CONFIG: https://django-constance.readthedocs.io/en/latest/
 #
-# To edit, visit: ${SITE_URL}/admin/posthog/instancesetting/
+# To edit, visit: ${SITE_URL}/admin/insights/instancesetting/
 
 CONSTANCE_CONFIG = {
     "RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS": (
@@ -63,9 +63,9 @@ CONSTANCE_CONFIG = {
         "(Advanced) Whether having an async migration running, errored or required should prevent upgrades.",
         bool,
     ),
-    "ASYNC_MIGRATIONS_IGNORE_POSTHOG_VERSION": (
-        get_from_env("ASYNC_MIGRATIONS_IGNORE_POSTHOG_VERSION", False, type_cast=str_to_bool),
-        "(Advanced) Whether to ignore async migrations posthog version restrictions",
+    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION": (
+        get_from_env("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION", False, type_cast=str_to_bool),
+        "(Advanced) Whether to ignore async migrations insights version restrictions",
         bool,
     ),
     "STRICT_CACHING_TEAMS": (
@@ -172,7 +172,7 @@ CONSTANCE_CONFIG = {
     ),
     "REDIRECT_APP_TO_US": (
         get_from_env("REDIRECT_APP_TO_US", False, type_cast=str_to_bool),
-        "Temporary option to redirect all app traffic from app.posthog.com to us.posthog.com.",
+        "Temporary option to redirect all app traffic from insights.hanzo.ai to insights.hanzo.ai.",
         bool,
     ),
     "WEB_ANALYTICS_WARMING_DAYS": (
@@ -200,7 +200,7 @@ SETTINGS_ALLOWING_API_OVERRIDE = (
     "ASYNC_MIGRATIONS_DISABLE_AUTO_ROLLBACK",
     "ASYNC_MIGRATIONS_AUTO_CONTINUE",
     "ASYNC_MIGRATIONS_BLOCK_UPGRADE",
-    "ASYNC_MIGRATIONS_IGNORE_POSTHOG_VERSION",
+    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION",
     "EMAIL_ENABLED",
     "EMAIL_HOST",
     "EMAIL_PORT",

@@ -161,7 +161,7 @@ def _emit_metrics(integrity_results: Counter) -> None:
     from statshog.defaults.django import statsd
 
     for key, value in integrity_results.items():
-        statsd.gauge(f"posthog_person_integrity_{key}", value)
+        statsd.gauge(f"insights_person_integrity_{key}", value)
 
 
 def _index_by(collection: list[Any], key_fn: Any, flat: bool = True) -> dict:

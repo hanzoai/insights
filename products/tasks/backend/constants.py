@@ -1,8 +1,8 @@
 DEFAULT_TRUSTED_DOMAINS = [
     # Insights Services
     "insights.com",
-    "us.posthog.com",
-    "eu.posthog.com",
+    "insights.hanzo.ai",
+    "insights.hanzo.ai",
     # Version Control
     "github.com",
     "www.github.com",

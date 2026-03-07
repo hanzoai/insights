@@ -40,7 +40,7 @@ You can create an API key in your [Mailchimp account settings](https://us1.admin
 The API key format is: `key-dc` (e.g., `abc123def456-us6`), where `dc` is the data center for your account.
 """,
             iconPath="/static/services/mailchimp.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/mailchimp",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/mailchimp",
             fields=cast(
                 list[FieldType],
                 [

@@ -62,7 +62,7 @@ const MULTIPLE_CHOICE_SURVEY: Survey = {
         uuid: '018aa8a6-10e8-0000-dba2-0e956f7bae38',
         distinct_id: 'TGqg9Cn4jLkj9X87oXni9ZPBD6VbOxMtGV1GfJeB5LO',
         first_name: 'test',
-        email: 'test@posthog.com',
+        email: 'test@hanzo.ai',
         is_email_verified: false,
     },
     start_date: '2023-10-12T06:46:34.482000Z',
@@ -114,7 +114,7 @@ describe('set response-based survey branching', () => {
             uuid: '018aa8a6-10e8-0000-dba2-0e956f7bae38',
             distinct_id: 'TGqg9Cn4jLkj9X87oXni9ZPBD6VbOxMtGV1GfJeB5LO',
             first_name: 'test',
-            email: 'test@posthog.com',
+            email: 'test@hanzo.ai',
             is_email_verified: false,
         },
         start_date: '2023-10-12T06:46:34.482000Z',
@@ -1027,7 +1027,7 @@ describe('survey filters', () => {
         const propertyFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },
@@ -1045,7 +1045,7 @@ describe('survey filters', () => {
                         properties: expect.arrayContaining([
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: PropertyOperator.Exact,
                                 type: PropertyFilterType.Person,
                             },
@@ -1060,7 +1060,7 @@ describe('survey filters', () => {
         const initialFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },
@@ -1078,7 +1078,7 @@ describe('survey filters', () => {
                         properties: expect.arrayContaining([
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: PropertyOperator.Exact,
                                 type: PropertyFilterType.Person,
                             },
@@ -1122,7 +1122,7 @@ describe('survey filters', () => {
         const multipleFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },
@@ -1146,7 +1146,7 @@ describe('survey filters', () => {
                         properties: expect.arrayContaining([
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: PropertyOperator.Exact,
                                 type: PropertyFilterType.Person,
                             },
@@ -1214,7 +1214,7 @@ describe('survey filters', () => {
         const mixedFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },
@@ -1239,7 +1239,7 @@ describe('survey filters', () => {
                         properties: expect.arrayContaining([
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: PropertyOperator.Exact,
                                 type: PropertyFilterType.Person,
                             },
@@ -1260,7 +1260,7 @@ describe('survey filters', () => {
         const propertyFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },
@@ -1286,7 +1286,7 @@ describe('survey filters', () => {
                             // Our new filter should be present
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: PropertyOperator.Exact,
                                 type: PropertyFilterType.Person,
                             },
@@ -1334,7 +1334,7 @@ describe('URL parameter synchronization', () => {
         const propertyFilters: AnyPropertyFilter[] = [
             {
                 key: 'email',
-                value: 'test@posthog.com',
+                value: 'test@hanzo.ai',
                 operator: PropertyOperator.Exact,
                 type: PropertyFilterType.Person,
             },

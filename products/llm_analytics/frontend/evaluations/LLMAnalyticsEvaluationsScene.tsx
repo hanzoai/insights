@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconCopy, IconPencil, IconPlus, IconSearch, IconTrash } from '@posthog/icons'
+import { IconCopy, IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -12,7 +12,7 @@ import {
     LemonTabs,
     LemonTag,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
@@ -331,7 +331,7 @@ export function LLMAnalyticsEvaluationsScene({ tabId }: { tabId?: string }): JSX
                         }}
                         actions={
                             <LemonButton
-                                to="https://posthog.com/docs/llm-analytics/evaluations"
+                                to="https://hanzo.ai/docs/llm-analytics/evaluations"
                                 type="secondary"
                                 targetBlank
                                 size="small"

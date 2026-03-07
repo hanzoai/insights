@@ -40,8 +40,8 @@ class PersistedFolder(models.Model):
     class Meta:
         unique_together = (("team", "user", "type"),)
         indexes = [
-            models.Index(F("team_id"), F("user_id"), name="posthog_pf_team_user"),
-            models.Index(F("team_id"), F("user_id"), F("type"), name="posthog_pf_team_user_type"),
+            models.Index(F("team_id"), F("user_id"), name="insights_pf_team_user"),
+            models.Index(F("team_id"), F("user_id"), F("type"), name="insights_pf_team_user_type"),
         ]
         verbose_name = "Persisted Folder"
         verbose_name_plural = "Persisted Folders"

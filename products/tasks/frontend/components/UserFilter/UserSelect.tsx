@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonDropdown, ProfilePicture } from '@posthog/lemon-ui'
+import { LemonDropdown, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { UserDropdown } from './UserDropdown'
 import { UserAssignee, userSelectLogic } from './userSelectLogic'

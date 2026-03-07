@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.cache import cache, caches
 
 import structlog
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from prometheus_client import Counter, Histogram
 
 from insights.models.team.team import Team
@@ -46,20 +46,20 @@ def get_cache_writer_url(cache_alias: str) -> str:
 
 
 CACHE_SYNC_COUNTER = Counter(
-    "posthog_hypercache_sync",
+    "insights_hypercache_sync",
     "Number of times the hypercache cache sync task has been run",
     labelnames=["result", "namespace", "value"],
 )
 
 CACHE_SYNC_DURATION_HISTOGRAM = Histogram(
-    "posthog_hypercache_sync_duration_seconds",
+    "insights_hypercache_sync_duration_seconds",
     "Time taken to sync hypercache in seconds",
     labelnames=["result", "namespace", "value"],
     buckets=(0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0, float("inf")),
 )
 
 CACHE_SYNC_SIZE_HISTOGRAM = Histogram(
-    "posthog_hypercache_sync_size_bytes",
+    "insights_hypercache_sync_size_bytes",
     "Size of hypercache entries in bytes",
     labelnames=["result", "namespace", "value"],
     buckets=(
@@ -76,7 +76,7 @@ CACHE_SYNC_SIZE_HISTOGRAM = Histogram(
 )
 
 HYPERCACHE_CACHE_COUNTER = Counter(
-    "posthog_hypercache_get_from_cache",
+    "insights_hypercache_get_from_cache",
     "Metric tracking whether a hypercache was fetched from cache or not",
     labelnames=["result", "namespace", "value"],
 )

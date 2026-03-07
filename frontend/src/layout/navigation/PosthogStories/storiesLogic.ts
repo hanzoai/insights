@@ -7,14 +7,14 @@ import type { storiesLogicType } from './storiesLogicType'
 import type { storyGroup } from './storiesMap'
 import { storiesMap } from './storiesMap'
 
-const STORAGE_KEY = 'posthog_stories_viewed'
+const STORAGE_KEY = 'insights_stories_viewed'
 
 export interface ViewedStories {
     storyIds: string[]
 }
 
 export const storiesLogic = kea<storiesLogicType>([
-    path(['layout', 'navigation', 'PosthogStories', 'storiesLogic']),
+    path(['layout', 'navigation', 'InsightsStories', 'storiesLogic']),
     actions({
         setActiveGroupIndex: (groupIndex: number) => ({ groupIndex }),
         setActiveStoryIndex: (storyIndex: number) => ({ storyIndex }),

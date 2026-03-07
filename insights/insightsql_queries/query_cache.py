@@ -80,28 +80,28 @@ def _is_short_lived_context() -> bool:
 def _create_cache_metrics(registry: Optional[CollectorRegistry] = None) -> CacheMetrics:
     """Create all cache metrics with optional registry."""
     hit_counter = Counter(
-        name="posthog_query_cache_hit_total",
+        name="insights_query_cache_hit_total",
         documentation="Whether we could fetch the query from the cache or not.",
         labelnames=[LABEL_TEAM_ID, "cache_hit", "trigger", "backend"],
         registry=registry,
     )
 
     write_counter = Counter(
-        name="posthog_query_cache_write_total",
+        name="insights_query_cache_write_total",
         documentation="When a query result was persisted in the cache.",
         labelnames=[LABEL_TEAM_ID, "backend"],
         registry=registry,
     )
 
     bytes_counter = Counter(
-        name="posthog_query_cache_write_bytes_total",
+        name="insights_query_cache_write_bytes_total",
         documentation="Total bytes written to cache (uncompressed JSON)",
         labelnames=[LABEL_TEAM_ID, "backend"],
         registry=registry,
     )
 
     size_histogram = Histogram(
-        name="posthog_query_cache_write_size_bytes",
+        name="insights_query_cache_write_size_bytes",
         documentation="Distribution of cache write data sizes in bytes (uncompressed JSON)",
         labelnames=[LABEL_TEAM_ID, "backend"],
         buckets=[

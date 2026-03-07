@@ -28,7 +28,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     language: 'swift',
                                     file: 'AppDelegate.swift',
                                     code: dedent`
-                                        let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                        let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
                                         config.captureScreenViews = true
                                         InsightsSDK.shared.setup(config)
                                     `,

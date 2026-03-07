@@ -29,7 +29,7 @@ import { ActivityScope, AnyPropertyFilter, Breadcrumb, InsightLogicProps } from 
 import { llmAnalyticsSharedLogic } from './llmAnalyticsSharedLogic'
 import type { llmAnalyticsTraceLogicType } from './llmAnalyticsTraceLogicType'
 
-const teamId = window.POSTHOG_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}__` }
 
 export enum DisplayOption {

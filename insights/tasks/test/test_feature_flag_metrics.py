@@ -38,7 +38,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         flag_count = self.registry.get_sample_value(
-            "posthog_feature_flag_team_flag_count",
+            "insights_feature_flag_team_flag_count",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         assert flag_count == 1
@@ -72,7 +72,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         flag_count = self.registry.get_sample_value(
-            "posthog_feature_flag_team_flag_count",
+            "insights_feature_flag_team_flag_count",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         assert flag_count == 1
@@ -100,13 +100,13 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         rank1_count = self.registry.get_sample_value(
-            "posthog_feature_flag_team_flag_count",
+            "insights_feature_flag_team_flag_count",
             {"rank": "1", "team_id": str(team_with_many.pk), "team_name": "Many Flags Team"},
         )
         assert rank1_count == 5
 
         rank2_count = self.registry.get_sample_value(
-            "posthog_feature_flag_team_flag_count",
+            "insights_feature_flag_team_flag_count",
             {"rank": "2", "team_id": str(team_with_few.pk), "team_name": "Few Flags Team"},
         )
         assert rank2_count == 1
@@ -129,7 +129,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         largest_flag_bytes = self.registry.get_sample_value(
-            "posthog_feature_flag_team_largest_flag_bytes",
+            "insights_feature_flag_team_largest_flag_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         assert largest_flag_bytes is not None
@@ -147,7 +147,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         total_size = self.registry.get_sample_value(
-            "posthog_feature_flag_team_total_size_bytes",
+            "insights_feature_flag_team_total_size_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         assert total_size is not None
@@ -173,7 +173,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
                 for metric in self.registry.collect()
                 if hasattr(metric, "samples")
                 for sample in metric.samples
-                if sample.name == "posthog_feature_flag_team_flag_count" and sample.labels.get("rank") == str(rank)
+                if sample.name == "insights_feature_flag_team_flag_count" and sample.labels.get("rank") == str(rank)
             ]
             assert len(samples) == 1
 
@@ -183,7 +183,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
                 for metric in self.registry.collect()
                 if hasattr(metric, "samples")
                 for sample in metric.samples
-                if sample.name == "posthog_feature_flag_team_flag_count" and sample.labels.get("rank") == str(rank)
+                if sample.name == "insights_feature_flag_team_flag_count" and sample.labels.get("rank") == str(rank)
             ]
             assert len(samples) == 0
 
@@ -200,7 +200,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
         compute_feature_flag_metrics()
 
         flag_count = self.registry.get_sample_value(
-            "posthog_feature_flag_team_flag_count",
+            "insights_feature_flag_team_flag_count",
             {"rank": "1", "team_id": str(team_no_name.pk), "team_name": "Unknown"},
         )
         assert flag_count == 1
@@ -216,7 +216,7 @@ class TestComputeFeatureFlagMetrics(BaseTest):
             for metric in samples
             if hasattr(metric, "samples")
             for sample in metric.samples
-            if sample.name == "posthog_feature_flag_team_flag_count"
+            if sample.name == "insights_feature_flag_team_flag_count"
         ]
         assert len(flag_count_samples) == 0
 
@@ -246,14 +246,14 @@ class TestComputeFeatureFlagMetrics(BaseTest):
 
         # Team with larger flag should be ranked first
         rank1_size = self.registry.get_sample_value(
-            "posthog_feature_flag_team_largest_flag_bytes",
+            "insights_feature_flag_team_largest_flag_bytes",
             {"rank": "1", "team_id": str(team_large.pk), "team_name": "Large Flag Team"},
         )
         assert rank1_size is not None
         assert rank1_size > 1000
 
         rank2_size = self.registry.get_sample_value(
-            "posthog_feature_flag_team_largest_flag_bytes",
+            "insights_feature_flag_team_largest_flag_bytes",
             {"rank": "2", "team_id": str(team_small.pk), "team_name": "Small Flag Team"},
         )
         assert rank2_size is not None
@@ -285,13 +285,13 @@ class TestComputeFeatureFlagMetrics(BaseTest):
 
         # Team with larger total should be ranked first
         rank1_total = self.registry.get_sample_value(
-            "posthog_feature_flag_team_total_size_bytes",
+            "insights_feature_flag_team_total_size_bytes",
             {"rank": "1", "team_id": str(team_large_total.pk), "team_name": "Large Total Team"},
         )
         assert rank1_total is not None
 
         rank2_total = self.registry.get_sample_value(
-            "posthog_feature_flag_team_total_size_bytes",
+            "insights_feature_flag_team_total_size_bytes",
             {"rank": "2", "team_id": str(team_small_total.pk), "team_name": "Small Total Team"},
         )
         assert rank2_total is not None
@@ -317,11 +317,11 @@ class TestComputeFeatureFlagMetrics(BaseTest):
 
         # Check all five metrics have exactly 5 entries (ranks 1-5)
         metric_names = [
-            "posthog_feature_flag_team_flag_count",
-            "posthog_feature_flag_team_largest_flag_bytes",
-            "posthog_feature_flag_team_largest_flag_pg_bytes",
-            "posthog_feature_flag_team_total_size_bytes",
-            "posthog_feature_flag_team_total_size_pg_bytes",
+            "insights_feature_flag_team_flag_count",
+            "insights_feature_flag_team_largest_flag_bytes",
+            "insights_feature_flag_team_largest_flag_pg_bytes",
+            "insights_feature_flag_team_total_size_bytes",
+            "insights_feature_flag_team_total_size_pg_bytes",
         ]
 
         for metric_name in metric_names:
@@ -366,11 +366,11 @@ class TestComputeFeatureFlagMetrics(BaseTest):
 
         # Both metrics should be reported
         largest_flag_bytes = self.registry.get_sample_value(
-            "posthog_feature_flag_team_largest_flag_bytes",
+            "insights_feature_flag_team_largest_flag_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         largest_flag_pg_bytes = self.registry.get_sample_value(
-            "posthog_feature_flag_team_largest_flag_pg_bytes",
+            "insights_feature_flag_team_largest_flag_pg_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
 
@@ -395,11 +395,11 @@ class TestComputeFeatureFlagMetrics(BaseTest):
 
         # Both metrics should be reported
         total_size = self.registry.get_sample_value(
-            "posthog_feature_flag_team_total_size_bytes",
+            "insights_feature_flag_team_total_size_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
         total_pg_size = self.registry.get_sample_value(
-            "posthog_feature_flag_team_total_size_pg_bytes",
+            "insights_feature_flag_team_total_size_pg_bytes",
             {"rank": "1", "team_id": str(self.team.pk), "team_name": self.team.name},
         )
 
@@ -429,6 +429,6 @@ class TestComputeFeatureFlagMetrics(BaseTest):
             for metric in samples
             if hasattr(metric, "samples")
             for sample in metric.samples
-            if sample.name == "posthog_feature_flag_team_flag_count"
+            if sample.name == "insights_feature_flag_team_flag_count"
         ]
         assert len(flag_count_samples) == 0

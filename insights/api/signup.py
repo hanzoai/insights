@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.urls.base import reverse
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import exceptions, generics, permissions, response, serializers, status
 from rest_framework.request import Request
 from social_core.pipeline.partial import partial
@@ -748,7 +748,7 @@ def social_create_user(
     *args,
     **kwargs,
 ):
-    posthoganalytics.tag("details", json.dumps(details))
+    hanzoanalytics.tag("details", json.dumps(details))
     invite_id = strategy.session_get("invite_id")
     backend_processor = "social_create_user"
     email = details["email"][0] if isinstance(details["email"], list | tuple) else details["email"]
@@ -788,8 +788,8 @@ def social_create_user(
 
     if not email or not full_name:
         missing_attr = "email" if not email else "name"
-        posthoganalytics.tag("email", email)
-        posthoganalytics.tag("name", full_name)
+        hanzoanalytics.tag("email", email)
+        hanzoanalytics.tag("name", full_name)
         raise ValidationError(
             {missing_attr: "This field is required and was not provided by the IdP."},
             code="required",

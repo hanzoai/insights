@@ -2,7 +2,7 @@
  * UI App Resource URIs
  *
  * Each constant maps a tool (or group of related tools) to its UI visualization.
- * The URI format is: ui://posthog/<app-name>.html
+ * The URI format is: ui://insights/<app-name>.html
  *
  * When adding a new UI app:
  * 1. Create a new folder in src/ui-apps/<app-name>/
@@ -17,11 +17,11 @@
  * Used by: query-run, insight-query
  * Shows trends, funnels, tables, and other query result types.
  */
-export const QUERY_RESULTS_RESOURCE_URI = 'ui://posthog/query-results.html'
+export const QUERY_RESULTS_RESOURCE_URI = 'ui://insights/query-results.html'
 
 /**
  * Demo app for testing MCP Apps SDK integration.
  * Used by: demo-mcp-ui-apps
  * Displays SDK events and tool result data for debugging.
  */
-export const DEMO_RESOURCE_URI = 'ui://posthog/demo.html'
+export const DEMO_RESOURCE_URI = 'ui://insights/demo.html'

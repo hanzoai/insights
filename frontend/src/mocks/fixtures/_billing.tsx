@@ -22,10 +22,10 @@ export const billingJson: BillingType = {
                 'A comprehensive product analytics platform built to natively work with session replay, feature flags, experiments, and surveys.',
             price_description: null,
             usage_key: 'events',
-            image_url: 'https://posthog.com/images/products/product-analytics/product-analytics.png',
-            screenshot_url: 'https://posthog.com/images/products/product-analytics/screenshot-product-analytics.png',
+            image_url: 'https://hanzo.ai/images/products/product-analytics/product-analytics.png',
+            screenshot_url: 'https://hanzo.ai/images/products/product-analytics/screenshot-product-analytics.png',
             icon_key: 'IconGraph',
-            docs_url: 'https://posthog.com/docs/product-analytics',
+            docs_url: 'https://hanzo.ai/docs/product-analytics',
             subscribed: true,
             plans: [
                 {
@@ -34,8 +34,8 @@ export const billingJson: BillingType = {
                     name: 'Free',
                     description:
                         'A comprehensive product analytics platform built to natively work with session replay, feature flags, experiments, and surveys.',
-                    image_url: 'https://posthog.com/images/products/product-analytics/product-analytics.png',
-                    docs_url: 'https://posthog.com/docs/product-analytics',
+                    image_url: 'https://hanzo.ai/images/products/product-analytics/product-analytics.png',
+                    docs_url: 'https://hanzo.ai/docs/product-analytics',
                     note: null,
                     unit: 'event',
                     flat_rate: false,
@@ -60,7 +60,7 @@ export const billingJson: BillingType = {
                             note: null,
                         },
                         {
-                            key: 'graphs_trends',
+                            key: 'grahis_trends',
                             name: 'Graphs & trends',
                             description: 'Plot any number of events or actions over time.',
                             unit: null,
@@ -97,8 +97,8 @@ export const billingJson: BillingType = {
                     name: 'Paid',
                     description:
                         'A comprehensive product analytics platform built to natively work with session replay, feature flags, experiments, and surveys.',
-                    image_url: 'https://posthog.com/images/products/product-analytics/product-analytics.png',
-                    docs_url: 'https://posthog.com/docs/product-analytics',
+                    image_url: 'https://hanzo.ai/images/products/product-analytics/product-analytics.png',
+                    docs_url: 'https://hanzo.ai/docs/product-analytics',
                     note: null,
                     unit: 'event',
                     flat_rate: false,
@@ -123,7 +123,7 @@ export const billingJson: BillingType = {
                             note: null,
                         },
                         {
-                            key: 'graphs_trends',
+                            key: 'grahis_trends',
                             name: 'Graphs & trends',
                             description: 'Plot any number of events or actions over time.',
                             unit: null,
@@ -355,9 +355,9 @@ export const billingJson: BillingType = {
                     description:
                         'Associate events with a group or entity - such as a company, community, or project. Analyze these events as if they were sent by that entity itself. Great for B2B, marketplaces, and more.',
                     price_description: null,
-                    image_url: 'https://posthog.com/images/product/product-icons/group-analytics.svg',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/group-analytics.svg',
                     icon_key: 'IconPeople',
-                    docs_url: 'https://posthog.com/docs/product-analytics/group-analytics',
+                    docs_url: 'https://hanzo.ai/docs/product-analytics/group-analytics',
                     type: 'group_analytics',
                     tiers: [
                         {
@@ -443,8 +443,8 @@ export const billingJson: BillingType = {
                             name: 'Addon',
                             description:
                                 'Associate events with a group or entity - such as a company, community, or project. Analyze these events as if they were sent by that entity itself. Great for B2B, marketplaces, and more.',
-                            image_url: 'https://posthog.com/images/product/product-icons/group-analytics.svg',
-                            docs_url: 'https://posthog.com/docs/product-analytics/group-analytics',
+                            image_url: 'https://hanzo.ai/images/product/product-icons/group-analytics.svg',
+                            docs_url: 'https://hanzo.ai/docs/product-analytics/group-analytics',
                             note: null,
                             unit: 'event',
                             flat_rate: false,
@@ -550,8 +550,8 @@ export const billingJson: BillingType = {
                     name: 'Dashboards',
                     description: 'Save trends, funnels, and other insights for easy reference by your whole team.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-dashboards.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-dashboards-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-dashboards.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-dashboards-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -562,14 +562,14 @@ export const billingJson: BillingType = {
                     description:
                         'Visualize user dropoff between a sequence of events. See conversion rate over time, use flexible step ordering, set exclusion steps, and more.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-funnels.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-funnels-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-funnels.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-funnels-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
                 },
                 {
-                    key: 'graphs_trends',
+                    key: 'grahis_trends',
                     name: 'Graphs & trends',
                     description: 'Plot any number of events or actions over time.',
                     images: null,
@@ -618,8 +618,8 @@ export const billingJson: BillingType = {
                     description:
                         'Automatically highlight significant factors that affect the conversion rate of users within a funnel.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-correlation-analysis.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-correlation-analysis-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-correlation-analysis.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-correlation-analysis-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -630,8 +630,8 @@ export const billingJson: BillingType = {
                     description:
                         'Discover how your active users break down, highlighting those who have recently stopped being active or those who have just become active for the first time.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-lifecycle.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-lifecycle-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-lifecycle.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-lifecycle-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -642,8 +642,8 @@ export const billingJson: BillingType = {
                     description:
                         'See how many users return on subsequent days after performing an event the first time, or recurrently.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-retention.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-retention-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-retention.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-retention-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -653,8 +653,8 @@ export const billingJson: BillingType = {
                     name: 'Stickiness',
                     description: 'Learn how many times users perform a specific event in a period of time.',
                     images: {
-                        light: 'https://posthog.com/images/products/product-analytics/screenshot-stickiness.png',
-                        dark: 'https://posthog.com/images/products/product-analytics/screenshot-stickiness-dark.png',
+                        light: 'https://hanzo.ai/images/products/product-analytics/screenshot-stickiness.png',
+                        dark: 'https://hanzo.ai/images/products/product-analytics/screenshot-stickiness-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -694,10 +694,10 @@ export const billingJson: BillingType = {
                 'Session replay helps you diagnose issues and understand user behavior in your product or website.',
             price_description: null,
             usage_key: 'recordings',
-            image_url: 'https://posthog.com/images/products/session-replay/session-replay.png',
-            screenshot_url: 'https://posthog.com/images/products/session-replay/screenshot-session-replay.png',
+            image_url: 'https://hanzo.ai/images/products/session-replay/session-replay.png',
+            screenshot_url: 'https://hanzo.ai/images/products/session-replay/screenshot-session-replay.png',
             icon_key: 'IconRewindPlay',
-            docs_url: 'https://posthog.com/docs/session-replay',
+            docs_url: 'https://hanzo.ai/docs/session-replay',
             subscribed: true,
             plans: [
                 {
@@ -706,8 +706,8 @@ export const billingJson: BillingType = {
                     name: 'Free',
                     description:
                         'Session replay helps you diagnose issues and understand user behavior in your product or website.',
-                    image_url: 'https://posthog.com/images/products/session-replay/session-replay.png',
-                    docs_url: 'https://posthog.com/docs/session-replay',
+                    image_url: 'https://hanzo.ai/images/products/session-replay/session-replay.png',
+                    docs_url: 'https://hanzo.ai/docs/session-replay',
                     note: null,
                     unit: 'recording',
                     flat_rate: false,
@@ -833,8 +833,8 @@ export const billingJson: BillingType = {
                     name: 'Paid',
                     description:
                         'Session replay helps you diagnose issues and understand user behavior in your product or website.',
-                    image_url: 'https://posthog.com/images/products/session-replay/session-replay.png',
-                    docs_url: 'https://posthog.com/docs/session-replay',
+                    image_url: 'https://hanzo.ai/images/products/session-replay/session-replay.png',
+                    docs_url: 'https://hanzo.ai/docs/session-replay',
                     note: null,
                     unit: 'recording',
                     flat_rate: false,
@@ -1098,7 +1098,7 @@ export const billingJson: BillingType = {
                     price_description: null,
                     image_url: 'None',
                     icon_key: 'IconRewindPlay',
-                    docs_url: 'https://posthog.com/docs/session-replay',
+                    docs_url: 'https://hanzo.ai/docs/session-replay',
                     type: 'mobile_replay',
                     tiers: [
                         {
@@ -1175,7 +1175,7 @@ export const billingJson: BillingType = {
                             name: 'Addon',
                             description: 'Record and replay mobile app sessions.',
                             image_url: null,
-                            docs_url: 'https://posthog.com/docs/session-replay',
+                            docs_url: 'https://hanzo.ai/docs/session-replay',
                             note: null,
                             unit: 'mobile recording',
                             flat_rate: false,
@@ -1205,7 +1205,7 @@ export const billingJson: BillingType = {
                             name: 'Addon',
                             description: 'Record and replay mobile app sessions.',
                             image_url: null,
-                            docs_url: 'https://posthog.com/docs/session-replay',
+                            docs_url: 'https://hanzo.ai/docs/session-replay',
                             note: null,
                             unit: 'mobile recording',
                             flat_rate: false,
@@ -1322,8 +1322,8 @@ export const billingJson: BillingType = {
                     name: 'Console logs',
                     description: "Debug issues faster by browsing the user's console.",
                     images: {
-                        light: 'https://posthog.com/images/products/session-replay/console.png',
-                        dark: 'https://posthog.com/images/products/session-replay/console-dark.png',
+                        light: 'https://hanzo.ai/images/products/session-replay/console.png',
+                        dark: 'https://hanzo.ai/images/products/session-replay/console-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1342,8 +1342,8 @@ export const billingJson: BillingType = {
                     name: 'Network monitor',
                     description: 'Analyze performance and network calls.',
                     images: {
-                        light: 'https://posthog.com/images/products/session-replay/network.png',
-                        dark: 'https://posthog.com/images/products/session-replay/network-dark.png',
+                        light: 'https://hanzo.ai/images/products/session-replay/network.png',
+                        dark: 'https://hanzo.ai/images/products/session-replay/network-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1402,8 +1402,8 @@ export const billingJson: BillingType = {
                     name: 'Event timeline',
                     description: "See a history of everything that happened in a user's session.",
                     images: {
-                        light: 'https://posthog.com/images/products/session-replay/timeline.png',
-                        dark: 'https://posthog.com/images/products/session-replay/timeline-dark.png',
+                        light: 'https://hanzo.ai/images/products/session-replay/timeline.png',
+                        dark: 'https://hanzo.ai/images/products/session-replay/timeline-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1433,7 +1433,7 @@ export const billingJson: BillingType = {
                     type: null,
                 },
                 {
-                    key: 'works_with_posthog_js',
+                    key: 'works_with_insights_js',
                     name: 'Capture sessions without extra code',
                     description: 'Works with Insights.js',
                     images: null,
@@ -1457,10 +1457,10 @@ export const billingJson: BillingType = {
                 'Test changes with small groups of users before rolling out wider. Analyze usage with product analytics and session replay.',
             price_description: null,
             usage_key: 'feature_flag_requests',
-            image_url: 'https://posthog.com/images/products/feature-flags/feature-flags.png',
-            screenshot_url: 'https://posthog.com/images/products/feature-flags/screenshot-feature-flags.png',
+            image_url: 'https://hanzo.ai/images/products/feature-flags/feature-flags.png',
+            screenshot_url: 'https://hanzo.ai/images/products/feature-flags/screenshot-feature-flags.png',
             icon_key: 'IconToggle',
-            docs_url: 'https://posthog.com/docs/feature-flags',
+            docs_url: 'https://hanzo.ai/docs/feature-flags',
             subscribed: true,
             plans: [
                 {
@@ -1469,8 +1469,8 @@ export const billingJson: BillingType = {
                     name: 'Free',
                     description:
                         'Test changes with small groups of users before rolling out wider. Analyze usage with product analytics and session replay.',
-                    image_url: 'https://posthog.com/images/products/feature-flags/feature-flags.png',
-                    docs_url: 'https://posthog.com/docs/feature-flags',
+                    image_url: 'https://hanzo.ai/images/products/feature-flags/feature-flags.png',
+                    docs_url: 'https://hanzo.ai/docs/feature-flags',
                     note: null,
                     unit: 'request',
                     flat_rate: false,
@@ -1612,8 +1612,8 @@ export const billingJson: BillingType = {
                     name: 'Paid',
                     description:
                         'Test changes with small groups of users before rolling out wider. Analyze usage with product analytics and session replay.',
-                    image_url: 'https://posthog.com/images/products/feature-flags/feature-flags.png',
-                    docs_url: 'https://posthog.com/docs/feature-flags',
+                    image_url: 'https://hanzo.ai/images/products/feature-flags/feature-flags.png',
+                    docs_url: 'https://hanzo.ai/docs/feature-flags',
                     note: null,
                     flat_rate: false,
                     unit: 'request',
@@ -1895,8 +1895,8 @@ export const billingJson: BillingType = {
                     description:
                         'Create three or more variants of a feature flag to test or release different versions of a feature.',
                     images: {
-                        light: 'https://posthog.com/images/products/feature-flags/multivariate.png',
-                        dark: 'https://posthog.com/images/products/feature-flags/multivariate-dark.png',
+                        light: 'https://hanzo.ai/images/products/feature-flags/multivariate.png',
+                        dark: 'https://hanzo.ai/images/products/feature-flags/multivariate-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1916,8 +1916,8 @@ export const billingJson: BillingType = {
                     description:
                         'Use JSON payloads to change text, visuals, or entire blocks of code without subsequent deployments.',
                     images: {
-                        light: 'https://posthog.com/images/products/feature-flags/payloads.png',
-                        dark: 'https://posthog.com/images/products/feature-flags/payloads-dark.png',
+                        light: 'https://hanzo.ai/images/products/feature-flags/payloads.png',
+                        dark: 'https://hanzo.ai/images/products/feature-flags/payloads-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1928,8 +1928,8 @@ export const billingJson: BillingType = {
                     description:
                         'Customize your rollout strategy by user or group properties, cohort, or trafic percentage.',
                     images: {
-                        light: 'https://posthog.com/images/products/feature-flags/release-conditions.png',
-                        dark: 'https://posthog.com/images/products/feature-flags/release-conditions-dark.png',
+                        light: 'https://hanzo.ai/images/products/feature-flags/release-conditions.png',
+                        dark: 'https://hanzo.ai/images/products/feature-flags/release-conditions-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1967,8 +1967,8 @@ export const billingJson: BillingType = {
                     description:
                         'See how many times a flag has been evaluated, how many times each variant has been returned, and what values users received.',
                     images: {
-                        light: 'https://posthog.com/images/products/feature-flags/reports.png',
-                        dark: 'https://posthog.com/images/products/feature-flags/reports-dark.png',
+                        light: 'https://hanzo.ai/images/products/feature-flags/reports.png',
+                        dark: 'https://hanzo.ai/images/products/feature-flags/reports-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -1979,8 +1979,8 @@ export const billingJson: BillingType = {
                     description:
                         'Allow users to opt in to (or out of) specified features. Or use the API to build your own UI.',
                     images: {
-                        light: 'https://posthog.com/images/products/feature-flags/early-access.png',
-                        dark: 'https://posthog.com/images/products/feature-flags/early-access-dark.png',
+                        light: 'https://hanzo.ai/images/products/feature-flags/early-access.png',
+                        dark: 'https://hanzo.ai/images/products/feature-flags/early-access-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2046,10 +2046,10 @@ export const billingJson: BillingType = {
                 'Build in-app popups with freeform text responses, multiple choice, NPS, ratings, and emoji reactions. Or use the API for complete control.',
             price_description: null,
             usage_key: 'survey_responses',
-            image_url: 'https://posthog.com/images/products/surveys/surveys.png',
-            screenshot_url: 'https://posthog.com/images/products/surveys/screenshot-surveys.png',
+            image_url: 'https://hanzo.ai/images/products/surveys/surveys.png',
+            screenshot_url: 'https://hanzo.ai/images/products/surveys/screenshot-surveys.png',
             icon_key: 'IconMessage',
-            docs_url: 'https://posthog.com/docs/surveys',
+            docs_url: 'https://hanzo.ai/docs/surveys',
             subscribed: true,
             plans: [
                 {
@@ -2058,8 +2058,8 @@ export const billingJson: BillingType = {
                     name: 'Free',
                     description:
                         'Build in-app popups with freeform text responses, multiple choice, NPS, ratings, and emoji reactions. Or use the API for complete control.',
-                    image_url: 'https://posthog.com/images/products/surveys/surveys.png',
-                    docs_url: 'https://posthog.com/docs/surveys',
+                    image_url: 'https://hanzo.ai/images/products/surveys/surveys.png',
+                    docs_url: 'https://hanzo.ai/docs/surveys',
                     note: null,
                     flat_rate: false,
                     unit: 'survey response',
@@ -2146,8 +2146,8 @@ export const billingJson: BillingType = {
                     name: 'Paid',
                     description:
                         'Build in-app popups with freeform text responses, multiple choice, NPS, ratings, and emoji reactions. Or use the API for complete control.',
-                    image_url: 'https://posthog.com/images/products/surveys/surveys.png',
-                    docs_url: 'https://posthog.com/docs/surveys',
+                    image_url: 'https://hanzo.ai/images/products/surveys/surveys.png',
+                    docs_url: 'https://hanzo.ai/docs/surveys',
                     note: null,
                     flat_rate: false,
                     unit: 'survey response',
@@ -2355,8 +2355,8 @@ export const billingJson: BillingType = {
                     description:
                         'Rating scale (for NPS and the like), multiple choice, single choice, emoji rating, link, free text.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/question-types.png',
-                        dark: 'https://posthog.com/images/products/surveys/question-types-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/question-types.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/question-types-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2366,8 +2366,8 @@ export const billingJson: BillingType = {
                     name: 'Multiple questions',
                     description: 'Ask up to 10 questions in a single survey.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/steps.png',
-                        dark: 'https://posthog.com/images/products/surveys/steps-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/steps.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/steps-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2377,8 +2377,8 @@ export const billingJson: BillingType = {
                     name: 'Advanced user targeting',
                     description: 'Target by URL, user property, or feature flag when used with Feature flags.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/targeting.png',
-                        dark: 'https://posthog.com/images/products/surveys/targeting-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/targeting.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/targeting-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2413,8 +2413,8 @@ export const billingJson: BillingType = {
                     description:
                         'Using Insights.js? No more code required. But if want to create your own UI, we have a full API.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/api.png',
-                        dark: 'https://posthog.com/images/products/surveys/api-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/api.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/api-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2434,8 +2434,8 @@ export const billingJson: BillingType = {
                     description:
                         'Use our templates to get started quickly with NPS, customer satisfaction surveys, user interviews, and more.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/templates.png',
-                        dark: 'https://posthog.com/images/products/surveys/templates-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/templates.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/templates-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2453,8 +2453,8 @@ export const billingJson: BillingType = {
                     name: 'Link somewhere',
                     description: 'Send users to a webpage or invite them to book a meeting with a calendar invite.',
                     images: {
-                        light: 'https://posthog.com/images/products/surveys/link-scheduler.png',
-                        dark: 'https://posthog.com/images/products/surveys/link-scheduler-dark.png',
+                        light: 'https://hanzo.ai/images/products/surveys/link-scheduler.png',
+                        dark: 'https://hanzo.ai/images/products/surveys/link-scheduler-dark.png',
                     },
                     icon_key: null,
                     type: 'primary',
@@ -2483,10 +2483,10 @@ export const billingJson: BillingType = {
             description: 'Connect Insights to your favorite tools.',
             price_description: null,
             usage_key: null,
-            image_url: 'https://posthog.com/images/product/product-icons/integrations.svg',
+            image_url: 'https://hanzo.ai/images/product/product-icons/integrations.svg',
             screenshot_url: null,
             icon_key: 'IconBolt',
-            docs_url: 'https://posthog.com/docs/cdp',
+            docs_url: 'https://hanzo.ai/docs/cdp',
             subscribed: null,
             plans: [
                 {
@@ -2494,8 +2494,8 @@ export const billingJson: BillingType = {
                     product_key: 'integrations',
                     name: 'Free',
                     description: 'Connect Insights to your favorite tools.',
-                    image_url: 'https://posthog.com/images/product/product-icons/integrations.svg',
-                    docs_url: 'https://posthog.com/docs/cdp',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/integrations.svg',
+                    docs_url: 'https://hanzo.ai/docs/cdp',
                     note: null,
                     unit: null,
                     flat_rate: false,
@@ -2555,8 +2555,8 @@ export const billingJson: BillingType = {
                     product_key: 'integrations',
                     name: 'Paid',
                     description: 'Connect Insights to your favorite tools.',
-                    image_url: 'https://posthog.com/images/product/product-icons/integrations.svg',
-                    docs_url: 'https://posthog.com/docs/cdp',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/integrations.svg',
+                    docs_url: 'https://hanzo.ai/docs/cdp',
                     note: null,
                     unit: null,
                     flat_rate: false,
@@ -2702,10 +2702,10 @@ export const billingJson: BillingType = {
             description: 'SSO, permission management, and support.',
             price_description: null,
             usage_key: null,
-            image_url: 'https://posthog.com/images/product/product-icons/platform.svg',
+            image_url: 'https://hanzo.ai/images/product/product-icons/platform.svg',
             screenshot_url: null,
             icon_key: 'IconStack',
-            docs_url: 'https://posthog.com/docs',
+            docs_url: 'https://hanzo.ai/docs',
             subscribed: true,
             plans: [
                 {
@@ -2713,8 +2713,8 @@ export const billingJson: BillingType = {
                     product_key: 'platform_and_support',
                     name: 'Free',
                     description: 'SSO, permission management, and support.',
-                    image_url: 'https://posthog.com/images/product/product-icons/platform.svg',
-                    docs_url: 'https://posthog.com/docs',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/platform.svg',
+                    docs_url: 'https://hanzo.ai/docs',
                     note: null,
                     unit: null,
                     flat_rate: false,
@@ -2789,8 +2789,8 @@ export const billingJson: BillingType = {
                     product_key: 'platform_and_support',
                     name: 'With Pay-per-use',
                     description: 'SSO, permission management, and support.',
-                    image_url: 'https://posthog.com/images/product/product-icons/platform.svg',
-                    docs_url: 'https://posthog.com/docs',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/platform.svg',
+                    docs_url: 'https://hanzo.ai/docs',
                     note: null,
                     unit: null,
                     flat_rate: false,
@@ -2883,8 +2883,8 @@ export const billingJson: BillingType = {
                     product_key: 'platform_and_support',
                     name: 'Enterprise',
                     description: 'SSO, permission management, and support.',
-                    image_url: 'https://posthog.com/images/product/product-icons/platform.svg',
-                    docs_url: 'https://posthog.com/docs',
+                    image_url: 'https://hanzo.ai/images/product/product-icons/platform.svg',
+                    docs_url: 'https://hanzo.ai/docs',
                     note: null,
                     unit: null,
                     flat_rate: false,
@@ -3130,7 +3130,7 @@ export const billingJson: BillingType = {
                     price_description: null,
                     image_url: 'None',
                     icon_key: 'IconBuilding',
-                    docs_url: 'https://posthog.com/pricing',
+                    docs_url: 'https://hanzo.ai/pricing',
                     type: 'teams',
                     tiers: [],
                     tiered: false,
@@ -3153,7 +3153,7 @@ export const billingJson: BillingType = {
                             description:
                                 'Priority support, unlimited projects, white labelling, SSO enforcement, and features for collaboration with team members',
                             image_url: null,
-                            docs_url: 'https://posthog.com/pricing',
+                            docs_url: 'https://hanzo.ai/pricing',
                             note: null,
                             unit: 'month',
                             flat_rate: true,
@@ -3684,6 +3684,6 @@ export const billingJson: BillingType = {
     subscription_level: 'paid',
     account_owner: {
         name: 'Simon Fisher',
-        email: 'simon@posthog.com',
+        email: 'simon@hanzo.ai',
     },
 }
