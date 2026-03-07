@@ -230,7 +230,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
                             "operator": "exact",
                         },
                         {
-                            "key": "alhia_tester",
+                            "key": "alpha_tester",
                             "type": "person",
                             "value": True,
                             "negation": False,

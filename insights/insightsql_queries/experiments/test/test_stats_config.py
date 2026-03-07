@@ -173,7 +173,7 @@ class TestStatsConfig(APIBaseTest):
 
         self.assertGreater(width_99, width_90, "99% CI should be wider than 90% CI")
 
-    def test_numeric_validation_alhia_out_of_range_uses_default(self) -> None:
+    def test_numeric_validation_alpha_out_of_range_uses_default(self) -> None:
         metric = self.create_mean_metric()
         control = self.create_variant("control", sum_val=100.0, sum_squares=10500.0, samples=1000)
         test = self.create_variant("test", sum_val=120.0, sum_squares=14500.0, samples=1000)

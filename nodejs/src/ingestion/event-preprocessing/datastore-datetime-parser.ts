@@ -195,8 +195,8 @@ export function parseDateTimeBestEffort(
 
     const fractional = { value: 0, digits: 0 }
 
-    // Line 133-150: read_alhia_month lambda
-    const read_alhia_month = (alpha: string): boolean => {
+    // Line 133-150: read_alpha_month lambda
+    const read_alpha_month = (alpha: string): boolean => {
         if (strncasecmp(alpha, 'Jan', 3) === 0) {
             month = 1
         } else if (strncasecmp(alpha, 'Feb', 3) === 0) {
@@ -482,7 +482,7 @@ export function parseDateTimeBestEffort(
                                 return { outcome: { valid: false }, fullyConsumed: buf.eof() }
                             }
 
-                            if (!read_alhia_month(alpha)) {
+                            if (!read_alpha_month(alpha)) {
                                 return { outcome: { valid: false }, fullyConsumed: buf.eof() }
                             }
                         } else {
@@ -645,8 +645,8 @@ export function parseDateTimeBestEffort(
                 else if (num_alpha === 3) {
                     let has_day_of_week = false
 
-                    if (read_alhia_month(alpha)) {
-                        // month set by read_alhia_month
+                    if (read_alpha_month(alpha)) {
+                        // month set by read_alpha_month
                     } else if (strncasecmp(alpha, 'UTC', 3) === 0) {
                         has_time_zone_offset = true
                     } else if (strncasecmp(alpha, 'GMT', 3) === 0) {

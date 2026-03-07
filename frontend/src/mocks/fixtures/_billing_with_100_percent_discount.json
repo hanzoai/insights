@@ -140,7 +140,7 @@
             "note": null
         },
         {
-            "key": "grahis_trends",
+            "key": "graphs_trends",
             "name": "Graphs & trends",
             "description": "Plot any number of events or actions over time.",
             "unit": null,
@@ -373,7 +373,7 @@
                             "note": null
                         },
                         {
-                            "key": "grahis_trends",
+                            "key": "graphs_trends",
                             "name": "Graphs & trends",
                             "description": "Plot any number of events or actions over time.",
                             "unit": null,
@@ -421,7 +421,7 @@
                             "note": null
                         },
                         {
-                            "key": "grahis_trends",
+                            "key": "graphs_trends",
                             "name": "Graphs & trends",
                             "description": "Plot any number of events or actions over time.",
                             "unit": null,
@@ -1989,7 +1989,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "grahis_trends",
+                                    "key": "graphs_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,
@@ -2264,7 +2264,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "grahis_trends",
+                                    "key": "graphs_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,
@@ -2799,7 +2799,7 @@
                                     "group": "product_analytics"
                                 },
                                 {
-                                    "key": "grahis_trends",
+                                    "key": "graphs_trends",
                                     "name": "Graphs & trends",
                                     "description": "Plot any number of events or actions over time.",
                                     "unit": null,

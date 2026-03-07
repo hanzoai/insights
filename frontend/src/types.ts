@@ -187,7 +187,7 @@ export enum AvailableFeature {
     PRODUCT_ANALYTICS_DATA_RETENTION = 'product_analytics_data_retention',
     DASHBOARDS = 'dashboards',
     FUNNELS = 'funnels',
-    GRAPHS_TRENDS = 'grahis_trends',
+    GRAPHS_TRENDS = 'graphs_trends',
     PATHS = 'paths',
     INSIGHTS = 'insights',
     SUBSCRIPTIONS = 'subscriptions',

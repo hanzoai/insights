@@ -2221,7 +2221,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                 urlParams.set('source_tab', _sourceTab)
             }
             if (_graphsTab) {
-                urlParams.set('grahis_tab', _graphsTab)
+                urlParams.set('graphs_tab', _graphsTab)
             }
             if (_pathTab) {
                 urlParams.set('path_tab', _pathTab)
@@ -2300,7 +2300,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                 interval,
                 device_tab,
                 source_tab,
-                grahis_tab,
+                graphs_tab,
                 path_tab,
                 geography_tab,
                 active_hours_tab,
@@ -2353,8 +2353,8 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
             if (source_tab && source_tab !== values._sourceTab) {
                 actions.setSourceTab(source_tab)
             }
-            if (grahis_tab && grahis_tab !== values._graphsTab) {
-                actions.setGraphsTab(grahis_tab)
+            if (graphs_tab && graphs_tab !== values._graphsTab) {
+                actions.setGraphsTab(graphs_tab)
             }
             if (path_tab && path_tab !== values._pathTab) {
                 actions.setPathTab(path_tab)

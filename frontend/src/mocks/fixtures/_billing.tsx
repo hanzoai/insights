@@ -60,7 +60,7 @@ export const billingJson: BillingType = {
                             note: null,
                         },
                         {
-                            key: 'grahis_trends',
+                            key: 'graphs_trends',
                             name: 'Graphs & trends',
                             description: 'Plot any number of events or actions over time.',
                             unit: null,
@@ -123,7 +123,7 @@ export const billingJson: BillingType = {
                             note: null,
                         },
                         {
-                            key: 'grahis_trends',
+                            key: 'graphs_trends',
                             name: 'Graphs & trends',
                             description: 'Plot any number of events or actions over time.',
                             unit: null,
@@ -569,7 +569,7 @@ export const billingJson: BillingType = {
                     type: 'primary',
                 },
                 {
-                    key: 'grahis_trends',
+                    key: 'graphs_trends',
                     name: 'Graphs & trends',
                     description: 'Plot any number of events or actions over time.',
                     images: null,
