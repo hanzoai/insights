@@ -464,7 +464,7 @@ class TestOrganization(BaseTest):
 
 
 class TestOrganizationMembership(BaseTest):
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_event_sent_when_membership_level_changed(
         self,
         mock_capture,

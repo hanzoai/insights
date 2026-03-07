@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-import hanzoanalytics
+import hanzo_insights
 from pydantic import ValidationError
 
 from insights.schema import (
@@ -29,7 +29,7 @@ def create_default_modifiers_for_user(
     else:
         modifiers = modifiers.model_copy()
 
-    modifiers.useMaterializedViews = hanzoanalytics.feature_enabled(
+    modifiers.useMaterializedViews = hanzo_insights.feature_enabled(
         "data-modeling",
         str(user.distinct_id),
         person_properties={
@@ -68,7 +68,7 @@ def create_default_modifiers_for_team(
                     setattr(modifiers, key, value)
 
     if modifiers.optimizeProjections is None:
-        modifiers.optimizeProjections = hanzoanalytics.feature_enabled(
+        modifiers.optimizeProjections = hanzo_insights.feature_enabled(
             "projection-pushdown",
             str(team.uuid),
             groups={

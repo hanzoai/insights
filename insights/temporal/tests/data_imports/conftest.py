@@ -85,7 +85,7 @@ async def run_external_data_job_workflow(
             "insights.temporal.data_imports.external_data_job.get_data_import_finished_metric"
         ) as mock_get_data_import_finished_metric,
         # make sure intended error of line 175 in insights/warehouse/models/table.py doesn't trigger flag calls
-        mock.patch("hanzoanalytics.capture_exception", return_value=None),
+        mock.patch("hanzo_insights.capture_exception", return_value=None),
     ):
         async with await WorkflowEnvironment.start_time_skipping() as activity_environment:
             async with Worker(

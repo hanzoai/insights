@@ -1307,12 +1307,12 @@ dependencies = [
  "dirs",
  "globset",
  "inquire",
+ "insights-rs",
  "insights-symbol-data",
  "magic_string",
  "miette",
  "open",
  "plist",
- "posthog-rs",
  "proguard",
  "ratatui",
  "rayon",
@@ -1333,6 +1333,23 @@ dependencies = [
  "uuid",
  "walkdir",
  "zip",
+]
+
+[[package]]
+name = "insights-rs"
+version = "0.4.3"
+source = "git+https://github.com/hanzoai/insights-rs#dd64b816e095052cfcf7e29acabae334640a70dd"
+dependencies = [
+ "chrono",
+ "derive_builder",
+ "regex",
+ "reqwest 0.11.27",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha1",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1764,23 +1781,6 @@ dependencies = [
  "quick-xml",
  "serde",
  "time",
-]
-
-[[package]]
-name = "posthog-rs"
-version = "0.4.3"
-source = "git+https://github.com/hanzoai/insights-rs#d883eb4dad9bd22167d365f1e957522ec6053b0f"
-dependencies = [
- "chrono",
- "derive_builder",
- "regex",
- "reqwest 0.11.27",
- "semver",
- "serde",
- "serde_json",
- "sha1",
- "tracing",
- "uuid",
 ]
 
 [[package]]

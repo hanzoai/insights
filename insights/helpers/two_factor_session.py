@@ -11,9 +11,9 @@ from django.utils.crypto import constant_time_compare
 from django.utils.http import base36_to_int
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from loginas.utils import is_impersonated_session
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from rest_framework.exceptions import PermissionDenied
 from two_factor.utils import default_device
 
@@ -292,7 +292,7 @@ class EmailMFACheckResult:
 class EmailMFAVerifier:
     def _capture_suppression_bypass_event(self, user: User, reason: str, cached: bool) -> None:
         try:
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=str(user.distinct_id),
                 event="email_mfa_bypassed_due_to_suppression",
                 properties={
@@ -332,7 +332,7 @@ class EmailMFAVerifier:
             if not organization:
                 return EmailMFACheckResult(should_send=False)
 
-            feature_enabled = hanzoanalytics.feature_enabled(
+            feature_enabled = hanzo_insights.feature_enabled(
                 "email-mfa",
                 str(user.distinct_id),
                 groups={"organization": str(organization.id)},

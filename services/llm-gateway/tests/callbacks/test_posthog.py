@@ -46,7 +46,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
@@ -77,7 +77,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=None),
             patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
             patch("llm_gateway.callbacks.insights.uuid4", return_value=MagicMock(hex="test-uuid")),
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
@@ -98,7 +98,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id="end-user-123")
 
@@ -136,7 +136,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=oauth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             method = getattr(callback, method_name)
             await method(kwargs, None, 0.0, 1.0, end_user_id="123")
@@ -160,7 +160,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="twig"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id=None)
 
@@ -192,7 +192,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
@@ -218,7 +218,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value=product),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
@@ -242,7 +242,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value=product),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id=None)
 
@@ -261,7 +261,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="growth"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id="openai-end-user-456")
 
@@ -288,7 +288,7 @@ class TestInsightsCallback:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="growth"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id="openai-end-user-789")
 
@@ -462,7 +462,7 @@ class TestTruncateForCapture:
         with (
             patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
             patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.hanzo_insights") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 

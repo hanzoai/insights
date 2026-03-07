@@ -4,7 +4,7 @@ from uuid import UUID
 
 from django.db.models import QuerySet
 
-import hanzoanalytics
+import hanzo_insights
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions, mixins, permissions, request, response, serializers, status, viewsets
 
@@ -162,12 +162,12 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
             # Validate the level field
             level = item.get("level")
             if level not in ["member", "admin"]:
-                import hanzoanalytics
+                import hanzo_insights
 
                 request = self.context.get("request")
                 user = request.user if request else None
 
-                hanzoanalytics.capture_exception(
+                hanzo_insights.capture_exception(
                     Exception("Invalid access level used in private_project_access"),
                     properties={
                         "field": "private_project_access.level",
@@ -358,7 +358,7 @@ class OrganizationInviteViewSet(
         current_url = request.headers.get("Referer")
         session_id = request.headers.get("X-Insights-Session-Id")
         if user.distinct_id:
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=str(user.distinct_id),
                 event="bulk invite attempted",
                 properties={

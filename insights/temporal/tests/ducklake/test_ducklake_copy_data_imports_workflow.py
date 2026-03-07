@@ -68,7 +68,7 @@ async def test_ducklake_copy_data_imports_gate_respects_feature_flag(monkeypatch
         return flag_enabled
 
     monkeypatch.setattr(
-        "insights.temporal.ducklake.ducklake_copy_data_imports_workflow.hanzoanalytics.feature_enabled",
+        "insights.temporal.ducklake.ducklake_copy_data_imports_workflow.hanzo_insights.feature_enabled",
         fake_feature_enabled,
     )
 
@@ -660,7 +660,7 @@ async def test_ducklake_copy_data_imports_workflow_skips_when_feature_flag_disab
         call_counts["copy"] += 1
 
     monkeypatch.setattr(
-        ducklake_module.hanzoanalytics,
+        ducklake_module.hanzo_insights,
         "feature_enabled",
         lambda *args, **kwargs: False,
     )
@@ -727,7 +727,7 @@ async def test_ducklake_copy_data_imports_workflow_runs_when_feature_flag_enable
         return []
 
     monkeypatch.setattr(
-        ducklake_module.hanzoanalytics,
+        ducklake_module.hanzo_insights,
         "feature_enabled",
         lambda *args, **kwargs: True,
     )

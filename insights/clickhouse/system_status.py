@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 from django.utils import timezone
 
-import hanzoanalytics
+import hanzo_insights
 from dateutil.relativedelta import relativedelta
 
 from insights.api.dead_letter_queue import get_dead_letter_queue_size
@@ -54,7 +54,7 @@ def system_status() -> Generator[SystemStatusRow, None, None]:
     try:
         recordings_status = get_recording_status_month_to_date()
     except Exception as ex:
-        hanzoanalytics.capture_exception(ex)
+        hanzo_insights.capture_exception(ex)
 
     yield {
         "key": "clickhouse_session_recordings_count_month_to_date",

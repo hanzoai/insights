@@ -302,7 +302,7 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
         sync_execute("TRUNCATE TABLE sharded_session_replay_events")
 
         # Mock the feature flag to return "test" string directly
-        self.feature_flag_patcher = patch("hanzoanalytics.get_feature_flag")
+        self.feature_flag_patcher = patch("hanzo_insights.get_feature_flag")
         mock_get_feature_flag = self.feature_flag_patcher.start()
         mock_get_feature_flag.return_value = "test"
 

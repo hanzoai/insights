@@ -78,7 +78,7 @@ class BaseTaskAPITest(TestCase):
         if hasattr(self, "feature_flag_patcher"):
             self.feature_flag_patcher.stop()
 
-        self.feature_flag_patcher = patch("hanzoanalytics.feature_enabled")  # type: ignore[assignment]
+        self.feature_flag_patcher = patch("hanzo_insights.feature_enabled")  # type: ignore[assignment]
         self.mock_feature_flag = self.feature_flag_patcher.start()
 
         def check_flag(flag_name, *_args, **_kwargs):

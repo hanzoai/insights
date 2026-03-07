@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 
-import hanzoanalytics
+import hanzo_insights
 from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied
 from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAdminUser
 from rest_framework.request import Request
@@ -718,7 +718,7 @@ class InsightsFeatureFlagPermission(BasePermission):
             if "*" in actions or view.action in actions:
                 org_id = str(organization.id)
 
-                enabled = hanzoanalytics.feature_enabled(
+                enabled = hanzo_insights.feature_enabled(
                     required_flag,
                     user.distinct_id,
                     groups={"organization": org_id},

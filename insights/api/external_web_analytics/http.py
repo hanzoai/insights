@@ -1,6 +1,6 @@
 from django.conf import settings
 
-import hanzoanalytics
+import hanzo_insights
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -53,7 +53,7 @@ class ExternalWebAnalyticsViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, vi
         if self.team_id in TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS and isinstance(self.request.user, User):
             user = self.request.user
 
-            web_analytics_api_enabled = hanzoanalytics.feature_enabled("web-analytics-api", str(user.distinct_id))
+            web_analytics_api_enabled = hanzo_insights.feature_enabled("web-analytics-api", str(user.distinct_id))
 
             available = web_analytics_api_enabled
 

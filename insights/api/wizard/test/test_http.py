@@ -40,7 +40,7 @@ class SetupWizardTests(APIBaseTest):
         assert response.data["project_api_key"] == "test-key"
         assert response.data["host"] == "http://localhost:8010"
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_requires_hash_header(self, mock_openai):
         response = self.client.post(
@@ -53,7 +53,7 @@ class SetupWizardTests(APIBaseTest):
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     @patch("django.conf.settings.DEBUG", False)
     def test_query_endpoint_rate_limit(self, mock_openai):
@@ -84,7 +84,7 @@ class SetupWizardTests(APIBaseTest):
         )
         assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_invalid_hash(self, mock_openai):
         response = self.client.post(
@@ -97,7 +97,7 @@ class SetupWizardTests(APIBaseTest):
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint(self, mock_openai):
         mock_openai_instance = mock_openai.return_value
@@ -116,7 +116,7 @@ class SetupWizardTests(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"data": {"foo": "bar"}}
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_uses_default_model(self, mock_openai):
         mock_openai_instance = mock_openai.return_value
@@ -141,7 +141,7 @@ class SetupWizardTests(APIBaseTest):
 
         mock_openai_instance.chat.completions.create.assert_called_once()
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_accepts_valid_openai_model(self, mock_openai):
         mock_openai_instance = mock_openai.return_value
@@ -166,7 +166,7 @@ class SetupWizardTests(APIBaseTest):
         assert response.json() == {"data": {"result": "openai_success"}}
         mock_openai_instance.chat.completions.create.assert_called_once()
 
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.genai.Client")
     @patch("django.conf.settings.GEMINI_API_KEY", "test-key")
     def test_query_endpoint_accepts_valid_gemini_model(self, mock_genai_client):
@@ -211,7 +211,7 @@ class SetupWizardTests(APIBaseTest):
         assert "not supported" in response.json()["model"][0]
 
     @patch("django.conf.settings.DEBUG", True)
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_mock_wizard_data_in_debug_with_fixture_header(self, mock_openai):
         """Test that mock wizard data is used when DEBUG=True and X-Insights-Wizard-Fixture-Generation header is present"""
@@ -246,7 +246,7 @@ class SetupWizardTests(APIBaseTest):
         assert cached_data["user_distinct_id"] == "mock-user-id"
 
     @patch("django.conf.settings.DEBUG", True)
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_mock_wizard_data_overrides_existing_cache(self, mock_openai):
         """Test that mock wizard data overrides existing cache data when conditions are met"""
@@ -282,7 +282,7 @@ class SetupWizardTests(APIBaseTest):
         assert cached_data["user_distinct_id"] == "mock-user-id"
 
     @patch("django.conf.settings.DEBUG", False)
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_no_mock_when_debug_false(self, mock_openai):
         """Test that mock wizard data is NOT used when DEBUG=False even with fixture header"""
@@ -305,7 +305,7 @@ class SetupWizardTests(APIBaseTest):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @patch("django.conf.settings.DEBUG", True)
-    @patch("insights.api.wizard.http.hanzoanalytics.default_client", MagicMock())
+    @patch("insights.api.wizard.http.hanzo_insights.default_client", MagicMock())
     @patch("insights.api.wizard.http.OpenAI")
     def test_query_endpoint_no_mock_without_fixture_header(self, mock_openai):
         """Test that mock wizard data is NOT used when DEBUG=True but fixture header is missing"""

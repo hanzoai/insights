@@ -2508,6 +2508,7 @@ dependencies = [
  "health",
  "hogvm",
  "httpmock",
+ "insights-rs",
  "insights-symbol-data",
  "insta",
  "limiters",
@@ -2515,7 +2516,6 @@ dependencies = [
  "mockall",
  "moka",
  "once_cell",
- "posthog-rs",
  "proguard",
  "rdkafka",
  "regex",
@@ -2925,10 +2925,10 @@ dependencies = [
  "envconfig",
  "futures",
  "health",
+ "insights-rs",
  "leaky-bucket",
  "metrics",
  "moka",
- "posthog-rs",
  "reqwest 0.12.28",
  "serde",
  "sqlx",
@@ -4399,6 +4399,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf64c2edc8226891a71f127587a2861b132d2b942310843814d5001d99a1d307"
 dependencies = [
  "smallvec",
+]
+
+[[package]]
+name = "insights-rs"
+version = "0.4.3"
+source = "git+https://github.com/hanzoai/insights-rs#dd64b816e095052cfcf7e29acabae334640a70dd"
+dependencies = [
+ "chrono",
+ "derive_builder",
+ "regex",
+ "reqwest 0.11.27",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha1",
+ "tokio",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -6283,24 +6301,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a9db96d7fa8782dd8c15ce32ffe8680bbd1e978a43bf51a34d39483540495f5"
 dependencies = [
  "portable-atomic",
-]
-
-[[package]]
-name = "posthog-rs"
-version = "0.4.3"
-source = "git+https://github.com/hanzoai/insights-rs#d883eb4dad9bd22167d365f1e957522ec6053b0f"
-dependencies = [
- "chrono",
- "derive_builder",
- "regex",
- "reqwest 0.11.27",
- "semver",
- "serde",
- "serde_json",
- "sha1",
- "tokio",
- "tracing",
- "uuid",
 ]
 
 [[package]]

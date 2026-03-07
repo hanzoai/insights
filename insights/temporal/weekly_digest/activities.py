@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 import redis.asyncio as redis
-from hanzoanalytics import Insights
+from hanzo_insights import Insights
 from pydantic import ValidationError
 from structlog.contextvars import bind_contextvars
 from temporalio import activity

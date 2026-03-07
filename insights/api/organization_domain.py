@@ -1,7 +1,7 @@
 import re
 from typing import Any, cast
 
-import hanzoanalytics
+import hanzo_insights
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions, request, response, serializers, status
 from rest_framework.request import Request
@@ -30,7 +30,7 @@ def _capture_domain_event(request, domain: OrganizationDomain, event_type: str, 
         }
     )
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         event=f"organization domain {event_type}",
         distinct_id=str(request.user.distinct_id),
         properties=properties,

@@ -788,7 +788,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         )
 
     @patch(
-        "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
+        "insights.insightsql.database.database.hanzo_insights.feature_enabled",
         new=MagicMock(return_value=False),
     )
     @snapshot_postgres_queries

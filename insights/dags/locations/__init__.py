@@ -34,8 +34,8 @@ resources_by_env = {
             user=dagster.EnvVar("POSTGRES_USER"),
             password=dagster.EnvVar("POSTGRES_PASSWORD"),
         ),
-        "hanzoanalytics": dagster.ResourceDefinition.none_resource(
-            description="Dummy InsightsAnalytics resource since hanzoanalytics is configured properly in production."
+        "hanzo_insights": dagster.ResourceDefinition.none_resource(
+            description="Dummy InsightsAnalytics resource since hanzo_insights is configured properly in production."
         ),
         # Persons DB resource (parses connection URL)
         "persons_database": PostgresURLResource(
@@ -72,7 +72,7 @@ resources_by_env = {
             user=dagster.EnvVar("POSTGRES_USER"),
             password=dagster.EnvVar("POSTGRES_PASSWORD"),
         ),
-        "hanzoanalytics": InsightsAnalyticsResource(personal_api_key=dagster.EnvVar("PERSONAL_API_KEY")),
+        "hanzo_insights": InsightsAnalyticsResource(personal_api_key=dagster.EnvVar("PERSONAL_API_KEY")),
         # Persons DB resource (parses connection URL)
         "persons_database": PostgresURLResource(
             connection_url=dagster.EnvVar("PERSONS_DB_WRITER_URL"),

@@ -7,7 +7,7 @@ from insights.models.async_migration import AsyncMigration, MigrationStatus
 class AsyncMigrationBaseTest(BaseTest):
     def setUp(self):
         super().setUp()
-        self.patcher = patch("hanzoanalytics.capture")
+        self.patcher = patch("hanzo_insights.capture")
         self.patcher.start()
         self.addCleanup(self.patcher.stop)
 

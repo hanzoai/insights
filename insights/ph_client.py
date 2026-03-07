@@ -42,7 +42,7 @@ def ph_scoped_capture():
 
 
 def get_client(region: str = "US", **kwargs: Any):
-    from hanzoanalytics import Insights
+    from hanzo_insights import Insights
 
     api_key = None
     host = None

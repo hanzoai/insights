@@ -35,13 +35,13 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
         super().setUp()
         self.redis_client = get_client()
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     def test_no_exception_for_unmatched_playlist(self, mock_capture_exception: MagicMock):
         count_recordings_that_match_playlist_filters(12345)
         assert self.redis_client.get(f"{PLAYLIST_COUNT_REDIS_PREFIX}there_is_no_short_id") is None
         mock_capture_exception.assert_not_called()
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -67,7 +67,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
             "errored_at": None,
         }
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -102,7 +102,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
             "errored_at": None,
         }
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -140,7 +140,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
             "errored_at": None,
         }
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -164,7 +164,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
 
         assert self._get_counts_from_redis(playlist) == existing_value
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -241,7 +241,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
             ),
         )
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -256,7 +256,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
         mock_list_recordings_from_query.assert_not_called()
 
     @snapshot_postgres_queries
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -304,7 +304,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
                 call(playlist2.id),
             ]
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -367,7 +367,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
             ),
         )
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -391,7 +391,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
 
         assert self._get_counts_from_redis(playlist) == existing_value
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -415,7 +415,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
 
         assert self._get_counts_from_redis(playlist) == existing_value
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -478,7 +478,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
         assert counts is not None
         return json.loads(counts.decode("utf-8"))
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
@@ -500,7 +500,7 @@ class TestRecordingsThatMatchPlaylistFilters(APIBaseTest, QueryMatchingTest):
         # Should not be called for default filter playlist
         assert playlist.id not in [call_args[0][0] for call_args in mock_count_task.delay.call_args_list]
 
-    @patch("hanzoanalytics.capture_exception")
+    @patch("hanzo_insights.capture_exception")
     @patch(
         "insights.session_recordings.playlist_counters.recordings_that_match_playlist_filters.list_recordings_from_query"
     )
