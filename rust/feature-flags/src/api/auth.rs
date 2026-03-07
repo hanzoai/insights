@@ -78,12 +78,12 @@ pub async fn validate_secret_api_token_for_team(
 }
 
 /// Hash a personal API key value using legacy PBKDF2 mode
-/// Ported from Insights's `hash_key_value` function in `posthog/models/personal_api_key.py`
+/// Ported from Insights' `hash_key_value` function in `insights/models/personal_api_key.py`
 fn hash_legacy_pbkdf2_key(value: &str, iterations: u32) -> String {
     use pbkdf2::pbkdf2_hmac;
     use sha2::Sha256;
 
-    let salt = b"posthog_personal_api_key";
+    let salt = b"insights_personal_api_key";
 
     // Compute PBKDF2-HMAC-SHA256 hash
     let mut hash = [0u8; 32]; // 256 bits / 8 = 32 bytes
@@ -100,7 +100,7 @@ fn hash_legacy_pbkdf2_key(value: &str, iterations: u32) -> String {
 }
 
 /// Hash a personal API key value using the specified mode
-/// Ported from Insights's `hash_key_value` function in `posthog/models/personal_api_key.py`
+/// Ported from Insights' `hash_key_value` function in `insights/models/personal_api_key.py`
 fn hash_personal_api_key(value: &str, mode: &str, iterations: Option<u32>) -> String {
     use sha2::{Digest, Sha256};
 
@@ -164,8 +164,8 @@ pub async fn validate_personal_api_key_with_scopes_for_team(
                 u.id as user_id,
                 u.is_active as user_is_active,
                 u.current_organization_id as user_organization_id
-            FROM posthog_personalapikey pak
-            INNER JOIN posthog_user u ON pak.user_id = u.id
+            FROM insights_personalapikey pak
+            INNER JOIN insights_user u ON pak.user_id = u.id
             WHERE pak.secure_value = $1
               AND u.is_active = true
               AND (
@@ -217,7 +217,7 @@ pub async fn validate_personal_api_key_with_scopes_for_team(
                     _ => {
                         // Check if user is a member of the team's organization
                         let is_member: bool = sqlx::query_scalar(
-                            "SELECT EXISTS(SELECT 1 FROM posthog_organizationmembership WHERE user_id = $1 AND organization_id = $2)"
+                            "SELECT EXISTS(SELECT 1 FROM insights_organizationmembership WHERE user_id = $1 AND organization_id = $2)"
                         )
                         .bind(user_id)
                         .bind(team_organization_id)
@@ -314,7 +314,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported from Insights's `test_hash_key_values` function in `posthog/api/test/test_personal_api_keys.py`
+    // Ported from Insights' `test_hash_key_values` function in `insights/api/test/test_personal_api_keys.py`
     #[rstest]
     #[case(
         "sha256",
@@ -324,9 +324,9 @@ mod tests {
     #[case(
         "pbkdf2",
         Some(1),
-        "pbkdf2_sha256$1$posthog_personal_api_key$vzzA4fHFTiUipScUeDJ4+NjuXwAWWu2AFRbk/JUs6Ck="
+        "pbkdf2_sha256$1$insights_personal_api_key$vzzA4fHFTiUipScUeDJ4+NjuXwAWWu2AFRbk/JUs6Ck="
     )]
-    #[case("pbkdf2", Some(260000), "pbkdf2_sha256$260000$posthog_personal_api_key$eeRy21dbVoEzYND0NVLfjXxgNeO67SeBRrwQr6bbhK4=")]
+    #[case("pbkdf2", Some(260000), "pbkdf2_sha256$260000$insights_personal_api_key$eeRy21dbVoEzYND0NVLfjXxgNeO67SeBRrwQr6bbhK4=")]
     fn test_hash_personal_api_key(
         #[case] algorithm: &str,
         #[case] iterations: Option<u32>,

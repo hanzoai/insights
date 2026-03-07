@@ -58,9 +58,9 @@ pub async fn get_decide_site_apps(
             psf.updated_at as plugin_source_updated_at,
             p.updated_at as plugin_updated_at,
             pc.updated_at as config_updated_at
-        FROM posthog_pluginconfig pc
-        JOIN posthog_plugin p ON p.id = pc.plugin_id
-        JOIN posthog_pluginsourcefile psf ON psf.plugin_id = p.id
+        FROM insights_pluginconfig pc
+        JOIN insights_plugin p ON p.id = pc.plugin_id
+        JOIN insights_pluginsourcefile psf ON psf.plugin_id = p.id
         WHERE pc.team_id = $1
         AND pc.enabled = true
         AND psf.filename = 'site.ts'
@@ -108,7 +108,7 @@ mod tests {
             uuid::Uuid::new_v4()
         );
         let plugin_id: i32 = sqlx::query_scalar(
-            r#"INSERT INTO posthog_plugin 
+            r#"INSERT INTO insights_plugin 
                (name, description, url, config_schema, tag, source, plugin_type, is_global, is_preinstalled, is_stateless, capabilities, from_json, from_web, organization_id, updated_at, created_at)
                VALUES ($1, 'Test plugin', $2, '[]', '', '', 'source', false, false, false, '{}', false, false, $3::uuid, NOW(), NOW())
                RETURNING id"#,
@@ -130,7 +130,7 @@ mod tests {
         let mut conn = client.get_connection().await.unwrap();
         let uuid = uuid::Uuid::new_v4().to_string();
         sqlx::query(
-            r#"INSERT INTO posthog_pluginsourcefile 
+            r#"INSERT INTO insights_pluginsourcefile 
                (id, plugin_id, filename, source, transpiled, status, updated_at)
                VALUES ($1::uuid, $2, $3, 'function test(){}', 'function test(){}', $4, NOW())"#,
         )
@@ -143,7 +143,7 @@ mod tests {
         Ok(())
     }
 
-    async fn insert_posthog_pluginconfig_in_pg(
+    async fn insert_insights_pluginconfig_in_pg(
         client: Arc<dyn Client + Send + Sync>,
         plugin_id: i32,
         team_id: i32,
@@ -152,7 +152,7 @@ mod tests {
     ) -> Result<i32, sqlx::Error> {
         let mut conn = client.get_connection().await.unwrap();
         let config_id: i32 = sqlx::query_scalar(
-            r#"INSERT INTO posthog_pluginconfig 
+            r#"INSERT INTO insights_pluginconfig 
                (plugin_id, team_id, enabled, "order", config, web_token, updated_at, created_at)
                VALUES ($1, $2, $3, 1, '{}', $4, NOW(), NOW())
                RETURNING id"#,
@@ -203,7 +203,7 @@ mod tests {
         .unwrap();
 
         // Insert enabled plugin config
-        let config_id = insert_posthog_pluginconfig_in_pg(
+        let config_id = insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team.id,
@@ -250,7 +250,7 @@ mod tests {
         .unwrap();
 
         // Insert disabled plugin config
-        insert_posthog_pluginconfig_in_pg(
+        insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team.id,
@@ -292,7 +292,7 @@ mod tests {
         .unwrap();
 
         // Insert enabled plugin config
-        insert_posthog_pluginconfig_in_pg(
+        insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team.id,
@@ -334,7 +334,7 @@ mod tests {
         .unwrap();
 
         // Insert enabled plugin config
-        insert_posthog_pluginconfig_in_pg(
+        insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team.id,
@@ -374,7 +374,7 @@ mod tests {
         .await
         .unwrap();
 
-        let config_id_1 = insert_posthog_pluginconfig_in_pg(
+        let config_id_1 = insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id_1,
             team.id,
@@ -402,7 +402,7 @@ mod tests {
         .await
         .unwrap();
 
-        let config_id_2 = insert_posthog_pluginconfig_in_pg(
+        let config_id_2 = insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id_2,
             team.id,
@@ -453,7 +453,7 @@ mod tests {
         .await
         .unwrap();
 
-        let config_id = insert_posthog_pluginconfig_in_pg(
+        let config_id = insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team.id,
@@ -508,7 +508,7 @@ mod tests {
         .unwrap();
 
         // Insert config for team1 only
-        insert_posthog_pluginconfig_in_pg(
+        insert_insights_pluginconfig_in_pg(
             context.non_persons_writer.clone(),
             plugin_id,
             team1.id,

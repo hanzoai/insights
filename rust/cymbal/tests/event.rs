@@ -208,7 +208,7 @@ impl TestHarness {
     }
 
     async fn suppress_issue(&self, issue_id: Uuid) {
-        sqlx::query("UPDATE posthog_errortrackingissue SET status = 'suppressed' WHERE id = $1")
+        sqlx::query("UPDATE insights_errortrackingissue SET status = 'suppressed' WHERE id = $1")
             .bind(issue_id)
             .execute(&self.db)
             .await
@@ -217,7 +217,7 @@ impl TestHarness {
 
     async fn get_issue_id(&self) -> Uuid {
         let row: (Uuid,) =
-            sqlx::query_as("SELECT id FROM posthog_errortrackingissue WHERE team_id = 1")
+            sqlx::query_as("SELECT id FROM insights_errortrackingissue WHERE team_id = 1")
                 .fetch_one(&self.db)
                 .await
                 .expect("Issue should exist");

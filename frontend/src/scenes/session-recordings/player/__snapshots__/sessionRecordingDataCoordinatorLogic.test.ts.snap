@@ -49,7 +49,7 @@ exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match 
                     "childNodes": [
                       {
                         "id": 7,
-                        "textContent": "PostHog",
+                        "textContent": "Insights",
                         "type": 3,
                       },
                     ],
@@ -201,7 +201,7 @@ exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match 
                             "childNodes": [
                               {
                                 "id": 25,
-                                "textContent": "PostHog React",
+                                "textContent": "Insights React",
                                 "type": 3,
                               },
                             ],
@@ -1066,7 +1066,7 @@ exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match 
                     "childNodes": [
                       {
                         "id": 11,
-                        "textContent": "PostHog",
+                        "textContent": "Insights",
                         "type": 3,
                       },
                     ],
@@ -1218,7 +1218,7 @@ exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match 
                             "childNodes": [
                               {
                                 "id": 29,
-                                "textContent": "PostHog React",
+                                "textContent": "Insights React",
                                 "type": 3,
                               },
                             ],
@@ -1708,7 +1708,7 @@ exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match 
           "nextId": null,
           "node": {
             "id": 68,
-            "textContent": "PostHog",
+            "textContent": "Insights",
             "type": 3,
           },
           "parentId": 10,

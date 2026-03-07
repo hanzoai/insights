@@ -14,17 +14,17 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestPostHogKafkaConsumer_Consume(t *testing.T) {
+func TestInsightsKafkaConsumer_Consume(t *testing.T) {
 	// Create mock objects
 	mockConsumer := new(mocks.KafkaConsumerInterface)
 	mockGeoLocator := new(mocks.GeoLocator)
 
 	// Create channels
-	outgoingChan := make(chan PostHogEvent, 1)
+	outgoingChan := make(chan InsightsEvent, 1)
 	statsChan := make(chan CountEvent, 1)
 
-	// Create PostHogKafkaConsumer
-	consumer := &PostHogKafkaConsumer{
+	// Create InsightsKafkaConsumer
+	consumer := &InsightsKafkaConsumer{
 		consumer:     mockConsumer,
 		topic:        "test-topic",
 		geolocator:   mockGeoLocator,
@@ -38,7 +38,7 @@ func TestPostHogKafkaConsumer_Consume(t *testing.T) {
 	mockConsumer.On("SubscribeTopics", []string{"test-topic"}, mock.AnythingOfType("kafka.RebalanceCb")).Return(nil)
 
 	// Create a test message
-	testWrapper := PostHogEventWrapper{
+	testWrapper := InsightsEventWrapper{
 		Uuid:       "test-uuid",
 		DistinctId: "test-distinct-id",
 		Ip:         "192.0.2.1",
@@ -88,9 +88,9 @@ func TestPostHogKafkaConsumer_Consume(t *testing.T) {
 	mockGeoLocator.AssertExpectations(t)
 }
 
-func TestPostHogKafkaConsumer_Close(t *testing.T) {
+func TestInsightsKafkaConsumer_Close(t *testing.T) {
 	mockConsumer := new(mocks.KafkaConsumerInterface)
-	consumer := &PostHogKafkaConsumer{
+	consumer := &InsightsKafkaConsumer{
 		consumer: mockConsumer,
 		incoming: make(chan []byte),
 	}
@@ -109,7 +109,7 @@ func TestParse(t *testing.T) {
 	data, err := os.ReadFile("testdata/event.json")
 	assert.NoError(t, err)
 	got := parse(mockGeoLocator, data)
-	assert.Equal(t, PostHogEvent{
+	assert.Equal(t, InsightsEvent{
 		Token:     "this is token",
 		Timestamp: 1738073128810.,
 		Event:     "consumer_ack",
@@ -177,7 +177,7 @@ func TestFlexibleString_UnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestPostHogEventWrapper_NumericDistinctId(t *testing.T) {
+func TestInsightsEventWrapper_NumericDistinctId(t *testing.T) {
 	tests := []struct {
 		name               string
 		jsonInput          string
@@ -202,7 +202,7 @@ func TestPostHogEventWrapper_NumericDistinctId(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var wrapper PostHogEventWrapper
+			var wrapper InsightsEventWrapper
 			err := json.Unmarshal([]byte(tt.jsonInput), &wrapper)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedDistinctId, string(wrapper.DistinctId))
@@ -213,10 +213,10 @@ func TestPostHogEventWrapper_NumericDistinctId(t *testing.T) {
 func TestParse_NumericDistinctId(t *testing.T) {
 	mockGeoLocator := new(mocks.GeoLocator)
 
-	// Test that numeric distinct_id from posthog-ruby SDK is handled correctly
+	// Test that numeric distinct_id from insights-ruby SDK is handled correctly
 	// This is the exact format that was causing "parse error: expected string near offset 17 of '21'"
 	// The wrapper has distinct_id at the top level, and the data field contains the inner event JSON
-	input := `{"distinct_id":21,"uuid":"test-uuid","ip":"","data":"{\"event\":\"$pageview\",\"properties\":{\"$lib\":\"posthog-ruby\"}}","token":"test-token"}`
+	input := `{"distinct_id":21,"uuid":"test-uuid","ip":"","data":"{\"event\":\"$pageview\",\"properties\":{\"$lib\":\"insights-ruby\"}}","token":"test-token"}`
 
 	got := parse(mockGeoLocator, []byte(input))
 

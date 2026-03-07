@@ -38,19 +38,19 @@ async fn main() {
         }
     };
 
-    match &config.posthog_api_key {
+    match &config.insights_api_key {
         Some(key) => {
             let ph_config = insights_rs::ClientOptionsBuilder::default()
                 .api_key(key.clone())
-                .api_endpoint(config.posthog_endpoint.clone())
+                .api_endpoint(config.insights_endpoint.clone())
                 .build()
                 .unwrap();
             insights_rs::init_global(ph_config).await.unwrap();
-            info!("Posthog client initialized");
+            info!("Insights client initialized");
         }
         None => {
             insights_rs::disable_global();
-            warn!("Posthog client disabled");
+            warn!("Insights client disabled");
         }
     }
 

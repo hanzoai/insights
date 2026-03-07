@@ -4,7 +4,7 @@ while test $# -gt 0; do
   case "$1" in
   -h | --help)
     echo "USAGE:"
-    echo "    bin/posthog-node [FLAGS]"
+    echo "    bin/insights-node [FLAGS]"
     echo " "
     echo "FLAGS:"
     echo "    -h, --help           Print this help information."
@@ -43,7 +43,7 @@ cd nodejs
 
 if [[ -n $DEBUG ]]; then
   echo "🧐 Verifying installed packages..."
-  pnpm --filter=@posthog/nodejs install
+  pnpm --filter=@hanzo/nodejs install
 fi
 
 if [ $? -ne 0 ]; then

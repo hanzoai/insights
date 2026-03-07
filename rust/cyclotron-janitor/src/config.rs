@@ -18,7 +18,7 @@ pub struct Config {
     #[envconfig(from = "BIND_PORT", default = "3303")]
     pub port: u16,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/cyclotron")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/cyclotron")]
     pub database_url: String,
 
     #[envconfig(default = "30")]

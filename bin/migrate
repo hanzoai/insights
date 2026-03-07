@@ -190,7 +190,7 @@ fi
 
 if run_scope "async"; then
     # NOTE: we do not apply any non-noop migrations here. Rather these are run
-    # manually within the UI. See https://posthog.com/docs/runbook/async-migrations
+    # manually within the UI. See https://insights.hanzo.ai/docs/runbook/async-migrations
     # for details.
     python manage.py run_async_migrations --complete-noop-migrations
     if [ $? -ne 0 ]; then
@@ -199,7 +199,7 @@ if run_scope "async"; then
     fi
 
     # NOTE: this check should not fail if a migration isn't complete but within the
-    # given async migration posthog version range, thus this should not block e.g.
+    # given async migration insights version range, thus this should not block e.g.
     # k8s pod deployments.
     python manage.py run_async_migrations --check
     if [ $? -ne 0 ]; then

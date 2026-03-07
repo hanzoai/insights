@@ -28,7 +28,7 @@
                   0 AS reported_conversion_value
               
   FROM
-                  `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                  `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
               
   WHERE
                   and(greaterOrEquals(toDateTime(date1), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-11-30 23:59:59'))))
@@ -106,7 +106,7 @@
                       0 AS reported_conversion_value
                   
   FROM
-                      `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                      `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                   
   WHERE
                       and(greaterOrEquals(toDateTime(date1), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-12-31 23:59:59'))))
@@ -232,7 +232,7 @@
                       0 AS reported_conversion_value
                   
   FROM
-                      `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                      `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                   
   WHERE
                       and(greaterOrEquals(toDateTime(date1), toDateTime('2024-09-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-10-31 23:59:59'))))
@@ -385,7 +385,7 @@
                       0 AS reported_conversion_value
                   
   FROM
-                      `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                      `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                   
   WHERE
                       and(greaterOrEquals(toDateTime(date1), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-12-31 23:59:59'))))
@@ -511,7 +511,7 @@
                       0 AS reported_conversion_value
                   
   FROM
-                      `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                      `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                   
   WHERE
                       and(greaterOrEquals(toDateTime(date1), toDateTime('2024-09-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-10-31 23:59:59'))))
@@ -663,7 +663,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                          `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date1), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-12-31 23:59:59')))
@@ -681,7 +681,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_tiktok_ads_table` AS posthog_test_tiktok_ads_table
+                          `bigquery.insights_test.insights_test_tiktok_ads_table` AS insights_test_tiktok_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date2), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date2), toDateTime('2024-12-31 23:59:59')))
@@ -699,7 +699,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_linkedin_ads_table` AS posthog_test_linkedin_ads_table
+                          `bigquery.insights_test.insights_test_linkedin_ads_table` AS insights_test_linkedin_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date3), toDateTime('2024-11-01 00:00:00')), lessOrEquals(toDateTime(date3), toDateTime('2024-12-31 23:59:59'))))
@@ -751,7 +751,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_facebook_ads_table` AS posthog_test_facebook_ads_table
+                          `bigquery.insights_test.insights_test_facebook_ads_table` AS insights_test_facebook_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date1), toDateTime('2024-09-01 00:00:00')), lessOrEquals(toDateTime(date1), toDateTime('2024-10-31 23:59:59')))
@@ -769,7 +769,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_tiktok_ads_table` AS posthog_test_tiktok_ads_table
+                          `bigquery.insights_test.insights_test_tiktok_ads_table` AS insights_test_tiktok_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date2), toDateTime('2024-09-01 00:00:00')), lessOrEquals(toDateTime(date2), toDateTime('2024-10-31 23:59:59')))
@@ -787,7 +787,7 @@
                           0 AS reported_conversion_value
                       
       FROM
-                          `bigquery.posthog_test.posthog_test_linkedin_ads_table` AS posthog_test_linkedin_ads_table
+                          `bigquery.insights_test.insights_test_linkedin_ads_table` AS insights_test_linkedin_ads_table
                       
       WHERE
                           and(greaterOrEquals(toDateTime(date3), toDateTime('2024-09-01 00:00:00')), lessOrEquals(toDateTime(date3), toDateTime('2024-10-31 23:59:59'))))

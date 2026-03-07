@@ -10,7 +10,7 @@ __pycache__/
 .eslintcache
 .mypy_cache
 .parcel-cache
-.posthog/
+.insights/
 .postgres-backups/
 .python-version
 .temporal-worker-settings
@@ -64,9 +64,9 @@ upgrade/
 venv
 yalc.lock
 
-# Local ide config should be ignored but keep the example posthog.iml file
+# Local ide config should be ignored but keep the example insights.iml file
 .idea
-!.idea/posthog.iml
+!.idea/insights.iml
 
 # Local VSCode config should be ignored
 # but make sure we commit examples and the shared `launch.json` file
@@ -114,7 +114,7 @@ common/tailwind/dist
 frontend/__snapshots__/__diff_output__/
 frontend/__snapshots__/__failures__/
 frontend/.cache/
-frontend/@posthog/apps-common/dist/
+frontend/@hanzo/apps-common/dist/
 frontend/dist/
 frontend/pnpm-error.log
 frontend/public/Matter*.woff*
@@ -129,7 +129,7 @@ target/*
 CLAUDE.local.md
 
 # Ignore file for clearing demo data on local
-posthog/management/commands/clear_demo_data.py
+insights/management/commands/clear_demo_data.py
 
 # Ignore Claude Code settings
 .claude/settings.local.json

@@ -936,7 +936,7 @@ async fn test_feature_flags_with_json_payloads() -> Result<()> {
         .insert_person(
             team.id,
             distinct_id.clone(),
-            Some(json!({"email": "tim@posthog.com"})),
+            Some(json!({"email": "tim@hanzo.ai"})),
         )
         .await?;
 
@@ -953,7 +953,7 @@ async fn test_feature_flags_with_json_payloads() -> Result<()> {
                     "properties": [
                         {
                             "key": "email",
-                            "value": "tim@posthog.com",
+                            "value": "tim@hanzo.ai",
                             "operator": "exact",
                             "type": "person",
                         }
@@ -1021,7 +1021,7 @@ async fn test_feature_flags_with_group_relationships() -> Result<()> {
             team.id,
             "organization",
             "foo",
-            json!({"email": "posthog@example.com"}),
+            json!({"email": "insights.example.com"}),
         )
         .await?;
 
@@ -1058,7 +1058,7 @@ async fn test_feature_flags_with_group_relationships() -> Result<()> {
                         "properties": [
                             {
                                 "key": "email",
-                                "value": "posthog",
+                                "value": "insights",
                                 "operator": "icontains",
                                 "type": "group",
                                 "group_type_index": 1
@@ -1192,7 +1192,7 @@ async fn it_handles_not_contains_property_filter() -> Result<()> {
                     "properties": [
                         {
                             "key": "email",
-                            "value": "@posthog.com",
+                            "value": "@hanzo.ai",
                             "operator": "not_icontains",
                             "type": "person"
                         }
@@ -1261,7 +1261,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
                         "properties": [
                             {
                                 "key": "email",
-                                "value": "test@posthog.com",
+                                "value": "test@hanzo.ai",
                                 "operator": "is_not",
                                 "type": "person"
                             }
@@ -1284,7 +1284,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
                         "properties": [
                             {
                                 "key": "email",
-                                "value": ".*@posthog\\.com$",
+                                "value": ".*@hanzo\.ai$",
                                 "operator": "not_regex",
                                 "type": "person"
                             }
@@ -1354,7 +1354,7 @@ async fn it_handles_not_equal_and_not_regex_property_filters() -> Result<()> {
         "token": token,
         "distinct_id": distinct_id,
         "person_properties": {
-            "email": "test@posthog.com"
+            "email": "test@hanzo.ai"
         }
     });
 
@@ -1554,7 +1554,7 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
                     "rollout_percentage": 100
                 },
                 {
-                    "properties": [{"key": "email", "type": "person", "value": "@posthog.com", "operator": "icontains"}],
+                    "properties": [{"key": "email", "type": "person", "value": "@hanzo.ai", "operator": "icontains"}],
                     "rollout_percentage": 100
                 }
             ],
@@ -1582,13 +1582,13 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
             "project": "01908d8e-a7fe-0000-403d-5de1f5feeb34",
             "organization": "01908d8e-a7ed-0000-5678-bb4cf061a2f6",
             "customer": "cus_IK2DWsWVn2ZM16",
-            "instance": "https://us.posthog.com"
+            "instance": "https://us.insights.hanzo.ai"
         },
         "person_properties": {
-            "$initial_referrer": "https://us.posthog.com/admin/posthog/user/106009/change/?_changelist_filters=q%3Dgtarasov.work",
-            "$initial_referring_domain": "us.posthog.com",
-            "$initial_current_url": "https://us.posthog.com/project/78189/settings/user",
-            "$initial_host": "us.posthog.com",
+            "$initial_referrer": "https://us.insights.hanzo.ai/admin/insights/user/106009/change/?_changelist_filters=q%3Dgtarasov.work",
+            "$initial_referring_domain": "us.insights.hanzo.ai",
+            "$initial_current_url": "https://us.insights.hanzo.ai/project/78189/settings/user",
+            "$initial_host": "us.insights.hanzo.ai",
             "$initial_pathname": "/project/78189/settings/user",
             "$initial_utm_source": null,
             "$initial_utm_medium": null,
@@ -1870,7 +1870,7 @@ async fn test_config_passthrough_enterprise_team() -> Result<()> {
             {"id": 1, "url": "/site_app/enterprise_token/"}
         ],
         "analytics": {
-            "endpoint": "https://analytics.posthog.com"
+            "endpoint": "https://analytics.insights.hanzo.ai"
         },
         "elementsChainAsString": true,
         "capturePerformance": {
@@ -1940,7 +1940,7 @@ async fn test_config_passthrough_enterprise_team() -> Result<()> {
     assert!(json_data["analytics"].is_object());
     assert_eq!(
         json_data["analytics"]["endpoint"],
-        json!("https://analytics.posthog.com")
+        json!("https://analytics.insights.hanzo.ai")
     );
 
     // Elements chain as string
@@ -3743,7 +3743,7 @@ async fn test_cohort_filter_with_regex_and_negation() -> Result<()> {
     // Create the cohort in the database
     let mut conn = pg_client.get_connection().await.unwrap();
     let cohort_id: i32 = sqlx::query_scalar(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
            (name, description, team_id, deleted, filters, is_calculating, created_by_id, created_at, is_static, last_calculation, errors_calculating, groups, version)
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
@@ -4454,7 +4454,7 @@ async fn test_nested_cohort_targeting_with_days_since_paid_plan() -> Result<()> 
     });
 
     let cohort_128293_id: i32 = sqlx::query_scalar(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
            (name, description, team_id, deleted, filters, is_calculating, created_by_id, created_at, is_static, last_calculation, errors_calculating, groups, version)
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
@@ -4506,7 +4506,7 @@ async fn test_nested_cohort_targeting_with_days_since_paid_plan() -> Result<()> 
     });
 
     let cohort_128397_id: i32 = sqlx::query_scalar(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
            (name, description, team_id, deleted, filters, is_calculating, created_by_id, created_at, is_static, last_calculation, errors_calculating, groups, version)
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
@@ -4951,7 +4951,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
             team.id,
             distinct_id.clone(),
             Some(json!({
-                "email": "engineer@posthog.com"
+                "email": "engineer@hanzo.ai"
             })),
         )
         .await
@@ -4959,7 +4959,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
 
     let mut conn = pg_client.get_connection().await.unwrap();
 
-    // Create cohort 1001: matches "admin@posthog.com" (for exclusion)
+    // Create cohort 1001: matches "admin@hanzo.ai" (for exclusion)
     let excluded_cohort_filters = json!({
         "properties": {
             "type": "OR",
@@ -4968,7 +4968,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
                 "values": [{
                     "key": "email",
                     "type": "person",
-                    "value": "admin@posthog.com",
+                    "value": "admin@hanzo.ai",
                     "negation": false,
                     "operator": "exact"
                 }]
@@ -4977,19 +4977,19 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
     });
 
     let excluded_cohort_id: i32 = sqlx::query_scalar(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
            (name, description, team_id, deleted, filters, is_calculating, created_by_id, created_at, is_static, last_calculation, errors_calculating, groups, version)
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
     )
     .bind("Admin Users")
-    .bind("Matches admin@posthog.com")
+    .bind("Matches admin@hanzo.ai")
     .bind(team.id)
     .bind(excluded_cohort_filters)
     .fetch_one(&mut *conn)
     .await?;
 
-    // Create cohort 1002: matches "@posthog.com" AND NOT in excluded cohort
+    // Create cohort 1002: matches "@hanzo.ai" AND NOT in excluded cohort
     let main_cohort_filters = json!({
         "properties": {
             "type": "OR",
@@ -4999,7 +4999,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
                     {
                         "key": "email",
                         "type": "person",
-                        "value": "@posthog.com",
+                        "value": "@hanzo.ai",
                         "negation": false,
                         "operator": "regex"
                     },
@@ -5015,13 +5015,13 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
     });
 
     let main_cohort_id: i32 = sqlx::query_scalar(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
            (name, description, team_id, deleted, filters, is_calculating, created_by_id, created_at, is_static, last_calculation, errors_calculating, groups, version)
            VALUES ($1, $2, $3, false, $4, false, NULL, NOW(), false, NOW(), 0, '[]', NULL)
            RETURNING id"#,
     )
     .bind("Non-Admin Insights Users")
-    .bind("Matches @posthog.com but NOT admin")
+    .bind("Matches @hanzo.ai but NOT admin")
     .bind(team.id)
     .bind(main_cohort_filters)
     .fetch_one(&mut *conn)
@@ -5052,8 +5052,8 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
 
     let server = ServerHandle::for_config(config).await;
 
-    // Test 1: User with engineer@posthog.com should match
-    // (matches @posthog.com regex AND is NOT in admin cohort)
+    // Test 1: User with engineer@hanzo.ai should match
+    // (matches @hanzo.ai regex AND is NOT in admin cohort)
     let payload = json!({
         "token": token,
         "distinct_id": distinct_id,
@@ -5079,15 +5079,15 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
         })
     );
 
-    // Test 2: User with admin@posthog.com should NOT match
-    // (matches @posthog.com regex BUT is in admin cohort)
+    // Test 2: User with admin@hanzo.ai should NOT match
+    // (matches @hanzo.ai regex BUT is in admin cohort)
     let admin_distinct_id = "admin_user".to_string();
     context
         .insert_person(
             team.id,
             admin_distinct_id.clone(),
             Some(json!({
-                "email": "admin@posthog.com"
+                "email": "admin@hanzo.ai"
             })),
         )
         .await
@@ -5118,7 +5118,7 @@ async fn test_cohort_with_and_negated_cohort_condition() -> Result<()> {
         })
     );
 
-    // Test 3: User without @posthog.com should NOT match
+    // Test 3: User without @hanzo.ai should NOT match
     // (doesn't match regex, regardless of admin status)
     let external_distinct_id = "external_user".to_string();
     context

@@ -23,10 +23,10 @@ pub struct Config {
     #[envconfig(from = "BIND_PORT", default = "3305")]
     pub port: u16,
 
-    pub posthog_api_key: Option<String>,
+    pub insights_api_key: Option<String>,
 
-    #[envconfig(default = "https://us.i.posthog.com/capture")]
-    pub posthog_endpoint: String,
+    #[envconfig(default = "https://us.i.insights.hanzo.ai/capture")]
+    pub insights_endpoint: String,
 
     #[envconfig(nested = true)]
     pub kafka: KafkaConfig,
@@ -49,10 +49,10 @@ pub struct Config {
     #[envconfig(nested = true)]
     pub consumer: ConsumerConfig,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub persons_url: String,
 
     // Rust service connect directly to postgres, not via pgbouncer, so we keep this low

@@ -46,7 +46,7 @@
 !pyproject.toml
 !uv.lock
 !insights
-!posthog.json
+!insights.json
 !products
 !requirements-dev.txt
 !requirements.txt

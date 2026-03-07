@@ -180,7 +180,7 @@ async fn test_person_processing_filter_with_kafka() -> Result<()> {
     std::env::set_var("KAFKA_HOSTS", KAFKA_BROKERS);
     std::env::set_var(
         "DATABASE_URL",
-        "postgres://posthog:posthog@localhost:5432/posthog",
+        "postgres://insights:insights@localhost:5432/insights",
     );
 
     let config = Config::init_from_env()?;
@@ -278,7 +278,7 @@ async fn test_empty_person_processing_filter() -> Result<()> {
     std::env::set_var("KAFKA_HOSTS", KAFKA_BROKERS);
     std::env::set_var(
         "DATABASE_URL",
-        "postgres://posthog:posthog@localhost:5432/posthog",
+        "postgres://insights:insights@localhost:5432/insights",
     );
 
     let config = Config::init_from_env()?;

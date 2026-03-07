@@ -1,23 +1,23 @@
 <clickhouse>
     <tcp_port>9000</tcp_port>
     <remote_servers>
-        <posthog>
+        <insights>
             <shard>
                 <replica>
                     <host>clickhouse</host>
                     <port>9000</port>
                 </replica>
             </shard>
-        </posthog>
-        <posthog_single_shard>
+        </insights>
+        <insights_single_shard>
             <shard>
                 <replica>
                     <host>clickhouse</host>
                     <port>9000</port>
                 </replica>
             </shard>
-        </posthog_single_shard>
-        <posthog_migrations>
+        </insights_single_shard>
+        <insights_migrations>
             <shard>
                 <replica>
                     <host>clickhouse</host>
@@ -30,7 +30,7 @@
                     <port>9001</port>
                 </replica>
             </shard>
-        </posthog_migrations>
+        </insights_migrations>
     </remote_servers>
 
     <macros>
