@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.SeparateDatabaseAndState(
             # No database operations here - this is only for setting null=True on the `Team.project` field.
-            # Due to a mishap in posthog/migrations/0397_projects_backfill.py, the `project` field was non-nullable
+            # Due to a mishap in insights/migrations/0397_projects_backfill.py, the `project` field was non-nullable
             # in Django's state, BUT in fact still nullable in the database. This state update fixes the discrepancy.
             # (We'll be using a `CheckConstraint()` instead of `null=False` to avoid locking the table - see below.)
             state_operations=[

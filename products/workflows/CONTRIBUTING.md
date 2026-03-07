@@ -14,16 +14,16 @@ When you add a new "insights function" action node, the wiring is:
 
 1. Frontend action node sets `config.template_id`.
 2. Backend template with the same `id` contains the script code run for that node.
-3. Script code may call async functions (e.g. `postHogGetTicket(...)`).
+3. Script code may call async functions (e.g. `insightsGetTicket(...)`).
 4. Async function implementation is registered in the Node service and executed at runtime.
 
 Concrete end-to-end example:
 
 - Frontend action node uses `template_id: 'template-insights-get-ticket'`:
   - products/workflows/frontend/Workflows/hogflows/registry/actions/conversations.ts
-- Backend template defines `id: 'template-insights-get-ticket'` and calls `postHogGetTicket(...)`:
+- Backend template defines `id: 'template-insights-get-ticket'` and calls `insightsGetTicket(...)`:
   - nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-get-ticket.template.ts
-- Backend async function registers `postHogGetTicket`:
+- Backend async function registers `insightsGetTicket`:
   - nodejs/src/cdp/async-functions/conversations.ts
 
 ## Frontend: adding a trigger type

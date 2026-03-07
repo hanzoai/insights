@@ -4,8 +4,8 @@ from django.db import migrations, models
 from django.db.migrations.operations.base import Operation
 
 
-class AlterPosthogIntegrationKindField(Operation):
-    """Custom operation to alter the Integration model's kind field in the posthog app."""
+class AlterInsightsIntegrationKindField(Operation):
+    """Custom operation to alter the Integration model's kind field in the insights app."""
 
     reduces_to_sql = False
     reversible = True
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             database_operations=[],
             state_operations=[
-                AlterPosthogIntegrationKindField(),
+                AlterInsightsIntegrationKindField(),
             ],
         ),
     ]

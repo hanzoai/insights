@@ -38,7 +38,7 @@
             "required": false
         },
         {
-            "key": "postHogUrl",
+            "key": "insightsUrl",
             "hint": "Deprecated",
             "name": "Insights Instance",
             "type": "string",

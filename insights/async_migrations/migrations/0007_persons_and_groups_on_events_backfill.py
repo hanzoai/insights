@@ -141,7 +141,7 @@ class Migration(AsyncMigrationDefinition):
     def operations(self):
         return [
             AsyncMigrationOperation(
-                # See https://github.com/PostHog/posthog/issues/10616 for details on choice of codec
+                # See https://github.com/hanzoai/insights/issues/10616 for details on choice of codec
                 fn=lambda query_id: self._update_properties_column_compression_codec(query_id, "ZSTD(3)"),
                 rollback_fn=lambda query_id: self._update_properties_column_compression_codec(query_id, "LZ4"),
             ),
