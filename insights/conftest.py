@@ -425,7 +425,7 @@ def pytest_configure(config):
 
 def _runs_on_internal_pr() -> bool:
     """
-    Returns True when tests are running for an internal PR or on master,
+    Returns True when tests are running for an internal PR or on main,
     and False for fork PRs.
     Defaults to True, so local runs are unaffected.
     """

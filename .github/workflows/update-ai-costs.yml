@@ -87,7 +87,7 @@ jobs:
                       - [Google AI (Gemini) Pricing](https://ai.google.dev/pricing)
                       - [Mistral AI Pricing](https://mistral.ai/pricing#api-pricing)
                   branch: chore/llma-update-ai-costs
-                  base: master
+                  base: main
                   delete-branch: true
                   labels: |
                       automated

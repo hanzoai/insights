@@ -175,7 +175,7 @@ jobs:
         name: deploy ${{ matrix.release }}
         runs-on: ubuntu-24.04
         needs: build
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         strategy:
             matrix:
                 include:

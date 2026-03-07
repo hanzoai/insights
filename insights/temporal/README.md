@@ -440,7 +440,7 @@ Once the workers are deployed, they will be able to run your workflows and activ
 
 ### Trigger deployments for workers
 
-Some changes in our CI/CD pipeline will be required to ensure your changes are triggering deployments to your Temporal workers. First, when a new deployment of Temporal workers is created, you may want to trigger the deployment on merges to this repository's `master` branch. For that, edit the `container-images-cd.yaml` GitHub workflow and add a new trigger step.
+Some changes in our CI/CD pipeline will be required to ensure your changes are triggering deployments to your Temporal workers. First, when a new deployment of Temporal workers is created, you may want to trigger the deployment on merges to this repository's `main` branch. For that, edit the `container-images-cd.yaml` GitHub workflow and add a new trigger step.
 
 Moreover, notice that in the workflow every trigger step comes after a check step. This step ensures that only certain module changes trigger a worker re-deployment, and not every single change. This is done because restarting workers can be disruptive to workflows running in it, so as a general rule try to minimize the changes that will trigger a re-deployment of workers. You will probably only need the common temporal modules + your product specific modules in the check.
 
@@ -491,6 +491,6 @@ As you run workflows, you will be able to see the logs in the worker's logs, and
 
 ## Examples in Insights
 
-- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Hanzo Insights/insights/tree/master/products/batch_exports/backend/temporal/destinations).
-- [Examples on unit testing Temporal workflows](https://github.com/Hanzo Insights/insights/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
+- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Hanzo Insights/insights/tree/main/products/batch_exports/backend/temporal/destinations).
+- [Examples on unit testing Temporal workflows](https://github.com/Hanzo Insights/insights/tree/main/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
 - DuckLake data modeling writes leverage Temporal too; follow the [DuckLake copy workflow configuration guide](../ducklake/README.md) to see how we configure environment variables, bucket layouts, and IAM perms for the copy workflow.

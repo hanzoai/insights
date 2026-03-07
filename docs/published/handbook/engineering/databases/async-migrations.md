@@ -8,7 +8,7 @@ Also see: user-facing documentation under [in the runbook](https://hanzo.ai/docs
 
 ### Writing an async migration
 
-To write an async migration, you should create a migration file inside [`insights/async_migrations/migrations`](https://github.com/Hanzo Insights/insights/tree/master/insights/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/Hanzo Insights/insights/tree/master/insights/async_migrations/examples).
+To write an async migration, you should create a migration file inside [`insights/async_migrations/migrations`](https://github.com/Hanzo Insights/insights/tree/main/insights/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/Hanzo Insights/insights/tree/main/insights/async_migrations/examples).
 
 ### Workflow and architecture
 

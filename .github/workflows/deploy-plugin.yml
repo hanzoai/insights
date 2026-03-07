@@ -2,7 +2,7 @@ name: Deploy Hanzo Insights Plugin Server
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, main]
     paths:
       - 'Dockerfile.node'
       - 'nodejs/**'

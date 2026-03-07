@@ -9,7 +9,7 @@ from insights.insightsql.ast import AST, AST_CLASSES, Constant, Expr, InsightsQL
 def like_matches(pattern: str, text: str) -> bool:
     """
     Python implementation of ClickHouse LIKE pattern matching (case-sensitive).
-    See https://github.com/ClickHouse/ClickHouse/blob/master/src/Functions/MatchImpl.h
+    See https://github.com/ClickHouse/ClickHouse/blob/main/src/Functions/MatchImpl.h
 
     LIKE is case-sensitive matching where:
     - % matches any sequence of characters (including empty)

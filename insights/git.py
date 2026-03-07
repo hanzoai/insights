@@ -27,7 +27,7 @@ def get_git_commit_short() -> Optional[str]:
 def get_git_branch() -> Optional[str]:
     """Returns the symbolic name of the current active branch. Will return None in case of failure.
 
-    Example: get_git_branch() => "master"
+    Example: get_git_branch() => "main"
     """
 
     try:
