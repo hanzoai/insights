@@ -13,7 +13,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install [`insights-js`](https://github.com/insights/insights-js) and `@hanzo/react` using your package manager:</Markdown>
+                    <Markdown>Install [`insights-js`](https://github.com/hanzoai/insights-js) and `@hanzo/react` using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {

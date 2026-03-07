@@ -5,7 +5,7 @@ import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
 function GoInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>go get "github.com/insights/insights-go"</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>go get "github.com/hanzoai/insights-go"</CodeSnippet>
 }
 
 function GoSetupSnippet(): JSX.Element {
@@ -15,7 +15,7 @@ function GoSetupSnippet(): JSX.Element {
         <CodeSnippet language={Language.Go}>
             {`package main
 import (
-    "github.com/insights/insights-go"
+    "github.com/hanzoai/insights-go"
 )
 func main() {
     client, _ := insights.NewWithConfig("${currentTeam?.api_token}", insights.Config{Endpoint: "${apiHostOrigin()}"})

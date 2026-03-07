@@ -18,7 +18,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                go get "github.com/insights/insights-go"
+                                go get "github.com/hanzoai/insights-go"
                             `,
                             },
                         ]}
@@ -41,7 +41,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 package main
 
                                 import (
-                                    "github.com/insights/insights-go"
+                                    "github.com/hanzoai/insights-go"
                                 )
 
                                 func main() {

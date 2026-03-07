@@ -1,6 +1,6 @@
 {
     "name": "GCS Export",
-    "url": "https://github.com/Hanzo Insights/insights-gcs-plugin",
+    "url": "https://github.com/hanzoai/insights-gcs-plugin",
     "description": "Sends events to GCS on ingestion.",
     "main": "index.ts",
     "insightsVersion": ">= 1.25.0",

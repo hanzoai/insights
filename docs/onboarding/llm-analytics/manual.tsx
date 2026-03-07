@@ -133,14 +133,14 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                 <Markdown>### 1. Install</Markdown>
                                                 <CodeBlock
                                                     language="bash"
-                                                    code="go get github.com/insights/insights-go"
+                                                    code="go get github.com/hanzoai/insights-go"
                                                 />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>
                                                 <CodeBlock
                                                     language="go"
                                                     code={dedent`
-                                                        import "github.com/insights/insights-go"
+                                                        import "github.com/hanzoai/insights-go"
 
                                                         client, _ := insights.NewWithConfig("<ph_project_api_key>", insights.Config{
                                                             Endpoint: "<ph_client_api_host>",

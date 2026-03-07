@@ -4,13 +4,13 @@
     "version": "0.0.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/insights/insights.git"
+        "url": "https://github.com/hanzoai/insights.git"
     },
     "author": "Hanzo Insights Inc.",
     "bugs": {
-        "url": "https://github.com/insights/insights/issues"
+        "url": "https://github.com/hanzoai/insights/issues"
     },
-    "homepage": "https://github.com/insights/insights#readme",
+    "homepage": "https://github.com/hanzoai/insights#readme",
     "license": "MIT",
     "engines": {
         "node": ">=24 <25"

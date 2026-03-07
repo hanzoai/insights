@@ -76,7 +76,7 @@ export function Settings({
     const settingsInSidebar = props.sectionId && !!selectedSetting
 
     // Currently environment and project settings do not require periodic re-authentication,
-    // though this is likely to change (see https://github.com/insights/insights/pull/22421).
+    // though this is likely to change (see https://github.com/hanzoai/insights/pull/22421).
     // In the meantime, we don't want a needless re-authentication modal:
     const AuthenticationAreaComponent =
         selectedLevel !== 'environment' && selectedLevel !== 'project'

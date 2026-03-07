@@ -15,7 +15,7 @@ DEFAULT_INPUT_DIR = Path(__file__).resolve().parent.parent.parent / "github_issu
 def _extract_repo(issue: dict) -> str:
     """Extract owner/repo from the issue's html_url or repository_url."""
     html_url = issue.get("html_url", "")
-    # html_url looks like https://github.com/insights/insights/issues/12345
+    # html_url looks like https://github.com/hanzoai/insights/issues/12345
     parts = html_url.split("/")
     try:
         idx = parts.index("github.com")

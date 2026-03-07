@@ -29,7 +29,7 @@ class GolangGenerator(EventDefinitionGenerator):
             if any(prop.property_type == "DateTime" for prop in properties):
                 imports.append('\t"time"')
                 break
-        imports.append('\t"github.com/insights/insights-go"')
+        imports.append('\t"github.com/hanzoai/insights-go"')
         imports_section = "\n".join(imports)
 
         event_blocks: list[str] = []

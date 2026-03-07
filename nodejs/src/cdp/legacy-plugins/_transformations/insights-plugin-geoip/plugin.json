@@ -1,6 +1,6 @@
 {
     "name": "GeoIP",
-    "url": "https://github.com/Hanzo Insights/insights-plugin-geoip",
+    "url": "https://github.com/hanzoai/insights-plugin-geoip",
     "description": "Enrich Insights events and persons with IP location data",
     "main": "index.ts",
     "insightsVersion": ">=1.24.0",

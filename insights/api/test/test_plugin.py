@@ -842,7 +842,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             [
                 {
                     "name": "insights-currency-normalization-plugin",
-                    "url": "https://github.com/insights/insights-currency-normalization-plugin",
+                    "url": "https://github.com/hanzoai/insights-currency-normalization-plugin",
                     "description": "Normalise monerary values into a base currency",
                     "icon": "https://raw.githubusercontent.com/insights/insights-currency-normalization-plugin/main/logo.png",
                     "verified": False,
