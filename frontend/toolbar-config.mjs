@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { isDev } from '@posthog/esbuilder'
+import { isDev } from '@hanzo/esbuilder'
 
 const deniedPaths = [
     '~/lib/hooks/useUploadFiles',

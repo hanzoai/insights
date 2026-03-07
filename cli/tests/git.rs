@@ -1,10 +1,10 @@
-use posthog_cli::utils::git::{get_git_info, get_remote_url, get_repo_name};
+use insights_cli::utils::git::{get_git_info, get_remote_url, get_repo_name};
 use std::fs;
 use std::path::PathBuf;
 use uuid::Uuid;
 
 fn make_git_dir_with_config(config_content: &str) -> PathBuf {
-    let temp_root = std::env::temp_dir().join(format!("posthog_cli_git_test_{}", Uuid::now_v7()));
+    let temp_root = std::env::temp_dir().join(format!("insights_cli_git_test_{}", Uuid::now_v7()));
     let git_dir = temp_root.join(".git");
     fs::create_dir_all(&git_dir).expect("failed to create .git directory");
     let config_path = git_dir.join("config");

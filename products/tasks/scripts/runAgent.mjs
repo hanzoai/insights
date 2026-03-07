@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Agent, PermissionMode } from '@posthog/agent'
+import { Agent, PermissionMode } from '@hanzo/agent'
 
 function parseArgs() {
     const args = process.argv.slice(2)

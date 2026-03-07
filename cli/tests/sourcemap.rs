@@ -1,4 +1,4 @@
-use posthog_cli::{
+use insights_cli::{
     sourcemaps::{
         content::SourceMapContent, inject::inject_pairs, plain::inject::is_javascript_file,
         source_pairs::SourcePair,
@@ -42,7 +42,7 @@ pub fn read_pairs(
         .include(include)?
         .exclude(exclude)?;
 
-    Ok(posthog_cli::sourcemaps::source_pairs::read_pairs(
+    Ok(insights_cli::sourcemaps::source_pairs::read_pairs(
         selection.into_iter().filter(is_javascript_file),
         prefix,
     ))
@@ -284,7 +284,7 @@ fn test_upload_set() {
     assert_ne!(source_chunk_id, sourcemap_chunk_id);
 
     // Convert to UploadSet
-    use posthog_cli::api::symbol_sets::SymbolSetUpload;
+    use insights_cli::api::symbol_sets::SymbolSetUpload;
     let upload_set: SymbolSetUpload = pair_with_different_ids
         .try_into()
         .expect("Failed to convert to SymbolSetUpload");
