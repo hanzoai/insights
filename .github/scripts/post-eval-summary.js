@@ -56,7 +56,7 @@ module.exports = ({ github, context, fs }) => {
                 let baselineComparison = null
                 const diffHighlight = Math.abs(value.diff) > DIFF_THRESHOLD ? '**' : ''
                 let diffEmoji = '🆕'
-                if (result.comparison_experiment_name?.startsWith('master-')) {
+                if (result.comparison_experiment_name?.startsWith('main-')) {
                     baselineComparison = `${diffHighlight}${value.diff > 0 ? '+' : value.diff < 0 ? '' : '±'}${(
                         value.diff * 100
                     ).toFixed(
@@ -127,7 +127,7 @@ module.exports = ({ github, context, fs }) => {
             body: body,
         })
     } else {
-        // Just log the summary if this is a push to master
+        // Just log the summary if this is a push to main
         console.info(body)
     }
 }

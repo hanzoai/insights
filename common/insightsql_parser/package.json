@@ -40,5 +40,5 @@
     "bugs": {
         "url": "https://github.com/hanzoai/insights/issues"
     },
-    "homepage": "https://github.com/hanzoai/insights/tree/master/common/insightsql_parser"
+    "homepage": "https://github.com/hanzoai/insights/tree/main/common/insightsql_parser"
 }

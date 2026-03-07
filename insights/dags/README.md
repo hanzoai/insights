@@ -251,7 +251,7 @@ export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTIT
 #### Production Configuration
 
 For production deployments, configure similar concurrency settings in your `dagster.yaml`.
-For Insights employees, it is on our charts repo: https://github.com/Hanzo Insights/charts/tree/master/argocd/dagster
+For Insights employees, it is on our charts repo: https://github.com/Hanzo Insights/charts/tree/main/argocd/dagster
 
 ## Additional Resources
 

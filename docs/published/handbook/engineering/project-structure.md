@@ -60,7 +60,7 @@ The Django backend application. Key subdirectories:
 
 Product-specific code organized as **vertical slices**. Each product folder contains its own backend (Django app), frontend (React), and optionally shared code. This structure allows features to evolve independently.
 
-See the [products README](https://github.com/Hanzo Insights/insights/blob/master/products/README.md) for detailed conventions.
+See the [products README](https://github.com/Hanzo Insights/insights/blob/main/products/README.md) for detailed conventions.
 
 ### `nodejs`
 
@@ -90,7 +90,7 @@ Shared code used across the codebase:
 
 ### `ee`
 
-Enterprise edition licensed features. This directory has a [separate license](https://github.com/Hanzo Insights/insights/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/insights-foss](https://github.com/Hanzo Insights/insights-foss).
+Enterprise edition licensed features. This directory has a [separate license](https://github.com/Hanzo Insights/insights/blob/main/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/insights-foss](https://github.com/Hanzo Insights/insights-foss).
 
 ### `playwright`
 

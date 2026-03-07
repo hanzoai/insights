@@ -3,7 +3,7 @@ name: Livestream Docker CI/CD
 on:
     push:
         branches:
-            - master
+            - main
         paths:
             - 'livestream/**'
             - '.github/workflows/livestream-docker-image.yml'
@@ -46,7 +46,7 @@ jobs:
 
             - name: Build and push Docker image
               id: push
-              if: github.ref == 'refs/heads/master'
+              if: github.ref == 'refs/heads/main'
               uses: depot/build-push-action@5f3b3c2e5a00f0093de47f657aeaefcedff27d18 # v1.17.0
               with:
                   context: ./livestream/

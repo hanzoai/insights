@@ -271,7 +271,7 @@ gh issue create --repo Insights/insights-flutter --label "Survey" --label "enhan
 ```markdown
 ## 🚨 IMPORTANT
 
-This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Hanzo Insights/insights/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
+This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Hanzo Insights/insights/blob/main/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
 
 ## Summary
 

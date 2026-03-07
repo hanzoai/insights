@@ -4,8 +4,8 @@ from insights.demo.matrix import MatrixManager
 from insights.demo.products import HedgeboxMatrix
 
 
-def demo_reset_master_team() -> None:
+def demo_reset_primary_team() -> None:
     matrix = HedgeboxMatrix()
     manager = MatrixManager(matrix)
     with transaction.atomic():
-        manager.reset_master()
+        manager.reset_primary()

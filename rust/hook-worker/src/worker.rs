@@ -1268,7 +1268,7 @@ mod tests {
             assert_eq!(request_error.status(), Some(StatusCode::BAD_REQUEST));
             assert!(request_error.to_string().contains(body));
             // This is the display implementation of reqwest. Just checking it is still there.
-            // See: https://github.com/seanmonstar/reqwest/blob/master/src/error.rs
+            // See: https://github.com/seanmonstar/reqwest/blob/main/src/error.rs
             assert!(request_error
                 .to_string()
                 .contains("HTTP status client error (400 Bad Request)"));
@@ -1311,7 +1311,7 @@ mod tests {
                 error_string.len()
             );
             // This is the display implementation of reqwest. Just checking it is still there.
-            // See: https://github.com/seanmonstar/reqwest/blob/master/src/error.rs
+            // See: https://github.com/seanmonstar/reqwest/blob/main/src/error.rs
             assert!(error_string.contains("HTTP status client error (400 Bad Request)"));
         }
     }

@@ -12,7 +12,7 @@ name: Build Livestream TUI
 on:
     push:
         branches:
-            - master
+            - main
         paths:
             - 'livestream/tui/**'
             - '.github/workflows/build-livestream-tui.yml'

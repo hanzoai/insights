@@ -61,7 +61,7 @@ class Command(BaseCommand):
             "--team-id",
             type=int,
             default=None,
-            help="If specified, an existing project with this ID will be used, and no new user will be created. If the ID is 0, data will be generated for the master project (but insights etc. won't be created)",
+            help="If specified, an existing project with this ID will be used, and no new user will be created. If the ID is 0, data will be generated for the primary project (but insights etc. won't be created)",
         )
         parser.add_argument(
             "--email",
@@ -160,7 +160,7 @@ class Command(BaseCommand):
             try:
                 if existing_team_id is not None:
                     if existing_team_id == 0:
-                        matrix_manager.reset_master()
+                        matrix_manager.reset_primary()
                     else:
                         team = Team.objects.get(pk=existing_team_id)
                         user = team.organization.members.first()
@@ -201,7 +201,7 @@ class Command(BaseCommand):
 
             if not options.get("skip_user_product_list"):
                 # Create UserProductList entries for all products
-                # Skip if existing_team_id == 0 (master project reset)
+                # Skip if existing_team_id == 0 (primary project reset)
                 if existing_team_id != 0 and team and user:
                     print("Creating UserProductList entries for all products...")
                     self.create_default_user_product_list(team, user)
