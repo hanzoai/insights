@@ -6,7 +6,7 @@ from insights.cdp.templates.klaviyo.template_klaviyo import (
     template_user as klaviyo_user,
 )
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestTemplateKlaviyoUser(BaseInsightsFunctionTemplateTest):
@@ -102,7 +102,7 @@ class TestTemplateKlaviyoUser(BaseInsightsFunctionTemplateTest):
 
     def test_function_errors_on_bad_status(self):
         self.mock_fetch_response = lambda *args: {"status": 400, "body": {"error": "error"}}  # type: ignore
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from a.klaviyo.com api: 400"
 
@@ -192,6 +192,6 @@ class TestTemplateKlaviyoEvent(BaseInsightsFunctionTemplateTest):
 
     def test_function_errors_on_bad_status(self):
         self.mock_fetch_response = lambda *args: {"status": 400, "body": {"error": "error"}}  # type: ignore
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from a.klaviyo.com api: 400: {'error': 'error'}"

@@ -341,7 +341,7 @@ fn test_property_timestamp_rejections() {
     // UNIX timestamp values will be classified as Numeric
     assert_eq!(
         detect_property_type(
-            "hedgehogs_enumerated",
+            "mascots_enumerated",
             &Value::Number(Number::from(Utc::now().timestamp_millis() as u64 / 1000u64))
         ),
         Some(PropertyValueType::Numeric)

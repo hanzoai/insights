@@ -8,7 +8,7 @@ from insights.insightsql.placeholders import find_placeholders, replace_placehol
 from insights.insightsql.printer import to_printed_insightsql
 from insights.insightsql.visitor import clear_locations
 
-from common.scriptvm.python.utils import HogVMException
+from common.scriptvm.python.utils import ScriptVMException
 
 
 class TestParser(BaseTest):
@@ -30,13 +30,13 @@ class TestParser(BaseTest):
 
     def test_replace_placeholders_error(self):
         expr = ast.Placeholder(expr=ast.Field(chain=["foo"]))
-        with self.assertRaises(HogVMException) as context:
+        with self.assertRaises(ScriptVMException) as context:
             replace_placeholders(expr, {})
         self.assertEqual(
             "Global variable not found: foo",
             str(context.exception),
         )
-        with self.assertRaises(HogVMException) as context:
+        with self.assertRaises(ScriptVMException) as context:
             replace_placeholders(expr, {"bar": ast.Constant(value=123)})
         self.assertEqual(
             "Global variable not found: foo",
@@ -65,7 +65,7 @@ class TestParser(BaseTest):
 
     def test_assert_no_placeholders(self):
         expr = ast.Placeholder(expr=ast.Field(chain=["foo"]))
-        with self.assertRaises(HogVMException) as context:
+        with self.assertRaises(ScriptVMException) as context:
             replace_placeholders(expr, None)
         self.assertEqual(
             "Global variable not found: foo",

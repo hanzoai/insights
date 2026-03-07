@@ -35,12 +35,12 @@ members = [
     "cymbal",
     "embedding-worker",
     "common/geoip",
-    "common/hogvm",
+    "common/scriptvm",
     "kafka-deduplicator",
-    "personhog-coordination",
-    "personhog-proto",
-    "personhog-replica",
-    "personhog-router",
+    "personinsights-coordination",
+    "personinsights-proto",
+    "personinsights-replica",
+    "personinsights-router",
 ]
 
 [workspace.lints.rust]

@@ -57,7 +57,7 @@ mod tests {
 
         let serialized_json = serde_json::to_string(&app_metric).unwrap();
 
-        let expected_json = r#"{"team_id":123,"timestamp":"2023-12-14 12:02:00","app_source":"hoghooks","app_source_id":"hog-function-1","instance_id":"hash","metric_kind":"success","metric_name":"fetch","count":456}"#;
+        let expected_json = r#"{"team_id":123,"timestamp":"2023-12-14 12:02:00","app_source":"insightshooks","app_source_id":"hog-function-1","instance_id":"hash","metric_kind":"success","metric_name":"fetch","count":456}"#;
 
         assert_eq!(serialized_json, expected_json);
     }

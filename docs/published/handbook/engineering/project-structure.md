@@ -11,7 +11,7 @@ showTitle: true
 ```text
 .
 ├── bin              # Shell scripts wrapped by insightscli, the unified developer CLI
-├── common           # Shared code: insightscli CLI, Insights SQL parser, HogVM, shared UI packages
+├── common           # Shared code: insightscli CLI, Insights SQL parser, ScriptVM, shared UI packages
 ├── ee               # Enterprise platform package features (separate license)
 ├── frontend         # React/TypeScript frontend application
 │   └── src
@@ -85,7 +85,7 @@ Shared code used across the codebase:
 
 - `insightscli` – Unified developer CLI for building, testing, and running Insights
 - `insightsql_parser` – InsightsQL parser (C++)
-- `hogvm` – Hog virtual machine
+- `scriptvm` – Hog virtual machine
 - `tailwind` – Shared Tailwind configuration
 
 ### `ee`
