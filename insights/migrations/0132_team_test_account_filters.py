@@ -11,7 +11,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 
 def get_absolute_path(to: str) -> str:
     """
-    Returns an absolute path in the FS based on posthog/posthog (back-end root folder)
+    Returns an absolute path in the FS based on insights/insights (back-end root folder)
     """
     return os.path.join(__location__, to)
 
