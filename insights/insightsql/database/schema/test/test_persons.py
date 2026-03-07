@@ -38,7 +38,7 @@ from insights.insightsql_queries.insights.trends.trends_query_runner import Tren
 from insights.models.person.util import create_person
 
 
-@patch("hanzoanalytics.feature_enabled", new=Mock(return_value=True))  # for persons-inner-where-optimization
+@patch("hanzo_insights.feature_enabled", new=Mock(return_value=True))  # for persons-inner-where-optimization
 class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
     """
     Mostly tests for the optimization of pre-filtering before aggregating. See https://github.com/Hanzo Insights/insights/pull/25604

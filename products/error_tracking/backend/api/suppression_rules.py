@@ -1,7 +1,7 @@
 from typing import override
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
 
@@ -57,7 +57,7 @@ class ErrorTrackingSuppressionRuleViewSet(TeamAndOrgViewSetMixin, viewsets.Model
             order_key=0,
         )
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             "error_tracking_suppression_rule_created",
             groups=groups(self.team.organization, self.team),
         )

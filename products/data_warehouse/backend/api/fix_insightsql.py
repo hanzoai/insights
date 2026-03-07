@@ -1,9 +1,9 @@
 import uuid
 from typing import cast
 
-import hanzoanalytics
+import hanzo_insights
 from langchain_core.runnables import RunnableConfig
-from hanzoanalytics.ai.langchain.callbacks import CallbackHandler
+from hanzo_insights.ai.langchain.callbacks import CallbackHandler
 from rest_framework import status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -44,8 +44,8 @@ class FixInsightsQLViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 "distinct_id": user.distinct_id,
             },
             "callbacks": (
-                [CallbackHandler(hanzoanalytics.default_client, distinct_id=user.distinct_id, trace_id=trace_id)]
-                if hanzoanalytics.default_client
+                [CallbackHandler(hanzo_insights.default_client, distinct_id=user.distinct_id, trace_id=trace_id)]
+                if hanzo_insights.default_client
                 else None
             ),
         }

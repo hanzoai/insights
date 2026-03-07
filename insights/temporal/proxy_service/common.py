@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import connection
 
 import grpc.aio
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import sync_to_async
 from structlog.contextvars import bind_contextvars
 from temporalio import activity
@@ -173,7 +173,7 @@ def activity_capture_event(inputs: CaptureEventInputs):
         return
     org = Organization.objects.get(id=inputs.organization_id)
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         event=f"managed reverse proxy {inputs.event_type}",
         distinct_id=f"org-{record.organization_id}",
         properties={

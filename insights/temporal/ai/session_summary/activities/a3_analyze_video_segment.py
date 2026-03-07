@@ -13,7 +13,7 @@ from django.conf import settings
 
 import temporalio
 from google.genai import types
-from hanzoanalytics.ai.gemini import genai
+from hanzo_insights.ai.gemini import genai
 from temporalio.exceptions import ApplicationError
 
 from insights.models import Team

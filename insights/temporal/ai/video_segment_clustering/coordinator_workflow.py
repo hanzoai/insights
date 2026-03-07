@@ -12,7 +12,7 @@ from typing import Any
 
 import structlog
 import temporalio
-import hanzoanalytics
+import hanzo_insights
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
@@ -107,7 +107,7 @@ class VideoSegmentClusteringCoordinatorWorkflow(InsightsWorkflow):
                     workflow_handles[team_id] = handle
                 except Exception:
                     workflow.logger.exception(f"Failed to start video segment clustering for team {team_id}")
-                    hanzoanalytics.capture_exception(properties={"team_id": team_id})
+                    hanzo_insights.capture_exception(properties={"team_id": team_id})
                     failed_teams.add(team_id)
 
             # Wait for all workflows in batch to complete
@@ -122,13 +122,13 @@ class VideoSegmentClusteringCoordinatorWorkflow(InsightsWorkflow):
                         workflow.logger.error(
                             f"Video segment clustering failed for team {team_id}: {workflow_result.error}"
                         )
-                        hanzoanalytics.capture_exception(
+                        hanzo_insights.capture_exception(
                             Exception(workflow_result.error), properties={"team_id": team_id}
                         )
                         failed_teams.add(team_id)
                 except Exception:
                     workflow.logger.exception(f"Video segment clustering errored for team {team_id}")
-                    hanzoanalytics.capture_exception(properties={"team_id": team_id})
+                    hanzo_insights.capture_exception(properties={"team_id": team_id})
                     failed_teams.add(team_id)
 
         return {

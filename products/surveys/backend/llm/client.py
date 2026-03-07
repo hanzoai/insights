@@ -6,9 +6,9 @@ from typing import TypeVar
 from django.conf import settings
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from google.genai.types import GenerateContentConfig
-from hanzoanalytics.ai.gemini import genai
+from hanzo_insights.ai.gemini import genai
 from pydantic import BaseModel
 from rest_framework import exceptions
 
@@ -18,12 +18,12 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def create_gemini_client():
-    if settings.DEBUG and hanzoanalytics.disabled:
-        hanzoanalytics.disabled = False
-        if not hanzoanalytics.host:
-            hanzoanalytics.host = settings.SITE_URL
+    if settings.DEBUG and hanzo_insights.disabled:
+        hanzo_insights.disabled = False
+        if not hanzo_insights.host:
+            hanzo_insights.host = settings.SITE_URL
 
-    analytics_client = hanzoanalytics.default_client
+    analytics_client = hanzo_insights.default_client
     if not analytics_client:
         logger.warning("Insights default_client not available, LLM analytics will not be tracked")
 

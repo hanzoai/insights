@@ -18,7 +18,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from hanzoanalytics.client import Client as InsightsClient
+from hanzo_insights.client import Client as InsightsClient
 from psycopg import sql
 from retry import retry
 
@@ -2237,11 +2237,11 @@ def send_all_org_usage_reports(
     skip_capture_event: bool = False,
     organization_ids: Optional[list[str]] = None,
 ) -> None:
-    import hanzoanalytics
+    import hanzo_insights
 
-    are_usage_reports_disabled = hanzoanalytics.feature_enabled("disable-usage-reports", "internal_billing_events")
+    are_usage_reports_disabled = hanzo_insights.feature_enabled("disable-usage-reports", "internal_billing_events")
     if are_usage_reports_disabled:
-        hanzoanalytics.capture_exception(Exception(f"Usage reports are disabled for {at}"))
+        hanzo_insights.capture_exception(Exception(f"Usage reports are disabled for {at}"))
         return
 
     at_date = parser.parse(at) if at else None

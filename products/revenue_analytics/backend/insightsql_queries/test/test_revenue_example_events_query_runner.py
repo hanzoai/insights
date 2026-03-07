@@ -147,7 +147,7 @@ class TestRevenueExampleEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert results[0][3] == 42  # No conversion because assumed to not be in smallest unit
 
     def test_single_event_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             s11 = str(uuid7("2023-12-02"))
             self._create_events(
                 [

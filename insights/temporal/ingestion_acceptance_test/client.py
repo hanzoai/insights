@@ -16,7 +16,7 @@ from urllib3.util.retry import Retry
 from .config import Config
 
 if TYPE_CHECKING:
-    from hanzoanalytics import Insights
+    from hanzo_insights import Insights
 
 logger = structlog.get_logger(__name__)
 

@@ -6,7 +6,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from hanzoanalytics.client import Client as InsightsClient
+from hanzo_insights.client import Client as InsightsClient
 from retry import retry
 
 from insights.schema import AIEventType
@@ -828,15 +828,15 @@ def send_llm_analytics_usage_reports(
         at: ISO format date to run the report for (defaults to previous day)
         organization_ids: Optional list of specific organization IDs to report on
     """
-    import hanzoanalytics
+    import hanzo_insights
 
     # Check if reports are disabled
-    are_usage_reports_disabled = hanzoanalytics.feature_enabled(
+    are_usage_reports_disabled = hanzo_insights.feature_enabled(
         "llm-analytics-disable-usage-reports", "internal_billing_events"
     )
 
     if are_usage_reports_disabled:
-        hanzoanalytics.capture_exception(Exception(f"LLM Analytics usage reports are disabled for {at}"))
+        hanzo_insights.capture_exception(Exception(f"LLM Analytics usage reports are disabled for {at}"))
         return
 
     at_date = parser.parse(at) if at else None

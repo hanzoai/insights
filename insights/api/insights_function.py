@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from django_filters import BaseInFilter, CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -617,7 +617,7 @@ class InsightsFunctionViewSet(
 
         # Check feature flag for backfill-workflows-destination
         team = Team.objects.get(id=self.team_id)
-        if not hanzoanalytics.feature_enabled(
+        if not hanzo_insights.feature_enabled(
             "backfill-workflows-destination",
             str(team.uuid),
             groups={"organization": str(team.organization.id)},

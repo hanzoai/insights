@@ -58,7 +58,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     # Creating invites
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_add_organization_invite_email_required(self, mock_capture):
         response = self.client.post("/api/organizations/@current/invites/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -75,7 +75,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         mock_capture.assert_not_called()
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_add_organization_invite_with_email(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
         email = "x@x.com"
@@ -150,7 +150,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertListEqual(mail.outbox[0].to, [email])
         self.assertEqual(mail.outbox[0].reply_to, [self.user.email])  # Reply-To is set to the inviting user
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_add_organization_invite_with_email_on_instance_but_send_email_prop_false(self, mock_capture):
         """
         Email is available on the instance, but the user creating the invite does not want to send an email to the invitee.
@@ -398,7 +398,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     # Bulk create invites
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_allow_bulk_creating_invites(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
 
@@ -1195,7 +1195,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(invite.private_project_access[0]["id"], team.id)
         self.assertEqual(invite.private_project_access[0]["level"], "member")
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_add_organization_invite_case_insensitive_email_normalization(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
         mixed_case_email = "Test.User@Example.COM"

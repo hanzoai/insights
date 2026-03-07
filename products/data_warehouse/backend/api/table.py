@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 
 import boto3
-import hanzoanalytics
+import hanzo_insights
 from rest_framework import filters, parsers, request, response, serializers, status, viewsets
 
 from insights.schema import DatabaseSerializedFieldType
@@ -321,7 +321,7 @@ class TableViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     )
     def file(self, request: request.Request, *args: Any, **kwargs: Any) -> response.Response:
         team = Team.objects.get(id=self.team_id)
-        is_warehouse_api_enabled = hanzoanalytics.feature_enabled(
+        is_warehouse_api_enabled = hanzo_insights.feature_enabled(
             "warehouse-api",
             str(team.organization_id),
             groups={"organization": str(team.organization_id)},

@@ -3,7 +3,7 @@ from typing import Any
 from django.conf import settings
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import ValidationError
 
@@ -196,7 +196,7 @@ class SessionRecordingExternalReferenceSerializer(serializers.ModelSerializer):
             external_context=external_context,
         )
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=str(team.pk),
             event="session_replay_external_issue_created",
             groups=groups(team.organization, team),
