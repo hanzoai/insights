@@ -1,4 +1,4 @@
-// parser_json.cpp - Pure C++ HogQL Parser Core
+// parser_json.cpp - Pure C++ InsightsQL Parser Core
 // This file contains the core parser logic that returns JSON representations of ASTs.
 // It can be compiled for Python (via parser_python.cpp), WebAssembly, or other platforms.
 
@@ -6,15 +6,15 @@
 #include <string>
 #include <unordered_map>
 
-#include "HogQLLexer.h"
-#include "HogQLParser.h"
-#include "HogQLParserBaseVisitor.h"
+#include "InsightsQLLexer.h"
+#include "InsightsQLParser.h"
+#include "InsightsQLParserBaseVisitor.h"
 
 #include "error.h"
 #include "json.h"
 #include "string.h"
 
-#define VISIT(RULE) any visit##RULE(HogQLParser::RULE##Context* ctx) override
+#define VISIT(RULE) any visit##RULE(InsightsQLParser::RULE##Context* ctx) override
 #define VISIT_UNSUPPORTED(RULE)                            \
   VISIT(RULE) {                                            \
     throw NotImplementedError("Unsupported rule: " #RULE); \
@@ -112,14 +112,14 @@ bool containsMatchingProperty(const Json& json, const string& prop_name, const s
 
 // PARSING AND AST CONVERSION
 
-class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
+class InsightsQLParseTreeJSONConverter : public InsightsQLParserBaseVisitor {
  private:
   bool is_internal;
 
   const vector<string> RESERVED_KEYWORDS = {"true", "false", "null", "team_id"};
 
  public:
-  HogQLParseTreeJSONConverter(bool is_internal) : is_internal(is_internal) {}
+  InsightsQLParseTreeJSONConverter(bool is_internal) : is_internal(is_internal) {}
 
   any visit(antlr4::tree::ParseTree* tree) override {
     // Find the start and stop indices of the parse tree node
@@ -531,7 +531,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
     return json;
   }
 
-  // HogQL rules
+  // InsightsQL rules
 
   VISIT(Select) {
     if (const auto select_set_stmt_ctx = ctx->selectSetStmt()) {
@@ -542,7 +542,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
       return visit(select_stmt_ctx);
     }
 
-    return visit(ctx->hogqlxTagElement());
+    return visit(ctx->insightsqlxTagElement());
   }
 
   VISIT(SelectStmtWithParens) {
@@ -1747,7 +1747,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
     return json;
   }
 
-  VISIT(ColumnExprTagElement) { return visit(ctx->hogqlxTagElement()); }
+  VISIT(ColumnExprTagElement) { return visit(ctx->insightsqlxTagElement()); }
 
   VISIT(ColumnLambdaExpr) {
     auto column_expr_ctx = ctx->columnExpr();
@@ -1910,7 +1910,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
 
   VISIT(TableExprFunction) { return visit(ctx->tableFunctionExpr()); }
 
-  VISIT(TableExprTag) { return visit(ctx->hogqlxTagElement()); }
+  VISIT(TableExprTag) { return visit(ctx->insightsqlxTagElement()); }
 
   VISIT(TableFunctionExpr) {
     string table_name = visitAsString(ctx->identifier());
@@ -2029,7 +2029,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
 
   VISIT(HogqlxTagAttribute) {
     Json json = Json::object();
-    json["node"] = "HogQLXAttribute";
+    json["node"] = "InsightsQLXAttribute";
     if (!is_internal) addPositionInfo(json, ctx);
     json["name"] = visitAsString(ctx->identifier());
 
@@ -2050,10 +2050,10 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
   }
 
   VISIT(HogqlxChildElement) {
-    if (const auto tag_element_ctx = ctx->hogqlxTagElement()) {
+    if (const auto tag_element_ctx = ctx->insightsqlxTagElement()) {
       return visitAsJSON(tag_element_ctx);
     }
-    if (const auto text_element_ctx = ctx->hogqlxText()) {
+    if (const auto text_element_ctx = ctx->insightsqlxText()) {
       return visitAsJSON(text_element_ctx);
     }
     return visitAsJSON(ctx->columnExpr());
@@ -2063,16 +2063,16 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
     Json json = Json::object();
     json["node"] = "Constant";
     if (!is_internal) addPositionInfo(json, ctx);
-    json["value"] = ctx->HOGQLX_TEXT_TEXT()->getText();
+    json["value"] = ctx->INSIGHTSQLX_TEXT_TEXT()->getText();
     return json;
   }
 
   VISIT(HogqlxTagElementClosed) {
     Json json = Json::object();
-    json["node"] = "HogQLXTag";
+    json["node"] = "InsightsQLXTag";
     if (!is_internal) addPositionInfo(json, ctx);
     json["kind"] = visitAsString(ctx->identifier());
-    json["attributes"] = visitAsVectorOfJSON(ctx->hogqlxTagAttribute());
+    json["attributes"] = visitAsVectorOfJSON(ctx->insightsqlxTagAttribute());
     return json;
   }
 
@@ -2080,15 +2080,15 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
     std::string opening = visitAsString(ctx->identifier(0));
     std::string closing = visitAsString(ctx->identifier(1));
     if (opening != closing) {
-      throw SyntaxError("Opening and closing HogQLX tags must match. Got " + opening + " and " + closing);
+      throw SyntaxError("Opening and closing InsightsQLX tags must match. Got " + opening + " and " + closing);
     }
 
-    const auto attribute_ctxs = ctx->hogqlxTagAttribute();
+    const auto attribute_ctxs = ctx->insightsqlxTagAttribute();
     vector<Json> attributes = visitAsVectorOfJSON(attribute_ctxs);
 
     /* ── children ───────────────────────────────────────────── */
     std::vector<Json> kept_children;
-    for (const auto child_ctx : ctx->hogqlxChildElement()) {
+    for (const auto child_ctx : ctx->insightsqlxChildElement()) {
       Json child_json = visitAsJSON(child_ctx);
 
       /* drop Constant nodes that are only-whitespace *and* contain a line-break */
@@ -2119,7 +2119,7 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
       // Check if any attribute is named "children"
       for (const auto& attr_json : attributes) {
         if (attr_json.isObject() && attr_json.getObject().at("name").getString() == "children") {
-          throw SyntaxError("Can't have a HogQLX tag with both children and a 'children' attribute");
+          throw SyntaxError("Can't have a InsightsQLX tag with both children and a 'children' attribute");
         }
       }
 
@@ -2130,14 +2130,14 @@ class HogQLParseTreeJSONConverter : public HogQLParserBaseVisitor {
       }
 
       Json children_attr = Json::object();
-      children_attr["node"] = "HogQLXAttribute";
+      children_attr["node"] = "InsightsQLXAttribute";
       children_attr["name"] = "children";
       children_attr["value"] = std::move(children_array);
       attributes.push_back(children_attr);
     }
 
     Json json = Json::object();
-    json["node"] = "HogQLXTag";
+    json["node"] = "InsightsQLXTag";
     if (!is_internal) addPositionInfo(json, ctx);
     json["kind"] = opening;
     json["attributes"] = std::move(attributes);

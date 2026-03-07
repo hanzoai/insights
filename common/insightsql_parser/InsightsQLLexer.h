@@ -4,7 +4,7 @@
 
 
 
-// Generated from HogQLLexer.g4 by ANTLR 4.13.2
+// Generated from InsightsQLLexer.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -14,7 +14,7 @@
 
 
 
-class  HogQLLexer : public antlr4::Lexer {
+class  InsightsQLLexer : public antlr4::Lexer {
 public:
   enum {
     ALL = 1, AND = 2, ANTI = 3, ANY = 4, ARRAY = 5, AS = 6, ASCENDING = 7, 
@@ -48,18 +48,18 @@ public:
     RBRACKET = 154, RPAREN = 155, SEMICOLON = 156, SLASH = 157, SLASH_GT = 158, 
     UNDERSCORE = 159, MULTI_LINE_COMMENT = 160, SINGLE_LINE_COMMENT = 161, 
     WHITESPACE = 162, STRING_TEXT = 163, STRING_ESCAPE_TRIGGER = 164, FULL_STRING_TEXT = 165, 
-    FULL_STRING_ESCAPE_TRIGGER = 166, TAG_WS = 167, TAGC_WS = 168, HOGQLX_TEXT_TEXT = 169, 
-    HOGQLX_TEXT_WS = 170
+    FULL_STRING_ESCAPE_TRIGGER = 166, TAG_WS = 167, TAGC_WS = 168, INSIGHTSQLX_TEXT_TEXT = 169, 
+    INSIGHTSQLX_TEXT_WS = 170
   };
 
   enum {
-    IN_TEMPLATE_STRING = 1, IN_FULL_TEMPLATE_STRING = 2, HOGQLX_TAG_OPEN = 3, 
-    HOGQLX_TAG_CLOSE = 4, HOGQLX_TEXT = 5
+    IN_TEMPLATE_STRING = 1, IN_FULL_TEMPLATE_STRING = 2, INSIGHTSQLX_TAG_OPEN = 3, 
+    INSIGHTSQLX_TAG_CLOSE = 4, INSIGHTSQLX_TEXT = 5
   };
 
-  explicit HogQLLexer(antlr4::CharStream *input);
+  explicit InsightsQLLexer(antlr4::CharStream *input);
 
-  ~HogQLLexer() override;
+  ~InsightsQLLexer() override;
 
 
 
