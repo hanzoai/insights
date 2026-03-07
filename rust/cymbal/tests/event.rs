@@ -14,7 +14,7 @@ use cymbal::{
 };
 use insta::assert_json_snapshot;
 use mockall::predicate;
-use posthog_symbol_data::{write_symbol_data, SourceAndMap};
+use insights_symbol_data::{write_symbol_data, SourceAndMap};
 use reqwest::StatusCode;
 use serde::{de::DeserializeOwned, Deserialize};
 use serde_json::json;
