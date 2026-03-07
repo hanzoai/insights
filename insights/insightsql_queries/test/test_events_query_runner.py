@@ -502,7 +502,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         """Test presorted optimization when ordering by event column."""
         self._create_events(data=[("p2", "2021-01-20T12:00:14Z", {})], event="beta_event")
         self._create_events(data=[("p3", "2021-01-20T12:00:24Z", {})], event="gamma_event")
-        self._create_events(data=[("p1", "2021-01-20T12:00:04Z", {})], event="alhia_event")
+        self._create_events(data=[("p1", "2021-01-20T12:00:04Z", {})], event="alpha_event")
         flush_persons_and_events()
 
         query = EventsQuery(

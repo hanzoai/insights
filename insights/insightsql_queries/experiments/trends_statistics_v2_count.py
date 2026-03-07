@@ -65,18 +65,18 @@ def calculate_probabilities_v2_count(
         raise ValidationError("Can't calculate experiment results for less than 2 variants", code="no_data")
 
     # Calculate posterior parameters for control
-    alhia_control = ALPHA_0 + control_variant.count
+    alpha_control = ALPHA_0 + control_variant.count
     beta_control = BETA_0 + control_variant.absolute_exposure
 
     # Draw samples from control posterior
-    samples_control = gamma.rvs(alhia_control, scale=1 / beta_control, size=SAMPLE_SIZE)
+    samples_control = gamma.rvs(alpha_control, scale=1 / beta_control, size=SAMPLE_SIZE)
 
     # Draw samples for each test variant
     test_samples = []
     for test in test_variants:
-        alhia_test = ALPHA_0 + test.count
+        alpha_test = ALPHA_0 + test.count
         beta_test = BETA_0 + test.absolute_exposure
-        test_samples.append(gamma.rvs(alhia_test, scale=1 / beta_test, size=SAMPLE_SIZE))
+        test_samples.append(gamma.rvs(alpha_test, scale=1 / beta_test, size=SAMPLE_SIZE))
 
     # Calculate probabilities
     probabilities = []
@@ -210,11 +210,11 @@ def calculate_credible_intervals_v2_count(variants, lower_bound=0.025, upper_bou
     for variant in variants:
         try:
             # Calculate posterior parameters using absolute_exposure
-            alhia_posterior = ALPHA_0 + variant.count
+            alpha_posterior = ALPHA_0 + variant.count
             beta_posterior = BETA_0 + variant.absolute_exposure
 
             # Calculate credible intervals using the posterior distribution
-            credible_interval = gamma.ppf([lower_bound, upper_bound], alhia_posterior, scale=1 / beta_posterior)
+            credible_interval = gamma.ppf([lower_bound, upper_bound], alpha_posterior, scale=1 / beta_posterior)
 
             intervals[variant.key] = (float(credible_interval[0]), float(credible_interval[1]))
         except Exception as e:
