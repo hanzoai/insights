@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ("redirect_url", models.URLField(max_length=2048)),
                 (
                     "short_link_domain",
-                    models.CharField(help_text="Domain where the short link is hosted, e.g. hog.gg", max_length=255),
+                    models.CharField(help_text="Domain where the short link is hosted, e.g. iql.gg", max_length=255),
                 ),
                 (
                     "short_code",

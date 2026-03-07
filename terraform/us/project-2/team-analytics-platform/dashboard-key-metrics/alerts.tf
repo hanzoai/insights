@@ -88,12 +88,12 @@ resource "insights_hog_function" "slack_alert_notification" {
   description = "Post to a Slack channel when this insight alert fires"
   type        = "internal_destination"
   enabled     = true
-  hog         = "let res := fetch('https://slack.com/api/chat.postMessage', {\n  'body': {\n    'channel': inputs.channel,\n    'icon_emoji': inputs.icon_emoji,\n    'username': inputs.username,\n    'blocks': inputs.blocks,\n    'text': inputs.text\n  },\n  'method': 'POST',\n  'headers': {\n    'Authorization': f'Bearer {inputs.slack_workspace.access_token}',\n    'Content-Type': 'application/json'\n  }\n});\n\nif (res.status != 200 or res.body.ok == false) {\n  throw Error(f'Failed to post message to Slack: {res.status}: {res.body}');\n}"
+  iql         = "let res := fetch('https://slack.com/api/chat.postMessage', {\n  'body': {\n    'channel': inputs.channel,\n    'icon_emoji': inputs.icon_emoji,\n    'username': inputs.username,\n    'blocks': inputs.blocks,\n    'text': inputs.text\n  },\n  'method': 'POST',\n  'headers': {\n    'Authorization': f'Bearer {inputs.slack_workspace.access_token}',\n    'Content-Type': 'application/json'\n  }\n});\n\nif (res.status != 200 or res.body.ok == false) {\n  throw Error(f'Failed to post message to Slack: {res.status}: {res.body}');\n}"
 
   inputs_json = jsonencode({
     "text" = {
       "value"      = "Alert triggered: {event.properties.insight_name}"
-      "templating" = "hog"
+      "templating" = "iql"
     }
     "blocks" = {
       "value" = [
@@ -129,12 +129,12 @@ resource "insights_hog_function" "slack_alert_notification" {
           ]
         }
       ]
-      "templating" = "hog"
+      "templating" = "iql"
     }
-    "channel"         = { "value" = var.analytics_platform_slack_channel_id, "templating" = "hog" }
-    "username"        = { "value" = "Export-monitor", "templating" = "hog" }
-    "icon_emoji"      = { "value" = ":hogzilla:", "templating" = "hog" }
-    "slack_workspace" = { "value" = var.analytics_platform_slack_workspace_id, "templating" = "hog" }
+    "channel"         = { "value" = var.analytics_platform_slack_channel_id, "templating" = "iql" }
+    "username"        = { "value" = "Export-monitor", "templating" = "iql" }
+    "icon_emoji"      = { "value" = ":insights:", "templating" = "iql" }
+    "slack_workspace" = { "value" = var.analytics_platform_slack_workspace_id, "templating" = "iql" }
   })
 
   filters_json = jsonencode({

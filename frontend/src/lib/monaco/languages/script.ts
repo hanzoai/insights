@@ -79,7 +79,7 @@ export const conf: () => languages.LanguageConfiguration = () => ({
 export const language: () => languages.IMonarchLanguage = () => ({
     // Set defaultToken to invalid to see what you do not tokenize yet
     defaultToken: 'invalid',
-    tokenPostfix: '.hog',
+    tokenPostfix: '.iql',
 
     keywords: [
         'fn',
@@ -250,11 +250,11 @@ export const language: () => languages.IMonarchLanguage = () => ({
 
 export function initScriptLanguage(monaco: Monaco): void {
     if (!monaco.languages.getLanguages().some(({ id }) => id === 'fn')) {
-        monaco.languages.register({ id: 'hog', extensions: ['.hog'], mimetypes: ['application/hog'] })
-        monaco.languages.setLanguageConfiguration('hog', conf())
-        monaco.languages.setMonarchTokensProvider('hog', language())
-        monaco.languages.registerCompletionItemProvider('hog', insightsQLAutocompleteProvider(InsightsLanguage.insightsScript))
-        monaco.languages.registerCodeActionProvider('hog', insightsQLMetadataProvider())
+        monaco.languages.register({ id: 'iql', extensions: ['.iql'], mimetypes: ['application/iql'] })
+        monaco.languages.setLanguageConfiguration('iql', conf())
+        monaco.languages.setMonarchTokensProvider('iql', language())
+        monaco.languages.registerCompletionItemProvider('iql', insightsQLAutocompleteProvider(InsightsLanguage.insightsScript))
+        monaco.languages.registerCodeActionProvider('iql', insightsQLMetadataProvider())
     }
 }
 

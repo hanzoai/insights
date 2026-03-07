@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=400)),
                 ("description", models.TextField(blank=True, null=True)),
                 ("code", models.TextField()),
-                ("code_language", models.CharField(default="hog", max_length=20)),
+                ("code_language", models.CharField(default="iql", max_length=20)),
                 ("inputs_schema", models.JSONField()),
                 ("bytecode", models.JSONField(blank=True, null=True)),
                 ("type", models.CharField(max_length=50)),

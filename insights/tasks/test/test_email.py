@@ -610,7 +610,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             type="destination",
             enabled=True,
             deleted=False,
-            hog="return event",
+            iql="return event",
             created_by=creator_user,
         )
 
@@ -912,7 +912,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             type="destination",
             enabled=True,
             deleted=False,
-            hog="return event",
+            iql="return event",
             created_by=self.user,
         )
 
@@ -938,7 +938,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             type="destination",
             enabled=False,  # Disabled
             deleted=False,
-            hog="return event",
+            iql="return event",
             created_by=self.user,
         )
 
@@ -964,7 +964,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             type="destination",
             enabled=True,
             deleted=True,  # Deleted
-            hog="return event",
+            iql="return event",
             created_by=self.user,
         )
 

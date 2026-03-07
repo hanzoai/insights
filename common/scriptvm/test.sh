@@ -5,7 +5,7 @@ set -e
 SKIP_COMPILEDJS_FILES=("")
 
 # Files on which we only want to run Node.js tests
-ONLY_NODEJS_FILES=("sql.hog")
+ONLY_NODEJS_FILES=("sql.iql")
 
 # Navigate to the script's directory
 cd "$(dirname "$0")"
@@ -15,15 +15,15 @@ cd typescript
 pnpm run build
 cd ..
 
-# Navigate to the project root (parent of 'common/hogvm')
+# Navigate to the project root (parent of 'common/scriptvm')
 cd ../..
 
 # Function to compute the basename for a given file
 get_basename() {
     local file="$1"
-    local base="${file%.hog}"
+    local base="${file%.iql}"
     base="${base##*/}"
-    echo "common/hogvm/__tests__/__snapshots__/$base"
+    echo "common/scriptvm/__tests__/__snapshots__/$base"
 }
 
 # Function to check if a value is in an array
@@ -42,9 +42,9 @@ is_in_array() {
 # Collect test files based on optional argument
 if [ "$#" -eq 1 ]; then
     test_file="$1"
-    # Adjust the test file path if it doesn't start with 'common/hogvm/'
-    if [[ ! "$test_file" == common/hogvm/* ]]; then
-        test_file="common/hogvm/__tests__/$test_file"
+    # Adjust the test file path if it doesn't start with 'common/scriptvm/'
+    if [[ ! "$test_file" == common/scriptvm/* ]]; then
+        test_file="common/scriptvm/__tests__/$test_file"
     fi
     # Check if the test file exists
     if [ ! -f "$test_file" ]; then
@@ -57,18 +57,18 @@ if [ "$#" -eq 1 ]; then
     rm -f "$basename.stdout.nodejs" "$basename.stdout.python" "$basename.stdout.compiledjs"
 else
     shopt -s nullglob
-    test_files=(common/hogvm/__tests__/*.hog)
+    test_files=(common/scriptvm/__tests__/*.iql)
     shopt -u nullglob
 
     if [ ${#test_files[@]} -eq 0 ]; then
-        echo "No test files found in common/hogvm/__tests__/"
+        echo "No test files found in common/scriptvm/__tests__/"
         exit 1
     fi
 
     # Remove all previous outputs
-    rm -f common/hogvm/__tests__/__snapshots__/*.stdout.nodejs
-    rm -f common/hogvm/__tests__/__snapshots__/*.stdout.python
-    rm -f common/hogvm/__tests__/__snapshots__/*.stdout.compiledjs
+    rm -f common/scriptvm/__tests__/__snapshots__/*.stdout.nodejs
+    rm -f common/scriptvm/__tests__/__snapshots__/*.stdout.python
+    rm -f common/scriptvm/__tests__/__snapshots__/*.stdout.compiledjs
 fi
 
 for file in "${test_files[@]}"; do
@@ -77,11 +77,11 @@ for file in "${test_files[@]}"; do
     basename=$(get_basename "$file")
     filename=$(basename "$file")
 
-    # Compile to .hoge
-    ./bin/hoge "$file" "$basename.hoge"
+    # Compile to .iqle
+    ./bin/iqle "$file" "$basename.iqle"
 
     # Always run Node.js test
-    ./bin/hog --nodejs "$basename.hoge" > "$basename.stdout.nodejs"
+    ./bin/iql --nodejs "$basename.iqle" > "$basename.stdout.nodejs"
 
     # If this file is in ONLY_NODEJS_FILES, skip python + compiledjs
     if is_in_array "$filename" "${ONLY_NODEJS_FILES[@]}"; then
@@ -91,7 +91,7 @@ for file in "${test_files[@]}"; do
     fi
 
     # Otherwise, run Python
-    ./bin/hog --python "$basename.hoge" > "$basename.stdout.python"
+    ./bin/iql --python "$basename.iqle" > "$basename.stdout.python"
 
     # Check if compiledjs is skipped
     if is_in_array "$filename" "${SKIP_COMPILEDJS_FILES[@]}"; then
@@ -109,7 +109,7 @@ for file in "${test_files[@]}"; do
     else
         # Run compiledjs
         set +e
-        ./bin/hoge "$file" "$basename.js"
+        ./bin/iqle "$file" "$basename.js"
         node "$basename.js" > "$basename.stdout.compiledjs" 2>&1
         set -e
 

@@ -47,7 +47,7 @@ pub struct ScriptVM<'a> {
     ip: usize,
 
     context: &'a ExecutionContext,
-    // The base program is None, but calling into e.g. hog standard library functions involves changing the "module"
+    // The base program is None, but calling into e.g. iql standard library functions involves changing the "module"
     // the pointer is currently pointing into to e.g. "arrayExists", as part of the function call that branches into
     // that function.
     current_symbol: Option<Symbol>,
@@ -106,7 +106,7 @@ impl<'a> ScriptVM<'a> {
         match op {
             Operation::GetGlobal => {
                 // GetGlobal is used to do 1 of 2 things, either push a value from a global variable onto the stack, or push a new
-                // function reference (referred to in other impls as a "closure") onto the stack - either a native one, or a hog one
+                // function reference (referred to in other impls as a "closure") onto the stack - either a native one, or a iql one
                 let mut chain = Vec::new();
                 let count: usize = self.next()?;
                 for _ in 0..count {
@@ -390,12 +390,12 @@ impl<'a> ScriptVM<'a> {
                 let obj = HogLiteral::Object(map);
                 // For the non-primitive types below (objects, arrays, "tuples"), we /always/ heap allocate them. The reason
                 // is that the pattern for e.g. nestedly setting an array value is to GetLocal followed by GetProperty, followed
-                // by a SetProperty. If the array is "flat", as in, element 3 is a HogLiteral rather than Value, that SetProperty
+                // by a SetProperty. If the array is "flat", as in, element 3 is an IQLLiteral rather than Value, that SetProperty
                 // will do nothing, because there's nowhere to write the new value /to/ (as the stack copy of the literal array would be
                 // immediately dropped). We assert in SetProperty that the target is a reference, in order to prevent this surprising no-op
                 // behaviour, but that means we have to either always heap-allocate our indexable values, or hoist in GetProperty. I've decided
                 // to pay the cost of heap-allocating them up-front (and therefore chasing an extra pointer), because I think it more closely
-                // mirrors the semantics of e.g. JavaScript or Python, which is what hog is based around.
+                // mirrors the semantics of e.g. JavaScript or Python, which is what iql is based around.
                 let ptr = self.heap.emplace(obj)?;
                 self.push_stack(ptr)?;
             }
@@ -513,14 +513,14 @@ impl<'a> ScriptVM<'a> {
                 let message_key = HogLiteral::from("message".to_string()).into();
                 let message = exception.get_nested(&[message_key], &self.heap)?;
                 // The other impls here have some special case handling that treats "Error" as a distinct type, but
-                // as far as I can tell, a "hog error" is just a HogValue::Object with some specific properties, so
-                // I'll just check those exist. hog is mostly duck-typed, based on the existing impls
+                // as far as I can tell, a "iql error" is just an IQLValue::Object with some specific properties, so
+                // I'll just check those exist. iql is mostly duck-typed, based on the existing impls
                 if _type.is_none() || message.is_none() {
                     return Err(VmError::InvalidException);
                 };
 
                 let Some(frame) = self.throw_frames.pop() else {
-                    // TODO - we need some helper that'll deeply clone a HogValue::Object and product a HashMap<String, HogLiteral>, since
+                    // TODO - we need some helper that'll deeply clone an IQLValue::Object and product a HashMap<String, HogLiteral>, since
                     // this is escaping the VM, so heap references can't leak.
                     // let payload_key = HogLiteral::from("payload".to_string()).into();
                     // let payload = exception.get_nested(&[payload_key], &self.heap)?;
@@ -604,7 +604,7 @@ impl<'a> ScriptVM<'a> {
                     )));
                 }
                 let null_args = callable.stack_arg_count.saturating_sub(arg_count);
-                // For pure-hog function calls (calls to "local" callables), we just push a null onto the stack for each missing argument,
+                // For pure-iql function calls (calls to "local" callables), we just push a null onto the stack for each missing argument,
                 // then construct the stack frame, and jump to the callable's frame ip. For other kinds of calls (which we don't support yet),
                 // we'll have to do something more complicated
                 for _ in 0..null_args {
@@ -810,13 +810,13 @@ impl<'a> ScriptVM<'a> {
         Ok(StepOutcome::Continue)
     }
 
-    // Construct a hog value from a Json object. If the json object would be heap allocated
-    // as a HogValue (e.g. if it's an array or object), then it will be allocated onto the heap,
+    // Construct a iql value from a Json object. If the json object would be heap allocated
+    // as an IQLValue (e.g. if it's an array or object), then it will be allocated onto the heap,
     // and a reference will be returned. Nested json objects are flattened during allocation,
     // such that e.g. [[1,2],[3,4]] would lead to an array of [HeapReference, HeapReference] being
     // put into the heap, and a HeapReference being returned.
     //
-    // This is a function on the VM, rather than being standalone, because hog values don't really
+    // This is a function on the VM, rather than being standalone, because iql values don't really
     // exist outside of the context of a VM (and specifically a heap). It could be a function on the
     // heap itself, though.
     pub fn json_to_hog(&mut self, json: JsonValue) -> Result<HogValue, VmError> {
@@ -826,7 +826,7 @@ impl<'a> ScriptVM<'a> {
     fn json_to_hog_impl(&mut self, current: JsonValue, depth: usize) -> Result<HogValue, VmError> {
         if depth > MAX_JSON_SERDE_DEPTH {
             return Err(VmError::OutOfResource(
-                "json->hog deserialization depth".to_string(),
+                "json->iql deserialization depth".to_string(),
             ));
         };
 
@@ -865,7 +865,7 @@ impl<'a> ScriptVM<'a> {
     fn hog_to_json_impl(&self, value: &HogValue, depth: usize) -> Result<JsonValue, VmError> {
         if depth > MAX_JSON_SERDE_DEPTH {
             return Err(VmError::OutOfResource(
-                "hog->json serialization depth".to_string(),
+                "fn->json serialization depth".to_string(),
             ));
         };
 

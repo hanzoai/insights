@@ -3,7 +3,7 @@
     "version": "6.0.0",
     "description": "Hanzo Insights JavaScript SDK for browsers",
     "author": "Hanzo AI <dev@hanzo.ai>",
-    "repository": "https://github.com/hanzo-js/insights-js",
+    "repository": "https://github.com/hanzoai/insights",
     "license": "MIT",
     "main": "index.js",
     "types": "index.d.ts",
@@ -13,6 +13,6 @@
         "lib/"
     ],
     "dependencies": {
-        "_insights-js-upstream": "1.352.0"
+        "insights-js-upstream": "npm:@hanzo/insights@1.352.0"
     }
 }

@@ -1126,7 +1126,7 @@ def send_team_insights_functions_digest(team_id: int, insights_function_ids: lis
             "succeeded": metrics["succeeded"],
             "failed": metrics["failed"],
             "failure_rate": round(failure_rate, 1),
-            "url": f"{settings.SITE_URL}/project/{team_id}/pipeline/destinations/hog-{insights_function_id}",
+            "url": f"{settings.SITE_URL}/project/{team_id}/pipeline/destinations/fn-{insights_function_id}",
         }
         function_metrics.append(function_info)
 

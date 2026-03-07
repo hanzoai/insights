@@ -105,7 +105,7 @@ export interface InsightsQLParser {
     parseProgram(input: string, isInternal?: boolean): string
 
     /**
-     * Parse a Hog template string (f'...' syntax)
+     * Parse an IQL template string (f'...' syntax)
      *
      * @param input - The template string to parse
      * @param isInternal - If true, omits position information from the AST (default: false)

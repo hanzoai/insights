@@ -28,7 +28,7 @@ COPY frontend/package.json frontend/
 COPY frontend/bin/ frontend/bin/
 COPY bin/ bin/
 COPY patches/ patches/
-COPY common/hogvm/typescript/ common/hogvm/typescript/
+COPY common/scriptvm/typescript/ common/scriptvm/typescript/
 COPY common/esbuilder/ common/esbuilder/
 COPY common/tailwind/ common/tailwind/
 COPY products/ products/
@@ -155,7 +155,7 @@ ENV PATH=/python-runtime/bin:$PATH \
 # Add in Django deps
 COPY manage.py manage.py
 COPY common/esbuilder common/esbuilder
-COPY common/hogvm common/hogvm/
+COPY common/scriptvm common/scriptvm/
 COPY common/migration_utils common/migration_utils/
 COPY insights insights/
 COPY products/ products/
@@ -327,7 +327,7 @@ COPY --chown=insights:insights ./bin ./bin/
 COPY --chown=insights:insights ./rust/persons_migrations ./rust/persons_migrations/
 COPY --chown=insights:insights manage.py manage.py
 COPY --chown=insights:insights insights insights/
-COPY --chown=insights:insights common/hogvm common/hogvm/
+COPY --chown=insights:insights common/scriptvm common/scriptvm/
 COPY --chown=insights:insights common/migration_utils common/migration_utils/
 COPY --chown=insights:insights products products/
 
