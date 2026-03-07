@@ -453,7 +453,7 @@ def compile_script(fn: str, script_type: str, in_repl: Optional[bool] = False) -
 
         supported_functions = set()
 
-        if hog_type == "destination":
+        if iql_type == "destination":
             supported_functions = CORE_SUPPORTED_FUNCTIONS | PRODUCT_ASYNC_FUNCTIONS
 
         return create_bytecode(program, supported_functions=supported_functions, in_repl=in_repl).bytecode

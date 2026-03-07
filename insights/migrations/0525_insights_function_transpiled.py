@@ -36,6 +36,6 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="customfunction",
-            index=models.Index(fields=["type", "enabled", "team"], name="insights_hog_type_6f8967_idx"),
+            index=models.Index(fields=["type", "enabled", "team"], name="insights_iql_type_6f8967_idx"),
         ),
     ]

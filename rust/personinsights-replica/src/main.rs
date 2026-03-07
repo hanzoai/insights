@@ -4,7 +4,7 @@ use axum::{routing::get, Router};
 use common_database::{get_pool_with_config, PoolConfig};
 use common_metrics::setup_metrics_routes;
 use envconfig::Envconfig;
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::PersonInsightsReplicaServer;
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::PersonInsightsReplicaServer;
 use tokio::signal;
 use tonic::transport::Server;
 use tracing::level_filters::LevelFilter;

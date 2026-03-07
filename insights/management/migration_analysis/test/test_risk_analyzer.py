@@ -1343,13 +1343,13 @@ class TestCombinationRisks:
         was counted as a separate operation, triggering the warning even though
         there's only one top-level operation.
 
-        Pattern from 0948_hogfunction_batch_export migration:
+        Pattern from 0948_insights_function_batch_export migration:
         - SeparateDatabaseAndState with state_operations (AddField, AlterField)
         - database_operations containing RunSQL with ALTER TABLE
         """
         mock_migration = MagicMock()
         mock_migration.app_label = "insights"
-        mock_migration.name = "0948_hogfunction_batch_export"
+        mock_migration.name = "0948_insights_function_batch_export"
         mock_migration.atomic = True
 
         # Create the SeparateDatabaseAndState operation like 0948
@@ -1380,7 +1380,7 @@ class TestCombinationRisks:
         mock_migration.operations = [separate_op]
 
         migration_risk = self.analyzer.analyze_migration(
-            mock_migration, "insights/migrations/0948_hogfunction_batch_export.py"
+            mock_migration, "insights/migrations/0948_insights_function_batch_export.py"
         )
 
         # Should NOT have DDL isolation warning - there's only one top-level operation

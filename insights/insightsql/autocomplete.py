@@ -378,7 +378,7 @@ class VariableFinder(TraversingVisitor):
         super().visit_variable_declaration(node)
 
 
-def gather_hog_variables_in_scope(root_node, node) -> list[str]:
+def gather_iql_variables_in_scope(root_node, node) -> list[str]:
     finder = VariableFinder(node)
     finder.visit(root_node)
     return list(finder.node_vars)
@@ -480,9 +480,9 @@ def get_insightsql_autocomplete(
 
             if query.language in (InsightsLanguage.INSIGHTS_SCRIPT, InsightsLanguage.INSIGHTS_TEMPLATE, InsightsLanguage.LIQUID):
                 # For Insights Script and Liquid, first add all local variables in scope
-                hog_vars = gather_hog_variables_in_scope(root_node, node)
+                iql_vars = gather_iql_variables_in_scope(root_node, node)
                 extend_responses(
-                    keys=hog_vars,
+                    keys=iql_vars,
                     suggestions=response.suggestions,
                     kind=AutocompleteCompletionItemKind.VARIABLE,
                 )

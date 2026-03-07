@@ -355,7 +355,7 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
         # Only A is present, so A=0
         assert validated["A"]["order"] == 0
 
-    def test_validate_inputs_no_bytcode_if_not_hog(self):
+    def test_validate_inputs_no_bytcode_if_not_iql(self):
         # A depends on a non-existing input X
         # This should ignore X since it's not defined.
         # So no error, but A has no real dependencies that matter.
@@ -504,12 +504,12 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
             ("subtraction_code", "let x := event.properties.count - total", False),
         ]
     )
-    def test_hyphenated_property_detection_in_hog(self, _name, hog_code, should_error):
+    def test_hyphenated_property_detection_in_iql(self, _name, iql_code, should_error):
         if should_error:
             with self.assertRaises(ValidationError) as ctx:
-                compile_script(hog_code, "destination")
+                compile_script(iql_code, "destination")
             error_msg = str(ctx.exception)
             assert "Hyphens are not supported" in error_msg
             assert "bracket notation" in error_msg
         else:
-            compile_script(hog_code, "destination")
+            compile_script(iql_code, "destination")

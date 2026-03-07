@@ -9,7 +9,7 @@ Use the steps below to plan or implement a new mode. A mode is a way to manage t
 
 ## Determine mode name
 
-Explore the `ee/hogai/core/agent_modes/presets` directory and check if there are already modes that match the user's intent. If you want to create a new mode, you should scope it by a Insights product (Product analytics), product area (SQL), or agent (Instrumentation agent).
+Explore the `ee/insightsai/core/agent_modes/presets` directory and check if there are already modes that match the user's intent. If you want to create a new mode, you should scope it by a Insights product (Product analytics), product area (SQL), or agent (Instrumentation agent).
 
 ## (optionally) Create a new mode in schema
 
@@ -36,7 +36,7 @@ Note: you should only create new executables if the user needs to modify the pro
 
 ## Adding tools to the mode
 
-Relevant tools might be located in `ee/hogai/tools` or `products/<product_name>/backend/max_tools`. There is a set of tools that is always injected into the context, like the `read_data` tool, but all other tools should be specific to the mode.
+Relevant tools might be located in `ee/insightsai/tools` or `products/<product_name>/backend/max_tools`. There is a set of tools that is always injected into the context, like the `read_data` tool, but all other tools should be specific to the mode.
 
 Before adding a tool to the toolkit, determine if those tools have tool dependencies. If there are dependencies (like an experiment depends on feature flag creation), loop back to the user to determine whether they want to merge modes into a single one. If they don't want to do that, make sure that you later add a trajectory example clearly explaining mode switching and tool selection.
 
@@ -44,7 +44,7 @@ You should also verify that the tools are backend-first. If tools apply frontend
 
 ## Review the default toolkit
 
-If the new mode contains new Django models, you should review whether the `read_data`, `search`, and `list_data` tools have the functionality to retrieve the models. If they don't support these models, you should use or implement one of the context providers available in `ee/hogai/context/...`.
+If the new mode contains new Django models, you should review whether the `read_data`, `search`, and `list_data` tools have the functionality to retrieve the models. If they don't support these models, you should use or implement one of the context providers available in `ee/insightsai/context/...`.
 
 ## Write JTBD-like trajectory examples
 
@@ -62,7 +62,7 @@ Say you've updated the Error tracking tool to list issues. It used to be a front
 
 All new modes must be feature-flagged. Example:
 
-```ee/hogai/chat_agent/mode_manager.py
+```ee/insightsai/chat_agent/mode_manager.py
     @property
     def mode_registry(self) -> dict[AgentMode, AgentModeDefinition]:
         registry = dict(DEFAULT_CHAT_AGENT_MODE_REGISTRY)

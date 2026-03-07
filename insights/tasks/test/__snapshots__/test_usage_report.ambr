@@ -889,7 +889,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_function'
+  WHERE app_source='insights_function'
     AND metric_name IN ('succeeded',
                         'failed')
     AND timestamp >= '2022-01-10 00:00:00'
@@ -904,7 +904,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_function'
+  WHERE app_source='insights_function'
     AND metric_name IN ('fetch')
     AND timestamp >= '2022-01-10 00:00:00'
     AND timestamp < '2022-01-10 23:59:59'
@@ -918,7 +918,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_function'
+  WHERE app_source='insights_function'
     AND metric_name IN ('billable_invocation')
     AND timestamp >= '2022-01-10 00:00:00'
     AND timestamp < '2022-01-10 23:59:59'
@@ -943,7 +943,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_flow'
+  WHERE app_source='insights_flow'
     AND metric_name IN ('billable_invocation')
     AND metric_kind IN ('email')
     AND timestamp >= '2022-01-10 00:00:00'
@@ -957,7 +957,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_flow'
+  WHERE app_source='insights_flow'
     AND metric_name IN ('billable_invocation')
     AND metric_kind IN ('push')
     AND timestamp >= '2022-01-10 00:00:00'
@@ -971,7 +971,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_flow'
+  WHERE app_source='insights_flow'
     AND metric_name IN ('billable_invocation')
     AND metric_kind IN ('sms')
     AND timestamp >= '2022-01-10 00:00:00'
@@ -985,7 +985,7 @@
   SELECT team_id,
          SUM(count) as count
   FROM app_metrics2
-  WHERE app_source='hog_flow'
+  WHERE app_source='insights_flow'
     AND metric_name IN ('billable_invocation')
     AND metric_kind IN ('fetch')
     AND timestamp >= '2022-01-10 00:00:00'

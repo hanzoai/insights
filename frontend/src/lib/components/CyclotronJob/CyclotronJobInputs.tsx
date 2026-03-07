@@ -146,7 +146,7 @@ function JsonConfigField(props: {
                 <LemonField.Pure error={error}>
                     <span className={clsx('group relative', props.className)}>
                         <CodeEditorResizeable
-                            language={props.templating ? (templatingKind === 'fn' ? 'hogJson' : 'liquid') : 'json'}
+                            language={props.templating ? (templatingKind === 'fn' ? 'iqlJson' : 'liquid') : 'json'}
                             value={formattedValue}
                             embedded={true}
                             onChange={(value) => setJsonValue(value || '{}')}

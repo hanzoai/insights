@@ -89,7 +89,7 @@ Insights.screen(
     screenTitle = "Dashboard",
     properties = mapOf(
         "background" to "blue",
-        "hero" to "superhog"
+        "hero" to "supermascot"
     )
 )`}</CodeSnippet>
         </>

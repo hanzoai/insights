@@ -135,7 +135,7 @@ export function InsightsFunctionInputs(): JSX.Element {
             identifier="create_insights_function_inputs"
             context={{
                 current_inputs_schema: configuration.inputs_schema ?? [],
-                hog_code: configuration.fn ?? '',
+                iql_code: configuration.fn ?? '',
             }}
             contextDescription={{
                 text: 'Current inputs schema',

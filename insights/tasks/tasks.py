@@ -133,7 +133,7 @@ def process_query_task(
 
 @shared_task(ignore_result=True)
 def pg_table_cache_hit_rate() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     with connection.cursor() as cursor:
         try:
@@ -165,7 +165,7 @@ def pg_table_cache_hit_rate() -> None:
 
 @shared_task(ignore_result=True)
 def pg_plugin_server_query_timing() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     with connection.cursor() as cursor:
         try:
@@ -241,7 +241,7 @@ HEARTBEAT_EVENT_TO_INGESTION_LAG_METRIC = {"$heartbeat": "ingestion_api"}
 
 @shared_task(ignore_result=True)
 def ingestion_lag() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     from insights.clickhouse.client import sync_execute
     from insights.models.team.team import Team
@@ -358,7 +358,7 @@ KNOWN_CELERY_TASK_IDENTIFIERS = {
 
 @shared_task(ignore_result=True)
 def clickhouse_row_count() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     from insights.clickhouse.client import sync_execute
 
@@ -425,7 +425,7 @@ def clickhouse_errors_count() -> None:
 
 @shared_task(ignore_result=True)
 def clickhouse_part_count() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     from insights.clickhouse.client import sync_execute
 
@@ -456,7 +456,7 @@ def clickhouse_part_count() -> None:
 
 @shared_task(ignore_result=True)
 def clickhouse_mutation_count() -> None:
-    from statshog.defaults.django import statsd
+    from statsiql.defaults.django import statsd
 
     from insights.clickhouse.client import sync_execute
 

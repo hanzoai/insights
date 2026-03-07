@@ -14,7 +14,7 @@ filename = args[1]
 debug = "--debug" in modifiers
 
 if not filename.endswith(".iqle"):
-    raise ValueError("filename must end with '.hoge'. Got: " + filename)
+    raise ValueError("filename must end with '.iqle'. Got: " + filename)
 
 with open(filename) as file:
     code = file.read()

@@ -158,9 +158,9 @@ export function InsightsFunctionCode(): JSX.Element {
 
     return (
         <MaxTool
-            identifier="create_hog_transformation_function"
+            identifier="create_iql_transformation_function"
             context={{
-                current_hog_code: configuration.fn ?? '',
+                current_iql_code: configuration.fn ?? '',
             }}
             contextDescription={{
                 text: 'Current Custom code',

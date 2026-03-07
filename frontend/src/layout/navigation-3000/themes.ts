@@ -41,7 +41,7 @@ export const themes: Theme[] = [
         },
     },
     {
-        id: 'livelaughhog',
+        id: 'livelaughinsights',
         name: 'Monochrome',
         dark: false,
         sidebarStyle: {

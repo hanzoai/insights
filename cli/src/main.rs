@@ -21,7 +21,7 @@ fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
 
     match cmd::Cli::run() {
-        Ok(_) => info!("All done, happy hogging!"),
+        Ok(_) => info!("All done, happy querying!"),
         Err(e) => {
             match e.exception_id {
                 Some(id) => {

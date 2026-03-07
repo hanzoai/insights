@@ -51,7 +51,7 @@ class TestMCPToolsAPI(APIBaseTest):
         self.assertFalse(data["success"])
         self.assertIn("validation error", data["content"].lower())
 
-    @patch("ee.hogai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
+    @patch("ee.insightsai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
     def test_invoke_execute_sql_success(self, mock_execute):
         mock_execute.return_value = "event | cnt\ntest_event | 5"
 
@@ -67,7 +67,7 @@ class TestMCPToolsAPI(APIBaseTest):
         self.assertIn("test_event", data["content"])
         mock_execute.assert_called_once()
 
-    @patch("ee.hogai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
+    @patch("ee.insightsai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
     def test_invoke_tool_error_returns_error_response(self, mock_execute):
 
         mock_execute.side_effect = MaxToolRetryableError("Query validation failed: syntax error")
@@ -83,7 +83,7 @@ class TestMCPToolsAPI(APIBaseTest):
         self.assertFalse(data["success"])
         self.assertIn("Tool failed", data["content"])
 
-    @patch("ee.hogai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
+    @patch("ee.insightsai.tools.execute_sql.mcp_tool.ExecuteSQLMCPTool.execute", new_callable=AsyncMock)
     def test_invoke_tool_unexpected_error_returns_internal_error(self, mock_execute):
         mock_execute.side_effect = RuntimeError("unexpected")
 
