@@ -8,7 +8,7 @@ from insights.cdp.templates.customerio.template_customerio import (
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.models.plugin import PluginConfig
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 def create_inputs(**kwargs):
@@ -152,7 +152,7 @@ class TestTemplateCustomerio(BaseInsightsFunctionTemplateTest):
 
     def test_function_errors_on_bad_status(self):
         self.mock_fetch_response = lambda *args: {"status": 400, "body": {"error": "error"}}  # type: ignore
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=create_inputs())
         assert e.value.message == "Error from customer.io api: 400: {'error': 'error'}"
 

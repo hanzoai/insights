@@ -25,10 +25,10 @@ import {
     convertHogToJS,
     convertJSToHog,
     getNestedValue,
-    HogVMException,
+    ScriptVMException,
     like,
     setNestedValue,
-    UncaughtHogVMException,
+    UncaughtScriptVMException,
     unifyComparisonTypes,
 } from './utils'
 
@@ -40,7 +40,7 @@ export function execSync(bytecode: any[] | VMState | Bytecodes, options?: ExecOp
     if (response.error) {
         throw response.error
     }
-    throw new HogVMException('Unexpected async function call: ' + response.asyncFunctionName)
+    throw new ScriptVMException('Unexpected async function call: ' + response.asyncFunctionName)
 }
 
 export async function execAsync(bytecode: any[] | VMState | Bytecodes, options?: ExecOptions): Promise<ExecResult> {
@@ -66,10 +66,10 @@ export async function execAsync(bytecode: any[] | VMState | Bytecodes, options?:
                 )
                 vmState.stack.push(result)
             } else {
-                throw new HogVMException('Invalid async function call: ' + response.asyncFunctionName)
+                throw new ScriptVMException('Invalid async function call: ' + response.asyncFunctionName)
             }
         } else {
-            throw new HogVMException('Invalid async function call')
+            throw new ScriptVMException('Invalid async function call')
         }
     }
 }
@@ -91,7 +91,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     }
     const rootBytecode = bytecodes.root.bytecode
     if (!rootBytecode || rootBytecode.length === 0 || (rootBytecode[0] !== '_h' && rootBytecode[0] !== '_H')) {
-        throw new HogVMException("Invalid InsightsQL bytecode, must start with '_H'")
+        throw new ScriptVMException("Invalid InsightsQL bytecode, must start with '_H'")
     }
     const version = rootBytecode[0] === '_H' ? (rootBytecode[1] ?? 0) : 0
 
@@ -169,10 +169,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 chunkBytecode = chunk.bytecode
                 chunkGlobals = chunk.globals ?? {}
             } else {
-                throw new HogVMException(`Unknown chunk: ${frame.chunk}`)
+                throw new ScriptVMException(`Unknown chunk: ${frame.chunk}`)
             }
         } else {
-            throw new HogVMException(`Unknown chunk: ${frame.chunk}`)
+            throw new ScriptVMException(`Unknown chunk: ${frame.chunk}`)
         }
         if (frame.ip === 0 && (chunkBytecode[0] === '_H' || chunkBytecode[0] === '_h')) {
             // TODO: store chunkVersion
@@ -184,7 +184,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     function popStack(): any {
         if (stack.length === 0) {
             logTelemetry()
-            throw new HogVMException('Invalid InsightsQL bytecode, stack is empty, can not pop')
+            throw new ScriptVMException('Invalid InsightsQL bytecode, stack is empty, can not pop')
         }
         memUsed -= memStack.pop() ?? 0
         return stack.pop()
@@ -195,7 +195,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
         memUsed += memStack[memStack.length - 1]
         maxMemUsed = Math.max(maxMemUsed, memUsed)
         if (memUsed > memLimit && memLimit > 0) {
-            throw new HogVMException(`Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`)
+            throw new ScriptVMException(`Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`)
         }
         return stack.push(value)
     }
@@ -207,7 +207,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
 
     function stackKeepFirstElements(count: number): any[] {
         if (count < 0 || stack.length < count) {
-            throw new HogVMException('Stack underflow')
+            throw new ScriptVMException('Stack underflow')
         }
         for (let i = sortedUpValues.length - 1; i >= 0; i--) {
             if (sortedUpValues[i].location >= count) {
@@ -226,14 +226,14 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
 
     function next(): any {
         if (frame.ip >= chunkBytecode.length - 1) {
-            throw new HogVMException('Unexpected end of bytecode')
+            throw new ScriptVMException('Unexpected end of bytecode')
         }
         return chunkBytecode[++frame.ip]
     }
 
     function checkTimeout(): void {
         if (syncDuration + Date.now() - startTime > timeout) {
-            throw new HogVMException(`Execution timed out after ${timeout / 1000} seconds. Performed ${ops} ops.`)
+            throw new ScriptVMException(`Execution timed out after ${timeout / 1000} seconds. Performed ${ops} ops.`)
         }
     }
 
@@ -280,7 +280,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
 
     function regexMatch(): (regex: string, value: string) => boolean {
         if (!options?.external?.regex?.match) {
-            throw new HogVMException('Set options.external.regex.match for RegEx support')
+            throw new ScriptVMException('Set options.external.regex.match for RegEx support')
         }
         return (regex: string, value: string): boolean =>
             regex && value ? !!options.external?.regex?.match(regex, value) : false
@@ -527,7 +527,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             )
                         )
                     } else {
-                        throw new HogVMException(`Global variable not found: ${chain.join('.')}`)
+                        throw new ScriptVMException(`Global variable not found: ${chain.join('.')}`)
                     }
                     break
                 }
@@ -643,12 +643,12 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.CLOSURE: {
                     const callable = popStack()
                     if (!isHogCallable(callable)) {
-                        throw new HogVMException(`Invalid callable: ${JSON.stringify(callable)}`)
+                        throw new ScriptVMException(`Invalid callable: ${JSON.stringify(callable)}`)
                     }
                     const upvalueCount = next()
                     const closureUpValues: number[] = []
                     if (upvalueCount !== callable.upvalueCount) {
-                        throw new HogVMException(
+                        throw new ScriptVMException(
                             `Invalid upvalue count. Expected ${callable.upvalueCount}, got ${upvalueCount}`
                         )
                     }
@@ -667,11 +667,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.GET_UPVALUE: {
                     const index = next()
                     if (index >= frame.closure.upvalues.length) {
-                        throw new HogVMException(`Invalid upvalue index: ${index}`)
+                        throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
                     if (!isHogUpValue(upvalue)) {
-                        throw new HogVMException(`Invalid upvalue: ${upvalue}`)
+                        throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
                         pushStack(upvalue.value)
@@ -683,11 +683,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.SET_UPVALUE: {
                     const index = next()
                     if (index >= frame.closure.upvalues.length) {
-                        throw new HogVMException(`Invalid upvalue index: ${index}`)
+                        throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
                     if (!isHogUpValue(upvalue)) {
-                        throw new HogVMException(`Invalid upvalue: ${upvalue}`)
+                        throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
                         upvalue.value = popStack()
@@ -729,10 +729,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         continue // resume the loop without incrementing frame.ip
                     } else {
                         if (temp > stack.length) {
-                            throw new HogVMException('Not enough arguments on the stack')
+                            throw new ScriptVMException('Not enough arguments on the stack')
                         }
                         if (temp > MAX_FUNCTION_ARGS_LENGTH) {
-                            throw new HogVMException('Too many arguments')
+                            throw new ScriptVMException('Too many arguments')
                         }
 
                         if (name === 'import') {
@@ -743,7 +743,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                           .map(() => popStack())
                                     : stackKeepFirstElements(stack.length - temp)
                             if (args.length !== 1) {
-                                throw new HogVMException(`Function ${name} requires exactly 1 argument`)
+                                throw new ScriptVMException(`Function ${name} requires exactly 1 argument`)
                             }
                             frame.ip += 1 // advance for when we return
                             frame = {
@@ -784,7 +784,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 name in ASYNC_STL)
                         ) {
                             if (asyncSteps >= maxAsyncSteps) {
-                                throw new HogVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
+                                throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
                             }
 
                             const args =
@@ -817,7 +817,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         } else if (name in BYTECODE_STL) {
                             const argNames = BYTECODE_STL[name][0]
                             if (argNames.length !== temp) {
-                                throw new HogVMException(
+                                throw new ScriptVMException(
                                     `Function ${name} requires exactly ${argNames.length} arguments`
                                 )
                             }
@@ -840,11 +840,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             setChunkBytecode()
                             callStack.push(frame)
                             if (callStack.length > CALLSTACK_LENGTH) {
-                                throw new HogVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
+                                throw new ScriptVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
                             }
                             continue // resume the loop without incrementing frame.ip
                         } else {
-                            throw new HogVMException(`Unsupported function call: ${name}`)
+                            throw new ScriptVMException(`Unsupported function call: ${name}`)
                         }
                     }
                     break
@@ -853,17 +853,17 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     checkTimeout()
                     const closure = popStack()
                     if (!isHogClosure(closure)) {
-                        throw new HogVMException(`Invalid closure: ${JSON.stringify(closure)}`)
+                        throw new ScriptVMException(`Invalid closure: ${JSON.stringify(closure)}`)
                     }
                     if (!isHogCallable(closure.callable)) {
-                        throw new HogVMException(`Invalid callable: ${JSON.stringify(closure.callable)}`)
+                        throw new ScriptVMException(`Invalid callable: ${JSON.stringify(closure.callable)}`)
                     }
                     temp = next() // args.length
                     if (temp > stack.length) {
-                        throw new HogVMException('Not enough arguments on the stack')
+                        throw new ScriptVMException('Not enough arguments on the stack')
                     }
                     if (temp > MAX_FUNCTION_ARGS_LENGTH) {
-                        throw new HogVMException('Too many arguments')
+                        throw new ScriptVMException('Too many arguments')
                     }
                     if (closure.callable.__hogCallable__ === 'local') {
                         if (closure.callable.argCount > temp) {
@@ -871,7 +871,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 pushStack(null)
                             }
                         } else if (closure.callable.argCount < temp) {
-                            throw new HogVMException(
+                            throw new ScriptVMException(
                                 `Too many arguments. Passed ${temp}, expected ${closure.callable.argCount}`
                             )
                         }
@@ -886,21 +886,21 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         setChunkBytecode()
                         callStack.push(frame)
                         if (callStack.length > CALLSTACK_LENGTH) {
-                            throw new HogVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
+                            throw new ScriptVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
                         }
                         continue // resume the loop without incrementing frame.ip
                     } else if (closure.callable.__hogCallable__ === 'stl') {
                         if (!closure.callable.name || !(closure.callable.name in STL)) {
-                            throw new HogVMException(`Unsupported function call: ${closure.callable.name}`)
+                            throw new ScriptVMException(`Unsupported function call: ${closure.callable.name}`)
                         }
                         const stlFn = STL[closure.callable.name]
                         if (stlFn.minArgs !== undefined && temp < stlFn.minArgs) {
-                            throw new HogVMException(
+                            throw new ScriptVMException(
                                 `Function ${closure.callable.name} requires at least ${stlFn.minArgs} arguments`
                             )
                         }
                         if (stlFn.maxArgs !== undefined && temp > stlFn.maxArgs) {
-                            throw new HogVMException(
+                            throw new ScriptVMException(
                                 `Function ${closure.callable.name} requires at most ${stlFn.maxArgs} arguments`
                             )
                         }
@@ -918,7 +918,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         pushStack(stlFn.fn(args, closure.callable.name, options))
                     } else if (closure.callable.__hogCallable__ === 'async') {
                         if (asyncSteps >= maxAsyncSteps) {
-                            throw new HogVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
+                            throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
                         }
                         const args = Array(temp)
                             .fill(null)
@@ -931,7 +931,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             state: { ...getVMState(), asyncSteps: asyncSteps + 1 },
                         } satisfies ExecResult
                     } else {
-                        throw new HogVMException(`Unsupported function call: ${closure.callable.name}`)
+                        throw new ScriptVMException(`Unsupported function call: ${closure.callable.name}`)
                     }
                     break
                 }
@@ -946,13 +946,13 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     if (throwStack.length > 0) {
                         throwStack.pop()
                     } else {
-                        throw new HogVMException('Invalid operation POP_TRY: no try block to pop')
+                        throw new ScriptVMException('Invalid operation POP_TRY: no try block to pop')
                     }
                     break
                 case Operation.THROW: {
                     const exception = popStack()
                     if (!isHogError(exception)) {
-                        throw new HogVMException('Can not throw: value is not of type Error')
+                        throw new ScriptVMException('Can not throw: value is not of type Error')
                     }
                     if (throwStack.length > 0) {
                         const { callStackLen, stackLen, catchIp } = throwStack.pop()!
@@ -965,11 +965,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         frame.ip = catchIp
                         continue // resume the loop without incrementing frame.ip
                     } else {
-                        throw new UncaughtHogVMException(exception.type, exception.message, exception.payload)
+                        throw new UncaughtScriptVMException(exception.type, exception.message, exception.payload)
                     }
                 }
                 default:
-                    throw new HogVMException(
+                    throw new ScriptVMException(
                         `Unexpected node while running bytecode in chunk "${frame.chunk}": ${chunkBytecode[frame.ip]}`
                     )
             }

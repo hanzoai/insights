@@ -2,7 +2,7 @@ import { calculateCost, convertHogToJS, convertJSToHog } from '../utils'
 
 const PTR_COST = 8
 
-describe('hogvm utils', () => {
+describe('scriptvm utils', () => {
     test('calculateCost', async () => {
         expect(calculateCost(1)).toBe(PTR_COST)
         expect(calculateCost('hello')).toBe(PTR_COST + 5)

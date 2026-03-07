@@ -3,7 +3,7 @@ import RE2 from 're2'
 import { exec, execAsync, execSync } from '../execute'
 import { Operation as op } from '../operation'
 import { BytecodeEntry } from '../types'
-import { UncaughtHogVMException } from '../utils'
+import { UncaughtScriptVMException } from '../utils'
 
 export function delay(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -17,7 +17,7 @@ const tuple = (array: any[]): any[] => {
     return array
 }
 
-describe('hogvm execute', () => {
+describe('scriptvm execute', () => {
     test('execution results', async () => {
         const globals = { properties: { foo: 'bar', nullValue: null } }
         const options = {
@@ -134,8 +134,8 @@ describe('hogvm execute', () => {
     })
 
     test('null coercion in ordering comparisons - preserved behavior', () => {
-        // This test documents the current typescript hogvm behavior where null is coerced to 0 in ordering comparisons.
-        // HogVM in python/rust does not share this behavior.
+        // This test documents the current typescript scriptvm behavior where null is coerced to 0 in ordering comparisons.
+        // ScriptVM in python/rust does not share this behavior.
         // It is preserved for backward compatibility - users depend on it.
         // See: https://github.com/hanzoai/insights/pull/45328
         const options = {}
@@ -1985,7 +1985,7 @@ describe('hogvm execute', () => {
     test('uncaught exceptions', () => {
         // throw Error('Not a good day')
         const bytecode1 = ['_h', op.NULL, op.NULL, op.STRING, 'Not a good day', op.CALL_GLOBAL, 'Error', 3, op.THROW]
-        expect(() => execSync(bytecode1)).toThrow(new UncaughtHogVMException('Error', 'Not a good day', null))
+        expect(() => execSync(bytecode1)).toThrow(new UncaughtScriptVMException('Error', 'Not a good day', null))
 
         // throw RetryError('Not a good day', {'key': 'value'})
         const bytecode2 = [
@@ -2004,7 +2004,7 @@ describe('hogvm execute', () => {
             op.THROW,
         ]
         expect(() => execSync(bytecode2)).toThrow(
-            new UncaughtHogVMException('RetryError', 'Not a good day', { key: 'value' })
+            new UncaughtScriptVMException('RetryError', 'Not a good day', { key: 'value' })
         )
     })
 
