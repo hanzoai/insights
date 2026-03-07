@@ -18,7 +18,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                go get "github.com/posthog/posthog-go"
+                                go get "github.com/insights/insights-go"
                             `,
                             },
                         ]}
@@ -41,11 +41,11 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 package main
 
                                 import (
-                                    "github.com/posthog/posthog-go"
+                                    "github.com/insights/insights-go"
                                 )
 
                                 func main() {
-                                    client, _ := posthog.NewWithConfig("<ph_project_api_key>", posthog.Config{Endpoint: "<ph_client_api_host>"})
+                                    client, _ := insights.NewWithConfig("<ph_project_api_key>", insights.Config{Endpoint: "<ph_client_api_host>"})
                                     defer client.Close()
                                 }
                             `,
@@ -67,10 +67,10 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 language: 'go',
                                 file: 'Go',
                                 code: dedent`
-                                client.Enqueue(posthog.Capture{
+                                client.Enqueue(insights.Capture{
                                     DistinctId: "user_123",
                                     Event: "button_clicked",
-                                    Properties: posthog.NewProperties().
+                                    Properties: insights.NewProperties().
                                         Set("button_name", "signup"),
                                 })
                             `,

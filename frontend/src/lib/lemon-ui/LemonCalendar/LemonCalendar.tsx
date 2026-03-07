@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { Ref, forwardRef, useEffect, useState } from 'react'
 
-import { IconChevronLeft, IconChevronRight } from '@posthog/icons'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { dayjs } from 'lib/dayjs'

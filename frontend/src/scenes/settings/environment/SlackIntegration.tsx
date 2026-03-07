@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'

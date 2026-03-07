@@ -97,7 +97,7 @@ class TestOpenRouterHeaders:
 
         headers = adapter._get_default_headers()
 
-        assert headers == {"HTTP-Referer": "https://posthog.com", "X-Title": "Insights"}
+        assert headers == {"HTTP-Referer": "https://hanzo.ai", "X-Title": "Insights"}
 
     def test_list_models_passes_headers_to_client(self):
         mock_client = MagicMock()

@@ -4,7 +4,7 @@ import { Form } from 'kea-forms'
 import { MarkerSeverity, editor as monacoEditor } from 'monaco-editor'
 import { useRef } from 'react'
 
-import { IconInfo, IconX } from '@posthog/icons'
+import { IconInfo, IconX } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,7 +15,7 @@ import {
     LemonTable,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/lemon-ui/LemonButton/More'

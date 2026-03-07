@@ -133,7 +133,7 @@ if (res.status != 200 or res.body.ok == false) {
 
 
 class TemplateRudderstackMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/rudderstack-posthog-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/rudderstack-insights-plugin"
 
     @classmethod
     def migrate(cls, obj):

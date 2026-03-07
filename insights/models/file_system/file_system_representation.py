@@ -1,4 +1,4 @@
-# posthog/models/file_system/file_system_representation.py
+# insights/models/file_system/file_system_representation.py
 
 from dataclasses import dataclass
 from typing import Any

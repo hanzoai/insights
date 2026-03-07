@@ -616,7 +616,7 @@
         "uuid": "018a92f8-b5a3-0000-5af3-ef9c18b7af66",
         "distinct_id": "krRfgopsUy1TwNU1yhSDLqNDTd6N5tMZrHlm8nLJIDI",
         "first_name": "Employee 427",
-        "email": "test@posthog.com",
+        "email": "test@hanzo.ai",
         "is_email_verified": null
     },
     "description": "",
@@ -629,7 +629,7 @@
         "uuid": "018a92f8-b5a3-0000-5af3-ef9c18b7af66",
         "distinct_id": "krRfgopsUy1TwNU1yhSDLqNDTd6N5tMZrHlm8nLJIDI",
         "first_name": "Employee 427",
-        "email": "test@posthog.com",
+        "email": "test@hanzo.ai",
         "is_email_verified": null
     },
     "is_sample": false,

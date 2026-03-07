@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 
 // import { toolbarDenylistPlugin } from './vite-toolbar-plugin'
 import { htmlGenerationPlugin } from './vite-html-plugin'
-import { posthogJsPlugin } from './vite-posthog-js-plugin'
+import { insightsJsPlugin } from './vite-insights-js-plugin'
 import { publicAssetsPlugin } from './vite-public-assets-plugin'
 
 // https://vitejs.dev/config/
@@ -19,8 +19,8 @@ export default defineConfig(({ mode }) => {
             htmlGenerationPlugin(),
             // Copy public assets to src/assets for development
             publicAssetsPlugin(),
-            // Copy posthog-js files from node_modules to dist for development
-            posthogJsPlugin(),
+            // Copy insights-js files from node_modules to dist for development
+            insightsJsPlugin(),
             {
                 name: 'startup-message',
                 configureServer(server) {
@@ -55,16 +55,16 @@ export default defineConfig(({ mode }) => {
                 exporter: resolve(__dirname, 'src/exporter'),
                 stories: resolve(__dirname, 'src/stories'),
                 types: resolve(__dirname, 'src/types.ts'),
-                // @posthog/lemon-ui aliases
-                '@posthog/lemon-ui': resolve(__dirname, '@posthog/lemon-ui/src/index'),
-                '@posthog/lemon-ui/': resolve(__dirname, '@posthog/lemon-ui/src/'),
+                // @hanzo/lemon-ui aliases
+                '@hanzo/lemon-ui': resolve(__dirname, '@hanzo/lemon-ui/src/index'),
+                '@hanzo/lemon-ui/': resolve(__dirname, '@hanzo/lemon-ui/src/'),
                 // Other aliases from tsconfig.json
                 storybook: resolve(__dirname, '../.storybook'),
                 // Just for Vite: we copy public assets to src/assets, we need to alias it to the correct path
                 public: resolve(__dirname, 'src/assets'),
                 products: resolve(__dirname, '../products'),
-                '@posthog/shared-onboarding': resolve(__dirname, '../docs/onboarding'),
-                '@posthog/shared-onboarding/*': resolve(__dirname, '../docs/onboarding/*'),
+                '@hanzo/shared-onboarding': resolve(__dirname, '../docs/onboarding'),
+                '@hanzo/shared-onboarding/*': resolve(__dirname, '../docs/onboarding/*'),
                 // Node.js polyfills for browser compatibility
                 buffer: 'buffer',
             },

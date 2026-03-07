@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock, IconPlayFilled } from '@posthog/icons'
-import { IconChevronDown } from '@posthog/icons'
-import { LemonButton, LemonInput, Popover } from '@posthog/lemon-ui'
+import { IconClock, IconPlayFilled } from '@hanzo/icons'
+import { IconChevronDown } from '@hanzo/icons'
+import { LemonButton, LemonInput, Popover } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { humanFriendlyNumber } from 'lib/utils'

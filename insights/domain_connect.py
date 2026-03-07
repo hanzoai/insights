@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 # Maps _domainconnect TXT record values (provider endpoints) to display names.
 # Display names must match DomainConnectProviderName in schema-general.ts — run
-# `hogli build:schema` after adding a new provider to keep frontend types in sync.
+# `insightscli build:schema` after adding a new provider to keep frontend types in sync.
 # A provider is added here only AFTER our templates are accepted in their store.
 # To add a provider: submit templates to github.com/Domain-Connect/Templates,
 # contact the provider, and add their endpoint here once confirmed.

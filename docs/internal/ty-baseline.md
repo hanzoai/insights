@@ -12,7 +12,7 @@ The baseline system filters out 567 pre-existing errors so you only see new issu
 
 ```bash
 ./bin/ty.py check path/to/file.py    # Check specific files
-./bin/ty.py check posthog ee         # Check directories
+./bin/ty.py check insights ee         # Check directories
 ```
 
 ## Ty vs mypy: Fast trial vs authoritative checking

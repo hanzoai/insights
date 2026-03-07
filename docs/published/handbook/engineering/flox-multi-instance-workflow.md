@@ -28,17 +28,17 @@ This guide explains how to create isolated Insights development environments usi
 
 ### Worktree Location
 
-By default, worktrees are created in `~/.worktrees/posthog/`. You can customize this location by setting the `POSTHOG_WORKTREE_BASE` environment variable:
+By default, worktrees are created in `~/.worktrees/insights/`. You can customize this location by setting the `INSIGHTS_WORKTREE_BASE` environment variable:
 
 ```bash
 # In your shell profile (~/.zshrc or ~/.bashrc)
-export POSTHOG_WORKTREE_BASE="/path/to/your/preferred/location"
+export INSIGHTS_WORKTREE_BASE="/path/to/your/preferred/location"
 ```
 
 For example:
 
 ```bash
-export POSTHOG_WORKTREE_BASE="$HOME/code/worktrees"
+export INSIGHTS_WORKTREE_BASE="$HOME/code/worktrees"
 # Worktrees will be created in ~/code/worktrees/<branch-name>
 ```
 
@@ -46,7 +46,7 @@ export POSTHOG_WORKTREE_BASE="$HOME/code/worktrees"
 
 The `phw list` and `phw remove` commands work with **all** your Insights worktrees, regardless of where they were created. This is helpful if you:
 
-- Changed your `POSTHOG_WORKTREE_BASE` setting after creating some worktrees
+- Changed your `INSIGHTS_WORKTREE_BASE` setting after creating some worktrees
 - Have worktrees in multiple locations
 - Want to clean up old worktrees from previous setups
 
@@ -54,11 +54,11 @@ The `phw list` and `phw remove` commands work with **all** your Insights worktre
 
 ```bash
 # You had worktrees in the old location
-ls ~/.worktrees/posthog/
+ls ~/.worktrees/insights/
 # old-feature/  pr-1234-teammate/
 
 # You changed your worktree base
-export POSTHOG_WORKTREE_BASE="$HOME/dev/worktrees"
+export INSIGHTS_WORKTREE_BASE="$HOME/dev/worktrees"
 
 # phw list still shows ALL worktrees
 phw list
@@ -74,7 +74,7 @@ This uses Git's native worktree tracking (`git worktree list`) rather than tryin
 
 ### 1. One-Time Setup
 
-In all these examples, replace `~/dev/posthog/posthog` with your local path to the Insights repo.
+In all these examples, replace `~/dev/insights/insights` with your local path to the Insights repo.
 
 ```bash
 # Install dependencies
@@ -84,13 +84,13 @@ brew install direnv gh jq
 eval "$(direnv hook zsh)"  # or bash
 
 # Add the phw function for auto-cd functionality
-echo 'source ~/dev/posthog/posthog/bin/phw' >> ~/.zshrc  # or ~/.bashrc
+echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc  # or ~/.bashrc
 
 # Reload your shell
 source ~/.zshrc  # or ~/.bashrc
 
 # Verify setup in main repo
-cd ~/dev/posthog/posthog
+cd ~/dev/insights/insights
 flox activate
 # You should see Flox environment activate and uv sync run
 ```
@@ -213,13 +213,13 @@ phw list
 #
 # Branch                        Path                                           Location
 # ------                        ----                                           --------
-# haacked/improved-workflow     /Users/username/dev/posthog/posthog            other
-# haacked/analytics-dashboard   /Users/username/.worktrees/posthog/haacked/... current
-# main                         /Users/username/.worktrees/posthog/main        current
-# pr-5678-teammate             /Users/username/.worktrees/posthog/pr-5678-... current
+# haacked/improved-workflow     /Users/username/dev/insights/insights            other
+# haacked/analytics-dashboard   /Users/username/.worktrees/insights/haacked/... current
+# main                         /Users/username/.worktrees/insights/main        current
+# pr-5678-teammate             /Users/username/.worktrees/insights/pr-5678-... current
 #
 # Legend:
-#   current = in current worktree base (/Users/username/.worktrees/posthog)
+#   current = in current worktree base (/Users/username/.worktrees/insights)
 #   other   = in different location
 
 # Remove when done (works regardless of location)
@@ -268,7 +268,7 @@ When you switch between worktrees while already in a Flox environment, you'll se
 
 ```text
 ⚠️  About to activate Flox environment in worktree while already in environment for:
-   /Users/username/dev/posthog/posthog
+   /Users/username/dev/insights/insights
 
 Continue with nested activation? (y/N):
 ```
@@ -284,7 +284,7 @@ Continue with nested activation? (y/N):
 ```bash
 # Currently in main repo with Flox active
 exit  # Leave current Flox environment
-cd ~/.worktrees/posthog/my-branch  # Switch to worktree
+cd ~/.worktrees/insights/my-branch  # Switch to worktree
 # Flox activates cleanly without nesting prompt
 ```
 
@@ -343,7 +343,7 @@ flox activate --trust
 
 # Or reinstall Flox environment
 rm -rf .flox
-cp -r ~/dev/posthog/posthog/.flox/env .flox/
+cp -r ~/dev/insights/insights/.flox/env .flox/
 flox activate
 ```
 
@@ -351,10 +351,10 @@ flox activate
 
 ```bash
 # Make sure you've sourced the phw script
-source ~/dev/posthog/posthog/bin/phw
+source ~/dev/insights/insights/bin/phw
 
 # Add it permanently to your shell profile
-echo 'source ~/dev/posthog/posthog/bin/phw' >> ~/.zshrc
+echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc
 ```
 
 ### Dependencies out of sync
@@ -401,14 +401,14 @@ For a complete one-time setup, run:
 # For zsh users
 brew install direnv gh jq && \
 echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc && \
-echo 'source ~/dev/posthog/posthog/bin/phw' >> ~/.zshrc && \
+echo 'source ~/dev/insights/insights/bin/phw' >> ~/.zshrc && \
 source ~/.zshrc && \
 echo "✅ Setup complete! You can now use 'phw' commands."
 
 # For bash users
 brew install direnv gh jq && \
 echo 'eval "$(direnv hook bash)"' >> ~/.bashrc && \
-echo 'source ~/dev/posthog/posthog/bin/phw' >> ~/.bashrc && \
+echo 'source ~/dev/insights/insights/bin/phw' >> ~/.bashrc && \
 source ~/.bashrc && \
 echo "✅ Setup complete! You can now use 'phw' commands."
 ```

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconInfo } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

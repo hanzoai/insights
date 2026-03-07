@@ -14,8 +14,8 @@ export const PythonEventCapture = (): JSX.Element => {
                         language: 'python',
                         file: 'Python',
                         code: dedent`
-                            import posthog
-                            posthog.capture('user_123', 'user_signed_up', properties={'example_property': 'example_value'})
+                            import insights
+                            insights.capture('user_123', 'user_signed_up', properties={'example_property': 'example_value'})
                         `,
                     },
                 ]}

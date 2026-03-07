@@ -119,8 +119,8 @@ interface HoldoutCondition {
 
 | Component         | Path                                            |
 | ----------------- | ----------------------------------------------- |
-| Model             | `posthog/models/experiment.py`                  |
+| Model             | `insights/models/experiment.py`                  |
 | Serializer        | `ee/clickhouse/views/experiment_holdouts.py`    |
 | Rust evaluation   | `rust/feature-flags/src/flags/flag_matching.rs` |
-| Python evaluation | `posthog/models/feature_flag/flag_matching.py`  |
+| Python evaluation | `insights/models/feature_flag/flag_matching.py`  |
 | Frontend types    | `frontend/src/types.ts`                         |

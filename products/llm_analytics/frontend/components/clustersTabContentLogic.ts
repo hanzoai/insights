@@ -1,6 +1,6 @@
 import { actions, afterMount, kea, key, listeners, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 
@@ -85,7 +85,7 @@ export const clustersTabContentLogic = kea<clustersTabContentLogicType>([
     listeners(({ props: logicProps }) => ({
         loadClustersSuccess: ({ clusters }) => {
             if (clusters.length === 0) {
-                posthog.capture('llma clusters empty state shown', {
+                insights.capture('llma clusters empty state shown', {
                     reason: 'trace_not_in_clusters',
                     trace_id: logicProps.traceId,
                 })

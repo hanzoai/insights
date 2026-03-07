@@ -12,9 +12,9 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonMenuItems } from '@posthog/lemon-ui'
+import { LemonMenuItems } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { JSONContent, RichContentNode } from 'lib/components/RichContentEditor/types'
@@ -1317,7 +1317,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
 
         setExpanded: ({ expanded }) => {
             if (expanded) {
-                posthog.capture('notebook node expanded', {
+                insights.capture('notebook node expanded', {
                     node_type: props.nodeType,
                     short_id: props.notebookLogic.props.shortId,
                 })

@@ -46,7 +46,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.save()
 
     @patch("insights.api.proxy_record.sync_connect")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_create_proxy_record(self, mock_capture, mock_sync_connect):
         """Should allow creating a proxy record when feature is available."""
         mock_temporal = AsyncMock()
@@ -63,7 +63,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.assertIn("target_cname", data)
 
     @patch("insights.api.proxy_record.sync_connect")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_cannot_exceed_feature_limit(self, mock_capture, mock_sync_connect):
         """Should reject creation when the org has reached the feature limit (2)."""
         mock_temporal = AsyncMock()
@@ -89,7 +89,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.assertEqual(ProxyRecord.objects.filter(organization=self.organization).count(), 2)
 
     @patch("insights.api.proxy_record.sync_connect")
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_can_create_without_feature_using_default(self, mock_capture, mock_sync_connect):
         """Without the feature, creation should still work using the default limit of 2."""
         mock_temporal = AsyncMock()

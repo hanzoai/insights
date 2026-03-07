@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconPin, IconPinFilled } from '@posthog/icons'
-import { LemonInput, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconPin, IconPinFilled } from '@hanzo/icons'
+import { LemonInput, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -284,7 +284,7 @@ export function ActionsTable(): JSX.Element {
                 thingName="action"
                 isEmpty={shouldShowEmptyState}
                 description="Use actions to combine events that you want to have tracked together or to make detailed Autocapture events easier to reuse."
-                docsURL="https://posthog.com/docs/data/actions"
+                docsURL="https://hanzo.ai/docs/data/actions"
                 actionElementOverride={
                     <NewActionButton onSelectOption={() => updateHasSeenProductIntroFor(ProductKey.ACTIONS)} />
                 }

@@ -25,7 +25,7 @@ export const queryRunHandler: ToolBase<typeof schema>['handler'] = async (contex
 
     const baseUrl = context.api.getProjectBaseUrl(projectId)
     const queryParam = encodeURIComponent(JSON.stringify(query))
-    const posthogUrl = `${baseUrl}/insights/new?q=${queryParam}`
+    const insightsUrl = `${baseUrl}/insights/new?q=${queryParam}`
 
     const queryInfo = analyzeQuery(query)
 
@@ -37,7 +37,7 @@ export const queryRunHandler: ToolBase<typeof schema>['handler'] = async (contex
         return {
             query: queryInfo.innerQuery || query,
             results: queryResult.data.results,
-            _posthogUrl: posthogUrl,
+            _insightsUrl: insightsUrl,
         }
     }
 
@@ -48,7 +48,7 @@ export const queryRunHandler: ToolBase<typeof schema>['handler'] = async (contex
             columns: queryResult.data.columns || [],
             results: queryResult.data.results || [],
         },
-        _posthogUrl: posthogUrl,
+        _insightsUrl: insightsUrl,
     }
 }
 

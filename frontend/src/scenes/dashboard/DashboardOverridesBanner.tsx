@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
 

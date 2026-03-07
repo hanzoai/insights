@@ -1,5 +1,5 @@
 import api, { ApiMethodOptions } from 'lib/api'
-import posthog from 'lib/posthog-typed'
+import insights from 'lib/insights-typed'
 import { delay } from 'lib/utils'
 
 import {
@@ -175,7 +175,7 @@ async function executeQuery<N extends DataNode>(
         // Determine the refresh type based on the query node type and refresh parameter
         let refreshParam: RefreshType
 
-        if (posthog.isFeatureEnabled('always-query-blocking')) {
+        if (insights.isFeatureEnabled('always-query-blocking')) {
             refreshParam = refresh || 'blocking'
         } else if (shouldQueryBeAsync(queryNode)) {
             // For insight queries, use async variants but preserve explicit force requests
@@ -252,7 +252,7 @@ export async function performQuery<N extends DataNode>(
                 logParams.clickhouse_sql = (response as InsightsQLQueryResponse)?.clickhouse
             }
         }
-        posthog.capture('query completed', {
+        insights.capture('query completed', {
             query: queryNode,
             queryId,
             duration: performance.now() - startTime,
@@ -261,7 +261,7 @@ export async function performQuery<N extends DataNode>(
         })
         return response
     } catch (e) {
-        posthog.capture('query failed', {
+        insights.capture('query failed', {
             query: queryNode,
             queryId,
             duration: performance.now() - startTime,

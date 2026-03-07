@@ -3,8 +3,8 @@ import './MarketingAnalyticsTableStyleOverride.scss'
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconGear, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonInput, Tooltip } from '@posthog/lemon-ui'
+import { IconGear, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonInput, Tooltip } from '@hanzo/lemon-ui'
 
 import { Query } from '~/queries/Query/Query'
 import { ColumnFeature } from '~/queries/nodes/DataTable/DataTable'

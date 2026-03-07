@@ -4,8 +4,8 @@ import { BubbleMenu } from '@tiptap/react/menus'
 import { useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { richContentEditorLogic } from 'lib/components/RichContentEditor/richContentEditorLogic'
 import { RichContentEditorType } from 'lib/components/RichContentEditor/types'
@@ -78,7 +78,7 @@ export const InlineMenu = ({
                     <>
                         <LemonInput
                             size="small"
-                            placeholder="https://posthog.com"
+                            placeholder="https://hanzo.ai"
                             onChange={setLink}
                             value={href ?? ''}
                             className="border-0"

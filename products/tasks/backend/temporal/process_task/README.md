@@ -38,7 +38,7 @@ User ─────────────────────────
                               │  ┌──────────────────────┐  │
                               │  │  agent-server (npx)  │  │
                               │  │  ┌────────────────┐  │  │
-                              │  │  │ @posthog/agent │  │  │
+                              │  │  │ @hanzo/agent │  │  │
                               │  │  │  (runAgent.mjs)│  │  │
                               │  │  └────────────────┘  │  │
                               │  └──────────────────────┘  │
@@ -71,20 +71,20 @@ User ─────────────────────────
 `backend/services/sandbox.py` — Protocol-based abstraction. `get_sandbox_class()` returns `DockerSandbox` when `SANDBOX_PROVIDER=docker` (requires `DEBUG=True`), otherwise `ModalSandbox`.
 
 - **DockerSandbox** (`backend/services/docker_sandbox.py`) — Local dev. Port 47821, no auth token needed. Builds images from `backend/sandbox/images/Dockerfile.sandbox-base`.
-- **ModalSandbox** (`backend/services/modal_sandbox.py`) — Production. Port 8080, gVisor isolation, Modal connect tokens for authenticated access. Images from `ghcr.io/posthog/posthog-sandbox-base`.
+- **ModalSandbox** (`backend/services/modal_sandbox.py`) — Production. Port 8080, gVisor isolation, Modal connect tokens for authenticated access. Images from `ghcr.io/insights/insights-sandbox-base`.
 
 ### Agent server and runner
 
-Inside the sandbox, `npx agent-server` starts an HTTP server on the configured port. The server uses `@posthog/agent` SDK to execute the task. `scripts/runAgent.mjs` is the entrypoint that initializes the `Agent` class and calls `agent.runTaskCloud(taskId, runId, ...)`.
+Inside the sandbox, `npx agent-server` starts an HTTP server on the configured port. The server uses `@hanzo/agent` SDK to execute the task. `scripts/runAgent.mjs` is the entrypoint that initializes the `Agent` class and calls `agent.runTaskCloud(taskId, runId, ...)`.
 
 Environment variables consumed inside the sandbox:
 
 | Variable                   | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
 | `GITHUB_TOKEN`             | GitHub installation access token for repo operations |
-| `POSTHOG_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
-| `POSTHOG_API_URL`          | Insights instance URL                                 |
-| `POSTHOG_PROJECT_ID`       | Team ID for API scoping                              |
+| `INSIGHTS_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
+| `INSIGHTS_API_URL`          | Insights instance URL                                 |
+| `INSIGHTS_PROJECT_ID`       | Team ID for API scoping                              |
 | `JWT_PUBLIC_KEY`           | Public key for verifying sandbox connection tokens   |
 
 ## End-to-end flow
@@ -124,7 +124,7 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 | --------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Feature flag    | `tasks` — checked in `client.py` before starting workflow                                                         |
 | Array OAuth app | Region-specific client IDs (US/EU/DEV) in `backend/temporal/oauth.py`. Creates scoped OAuth tokens with 6h expiry |
-| Sandbox JWT     | RS256 tokens from `backend/services/connection_token.py`. 24h expiry, audience `posthog:sandbox_connection`       |
+| Sandbox JWT     | RS256 tokens from `backend/services/connection_token.py`. 24h expiry, audience `insights:sandbox_connection`       |
 | GitHub App      | Installation access tokens via the team's GitHub integration                                                      |
 | API permissions | `InsightsFeatureFlagPermission` + `APIScopePermission` on all endpoints                                            |
 
@@ -136,7 +136,7 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 | Port         | 47821                     | 8080                                   |
 | Isolation    | Standard Docker container | gVisor kernel-level sandboxing         |
 | Auth         | No token needed           | Modal connect token                    |
-| Image source | Local Dockerfile build    | `ghcr.io/posthog/posthog-sandbox-base` |
+| Image source | Local Dockerfile build    | `ghcr.io/insights/insights-sandbox-base` |
 | Snapshots    | Docker commit/tag         | Modal `snapshot_filesystem()`          |
 
 ### Local development with Modal
@@ -161,14 +161,14 @@ Set `SANDBOX_API_URL` to the ngrok URL. `SITE_URL` stays as `http://localhost:80
 
 ### Images
 
-- `Dockerfile.sandbox-base` — Base image with Node.js, `@posthog/agent` from npm, git
+- `Dockerfile.sandbox-base` — Base image with Node.js, `@hanzo/agent` from npm, git
 - `Dockerfile.sandbox-notebook` — Extends base with Jupyter/notebook support
-- `Dockerfile.sandbox-local` — Dev overlay that replaces npm `@posthog/agent` with local packages
+- `Dockerfile.sandbox-local` — Dev overlay that replaces npm `@hanzo/agent` with local packages
 
 ## Frontend
 
 - **TaskDetailPage** (`frontend/components/TaskDetailPage.tsx`) — Task detail view with run history, "Run task" button, "Open in Twig" link
-- **TaskSessionView** (`frontend/components/TaskSessionView.tsx`) — Live log streaming with hedgehog animation during agent execution
+- **TaskSessionView** (`frontend/components/TaskSessionView.tsx`) — Live log streaming with mascot animation during agent execution
 - Twig IDE integration via `twig://task/{id}` deep links
 
 ## Key files
@@ -190,4 +190,4 @@ Set `SANDBOX_API_URL` to the ngrok URL. `SITE_URL` stays as `http://localhost:80
 | `scripts/run_agent_in_docker.py`            | Local test script                                             |
 | `frontend/components/TaskDetailPage.tsx`    | Task detail UI                                                |
 | `frontend/components/TaskSessionView.tsx`   | Live log streaming UI                                         |
-| `posthog/settings/temporal.py`              | Temporal and sandbox settings                                 |
+| `insights/settings/temporal.py`              | Temporal and sandbox settings                                 |

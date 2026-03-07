@@ -56,7 +56,7 @@ class TestCSVExporter(APIBaseTest):
         with patch("insights.tasks.exports.csv_exporter.requests.request") as patched_request:
             mock_response = Mock()
             mock_response.status_code = 200
-            # API responses copied from https://github.com/PostHog/posthog/runs/7221634689?check_suite_focus=true
+            # API responses copied from https://github.com/Hanzo Insights/insights/runs/7221634689?check_suite_focus=true
             mock_response.json.side_effect = [
                 {
                     "next": "http://testserver/api/projects/169/events?orderBy=%5B%22-timestamp%22%5D&properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D&after=2022-07-06T19%3A27%3A43.206326&limit=1&before=2022-07-06T19%3A37%3A43.095295%2B00%3A00",
@@ -350,7 +350,7 @@ class TestCSVExporter(APIBaseTest):
             patched_make_api_call.assert_called_with(mock.ANY, mock.ANY, 64, mock.ANY, mock.ANY, mock.ANY)
 
     def test_limiting_query_as_expected(self) -> None:
-        with self.settings(SITE_URL="https://app.posthog.com"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai"):
             modified_url = add_query_params(absolute_uri(regression_11204), {"limit": "3500"})
             actual_bits = self._split_to_dict(modified_url)
             expected_bits = {
@@ -360,7 +360,7 @@ class TestCSVExporter(APIBaseTest):
             assert expected_bits == actual_bits
 
     def test_limiting_existing_limit_query_as_expected(self) -> None:
-        with self.settings(SITE_URL="https://app.posthog.com"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai"):
             url_with_existing_limit = regression_11204 + "&limit=100000"
             modified_url = add_query_params(absolute_uri(url_with_existing_limit), {"limit": "3500"})
             actual_bits = self._split_to_dict(modified_url)

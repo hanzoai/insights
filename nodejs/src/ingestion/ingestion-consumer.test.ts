@@ -197,7 +197,7 @@ describe('IngestionConsumer', () => {
         it('should process a cookieless event', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Stateful, team.id],
                 'set cookieless to stateful'
             )
@@ -209,7 +209,7 @@ describe('IngestionConsumer', () => {
         it('should drop a cookieless event if the team has cookieless disabled', async () => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [CookielessServerHashMode.Disabled, team.id],
                 'set cookieless to disabled'
             )
@@ -327,7 +327,7 @@ describe('IngestionConsumer', () => {
 
                     // Pre-seed Redis with overflow flags (simulating main lane has flagged these keys)
                     const redis = await hub.redisPool.acquire()
-                    const redisKey = `@posthog/stateful-overflow/events:${team.api_token}:overflow-user`
+                    const redisKey = `@hanzo/stateful-overflow/events:${team.api_token}:overflow-user`
                     await redis.set(redisKey, '1', 'EX', 300)
 
                     // Get initial TTL
@@ -367,7 +367,7 @@ describe('IngestionConsumer', () => {
                     })
 
                     const redis = await hub.redisPool.acquire()
-                    const redisKey = `@posthog/stateful-overflow/events:${team.api_token}:new-user`
+                    const redisKey = `@hanzo/stateful-overflow/events:${team.api_token}:new-user`
 
                     // Verify key doesn't exist initially
                     expect(await redis.exists(redisKey)).toBe(0)
@@ -623,7 +623,7 @@ describe('IngestionConsumer', () => {
 
             describe('with DROP_EVENTS_BY_TOKEN_DISTINCT_ID drops events with matching token:distinct_id when only event keys are listed', () => {
                 beforeEach(async () => {
-                    hub.DROP_EVENTS_BY_TOKEN_DISTINCT_ID = `${team.api_token}:distinct-id-to-ignore,phc_other:distinct-id-to-ignore`
+                    hub.DROP_EVENTS_BY_TOKEN_DISTINCT_ID = `${team.api_token}:distinct-id-to-ignore,hi_other:distinct-id-to-ignore`
                     ingester = await createIngestionConsumer(hub)
                 })
                 it('should drop events with matching token and distinct_id', async () => {

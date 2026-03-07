@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React, { useMemo } from 'react'
 
-import { IconDatabase, IconExternal, IconPencil } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonDropdown, LemonInput, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconDatabase, IconExternal, IconPencil } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonDropdown, LemonInput, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonField } from 'lib/lemon-ui/LemonField'

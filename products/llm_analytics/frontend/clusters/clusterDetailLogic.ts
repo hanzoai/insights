@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { getSeriesColor } from 'lib/colors'
@@ -350,7 +350,7 @@ export const clusterDetailLogic = kea<clusterDetailLogicType>([
         },
 
         setPage: async ({ page }) => {
-            posthog.capture('llma clusters page changed', {
+            insights.capture('llma clusters page changed', {
                 page,
                 cluster_id: props.clusterId,
                 run_id: props.runId,

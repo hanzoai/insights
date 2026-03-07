@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, team_id, ref as set_ref, storage_ptr, created_at, failure_reason, content_hash, last_used\n            FROM posthog_errortrackingsymbolset\n            WHERE (content_hash is not null OR storage_ptr is null) AND team_id = $1 AND ref = $2",
+  "query": "SELECT id, team_id, ref as set_ref, storage_ptr, created_at, failure_reason, content_hash, last_used\n            FROM insights_errortrackingsymbolset\n            WHERE (content_hash is not null OR storage_ptr is null) AND team_id = $1 AND ref = $2",
   "describe": {
     "columns": [
       {

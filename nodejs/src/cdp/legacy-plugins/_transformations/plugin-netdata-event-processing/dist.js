@@ -96,7 +96,7 @@ function processElementsAgent(event) {
             }
         })
 
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1026,7 +1026,7 @@ function processElementsCloud(event) {
             }
         })
 
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1059,7 +1059,7 @@ function processElementsCloud(event) {
                         event.properties['el_data_ga_3'] = arr[3]
                         event.properties['el_data_ga_4'] = arr[4]
 
-                        // give nice names in posthog
+                        // give nice names in insights
                         event.properties['event_category'] = arr[0]
                         event.properties['event_action'] = arr[1]
                         event.properties['event_label'] = arr[2]
@@ -1197,7 +1197,7 @@ function processPropertiesCloud(event) {
 function processElementsStaging(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1332,7 +1332,7 @@ function processPropertiesStaging(event) {
 function processElementsTesting(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1467,7 +1467,7 @@ function processPropertiesTesting(event) {
 function processElementsWebsite(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1572,7 +1572,7 @@ function processPropertiesWebsite(event) {
 function processElementsLearn(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1686,7 +1686,7 @@ function processPropertiesLearn(event) {
 function processElementsCommunity(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1791,7 +1791,7 @@ function processPropertiesCommunity(event) {
 function processElementsBlog(event) {
     // extract properties from elements
     if (event.properties['$elements']) {
-        // process each element, reverse to use posthog order as preference
+        // process each element, reverse to use insights order as preference
         event.properties['$elements']
             .slice()
             .reverse()
@@ -1909,7 +1909,7 @@ const netdataPluginVersion = '0.0.15'
 function processEvent(event) {
     if (event.properties) {
         event.properties['event_ph'] = event.event
-        event.properties['netdata_posthog_plugin_version'] = netdataPluginVersion
+        event.properties['netdata_insights_plugin_version'] = netdataPluginVersion
 
         // determine processing based on url
         if ('$current_url' in event.properties) {

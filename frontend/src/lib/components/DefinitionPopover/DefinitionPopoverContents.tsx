@@ -2,8 +2,8 @@ import { hide } from '@floating-ui/react'
 import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useMemo } from 'react'
 
-import { IconBadge, IconEye, IconHide, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSegmentedButton, LemonSelect, LemonTag } from '@posthog/lemon-ui'
+import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSegmentedButton, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
 
 import { ActionPopoverInfo } from 'lib/components/DefinitionPopover/ActionPopoverInfo'
 import { CohortPopoverInfo } from 'lib/components/DefinitionPopover/CohortPopoverInfo'

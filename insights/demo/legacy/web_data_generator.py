@@ -33,7 +33,7 @@ class WebDataGenerator(DataGenerator):
             steps_json=[
                 {
                     "event": "$pageview",
-                    "url": "http://hogflix.com",
+                    "url": "http://insightsflix.com",
                     "url_matching": "exact",
                 }
             ],
@@ -45,7 +45,7 @@ class WebDataGenerator(DataGenerator):
             steps_json=[
                 {
                     "event": "$autocapture",
-                    "url": "http://hogflix.com/1",
+                    "url": "http://insightsflix.com/1",
                     "url_matching": "contains",
                     "selector": "button",
                 }
@@ -58,7 +58,7 @@ class WebDataGenerator(DataGenerator):
             steps_json=[
                 {
                     "event": "$autocapture",
-                    "url": "http://hogflix.com/2",
+                    "url": "http://insightsflix.com/2",
                     "url_matching": "contains",
                     "selector": "button",
                 }
@@ -106,7 +106,7 @@ class WebDataGenerator(DataGenerator):
             distinct_id=distinct_id,
             timestamp=now() - relativedelta(days=start_day),
             properties={
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://insightsflix.com",
                 "$browser": browser,
                 "$lib": "web",
             },
@@ -116,7 +116,7 @@ class WebDataGenerator(DataGenerator):
             distinct_id=distinct_id,
             event="$autocapture",
             properties={
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://insightsflix.com",
                 "$browser": browser,
                 "$lib": "web",
                 "$event_type": "click",
@@ -129,7 +129,7 @@ class WebDataGenerator(DataGenerator):
                 event="$autocapture",
                 distinct_id=distinct_id,
                 properties={
-                    "$current_url": "http://hogflix.com/1",
+                    "$current_url": "http://insightsflix.com/1",
                     "$browser": browser,
                     "$lib": "web",
                     "$event_type": "click",
@@ -140,7 +140,7 @@ class WebDataGenerator(DataGenerator):
                 event="$pageview",
                 distinct_id=distinct_id,
                 properties={
-                    "$current_url": "http://hogflix.com/2",
+                    "$current_url": "http://insightsflix.com/2",
                     "$browser": browser,
                     "$lib": "web",
                 },
@@ -151,7 +151,7 @@ class WebDataGenerator(DataGenerator):
                     event="$autocapture",
                     distinct_id=distinct_id,
                     properties={
-                        "$current_url": "http://hogflix.com/2",
+                        "$current_url": "http://insightsflix.com/2",
                         "$browser": browser,
                         "$lib": "web",
                         "$event_type": "click",
@@ -168,7 +168,7 @@ class WebDataGenerator(DataGenerator):
                     event="$pageview",
                     distinct_id=distinct_id,
                     properties={
-                        "$current_url": "http://hogflix.com/3",
+                        "$current_url": "http://insightsflix.com/3",
                         "$browser": browser,
                         "$lib": "web",
                     },
@@ -210,5 +210,5 @@ class WebDataGenerator(DataGenerator):
 
     @cached_property
     def demo_recording(self) -> dict[str, Any]:
-        with open(get_absolute_path("demo/legacy/hogflix_session_recording.json")) as demo_session_file:
+        with open(get_absolute_path("demo/legacy/insightsflix_session_recording.json")) as demo_session_file:
             return json.load(demo_session_file)

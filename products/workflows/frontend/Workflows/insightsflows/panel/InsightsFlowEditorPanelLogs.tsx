@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { IconOpenInApp } from 'lib/lemon-ui/icons'
 import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'

@@ -27,16 +27,16 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { useInsights } from 'posthog-react-native'
+                                    import { useInsights } from 'insights-react-native'
 
                                     function MyComponent() {
-                                        const posthog = useInsights()
-                                        const isMyFlagEnabled = posthog.isFeatureEnabled('flag-key')
+                                        const insights = useInsights()
+                                        const isMyFlagEnabled = insights.isFeatureEnabled('flag-key')
 
                                         if (isMyFlagEnabled) {
                                             // Do something differently for this user
                                             // Optional: fetch the payload
-                                            const matchedFlagPayload = posthog.getFeatureFlagPayload('flag-key')
+                                            const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
                                         }
 
                                         return <View>...</View>
@@ -58,16 +58,16 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { useInsights } from 'posthog-react-native'
+                                    import { useInsights } from 'insights-react-native'
 
                                     function MyComponent() {
-                                        const posthog = useInsights()
-                                        const enabledVariant = posthog.getFeatureFlag('flag-key')
+                                        const insights = useInsights()
+                                        const enabledVariant = insights.getFeatureFlag('flag-key')
 
                                         if (enabledVariant === 'variant-key') { // replace 'variant-key' with the key of your variant
                                             // Do something differently for this user
                                             // Optional: fetch the payload
-                                            const matchedFlagPayload = posthog.getFeatureFlagPayload('flag-key')
+                                            const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
                                         }
 
                                         return <View>...</View>

@@ -58,7 +58,7 @@ class DashboardTemplate(UUIDTModel, RootTeamMixin):
     @staticmethod
     def original_template() -> "DashboardTemplate":
         """
-        This OG template is not stored in https://github.com/PostHog/templates-repository
+        This OG template is not stored in https://github.com/Hanzo Insights/templates-repository
         The system assumes this template is always present and doesn't wait to import it from the template repository
         """
         return DashboardTemplate(

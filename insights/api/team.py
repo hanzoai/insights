@@ -25,7 +25,7 @@ from insights.constants import AvailableFeature
 from insights.decorators import disallow_if_impersonated
 from insights.event_usage import report_user_action
 from insights.geoip import get_geoip_properties
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models import ProductIntent, Team, TeamMarketingAnalyticsConfig, TeamRevenueAnalyticsConfig, User
 from insights.models.activity_logging.activity_log import (
     ActivityLog,
@@ -381,7 +381,7 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # fallback to the default posthog data theme id, if the color feature isn't available e.g. after a downgrade
+        # fallback to the default insights data theme id, if the color feature isn't available e.g. after a downgrade
         if not instance.organization.is_feature_available(AvailableFeature.DATA_COLOR_THEMES):
             representation["default_data_theme"] = (
                 DataColorTheme.objects.filter(team_id__isnull=True).values_list("id", flat=True).first()
@@ -407,7 +407,7 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
         return encode_jwt(
             {"team_id": team.id, "api_token": team.api_token},
             timedelta(days=7),
-            PosthogJwtAudience.LIVESTREAM,
+            InsightsJwtAudience.LIVESTREAM,
         )
 
     def get_product_intents(self, obj):
@@ -588,12 +588,12 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
     def validate_access_control(self, value) -> None:
         """Validate that access_control field is not being used as it's deprecated."""
         if value is not None:
-            import posthoganalytics
+            import hanzoanalytics
 
             request = self.context.get("request")
             user = request.user if request else None
 
-            posthoganalytics.capture_exception(
+            hanzoanalytics.capture_exception(
                 Exception("Deprecated access control field used"),
                 properties={
                     "field": "access_control",
@@ -606,7 +606,7 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
             raise exceptions.ValidationError(
                 "The 'access_control' field has been deprecated and is no longer supported. "
                 "Please use the new access control system instead. "
-                "For more information, visit: https://posthog.com/docs/settings/access-control"
+                "For more information, visit: https://hanzo.ai/docs/settings/access-control"
             )
         return None
 
@@ -1379,7 +1379,7 @@ class TeamViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.Mo
         team = self.get_object()
         user = request.user
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         serializer = ProductIntentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1406,7 +1406,7 @@ class TeamViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.Mo
         product_type = request.data.get("product_type")
         user = request.user
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         if not product_type:
             return response.Response({"error": "product_type is required"}, status=400)
@@ -1534,7 +1534,7 @@ def validate_team_attrs(
 
         if len(json.dumps(attrs["autocapture_exceptions_errors_to_ignore"])) > 300:
             raise exceptions.ValidationError(
-                "Field autocapture_exceptions_errors_to_ignore must be less than 300 characters. Complex config should be provided in posthog-js initialization."
+                "Field autocapture_exceptions_errors_to_ignore must be less than 300 characters. Complex config should be provided in insights-js initialization."
             )
     return attrs
 

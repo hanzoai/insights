@@ -53,7 +53,7 @@ class TestUser(BaseTest):
         # One org, one team, anonymized
         organization, team, user = User.objects.bootstrap(
             organization_name="Test Org",
-            email="test_org@posthog.com",
+            email="test_org@hanzo.ai",
             password="12345678",
             anonymize_data=True,
         )
@@ -91,7 +91,7 @@ class TestUser(BaseTest):
         self.team.ingested_event = True
         self.team.save()
         Team.objects.create(organization=self.organization)
-        user_2: User = User.objects.create(email="test_org_2@posthog.com")
+        user_2: User = User.objects.create(email="test_org_2@hanzo.ai")
         user_2.join(organization=self.organization)
 
         with self.is_cloud(False):
@@ -100,7 +100,7 @@ class TestUser(BaseTest):
                 {
                     "realm": "hosted-clickhouse",
                     "anonymize_data": False,
-                    "email": "test_org_2@posthog.com",
+                    "email": "test_org_2@hanzo.ai",
                     "is_signed_up": True,
                     "organization_count": 1,
                     "project_count": 2,

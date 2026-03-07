@@ -19,7 +19,7 @@ to_dict = lambda x: json.loads(json.dumps(x))
 class TestInsightsFunction(TestCase):
     def setUp(self):
         super().setUp()
-        org, team, user = User.objects.bootstrap("Test org", "ben@posthog.com", None)
+        org, team, user = User.objects.bootstrap("Test org", "ben@hanzo.ai", None)
         self.team = team
         self.user = user
         self.org = org
@@ -27,7 +27,7 @@ class TestInsightsFunction(TestCase):
     def test_insights_function_basic(self):
         item = InsightsFunction.objects.create(name="Test", team=self.team, type="destination")
         assert item.name == "Test"
-        assert item.hog == ""
+        assert item.iql == ""
         assert not item.enabled
 
     def test_insights_function_team_no_filters_compilation(self):
@@ -126,7 +126,7 @@ class TestInsightsFunction(TestCase):
 class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
     def setUp(self):
         super().setUp()
-        org, team, user = User.objects.bootstrap("Test org", "ben@posthog.com", None)
+        org, team, user = User.objects.bootstrap("Test org", "ben@hanzo.ai", None)
         self.team = team
         self.user = user
         self.org = org
@@ -215,7 +215,7 @@ class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
                 ],
             }
         ]
-        # 1 update action, 2 activity logging, 1 load action, 1 load custom functions, 1 load hog flows, 1 load all related actions, 1 bulk update custom functions, 5 filesystem
+        # 1 update action, 2 activity logging, 1 load action, 1 load custom functions, 1 load iql flows, 1 load all related actions, 1 bulk update custom functions, 5 filesystem
         with self.assertNumQueries(12):
             self.action.save()
         insights_function_1.refresh_from_db()
@@ -275,7 +275,7 @@ class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
             {"key": "$host", "operator": "regex", "value": "^(localhost|127\\.0\\.0\\.1)($|:)"},
             {"key": "$pageview", "operator": "regex", "value": "test"},
         ]
-        # 1 select team (for field comparison), 1 update team, 1 load hog flows, 1 load custom functions, 1 update custom functions
+        # 1 select team (for field comparison), 1 update team, 1 load iql flows, 1 load custom functions, 1 update custom functions
         # Note: RemoteConfig refresh queries are now deferred via async signals
         with self.assertNumQueries(5):
             self.team.save()
@@ -311,7 +311,7 @@ class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
                 "status": "stable",
                 "free": True,
                 "category": ["Custom"],
-                "code_language": "hog",
+                "code_language": "iql",
                 "icon_url": "/static/transformations/geoip.png",
             }
         ]
@@ -374,12 +374,12 @@ class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
                 "name": "GeoIP",
                 "description": "Adds geoip data to the event",
                 "type": "transformation",
-                "code": "invalid {{ hog code that will fail",
+                "code": "invalid {{ iql code that will fail",
                 "inputs_schema": [],
                 "status": "stable",
                 "free": True,
                 "category": ["Custom"],
-                "code_language": "hog",
+                "code_language": "iql",
                 "icon_url": "/static/transformations/geoip.png",
             }
         ]

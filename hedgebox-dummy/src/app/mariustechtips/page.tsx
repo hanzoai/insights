@@ -1,14 +1,14 @@
 'use client'
 
 import Header from '@/components/Header'
-import { posthog } from '@/lib/posthog'
+import { insights } from '@/lib/insights'
 import Link from 'next/link'
 import { useEffect } from 'react'
 
 export default function MariusTechTipsPage(): React.JSX.Element {
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            posthog.capture('$pageview', {
+            insights.capture('$pageview', {
                 $current_url: window.location.href,
                 $host: window.location.host,
                 $pathname: window.location.pathname,
@@ -18,7 +18,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
     }, [])
 
     const handleProductAdClick = (adNumber: number, url: string): void => {
-        posthog.capture('$autocapture', {
+        insights.capture('$autocapture', {
             $event_type: 'click',
             $external_click_url: url,
         })

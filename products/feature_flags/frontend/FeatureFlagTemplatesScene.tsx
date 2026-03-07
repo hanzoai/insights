@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconArrowLeft, IconFlask, IconPeople, IconPlus, IconTestTube, IconToggle } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconFlask, IconPeople, IconPlus, IconTestTube, IconToggle } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -54,7 +54,7 @@ function TemplateCard({ template }: TemplateCardProps): JSX.Element {
     const { searchParams } = useValues(router)
 
     const handleClick = (): void => {
-        posthog.capture('feature flag template selected', {
+        insights.capture('feature flag template selected', {
             template_key: isBlank ? 'blank' : template.key,
         })
 

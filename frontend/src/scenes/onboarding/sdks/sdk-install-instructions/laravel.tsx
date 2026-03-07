@@ -5,7 +5,7 @@ import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
 function LaravelConfigSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>composer require posthog/posthog-php</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>composer require insights/insights-php</CodeSnippet>
 }
 
 function LaravelInstallSnippet(): JSX.Element {

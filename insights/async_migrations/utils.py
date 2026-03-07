@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 
 from insights.async_migrations.definition import AsyncMigrationOperation
 from insights.async_migrations.setup import DEPENDENCY_TO_ASYNC_MIGRATION
@@ -33,14 +33,14 @@ logger = structlog.get_logger(__name__)
 SLEEP_TIME_SECONDS = 20 if not TEST else 1
 
 
-def send_analytics_to_posthog(event, data):
-    posthoganalytics.project_api_key = "sTMFPsFhdP1Ssg"
+def send_analytics_to_insights(event, data):
+    hanzoanalytics.project_api_key = "sTMFPsFhdP1Ssg"
     user = User.objects.filter(is_active=True).first()
     groups = {"instance": settings.SITE_URL}
     if user and user.current_organization:
         data["organization_name"] = user.current_organization.name
         groups["organization"] = str(user.current_organization.id)
-    posthoganalytics.capture(distinct_id=get_machine_id(), event=event, properties=data, groups=groups)
+    hanzoanalytics.capture(distinct_id=get_machine_id(), event=event, properties=data, groups=groups)
 
 
 def execute_op(op: AsyncMigrationOperation, uuid: str, rollback: bool = False):
@@ -211,7 +211,7 @@ def process_error(
         error=error,
         finished_at=now(),
     )
-    send_analytics_to_posthog(
+    send_analytics_to_insights(
         "Async migration error",
         {
             "name": migration_instance.name,
@@ -296,7 +296,7 @@ def complete_migration(migration_instance: AsyncMigration, email: bool = True):
             finished_at=finished_at,
             progress=100,
         )
-        send_analytics_to_posthog("Async migration completed", {"name": migration_instance.name})
+        send_analytics_to_insights("Async migration completed", {"name": migration_instance.name})
 
         if email and async_migrations_emails_enabled():
             from insights.tasks.email import send_async_migration_complete_email

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconDownload } from '@posthog/icons'
-import { LemonButton, LemonTable, Tooltip } from '@posthog/lemon-ui'
+import { IconDownload } from '@hanzo/icons'
+import { LemonButton, LemonTable, Tooltip } from '@hanzo/lemon-ui'
 
 import { DetectiveHog } from 'lib/components/mascots'
 import { humanFriendlyDetailedTime } from 'lib/utils'

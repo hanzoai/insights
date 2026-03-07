@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconRefresh, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonSwitch, LemonTextArea } from '@posthog/lemon-ui'
+import { IconRefresh, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonSwitch, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { LemonField } from 'lib/lemon-ui/LemonField'

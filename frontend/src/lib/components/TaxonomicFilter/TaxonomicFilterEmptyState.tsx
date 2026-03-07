@@ -2,8 +2,8 @@ import { useActions } from 'kea'
 import { router } from 'kea-router'
 import type React from 'react'
 
-import { IconOpenSidebar, IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconOpenSidebar, IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { teamLogic } from 'scenes/teamLogic'
@@ -83,7 +83,7 @@ const DataWarehouseEmptyState = (): JSX.Element => {
                 to: urls.dataWarehouseSourceNew(),
                 text: 'New source',
             }}
-            docsUrl="https://posthog.com/docs/data-warehouse"
+            docsUrl="https://hanzo.ai/docs/data-warehouse"
             icon={BuilderHog3}
         />
     )

@@ -265,12 +265,12 @@ class _KafkaProducer:
         result.set_result(err, msg)
         if err is not None:
             statsd.incr(
-                "posthog_cloud_kafka_send_failure",
+                "insights_cloud_kafka_send_failure",
                 tags={"topic": topic, "exception": err.name()},
             )
         else:
             statsd.incr(
-                "posthog_cloud_kafka_send_success",
+                "insights_cloud_kafka_send_success",
                 tags={"topic": msg.topic() if msg else None},
             )
 

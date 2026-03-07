@@ -2,7 +2,7 @@
 
 Insights function templates are the main way that people will get started with the CDP V2. Templates are ephemeral configurations of InsightsFunctions. They are purposefully ephemeral for a few reasons:
 
-1. Easier to manage as they are just code in the `posthog` repo - we don't need to worry about keeping a database in sync
+1. Easier to manage as they are just code in the `insights` repo - we don't need to worry about keeping a database in sync
 2. Update conflicts are left to the user to manage - changing the template doesn't change their function. It only will indicate in the UI that it is out of sync and they can choose to pull in the updated template changes, resolving any issues at that point.
 3. Sharing templates becomes very simple - it can all be done via a URL
 

@@ -3,7 +3,7 @@ import { useActions, useMountedLogic, useValues } from 'kea'
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconCornerDownRight } from '@posthog/icons'
+import { IconCornerDownRight } from '@hanzo/icons'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'

@@ -1,6 +1,6 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { eventWithTime } from '@posthog/rrweb-types'
+import { eventWithTime } from '@hanzo/rrweb-types'
 
 import { mobileEventWithTime } from './mobile.types'
 import { makeCustomEvent, makeFullEvent, makeIncrementalEvent, makeMetaEvent } from './transformer/transformers'
@@ -29,7 +29,7 @@ export function transformEventToWeb(event: unknown): eventWithTime {
             }
         }
     } catch (e) {
-        posthog.captureException(e, { event })
+        insights.captureException(e, { event })
     }
     return result
 }

@@ -3,7 +3,7 @@ import './DefinitionPopover.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonDivider, ProfilePicture } from '@posthog/lemon-ui'
+import { LemonDivider, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { DefinitionPopoverState, definitionPopoverLogic } from 'lib/components/DefinitionPopover/definitionPopoverLogic'
 import { ImageCarousel } from 'lib/components/ImageCarousel/ImageCarousel'

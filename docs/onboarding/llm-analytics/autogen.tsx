@@ -21,7 +21,7 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -53,7 +53,7 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
+                        settings](https://insights.hanzo.ai/settings/project), then create a Insights OpenAI wrapper and
                         pass it to AutoGen's `OpenAIChatCompletionClient`.
                     </Markdown>
 
@@ -61,19 +61,19 @@ export const getAutoGenSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                         language="python"
                         code={dedent`
                             import asyncio
-                            from posthog.ai.openai import OpenAI
-                            from posthog import Posthog
+                            from insights.ai.openai import OpenAI
+                            from insights import Insights
                             from autogen_agentchat.agents import AssistantAgent
                             from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-                            posthog = Posthog(
+                            insights = Insights(
                                 "<ph_project_api_key>",
                                 host="<ph_client_api_host>"
                             )
 
                             openai_client = OpenAI(
                                 api_key="your_openai_api_key",
-                                posthog_client=posthog,
+                                insights_client=insights,
                             )
 
                             model_client = OpenAIChatCompletionClient(

@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-js'
+import { Insights } from '~/lib/insights-browser'
 
 const SHIMMER_EFFECT_CSS = `
     @keyframes shimmer {
@@ -92,28 +92,28 @@ const generatePiiMaskingCSSForSelector = (
     `
 }
 
-export const generatePiiMaskingCSS = (baseColor: string, posthog: PostHog | null): string => {
+export const generatePiiMaskingCSS = (baseColor: string, insights: Insights | null): string => {
     const [color1, color2, color3, color4, color5] = getColorPalette(baseColor).map(colorToHex)
 
     // There's some checks that can be a regexp or even done via JS which means we can't do it CSS based
     // We're ok with that for now, but we should consider reworking this in the future
     // to make use of ResizeObserver to detect changes in the DOM and update the CSS accordingly
     const selectors = new Set<string>(['.ph-no-capture', '.ph-sensitive'])
-    if (posthog) {
+    if (insights) {
         selectors.add(
-            typeof posthog.config.session_recording?.blockClass === 'string'
-                ? `.${posthog.config.session_recording?.blockClass}`
+            typeof insights.config.session_recording?.blockClass === 'string'
+                ? `.${insights.config.session_recording?.blockClass}`
                 : '.ph-no-capture'
         )
         selectors.add(
-            typeof posthog.config.session_recording?.maskTextClass === 'string'
-                ? `.${posthog.config.session_recording?.maskTextClass}`
+            typeof insights.config.session_recording?.maskTextClass === 'string'
+                ? `.${insights.config.session_recording?.maskTextClass}`
                 : '.ph-mask'
         )
-        if (typeof posthog.config.session_recording?.maskTextSelector === 'string') {
-            selectors.add(posthog.config.session_recording?.maskTextSelector)
+        if (typeof insights.config.session_recording?.maskTextSelector === 'string') {
+            selectors.add(insights.config.session_recording?.maskTextSelector)
         }
-        if (posthog.config.session_recording?.maskAllInputs === true) {
+        if (insights.config.session_recording?.maskAllInputs === true) {
             selectors.add('input, textarea')
         }
     }

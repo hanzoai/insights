@@ -1,6 +1,6 @@
 import { ItemCategory, ItemRenderer, TimelineItem } from '..'
 
-import { IconTerminal } from '@posthog/icons'
+import { IconTerminal } from '@hanzo/icons'
 
 import { Dayjs } from 'lib/dayjs'
 import { uuid } from 'lib/utils'

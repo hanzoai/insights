@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, PopoverReferenceContext, Tooltip } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, PopoverReferenceContext, Tooltip } from '@hanzo/lemon-ui'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { midEllipsis } from 'lib/utils'

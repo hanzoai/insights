@@ -1,7 +1,7 @@
 import { Node } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
 
-import { LemonDivider, LemonInputSelect, LemonLabel, LemonSelect, LemonSwitch } from '@posthog/lemon-ui'
+import { LemonDivider, LemonInputSelect, LemonLabel, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

@@ -2,8 +2,8 @@ import './InviteModal.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonTextArea, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonInput, LemonSelect, LemonTextArea, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
@@ -32,7 +32,7 @@ export function EmailUnavailableForInvitesBanner(): JSX.Element {
         <LemonBanner type="info" className="my-2">
             <>
                 This Insights instance isn't{' '}
-                <Link to="https://posthog.com/docs/self-host/configure/email" target="_blank" targetBlankIcon>
+                <Link to="https://hanzo.ai/docs/self-host/configure/email" target="_blank" targetBlankIcon>
                     configured&nbsp;to&nbsp;send&nbsp;emails&nbsp;
                 </Link>
                 .<br />
@@ -87,7 +87,7 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                         <span>
                             Give this user access to specific projects. These access controls will be applied when the
                             user accepts the invite and joins the organization. Learn more about{' '}
-                            <Link to="https://posthog.com/docs/settings/access-control" target="_blank">
+                            <Link to="https://hanzo.ai/docs/settings/access-control" target="_blank">
                                 access controls
                             </Link>{' '}
                             in our docs.
@@ -224,7 +224,7 @@ export function InviteRow({
             <div className="flex gap-2">
                 <div className="flex-2">
                     <LemonInput
-                        placeholder={`${name.toLowerCase()}@posthog.com`}
+                        placeholder={`${name.toLowerCase()}@hanzo.ai`}
                         type="email"
                         className={`error-on-blur${!invitesToSend[index]?.isValid ? ' errored' : ''}`}
                         onChange={(v) => {

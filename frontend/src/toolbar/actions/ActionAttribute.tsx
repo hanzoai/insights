@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@posthog/lemon-ui'
+import { LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { IconBranch, IconClipboardEdit, IconLink, IconTextSize } from 'lib/lemon-ui/icons'
 

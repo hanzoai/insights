@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useMemo } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneDuplicate } from 'lib/components/Scenes/SceneDuplicate'
@@ -87,7 +87,7 @@ export function SessionRecordingsPlaylistScene(): JSX.Element {
             return
         }
 
-        posthog.capture('viewed playlist', {
+        insights.capture('viewed playlist', {
             playlist_id: playlist.id,
             playlist_name: playlist.name,
             is_synthetic: playlist.is_synthetic,

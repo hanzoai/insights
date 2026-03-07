@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconPencil } from '@posthog/icons'
+import { IconPencil } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'

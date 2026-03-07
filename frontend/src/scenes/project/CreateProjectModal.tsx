@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -69,7 +69,7 @@ export function CreateProjectModal({
                     <p>
                         <strong>Tip:</strong> We recommend using the same project for both your website and app to track
                         conversion fully.{' '}
-                        <Link to="https://posthog.com/docs/settings/projects" target="_blank" disableDocsPanel>
+                        <Link to="https://hanzo.ai/docs/settings/projects" target="_blank" disableDocsPanel>
                             Learn more in Insights docs.
                         </Link>
                     </p>

@@ -22,7 +22,7 @@ export const fixtureSubscriptionResponse = (id: number, args: Partial<Subscripti
         id,
         title: 'My example subscription',
         target_type: 'email',
-        target_value: 'ben@posthog.com,geoff@other-company.com',
+        target_value: 'ben@hanzo.ai,geoff@other-company.com',
         frequency: 'monthly',
         interval: 2,
         start_date: '2022-01-01T00:09:00',

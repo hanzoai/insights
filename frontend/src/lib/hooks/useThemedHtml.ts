@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -48,7 +48,7 @@ export function useThemedHtml(overflowHidden = true): void {
             document.head.insertAdjacentHTML('beforeend', `<meta name="theme-color" content="${backgroundColor}">`)
         } catch (e) {
             console.warn('Failed to set theme-color meta tag. This could indicate the variables no longer exist', e)
-            posthog.captureException(new Error('Failed to set theme-color meta tag'), { extra: { error: e } })
+            insights.captureException(new Error('Failed to set theme-color meta tag'), { extra: { error: e } })
         }
     }, [isDarkModeOn, sceneConfig?.projectBased])
 }

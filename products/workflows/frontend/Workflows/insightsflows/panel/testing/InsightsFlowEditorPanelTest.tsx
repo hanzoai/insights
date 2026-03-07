@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlayFilled, IconRedo, IconTestTube } from '@posthog/icons'
+import { IconInfo, IconPlayFilled, IconRedo, IconTestTube } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -14,7 +14,7 @@ import {
     ProfilePicture,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'

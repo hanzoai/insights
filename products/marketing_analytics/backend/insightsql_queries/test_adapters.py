@@ -49,7 +49,7 @@ from products.marketing_analytics.backend.insightsql_queries.adapters.tiktok_ads
 # Test Constants
 TEST_DATE_FROM = "2024-01-01"
 TEST_DATE_TO = "2024-12-31"
-TEST_BUCKET_BASE = "test_storage_bucket-posthog.marketing_analytics"
+TEST_BUCKET_BASE = "test_storage_bucket-insights.marketing_analytics"
 EXPECTED_COLUMN_COUNT = 9
 EXPECTED_COLUMN_ALIASES = [
     "match_key",

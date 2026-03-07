@@ -1,5 +1,5 @@
-import { IconClock } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconClock } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { isLegacyExperimentQuery } from 'scenes/experiments/utils'
 

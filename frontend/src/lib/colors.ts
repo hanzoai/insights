@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { RevenueAnalyticsMRRQueryResultItem } from '~/queries/schema/schema-general'
 import { LifecycleToggle } from '~/types'
@@ -9,7 +9,7 @@ import { LemonTagType } from './lemon-ui/LemonTag'
  * Data colors.
  */
 
-/** CSS variable names for the default posthog theme data colors. */
+/** CSS variable names for the default insights theme data colors. */
 export const dataColorVars = [
     'data-color-1',
     'data-color-2',
@@ -52,7 +52,7 @@ export type DataColorTheme = Partial<Record<DataColorToken, string>> & {
 export function getColorVar(variable: string): string {
     const colorValue = getComputedStyle(document.body).getPropertyValue('--' + variable)
     if (!colorValue) {
-        posthog.captureException(new Error(`Couldn't find color variable --${variable}`))
+        insights.captureException(new Error(`Couldn't find color variable --${variable}`))
         // Fall back to black or white depending on the theme
         return document.body.getAttribute('theme') === 'light' ? '#000' : '#fff'
     }

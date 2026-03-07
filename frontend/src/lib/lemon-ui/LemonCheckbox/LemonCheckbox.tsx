@@ -3,7 +3,7 @@ import './LemonCheckbox.scss'
 import clsx from 'clsx'
 import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from '../Tooltip'
 
@@ -24,7 +24,7 @@ export interface LemonCheckboxProps {
     fullWidth?: boolean
     size?: 'xsmall' | 'small' | 'medium'
     bordered?: boolean
-    /** @deprecated See https://github.com/PostHog/posthog/pull/9357#pullrequestreview-933783868. */
+    /** @deprecated See https://github.com/hanzoai/insights/pull/9357#pullrequestreview-933783868. */
     color?: string
     'data-attr'?: string
     /** Whether to stop propagation of events from the input */

@@ -13,7 +13,7 @@ describe('groupsListLogic', () => {
     beforeEach(() => {
         initKeaTests()
         localStorage.clear()
-        window.POSTHOG_APP_CONTEXT = { current_team: { id: 123 } } as AppContext
+        window.INSIGHTS_APP_CONTEXT = { current_team: { id: 123 } } as AppContext
     })
 
     afterEach(() => {
@@ -178,7 +178,7 @@ describe('groupsListLogic', () => {
         })
 
         it('should handle missing team ID gracefully', async () => {
-            window.POSTHOG_APP_CONTEXT = { current_team: null } as AppContext
+            window.INSIGHTS_APP_CONTEXT = { current_team: null } as AppContext
 
             logic = groupsListLogic({ groupTypeIndex: 0 })
 

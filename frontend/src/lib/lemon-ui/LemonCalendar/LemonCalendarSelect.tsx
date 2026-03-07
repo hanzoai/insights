@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useRef, useState } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

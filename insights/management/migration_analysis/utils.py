@@ -151,7 +151,7 @@ def check_drop_properly_staged(
 
     Args:
         target_type: Either "table" or "column"
-        table_name: Name of table (e.g., "posthog_namedquery" or "llm_analytics_evaluation")
+        table_name: Name of table (e.g., "insights_namedquery" or "llm_analytics_evaluation")
         migration: The migration object containing the DROP operation
         loader: Django MigrationLoader with migration history
         field_name: Column name (required for target_type="column", e.g., "prompt")
@@ -168,7 +168,7 @@ def check_drop_properly_staged(
         return False
 
     # Extract model name from table name
-    # posthog_namedquery -> NamedQuery
+    # insights_namedquery -> NamedQuery
     # llm_analytics_evaluation (app=llm_analytics) -> Evaluation
     app_label = getattr(migration, "app_label", None)
     model_name = _extract_model_name_from_table(table_name, app_label)
@@ -212,13 +212,13 @@ def _extract_model_name_from_table(table_name: str, app_label: Optional[str] = N
     Extract Django model name from table name.
 
     Examples:
-        posthog_namedquery -> NamedQuery
-        posthog_old_model -> OldModel
+        insights_namedquery -> NamedQuery
+        insights_old_model -> OldModel
         llm_analytics_evaluation (app=llm_analytics) -> Evaluation
         my_app_some_table -> SomeTable
 
     Args:
-        table_name: Database table name (e.g., "posthog_namedquery", "llm_analytics_evaluation")
+        table_name: Database table name (e.g., "insights_namedquery", "llm_analytics_evaluation")
         app_label: Optional app label to strip (e.g., "llm_analytics"). If not provided, assumes single-word app.
     """
     parts = table_name.split("_")
@@ -236,7 +236,7 @@ def _extract_model_name_from_table(table_name: str, app_label: Optional[str] = N
             # Fallback: assume single-word app
             model_parts = parts[1:]
     else:
-        # Skip first part (assumed to be app label like 'posthog')
+        # Skip first part (assumed to be app label like 'insights')
         model_parts = parts[1:]
 
     if not model_parts:

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonDropdown, Popover } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonDropdown, Popover } from '@hanzo/lemon-ui'
 
 import { OperatorValueSelectProps } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 

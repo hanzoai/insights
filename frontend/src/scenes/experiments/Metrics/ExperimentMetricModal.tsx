@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonModal } from '@hanzo/lemon-ui'
 
 import type { ExperimentExposureCriteria, ExperimentMetric } from '~/queries/schema/schema-general'
 import type { Experiment } from '~/types'

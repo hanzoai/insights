@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyDuration } from 'lib/utils'
@@ -277,7 +277,7 @@ export function captureFeedback(
     triggerType: FeedbackTriggerType,
     feedbackText?: string
 ): void {
-    posthog.capture('$ai_metric', {
+    insights.capture('$ai_metric', {
         $ai_metric_name: 'feedback',
         $ai_metric_value: rating,
         $ai_session_id: conversationId,
@@ -286,7 +286,7 @@ export function captureFeedback(
     })
 
     if (feedbackText) {
-        posthog.capture('$ai_feedback', {
+        insights.capture('$ai_feedback', {
             $ai_feedback_text: feedbackText,
             $ai_session_id: conversationId,
             $ai_trace_id: traceId,

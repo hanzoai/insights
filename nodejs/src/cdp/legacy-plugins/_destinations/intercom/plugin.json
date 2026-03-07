@@ -23,7 +23,7 @@
         },
         {
             "key": "ignoredEmailDomains",
-            "hint": "A comma-separated list of email domains to ignore and not send events for in Intercom (e.g. 'posthog.com,dev.posthog.com' ).",
+            "hint": "A comma-separated list of email domains to ignore and not send events for in Intercom (e.g. 'hanzo.ai,dev.hanzo.ai' ).",
             "name": "Email domains to skip",
             "type": "string",
             "default": "",

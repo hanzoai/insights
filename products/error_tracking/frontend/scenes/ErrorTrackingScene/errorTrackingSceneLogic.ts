@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal'
 import { actions, connect, kea, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { Params } from 'scenes/sceneTypes'
 
@@ -126,7 +126,7 @@ export const errorTrackingSceneLogic = kea<errorTrackingSceneLogicType>([
             actions.setSelectedIssueIds([])
 
             const mergedFilterGroup = values.mergedFilterGroup.values[0] as UniversalFiltersGroup
-            posthog.capture('error_tracking_query_executed', {
+            insights.capture('error_tracking_query_executed', {
                 filter_count: mergedFilterGroup.values.length,
                 has_search_query: !!values.searchQuery,
                 filter_test_accounts: values.filterTestAccounts,

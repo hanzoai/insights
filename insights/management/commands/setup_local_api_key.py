@@ -18,8 +18,8 @@ from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
 from insights.models.utils import mask_key_value
 
 # Fixed key value for local development - DO NOT use in production
-DEV_API_KEY = "phx_dev_local_test_api_key_1234567890abcdef"
-DEV_USER_EMAIL = "test@posthog.com"
+DEV_API_KEY = "hix_dev_local_test_api_key_1234567890abcdef"
+DEV_USER_EMAIL = "test@hanzo.ai"
 DEV_KEY_LABEL = "Local Development Key"
 
 

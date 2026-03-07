@@ -1,5 +1,5 @@
-import { Replayer } from '@posthog/rrweb'
-import { CanvasArg } from '@posthog/rrweb-types'
+import { Replayer } from '@hanzo/rrweb'
+import { CanvasArg } from '@hanzo/rrweb-types'
 
 import { base64ArrayBuffer } from 'lib/utils'
 

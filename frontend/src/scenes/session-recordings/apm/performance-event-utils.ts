@@ -1,13 +1,13 @@
-import { CapturedNetworkRequest } from 'posthog-js'
+import { CapturedNetworkRequest } from '@hanzo/insights'
 
-import { eventWithTime } from '@posthog/rrweb-types'
+import { eventWithTime } from '@hanzo/rrweb-types'
 
 import { getSeriesBackgroundColor, getSeriesColor } from 'lib/colors'
 import { humanizeBytes } from 'lib/utils'
 
 import { PerformanceEvent } from '~/types'
 
-const NETWORK_PLUGIN_NAME = 'posthog/network@1'
+const NETWORK_PLUGIN_NAME = 'insights/network@1'
 const RRWEB_NETWORK_PLUGIN_NAME = 'rrweb/network@1'
 
 export const PerformanceEventReverseMapping: { [key: number]: keyof PerformanceEvent } = {
@@ -226,9 +226,9 @@ export function mapRRWebNetworkRequest(
 }
 
 export function getPerformanceEvents(snapshotsByWindowId: Record<string, eventWithTime[]>): PerformanceEvent[] {
-    // we only support rrweb/network@1 events or posthog/network@1 events in any one recording
+    // we only support rrweb/network@1 events or insights/network@1 events in any one recording
     // apart from during testing, where we might have both
-    // if we have both, we only display posthog/network@1 events
+    // if we have both, we only display insights/network@1 events
     const events: PerformanceEvent[] = []
     const rrwebEvents: PerformanceEvent[] = []
 

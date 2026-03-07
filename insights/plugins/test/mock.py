@@ -43,34 +43,34 @@ def mocked_plugin_requests_get(*args, **kwargs):
         def ok(self):
             return self.status_code < 300
 
-    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=&path=":
+    if args[0] == "https://api.github.com/repos/Insights/insights/commits?sha=&path=":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=":
+    if args[0] == "https://api.github.com/repos/Insights/insights/commits?sha=main&path=":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=test/path/in/repo":
+    if args[0] == "https://api.github.com/repos/Insights/insights/commits?sha=main&path=test/path/in/repo":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Hanzo Insights/insights/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
@@ -81,7 +81,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             [
                 {
                     "sha": HELLO_WORLD_PLUGIN_GITHUB_ZIP[0],
-                    "html_url": "https://www.github.com/PostHog/helloworldplugin/commit/{}".format(
+                    "html_url": "https://www.github.com/Hanzo Insights/helloworldplugin/commit/{}".format(
                         HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]
                     ),
                 }
@@ -117,46 +117,46 @@ def mocked_plugin_requests_get(*args, **kwargs):
             200,
         )
 
-    if args[0] == "https://registry.npmjs.org/posthog-helloworld-plugin/latest":
-        return MockJSONResponse({"pkg": "posthog-helloworld-plugin", "version": "MOCK"}, 200)
+    if args[0] == "https://registry.npmjs.org/insights-helloworld-plugin/latest":
+        return MockJSONResponse({"pkg": "insights-helloworld-plugin", "version": "MOCK"}, 200)
 
-    if args[0] == "https://registry.npmjs.org/@posthog/helloworldplugin/latest":
-        return MockJSONResponse({"pkg": "@posthog/helloworldplugin", "version": "MOCK"}, 200)
+    if args[0] == "https://registry.npmjs.org/@insights/helloworldplugin/latest":
+        return MockJSONResponse({"pkg": "@insights/helloworldplugin", "version": "MOCK"}, 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
+    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Hanzo Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[1], 200)
 
-    # https://github.com/posthog-plugin/version-equals/commit/{vesrion}
-    # https://github.com/posthog-plugin/version-greater-than/commit/{vesrion}
-    # https://github.com/posthog-plugin/version-less-than/commit/{vesrion}
-    if args[0].startswith(f"https://github.com/posthog-plugin/version-"):
+    # https://github.com/insights-plugin/version-equals/commit/{vesrion}
+    # https://github.com/insights-plugin/version-greater-than/commit/{vesrion}
+    # https://github.com/insights-plugin/version-less-than/commit/{vesrion}
+    if args[0].startswith(f"https://github.com/insights-plugin/version-"):
         url_repo = args[0].split("/")[4]
         url_version = args[0].split("/")[6].split(".zip")[0]
 
         archive = base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1])
         plugin_json = cast(dict, get_file_from_zip_archive(archive, "plugin.json", json_parse=True))
-        plugin_json["posthogVersion"] = url_version
+        plugin_json["insightsVersion"] = url_version
 
         if url_repo == "version-greater-than":
-            plugin_json["posthogVersion"] = f">= {plugin_json['posthogVersion']}"
+            plugin_json["insightsVersion"] = f">= {plugin_json['insightsVersion']}"
 
         if url_repo == "version-less-than":
-            plugin_json["posthogVersion"] = f"< {plugin_json['posthogVersion']}"
+            plugin_json["insightsVersion"] = f"< {plugin_json['insightsVersion']}"
 
         archive = put_json_into_zip_archive(archive, plugin_json, "plugin.json")
         return MockBase64Response(base64.b64encode(archive), 200)
@@ -172,29 +172,29 @@ def mocked_plugin_requests_get(*args, **kwargs):
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITLAB_ZIP[1], 200)
 
-    if args[0] == "https://registry.npmjs.org/@posthog/helloworldplugin/-/helloworldplugin-0.0.0.tgz":
+    if args[0] == "https://registry.npmjs.org/@insights/helloworldplugin/-/helloworldplugin-0.0.0.tgz":
         return MockBase64Response(HELLO_WORLD_PLUGIN_NPM_TGZ[1], 200)
 
-    if args[0] == "https://registry.npmjs.org/posthog-helloworld-plugin/-/posthog-helloworld-plugin-0.0.0.tgz":
+    if args[0] == "https://registry.npmjs.org/insights-helloworld-plugin/-/insights-helloworld-plugin-0.0.0.tgz":
         return MockBase64Response(HELLO_WORLD_PLUGIN_NPM_TGZ[1], 200)
 
-    if args[0] == "https://raw.githubusercontent.com/PostHog/integrations-repository/main/plugins.json":
+    if args[0] == "https://raw.githubusercontent.com/Hanzo Insights/integrations-repository/main/plugins.json":
         return MockTextResponse(
             json.dumps(
                 [
                     {
-                        "name": "posthog-currency-normalization-plugin",
-                        "url": "https://github.com/posthog/posthog-currency-normalization-plugin",
+                        "name": "insights-currency-normalization-plugin",
+                        "url": "https://github.com/insights/insights-currency-normalization-plugin",
                         "description": "Normalise monerary values into a base currency",
-                        "icon": "https://raw.githubusercontent.com/posthog/posthog-currency-normalization-plugin/main/logo.png",
+                        "icon": "https://raw.githubusercontent.com/insights/insights-currency-normalization-plugin/main/logo.png",
                         "verified": False,
                         "maintainer": "official",
                     },
                     {
                         "name": "helloworldplugin",
-                        "url": "https://github.com/posthog/helloworldplugin",
+                        "url": "https://github.com/insights/helloworldplugin",
                         "description": "Greet the World and Foo a Bar",
-                        "icon": "https://raw.githubusercontent.com/posthog/helloworldplugin/main/logo.png",
+                        "icon": "https://raw.githubusercontent.com/insights/helloworldplugin/main/logo.png",
                         "verified": True,
                         "maintainer": "community",
                     },

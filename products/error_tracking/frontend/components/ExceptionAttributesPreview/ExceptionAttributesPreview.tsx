@@ -1,8 +1,8 @@
 import { Children } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconBug } from '@posthog/icons'
-import { LemonTag, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconBug } from '@hanzo/icons'
+import { LemonTag, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { ExceptionAttributes } from 'lib/components/Errors/types'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'

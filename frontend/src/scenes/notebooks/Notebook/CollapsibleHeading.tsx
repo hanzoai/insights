@@ -4,8 +4,8 @@ import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { Editor, ReactRenderer } from '@tiptap/react'
 
-import { IconEye, IconTriangleDownFilled, IconTriangleRightFilled } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconEye, IconTriangleDownFilled, IconTriangleRightFilled } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { humanList, identifierToHuman, pluralize } from 'lib/utils'
 

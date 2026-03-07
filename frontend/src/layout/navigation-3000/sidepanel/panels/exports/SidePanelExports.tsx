@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload, IconPencil, IconRefresh, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonSelect, LemonSkeleton, Spinner, lemonToast } from '@posthog/lemon-ui'
+import { IconDownload, IconPencil, IconRefresh, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonSelect, LemonSkeleton, Spinner, lemonToast } from '@hanzo/lemon-ui'
 
 import { downloadExportedAsset, exportedAssetBlob } from 'lib/components/ExportButton/exporter'
 import { ScreenShotEditor } from 'lib/components/TakeScreenshot/ScreenShotEditor'

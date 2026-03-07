@@ -233,7 +233,7 @@
             }
         ],
         "$exception_issue_id": "019b07d0-226b-7c93-94b7-bb77fe777b05",
-        "$lib": "posthog-node",
+        "$lib": "insights-node",
         "$lib_version": "5.14.1",
         "$exception_level": "error",
         "$geoip_disable": true,

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonModal, LemonTable, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { LemonButton, LemonCheckbox, LemonModal, LemonTable, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { SyncTypeLabelMap } from 'scenes/data-warehouse/utils'

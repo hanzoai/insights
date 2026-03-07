@@ -16,7 +16,7 @@ export const getCategoryDisplayName = (category: string): string => {
         eventDefinitions: 'Events',
         propertyDefinitions: 'Properties',
         ai: 'Insights AI',
-        askAI: 'Posthog AI',
+        askAI: 'Insights AI',
         insight: 'Insights',
         dashboard: 'Dashboards',
         feature_flag: 'Feature flags',

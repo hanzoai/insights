@@ -14,8 +14,8 @@ DEFAULTS: dict[str, str] = {
     "DUCKLAKE_RDS_HOST": "localhost",
     "DUCKLAKE_RDS_PORT": "5432",
     "DUCKLAKE_RDS_DATABASE": "ducklake",
-    "DUCKLAKE_RDS_USERNAME": "posthog",
-    "DUCKLAKE_RDS_PASSWORD": "posthog",
+    "DUCKLAKE_RDS_USERNAME": "insights",
+    "DUCKLAKE_RDS_PASSWORD": "insights",
     "DUCKLAKE_BUCKET": "ducklake-dev",
     "DUCKLAKE_BUCKET_REGION": "us-east-1",
     # Optional: S3 credentials for local dev (production uses IRSA)
@@ -95,7 +95,7 @@ def get_ducklake_connection_string(config: dict[str, str] | None = None) -> str:
     host = config.get("DUCKLAKE_RDS_HOST")
     port = config.get("DUCKLAKE_RDS_PORT", "5432")
     database = config.get("DUCKLAKE_RDS_DATABASE", "ducklake")
-    username = config.get("DUCKLAKE_RDS_USERNAME", "posthog")
+    username = config.get("DUCKLAKE_RDS_USERNAME", "insights")
     password = config.get("DUCKLAKE_RDS_PASSWORD")
 
     if not host or not password:
@@ -199,8 +199,8 @@ def ensure_ducklake_catalog(config: dict[str, str] | None = None) -> None:
         "dbname": params.get("maintenance_db") or "postgres",
         "host": params.get("host") or "localhost",
         "port": int(params.get("port") or "5432"),
-        "user": params.get("user") or "posthog",
-        "password": params.get("password") or "posthog",
+        "user": params.get("user") or "insights",
+        "password": params.get("password") or "insights",
         "autocommit": True,
     }
 

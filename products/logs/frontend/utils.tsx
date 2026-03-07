@@ -3,11 +3,11 @@ const DISTINCT_ID_KEYS = [
     'distinct_id',
     'distinctId',
     'distinctID',
-    'posthogDistinctId',
-    'posthogDistinctID',
-    'posthog_distinct_id',
-    'posthog.distinct.id',
-    'posthog.distinct_id',
+    'insightsDistinctId',
+    'insightsDistinctID',
+    'insights_distinct_id',
+    'insights.distinct.id',
+    'insights.distinct_id',
 ]
 const SESSION_ID_KEYS = [
     'session.id',
@@ -15,11 +15,11 @@ const SESSION_ID_KEYS = [
     'sessionId',
     'sessionID',
     '$session_id',
-    'posthogSessionId',
-    'posthogSessionID',
-    'posthog_session_id',
-    'posthog.session.id',
-    'posthog.session_id',
+    'insightsSessionId',
+    'insightsSessionID',
+    'insights_session_id',
+    'insights.session.id',
+    'insights.session_id',
 ]
 
 function matchesKey(key: string, candidates: string[]): boolean {

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonInput, LemonTable, LemonTag } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, LemonTable, LemonTag } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -73,7 +73,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                 thingName="feature"
                 description="Allow your users to individually enable or disable features that are in public beta."
                 isEmpty={shouldShowEmptyState}
-                docsURL="https://posthog.com/docs/feature-flags/early-access-feature-management"
+                docsURL="https://hanzo.ai/docs/feature-flags/early-access-feature-management"
                 action={() => router.actions.push(urls.earlyAccessFeature('new'))}
                 className="my-0"
             />

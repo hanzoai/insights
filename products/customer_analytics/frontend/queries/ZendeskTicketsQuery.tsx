@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { DataTableNode, NodeKind } from '~/queries/schema/schema-general'
 import { QueryContext, QueryContextColumn } from '~/queries/types'

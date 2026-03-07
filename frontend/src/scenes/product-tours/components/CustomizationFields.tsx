@@ -1,5 +1,5 @@
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonSelect } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonSelect } from '@hanzo/lemon-ui'
 
 import { LemonColorPicker } from 'lib/lemon-ui/LemonColor/LemonColorPicker'
 import { LemonField } from 'lib/lemon-ui/LemonField'

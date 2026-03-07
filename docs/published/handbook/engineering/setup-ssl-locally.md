@@ -68,11 +68,11 @@ python manage.py runserver
 
 If you're testing the Toolbar, make sure to add the ngrok urls to the list on the 'Project Settings' page.
 
-![Permitted domains](https://res.cloudinary.com/dmukukwp6/image/upload/v1710055416/posthog.com/contents/images/engineering/toolbar-permitted-ngrok.png)
+![Permitted domains](https://res.cloudinary.com/dmukukwp6/image/upload/v1710055416/hanzo.ai/contents/images/engineering/toolbar-permitted-ngrok.png)
 
 Also, watch out, network requests can be slow through ngrok:
 
-![Network slow with ngrok](https://res.cloudinary.com/dmukukwp6/image/upload/v1710055416/posthog.com/contents/images/engineering/ngrok-slow.gif)
+![Network slow with ngrok](https://res.cloudinary.com/dmukukwp6/image/upload/v1710055416/hanzo.ai/contents/images/engineering/ngrok-slow.gif)
 
 ## Set up SSL via NGINX and a local certificate
 
@@ -85,8 +85,8 @@ In case `brew install openssl` and `brew link openssl` don't work well, use
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
-  -keyout localhost.key -out localhost.crt -subj "/CN=secure.posthog.dev" \
-  -addext "subjectAltName=DNS:secure.posthog.dev,IP:10.0.0.1"
+  -keyout localhost.key -out localhost.crt -subj "/CN=secure.insights.dev" \
+  -addext "subjectAltName=DNS:secure.insights.dev,IP:10.0.0.1"
 ```
 
 2. Trust the key for Chrome/Safari
@@ -95,10 +95,10 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.crt
 ```
 
-3. Add `secure.posthog.dev` to /etc/hosts
+3. Add `secure.insights.dev` to /etc/hosts
 
 ```text
-127.0.0.1 secure.posthog.dev
+127.0.0.1 secure.insights.dev
 ```
 
 4. Install nginx (`brew install nginx`) and add the following config in `/usr/local/etc/nginx/nginx.conf`
@@ -108,13 +108,13 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
          server 127.0.0.1:8000;
      }
      server {
-         server_name secure.posthog.dev;
-         rewrite ^(.*) https://secure.posthog.dev$1 permanent;
+         server_name secure.insights.dev;
+         rewrite ^(.*) https://secure.insights.dev$1 permanent;
      }
 
      server {
          listen       443 ssl;
-         server_name  secure.posthog.dev;
+         server_name  secure.insights.dev;
          ssl_certificate  /path/to/your/certs/localhost.crt;
          ssl_certificate_key /path/to/your/certs/localhost.key;
          ssl_prefer_server_ciphers  on;
@@ -149,5 +149,5 @@ nginx -p /usr/local/etc/nginx/ -c /usr/local/etc/nginx/nginx.conf -s stop
 7. To run local development, use
 
 ```bash
-bin/hogli start
+bin/insightscli start
 ```

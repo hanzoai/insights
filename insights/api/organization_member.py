@@ -20,7 +20,7 @@ from insights.event_usage import groups
 from insights.models import OrganizationMembership
 from insights.models.user import User
 from insights.permissions import TimeSensitiveActionPermission, extract_organization
-from insights.utils import posthoganalytics
+from insights.utils import hanzoanalytics
 
 
 class OrganizationMemberObjectPermissions(BasePermission):
@@ -151,7 +151,7 @@ class OrganizationMemberViewSet(
 
         is_self_removal = requesting_user.id == removed_user.id
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=str(requesting_user.distinct_id),
             event="organization member removed",
             properties={

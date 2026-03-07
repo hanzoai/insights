@@ -1,4 +1,4 @@
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 export const OperandTag = ({ operand }: { operand: 'and' | 'or' }): JSX.Element => {
     return (

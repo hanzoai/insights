@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT name from posthog_eventdefinition",
+  "query": "SELECT name from insights_eventdefinition",
   "describe": {
     "columns": [
       {

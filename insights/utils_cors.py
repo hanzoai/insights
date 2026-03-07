@@ -16,7 +16,7 @@ CORS_ALLOWED_TRACING_HEADERS = (
     "Baggage",
     "x-highlight-request",
     "x-datadome-clientid",
-    "x-posthog-token",
+    "x-insights-token",
     "x-conversations-token",
     "x-b3-sampled",
     "x-b3-spanid",
@@ -27,12 +27,12 @@ CORS_ALLOWED_TRACING_HEADERS = (
 
 # Temporary list of known good origins for monitoring
 KNOWN_ORIGINS = {
-    "app.posthog.com",
-    "us.posthog.com",
-    "eu.posthog.com",
+    "insights.hanzo.ai",
+    "insights.hanzo.ai",
+    "insights.hanzo.ai",
     "localhost:8000",
     "localhost:8010",
-    "app.dev.posthog.dev",
+    "app.dev.insights.dev",
 }
 
 

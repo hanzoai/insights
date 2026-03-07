@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonSelect, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { LemonButton, LemonCheckbox, LemonSelect, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { SceneExport } from 'scenes/sceneTypes'
 

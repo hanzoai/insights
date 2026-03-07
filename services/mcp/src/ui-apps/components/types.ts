@@ -2,7 +2,7 @@ import type { AnalyticsMetadata } from '../types'
 
 // Base payload that all tool results share
 interface BasePayload {
-    _posthogUrl?: string
+    _insightsUrl?: string
     /** Analytics metadata injected by MCP server for user tracking */
     _analytics?: AnalyticsMetadata
 }

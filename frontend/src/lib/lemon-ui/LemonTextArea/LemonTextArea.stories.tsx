@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
-import { IconTrash } from '@posthog/icons'
+import { IconTrash } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 

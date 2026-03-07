@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

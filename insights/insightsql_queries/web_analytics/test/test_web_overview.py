@@ -54,7 +54,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         distinct_ids=[id],
                         properties={
                             "name": id,
-                            **({"email": "test@posthog.com"} if id == "test" else {}),
+                            **({"email": "test@hanzo.ai"} if id == "test" else {}),
                         },
                     )
                 )
@@ -661,7 +661,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertIn(f" max_execution_time={INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME},", mock_sync_execute.call_args[0][0])
 
     def test_no_previous_when_comparison_disabled_but_conversion_goal_enabled(self):
-        # See: https://posthoghelp.zendesk.com/agent/tickets/29100
+        # See: https://insightshelp.zendesk.com/agent/tickets/29100
         s1 = str(uuid7("2023-12-01"))
         s2 = str(uuid7("2023-12-01"))
         s3 = str(uuid7("2023-12-01"))
@@ -776,7 +776,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
     def test_can_use_preaggregated_tables_with_supported_properties(self):
         query = WebOverviewQuery(
             dateRange=DateRange(date_from="2023-11-01", date_to="2023-11-30"),
-            properties=[{"key": "$host", "value": "app.posthog.com"}],
+            properties=[{"key": "$host", "value": "insights.hanzo.ai"}],
         )
         runner = WebOverviewQueryRunner(team=self.team, query=query)
         pre_agg_builder = WebOverviewPreAggregatedQueryBuilder(runner)

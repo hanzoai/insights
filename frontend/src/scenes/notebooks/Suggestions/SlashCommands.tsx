@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SlashCommandsPopover } from '../Notebook/SlashCommands'
 import { InsertionSuggestion, InsertionSuggestionViewProps } from './InsertionSuggestion'

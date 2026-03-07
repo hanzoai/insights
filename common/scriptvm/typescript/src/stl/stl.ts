@@ -20,7 +20,7 @@ import {
 import { printHogStringOutput } from './print'
 import { isIPAddressInRange } from './ip'
 
-// TODO: this file should be generated from or mergred with posthog/insightsql/compiler/javascript_stl.py
+// TODO: this file should be generated from or mergred with insights/insightsql/compiler/javascript_stl.py
 
 function STLToString(args: any[]): string {
     if (isHogDate(args[0])) {

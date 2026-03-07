@@ -32,7 +32,7 @@ const esmModules = [
     'space-separated-tokens',
     'comma-separated-tokens',
     'zwitch',
-    '@posthog/insightsql-parser',
+    '@hanzo/insightsql-parser',
 ]
 function rootDirectories(): string[] {
     return ['<rootDir>/src', '<rootDir>/../products']
@@ -117,14 +117,14 @@ const config: Config = {
         '^.+\\.(css|less|scss|svg|png|lottie)$': '<rootDir>/src/test/mocks/styleMock.js',
         '^.+\\.sql\\?raw$': '<rootDir>/src/test/mocks/rawFileMock.js',
         '^~/(.*)$': '<rootDir>/src/$1',
-        '^@posthog/lemon-ui(|/.*)$': '<rootDir>/@posthog/lemon-ui/src/$1',
+        '^@hanzo/lemon-ui(|/.*)$': '<rootDir>/@hanzo/lemon-ui/src/$1',
         '^lib/(.*)$': '<rootDir>/src/lib/$1',
         'monaco-editor': '<rootDir>/node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts',
         '^scenes/(.*)$': '<rootDir>/src/scenes/$1',
         '^products/(.*)$': '<rootDir>/../products/$1',
         '^common/(.*)$': '<rootDir>/../common/$1',
-        '^@posthog/shared-onboarding/(.*)$': '<rootDir>/../docs/onboarding/$1',
-        '^@posthog/rrweb/es/rrweb': '@posthog/rrweb/dist/rrweb.min.js',
+        '^@hanzo/shared-onboarding/(.*)$': '<rootDir>/../docs/onboarding/$1',
+        '^@hanzo/rrweb/es/rrweb': '@hanzo/rrweb/dist/rrweb.min.js',
         d3: '<rootDir>/node_modules/d3/dist/d3.min.js',
         '^d3-(.*)$': `d3-$1/dist/d3-$1`,
     },

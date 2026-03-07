@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArrowRight, IconCheckCircle } from '@posthog/icons'
-import { LemonButton, LemonCard, Link } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
+import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
@@ -127,7 +127,7 @@ export function AddSourceStep({ onContinue, hasSources }: AddSourceStepProps): J
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-3 border-t border-primary">
                     <Link
-                        to="https://posthog.com/docs/web-analytics/marketing-analytics"
+                        to="https://hanzo.ai/docs/web-analytics/marketing-analytics"
                         target="_blank"
                         className="text-xs"
                     >

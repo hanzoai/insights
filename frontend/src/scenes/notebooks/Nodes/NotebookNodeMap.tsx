@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { Marker } from 'maplibre-gl'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'

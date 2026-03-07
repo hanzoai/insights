@@ -120,26 +120,26 @@ class TestGolangGenerator(APIBaseTest):
         self.assertEqual(
             """// SimpleClickCapture creates a capture for the "simple_click" event.
 // This event has no defined schema properties.
-func SimpleClickCapture(distinctId string, properties ...posthog.Properties) posthog.Capture {
-	props := posthog.Properties{}
+func SimpleClickCapture(distinctId string, properties ...insights.Properties) insights.Capture {
+	props := insights.Properties{}
 	for _, p := range properties {
 		for k, v := range p {
 			props[k] = v
 		}
 	}
 
-	return posthog.Capture{
+	return insights.Capture{
 		DistinctId: distinctId,
 		Event:      "simple_click",
 		Properties: props,
 	}
 }
 
-// SimpleClickCaptureFromBase creates a posthog.Capture for the "simple_click" event
+// SimpleClickCaptureFromBase creates a insights.Capture for the "simple_click" event
 // starting from an existing base capture. The event name is overridden, and
 // any additional properties can be passed via the properties parameter.
-func SimpleClickCaptureFromBase(base posthog.Capture, properties ...posthog.Properties) posthog.Capture {
-\tprops := posthog.Properties{}
+func SimpleClickCaptureFromBase(base insights.Capture, properties ...insights.Properties) insights.Capture {
+\tprops := insights.Properties{}
 \tfor _, p := range properties {
 \t\tfor k, v := range p {
 \t\t\tprops[k] = v
@@ -148,7 +148,7 @@ func SimpleClickCaptureFromBase(base posthog.Capture, properties ...posthog.Prop
 
 \tbase.Event = "simple_click"
 \tif base.Properties == nil {
-\t\tbase.Properties = posthog.Properties{}
+\t\tbase.Properties = insights.Properties{}
 \t}
 \tbase.Properties = base.Properties.Merge(props)
 
@@ -170,13 +170,13 @@ func SimpleClickCaptureFromBase(base posthog.Capture, properties ...posthog.Prop
         code = self.generator._generate_event_with_properties("file_uploaded", props)  # type: ignore[arg-type]
         self.assertEqual(
             """// FileUploadedOption configures optional properties for a "file_uploaded" capture.
-type FileUploadedOption func(*posthog.Capture)
+type FileUploadedOption func(*insights.Capture)
 
 // FileUploadedWithIsActive sets the "is_active" property on a "file_uploaded" event.
 func FileUploadedWithIsActive(isActive bool) FileUploadedOption {
-	return func(c *posthog.Capture) {
+	return func(c *insights.Capture) {
 		if c.Properties == nil {
-			c.Properties = posthog.Properties{}
+			c.Properties = insights.Properties{}
 		}
 		c.Properties["is_active"] = isActive
 	}
@@ -184,9 +184,9 @@ func FileUploadedWithIsActive(isActive bool) FileUploadedOption {
 
 // FileUploadedWithMetadata sets the "metadata" property on a "file_uploaded" event.
 func FileUploadedWithMetadata(metadata map[string]interface{}) FileUploadedOption {
-	return func(c *posthog.Capture) {
+	return func(c *insights.Capture) {
 		if c.Properties == nil {
-			c.Properties = posthog.Properties{}
+			c.Properties = insights.Properties{}
 		}
 		c.Properties["metadata"] = metadata
 	}
@@ -194,19 +194,19 @@ func FileUploadedWithMetadata(metadata map[string]interface{}) FileUploadedOptio
 
 // FileUploadedWithTags sets the "tags" property on a "file_uploaded" event.
 func FileUploadedWithTags(tags []interface{}) FileUploadedOption {
-	return func(c *posthog.Capture) {
+	return func(c *insights.Capture) {
 		if c.Properties == nil {
-			c.Properties = posthog.Properties{}
+			c.Properties = insights.Properties{}
 		}
 		c.Properties["tags"] = tags
 	}
 }
 
 // FileUploadedWithExtraProps adds additional properties to a "file_uploaded" event.
-func FileUploadedWithExtraProps(props posthog.Properties) FileUploadedOption {
-	return func(c *posthog.Capture) {
+func FileUploadedWithExtraProps(props insights.Properties) FileUploadedOption {
+	return func(c *insights.Capture) {
 		if c.Properties == nil {
-			c.Properties = posthog.Properties{}
+			c.Properties = insights.Properties{}
 		}
 		for k, v := range props {
 			c.Properties[k] = v
@@ -215,7 +215,7 @@ func FileUploadedWithExtraProps(props posthog.Properties) FileUploadedOption {
 }
 
 // FileUploadedCapture is a wrapper for the "file_uploaded" event.
-// It manages the creation of the `posthog.Capture`. If you need control over this, please make use of
+// It manages the creation of the `insights.Capture`. If you need control over this, please make use of
 // the FileUploadedCaptureFromBase function.
 // Required properties from the schema are explicit parameters; optional properties
 // should be passed via FileUploadedWith* option functions.
@@ -225,14 +225,14 @@ func FileUploadedCapture(
 	fileName string,
 	fileSize float64,
 	options ...FileUploadedOption,
-) posthog.Capture {
-	props := posthog.Properties{
+) insights.Capture {
+	props := insights.Properties{
 		"created_at": createdAt,
 		"file_name": fileName,
 		"file_size": fileSize,
 	}
 
-	c := posthog.Capture{
+	c := insights.Capture{
 		DistinctId: distinctId,
 		Event:      "file_uploaded",
 		Properties: props,
@@ -245,18 +245,18 @@ func FileUploadedCapture(
 	return c
 }
 
-// FileUploadedCaptureFromBase creates a posthog.Capture for the "file_uploaded" event
+// FileUploadedCaptureFromBase creates a insights.Capture for the "file_uploaded" event
 // starting from an existing base capture. The event name is overridden, and
 // required properties from the schema are merged on top. Optional properties
 // should be passed via FileUploadedWith* option functions.
 func FileUploadedCaptureFromBase(
-	base posthog.Capture,
+	base insights.Capture,
 	createdAt time.Time,
 	fileName string,
 	fileSize float64,
 	options ...FileUploadedOption,
-) posthog.Capture {
-	props := posthog.Properties{
+) insights.Capture {
+	props := insights.Properties{
 		"created_at": createdAt,
 		"file_name": fileName,
 		"file_size": fileSize,
@@ -264,7 +264,7 @@ func FileUploadedCaptureFromBase(
 
 	base.Event = "file_uploaded"
 	if base.Properties == nil {
-		base.Properties = posthog.Properties{}
+		base.Properties = insights.Properties{}
 	}
 	base.Properties = base.Properties.Merge(props)
 
@@ -285,13 +285,13 @@ func FileUploadedCaptureFromBase(
         code = self.generator._generate_event_with_properties("creative_naming", props)  # type: ignore[arg-type]
         self.assertEqual(
             """// CreativeNamingOption configures optional properties for a "creative_naming" capture.
-type CreativeNamingOption func(*posthog.Capture)
+type CreativeNamingOption func(*insights.Capture)
 
 // CreativeNamingWithExtraProps adds additional properties to a "creative_naming" event.
-func CreativeNamingWithExtraProps(props posthog.Properties) CreativeNamingOption {
-	return func(c *posthog.Capture) {
+func CreativeNamingWithExtraProps(props insights.Properties) CreativeNamingOption {
+	return func(c *insights.Capture) {
 		if c.Properties == nil {
-			c.Properties = posthog.Properties{}
+			c.Properties = insights.Properties{}
 		}
 		for k, v := range props {
 			c.Properties[k] = v
@@ -300,7 +300,7 @@ func CreativeNamingWithExtraProps(props posthog.Properties) CreativeNamingOption
 }
 
 // CreativeNamingCapture is a wrapper for the "creative_naming" event.
-// It manages the creation of the `posthog.Capture`. If you need control over this, please make use of
+// It manages the creation of the `insights.Capture`. If you need control over this, please make use of
 // the CreativeNamingCaptureFromBase function.
 // Required properties from the schema are explicit parameters; optional properties
 // should be passed via CreativeNamingWith* option functions.
@@ -308,12 +308,12 @@ func CreativeNamingCapture(
 	distinctId string,
 	escApEing string,
 	options ...CreativeNamingOption,
-) posthog.Capture {
-	props := posthog.Properties{
+) insights.Capture {
+	props := insights.Properties{
 		"esc'ap\\"eing": escApEing,
 	}
 
-	c := posthog.Capture{
+	c := insights.Capture{
 		DistinctId: distinctId,
 		Event:      "creative_naming",
 		Properties: props,
@@ -326,22 +326,22 @@ func CreativeNamingCapture(
 	return c
 }
 
-// CreativeNamingCaptureFromBase creates a posthog.Capture for the "creative_naming" event
+// CreativeNamingCaptureFromBase creates a insights.Capture for the "creative_naming" event
 // starting from an existing base capture. The event name is overridden, and
 // required properties from the schema are merged on top. Optional properties
 // should be passed via CreativeNamingWith* option functions.
 func CreativeNamingCaptureFromBase(
-	base posthog.Capture,
+	base insights.Capture,
 	escApEing string,
 	options ...CreativeNamingOption,
-) posthog.Capture {
-	props := posthog.Properties{
+) insights.Capture {
+	props := insights.Properties{
 		"esc'ap\\"eing": escApEing,
 	}
 
 	base.Event = "creative_naming"
 	if base.Properties == nil {
-		base.Properties = posthog.Properties{}
+		base.Properties = insights.Properties{}
 	}
 	base.Properties = base.Properties.Merge(props)
 
@@ -374,7 +374,7 @@ func CreativeNamingCaptureFromBase(
         # Check header / imports
         self.assertIn("// Code generated by Insights - DO NOT EDIT", code)
         self.assertIn("package typed", code)
-        self.assertIn('"github.com/posthog/posthog-go"', code)
+        self.assertIn('"github.com/insights/insights-go"', code)
         self.assertNotIn('"time"', code, "time should not be imported as we do not have a DateTime property.")
 
         # Check event code
@@ -536,9 +536,9 @@ class TestGolangGeneratorAPI(APIBaseTest):
             go_content = response.json()["content"]
 
             subprocess.run(["go", "mod", "init", "testmodule"], cwd=str(tmpdir_path), check=True, capture_output=True)
-            # Install posthog-go dependency
+            # Install insights-go dependency
             install_result = subprocess.run(
-                ["go", "get", "github.com/posthog/posthog-go"],
+                ["go", "get", "github.com/insights/insights-go"],
                 cwd=str(tmpdir_path),
                 capture_output=True,
                 text=True,
@@ -546,7 +546,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
             )
             if install_result.returncode != 0:
                 self.fail(
-                    f"Failed to install posthog-go dependency:\n"
+                    f"Failed to install insights-go dependency:\n"
                     f"STDOUT: {install_result.stdout}\n"
                     f"STDERR: {install_result.stderr}"
                 )
@@ -565,7 +565,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
 import (
 	"time"
 	"testmodule/typed"
-	"github.com/posthog/posthog-go"
+	"github.com/insights/insights-go"
 )
 
 func main() {
@@ -576,7 +576,7 @@ func main() {
 		"document.pdf",  // file_name (required)
 		1024,            // file_size (required)
 		typed.FileDownloadedWithFileExtension("pdf"), // optional
-		typed.FileDownloadedWithExtraProps(posthog.Properties{
+		typed.FileDownloadedWithExtraProps(insights.Properties{
 			"custom_field": "custom_value",
 		}),
 	)
@@ -591,9 +591,9 @@ func main() {
 	_ = cap2
 
 	// Test 3: CaptureFromBase extending an existing capture
-	base := posthog.Capture{
+	base := insights.Capture{
 		DistinctId: "user_789",
-		Properties: posthog.Properties{"source": "web"},
+		Properties: insights.Properties{"source": "web"},
 	}
 	cap3 := typed.FileDownloadedCaptureFromBase(
 		base,

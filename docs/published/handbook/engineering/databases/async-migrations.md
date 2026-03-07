@@ -4,11 +4,11 @@ sidebar: Handbook
 showTitle: true
 ---
 
-Also see: user-facing documentation under [in the runbook](https://posthog.com/docs/runbook/async-migrations)
+Also see: user-facing documentation under [in the runbook](https://hanzo.ai/docs/runbook/async-migrations)
 
 ### Writing an async migration
 
-To write an async migration, you should create a migration file inside [`posthog/async_migrations/migrations`](https://github.com/PostHog/posthog/tree/master/posthog/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/PostHog/posthog/tree/master/posthog/async_migrations/examples).
+To write an async migration, you should create a migration file inside [`insights/async_migrations/migrations`](https://github.com/Hanzo Insights/insights/tree/master/insights/async_migrations/migrations). The name should follow the convention we use for Django and EE migrations (e.g. `0005_update_events_schema`). Check out the existing migrations or [examples](https://github.com/Hanzo Insights/insights/tree/master/insights/async_migrations/examples).
 
 ### Workflow and architecture
 
@@ -60,7 +60,7 @@ If a migration errors, the error message is added to the migration's database re
 
 The initial implementation of async migrations targets only **data migrations**, and assumes that the migration is used as a mechanism to help users move into a new default state.
 
-For example, when we [moved our ClickHouse `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/PostHog/posthog/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
+For example, when we [moved our ClickHouse `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/Hanzo Insights/insights/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
 
 However, users that did a fresh deploy of Insights _after_ this change already had the table with the new schema created by default.
 
@@ -74,7 +74,7 @@ For instance, here's a good `is_required` function, which ensures the migration 
 
 ```python
 def is_required(self):
-    result = sync_execute("SELECT count(*) FROM system.tables WHERE database='posthog' AND name='table_x_new'")
+    result = sync_execute("SELECT count(*) FROM system.tables WHERE database='insights' AND name='table_x_new'")
     return result[0][0] == 0
 ```
 
@@ -84,33 +84,33 @@ Is required functions could also take into consideration table schemas, for exam
 
 The codebase is structured as follows:
 
-#### posthog/models/async_migration.py
+#### insights/models/async_migration.py
 
 The Django ORM (Postgres) model for storing metadata about async migrations.
 
-#### posthog/api/async_migrations.py
+#### insights/api/async_migrations.py
 
 API for requesting data about async migrations as well as triggering starts, stops, and rollbacks.
 
-#### posthog/tasks/async_migrations.py
+#### insights/tasks/async_migrations.py
 
 Celery tasks for dealing with async migrations. These are:
 
 1. `run_async_migration`: Explicitly triggered to run a migration
 2. `check_async_migration_health`: Runs every 30 minutes to perform a healthcheck
 
-#### posthog/async_migrations/definition.py
+#### insights/async_migrations/definition.py
 
 Classes to be used when writing an async migration, outlining the necessary components of a migration.
 
-#### posthog/async_migrations/setup.py
+#### insights/async_migrations/setup.py
 
 Code that runs when the Django server boots to setup the necessary scaffolding for async migrations.
 
-#### posthog/async_migrations/runner.py
+#### insights/async_migrations/runner.py
 
 Code related to running an async migration, from executing operations in sequence to attempting rollbacks.
 
-#### posthog/async_migrations/utils.py
+#### insights/async_migrations/utils.py
 
 Code to support the runner in tasks that do not depend on the availability of the migration definition (module).

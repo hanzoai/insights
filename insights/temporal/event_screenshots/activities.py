@@ -26,8 +26,8 @@ SELECT
 	ed.id,
     ed.name,
 	ed.team_id
-FROM posthog_eventdefinition ed
-INNER JOIN posthog_eventproperty ep
+FROM insights_eventdefinition ed
+INNER JOIN insights_eventproperty ep
 ON
 	ed.name = ep.event
 	AND ed.team_id = ep.team_id

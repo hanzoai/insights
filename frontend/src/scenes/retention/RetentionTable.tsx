@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@posthog/icons'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { gradateColor, humanFriendlyNumber } from 'lib/utils'

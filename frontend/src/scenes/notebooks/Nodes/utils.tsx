@@ -2,7 +2,7 @@ import { ExtendedRegExpMatchArray, InputRule, NodeViewProps, PasteRule } from '@
 import { NodeType } from '@tiptap/pm/model'
 import clsx from 'clsx'
 import DOMPurify from 'dompurify'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { type ReactNode, useCallback, useMemo, useRef } from 'react'
 
 import { TTEditor } from 'lib/components/RichContentEditor/types'
@@ -145,10 +145,10 @@ export function createUrlRegex(path: string | RegExp, origin?: string): RegExp {
 }
 
 export function reportNotebookNodeCreation(nodeType: string): void {
-    posthog.capture('notebook node created', { type: nodeType })
+    insights.capture('notebook node created', { type: nodeType })
 }
 
-export function posthogNodePasteRule(options: {
+export function insightsNodePasteRule(options: {
     find: string | RegExp
     type: NodeType
     editor: TTEditor
@@ -175,7 +175,7 @@ export function posthogNodePasteRule(options: {
     })
 }
 
-export function posthogNodeInputRule(options: {
+export function insightsNodeInputRule(options: {
     find: string | RegExp
     type: NodeType
     editor: TTEditor

@@ -27,7 +27,7 @@ class ActivityLogTestHelper(APILicensedTest):
 
         if not hasattr(self, "user") or not self.user:
             self.user = User.objects.create_user(
-                email="test@posthog.com", password="testpass123", first_name="Test", last_name="User"
+                email="test@hanzo.ai", password="testpass123", first_name="Test", last_name="User"
             )
             self.organization.members.add(self.user)
             self.client.force_login(self.user)
@@ -147,7 +147,7 @@ class ActivityLogTestHelper(APILicensedTest):
             "name": name,
             "plugin_type": "local",
             "description": "Test plugin",
-            "url": "https://github.com/PostHog/posthog-plugin-test",
+            "url": "https://github.com/Hanzo Insights/insights-plugin-test",
             **kwargs,
         }
         response = self.client.post("/api/organizations/@current/plugins/", data, format="json")

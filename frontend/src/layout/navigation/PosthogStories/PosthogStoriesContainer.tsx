@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconChevronRight } from '@posthog/icons'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { StoriesModal } from './StoriesModal'
 import { storiesLogic } from './storiesLogic'
 
-export const PosthogStoriesContainer = (): JSX.Element => {
+export const InsightsStoriesContainer = (): JSX.Element => {
     const { stories, isStoryViewed, storiesCollapsed } = useValues(storiesLogic)
     const { setActiveGroupIndex, setOpenStoriesModal, setActiveStoryIndex, toggleStoriesCollapsed } =
         useActions(storiesLogic)
@@ -45,7 +45,7 @@ export const PosthogStoriesContainer = (): JSX.Element => {
             {!storiesCollapsed && (
                 <div
                     id="dopamine-brainrot"
-                    className="PosthogStoriesContainer flex flex-row gap-4 px-4 overflow-x-auto"
+                    className="InsightsStoriesContainer flex flex-row gap-4 px-4 overflow-x-auto"
                 >
                     {sortedStories.map((storyGroup) => {
                         const { hasViewedEntireGroup } = storyGroup
@@ -64,7 +64,7 @@ export const PosthogStoriesContainer = (): JSX.Element => {
                                     hasViewedEntireGroup ? 'opacity-75' : ''
                                 }`}
                                 onClick={() => {
-                                    posthog.capture('posthog_story_group_clicked', {
+                                    insights.capture('insights_story_group_clicked', {
                                         story_group_id: storyGroup.id,
                                         group_title: storyGroup.title,
                                         group_thumbnail_url: nextStory.thumbnailUrl,

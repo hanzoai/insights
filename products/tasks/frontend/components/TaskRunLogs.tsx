@@ -1,4 +1,4 @@
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 export interface TaskRunLogsProps {
     logs: string

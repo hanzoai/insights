@@ -14,7 +14,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     category=["Email Marketing"],
     code_language="fn",
     code="""
-fetch('https://api.engage.so/posthog', {
+fetch('https://api.engage.so/insights', {
     'method': 'POST',
     'headers': {
         'Authorization': f'Basic {base64Encode(f'{inputs.public_key}:{inputs.private_key}')}',
@@ -56,7 +56,7 @@ fetch('https://api.engage.so/posthog', {
 
 
 class TemplateEngageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-engage-so-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/insights-engage-so-plugin"
 
     @classmethod
     def migrate(cls, obj):

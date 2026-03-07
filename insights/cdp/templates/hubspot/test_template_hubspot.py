@@ -18,7 +18,7 @@ class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "oauth": {"access_token": "TOKEN"},
-            "email": "example@posthog.com",
+            "email": "example@hanzo.ai",
             "properties": {
                 "company": "Insights",
             },
@@ -42,8 +42,8 @@ class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):
                     "body": {
                         "inputs": [
                             {
-                                "properties": {"company": "Insights", "email": "example@posthog.com"},
-                                "id": "example@posthog.com",
+                                "properties": {"company": "Insights", "email": "example@hanzo.ai"},
+                                "id": "example@hanzo.ai",
                                 "idProperty": "email",
                             }
                         ]
@@ -51,7 +51,7 @@ class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):
                 },
             )
         ]
-        assert self.get_mock_print_calls() == [("Contact example@posthog.com updated successfully!",)]
+        assert self.get_mock_print_calls() == [("Contact example@hanzo.ai updated successfully!",)]
 
     def test_exits_if_no_email(self):
         for email in [None, ""]:
@@ -92,7 +92,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
         inputs = {
             "oauth": {"access_token": "TOKEN"},
             "eventName": "purchase",
-            "email": "example@posthog.com",
+            "email": "example@hanzo.ai",
             "include_all_properties": False,
             "properties": {
                 "price": 50,
@@ -114,7 +114,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
                 "headers": {"Authorization": "Bearer TOKEN", "Content-Type": "application/json"},
                 "body": {
                     "eventName": "pe_purchase",
-                    "email": "example@posthog.com",
+                    "email": "example@hanzo.ai",
                     "occurredAt": "2024-01-01T00:00:00Z",
                     "properties": {"price": 50, "currency": "USD"},
                 },
@@ -224,7 +224,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
                 "headers": {"Authorization": "Bearer TOKEN", "Content-Type": "application/json"},
                 "body": {
                     "eventName": "pe_sign_up",
-                    "email": "example@posthog.com",
+                    "email": "example@hanzo.ai",
                     "occurredAt": "2024-01-01T00:00:00Z",
                     "properties": {
                         "price": 50,
@@ -315,7 +315,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
                 "headers": {"Authorization": "Bearer TOKEN", "Content-Type": "application/json"},
                 "body": {
                     "eventName": "pe_purchase",
-                    "email": "example@posthog.com",
+                    "email": "example@hanzo.ai",
                     "occurredAt": "2024-01-01T00:00:00Z",
                     "properties": {
                         "price": 50,

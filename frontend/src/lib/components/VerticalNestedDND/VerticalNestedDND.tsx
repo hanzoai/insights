@@ -31,7 +31,7 @@ import isEqual from 'lodash.isequal'
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconTrash } from '@posthog/icons'
+import { IconTrash } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'

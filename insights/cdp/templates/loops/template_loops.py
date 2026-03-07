@@ -203,7 +203,7 @@ if (res.status >= 400) {
 
 
 class TemplateLoopsMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-loops-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/insights-loops-plugin"
 
     @classmethod
     def migrate(cls, obj):

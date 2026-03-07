@@ -12,9 +12,11 @@
 !common/plugin-scaffold
 !common/siphash
 !common/insights-node
+!common/insights-js
+!common/insights-js-lite
 !dags
 !docs/onboarding
-!frontend/@posthog
+!frontend/@hanzo
 !frontend/*.*
 !frontend/.storybook
 !frontend/bin
@@ -27,6 +29,7 @@
 !manage.py
 !turbo.json
 !package.json
+!.pnpmfile.cjs
 !patches
 !playwright.config.ts
 !nodejs

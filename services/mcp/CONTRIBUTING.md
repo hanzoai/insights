@@ -42,10 +42,10 @@ The MCP server is already configured in our mprocs setup. From the repo root:
 
 ```bash
 # Start the full stack (includes MCP server)
-hogli start
+insightscli start
 
 # Or start with the minimal stack
-hogli start --minimal
+insightscli start --minimal
 ```
 
 The MCP server will be available at `http://localhost:8787`.
@@ -92,13 +92,13 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "posthog-dev": {
+    "insights-dev": {
       "command": "npx",
       "args": [
         "mcp-remote",
         "http://localhost:8787/mcp",
         "--header",
-        "Authorization: Bearer <your_local_personal_posthog_key>"
+        "Authorization: Bearer <your_local_personal_insights_key>"
       ]
     }
   }
@@ -186,7 +186,7 @@ This runs:
 
 ## UI Apps Architecture
 
-The visualization system is designed to be extractable to a standalone `@posthog/query-visualizer` package:
+The visualization system is designed to be extractable to a standalone `@hanzo/query-visualizer` package:
 
 ### Components (src/ui-apps/components/)
 
@@ -195,7 +195,7 @@ The visualization system is designed to be extractable to a standalone `@posthog
 - **Component** - Main entry point, infers visualization type from data structure
 - **TrendsVisualizer** - Renders TrendsQuery results as line/bar/number
 - **FunnelVisualizer** - Renders FunnelsQuery results as horizontal bars
-- **TableVisualizer** - Renders HogQLQuery results, auto-detects simple formats
+- **TableVisualizer** - Renders InsightsQLQuery results, auto-detects simple formats
 
 **Dumb chart components** (src/ui-apps/components/charts/) - Receive pre-processed data:
 
@@ -219,7 +219,7 @@ Components use CSS variables from the ext-apps SDK that the host provides:
 - `--font-sans`, `--font-mono`
 - `--border-radius-sm`, `--border-radius-md`, `--border-radius-lg`
 
-Chart colors are Insights-specific (`--posthog-chart-1` through `--posthog-chart-5`) since the ext-apps SDK doesn't provide chart colors.
+Chart colors are Insights-specific (`--insights-chart-1` through `--insights-chart-5`) since the ext-apps SDK doesn't provide chart colors.
 
 Default values are provided for light/dark mode via `prefers-color-scheme`.
 
@@ -252,7 +252,7 @@ To add UI visualization to a tool using an existing UI app:
    return {
        query: params.query,
        results: queryResult.data.results,
-       _posthogUrl: buildUrl(context, params.query)
+       _insightsUrl: buildUrl(context, params.query)
    }
    ```
 
@@ -318,7 +318,7 @@ When you need a completely new visualization (not just adding a tool to an exist
     * My new app visualization.
     * Used by: my-tool-name
     */
-   export const MY_NEW_APP_RESOURCE_URI = 'ui://posthog/my-new-app.html'
+   export const MY_NEW_APP_RESOURCE_URI = 'ui://insights/my-new-app.html'
    ```
 
 3. **Register the resource** (`src/resources/ui-apps.ts`):

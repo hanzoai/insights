@@ -12,8 +12,8 @@ import {
     IconLogomark,
     IconTerminal,
     IconVideoCamera,
-} from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { getExceptionAttributes } from 'lib/components/Errors/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

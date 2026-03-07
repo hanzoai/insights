@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconArrowLeft, IconExternal } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconExternal } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 import { useOpenAi } from 'scenes/max/useOpenAi'

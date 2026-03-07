@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { LemonModal, LemonTable, Link } from '@posthog/lemon-ui'
+import { LemonModal, LemonTable, Link } from '@hanzo/lemon-ui'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { Dayjs, dayjs, dayjsLocalToTimezone } from 'lib/dayjs'

@@ -34,31 +34,31 @@ export const healthMenuLogic = kea<healthMenuLogicType>([
         ],
     }),
     selectors({
-        postHogStatus: [(s) => [s.status], (status): InsightsStatusType => status],
+        insightsStatus: [(s) => [s.status], (status): InsightsStatusType => status],
         isFakeStatus: [
             (s) => [s.superpowersEnabled, s.fakeStatusOverride],
             (superpowersEnabled, fakeStatusOverride): boolean => !!superpowersEnabled && fakeStatusOverride !== 'none',
         ],
-        postHogStatusTooltip: [
-            (s) => [s.statusDescription, s.isFakeStatus, s.postHogStatus],
-            (statusDescription, isFakeStatus, postHogStatus): string | null => {
+        insightsStatusTooltip: [
+            (s) => [s.statusDescription, s.isFakeStatus, s.insightsStatus],
+            (statusDescription, isFakeStatus, insightsStatus): string | null => {
                 if (isFakeStatus) {
-                    return `[DRILL] ${capitalizeFirstLetter(postHogStatus.replace(/_/g, ' '))}`
+                    return `[DRILL] ${capitalizeFirstLetter(insightsStatus.replace(/_/g, ' '))}`
                 }
                 return statusDescription
             },
         ],
-        postHogStatusBadgeContent: [
-            (s) => [s.postHogStatus],
-            (postHogStatus): string => (postHogStatus !== 'operational' ? '!' : '✓'),
+        insightsStatusBadgeContent: [
+            (s) => [s.insightsStatus],
+            (insightsStatus): string => (insightsStatus !== 'operational' ? '!' : '✓'),
         ],
-        postHogStatusBadgeStatus: [
-            (s) => [s.postHogStatus],
-            (postHogStatus): InsightsStatusBadgeStatus => {
-                if (postHogStatus.includes('outage')) {
+        insightsStatusBadgeStatus: [
+            (s) => [s.insightsStatus],
+            (insightsStatus): InsightsStatusBadgeStatus => {
+                if (insightsStatus.includes('outage')) {
                     return 'danger'
                 }
-                if (postHogStatus.includes('degraded') || postHogStatus.includes('monitoring')) {
+                if (insightsStatus.includes('degraded') || insightsStatus.includes('monitoring')) {
                     return 'warning'
                 }
                 return 'success'

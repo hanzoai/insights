@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 const AnimatedNumber = ({ value, duration = 300 }: { value: number; duration?: number }): JSX.Element => {
     const [displayValue, setDisplayValue] = useState(value)

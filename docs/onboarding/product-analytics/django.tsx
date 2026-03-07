@@ -20,7 +20,7 @@ export const getDjangoSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                         ]}
@@ -44,14 +44,14 @@ export const getDjangoSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'your_app/apps.py',
                                 code: dedent`
                                     from django.apps import AppConfig
-                                    import posthog
+                                    import insights
 
                                     class YourAppConfig(AppConfig):
                                         name = "your_app_name"
 
                                         def ready(self):
-                                            posthog.api_key = '<ph_project_api_key>'
-                                            posthog.host = '<ph_client_api_host>'
+                                            insights.api_key = '<ph_project_api_key>'
+                                            insights.host = '<ph_client_api_host>'
                                 `,
                             },
                         ]}

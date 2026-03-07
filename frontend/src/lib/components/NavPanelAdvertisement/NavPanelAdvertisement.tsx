@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { IconX } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { addProductIntent } from 'lib/utils/product-intents'
@@ -56,7 +56,7 @@ export function NavPanelAdvertisementContent({
 
     useEffect(() => {
         if (!hidden && productInfo) {
-            posthog.capture('nav panel advertisement shown', {
+            insights.capture('nav panel advertisement shown', {
                 product_path: recommendedProduct.product_path,
                 product_id: recommendedProduct.id,
             })
@@ -74,7 +74,7 @@ export function NavPanelAdvertisementContent({
                 to={productInfo.href}
                 className="text-primary"
                 onClick={() => {
-                    posthog.capture('nav panel advertisement clicked', {
+                    insights.capture('nav panel advertisement clicked', {
                         product_path: recommendedProduct.product_path,
                         product_id: recommendedProduct.id,
                     })
@@ -109,7 +109,7 @@ export function NavPanelAdvertisementContent({
                                 e.preventDefault()
                                 e.stopPropagation()
 
-                                posthog.capture('nav panel advertisement dismissed', {
+                                insights.capture('nav panel advertisement dismissed', {
                                     product_path: recommendedProduct.product_path,
                                     product_id: recommendedProduct.id,
                                 })

@@ -116,7 +116,7 @@ class JavaScriptCompiler(Visitor):
         self.args = args or []
         self.indent_level = 0
         self.stl_functions: set[str] = set()
-        self.mode: str = "hog"
+        self.mode: str = "iql"
 
         # Initialize locals with function arguments
         for arg in self.args:
@@ -143,10 +143,10 @@ class JavaScriptCompiler(Visitor):
         return "\n".join(indentation + line if line else "" for line in code.split("\n"))
 
     def visit(self, node: ast.AST | None):
-        # In "hog" mode we compile AST nodes to bytecode.
+        # In "iql" mode we compile AST nodes to bytecode.
         # In "ast" mode we pass through as they are.
         # You may enter "ast" mode with `sql()` or `(select ...)`
-        if self.mode == "hog" or isinstance(node, ast.Placeholder):
+        if self.mode == "iql" or isinstance(node, ast.Placeholder):
             return super().visit(node)
         return self._visit_hog_ast(node)
 
@@ -354,7 +354,7 @@ class JavaScriptCompiler(Visitor):
         if node.name == "sql" and len(node.args) == 1:
             self.mode = "ast"
             response = self.visit(node.args[0])
-            self.mode = "hog"
+            self.mode = "iql"
             return response
 
         if node.name in STL_FUNCTIONS:
@@ -632,7 +632,7 @@ class JavaScriptCompiler(Visitor):
 
     def visit_placeholder(self, node: ast.Placeholder):
         if self.mode == "ast":
-            self.mode = "hog"
+            self.mode = "iql"
             result = self.visit(node.expr)
             self.mode = "ast"
             return result

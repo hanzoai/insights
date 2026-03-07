@@ -560,7 +560,7 @@ const censorUrlPath = (path, routes) => {
 }
 
 /**
- * Removes addresses and hashes from URLs stored in posthog properties.
+ * Removes addresses and hashes from URLs stored in insights properties.
  *
  * @param properties Full list of properties passed into the event.
  * @param propertiesToAnonymize List of properties that should be anonymized.
@@ -594,7 +594,7 @@ const censorProperties = (properties, routes, propertiesToAnonymize) => {
 /**
  * Runs on every event
  *
- * @param event PostHog event
+ * @param event Insights event
  * @param meta metadata defined in the plugin.json
  * @returns modified event
  */

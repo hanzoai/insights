@@ -1802,7 +1802,7 @@
             "required": ["insightId"],
             "additionalProperties": false
         },
-        "InsightGenerateHogQLFromQuestionSchema": {
+        "InsightGenerateInsightsQLFromQuestionSchema": {
             "type": "object",
             "properties": {
                 "question": {
@@ -3175,7 +3175,7 @@
                                     "properties": {
                                         "kind": {
                                             "type": "string",
-                                            "const": "HogQLQuery"
+                                            "const": "InsightsQLQuery"
                                         },
                                         "query": {
                                             "type": "string"

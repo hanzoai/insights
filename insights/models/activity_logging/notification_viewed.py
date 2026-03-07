@@ -10,4 +10,4 @@ class NotificationViewed(UUIDTModel):
     last_viewed_activity_date = models.DateTimeField(default=None)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user"], name="posthog_user_unique_viewed_date")]
+        constraints = [models.UniqueConstraint(fields=["user"], name="insights_user_unique_viewed_date")]

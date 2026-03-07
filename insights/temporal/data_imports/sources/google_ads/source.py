@@ -96,10 +96,10 @@ class GoogleAdsSource(SimpleSource[GoogleAdsSourceConfig | GoogleAdsServiceAccou
         return SourceConfig(
             name=SchemaExternalDataSourceType.GOOGLE_ADS,
             label="Google Ads",
-            caption="Ensure you have granted Insights access to your Google Ads account, learn how to do this in [the docs](https://posthog.com/docs/cdp/sources/google-ads).",
+            caption="Ensure you have granted Insights access to your Google Ads account, learn how to do this in [the docs](https://hanzo.ai/docs/cdp/sources/google-ads).",
             betaSource=True,
             iconPath="/static/services/google-ads.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/google-ads",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/google-ads",
             fields=cast(
                 list[FieldType],
                 [

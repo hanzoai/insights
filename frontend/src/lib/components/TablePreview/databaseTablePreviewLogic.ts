@@ -1,6 +1,6 @@
 import { afterMount, kea, key, path, props, propsChanged } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { insightsqlQuery } from '~/queries/query'
 import { insightsql } from '~/queries/utils'
@@ -44,7 +44,7 @@ export const databaseTablePreviewLogic = kea<databaseTablePreviewLogicType>([
                             )
                         )
                     } catch (error) {
-                        posthog.captureException(error)
+                        insights.captureException(error)
                         return []
                     }
                 },

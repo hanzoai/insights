@@ -92,7 +92,7 @@ function createShadowRoot(style) {
         {
             "key": "domains",
             "label": "Domains",
-            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,app.posthog.com"',
+            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,insights.hanzo.ai"',
             "type": "string",
             "default": "",
         },

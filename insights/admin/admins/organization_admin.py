@@ -22,7 +22,7 @@ from insights.models.organization import Organization
 
 # Registry of models to count for bulk-delete report.
 # Format: (model_import_path, filter_field, display_name)
-# This mirrors delete_bulky_postgres_data() in posthog/models/team/util.py
+# This mirrors delete_bulky_postgres_data() in insights/models/team/util.py
 # When bulk-delete changes, update this list accordingly.
 # Note: CohortPeople and BatchExport require special handling (see below)
 BULK_DELETE_MODEL_REGISTRY: tuple[tuple[str, str, str], ...] = (
@@ -138,7 +138,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "updated_at",
         "plugins_access_level",
         "billing_link",
-        "usage_posthog",
+        "usage_insights",
         "usage_display",
         "limited_products_display",
         "customer_trust_scores",
@@ -155,7 +155,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
         "billing_link",
-        "usage_posthog",
+        "usage_insights",
         "usage_display",
         "limited_products_display",
         "customer_trust_scores",
@@ -182,7 +182,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     def first_member(self, organization: Organization):
         user = organization.members.order_by("id").first()
         return (
-            format_html('<a href="{}">{}</a>', reverse("admin:posthog_user_change", args=[user.pk]), user.email)
+            format_html('<a href="{}">{}</a>', reverse("admin:insights_user_change", args=[user.pk]), user.email)
             if user is not None
             else "None"
         )
@@ -191,7 +191,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         url = f"{settings.BILLING_SERVICE_URL}/admin/billing/customer/?q={organization.pk}"
         return format_html(f'<a href="{url}">Billing →</a>')
 
-    def usage_posthog(self, organization: Organization):
+    def usage_insights(self, organization: Organization):
         return format_html(
             '<a target="_blank" href="/insights/new?insight=TRENDS&interval=day&display=ActionsLineGraph&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%2C%22math%22%3A%22dau%22%7D%5D&properties=%5B%7B%22key%22%3A%22organization_id%22%2C%22value%22%3A%22{}%22%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22person%22%7D%5D&actions=%5B%5D&new_entity=%5B%5D">See usage on Insights →</a>',
             organization.id,
@@ -308,7 +308,7 @@ class OrganizationAdmin(admin.ModelAdmin):
             except Exception as e:
                 messages.error(request, f"Error limiting {resource_name}: {str(e)}")
 
-        return redirect(reverse("admin:posthog_organization_change", args=[organization_id]))
+        return redirect(reverse("admin:insights_organization_change", args=[organization_id]))
 
     def unlimit_product_view(self, request, organization_id):
 
@@ -317,7 +317,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         if request.method == "POST":
             messages.info(request, "Quota limiting has been removed")
 
-        return redirect(reverse("admin:posthog_organization_change", args=[organization_id]))
+        return redirect(reverse("admin:insights_organization_change", args=[organization_id]))
 
     def get_urls(self):
         urls = super().get_urls()
@@ -361,7 +361,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     def send_usage_report_view(self, request):
         if not request.user.groups.filter(name="Billing Team").exists():
             messages.error(request, "You are not authorized to send usage reports.")
-            return redirect(reverse("admin:posthog_organization_changelist"))
+            return redirect(reverse("admin:insights_organization_changelist"))
 
         if request.method == "POST":
             form = UsageReportForm(request.POST)
@@ -369,11 +369,11 @@ class OrganizationAdmin(admin.ModelAdmin):
                 report_date = form.cleaned_data["report_date"]
                 call_command("send_usage_report", f"--date={report_date.strftime('%Y-%m-%d')}", "--async=1")
                 messages.success(request, f"Usage report for date {report_date} was sent successfully.")
-                return redirect(reverse("admin:posthog_organization_changelist"))
+                return redirect(reverse("admin:insights_organization_changelist"))
         else:
             form = UsageReportForm()
 
-        return render(request, "admin/posthog/organization/send_usage_report.html", {"form": form})
+        return render(request, "admin/insights/organization/send_usage_report.html", {"form": form})
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}

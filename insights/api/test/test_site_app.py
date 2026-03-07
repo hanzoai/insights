@@ -39,7 +39,7 @@ class TestSiteApp(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.content.decode("utf-8"),
-            f"function inject(){{}}().inject({{config:{{}},posthog:window['__$$ph_site_app_{plugin_config.id}']}})",
+            f"function inject(){{}}().inject({{config:{{}},insights:window['__$$ph_site_app_{plugin_config.id}']}})",
         )
 
     def test_cors_access(self):
@@ -75,7 +75,7 @@ class TestSiteApp(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.content.decode("utf-8"),
-            f"function inject(){{}}().inject({{config:{{}},posthog:window['__$$ph_site_app_{plugin_config.id}']}})",
+            f"function inject(){{}}().inject({{config:{{}},insights:window['__$$ph_site_app_{plugin_config.id}']}})",
         )
 
     def test_get_site_config_from_schema(self):

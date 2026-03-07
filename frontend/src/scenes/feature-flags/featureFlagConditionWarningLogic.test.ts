@@ -41,7 +41,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Exact,
-                    value: 'test@posthog.com',
+                    value: 'test@hanzo.ai',
                 },
             ]
 
@@ -62,7 +62,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: '^[a-z]+@posthog\\.com$',
+                    value: '^[a-z]+@insights\\.com$',
                 },
                 {
                     key: 'email',
@@ -103,7 +103,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: 'test(?=@posthog)',
+                    value: 'test(?=@insights)',
                 },
             ]
 
@@ -124,7 +124,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: 'posthog(?!\\.org)',
+                    value: 'insights(?!\\.org)',
                 },
             ]
 
@@ -147,7 +147,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: '(?<=@)posthog',
+                    value: '(?<=@)insights',
                 },
             ]
 
@@ -168,7 +168,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: '(?<!admin@)posthog',
+                    value: '(?<!admin@)insights',
                 },
             ]
 
@@ -501,7 +501,7 @@ describe('featureFlagConditionWarningLogic', () => {
                     key: 'email',
                     type: PropertyFilterType.Person,
                     operator: PropertyOperator.Regex,
-                    value: '(test|prod)@(posthog|example)\\.(com|org)',
+                    value: '(test|prod)@(insights|example)\\.(com|org)',
                 },
             ]
 

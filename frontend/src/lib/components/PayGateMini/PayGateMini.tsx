@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { IconInfo, IconOpenSidebar, IconUnlock } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -63,7 +63,7 @@ export function PayGateMini({
 
     useEffect(() => {
         if (gateVariant) {
-            posthog.capture('pay gate shown', {
+            insights.capture('pay gate shown', {
                 product_key: productWithFeature?.type,
                 feature: feature,
                 gate_variant: gateVariant,
@@ -76,7 +76,7 @@ export function PayGateMini({
         if (handleSubmit) {
             handleSubmit()
         }
-        posthog.capture('pay gate CTA clicked', {
+        insights.capture('pay gate CTA clicked', {
             product_key: productWithFeature?.type,
             feature: feature,
             gate_variant: gateVariant,

@@ -114,7 +114,7 @@ class MongoDBSource(SimpleSource[MongoDBSourceConfig], ValidateDatabaseHostMixin
             caption="Enter your MongoDB connection string to automatically pull your MongoDB data into the Insights Data warehouse.",
             betaSource=True,
             iconPath="/static/services/Mongodb.svg",
-            docsUrl="https://posthog.com/docs/cdp/sources/mongodb",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/mongodb",
             fields=cast(
                 list[FieldType],
                 [

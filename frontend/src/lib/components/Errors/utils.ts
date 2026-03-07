@@ -20,39 +20,39 @@ export function stacktraceHasInAppFrames(stacktrace: ErrorTrackingException['sta
 
 export function getRuntimeFromLib(lib?: string | null): ErrorTrackingRuntime {
     switch (lib?.toLowerCase()) {
-        case 'posthog-python':
+        case 'insights-python':
             return 'python'
-        case 'posthog-node':
+        case 'insights-node':
         case 'analytics-node':
-        case 'posthog-edge':
+        case 'insights-edge':
             return 'node'
-        case 'posthog-js':
+        case 'insights-js':
         case 'web':
         case 'js':
             return 'web'
-        case 'posthog-go':
+        case 'insights-go':
         case 'analytics-go':
             return 'go'
-        case 'posthog-php':
+        case 'insights-php':
             return 'php'
-        case 'posthog-rs':
+        case 'insights-rs':
             return 'rust'
-        case 'posthog-dotnet':
+        case 'insights-dotnet':
             return 'dotnet'
-        case 'posthog-android':
+        case 'insights-android':
             return 'android'
-        case 'posthog-ios':
+        case 'insights-ios':
         case 'ios-widget':
             return 'ios'
-        case 'posthog-react-native':
+        case 'insights-react-native':
             return 'react-native'
-        case 'posthog-dart':
+        case 'insights-dart':
             return 'dart'
-        case 'posthog-flutter':
+        case 'insights-flutter':
             return 'flutter'
-        case 'posthog-elixir':
+        case 'insights-elixir':
             return 'elixir'
-        case 'posthog-java':
+        case 'insights-java':
         case 'analytics-java':
             return 'java'
         default:

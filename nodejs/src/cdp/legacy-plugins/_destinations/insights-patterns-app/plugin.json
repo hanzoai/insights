@@ -1,9 +1,9 @@
 {
     "name": "Patterns App",
-    "url": "https://github.com/patterns-app/posthog-patterns-app",
+    "url": "https://github.com/patterns-app/insights-patterns-app",
     "description": "Send events data to Patterns App",
     "main": "index.ts",
-    "posthogVersion": ">= 1.25.0",
+    "insightsVersion": ">= 1.25.0",
     "config": [
         {
             "key": "webhookUrl",

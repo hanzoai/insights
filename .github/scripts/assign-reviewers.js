@@ -99,8 +99,8 @@ function parseOwners(owners) {
     const users = new Set()
 
     for (const owner of owners) {
-        if (owner.startsWith('@PostHog/')) {
-            const teamName = owner.replace('@PostHog/', '')
+        if (owner.startsWith('@hanzoai/')) {
+            const teamName = owner.replace('@hanzoai/', '')
             teams.add(teamName)
         } else if (owner.startsWith('@')) {
             const username = owner.replace('@', '')

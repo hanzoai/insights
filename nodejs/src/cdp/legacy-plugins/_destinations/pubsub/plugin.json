@@ -1,9 +1,9 @@
 {
     "name": "Pub/Sub Export",
-    "url": "https://github.com/PostHog/pubsub-plugin",
+    "url": "https://github.com/Hanzo Insights/pubsub-plugin",
     "description": "Sends events to a Pub/Sub topic on ingestion.",
     "main": "index.ts",
-    "posthogVersion": ">= 1.25.0",
+    "insightsVersion": ">= 1.25.0",
     "config": [
         {
             "key": "googleCloudKeyJson",

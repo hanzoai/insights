@@ -1,7 +1,7 @@
 import { BuiltLogic, useValues } from 'kea'
 
-import { IconCheck, IconMinus, IconWarning, IconX } from '@posthog/icons'
-import { LemonTable, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconMinus, IconWarning, IconX } from '@hanzo/icons'
+import { LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'

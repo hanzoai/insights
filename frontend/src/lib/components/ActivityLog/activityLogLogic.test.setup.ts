@@ -24,7 +24,7 @@ const makeAPIItem = ({
     merge = null,
     trigger = null,
 }: APIMockSetup): ActivityLogItem => ({
-    user: { first_name: 'peter', email: 'peter@posthog.com' },
+    user: { first_name: 'peter', email: 'peter@hanzo.ai' },
     activity,
     scope,
     item_id: '7',

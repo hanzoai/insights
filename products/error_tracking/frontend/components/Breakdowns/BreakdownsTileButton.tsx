@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 import { BREAKDOWN_NULL_STRING_LABEL } from 'scenes/insights/utils'
@@ -29,7 +29,7 @@ export function BreakdownsTileButton({ item }: BreakdownsTileButtonProps): JSX.E
             onClick={() => {
                 setBreakdownProperty(item.property)
                 setCategory('breakdowns')
-                posthog.capture(BreakdownsEvents.MiniBreakdownsPropertySelected, {
+                insights.capture(BreakdownsEvents.MiniBreakdownsPropertySelected, {
                     property: item.property,
                 })
             }}

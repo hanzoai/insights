@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import isEqual from 'lodash.isequal'
 import { useMemo, useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
+import { IconPlus } from '@hanzo/icons'
 
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { VerticalNestedDND } from 'lib/components/VerticalNestedDND/VerticalNestedDND'
@@ -160,7 +160,7 @@ export function CustomChannelTypes(): JSX.Element {
             <p>
                 You can create custom channel types by defining rules that match incoming events. The first matching
                 rule is used, and if no rule matches (or if none are defined) then the{' '}
-                <Link to="https://posthog.com/docs/data/channel-type#channel-type-calculation">
+                <Link to="https://hanzo.ai/docs/data/channel-type#channel-type-calculation">
                     default channel type
                 </Link>{' '}
                 is used.

@@ -33,7 +33,7 @@ def prepare_version(force=False):
     except FileExistsError:
         if not args.force:
             raise FileExistsError(
-                f"A directory already exists for this version at posthog/user_scripts/{VERSION_STR}. Did you forget to increment the version? If not, delete the folder and run this again, or run this script with a -f"
+                f"A directory already exists for this version at insights/user_scripts/{VERSION_STR}. Did you forget to increment the version? If not, delete the folder and run this again, or run this script with a -f"
             )
     for file in os.listdir():
         if os.path.isfile(file) and not file.endswith(".xml"):

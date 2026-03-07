@@ -10,7 +10,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonTable, lemonToast } from '@posthog/lemon-ui'
+import { LemonTable, lemonToast } from '@hanzo/lemon-ui'
 
 import {
     ActiveElement,

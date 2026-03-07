@@ -83,10 +83,10 @@ jobs:
 
             - name: Check MCP schema is up to date
               run: |
-                  ./bin/hogli build:schema-mcp
+                  ./bin/insightscli build:schema-mcp
                   if ! git diff --exit-code services/mcp/schema/tool-inputs.json; then
                     echo ""
-                    echo "::error::MCP tool-inputs.json is out of date. Run 'hogli build:schema-mcp' and commit the result."
+                    echo "::error::MCP tool-inputs.json is out of date. Run 'insightscli build:schema-mcp' and commit the result."
                     exit 1
                   fi
 
@@ -125,8 +125,8 @@ jobs:
         if: needs.changes.outputs.mcp == 'true'
         env:
             SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da'
-            DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
-            PERSONS_DB_WRITER_URL: 'postgres://posthog:posthog@localhost:5432/posthog_persons'
+            DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
+            PERSONS_DB_WRITER_URL: 'postgres://insights:insights@localhost:5432/insights_persons'
             REDIS_URL: 'redis://localhost'
             CLICKHOUSE_HOST: 'localhost'
             CLICKHOUSE_SECURE: 'False'
@@ -154,7 +154,7 @@ jobs:
             - name: Stop/Start stack with Docker Compose
               shell: bash
               run: |
-                  export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/posthog-301601/mirror/"
+                  export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/insights-301601/mirror/"
                   cp insights/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
                   (
                       max_attempts=3
@@ -262,9 +262,9 @@ jobs:
             - name: Run migrations
               run: |
                   # Create persons database and run sqlx migrations first
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx database create
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx migrate run --source rust/persons_migrations/
                   # Then run Django migrations
                   python manage.py migrate --noinput
@@ -279,7 +279,7 @@ jobs:
                   from insights.clickhouse.client import sync_execute
                   with open('products/logs/backend/test/test_logs_schema.sql') as f:
                       schema_sql = f.read()
-                  schema_sql = schema_sql.replace('use database posthog_test;', '')
+                  schema_sql = schema_sql.replace('use database insights_test;', '')
                   for sql in schema_sql.split(';'):
                       sql = sql.strip()
                       if not sql:
@@ -332,8 +332,8 @@ jobs:
             - name: Run integration tests
               run: cd services/mcp && pnpm run test:integration
               env:
-                  TEST_POSTHOG_API_BASE_URL: http://localhost:8000
-                  TEST_POSTHOG_PERSONAL_API_KEY: e2e_demo_api_key
+                  TEST_INSIGHTS_API_BASE_URL: http://localhost:8000
+                  TEST_INSIGHTS_PERSONAL_API_KEY: e2e_demo_api_key
                   TEST_ORG_ID: ${{ env.TEST_ORG_ID }}
                   TEST_PROJECT_ID: ${{ env.TEST_PROJECT_ID }}
 

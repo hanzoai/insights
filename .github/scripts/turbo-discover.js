@@ -46,12 +46,12 @@ function getTurboTasks() {
 function getProducts(tasks, legacyChanged) {
     if (legacyChanged) {
         // Legacy code changed — all products must be tested
-        return [...new Set(tasks.map((t) => t.package.replace('@posthog/products-', '')))].sort()
+        return [...new Set(tasks.map((t) => t.package.replace('@hanzo/products-', '')))].sort()
     }
     // Only product files changed — test only cache MISSes
     return [
         ...new Set(
-            tasks.filter((t) => t.cache?.status === 'MISS').map((t) => t.package.replace('@posthog/products-', ''))
+            tasks.filter((t) => t.cache?.status === 'MISS').map((t) => t.package.replace('@hanzo/products-', ''))
         ),
     ].sort()
 }
@@ -109,7 +109,7 @@ function buildMatrix(products, durations) {
         const duration = getProductDuration(product, durations)
         const shards = duration > TARGET_SHARD_SECONDS ? Math.ceil(duration / TARGET_SHARD_SECONDS) : 1
         console.error(`  ${product}: ${(duration / 60).toFixed(1)} min, ${shards} shard(s)`)
-        const filters = `--filter=@posthog/products-${product}`
+        const filters = `--filter=@hanzo/products-${product}`
 
         if (duration < SMALL_THRESHOLD_SECONDS) {
             small.push(product)
@@ -129,7 +129,7 @@ function buildMatrix(products, durations) {
     for (const bucket of packSmallProducts(small, durations)) {
         matrix.push({
             group: bucket.join(', '),
-            filters: bucket.map((p) => `--filter=@posthog/products-${p}`).join(' '),
+            filters: bucket.map((p) => `--filter=@hanzo/products-${p}`).join(' '),
             pytest_args: '',
         })
     }

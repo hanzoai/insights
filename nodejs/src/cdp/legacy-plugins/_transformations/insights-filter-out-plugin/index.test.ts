@@ -1,6 +1,6 @@
 import { Filter, processEvent, setupPlugin } from '.'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { LegacyTransformationPluginMeta } from '../../types'
 

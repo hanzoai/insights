@@ -14,7 +14,7 @@ test.describe('Toolbar', () => {
             await page.goto(href)
         }
 
-        await expect(page.locator('#__POSTHOG_TOOLBAR__ .Toolbar')).toBeVisible({ timeout: 5000 })
+        await expect(page.locator('#__INSIGHTS_TOOLBAR__ .Toolbar')).toBeVisible({ timeout: 5000 })
     })
 
     test('Toolbar item in sidebar has launch options', async ({ page }) => {

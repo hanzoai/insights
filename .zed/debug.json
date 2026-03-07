@@ -12,10 +12,10 @@
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
-            "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+            "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
             "PRINT_SQL": "1",
-            "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
+            "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
             "CLOUD_DEPLOYMENT": "local"
         },
         "justMyCode": false
@@ -33,7 +33,7 @@
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
-            "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+            "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
             "PRINT_SQL": "1",
             "BILLING_SERVICE_URL": "http://localhost:8100/",
@@ -51,7 +51,7 @@
         "env": {
             "SKIP_ASYNC_MIGRATIONS_SETUP": "1",
             "DEBUG": "1",
-            "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
+            "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1"
         },
         "justMyCode": true
@@ -66,7 +66,7 @@
         "env": {
             "SKIP_ASYNC_MIGRATIONS_SETUP": "1",
             "DEBUG": "1",
-            "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
+            "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1"
         },
         "justMyCode": true
@@ -84,7 +84,7 @@
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
-            "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+            "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
             "PRINT_SQL": "1"
         },
@@ -129,14 +129,14 @@
         "request": "launch",
         "program": "$ZED_WORKTREE_ROOT/manage.py",
         "cwd": "$ZED_WORKTREE_ROOT",
-        "args": ["migrate", "posthog"],
+        "args": ["migrate", "insights"],
         "env": {
             "PYTHONUNBUFFERED": "1",
             "DJANGO_SETTINGS_MODULE": "insights.settings",
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
-            "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+            "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
             "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
             "PRINT_SQL": "1",
             "BILLING_SERVICE_URL": "http://localhost:8100/",

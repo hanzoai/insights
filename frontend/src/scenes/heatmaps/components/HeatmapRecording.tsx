@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { LemonBanner, LemonDivider, LemonInput, LemonLabel } from '@posthog/lemon-ui'
+import { LemonBanner, LemonDivider, LemonInput, LemonLabel } from '@hanzo/lemon-ui'
 
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { FixedReplayHeatmapBrowser } from 'scenes/heatmaps/components/FixedReplayHeatmapBrowser'

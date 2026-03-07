@@ -8,7 +8,7 @@ import {
     LemonDropdownProps,
     LemonInput,
     ProfilePicture,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { fullName } from 'lib/utils'
 import { membersLogic } from 'scenes/organization/membersLogic'

@@ -13,7 +13,7 @@ import structlog
 from asgiref.sync import sync_to_async
 from google.genai import types
 from google.genai.types import GenerateContentConfig
-from posthoganalytics.ai.gemini import genai
+from hanzoanalytics.ai.gemini import genai
 from temporalio import activity
 
 from insights.models.team.team import Team

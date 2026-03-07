@@ -19,7 +19,7 @@ import {
     IconReceipt,
     IconServer,
     IconShieldLock,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
@@ -279,7 +279,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                     {billing?.account_owner?.email && billing?.account_owner?.name && (
                         <>
                             <Label intent="menu" className="px-2 mt-2">
-                                YOUR POSTHOG HUMAN
+                                YOUR INSIGHTS HUMAN
                             </Label>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
@@ -347,7 +347,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
 
                     <DropdownMenuItem asChild>
                         <Link
-                            to="https://posthog.com/changelog"
+                            to="https://hanzo.ai/changelog"
                             buttonProps={{
                                 menuItem: true,
                             }}

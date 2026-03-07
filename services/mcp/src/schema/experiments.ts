@@ -14,7 +14,7 @@ const ExperimentConclusion = ['won', 'lost', 'inconclusive', 'stopped_early', 'i
 /**
  * This is the schema for the experiment metric base properties.
  * It references the ExperimentMetricBaseProperties type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  *
  * TODO: Add the schemas for FunnelConversionWindowTimeUnit
  */
@@ -31,7 +31,7 @@ export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBase
 /**
  * This is the schema for the experiment metric outlier handling.
  * It references the ExperimentMetricOutlierHandling type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentMetricOutlierHandlingSchema = z.object({
     lower_bound_percentile: z.number().optional(),
@@ -43,7 +43,7 @@ export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOut
 /**
  * This is the schema for the experiment metric source.
  * It references the ExperimentMetricSource type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  *
  * TODO: Add the schemas for the EventsNode and ActionsNode and ExperimentDataWarehouseNode
  */
@@ -52,7 +52,7 @@ export const ExperimentMetricSourceSchema = z.any() // EventsNode | ActionsNode 
 /**
  * This is the schema for the experiment funnel metric step.
  * It references the ExperimentFunnelMetricStep type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  *
  * TODO: Add the schemas for the EventsNode and ActionsNode
  */
@@ -61,7 +61,7 @@ export const ExperimentFunnelMetricStepSchema = z.any() // EventsNode | ActionsN
 /**
  * This is the schema for the experiment mean metric.
  * It references the ExperimentMeanMetric type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentMeanMetricSchema = z
     .object({
@@ -76,7 +76,7 @@ export type ExperimentMeanMetric = z.infer<typeof ExperimentMeanMetricSchema>
 /**
  * This is the schema for the experiment funnel metric.
  * It references the ExperimentFunnelMetric type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentFunnelMetricSchema = z
     .object({
@@ -91,7 +91,7 @@ export type ExperimentFunnelMetric = z.infer<typeof ExperimentFunnelMetricSchema
 /**
  * This is the schema for the experiment ratio metric.
  * It references the ExperimentRatioMetric type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentRatioMetricSchema = z
     .object({
@@ -106,7 +106,7 @@ export type ExperimentRatioMetric = z.infer<typeof ExperimentRatioMetricSchema>
 /**
  * This is the schema for the experiment metric.
  * It references the ExperimentMetric type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentMetricSchema = z.union([
     ExperimentMeanMetricSchema,
@@ -119,7 +119,7 @@ export type ExperimentMetric = z.infer<typeof ExperimentMetricSchema>
 /**
  * This is the schema for the experiment exposure config.
  * It references the ExperimentEventExposureConfig type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentEventExposureConfigSchema = z.object({
     kind: z.literal('ExperimentEventExposureConfig'),
@@ -130,7 +130,7 @@ export const ExperimentEventExposureConfigSchema = z.object({
 /**
  * This is the schema for the experiment exposure criteria.
  * It references the ExperimentExposureCriteria type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentExposureCriteriaSchema = z.object({
     filterTestAccounts: z.boolean().optional(),
@@ -141,7 +141,7 @@ export const ExperimentExposureCriteriaSchema = z.object({
 /**
  * This is the schema for the experiment object.
  * It references the Experiment type from
- * @posthog/frontend/src/types.ts
+ * @hanzo/frontend/src/types.ts
  */
 export const ExperimentSchema = z.object({
     id: z.number(),
@@ -433,7 +433,7 @@ export type ExperimentUpdateTransform = z.output<typeof ExperimentUpdateTransfor
 /**
  * This is the schema for the experiment exposure query.
  * It references the ExperimentExposureQuery type from
- * @posthog/frontend/src/queries/schema/schema-general.ts
+ * @hanzo/frontend/src/queries/schema/schema-general.ts
  */
 export const ExperimentExposureQuerySchema = z.object({
     kind: z.literal('ExperimentExposureQuery'),

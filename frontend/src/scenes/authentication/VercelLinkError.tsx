@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { IconErrorOutline } from 'lib/lemon-ui/icons'

@@ -1,9 +1,9 @@
 import equal from 'fast-deep-equal'
 import { actions, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { EventType, customEvent, eventWithTime } from '@posthog/rrweb-types'
+import { EventType, customEvent, eventWithTime } from '@hanzo/rrweb-types'
 
 import { Dayjs, dayjs, now } from 'lib/dayjs'
 
@@ -402,14 +402,14 @@ export const sessionRecordingDataCoordinatorLogic = kea<sessionRecordingDataCoor
 
                 if (everyWindowMissingFullSnapshot) {
                     // video is definitely unplayable
-                    posthog.capture('recording_has_no_full_snapshot', {
+                    insights.capture('recording_has_no_full_snapshot', {
                         watchedSession: sessionRecordingId,
                         teamId: currentTeam?.id,
                         teamName: currentTeam?.name,
                         recordingAgeMs,
                     })
                 } else if (anyWindowMissingFullSnapshot) {
-                    posthog.capture('recording_window_missing_full_snapshot', {
+                    insights.capture('recording_window_missing_full_snapshot', {
                         watchedSession: sessionRecordingId,
                         teamID: currentTeam?.id,
                         teamName: currentTeam?.name,
@@ -545,7 +545,7 @@ export const sessionRecordingDataCoordinatorLogic = kea<sessionRecordingDataCoor
     subscriptions(({ values }) => ({
         isRecentAndInvalid: (prev: boolean, next: boolean) => {
             if (!prev && next) {
-                posthog.capture('recording cannot playback yet', {
+                insights.capture('recording cannot playback yet', {
                     watchedSession: values.sessionPlayerData.sessionRecordingId,
                 })
             }

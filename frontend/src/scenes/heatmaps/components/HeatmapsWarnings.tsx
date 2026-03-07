@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { teamLogic } from 'scenes/teamLogic'
 

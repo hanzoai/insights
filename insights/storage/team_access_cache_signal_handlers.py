@@ -5,9 +5,9 @@ This module provides handler functions that automatically update
 the team access token cache when Team models change,
 ensuring cache consistency with the database.
 
-Note: Signal subscriptions are registered in posthog/models/remote_config.py
+Note: Signal subscriptions are registered in insights/models/remote_config.py
 Note: PersonalAPIKey and OrganizationMembership cache updates are handled
-      by Celery tasks in posthog/tasks/team_access_cache_tasks.py
+      by Celery tasks in insights/tasks/team_access_cache_tasks.py
 """
 
 import logging

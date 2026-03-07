@@ -1,19 +1,19 @@
 {
     "name": "Replicator",
-    "url": "https://github.com/PostHog/posthog-plugin-replicator",
+    "url": "https://github.com/Hanzo Insights/insights-plugin-replicator",
     "description": "Replicate Insights event stream in another Insights instance",
     "main": "index.ts",
     "config": [
         {
             "key": "host",
-            "hint": "E.g. posthog.yourcompany.com",
+            "hint": "E.g. insights.yourcompany.com",
             "name": "Host",
             "type": "string",
             "required": true
         },
         {
             "key": "project_api_key",
-            "hint": "Grab it from e.g. https://posthog.yourcompany.com/project/settings",
+            "hint": "Grab it from e.g. https://insights.yourcompany.com/project/settings",
             "name": "Project API Key",
             "type": "string",
             "required": true

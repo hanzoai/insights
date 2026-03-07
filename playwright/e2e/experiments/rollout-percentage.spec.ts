@@ -65,7 +65,7 @@ test.describe('Experiment Rollout Percentage', () => {
 
             const patchResult = await page.evaluate(
                 async ({ url, filters }) => {
-                    const cookie = document.cookie.split('; ').find((c) => c.startsWith('posthog_csrftoken='))
+                    const cookie = document.cookie.split('; ').find((c) => c.startsWith('insights_csrftoken='))
                     const csrfToken = cookie ? cookie.split('=')[1] : ''
                     const res = await fetch(url, {
                         method: 'PATCH',

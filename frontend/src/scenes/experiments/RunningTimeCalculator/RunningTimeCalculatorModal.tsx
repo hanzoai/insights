@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { humanFriendlyNumber } from 'lib/utils'

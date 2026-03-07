@@ -5,7 +5,7 @@ from typing import Any, Union, cast
 from django.db.models import Model, QuerySet
 from django.shortcuts import get_object_or_404
 
-import posthoganalytics
+import hanzoanalytics
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions, permissions, serializers, viewsets
 from rest_framework.decorators import action
@@ -356,7 +356,7 @@ class OrganizationViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
         for field, event_name in setting_events:
             if field in request.data:
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     event_name,
                     distinct_id=str(user.distinct_id),
                     properties={

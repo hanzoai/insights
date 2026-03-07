@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { ReactNode } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonInput, Tooltip } from '@posthog/lemon-ui'
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { ChartFilter } from 'lib/components/ChartFilter'
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
@@ -365,7 +365,7 @@ function DecimalPrecisionInput(): JSX.Element {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     const reportChange = useDebouncedCallback(() => {
-        posthog.capture('decimal places changed', {
+        insights.capture('decimal places changed', {
             decimal_places: trendsFilter?.decimalPlaces,
         })
     }, 500)

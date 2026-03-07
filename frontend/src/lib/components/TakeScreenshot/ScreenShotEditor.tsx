@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconPencil, IconUndo } from '@posthog/icons'
-import { LemonButton, LemonColorPicker, LemonInput, LemonModal, LemonSelect } from '@posthog/lemon-ui'
+import { IconPencil, IconUndo } from '@hanzo/icons'
+import { LemonButton, LemonColorPicker, LemonInput, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
 
 import { getSeriesColorPalette } from 'lib/colors'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'

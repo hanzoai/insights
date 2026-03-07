@@ -21,7 +21,7 @@
                         "$browser_version": 114,
                         "$referrer": "$direct",
                         "$referring_domain": "$direct",
-                        "email": "marius@posthog.com"
+                        "email": "marius@hanzo.ai"
                     },
                     "$sent_at": "2023-06-15T09:34:08.102000+00:00",
                     "$geoip_city_name": "Sydney",
@@ -48,7 +48,7 @@
             },
             "$identify",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             null,
@@ -165,7 +165,7 @@
                     "current_usage.session_replay": 0,
                     "$referrer": "$direct",
                     "$referring_domain": "$direct",
-                    "token": "phc_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
+                    "token": "hi_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
                     "$session_id": "188be678d9b3dca-06f2a14fff24a9-1b525634-201b88-188be678d9c5938",
                     "$window_id": "188be678d9d58c7-0befefd64c3a61-1b525634-201b88-188be678d9e58ed",
                     "$pageview_id": "188be67b6d51fb2-09a13f006e2edf-1b525634-201b88-188be67b6d64be6",
@@ -207,7 +207,7 @@
             },
             "$pageview",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             "http://localhost:8000/events",
@@ -324,7 +324,7 @@
                     "current_usage.session_replay": 0,
                     "$referrer": "$direct",
                     "$referring_domain": "$direct",
-                    "token": "phc_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
+                    "token": "hi_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
                     "$session_id": "188be678d9b3dca-06f2a14fff24a9-1b525634-201b88-188be678d9c5938",
                     "$window_id": "188be678d9d58c7-0befefd64c3a61-1b525634-201b88-188be678d9e58ed",
                     "$pageview_id": "188be67b6d51fb2-09a13f006e2edf-1b525634-201b88-188be67b6d64be6",
@@ -366,7 +366,7 @@
             },
             "$opt_in",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             "http://localhost:8000/events",
@@ -483,7 +483,7 @@
                     "current_usage.session_replay": 0,
                     "$referrer": "$direct",
                     "$referring_domain": "$direct",
-                    "token": "phc_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
+                    "token": "hi_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
                     "$session_id": "188be678d9b3dca-06f2a14fff24a9-1b525634-201b88-188be678d9c5938",
                     "$window_id": "188be678d9d58c7-0befefd64c3a61-1b525634-201b88-188be678d9e58ed",
                     "$pageview_id": "188be67935d3aa9-02388d30cd9ce4-1b525634-201b88-188be67935e4d1e",
@@ -525,7 +525,7 @@
             },
             "$pageleave",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             "http://localhost:8000/events",
@@ -656,7 +656,7 @@
                         "after": "-24h"
                     },
                     "duration": 790.3000000119209,
-                    "token": "phc_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
+                    "token": "hi_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
                     "$session_id": "188be678d9b3dca-06f2a14fff24a9-1b525634-201b88-188be678d9c5938",
                     "$window_id": "188be678d9d58c7-0befefd64c3a61-1b525634-201b88-188be678d9e58ed",
                     "$pageview_id": "188be67935d3aa9-02388d30cd9ce4-1b525634-201b88-188be67935e4d1e",
@@ -698,7 +698,7 @@
             },
             "query completed",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             "http://localhost:8000/events",
@@ -829,7 +829,7 @@
                     "retention_count": 1,
                     "lifecycle_count": 1,
                     "funnels_count": 1,
-                    "token": "phc_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
+                    "token": "hi_cCXjM51PQcavKBvv1Ys1owgme46pQSyzzWfKd9bOiDd",
                     "$session_id": "188be678d9b3dca-06f2a14fff24a9-1b525634-201b88-188be678d9c5938",
                     "$window_id": "188be678d9d58c7-0befefd64c3a61-1b525634-201b88-188be678d9e58ed",
                     "$pageview_id": "188be67935d3aa9-02388d30cd9ce4-1b525634-201b88-188be67935e4d1e",
@@ -871,7 +871,7 @@
             },
             "viewed dashboard",
             {
-                "display_name": "marius@posthog.com",
+                "display_name": "marius@hanzo.ai",
                 "distinct_id": "AVj4CE0lzux5674cWjLNXat7nzEWiwOQQN0EvY2LAee"
             },
             "http://localhost:8000/events",

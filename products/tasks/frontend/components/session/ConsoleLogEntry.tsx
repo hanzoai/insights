@@ -1,4 +1,4 @@
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { LogLevel } from '../../lib/parse-logs'
 

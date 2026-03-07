@@ -1,6 +1,6 @@
 {
     "sdk_versions": {
-        "posthog-python": [
+        "insights-python": [
             {
                 "lib_version": "6.7.4",
                 "max_timestamp": "2025-10-11 21:07:24.248000+00:00",

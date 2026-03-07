@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-managed-migrations",
+    "name": "@hanzo/products-managed-migrations",
     "dependencies": {
         "kea": "catalog:",
         "kea-forms": "catalog:",
@@ -7,8 +7,8 @@
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
-        "@posthog/lemon-ui": "*",
+        "@hanzo/icons": "*",
+        "@hanzo/lemon-ui": "*",
         "@types/react": "*",
         "react": "*"
     }

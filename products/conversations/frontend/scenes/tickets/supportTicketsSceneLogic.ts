@@ -1,6 +1,6 @@
 import { actions, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 

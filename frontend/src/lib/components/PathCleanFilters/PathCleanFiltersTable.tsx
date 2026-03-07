@@ -14,8 +14,8 @@ import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { SortableDragIcon } from 'lib/lemon-ui/icons'
 import { isValidRegexp } from 'lib/utils/regexp'

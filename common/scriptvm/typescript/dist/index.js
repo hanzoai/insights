@@ -1462,7 +1462,7 @@ function $baa08b22344fa42c$var$toBytes(ip, isV4) {
 
 
 var $f394cf71e69f6308$require$Buffer = $92bN8$buffer.Buffer;
-// TODO: this file should be generated from or mergred with posthog/insightsql/compiler/javascript_stl.py
+// TODO: this file should be generated from or mergred with insights/insightsql/compiler/javascript_stl.py
 function $f394cf71e69f6308$var$STLToString(args) {
     if ((0, $656fe352dcd0774c$export$bd8197d5a05a4a7e)(args[0])) {
         const month = args[0].month;

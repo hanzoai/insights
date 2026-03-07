@@ -17,8 +17,8 @@ import {
     IconThumbsUp,
     IconTrending,
     IconWarning,
-} from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SurveyTemplate, SurveyTemplateType } from '../../constants'
 import { surveyWizardLogic } from '../surveyWizardLogic'

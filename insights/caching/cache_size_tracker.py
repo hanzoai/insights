@@ -118,9 +118,9 @@ class TeamCacheSizeTracker:
     Tracks cache size per team using Redis data structures.
 
     Redis keys used:
-    - posthog:cache_sizes:{team_id} - Sorted set: member=cache_key, score=timestamp (for LRU ordering)
-    - posthog:cache_entry_sizes:{team_id} - Hash: field=cache_key, value=size (for O(1) size lookup)
-    - posthog:cache_total:{team_id} - String counter: total bytes (for O(1) total size lookup)
+    - insights:cache_sizes:{team_id} - Sorted set: member=cache_key, score=timestamp (for LRU ordering)
+    - insights:cache_entry_sizes:{team_id} - Hash: field=cache_key, value=size (for O(1) size lookup)
+    - insights:cache_total:{team_id} - String counter: total bytes (for O(1) total size lookup)
     """
 
     def __init__(self, team_id: int, cache_backend=None, redis_client=None, is_cluster: bool = False):
@@ -131,13 +131,13 @@ class TeamCacheSizeTracker:
         if self._is_cluster:
             # Redis Cluster requires all keys in a multi-key Lua script to be on the same shard
             # Wrap in braces to only hash on team_id
-            self.entries_key = f"posthog:cache_sizes:{{{team_id}}}"
-            self.sizes_key = f"posthog:cache_entry_sizes:{{{team_id}}}"
-            self.total_key = f"posthog:cache_total:{{{team_id}}}"
+            self.entries_key = f"insights:cache_sizes:{{{team_id}}}"
+            self.sizes_key = f"insights:cache_entry_sizes:{{{team_id}}}"
+            self.total_key = f"insights:cache_total:{{{team_id}}}"
         else:
-            self.entries_key = f"posthog:cache_sizes:{team_id}"
-            self.sizes_key = f"posthog:cache_entry_sizes:{team_id}"
-            self.total_key = f"posthog:cache_total:{team_id}"
+            self.entries_key = f"insights:cache_sizes:{team_id}"
+            self.sizes_key = f"insights:cache_entry_sizes:{team_id}"
+            self.total_key = f"insights:cache_total:{team_id}"
 
         self._track_write_script = self.redis_client.register_script(TRACK_CACHE_WRITE_SCRIPT)
         self._remove_tracking_script = self.redis_client.register_script(REMOVE_TRACKING_SCRIPT)

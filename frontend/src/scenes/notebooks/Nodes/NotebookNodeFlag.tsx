@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconRocket } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconFlag, IconRocket } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'

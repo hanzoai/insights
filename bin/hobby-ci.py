@@ -70,7 +70,7 @@ class HobbyTester:
             self.record = digitalocean.Record(token=self.token, id=record_id)
 
         # SSH private key from secrets (DIGITALOCEAN_SSH_PRIVATE_KEY)
-        # This key matches posthog-ci-cd registered in DigitalOcean
+        # This key matches insights-ci-cd registered in DigitalOcean
         self.ssh_private_key = ssh_private_key or os.environ.get("DIGITALOCEAN_SSH_PRIVATE_KEY")
 
         # Only build user_data if we don't already have a droplet (i.e., creating a new one)
@@ -92,7 +92,7 @@ class HobbyTester:
             "IMAGE_FOUND=false; "
             "while [ $(date +%s) -lt $END_TIME ]; do "
             "  MINS_LEFT=$(( (END_TIME - $(date +%s)) / 60 )); "
-            '  if curl -s "https://hub.docker.com/v2/repositories/posthog/posthog/tags/$CURRENT_COMMIT" | grep -q "$CURRENT_COMMIT"; then '
+            '  if curl -s "https://hub.docker.com/v2/repositories/insights/insights/tags/$CURRENT_COMMIT" | grep -q "$CURRENT_COMMIT"; then '
             '    echo "$LOG_PREFIX Docker image found on DockerHub"; '
             "    IMAGE_FOUND=true; "
             "    break; "
@@ -102,14 +102,14 @@ class HobbyTester:
             "done; "
             'if [ "$IMAGE_FOUND" = false ]; then '
             '  echo "$LOG_PREFIX Image not found after 20 mins, building locally..."; '
-            "  cd posthog; "
-            "  docker build -t posthog/posthog:$CURRENT_COMMIT .; "
+            "  cd insights; "
+            "  docker build -t insights/insights:$CURRENT_COMMIT .; "
             "  cd ..; "
             "fi"
         )
 
     def _get_node_image_fallback_script(self):
-        """Return bash script to check if posthog-node image exists on DockerHub.
+        """Return bash script to check if insights-node image exists on DockerHub.
 
         If the node image doesn't exist for this commit (it's only built when
         node files change), rewrite the compose file to use :latest for the
@@ -117,14 +117,14 @@ class HobbyTester:
         """
         return (
             "if curl -sf "
-            "https://hub.docker.com/v2/repositories/posthog/posthog-node/tags/$CURRENT_COMMIT "
+            "https://hub.docker.com/v2/repositories/insights/insights-node/tags/$CURRENT_COMMIT "
             "> /dev/null 2>&1; then "
-            "echo posthog-node image found on DockerHub; "
+            "echo insights-node image found on DockerHub; "
             "else "
-            "echo posthog-node image not found, using latest for plugins service; "
+            "echo insights-node image not found, using latest for plugins service; "
             "sed -i "
-            "'s|${REGISTRY_URL}-node:${POSTHOG_APP_TAG}|posthog/posthog-node:latest|g' "
-            "posthog/docker-compose.hobby.yml; "
+            "'s|${REGISTRY_URL}-node:${INSIGHTS_APP_TAG}|insights/insights-node:latest|g' "
+            "insights/docker-compose.hobby.yml; "
             "fi"
         )
 
@@ -144,14 +144,14 @@ class HobbyTester:
                 "export PATH=$PATH:/usr/local/go/bin",
                 "export GOPATH=/tmp/go",
                 "export GOCACHE=/tmp/go-cache",
-                "cd posthog/bin/hobby-installer && go build -o /tmp/hobby-installer . && cd ../../..",
+                "cd insights/bin/hobby-installer && go build -o /tmp/hobby-installer . && cd ../../..",
                 "cp /tmp/hobby-installer hobby-installer",
                 "chmod +x hobby-installer",
             ]
 
         return [
             'echo "$LOG_PREFIX Downloading hobby installer from GitHub releases..."',
-            "curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer",
+            "curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/hobby-installer -o hobby-installer",
             "chmod +x hobby-installer",
         ]
 
@@ -174,8 +174,8 @@ runcmd:
             'echo "$LOG_PREFIX Setting up needrestart config"',
             "sed -i \"s/#\\$nrconf{restart} = 'i';/\\$nrconf{restart} = 'a';/g\" /etc/needrestart/needrestart.conf",
             'echo "$LOG_PREFIX Cloning Insights repository"',
-            "git clone https://github.com/PostHog/posthog.git",
-            "cd posthog",
+            "git clone https://github.com/Hanzo Insights/insights.git",
+            "cd insights",
             f'echo "$LOG_PREFIX Fetching commit: {safe_sha}"',
             f"git fetch origin {safe_sha}",
             f'echo "$LOG_PREFIX Checking out commit: {safe_sha}"',
@@ -368,17 +368,17 @@ runcmd:
 
         # Update .env file with new image tag
         update_env_cmd = (
-            f"cd /hobby && sed -i 's/^POSTHOG_APP_TAG=.*/POSTHOG_APP_TAG={new_sha}/' .env && grep POSTHOG_APP_TAG .env"
+            f"cd /hobby && sed -i 's/^INSIGHTS_APP_TAG=.*/INSIGHTS_APP_TAG={new_sha}/' .env && grep INSIGHTS_APP_TAG .env"
         )
         result = self.run_ssh_command(update_env_cmd, timeout=30)
         if result["exit_code"] != 0:
             raise RuntimeError(f"Failed to update .env: {result['stderr']}")
-        print(f"✅ Updated POSTHOG_APP_TAG to {new_sha}")
+        print(f"✅ Updated INSIGHTS_APP_TAG to {new_sha}")
 
         # Resolve node image tag: use commit-specific tag if available, otherwise 'latest'
         print("🔍 Checking if node image exists for this commit...")
         check_node_cmd = (
-            f'curl -sf "https://hub.docker.com/v2/repositories/posthog/posthog-node/tags/{new_sha}" > /dev/null 2>&1'
+            f'curl -sf "https://hub.docker.com/v2/repositories/insights/insights-node/tags/{new_sha}" > /dev/null 2>&1'
         )
         result = self.run_ssh_command(check_node_cmd, timeout=30)
         if result["exit_code"] == 0:
@@ -388,19 +388,19 @@ runcmd:
             node_tag = "latest"
             print(f"ℹ️ Node image not found for commit, falling back to tag: latest")
 
-        # Update or add POSTHOG_NODE_TAG in .env
+        # Update or add INSIGHTS_NODE_TAG in .env
         update_node_tag_cmd = (
             f"cd /hobby && "
-            f"if grep -q '^POSTHOG_NODE_TAG=' .env; then "
-            f"  sed -i 's/^POSTHOG_NODE_TAG=.*/POSTHOG_NODE_TAG={node_tag}/' .env; "
+            f"if grep -q '^INSIGHTS_NODE_TAG=' .env; then "
+            f"  sed -i 's/^INSIGHTS_NODE_TAG=.*/INSIGHTS_NODE_TAG={node_tag}/' .env; "
             f"else "
-            f"  echo 'POSTHOG_NODE_TAG={node_tag}' >> .env; "
-            f"fi && grep POSTHOG_NODE_TAG .env"
+            f"  echo 'INSIGHTS_NODE_TAG={node_tag}' >> .env; "
+            f"fi && grep INSIGHTS_NODE_TAG .env"
         )
         result = self.run_ssh_command(update_node_tag_cmd, timeout=30)
         if result["exit_code"] != 0:
-            raise RuntimeError(f"Failed to update POSTHOG_NODE_TAG: {result['stderr']}")
-        print(f"✅ Updated POSTHOG_NODE_TAG to {node_tag}")
+            raise RuntimeError(f"Failed to update INSIGHTS_NODE_TAG: {result['stderr']}")
+        print(f"✅ Updated INSIGHTS_NODE_TAG to {node_tag}")
 
         # Pull new images with retry logic
         print("🐋 Pulling new Docker images...")
@@ -1038,7 +1038,7 @@ runcmd:
             f.write(f"DNS Record ID: {record_id}\n")
             f.write(f"DNS Record Name: {record_name}\n")
             f.write(f"SSH: ssh root@{ip_address}\n")
-            f.write(f"URL: https://{record_name}.posthog.cc\n")
+            f.write(f"URL: https://{record_name}.insights.cc\n")
 
         # Export to GitHub env
         env_file_name = os.getenv("GITHUB_ENV")
@@ -1095,7 +1095,7 @@ def update_smoke_test_comment(
         "Authorization": f"token {ctx.gh_token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    repo = "PostHog/posthog"
+    repo = "Hanzo Insights/insights"
 
     # Find existing comment and parse failure count
     existing_comment = None
@@ -1465,7 +1465,7 @@ def main():
                 try:
                     headers = {"Authorization": f"token {gh_token}", "Accept": "application/vnd.github.v3+json"}
                     resp = requests.get(
-                        f"https://api.github.com/repos/Insights/posthog/pulls/{pr_number}",
+                        f"https://api.github.com/repos/Insights/insights/pulls/{pr_number}",
                         headers=headers,
                         timeout=10,
                     )

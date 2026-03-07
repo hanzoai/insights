@@ -1,7 +1,7 @@
 {
     "name": "Insights Netdata Event Processing",
-    "url": "https://github.com/posthog/plugin-netdata-event-processing",
-    "description": "A Posthog plugin to do some data processing on our Posthog events as they arrive.",
+    "url": "https://github.com/insights/plugin-netdata-event-processing",
+    "description": "A Insights plugin to do some data processing on our Insights events as they arrive.",
     "main": "index.js",
     "config": []
 }

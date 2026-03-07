@@ -1,9 +1,9 @@
 import { gunzipSync, strFromU8, strToU8 } from 'fflate'
-import posthog from 'posthog-js'
-import { compressedEventWithTime } from 'posthog-js/lib/src/extensions/replay/external/lazy-loaded-session-recorder'
+import insights from '@hanzo/insights'
+import { compressedEventWithTime } from '@hanzo/insights/lib/src/extensions/replay/external/lazy-loaded-session-recorder'
 
-import { IncrementalSource } from '@posthog/rrweb-types'
-import { EventType } from '@posthog/rrweb-types'
+import { IncrementalSource } from '@hanzo/rrweb-types'
+import { EventType } from '@hanzo/rrweb-types'
 
 import { throttleCapture } from './throttle-capturing'
 
@@ -70,7 +70,7 @@ export function decompressEvent(ev: unknown, sessionRecordingId: string): unknow
                 }
             } else {
                 throttleCapture(`${sessionRecordingId}-unknown-compressed-event-version`, () => {
-                    posthog.captureException(new Error('Unknown compressed event version'), {
+                    insights.captureException(new Error('Unknown compressed event version'), {
                         feature: 'session-recording-compressed-event-decompression',
                         compressedEvent: ev,
                         compressionVersion: ev.cv,
@@ -83,7 +83,7 @@ export function decompressEvent(ev: unknown, sessionRecordingId: string): unknow
         return ev
     } catch (e) {
         throttleCapture(`${sessionRecordingId}-unknown-compressed-event-version`, () => {
-            posthog.captureException((e as Error) || new Error('Could not decompress event'), {
+            insights.captureException((e as Error) || new Error('Could not decompress event'), {
                 feature: 'session-recording-compressed-event-decompression',
                 compressedEvent: ev,
             })

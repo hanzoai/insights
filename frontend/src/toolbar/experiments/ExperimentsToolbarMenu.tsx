@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
@@ -25,7 +25,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
     const { allExperiments, sortedExperiments, allExperimentsLoading } = useValues(experimentsLogic)
     const { uiHost } = useValues(toolbarConfigLogic)
 
-    const isWebExperimentsDisabled = Boolean(window?.parent?.posthog?.config?.disable_web_experiments)
+    const isWebExperimentsDisabled = Boolean(window?.parent?.insights?.config?.disable_web_experiments)
 
     return (
         <ToolbarMenu>
@@ -51,7 +51,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
                                 <Link
                                     target="_blank"
                                     targetBlankIcon
-                                    to="https://posthog.com/docs/experiments/no-code-web-experiments"
+                                    to="https://hanzo.ai/docs/experiments/no-code-web-experiments"
                                 >
                                     Learn more
                                 </Link>

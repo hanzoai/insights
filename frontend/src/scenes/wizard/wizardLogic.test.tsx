@@ -33,7 +33,7 @@ describe('wizardLogic', () => {
 
     describe('if more than one project is available', () => {
         beforeEach(() => {
-            window.POSTHOG_APP_CONTEXT = {
+            window.INSIGHTS_APP_CONTEXT = {
                 current_user: {
                     organization: {
                         teams: [MOCK_DEFAULT_TEAM, { ...MOCK_DEFAULT_TEAM, id: MOCK_DEFAULT_TEAM.id + 1 }],
@@ -55,7 +55,7 @@ describe('wizardLogic', () => {
 
     describe('if only one project is available', () => {
         beforeEach(() => {
-            window.POSTHOG_APP_CONTEXT = {
+            window.INSIGHTS_APP_CONTEXT = {
                 current_user: {
                     organization: {
                         ...MOCK_DEFAULT_ORGANIZATION,

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

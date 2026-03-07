@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 if TYPE_CHECKING:
     from insights.demo.matrix.matrix import Cluster, Matrix
 
-# Refer to https://github.com/PostHog/insights-ai-costs-app/tree/main/src/ai-cost-data for missing models
+# Refer to https://github.com/Hanzo Insights/insights-ai-costs-app/tree/main/src/ai-cost-data for missing models
 LLM_COSTS_BY_MODEL = {
     "gpt-4o": {"prompt_token": 2.5 / 1e6, "completion_token": 10 / 1e6},
     "gpt-4o-mini": {"prompt_token": 0.15 / 1e6, "completion_token": 0.6 / 1e6},
@@ -149,7 +149,7 @@ class SimClient(ABC):
 class SimServerClient(SimClient):
     """A Python server client for simulating server-side tracking."""
 
-    LIB_NAME = "posthog-python"
+    LIB_NAME = "hanzo-insights"
     LIB_VERSION = "7.0.0"
 
     def __init__(self, matrix: "Matrix"):
@@ -294,7 +294,7 @@ class SimBrowserClient(SimClient):
         return self.person
 
     def capture(self, event: str, properties: Optional[Properties] = None):
-        """Capture an arbitrary event. Similar to JS `posthog.capture()`."""
+        """Capture an arbitrary event. Similar to JS `insights.capture()`."""
         combined_properties: Properties = {
             "$device_type": self.device_type,
             "$os": self.os,
@@ -359,9 +359,9 @@ class SimBrowserClient(SimClient):
         self.capture(EVENT_PAGEVIEW, properties)
 
     def identify(self, distinct_id: Optional[str], set_properties: Optional[Properties] = None):
-        """Identify person in active client. Similar to JS `posthog.identify()`.
+        """Identify person in active client. Similar to JS `insights.identify()`.
 
-        Use with distinct_id=None for `posthog.people.set()`-like behavior."""
+        Use with distinct_id=None for `insights.people.set()`-like behavior."""
         if set_properties is None:
             set_properties = {}
         identify_properties: Properties = {"$set": set_properties}
@@ -379,7 +379,7 @@ class SimBrowserClient(SimClient):
         group_key: str,
         set_properties: Optional[Properties] = None,
     ):
-        """Link the person to the specified group. Similar to JS `posthog.group()`."""
+        """Link the person to the specified group. Similar to JS `insights.group()`."""
         if set_properties is None:
             set_properties = {}
         self.person._groups[group_type] = group_key
@@ -394,16 +394,16 @@ class SimBrowserClient(SimClient):
         )
 
     def reset(self):
-        """Reset active client, for instance when the user logs out. Similar to JS `posthog.reset()`."""
+        """Reset active client, for instance when the user logs out. Similar to JS `insights.reset()`."""
         self.active_distinct_id = self.device_id
         self.is_logged_in = True
 
     def register(self, super_properties: Properties):
-        """Register super properties. Similar to JS `posthog.register()`."""
+        """Register super properties. Similar to JS `insights.register()`."""
         self.super_properties.update(super_properties)
 
     def unregister(self, *super_property_keys: str):
-        """Removes super properties. Similar to JS `posthog.unregister()`."""
+        """Removes super properties. Similar to JS `insights.unregister()`."""
         for key in super_property_keys:
             self.super_properties.pop(key)
 
@@ -419,7 +419,7 @@ class SimPerson(ABC):
 
     # Constant properties
     in_product_id: str  # User ID within the product being simulated (freeform string)
-    in_posthog_id: Optional[UUID]  # Person ID (must be a UUID)
+    in_insights_id: Optional[UUID]  # Person ID (must be a UUID)
     country_code: str
     region: str
     city: str
@@ -454,7 +454,7 @@ class SimPerson(ABC):
         self.x = x
         self.y = y
         self.in_product_id = self.cluster.random.randstr(False, 16)
-        self.in_posthog_id = None
+        self.in_insights_id = None
         self.active_client = SimBrowserClient(self)
         self.country_code = "US"
         self.region = "California"
@@ -570,8 +570,8 @@ class SimPerson(ABC):
         timestamp: dt.datetime,
     ):
         """Append event to `past_events` or `future_events`, whichever is appropriate."""
-        if self.in_posthog_id is None:
-            self.in_posthog_id = self.cluster.roll_uuidt()
+        if self.in_insights_id is None:
+            self.in_insights_id = self.cluster.roll_uuidt()
         if self.first_seen_at is None:
             self.first_seen_at = timestamp
         self.last_seen_at = timestamp
@@ -595,7 +595,7 @@ class SimPerson(ABC):
             distinct_id=distinct_id,
             properties=properties,
             timestamp=timestamp,
-            person_id=self.in_posthog_id,
+            person_id=self.in_insights_id,
             person_properties=deepcopy(self._properties),
             person_created_at=self.first_seen_at,
         )

@@ -1,12 +1,12 @@
 import '../ErrorTrackingIssueScene/ErrorTrackingIssueScene.scss'
 
 import { BindLogic, useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 import { useRef } from 'react'
 
-import { IconFilter, IconList, IconSearch } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconFilter, IconList, IconSearch } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
@@ -67,7 +67,7 @@ export function ErrorTrackingIssueScene(): JSX.Element {
 
     useEffect(() => {
         const utmSource = new URLSearchParams(window.location.search).get('utm_source')
-        posthog.capture('error_tracking_issue_viewed', {
+        insights.capture('error_tracking_issue_viewed', {
             issue_id: issueId,
             ...(utmSource ? { utm_source: utmSource } : {}),
         })

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -44,7 +44,7 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
 
     const handleTicketCreated = useCallback(
         (ticketId: string): void => {
-            posthog.capture('insights_ai_support_ticket_created', {
+            insights.capture('insights_ai_support_ticket_created', {
                 $ai_conversation_id: conversationId,
                 $ai_session_id: conversationId,
                 $ai_trace_id: traceId,

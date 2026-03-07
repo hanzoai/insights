@@ -31,10 +31,10 @@ export function FunnelVisualizer({ results }: FunnelVisualizerProps): ReactEleme
 
     const funnelColor = (index: number): string => {
         if (index === 0) {
-            return 'var(--posthog-chart-1, #1d4ed8)'
+            return 'var(--insights-chart-1, #1d4ed8)'
         }
         // Fade color for subsequent steps
-        return `color-mix(in srgb, var(--posthog-chart-1, #1d4ed8) ${100 - index * 15}%, var(--color-background-secondary, #f9fafb))`
+        return `color-mix(in srgb, var(--insights-chart-1, #1d4ed8) ${100 - index * 15}%, var(--color-background-secondary, #f9fafb))`
     }
 
     const lastCount = steps[steps.length - 1]?.count ?? 0

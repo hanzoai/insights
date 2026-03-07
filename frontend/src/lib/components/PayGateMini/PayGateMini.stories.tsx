@@ -49,7 +49,7 @@ export const PayGateMini_ = (): JSX.Element => {
 }
 
 export const PayGateMiniWithDocsLink = (): JSX.Element => {
-    return <Template feature={AvailableFeature.SUBSCRIPTIONS} docsLink="https://docs.posthog.com/" />
+    return <Template feature={AvailableFeature.SUBSCRIPTIONS} docsLink="https://docs.hanzo.ai/" />
 }
 
 export const PayGateMiniWithoutBackground = (): JSX.Element => {

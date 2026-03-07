@@ -15,8 +15,8 @@ logger.setLevel(logging.INFO)
 EXPORT_NAME = "Insights HTTP Migration"
 VALID_INTERVALS = {i[0] for i in BATCH_EXPORT_INTERVALS}
 REGION_URLS = {
-    "us": "https://app.posthog.com/batch",
-    "eu": "https://eu.posthog.com/batch",
+    "us": "https://insights.hanzo.ai/batch",
+    "eu": "https://insights.hanzo.ai/batch",
 }
 
 
@@ -217,8 +217,8 @@ def create_migration(
     if interval not in VALID_INTERVALS:
         raise CommandError("invalid interval, choices are: {}".format(VALID_INTERVALS))
 
-    if not dest_token.startswith("phc_"):
-        raise CommandError("invalid destination token, must start with 'phc_'")
+    if not dest_token.startswith("hi_"):
+        raise CommandError("invalid destination token, must start with 'hi_'")
 
     dest_region = dest_region.lower()
     if dest_region not in REGION_URLS:

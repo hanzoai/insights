@@ -38,7 +38,7 @@ if (inputs.debug) {
             "key": "hook",
             "type": "string",
             "label": "Zapier hook path",
-            "description": "Your Zapier webhook URL or just the path. You can create your own or use our native Zapier integration https://zapier.com/apps/posthog/integrations",
+            "description": "Your Zapier webhook URL or just the path. You can create your own or use our native Zapier integration https://zapier.com/apps/insights/integrations",
             "secret": False,
             "required": True,
             "hidden": False,

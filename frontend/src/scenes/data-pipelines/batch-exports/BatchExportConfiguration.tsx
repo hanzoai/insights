@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheckCircle, IconPlus, IconX } from '@posthog/icons'
-import { LemonSelect, LemonSwitch } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconPlus, IconX } from '@hanzo/icons'
+import { LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

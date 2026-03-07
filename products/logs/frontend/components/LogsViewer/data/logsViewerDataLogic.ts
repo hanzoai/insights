@@ -1,9 +1,9 @@
 import colors from 'ansi-colors'
 import { actions, afterMount, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dataColorVars } from 'lib/colors'
@@ -430,18 +430,18 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
         },
         fetchLogsSuccess: ({ logs }) => {
             if (logs.length === 0) {
-                posthog.capture('logs no results returned')
+                insights.capture('logs no results returned')
             } else {
-                posthog.capture('logs results returned', { count: logs.length })
+                insights.capture('logs results returned', { count: logs.length })
                 globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.ViewFirstLogs)
             }
         },
         fetchNextLogsPage: () => {
-            posthog.capture('logs load more requested')
+            insights.capture('logs load more requested')
         },
         setLiveTailRunning: async ({ enabled }) => {
             if (enabled) {
-                posthog.capture('logs live tail started')
+                insights.capture('logs live tail started')
                 actions.pollForNewLogs()
             } else {
                 actions.cancelInProgressLiveTail(null)
@@ -454,7 +454,7 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
             }
             // Track query execution (skip initial page load)
             if (values.hasRunQuery) {
-                posthog.capture('logs query executed', {
+                insights.capture('logs query executed', {
                     has_search_term: !!values.filters.searchTerm,
                     has_filters: values.filters.filterGroup.values.length > 0,
                     severity_count: values.filters.severityLevels?.length ?? 0,

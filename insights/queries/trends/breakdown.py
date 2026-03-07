@@ -81,9 +81,9 @@ BREAKDOWN_OTHER_DISPLAY = "Other (i.e. all remaining values)"
 BREAKDOWN_NULL_DISPLAY = "None (i.e. no value)"
 
 
-BREAKDOWN_OTHER_STRING_LABEL = "$$_posthog_breakdown_other_$$"
+BREAKDOWN_OTHER_STRING_LABEL = "$$_insights_breakdown_other_$$"
 BREAKDOWN_OTHER_NUMERIC_LABEL = 9007199254740991  # pow(2, 53) - 1, for JS compatibility
-BREAKDOWN_NULL_STRING_LABEL = "$$_posthog_breakdown_null_$$"
+BREAKDOWN_NULL_STRING_LABEL = "$$_insights_breakdown_null_$$"
 BREAKDOWN_NULL_NUMERIC_LABEL = 9007199254740990  # pow(2, 53) - 2, for JS compatibility
 
 
@@ -232,7 +232,7 @@ class TrendsBreakdown:
             # If there are no breakdown values, we are sure that there's no relevant events, so instead of adjusting
             # a "real" SELECT for this, we only include the below dummy SELECT.
             # It's a drop-in replacement for a "real" one, simply always returning 0 rows.
-            # See https://github.com/PostHog/posthog/pull/5674 for context.
+            # See https://github.com/Hanzo Insights/insights/pull/5674 for context.
             return (
                 "SELECT [now()] AS date, [0] AS total, '' AS breakdown_value LIMIT 0",
                 {},

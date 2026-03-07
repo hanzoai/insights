@@ -1,4 +1,4 @@
-import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@posthog/icons'
+import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'

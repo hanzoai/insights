@@ -2,9 +2,9 @@ import equal from 'fast-deep-equal'
 import { actions, afterMount, connect, kea, key, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
 import { lazyLoaders, loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -350,7 +350,7 @@ export function convertUniversalFiltersToRecordingsQuery(universalFilters: Recor
                     f.type === 'feature' ||
                     (f.type === 'event' && typeof f.key === 'string' && f.key.includes('$feature'))
                 ) {
-                    posthog.capture('debug_replay_filter_value_type', {
+                    insights.capture('debug_replay_filter_value_type', {
                         filter_type: f.type,
                         filter_key: f.key,
                         original_value: f.value,
@@ -395,7 +395,7 @@ export function convertLegacyFiltersToUniversalFilters(
     advancedFilters?: LegacyRecordingFilters
 ): RecordingUniversalFilters {
     // we want to remove this, so set a tombstone, lets us see if the dead come back to life
-    posthog.capture('legacy_recording_filters_converted_tombstone')
+    insights.capture('legacy_recording_filters_converted_tombstone')
 
     const filters = combineLegacyRecordingFilters(simpleFilters || {}, advancedFilters || {})
 
@@ -723,7 +723,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                 setFilters: (state, { filters }) => {
                     try {
                         if (!isValidRecordingFilters(filters)) {
-                            posthog.captureException(new Error('Invalid filters provided'), {
+                            insights.captureException(new Error('Invalid filters provided'), {
                                 filters,
                             })
                             return getDefaultFilters(props.personUUID)
@@ -736,7 +736,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                             ...filters,
                         }
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                         return getDefaultFilters(props.personUUID)
                     }
                 },
@@ -1088,7 +1088,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                         // Reload the playlist to show the new recordings
                         handleLoadCollectionRecordings(short_id)
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                     }
                 })(),
                 {
@@ -1118,7 +1118,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                         // Reload the playlist to see the recordings without the deleted ones
                         handleLoadCollectionRecordings(short_id)
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                     }
                 })(),
                 {
@@ -1159,7 +1159,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                             actions.loadSessionRecordings()
                         }
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                     }
                 })(),
                 {
@@ -1200,7 +1200,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                             actions.loadSessionRecordings()
                         }
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                     }
                 })(),
                 {
@@ -1228,7 +1228,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                             actions.loadSessionRecordings()
                         }
                     } catch (e) {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                     }
                 })(),
                 {

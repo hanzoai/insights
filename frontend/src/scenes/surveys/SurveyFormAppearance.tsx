@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
-import { getNextSurveyStep } from 'posthog-js/dist/surveys-preview'
+import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'

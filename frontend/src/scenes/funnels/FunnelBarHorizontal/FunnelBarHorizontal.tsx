@@ -3,7 +3,7 @@ import './FunnelBarHorizontal.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconInfinity } from '@posthog/icons'
+import { IconInfinity } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { SeriesGlyph } from 'lib/components/SeriesGlyph'

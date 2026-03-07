@@ -73,7 +73,7 @@ for (let key, value in event.properties) {
     }
 }
 
-fetch('https://api.avo.app/inspector/posthog/v1/track', {
+fetch('https://api.avo.app/inspector/insights/v1/track', {
     'method': 'POST',
     'headers': {
         'env': inputs.environment,
@@ -135,7 +135,7 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
 
 
 class TemplateAvoMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-avo-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/insights-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):

@@ -2,7 +2,7 @@ import './LemonWidget.scss'
 
 import clsx from 'clsx'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { LemonButton } from '../LemonButton'
 

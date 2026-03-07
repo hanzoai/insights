@@ -12,7 +12,7 @@ import React, {
     useState,
 } from 'react'
 
-import { IconEllipsis, IconUpload } from '@posthog/icons'
+import { IconEllipsis, IconUpload } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { ButtonGroupPrimitive, ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

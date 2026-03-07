@@ -1,5 +1,5 @@
-import { IconTrash } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'

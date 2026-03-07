@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { dayjs } from 'lib/dayjs'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -369,22 +369,22 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
     listeners(({ actions, values }) => ({
         togglePinLog: ({ log }) => {
             if (values.pinnedLogs[log.uuid]) {
-                posthog.capture('logs log pinned')
+                insights.capture('logs log pinned')
             }
         },
         toggleSelectLog: ({ logId }) => {
             if (values.selectedLogIds[logId]) {
-                posthog.capture('logs log selected')
+                insights.capture('logs log selected')
             } else {
-                posthog.capture('logs log unselected')
+                insights.capture('logs log unselected')
             }
         },
         clearSelection: () => {
-            posthog.capture('logs clear selection', { count: values.selectedCount })
+            insights.capture('logs clear selection', { count: values.selectedCount })
         },
         toggleExpandLog: ({ logId }) => {
             const isNowExpanded = values.expandedLogIds[logId]
-            posthog.capture(isNowExpanded ? 'logs log expanded' : 'logs log collapsed')
+            insights.capture(isNowExpanded ? 'logs log expanded' : 'logs log collapsed')
             actions.recomputeRowHeights([logId])
         },
         closeLogDetails: () => {
@@ -453,7 +453,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
             }
         },
         copyLinkToLog: ({ logId }) => {
-            posthog.capture('logs link copied')
+            insights.capture('logs link copied')
             const url = new URL(window.location.href)
             url.searchParams.set('linkToLogId', logId)
             if (values.visibleLogsTimeRange) {
@@ -472,7 +472,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
             void copyToClipboard(url.toString(), 'link to log')
         },
         selectLogRange: ({ fromIndex, toIndex }) => {
-            posthog.capture('logs range selected', { count: Math.abs(toIndex - fromIndex) + 1 })
+            insights.capture('logs range selected', { count: Math.abs(toIndex - fromIndex) + 1 })
             const minIndex = Math.min(fromIndex, toIndex)
             const maxIndex = Math.max(fromIndex, toIndex)
             const newSelection: Record<string, boolean> = { ...values.selectedLogIds }
@@ -486,7 +486,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
         },
         selectAll: ({ logsToSelect }) => {
             const logs = logsToSelect ?? values.logs
-            posthog.capture('logs select all', { count: logs.length })
+            insights.capture('logs select all', { count: logs.length })
             const newSelection: Record<string, boolean> = {}
             for (const log of logs) {
                 newSelection[log.uuid] = true
@@ -495,7 +495,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
         },
         toggleAttributeColumn: ({ attributeKey }) => {
             if (attributeKey in values.attributeColumnsConfig) {
-                posthog.capture('logs column added', { attribute_key: attributeKey })
+                insights.capture('logs column added', { attribute_key: attributeKey })
             }
         },
     })),

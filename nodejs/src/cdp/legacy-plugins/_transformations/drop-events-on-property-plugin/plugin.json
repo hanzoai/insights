@@ -1,9 +1,9 @@
 {
     "name": "Drop Events Based On Property",
-    "url": "https://github.com/posthog/drop-events-on-property-plugin",
+    "url": "https://github.com/insights/drop-events-on-property-plugin",
     "description": "This plugin will drop any events that have a specific key. If you supply a value, it will drop any event with the combination of they key and the value. You will not be billed for any events that this plugin drops.",
     "main": "index.js",
-    "posthogVersion": ">= 1.25.0",
+    "insightsVersion": ">= 1.25.0",
     "config": [
         {
             "markdown": "Configure the key and optional value to filter events on"

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonTag } from '@posthog/lemon-ui'
+import { IconArrowLeft } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonTag } from '@hanzo/lemon-ui'
 
 import { MessageInput } from '../Chat/MessageInput'
 import { MessageList } from '../Chat/MessageList'

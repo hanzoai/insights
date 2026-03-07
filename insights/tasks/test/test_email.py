@@ -66,19 +66,19 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         super().setUpTestData()
         set_instance_setting("EMAIL_HOST", "fake_host")
         set_instance_setting("EMAIL_ENABLED", True)
-        create_org_team_and_user("2022-01-01 00:00:00", "too_late_user@posthog.com")
+        create_org_team_and_user("2022-01-01 00:00:00", "too_late_user@hanzo.ai")
         create_org_team_and_user(
             "2022-01-02 00:00:00",
-            "ingested_event_in_range_user@posthog.com",
+            "ingested_event_in_range_user@hanzo.ai",
             ingested_event=True,
         )
-        create_org_team_and_user("2022-01-03 00:00:00", "too_early_user@posthog.com")
+        create_org_team_and_user("2022-01-03 00:00:00", "too_early_user@hanzo.ai")
 
     def test_send_invite(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
-        invite = OrganizationInvite.objects.create(organization=org, created_by=user, target_email="test@posthog.com")
+        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
+        invite = OrganizationInvite.objects.create(organization=org, created_by=user, target_email="test@hanzo.ai")
 
         send_invite(invite.id)
 
@@ -89,11 +89,11 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
     def test_send_member_join(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
+        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
 
         user = User.objects.create_and_join(
             organization=org,
-            email="new-user@posthog.com",
+            email="new-user@hanzo.ai",
             password=None,
             level=OrganizationMembership.Level.MEMBER,
         )
@@ -105,7 +105,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
     def test_send_password_reset(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
+        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
         token = password_reset_token_generator.make_token(self.user)
 
         send_password_reset(user.id, token)
@@ -114,10 +114,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert mocked_email_messages[0].send.call_count == 1
         assert mocked_email_messages[0].html_body
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_send_email_verification(self, mock_capture: MagicMock, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
+        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
         token = email_verification_token_generator.make_token(self.user)
         send_email_verification(user.id, token)
 
@@ -132,7 +132,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
     def test_send_fatal_plugin_error(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
+        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
         plugin = Plugin.objects.create(organization=org)
         plugin_config = PluginConfig.objects.create(plugin=plugin, team=user.team, enabled=True, order=1)
 
@@ -146,7 +146,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
         plugin = Plugin.objects.create(organization=self.organization)
         plugin_config = PluginConfig.objects.create(plugin=plugin, team=self.team, enabled=True, order=1)
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
         self.user.partial_notification_settings = {"plugin_disabled": False}
         self.user.save()
 
@@ -154,7 +154,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         # Should only be sent to user2
         assert mocked_email_messages[0].to == [
-            {"recipient": "test2@posthog.com", "raw_email": "test2@posthog.com", "distinct_id": str(user2.distinct_id)}
+            {"recipient": "test2@hanzo.ai", "raw_email": "test2@hanzo.ai", "distinct_id": str(user2.distinct_id)}
         ]
 
         self.user.partial_notification_settings = {"plugin_disabled": True}
@@ -165,7 +165,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
     def test_send_batch_export_run_failure(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
-        _, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@posthog.com")
+        _, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
         batch_export_destination = BatchExportDestination.objects.create(
             type=BatchExportDestination.Destination.S3, config={"bucket_name": "my_production_s3_bucket"}
         )
@@ -202,14 +202,14 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             data_interval_end=now,
         )
 
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
         self.user.partial_notification_settings = {"plugin_disabled": False}
         self.user.save()
 
         send_batch_export_run_failure(batch_export_run.id)
         # Should only be sent to user2
         assert mocked_email_messages[0].to == [
-            {"recipient": "test2@posthog.com", "raw_email": "test2@posthog.com", "distinct_id": str(user2.distinct_id)}
+            {"recipient": "test2@hanzo.ai", "raw_email": "test2@hanzo.ai", "distinct_id": str(user2.distinct_id)}
         ]
 
         self.user.partial_notification_settings = {"plugin_disabled": True}
@@ -320,7 +320,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert should_send_pipeline_error_notification(self.user, failure_rate=0.1) is True
 
     def test_get_members_to_notify_for_pipeline_error(self, MockEmailMessage: MagicMock) -> None:
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
 
         # Default threshold is 1% - failure rate 0.5 exceeds it, so both users notified
         memberships = get_members_to_notify_for_pipeline_error(cast(Team, self.user.team), failure_rate=0.5)
@@ -367,7 +367,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
     def test_send_canary_email(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
-        send_canary_email("test@posthog.com")
+        send_canary_email("test@hanzo.ai")
 
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
@@ -376,7 +376,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
     def test_send_async_migration_complete_email(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        User.objects.create(email="staff-user@posthog.com", password="password", is_staff=True)
+        User.objects.create(email="staff-user@hanzo.ai", password="password", is_staff=True)
         send_async_migration_complete_email("migration_1", "20:00")
 
         assert len(mocked_email_messages) == 1
@@ -386,7 +386,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
     def test_send_async_migration_errored_email(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        User.objects.create(email="staff-user@posthog.com", password="password", is_staff=True)
+        User.objects.create(email="staff-user@hanzo.ai", password="password", is_staff=True)
         send_async_migration_errored_email("migration_1", "20:00", "It exploded!")
 
         assert len(mocked_email_messages) == 1
@@ -435,7 +435,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
     def test_send_insights_functions_digest_email_with_settings(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
         self.user.partial_notification_settings = {"plugin_disabled": False}
         self.user.save()
 
@@ -511,7 +511,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Each user gets their own email now
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].to == [
-            {"recipient": "test2@posthog.com", "raw_email": "test2@posthog.com", "distinct_id": str(user2.distinct_id)}
+            {"recipient": "test2@hanzo.ai", "raw_email": "test2@hanzo.ai", "distinct_id": str(user2.distinct_id)}
         ]
 
         self.user.partial_notification_settings = {"plugin_disabled": True}
@@ -522,7 +522,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert len(mocked_email_messages) == 3  # 1 from first call + 2 from second call
         # Verify both users received emails from the second call
         second_call_recipients = {msg.to[0]["raw_email"] for msg in mocked_email_messages[1:]}
-        assert second_call_recipients == {"user1@posthog.com", "test2@posthog.com"}
+        assert second_call_recipients == {"user1@hanzo.ai", "test2@hanzo.ai"}
 
     def test_send_insights_functions_digest_email_team_not_found(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
@@ -600,8 +600,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         # Create users for creator and editor
-        creator_user = self._create_user("creator@posthog.com")
-        editor_user = self._create_user("editor@posthog.com")
+        creator_user = self._create_user("creator@hanzo.ai")
+        editor_user = self._create_user("editor@hanzo.ai")
 
         # Create a InsightsFunction for testing with real creator
         insights_function = InsightsFunction.objects.create(
@@ -670,8 +670,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         # Check that the HTML body contains both creator and editor info
         html_body = mocked_email_messages[0].html_body
-        assert "creator@posthog.com" in html_body, "Creator email should be in the email"
-        assert "editor@posthog.com" in html_body, "Editor email should be in the email"
+        assert "creator@hanzo.ai" in html_body, "Creator email should be in the email"
+        assert "editor@hanzo.ai" in html_body, "Editor email should be in the email"
         assert edit_date.strftime("%Y-%m-%d") in html_body, "Edit date should be in the email"
 
         # Reset mocked messages
@@ -710,14 +710,14 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages.clear()
 
         # Test 5: Test notification settings - user with plugin_disabled: False should not receive email
-        self._create_user("test2@posthog.com")
+        self._create_user("test2@hanzo.ai")
         self.user.partial_notification_settings = {"plugin_disabled": False}
         self.user.save()
 
         send_insights_functions_daily_digest()
         # Should be sent to users with notifications enabled (creator, editor, test2) - 3 separate emails
         recipients = {msg.to[0]["raw_email"] for msg in mocked_email_messages}
-        expected_recipients = {"creator@posthog.com", "editor@posthog.com", "test2@posthog.com"}
+        expected_recipients = {"creator@hanzo.ai", "editor@hanzo.ai", "test2@hanzo.ai"}
         assert recipients == expected_recipients
 
         # Reset mocked messages
@@ -735,8 +735,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         # Create users for testing
-        self._create_user("test2@posthog.com")
-        self._create_user("override@posthog.com")
+        self._create_user("test2@hanzo.ai")
+        self._create_user("override@hanzo.ai")
 
         # Disable notifications for the main user to verify override bypasses settings
         self.user.partial_notification_settings = {"plugin_disabled": False}
@@ -761,13 +761,13 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         }
 
         # Test with valid email override (user is member of org) - should send only to override email
-        send_insights_functions_digest_email(digest_data, test_email_override="override@posthog.com")
+        send_insights_functions_digest_email(digest_data, test_email_override="override@hanzo.ai")
 
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
         # Should only be sent to the override email, not to other team members
         assert len(mocked_email_messages[0].to) == 1
-        assert mocked_email_messages[0].to[0]["raw_email"] == "override@posthog.com"
+        assert mocked_email_messages[0].to[0]["raw_email"] == "override@hanzo.ai"
         assert mocked_email_messages[0].html_body
 
         # Reset mocked messages
@@ -786,28 +786,28 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Each user now gets their own email
         assert len(mocked_email_messages) == 2
         sent_emails = {msg.to[0]["raw_email"] for msg in mocked_email_messages}
-        assert "test2@posthog.com" in sent_emails
-        assert "override@posthog.com" in sent_emails
+        assert "test2@hanzo.ai" in sent_emails
+        assert "override@hanzo.ai" in sent_emails
 
     def test_send_insights_functions_digest_email_with_error_rate_threshold(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         # Create users with different error rate thresholds
         # User with default threshold (1%) - receives functions with failure rate > 1%
-        self._create_user("no_threshold@posthog.com")
+        self._create_user("no_threshold@hanzo.ai")
 
         # User with 10% threshold - should only receive functions with failure_rate > 10%
-        user_10_threshold = self._create_user("threshold_10@posthog.com")
+        user_10_threshold = self._create_user("threshold_10@hanzo.ai")
         user_10_threshold.partial_notification_settings = {"data_pipeline_error_threshold": 0.1}
         user_10_threshold.save()
 
         # User with 50% threshold - should only receive functions with failure_rate > 50%
-        user_50_threshold = self._create_user("threshold_50@posthog.com")
+        user_50_threshold = self._create_user("threshold_50@hanzo.ai")
         user_50_threshold.partial_notification_settings = {"data_pipeline_error_threshold": 0.5}
         user_50_threshold.save()
 
         # User with 100% threshold - should not receive any email (no function can exceed 100%)
-        user_100_threshold = self._create_user("threshold_100@posthog.com")
+        user_100_threshold = self._create_user("threshold_100@hanzo.ai")
         user_100_threshold.partial_notification_settings = {"data_pipeline_error_threshold": 1.0}
         user_100_threshold.save()
 
@@ -870,28 +870,28 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             emails_by_recipient[recipient_email] = msg
 
         # Verify user_no_threshold received all 3 functions (check html_body for function names)
-        assert "no_threshold@posthog.com" in emails_by_recipient
-        no_threshold_html = emails_by_recipient["no_threshold@posthog.com"].html_body
+        assert "no_threshold@hanzo.ai" in emails_by_recipient
+        no_threshold_html = emails_by_recipient["no_threshold@hanzo.ai"].html_body
         assert "Low Failure Function" in no_threshold_html
         assert "Medium Failure Function" in no_threshold_html
         assert "High Failure Function" in no_threshold_html
 
         # Verify user_10_threshold received 2 functions (25% and 60%, not 5%)
-        assert "threshold_10@posthog.com" in emails_by_recipient
-        threshold_10_html = emails_by_recipient["threshold_10@posthog.com"].html_body
+        assert "threshold_10@hanzo.ai" in emails_by_recipient
+        threshold_10_html = emails_by_recipient["threshold_10@hanzo.ai"].html_body
         assert "Low Failure Function" not in threshold_10_html
         assert "Medium Failure Function" in threshold_10_html
         assert "High Failure Function" in threshold_10_html
 
         # Verify user_50_threshold received only 1 function (60%, not 5% or 25%)
-        assert "threshold_50@posthog.com" in emails_by_recipient
-        threshold_50_html = emails_by_recipient["threshold_50@posthog.com"].html_body
+        assert "threshold_50@hanzo.ai" in emails_by_recipient
+        threshold_50_html = emails_by_recipient["threshold_50@hanzo.ai"].html_body
         assert "Low Failure Function" not in threshold_50_html
         assert "Medium Failure Function" not in threshold_50_html
         assert "High Failure Function" in threshold_50_html
 
         # Verify user_100_threshold did not receive any email
-        assert "threshold_100@posthog.com" not in emails_by_recipient
+        assert "threshold_100@hanzo.ai" not in emails_by_recipient
 
     def test_send_insights_functions_daily_digest_no_eligible_functions(self, MockEmailMessage: MagicMock) -> None:
         from insights.test.fixtures import create_app_metric2
@@ -1134,7 +1134,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         # Create a mentioned user
         mentioned_user = User.objects.create_and_join(
-            organization=self.organization, email="mentioned@posthog.com", password=None
+            organization=self.organization, email="mentioned@hanzo.ai", password=None
         )
 
         # Create a replay comment
@@ -1169,7 +1169,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         mentioned_user = User.objects.create_and_join(
-            organization=self.organization, email="mentioned2@posthog.com", password=None
+            organization=self.organization, email="mentioned2@hanzo.ai", password=None
         )
 
         # Create a replay comment
@@ -1205,7 +1205,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         mentioned_user = User.objects.create_and_join(
-            organization=self.organization, email="mentioned3@posthog.com", password=None
+            organization=self.organization, email="mentioned3@hanzo.ai", password=None
         )
 
         # Create a notebook comment
@@ -1241,7 +1241,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         mentioned_user = User.objects.create_and_join(
-            organization=self.organization, email="mentioned4@posthog.com", password=None
+            organization=self.organization, email="mentioned4@hanzo.ai", password=None
         )
 
         # Create a comment with unknown scope
@@ -1318,7 +1318,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             status=DataWarehouseSavedQuery.Status.FAILED,
         )
 
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
         user2.partial_notification_settings = {"materialized_view_sync_failed": True}
         user2.save()
 
@@ -1326,7 +1326,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         # Should only be sent to user2 who has explicitly opted in
         assert mocked_email_messages[0].to == [
-            {"recipient": "test2@posthog.com", "raw_email": "test2@posthog.com", "distinct_id": str(user2.distinct_id)}
+            {"recipient": "test2@hanzo.ai", "raw_email": "test2@hanzo.ai", "distinct_id": str(user2.distinct_id)}
         ]
 
         # Opt in self.user too

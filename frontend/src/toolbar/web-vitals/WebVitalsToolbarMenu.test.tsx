@@ -11,8 +11,8 @@ describe('WebVitalsToolbarMenu', () => {
         initKeaTests()
         toolbarConfigLogic
             .build({
-                posthog: {
-                    config: { ui_host: 'https://us.posthog.com/' },
+                insights: {
+                    config: { ui_host: 'https://insights.hanzo.ai/' },
                     webVitalsAutocapture: { isEnabled: false },
                 } as any,
             } as any)
@@ -23,7 +23,7 @@ describe('WebVitalsToolbarMenu', () => {
         render(<WebVitalsToolbarMenu />)
 
         const settingsLink = screen.getByRole('link', { name: 'settings page' })
-        expect(settingsLink).toHaveAttribute('href', 'https://us.posthog.com/settings/project')
+        expect(settingsLink).toHaveAttribute('href', 'https://insights.hanzo.ai/settings/project')
         expect(settingsLink).toHaveAttribute('target', '_blank')
     })
 })

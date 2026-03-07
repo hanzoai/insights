@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCopy } from '@posthog/icons'
-import { LemonButton, LemonMenu } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
 
 import { QuerySchema, TrendsQueryResponse, WebStatsTableQueryResponse } from '~/queries/schema/schema-general'
 import { ExporterFormat, InsightLogicProps } from '~/types'

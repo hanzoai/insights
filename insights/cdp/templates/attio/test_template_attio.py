@@ -5,7 +5,7 @@ from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 def create_inputs(**kwargs):
     inputs = {
         "apiKey": "apikey12345",
-        "email": "max@posthog.com",
+        "email": "max@hanzo.ai",
         "personAttributes": {"name": "Max", "job_title": "Mascot"},
     }
     inputs.update(kwargs)
@@ -25,7 +25,7 @@ class TestTemplateAttio(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "data": {
                         "values": {
-                            "email_addresses": [{"email_address": "max@posthog.com"}],
+                            "email_addresses": [{"email_address": "max@hanzo.ai"}],
                             "name": "Max",
                             "job_title": "Mascot",
                         }
@@ -48,7 +48,7 @@ class TestTemplateAttio(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "data": {
                         "values": {
-                            "email_addresses": [{"email_address": "max@posthog.com"}],
+                            "email_addresses": [{"email_address": "max@hanzo.ai"}],
                             "name": "Max",
                         }
                     }

@@ -17,12 +17,12 @@ before you do this... 🤷
 in one terminal
 
 ```bash
-pnpm --filter=@posthog/frontend storybook
+pnpm --filter=@hanzo/frontend storybook
 ```
 
 in another
 
 ```bash
 pnpm exec playwright install
-pnpm --filter=@posthog/storybook test:visual:debug
+pnpm --filter=@hanzo/storybook test:visual:debug
 ```

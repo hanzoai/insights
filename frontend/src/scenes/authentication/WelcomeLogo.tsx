@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import defaultLogo from 'public/hanzo-logo.svg'
 

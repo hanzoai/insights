@@ -11,7 +11,7 @@ import { percentageDistribution } from '~/scenes/experiments/utils'
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
 import { experimentsLogic } from '~/toolbar/experiments/experimentsLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { WebExperiment, WebExperimentDraftType, WebExperimentForm } from '~/toolbar/types'
 import { elementToQuery, joinWithUiHost } from '~/toolbar/utils'
 import { Experiment, ExperimentIdType } from '~/types'
@@ -482,11 +482,11 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
             }
         },
         showButtonExperiments: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: true })
         },
         hideButtonExperiments: () => {
             actions.setShowExperimentsTooltip(false)
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: false })
         },
         [experimentsLogic.actionTypes.getExperimentsSuccess]: () => {
             const { userIntent, experimentId } = values

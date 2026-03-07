@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconPause, IconPlay, IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonDialog, LemonDivider } from '@posthog/lemon-ui'
+import { IconPause, IconPlay, IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonDialog, LemonDivider } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import 'lib/lemon-ui/LemonModal/LemonModal'

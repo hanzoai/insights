@@ -5,11 +5,11 @@ Automated workflow for clustering LLM traces based on their semantic embeddings,
 ## File Structure
 
 ```text
-posthog/temporal/llm_analytics/trace_clustering/
+insights/temporal/llm_analytics/trace_clustering/
 ├── __init__.py              # Module exports
 ├── workflow.py              # Temporal workflow definition (orchestrates 3 activities)
 ├── activities.py            # Temporal activity definitions (3 activities)
-├── data.py                  # Data access layer (HogQL queries for team-scoped data)
+├── data.py                  # Data access layer (InsightsQL queries for team-scoped data)
 ├── clustering.py            # HDBSCAN clustering, UMAP reduction, distance calculations
 ├── labeling.py              # Entry point for cluster labeling (calls labeling agent)
 ├── event_emission.py        # Event building and emission to ClickHouse
@@ -32,7 +32,7 @@ posthog/temporal/llm_analytics/trace_clustering/
 
 This workflow implements trace clustering for LLM analytics:
 
-1. **Fetch trace IDs and embeddings** - Query trace IDs and embeddings via HogQL from the document embeddings table
+1. **Fetch trace IDs and embeddings** - Query trace IDs and embeddings via InsightsQL from the document embeddings table
 2. **Dimensionality reduction** - Use UMAP to reduce embeddings to 100 dimensions for clustering
 3. **HDBSCAN clustering** - Density-based clustering that automatically determines cluster count and identifies outliers
 4. **Compute distances** - Calculate distance from each trace to cluster centroids
@@ -132,7 +132,7 @@ The workflow uses **three separate activities** with independent timeouts and re
 
 **Activity 1 (Compute)** - CPU-bound work:
 
-- Fetches embeddings via HogQL (team-scoped)
+- Fetches embeddings via InsightsQL (team-scoped)
 - Reduces dimensionality with UMAP (3072D → 100D for clustering)
 - Performs HDBSCAN density-based clustering (auto-determines cluster count)
 - Computes distance matrix and centroid coordinates
@@ -166,10 +166,10 @@ The workflow uses **three separate activities** with independent timeouts and re
 - `generate_cluster_labels_activity()` - LLM labeling
 - `emit_cluster_events_activity()` - Event emission
 
-**`data.py`** - Data access layer (HogQL):
+**`data.py`** - Data access layer (InsightsQL):
 
-- `fetch_trace_embeddings_for_clustering()` - Query trace IDs and embeddings via HogQL (team-scoped, filters by product/document_type/rendering)
-- `fetch_trace_summaries()` - Fetch trace summaries for LLM labeling via HogQL
+- `fetch_trace_embeddings_for_clustering()` - Query trace IDs and embeddings via InsightsQL (team-scoped, filters by product/document_type/rendering)
+- `fetch_trace_summaries()` - Fetch trace summaries for LLM labeling via InsightsQL
 
 **`clustering.py`** - Clustering algorithms:
 
@@ -293,7 +293,7 @@ import django
 django.setup()
 
 import json
-from posthog.clickhouse.client.execute import sync_execute
+from insights.clickhouse.client.execute import sync_execute
 
 results = sync_execute('''
     SELECT
@@ -358,7 +358,7 @@ Key constants in `constants.py`:
 ## Processing Flow
 
 1. **Fetch Data**
-   - Query trace IDs and embeddings via HogQL (automatically team-scoped)
+   - Query trace IDs and embeddings via InsightsQL (automatically team-scoped)
    - Filter by product, document_type, and rendering
    - Sample if more than `max_samples`
 
@@ -398,7 +398,7 @@ Key constants in `constants.py`:
 ## Testing
 
 ```bash
-pytest posthog/temporal/llm_analytics/trace_clustering/test_workflow.py -v
+pytest insights/temporal/llm_analytics/trace_clustering/test_workflow.py -v
 ```
 
 Test coverage:
@@ -423,6 +423,6 @@ Test coverage:
 
 ## References
 
-- Main clustering issue: [#40787](https://github.com/PostHog/posthog/issues/40787)
-- Trace summarization workflow: `posthog/temporal/llm_analytics/trace_summarization/`
+- Main clustering issue: [#40787](https://github.com/Hanzo Insights/insights/issues/40787)
+- Trace summarization workflow: `insights/temporal/llm_analytics/trace_summarization/`
 - Document embeddings: `products/error_tracking/backend/embedding.py`

@@ -3,7 +3,7 @@ from insights.insightsql.ast import ArrayType, BooleanType, FloatType, IntegerTy
 from ..core import InsightsQLFunctionMeta
 from ..typegen import generate_json_path_signatures
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 JSON_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "isValidJSON": InsightsQLFunctionMeta("isValidJSON", 1, 1, signatures=[((StringType(),), IntegerType())]),
     "JSONHas": InsightsQLFunctionMeta(

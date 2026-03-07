@@ -74,7 +74,7 @@ def generate_combinator_suffix_combinations():
 
 
 # Permitted InsightsQL aggregations
-# Keep in sync with the posthog.com repository: contents/docs/sql/aggregations.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/aggregations.mdx
 INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
     # Generated combinator functions
     **generate_combinator_suffix_combinations(),

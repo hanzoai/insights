@@ -215,7 +215,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
     def test_multiple_users_can_authorize_different_codes(self):
         """Test that multiple users can authorize different device codes concurrently"""
         # Create another user
-        other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password123")
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
 
         # Create device code for other user
         response2 = self.client.post("/api/cli-auth/device-code/")
@@ -309,7 +309,7 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
 
         # Verify the API key is valid
         api_key = data["personal_api_key"]
-        self.assertTrue(api_key.startswith("phx_"))
+        self.assertTrue(api_key.startswith("hix_"))
 
     def test_poll_returns_expired_for_old_code(self):
         """Test that polling returns expired for old device codes"""

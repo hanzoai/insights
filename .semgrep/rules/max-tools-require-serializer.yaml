@@ -2,7 +2,7 @@
 # Max AI tools should go through serializers to ensure proper validation, rate limiting,
 # metrics logging, and consistent behavior with the rest of the codebase.
 #
-# See: https://github.com/PostHog/posthog/pull/48087 for context
+# See: https://github.com/Hanzo Insights/insights/pull/48087 for context
 rules:
     - id: max-tools-direct-model-create
       patterns:

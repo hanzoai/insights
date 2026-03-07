@@ -67,7 +67,7 @@ class Command(BaseCommand):
             push_to_gateway(
                 settings.PROM_PUSHGATEWAY_ADDRESS,
                 job="django_migrate",
-                grouping_key={"instance": "posthog"},
+                grouping_key={"instance": "insights"},
                 registry=registry,
             )
             logger.info(

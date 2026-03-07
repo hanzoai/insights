@@ -5,8 +5,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonTabs } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonTabs } from '@hanzo/lemon-ui'
 
 import { ActivityLogLogicProps, activityLogLogic } from 'lib/components/ActivityLog/activityLogLogic'
 import { ActivityChange, HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'

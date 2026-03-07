@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonSelect, Spinner } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonSelect, Spinner } from '@hanzo/lemon-ui'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'

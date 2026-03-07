@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/tailwind",
+    "name": "@hanzo/tailwind",
     "scripts": {
         "build": "npx @tailwindcss/cli@4.0.12 -i ./tailwind.css -o ./dist/tailwind.css",
         "start": "npx @tailwindcss/cli@4.0.12 -i ./tailwind.css -o ./dist/tailwind.css --watch"

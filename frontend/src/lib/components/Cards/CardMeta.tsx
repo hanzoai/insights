@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import React from 'react'
 import { Transition } from 'react-transition-group'
 
-import { IconPieChart } from '@posthog/icons'
+import { IconPieChart } from '@hanzo/icons'
 
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

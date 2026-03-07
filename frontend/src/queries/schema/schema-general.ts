@@ -68,9 +68,9 @@ export { ChartDisplayCategory }
  * This file acts as the source of truth for:
  *
  * - frontend/src/queries/schema.json
- *   - generated from typescript via "pnpm --filter=@posthog/frontend run schema:build:json"
+ *   - generated from typescript via "pnpm --filter=@hanzo/frontend run schema:build:json"
  *
- * - posthog/schema.py
+ * - insights/schema.py
  *   - generated from json the above json via "pnpm -w run schema:build:python"
  * */
 
@@ -1715,7 +1715,7 @@ export type LifecycleFilter = {
     stacked?: boolean
 }
 
-// See posthog/insightsql_queries/query_runner.py `ExecutionMode` for details on what the types mean
+// See insights/insightsql_queries/query_runner.py `ExecutionMode` for details on what the types mean
 export type RefreshType =
     | 'async'
     | 'async_except_on_cache_miss'
@@ -1800,7 +1800,7 @@ export interface EndpointLastExecutionTimesRequest {
 export interface QueryRequest {
     /** Client provided query ID. Can be used to retrieve the status or cancel the query. */
     client_query_id?: string
-    // Sync the `refresh` description here with the two instances in posthog/api/insight.py
+    // Sync the `refresh` description here with the two instances in insights/api/insight.py
     /**
      * Whether results should be calculated sync or async, and how much to rely on the cache:
      * - `'blocking'` - calculate synchronously (returning only when the query is done), UNLESS there are very fresh results in the cache
@@ -3098,7 +3098,7 @@ export interface ExperimentTrendsQuery extends DataNode<ExperimentTrendsQueryRes
     experiment_id?: integer
     count_query: TrendsQuery
     // Defaults to $feature_flag_called if not specified
-    // https://github.com/PostHog/posthog/blob/master/posthog/insightsql_queries/experiments/experiment_trends_query_runner.py
+    // https://github.com/hanzoai/insights/blob/master/insights/insightsql_queries/experiments/experiment_trends_query_runner.py
     exposure_query?: TrendsQuery
     fingerprint?: string
 }
@@ -3593,7 +3593,7 @@ export interface DatabaseSchemaField {
 }
 
 export type DatabaseSchemaTableType =
-    | 'posthog'
+    | 'insights'
     | 'system'
     | 'data_warehouse'
     | 'view'
@@ -3651,7 +3651,7 @@ export interface DatabaseSchemaMaterializedViewTable extends DatabaseSchemaTable
 }
 
 export interface DatabaseSchemaInsightsTable extends DatabaseSchemaTableCommon {
-    type: 'posthog'
+    type: 'insights'
 }
 
 export interface DatabaseSchemaSystemTable extends DatabaseSchemaTableCommon {
@@ -5588,7 +5588,7 @@ export enum ProductIntentContext {
     ENDPOINT_CREATED_FROM_SQL_EDITOR = 'endpoint_created_from_sql_editor',
 }
 
-// Known prod_interest values from posthog.com
+// Known prod_interest values from hanzo.ai
 export type WebsiteBrowsingHistoryProdInterest =
     | 'product-analytics'
     | 'web-analytics'

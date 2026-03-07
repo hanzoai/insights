@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@posthog/icons'
-import { LemonButton, LemonDropdown } from '@posthog/lemon-ui'
+import { IconDownload } from '@hanzo/icons'
+import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
 
 import { BasicFiltersTab } from './BasicFiltersTab'
 import { advancedActivityLogsLogic } from './advancedActivityLogsLogic'

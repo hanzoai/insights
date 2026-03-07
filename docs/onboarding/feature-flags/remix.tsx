@@ -31,7 +31,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Use `posthog-node` to evaluate feature flags on the server. Initialize Insights in your API
+                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your API
                         route or loader:
                     </Markdown>
                     <CodeBlock
@@ -40,10 +40,10 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'typescript',
                                 file: 'app/api/example/route.ts',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
+                                    import { Insights } from 'insights-node'
 
-                                    const posthog = new Insights(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-                                        host: process.env.NEXT_PUBLIC_POSTHOG_HOST
+                                    const insights = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                     })
                                 `,
                             },

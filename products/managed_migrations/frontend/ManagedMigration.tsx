@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconSort } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTag } from '@posthog/lemon-ui'
+import { IconSort } from '@hanzo/icons'
+import { LemonButton, LemonTable, LemonTag } from '@hanzo/lemon-ui'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { TZLabel } from 'lib/components/TZLabel'

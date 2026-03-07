@@ -188,7 +188,7 @@ export const loginLogic = kea<loginLogicType>([
     listeners(({ values }) => ({
         submitLoginSuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTHOG_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
         precheckSuccess: async (_, breakpoint) => {

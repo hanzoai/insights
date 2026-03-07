@@ -24,7 +24,7 @@ export const mockBasicUser: UserBasicType = {
     uuid: '1234',
     distinct_id: '1234',
     first_name: 'Tim',
-    email: 'tim@posthog.com',
+    email: 'tim@hanzo.ai',
 }
 
 export const mockEvent: EventType = {
@@ -40,7 +40,7 @@ export const mockEvent: EventType = {
         is_identified: true,
         distinct_ids: ['abcde'],
         properties: {
-            email: 'alex@posthog.com',
+            email: 'alex@hanzo.ai',
         },
     },
     elements: [],
@@ -197,7 +197,7 @@ export const mockSubscription: SubscriptionType = {
     id: 1,
     title: 'My example subscription',
     target_type: 'email',
-    target_value: 'ben@posthog.com,geoff@other-company.com',
+    target_value: 'ben@hanzo.ai,geoff@other-company.com',
     frequency: 'monthly',
     interval: 2,
     start_date: '2022-01-01T00:09:00',

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo, IconPinFilled } from '@posthog/icons'
-import { LemonButton, Popover, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconPinFilled } from '@hanzo/icons'
+import { LemonButton, Popover, Tooltip } from '@hanzo/lemon-ui'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'

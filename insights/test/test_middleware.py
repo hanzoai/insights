@@ -397,7 +397,7 @@ class TestAutoProjectMiddleware(APIBaseTest):
         assert res.status_code == 302
         assert res.headers["Location"] == f"/project/{self.second_team.pk}/home"
 
-    def test_project_redirects_to_posthog_org_style_tokens(self):
+    def test_project_redirects_to_insights_org_style_tokens(self):
         res = self.client.get(
             f"/project/{self.third_team.api_token}/replay/018f5c3e-1a17-7f2b-ac83-32d06be3269b?t=2601"
         )
@@ -410,7 +410,7 @@ class TestAutoProjectMiddleware(APIBaseTest):
     def test_project_redirects_to_current_team_when_accessing_missing_project_by_token(
         self,
     ):
-        res = self.client.get(f"/project/phc_123/home")
+        res = self.client.get(f"/project/hi_123/home")
         assert res.status_code == 302
         assert res.headers["Location"] == f"/project/{self.team.pk}/home"
 
@@ -422,11 +422,11 @@ class TestAutoProjectMiddleware(APIBaseTest):
         assert res.headers["Location"] == f"/project/{self.team.pk}/home"
 
     def test_project_redirects_including_query_params(self):
-        res = self.client.get(f"/project/phc_123?t=1")
+        res = self.client.get(f"/project/hi_123?t=1")
         assert res.status_code == 302
         assert res.headers["Location"] == f"/project/{self.team.pk}?t=1"
 
-        res = self.client.get(f"/project/phc_123/home?t=1")
+        res = self.client.get(f"/project/hi_123/home?t=1")
         assert res.status_code == 302
         assert res.headers["Location"] == f"/project/{self.team.pk}/home?t=1"
 
@@ -538,7 +538,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         super().setUp()
         # Reset back to initial team/org for each test
         self.other_user = User.objects.create_and_join(
-            self.organization, email="other-user@posthog.com", password="123456"
+            self.organization, email="other-user@hanzo.ai", password="123456"
         )
 
         self.user.is_staff = True
@@ -564,7 +564,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         assert self.client.get("/api/users/@me").json()["email"] == self.user.email
         response = self.login_as_other_user()
         assert response.status_code == 200
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
 
     def test_not_staff_user_cannot_login(self):
         self.user.is_staff = False
@@ -580,7 +580,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             self.login_as_other_user()
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "other-user@posthog.com"
+            assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:20+00:00"
             assert self.client.session.get("session_created_at") == now.timestamp()
 
@@ -589,7 +589,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         with freeze_time(now):
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "other-user@posthog.com"
+            assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:39+00:00"
 
         # Past idle timeout
@@ -605,7 +605,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             self.login_as_other_user()
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "other-user@posthog.com"
+            assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:20+00:00"
             assert self.client.session.get("session_created_at") == now.timestamp()
 
@@ -615,7 +615,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             with freeze_time(now):
                 res = self.client.get("/api/users/@me")
                 assert res.status_code == 200
-                assert res.json()["email"] == "other-user@posthog.com"
+                assert res.json()["email"] == "other-user@hanzo.ai"
                 # Format exactly like the date above
                 assert res.json()["is_impersonated_until"] == (now + timedelta(seconds=20)).strftime(
                     "%Y-%m-%dT%H:%M:%S+00:00"
@@ -625,7 +625,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         with freeze_time(now):
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "other-user@posthog.com"
+            assert res.json()["email"] == "other-user@hanzo.ai"
             # Even though below the idle timeout, we now see the total timeout as that is earlier
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:01:40+00:00"
 
@@ -650,11 +650,11 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             # Verify we're back to original user
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "user1@posthog.com"
+            assert res.json()["email"] == "user1@hanzo.ai"
 
     def test_after_timeout_admin_page_redirects_to_intended_admin_page(self):
         """When session times out navigating to an admin page, redirect to that page."""
-        third_user = User.objects.create_and_join(self.organization, email="third-user@posthog.com", password="123456")
+        third_user = User.objects.create_and_join(self.organization, email="third-user@hanzo.ai", password="123456")
 
         now = datetime.now()
         with freeze_time(now):
@@ -662,15 +662,15 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
 
         with freeze_time(now + timedelta(seconds=35)):
             # Navigate to a different user's admin page
-            res = self.client.get(f"/admin/posthog/user/{third_user.id}/change/")
+            res = self.client.get(f"/admin/insights/user/{third_user.id}/change/")
             assert res.status_code == 302
             # Should redirect to the intended admin page, not the impersonated user's page
-            assert res.headers["Location"] == f"/admin/posthog/user/{third_user.id}/change/"
+            assert res.headers["Location"] == f"/admin/insights/user/{third_user.id}/change/"
 
             # Verify we're back to original user
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "user1@posthog.com"
+            assert res.json()["email"] == "user1@hanzo.ai"
 
     def test_explicit_logout_redirects_to_impersonated_user_admin(self):
         """When explicitly logging out via /logout, redirect to impersonated user's admin page."""
@@ -681,12 +681,12 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             # Explicit logout via the main logout endpoint
             res = self.client.get("/logout")
             assert res.status_code == 302
-            assert res.headers["Location"] == f"/admin/posthog/user/{self.other_user.id}/change/"
+            assert res.headers["Location"] == f"/admin/insights/user/{self.other_user.id}/change/"
 
             # Verify we're back to original user
             res = self.client.get("/api/users/@me")
             assert res.status_code == 200
-            assert res.json()["email"] == "user1@posthog.com"
+            assert res.json()["email"] == "user1@hanzo.ai"
 
 
 @override_settings(IMPERSONATION_TIMEOUT_SECONDS=100)
@@ -700,7 +700,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.other_user = User.objects.create_and_join(
-            self.organization, email="other-user@posthog.com", password="123456"
+            self.organization, email="other-user@hanzo.ai", password="123456"
         )
         self.user.is_staff = True
         self.user.save()
@@ -732,7 +732,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Try to delete the dashboard
         response = self.client.delete(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/")
@@ -754,7 +754,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         # Verify we're logged in as the other user
         response = self.client.get("/api/users/@me")
         assert response.status_code == 200
-        assert response.json()["email"] == "other-user@posthog.com"
+        assert response.json()["email"] == "other-user@hanzo.ai"
 
         # GET request to dashboards should work
         response = self.client.get(f"/api/projects/{self.team.id}/dashboards/")
@@ -765,7 +765,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # POST to query endpoint - the query itself may fail but we shouldn't get blocked by the middleware
         response = self.client.post(
@@ -784,7 +784,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Update should work with regular impersonation
         response = self.client.patch(
@@ -824,13 +824,13 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Explicit logout via main logout endpoint
         response = self.client.get("/logout")
 
         assert response.status_code == 302
-        assert response.headers["Location"] == f"/admin/posthog/user/{self.other_user.id}/change/"
+        assert response.headers["Location"] == f"/admin/insights/user/{self.other_user.id}/change/"
 
         # Verify we're back to original user
         assert self.client.get("/api/users/@me").json()["email"] == self.user.email
@@ -877,7 +877,7 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.other_user = User.objects.create_and_join(
-            self.organization, email="other-user@posthog.com", password="123456"
+            self.organization, email="other-user@hanzo.ai", password="123456"
         )
         self.user.is_staff = True
         self.user.save()
@@ -901,14 +901,14 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
 
         response = self.client.get("/api/users/@me/")
         assert response.status_code == 200
-        assert response.json()["email"] == "other-user@posthog.com"
+        assert response.json()["email"] == "other-user@hanzo.ai"
 
     def test_impersonation_blocks_patch_to_users_api(self):
         """Verify any impersonation blocks PATCH requests to /api/users/."""
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         # Try to update user
         response = self.client.patch(
@@ -967,7 +967,7 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.get("/api/personal_api_keys/")
         assert response.status_code == 200
@@ -977,7 +977,7 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.post(
             "/api/personal_api_keys/",
@@ -1000,7 +1000,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.other_user = User.objects.create_and_join(
-            self.organization, email="other-user@posthog.com", password="123456"
+            self.organization, email="other-user@hanzo.ai", password="123456"
         )
         self.user.is_staff = True
         self.user.save()
@@ -1028,7 +1028,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
         )
 
         # Should now be logged in as other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@posthog.com"
+        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
     def test_impersonation_rejected_with_empty_reason(self):
         """Verify impersonation is rejected when reason is empty string."""
@@ -1059,7 +1059,7 @@ class TestUpgradeImpersonation(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.other_user = User.objects.create_and_join(
-            self.organization, email="other-user@posthog.com", password="123456"
+            self.organization, email="other-user@hanzo.ai", password="123456"
         )
         self.user.is_staff = True
         self.user.save()

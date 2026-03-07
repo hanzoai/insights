@@ -1,13 +1,13 @@
 {
-    "name": "@posthog/mcp",
+    "name": "@hanzo/insights-mcp",
     "version": "1.0.0",
-    "description": "PostHog MCP server",
+    "description": "Hanzo Insights MCP server",
     "scripts": {
         "build:ui-apps": "tsx scripts/build-ui-apps.ts",
         "build:ui-apps:watch": "tsx scripts/build-ui-apps.ts --watch",
         "build": "pnpm run build:ui-apps",
         "dev": "wrangler dev",
-        "dev:local-resources": "wrangler dev --var POSTHOG_MCP_LOCAL_SKILLS_URL:http://localhost:8765/skills-mcp-resources.zip",
+        "dev:local-resources": "wrangler dev --var INSIGHTS_MCP_LOCAL_SKILLS_URL:http://localhost:8765/skills-mcp-resources.zip",
         "deploy": "wrangler deploy",
         "cf-typegen": "wrangler types",
         "inspector": "npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/mcp",
@@ -18,14 +18,14 @@
         "generate-client": "tsx scripts/update-openapi-client.ts"
     },
     "keywords": [
-        "posthog",
+        "insights",
         "mcp",
         "ai",
         "agents",
         "analytics",
         "feature-flags"
     ],
-    "author": "PostHog Inc.",
+    "author": "Hanzo AI <dev@hanzo.ai>",
     "license": "MIT",
     "dependencies": {
         "@modelcontextprotocol/ext-apps": "^1.0.1",
@@ -34,8 +34,8 @@
         "agents": "^0.3.6",
         "ai": "^6.0.0",
         "fflate": "^0.8.2",
-        "posthog-js-lite": "4.2.2",
-        "posthog-node": "^5.10.4",
+        "@hanzo/insights-lite": "4.2.2",
+        "@hanzo/insights-node": "workspace:*",
         "uuid": "^11.1.0",
         "zod": "^3.24.4"
     },

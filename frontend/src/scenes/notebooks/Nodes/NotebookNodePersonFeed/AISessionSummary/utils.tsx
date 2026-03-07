@@ -1,4 +1,4 @@
-import { IconCheck, IconX } from '@posthog/icons'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 export function formatDuration(seconds: number): string {
     if (seconds < 60) {

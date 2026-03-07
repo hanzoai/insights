@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconCheck, IconDocument } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTabs, LemonTextArea } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconArrowRight, IconCheck, IconDocument } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTabs, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { dayjs } from 'lib/dayjs'
@@ -294,7 +294,7 @@ function ImplementStep(): JSX.Element {
                 <div className="flex gap-2">
                     <LemonButton
                         type="primary"
-                        to="https://posthog.com/docs/llm-analytics/collect-user-feedback"
+                        to="https://hanzo.ai/docs/llm-analytics/collect-user-feedback"
                         targetBlank
                         disableClientSideRouting
                     >
@@ -302,7 +302,7 @@ function ImplementStep(): JSX.Element {
                     </LemonButton>
                     <LemonButton
                         type="secondary"
-                        to="https://github.com/PostHog/posthog/blob/e332d656667b8906410e93591a0f16633079efbd/frontend/src/scenes/surveys/components/question-visualizations/OpenQuestionSummaryV2.tsx#L112"
+                        to="https://github.com/hanzoai/insights/blob/e332d656667b8906410e93591a0f16633079efbd/frontend/src/scenes/surveys/components/question-visualizations/OpenQuestionSummaryV2.tsx#L112"
                         targetBlank
                         sideIcon={<IconArrowRight />}
                     >

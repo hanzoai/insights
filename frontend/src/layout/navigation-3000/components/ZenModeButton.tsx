@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { navigation3000Logic } from '../navigationLogic'
 

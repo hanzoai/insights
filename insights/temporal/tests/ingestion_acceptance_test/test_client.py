@@ -15,29 +15,29 @@ from insights.temporal.ingestion_acceptance_test.config import Config
 @pytest.fixture
 def config() -> Config:
     return Config(
-        api_host="https://test.posthog.com",
-        project_api_key="phc_test_key",
+        api_host="https://test.hanzo.ai",
+        project_api_key="hi_test_key",
         project_id="12345",
-        personal_api_key="phx_personal_key",
+        personal_api_key="hix_personal_key",
         event_timeout_seconds=5,
         poll_interval_seconds=0.1,
     )
 
 
 @pytest.fixture
-def mock_posthog_sdk() -> MagicMock:
+def mock_analytics_sdk() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def client(config: Config, mock_posthog_sdk: MagicMock) -> Generator[InsightsClient, None, None]:
-    client = InsightsClient(config, mock_posthog_sdk)
+def client(config: Config, mock_analytics_sdk: MagicMock) -> Generator[InsightsClient, None, None]:
+    client = InsightsClient(config, mock_analytics_sdk)
     yield client
     client.shutdown()
 
 
 class TestCaptureEvent:
-    def test_calls_sdk_with_correct_arguments(self, client: InsightsClient, mock_posthog_sdk: MagicMock) -> None:
+    def test_calls_sdk_with_correct_arguments(self, client: InsightsClient, mock_analytics_sdk: MagicMock) -> None:
         properties = {"key": "value", "$set": {"email": "test@example.com"}}
 
         event_uuid = client.capture_event(
@@ -46,17 +46,17 @@ class TestCaptureEvent:
             properties=properties,
         )
 
-        mock_posthog_sdk.capture.assert_called_once_with(
+        mock_analytics_sdk.capture.assert_called_once_with(
             distinct_id="user_123",
             event="test_event",
             properties=properties,
             uuid=event_uuid,
         )
 
-    def test_uses_empty_dict_when_no_properties(self, client: InsightsClient, mock_posthog_sdk: MagicMock) -> None:
+    def test_uses_empty_dict_when_no_properties(self, client: InsightsClient, mock_analytics_sdk: MagicMock) -> None:
         client.capture_event(event_name="test_event", distinct_id="user_123")
 
-        call_kwargs = mock_posthog_sdk.capture.call_args[1]
+        call_kwargs = mock_analytics_sdk.capture.call_args[1]
         assert call_kwargs["properties"] == {}
 
 
@@ -71,7 +71,7 @@ class TestFetchEventByUuid:
             mock_post.assert_called_once()
             call_kwargs = mock_post.call_args[1]
 
-            assert call_kwargs["headers"] == {"Authorization": "Bearer phx_personal_key"}
+            assert call_kwargs["headers"] == {"Authorization": "Bearer hix_personal_key"}
             assert call_kwargs["timeout"] == InsightsClient.HTTP_TIMEOUT_SECONDS
 
             request_body = call_kwargs["json"]
@@ -90,7 +90,7 @@ class TestFetchEventByUuid:
             client._fetch_event_by_uuid("test-uuid")
 
             url = mock_post.call_args[0][0]
-            assert url == "https://test.posthog.com/api/projects/12345/query/"
+            assert url == "https://test.hanzo.ai/api/projects/12345/query/"
 
     def test_returns_captured_event_when_found(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
@@ -215,13 +215,13 @@ def mock_server() -> Generator[HTTPServer, None, None]:
 class TestHttpRetryBehavior:
     """Test HTTP retry behavior using a real test server."""
 
-    def test_retries_on_500_error_then_succeeds(self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock) -> None:
+    def test_retries_on_500_error_then_succeeds(self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
@@ -232,20 +232,20 @@ class TestHttpRetryBehavior:
             {"json": {"results": [], "columns": []}, "status_code": 200},
         ]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == []
         assert MockHttpHandler.call_count == 3
 
-    def test_retries_on_502_503_504_errors(self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock) -> None:
+    def test_retries_on_502_503_504_errors(self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
@@ -257,67 +257,67 @@ class TestHttpRetryBehavior:
             {"json": {"results": [], "columns": []}, "status_code": 200},
         ]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == []
         assert MockHttpHandler.call_count == 4
 
-    def test_does_not_retry_on_400_error(self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock) -> None:
+    def test_does_not_retry_on_400_error(self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
 
         MockHttpHandler.queued_responses = [{"status_code": 400, "json": {"error": "Bad request"}}]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         with pytest.raises(Exception):
             client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert MockHttpHandler.call_count == 1
 
-    def test_does_not_retry_on_429_rate_limit(self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock) -> None:
+    def test_does_not_retry_on_429_rate_limit(self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
 
         MockHttpHandler.queued_responses = [{"status_code": 429, "json": {"error": "Rate limited"}}]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         with pytest.raises(Exception):
             client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert MockHttpHandler.call_count == 1
 
-    def test_returns_empty_list_on_404(self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock) -> None:
+    def test_returns_empty_list_on_404(self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
 
         MockHttpHandler.queued_responses = [{"status_code": 404}]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
@@ -325,21 +325,21 @@ class TestHttpRetryBehavior:
         assert MockHttpHandler.call_count == 1
 
     def test_succeeds_on_first_try_when_server_healthy(
-        self, mock_server: HTTPServer, mock_posthog_sdk: MagicMock
+        self, mock_server: HTTPServer, mock_analytics_sdk: MagicMock
     ) -> None:
         port = mock_server.server_address[1]
         config = Config(
             api_host=f"http://127.0.0.1:{port}",
-            project_api_key="phc_test_key",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             event_timeout_seconds=5,
             poll_interval_seconds=0.1,
         )
 
         MockHttpHandler.queued_responses = [{"json": {"results": [["value"]], "columns": ["col"]}, "status_code": 200}]
 
-        client = InsightsClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_analytics_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 

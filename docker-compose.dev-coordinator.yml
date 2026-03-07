@@ -4,7 +4,7 @@
 # https://insights.hanzo.ai/handbook/engineering/developing-locally
 #
 # Insights has sunset support for self-hosted K8s deployments.
-# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-posthog
+# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-insights
 #
 
 services:
@@ -200,7 +200,7 @@ services:
             file: docker-compose.base.yml
             service: cyclotron-janitor
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/cyclotron'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/cyclotron'
             RUST_LOG: 'info'
         depends_on:
             db:

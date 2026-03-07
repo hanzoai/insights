@@ -48,7 +48,7 @@ class TestSearchErrorTrackingIssuesTool(ClickhouseTestMixin, NonAtomicBaseTest):
         )
         _create_person(
             team=self.team,
-            properties={"email": "email@posthog.com"},
+            properties={"email": "email@hanzo.ai"},
             distinct_ids=[self.distinct_id_two],
             is_identified=True,
         )

@@ -109,7 +109,7 @@ export function TrendsSeries(): JSX.Element | null {
                         : []),
                 ]}
                 hideDeleteBtn={series?.length === 1}
-                addFilterDocLink="https://posthog.com/docs/product-analytics/trends/filters"
+                addFilterDocLink="https://hanzo.ai/docs/product-analytics/trends/filters"
             />
         </>
     )

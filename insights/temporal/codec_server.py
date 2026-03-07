@@ -59,7 +59,7 @@ def decode_payloads(request):
     authentication for security.
     """
 
-    allowed_origins = ["https://temporal-ui.posthog.orb.local", "http://localhost:8081"]
+    allowed_origins = ["https://temporal-ui.insights.orb.local", "http://localhost:8081"]
     request_origin = request.headers.get("Origin")
 
     if request_origin not in allowed_origins:

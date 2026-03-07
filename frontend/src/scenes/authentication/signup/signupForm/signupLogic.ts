@@ -3,9 +3,9 @@ import { isString } from '@tiptap/core'
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
@@ -209,11 +209,11 @@ export const signupLogic = kea<signupLogicType>([
                     const res = await api.create('api/signup/', signupData)
 
                     if (!payload.organization_name) {
-                        posthog.capture('sign up organization name not provided')
+                        insights.capture('sign up organization name not provided')
                     }
 
                     if (values.passkeyRegistered) {
-                        posthog.capture('signup completed with passkey')
+                        insights.capture('signup completed with passkey')
                     }
 
                     // it's ok to trust the url sent from the server
@@ -321,7 +321,7 @@ export const signupLogic = kea<signupLogicType>([
                     })
 
                     if (!payload.organization_name) {
-                        posthog.capture('sign up organization name not provided')
+                        insights.capture('sign up organization name not provided')
                     }
 
                     // it's ok to trust the url sent from the server

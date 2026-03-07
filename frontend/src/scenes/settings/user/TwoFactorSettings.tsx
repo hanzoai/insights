@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconCopy, IconInfo, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonModal, LemonSwitch, Tooltip, lemonToast } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconCopy, IconInfo, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonModal, LemonSwitch, Tooltip, lemonToast } from '@hanzo/lemon-ui'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'

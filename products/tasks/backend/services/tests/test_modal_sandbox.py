@@ -164,7 +164,7 @@ class TestModalSandboxAgentServer:
         )
 
         mock_sandbox.start_agent_server(
-            repository="posthog/posthog",
+            repository="hanzoai/insights",
             task_id="task-123",
             run_id="run-456",
             mode="background",
@@ -173,7 +173,7 @@ class TestModalSandboxAgentServer:
         start_call = mock_sandbox.execute.call_args_list[0]
         command = start_call[0][0]
         assert f"--port {AGENT_SERVER_PORT}" in command
-        assert "--repositoryPath /tmp/workspace/repos/posthog/posthog" in command
+        assert "--repositoryPath /tmp/workspace/repos/insights/insights" in command
         assert "--taskId task-123" in command
         assert "--runId run-456" in command
         assert "--mode background" in command
@@ -183,7 +183,7 @@ class TestModalSandboxAgentServer:
 
         with pytest.raises(RuntimeError, match="Sandbox not in running state"):
             mock_sandbox.start_agent_server(
-                repository="posthog/posthog",
+                repository="hanzoai/insights",
                 task_id="task-123",
                 run_id="run-456",
             )
@@ -195,7 +195,7 @@ class TestModalSandboxAgentServer:
 
         with pytest.raises(SandboxExecutionError, match="Failed to start agent-server"):
             mock_sandbox.start_agent_server(
-                repository="posthog/posthog",
+                repository="hanzoai/insights",
                 task_id="task-123",
                 run_id="run-456",
             )
@@ -212,7 +212,7 @@ class TestModalSandboxAgentServer:
         with patch("products.tasks.backend.services.modal_sandbox.time.sleep"):
             with pytest.raises(SandboxExecutionError, match="Agent-server failed to start"):
                 mock_sandbox.start_agent_server(
-                    repository="posthog/posthog",
+                    repository="hanzoai/insights",
                     task_id="task-123",
                     run_id="run-456",
                 )

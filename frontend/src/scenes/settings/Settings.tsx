@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import React from 'react'
 
-import { IconChevronDown, IconChevronRight, IconExternal } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonButtonProps, LemonDivider, LemonInput, Link } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronRight, IconExternal } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonButtonProps, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SupportedPlatforms } from 'lib/components/SupportedPlatforms/SupportedPlatforms'
@@ -76,7 +76,7 @@ export function Settings({
     const settingsInSidebar = props.sectionId && !!selectedSetting
 
     // Currently environment and project settings do not require periodic re-authentication,
-    // though this is likely to change (see https://github.com/posthog/posthog/pull/22421).
+    // though this is likely to change (see https://github.com/insights/insights/pull/22421).
     // In the meantime, we don't want a needless re-authentication modal:
     const AuthenticationAreaComponent =
         selectedLevel !== 'environment' && selectedLevel !== 'project'

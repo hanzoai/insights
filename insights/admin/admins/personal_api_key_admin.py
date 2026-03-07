@@ -10,7 +10,7 @@ from insights.tasks.email import send_personal_api_key_exposed
 
 
 class PersonalAPIKeyAdmin(admin.ModelAdmin):
-    change_form_template = "admin/posthog/personal_api_key/change_form.html"
+    change_form_template = "admin/insights/personal_api_key/change_form.html"
 
     fields = (
         "id",
@@ -42,7 +42,7 @@ class PersonalAPIKeyAdmin(admin.ModelAdmin):
     def user_link(self, key: PersonalAPIKey):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_user_change", args=[key.user.pk]),
+            reverse("admin:insights_user_change", args=[key.user.pk]),
             key.user.email,
         )
 
@@ -54,7 +54,7 @@ class PersonalAPIKeyAdmin(admin.ModelAdmin):
             '<button type="submit" name="_roll" id="roll_key_button" class="button" '
             'formmethod="post" formaction="{}" formnovalidate style="padding: 5px 10px; background-color: red;">Roll</button> '
             '<input type="hidden" name="_roll_url" />',
-            reverse("admin:posthog_personalapikey_roll", args=[personal_api_key.pk]),
+            reverse("admin:insights_personalapikey_roll", args=[personal_api_key.pk]),
         )
 
     def get_urls(self):
@@ -63,7 +63,7 @@ class PersonalAPIKeyAdmin(admin.ModelAdmin):
             path(
                 "<path:object_id>/roll/",
                 self.admin_site.admin_view(self.roll_view),
-                name="posthog_personalapikey_roll",
+                name="insights_personalapikey_roll",
             ),
         ]
         return custom + urls
@@ -71,7 +71,7 @@ class PersonalAPIKeyAdmin(admin.ModelAdmin):
     def roll_view(self, request, object_id, *args, **kwargs):
         personal_api_key = self.get_queryset(request).select_related("user").get(pk=object_id)
         if not personal_api_key:
-            return redirect(reverse("admin:posthog_personalapikey_changelist"))
+            return redirect(reverse("admin:insights_personalapikey_changelist"))
         if request.method != "POST":
             return HttpResponseNotAllowed(["POST"])
 
@@ -87,4 +87,4 @@ class PersonalAPIKeyAdmin(admin.ModelAdmin):
         send_personal_api_key_exposed(personal_api_key.user.id, personal_api_key.id, old_mask_value, more_info)
 
         self.message_user(request, f"Personal API key rolled and user notified.")
-        return redirect(reverse("admin:posthog_personalapikey_change", args=[personal_api_key.pk]))
+        return redirect(reverse("admin:insights_personalapikey_change", args=[personal_api_key.pk]))

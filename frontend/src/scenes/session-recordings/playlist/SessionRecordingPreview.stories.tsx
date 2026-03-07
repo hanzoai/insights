@@ -2,7 +2,7 @@ import './SessionRecordingPreview.scss'
 
 import { Meta, StoryFn } from '@storybook/react'
 
-import { IconCursorClick, IconKeyboard } from '@posthog/icons'
+import { IconCursorClick, IconKeyboard } from '@hanzo/icons'
 
 import { PropertyIcons, PropertyIconsProps } from './SessionRecordingPreview'
 

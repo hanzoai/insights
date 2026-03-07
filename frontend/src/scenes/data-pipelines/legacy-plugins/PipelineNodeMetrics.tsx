@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCalendar, IconCollapse, IconExpand, IconInfo } from '@posthog/icons'
-import { IconChevronLeft, IconChevronRight } from '@posthog/icons'
+import { IconCalendar, IconCollapse, IconExpand, IconInfo } from '@hanzo/icons'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { ChartDataset } from 'lib/Chart'
 import { getColorVar } from 'lib/colors'

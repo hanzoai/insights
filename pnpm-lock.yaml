@@ -522,7 +522,7 @@ importers:
       '@posthog/hedgehog-mode':
         specifier: ^0.0.48
         version: 0.0.48(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@insights/scriptvm':
+      '@hanzo/scriptvm':
         specifier: workspace:*
         version: link:../common/hogvm/typescript
       '@posthog/icons':
@@ -1412,10 +1412,10 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: ^1.36.0
         version: 1.36.0
-      '@insights/cyclotron':
+      '@hanzo/cyclotron':
         specifier: workspace:*
         version: link:../rust/cyclotron-node
-      '@insights/scriptvm':
+      '@hanzo/scriptvm':
         specifier: workspace:*
         version: link:../common/hogvm/typescript
       '@posthog/plugin-scaffold':

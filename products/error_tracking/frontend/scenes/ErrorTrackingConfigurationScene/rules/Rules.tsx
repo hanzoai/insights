@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { BindLogic, useActions, useValues } from 'kea'
 import { PropsWithChildren, useEffect } from 'react'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonCard, LemonDialog, LemonSelect, Spinner, lemonToast } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonCard, LemonDialog, LemonSelect, Spinner, lemonToast } from '@hanzo/lemon-ui'
 
 import { PropertyFilters, PropertyFiltersProps } from 'lib/components/PropertyFilters/PropertyFilters'
 import { SortableDragIcon } from 'lib/lemon-ui/icons'

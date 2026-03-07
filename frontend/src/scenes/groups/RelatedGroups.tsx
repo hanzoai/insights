@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { IconPerson } from '@posthog/icons'
+import { IconPerson } from '@hanzo/icons'
 
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { capitalizeFirstLetter } from 'lib/utils'

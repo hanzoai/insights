@@ -115,8 +115,8 @@ def snapshot_library_fallback_from(user_agent: str | None) -> str | None:
             fallback = None
         else:
             fallback = "web"
-            if "posthog" in user_agent.lower() and "/" in user_agent:
-                # mobile SDKs send e.g. posthog-android/1.0.0
+            if "insights" in user_agent.lower() and "/" in user_agent:
+                # mobile SDKs send e.g. insights-android/1.0.0
                 fallback = user_agent.split("/")[0]
 
         return fallback
@@ -129,7 +129,7 @@ def preprocess_replay_events(
 ) -> Generator[Event, None, None]:
     """
     The events going to blob ingestion are uncompressed (the compression happens in the Kafka producer)
-    1. Since posthog-js {version} we are grouping events on the frontend in a batch and passing their size in $snapshot_bytes
+    1. Since insights-js {version} we are grouping events on the frontend in a batch and passing their size in $snapshot_bytes
        These are easy to group as we can simply make sure the total size is not higher than our max message size in Kafka.
        If one message has this property, they all do (thanks to batching).
     2. If this property isn't set, we estimate the size (json.dumps) and if it is small enough - merge it all together in one event

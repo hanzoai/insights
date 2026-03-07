@@ -24,8 +24,8 @@ class FileSystemShortcut(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["team", "user"]),
-            models.Index(F("team_id"), F("path"), name="posthog_fs_s_team_path"),
-            models.Index(F("team_id"), F("type"), F("ref"), name="posthog_fs_s_team_typeref"),
+            models.Index(F("team_id"), F("path"), name="insights_fs_s_team_path"),
+            models.Index(F("team_id"), F("type"), F("ref"), name="insights_fs_s_team_typeref"),
         ]
 
     def __str__(self):

@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-logs",
+    "name": "@hanzo/products-logs",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -8,11 +8,11 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "posthog-js": "catalog:"
+        "insights-js": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
-        "@posthog/products-error-tracking": "workspace:*",
+        "@hanzo/icons": "*",
+        "@hanzo/products-error-tracking": "workspace:*",
         "@storybook/react": "*",
         "@testing-library/jest-dom": "*",
         "@testing-library/react": "*",

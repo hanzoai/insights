@@ -342,7 +342,7 @@ class InsightViewed(models.Model):
     last_viewed_at: models.DateTimeField = models.DateTimeField()
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["team", "user", "insight"], name="posthog_unique_insightviewed")]
+        constraints = [models.UniqueConstraint(fields=["team", "user", "insight"], name="insights_unique_insightviewed")]
         indexes = [models.Index(fields=["team_id", "user_id", "-last_viewed_at"])]
 
 

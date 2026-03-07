@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSelect } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSelect } from '@hanzo/lemon-ui'
 
 import { SupermanHog } from 'lib/components/mascots'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'

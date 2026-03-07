@@ -1,7 +1,7 @@
 import { actions, connect, events, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React from 'react'
 
 import {
@@ -28,8 +28,8 @@ import {
     IconTestTube,
     IconToggle,
     IconWarning,
-} from '@posthog/icons'
-import { Spinner, lemonToast } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { Spinner, lemonToast } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
@@ -282,7 +282,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                 }
                 await category.onAdd(itemName)
             } catch (e) {
-                posthog.captureException(e)
+                insights.captureException(e)
                 console.error(e)
                 lemonToast.error('Something went wrong while saving the item. Please try again.')
             } finally {
@@ -399,7 +399,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             identifier: Scene.Dashboards,
                             label: 'Dashboards',
                             icon: <IconDashboard />,
-                            tooltipDocLink: 'https://posthog.com/docs/product-analytics/dashboards',
+                            tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/dashboards',
                             to: urls.dashboards(),
                             sideAction:
                                 pinnedDashboards.length > 0
@@ -434,28 +434,28 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'Notebooks',
                             icon: <IconNotebook />,
                             to: urls.notebooks(),
-                            tooltipDocLink: 'https://posthog.com/docs/notebooks',
+                            tooltipDocLink: 'https://hanzo.ai/docs/notebooks',
                         },
                         {
                             identifier: Scene.DataManagement,
                             label: 'Data management',
                             icon: <IconDatabase />,
                             to: urls.eventDefinitions(),
-                            tooltipDocLink: 'https://posthog.com/docs/data',
+                            tooltipDocLink: 'https://hanzo.ai/docs/data',
                         },
                         {
                             identifier: Scene.Persons,
                             label: 'People and groups',
                             icon: <IconPeople />,
                             to: urls.persons(),
-                            tooltipDocLink: 'https://posthog.com/docs/data/persons',
+                            tooltipDocLink: 'https://hanzo.ai/docs/data/persons',
                         },
                         {
                             identifier: Scene.ExploreEvents,
                             label: 'Events',
                             icon: <IconLive />,
                             to: urls.activity(),
-                            tooltipDocLink: 'https://posthog.com/docs/data/events',
+                            tooltipDocLink: 'https://hanzo.ai/docs/data/events',
                         },
                     ],
                     [
@@ -463,7 +463,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             identifier: Scene.SavedInsights,
                             label: 'Product analytics',
                             icon: <IconGraph />,
-                            tooltipDocLink: 'https://posthog.com/docs/product-analytics/insights',
+                            tooltipDocLink: 'https://hanzo.ai/docs/product-analytics/insights',
                             to: urls.savedInsights(),
                             sideAction:
                                 getAppContext()?.resource_access_control?.[AccessControlResourceType.Insight] ===
@@ -481,7 +481,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'Web analytics',
                             icon: <IconPieChart />,
                             to: urls.webAnalytics(),
-                            tooltipDocLink: 'https://posthog.com/docs/web-analytics/getting-started',
+                            tooltipDocLink: 'https://hanzo.ai/docs/web-analytics/getting-started',
                         },
                         featureFlags[FEATURE_FLAGS.REVENUE_ANALYTICS]
                             ? {
@@ -490,7 +490,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                                   icon: <IconPiggyBank />,
                                   to: urls.revenueAnalytics(),
                                   tag: 'alpha' as const,
-                                  tooltipDocLink: 'https://posthog.com/docs/revenue-analytics/getting-started',
+                                  tooltipDocLink: 'https://hanzo.ai/docs/revenue-analytics/getting-started',
                               }
                             : null,
                         {
@@ -498,7 +498,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'Session replay',
                             icon: <IconRewindPlay />,
                             to: urls.replay(),
-                            tooltipDocLink: 'https://posthog.com/docs/session-replay',
+                            tooltipDocLink: 'https://hanzo.ai/docs/session-replay',
                             sideAction: {
                                 identifier: 'replay-dropdown',
                                 dropdown: {
@@ -545,21 +545,21 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'Feature flags',
                             icon: <IconToggle />,
                             to: urls.featureFlags(),
-                            tooltipDocLink: 'https://posthog.com/docs/feature-flags/creating-feature-flags',
+                            tooltipDocLink: 'https://hanzo.ai/docs/feature-flags/creating-feature-flags',
                         },
                         {
                             identifier: Scene.Experiments,
                             label: 'Experiments',
                             icon: <IconTestTube />,
                             to: urls.experiments(),
-                            tooltipDocLink: 'https://posthog.com/docs/experiments/creating-an-experiment',
+                            tooltipDocLink: 'https://hanzo.ai/docs/experiments/creating-an-experiment',
                         },
                         {
                             identifier: Scene.Surveys,
                             label: 'Surveys',
                             icon: <IconMessage />,
                             to: urls.surveys(),
-                            tooltipDocLink: 'https://posthog.com/docs/surveys/creating-surveys',
+                            tooltipDocLink: 'https://hanzo.ai/docs/surveys/creating-surveys',
                         },
                         featureFlags[FEATURE_FLAGS.PRODUCT_TOURS]
                             ? {
@@ -575,7 +575,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'Early access features',
                             icon: <IconRocket />,
                             to: urls.earlyAccessFeatures(),
-                            tooltipDocLink: 'https://posthog.com/docs/feature-flags/early-access-feature-management',
+                            tooltipDocLink: 'https://hanzo.ai/docs/feature-flags/early-access-feature-management',
                         },
                         featureFlags[FEATURE_FLAGS.USER_INTERVIEWS]
                             ? {
@@ -591,7 +591,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             label: 'LLM analytics',
                             icon: <IconLlmAnalytics />,
                             to: urls.llmAnalyticsDashboard(),
-                            tooltipDocLink: 'https://posthog.com/docs/llm-analytics/dashboard',
+                            tooltipDocLink: 'https://hanzo.ai/docs/llm-analytics/dashboard',
                         },
                         {
                             identifier: Scene.Logs,
@@ -599,14 +599,14 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             icon: <IconLive />,
                             to: urls.logs(),
                             tag: 'beta' as const,
-                            tooltipDocLink: 'https://posthog.com/docs/logs',
+                            tooltipDocLink: 'https://hanzo.ai/docs/logs',
                         },
                         {
                             identifier: Scene.ErrorTracking,
                             label: 'Error tracking',
                             icon: <IconWarning />,
                             to: urls.errorTracking(),
-                            tooltipDocLink: 'https://posthog.com/docs/error-tracking/stack-traces',
+                            tooltipDocLink: 'https://hanzo.ai/docs/error-tracking/stack-traces',
                         },
                         {
                             identifier: Scene.SQLEditor,
@@ -614,14 +614,14 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             icon: <IconServer />,
                             to: urls.sqlEditor(),
                             logic: editorSceneLogic,
-                            tooltipDocLink: 'https://posthog.com/docs/data-warehouse/query#querying-sources-with-sql',
+                            tooltipDocLink: 'https://hanzo.ai/docs/data-warehouse/query#querying-sources-with-sql',
                         },
                         {
                             identifier: Scene.Apps,
                             label: 'Apps',
                             icon: <IconPlug />,
                             to: urls.apps(),
-                            tooltipDocLink: 'https://posthog.com/docs/cdp/apps',
+                            tooltipDocLink: 'https://hanzo.ai/docs/cdp/apps',
                         },
                         {
                             identifier: Scene.Heatmaps,
@@ -629,7 +629,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                             icon: <IconCursorClick />,
                             to: urls.heatmaps(),
                             tag: 'beta' as const,
-                            tooltipDocLink: 'https://posthog.com/docs/toolbar/heatmaps',
+                            tooltipDocLink: 'https://hanzo.ai/docs/toolbar/heatmaps',
                         },
                         featureFlags[FEATURE_FLAGS.LINKS]
                             ? {
@@ -638,7 +638,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                                   icon: <IconCursorClick />,
                                   to: urls.links(),
                                   tag: 'alpha' as const,
-                                  tooltipDocLink: 'https://posthog.com/docs/links',
+                                  tooltipDocLink: 'https://hanzo.ai/docs/links',
                               }
                             : null,
                         {

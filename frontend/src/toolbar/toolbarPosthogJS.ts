@@ -1,15 +1,15 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import { FeatureFlagKey } from 'lib/constants'
 
 const DEFAULT_API_KEY = 'sTMFPsFhdP1Ssg'
 
-const runningOnPosthog = !!window.POSTHOG_APP_CONTEXT
-const apiKey = runningOnPosthog ? window.JS_POSTHOG_API_KEY : DEFAULT_API_KEY
-const apiHost = runningOnPosthog ? window.JS_POSTHOG_HOST : 'https://internal-j.posthog.com'
+const runningOnInsights = !!window.INSIGHTS_APP_CONTEXT
+const apiKey = runningOnInsights ? window.JS_INSIGHTS_API_KEY : DEFAULT_API_KEY
+const apiHost = runningOnInsights ? window.JS_INSIGHTS_HOST : 'https://internal-j.hanzo.ai'
 
-const initResult = posthog.init(
+const initResult = insights.init(
     apiKey || DEFAULT_API_KEY,
     {
         api_host: apiHost,
@@ -31,7 +31,7 @@ const initResult = posthog.init(
             // so customer sessions don't see it), but also respect the customer's
             // ph-no-capture marks
             blockClass: 'ph-internal-no-capture',
-            blockSelector: '.ph-no-capture:not(#__POSTHOG_TOOLBAR__):not(#__POSTHOG_TOOLBAR__ *)',
+            blockSelector: '.ph-no-capture:not(#__INSIGHTS_TOOLBAR__):not(#__INSIGHTS_TOOLBAR__ *)',
             maskAllInputs: true,
         },
     },
@@ -40,17 +40,17 @@ const initResult = posthog.init(
 if (!initResult) {
     throw new Error('Failed to initialize Insights toolbar instance')
 }
-export const toolbarPosthogJS = initResult
+export const toolbarInsightsJS = initResult
 
-if (runningOnPosthog && window.JS_POSTHOG_SELF_CAPTURE) {
-    toolbarPosthogJS.debug()
+if (runningOnInsights && window.JS_INSIGHTS_SELF_CAPTURE) {
+    toolbarInsightsJS.debug()
 }
 
 export const useToolbarFeatureFlag = (flag: FeatureFlagKey, match?: string): boolean => {
-    const [flagValue, setFlagValue] = useState<boolean | string | undefined>(toolbarPosthogJS.getFeatureFlag(flag))
+    const [flagValue, setFlagValue] = useState<boolean | string | undefined>(toolbarInsightsJS.getFeatureFlag(flag))
 
     useEffect(() => {
-        return toolbarPosthogJS.onFeatureFlags(() => setFlagValue(toolbarPosthogJS.getFeatureFlag(flag)))
+        return toolbarInsightsJS.onFeatureFlags(() => setFlagValue(toolbarInsightsJS.getFeatureFlag(flag)))
     }, [flag, match])
 
     if (match) {

@@ -24,14 +24,14 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -77,7 +77,7 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
+                        settings](https://insights.hanzo.ai/settings/project), then create a Insights OpenAI wrapper and
                         pass it to Instructor.
                     </Markdown>
 
@@ -89,17 +89,17 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 code: dedent`
                                     import instructor
                                     from pydantic import BaseModel
-                                    from posthog.ai.openai import OpenAI
-                                    from posthog import Posthog
+                                    from insights.ai.openai import OpenAI
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
 
                                     openai_client = OpenAI(
                                         api_key="your_openai_api_key",
-                                        posthog_client=posthog
+                                        insights_client=insights
                                     )
 
                                     client = instructor.from_openai(openai_client)
@@ -110,8 +110,8 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 file: 'Node',
                                 code: dedent`
                                     import Instructor from '@instructor-ai/instructor'
-                                    import { OpenAI } from '@posthog/ai'
-                                    import { Insights } from 'posthog-node'
+                                    import { OpenAI } from '@hanzo/ai'
+                                    import { Insights } from 'insights-node'
                                     import { z } from 'zod'
 
                                     const phClient = new Insights(
@@ -121,7 +121,7 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                                     const openai = new OpenAI({
                                       apiKey: 'your_openai_api_key',
-                                      posthog: phClient,
+                                      insights: phClient,
                                     });
 
                                     const client = Instructor({ client: openai, mode: 'TOOLS' })
@@ -166,9 +166,9 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                         messages=[
                                             {"role": "user", "content": "John Doe is 30 years old."}
                                         ],
-                                        posthog_distinct_id="user_123",
-                                        posthog_trace_id="trace_123",
-                                        posthog_properties={"conversation_id": "abc123"},
+                                        insights_distinct_id="user_123",
+                                        insights_trace_id="trace_123",
+                                        insights_properties={"conversation_id": "abc123"},
                                     )
 
                                     print(f"{user.name} is {user.age} years old")
@@ -189,9 +189,9 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                       messages: [
                                         { role: 'user', content: 'John Doe is 30 years old.' }
                                       ],
-                                      posthogDistinctId: 'user_123',
-                                      posthogTraceId: 'trace_123',
-                                      posthogProperties: { conversation_id: 'abc123' },
+                                      insightsDistinctId: 'user_123',
+                                      insightsTraceId: 'trace_123',
+                                      insightsProperties: { conversation_id: 'abc123' },
                                     })
 
                                     console.log(\`\${user.name} is \${user.age} years old\`)

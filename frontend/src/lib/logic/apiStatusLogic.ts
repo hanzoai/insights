@@ -1,6 +1,6 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'

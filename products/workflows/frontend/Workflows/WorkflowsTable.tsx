@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonCollapse, LemonDivider, LemonInput, LemonSelect, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { LemonCollapse, LemonDivider, LemonInput, LemonSelect, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
@@ -282,7 +282,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                     productName="Workflow"
                     thingName="workflow"
                     description="Create workflows that automate actions or send messages to your users."
-                    docsURL="https://posthog.com/docs/workflows/start-here"
+                    docsURL="https://hanzo.ai/docs/workflows/start-here"
                     action={() => {
                         showNewWorkflowModal()
                     }}

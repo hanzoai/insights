@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { HealthCheckSection } from './components/HealthCheckSection'
 import { HealthCheck } from './healthCheckTypes'

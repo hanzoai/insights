@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonTag, Spinner } from '@posthog/lemon-ui'
+import { LemonSelect, LemonTag, Spinner } from '@hanzo/lemon-ui'
 
 import {
     ExperimentMetric,

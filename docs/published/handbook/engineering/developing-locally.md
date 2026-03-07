@@ -5,7 +5,7 @@ showTitle: true
 ---
 
 > ❗️ This guide is intended only for development of Insights itself. If you're looking to deploy Insights
-> for your product analytics needs, go to [Self-host Insights](https://posthog.com/docs/self-host).
+> for your product analytics needs, go to [Self-host Insights](https://hanzo.ai/docs/self-host).
 
 ## What does Insights look like on the inside?
 
@@ -25,7 +25,7 @@ We also have a growing collection of Rust services that handle performance-criti
 - cymbal – processes source maps for error tracking
 - property-defs-rs – extracts and infers property definitions from events
 - hook services – manages webhooks with high performance
-- hogvm – evaluates HogQL bytecode via a stack machine implementation
+- hogvm – evaluates InsightsQL bytecode via a stack machine implementation
 
 These components rely on a few external services:
 
@@ -39,7 +39,7 @@ These components rely on a few external services:
 When spinning up an instance of Insights for development, we recommend the following hybrid configuration:
 
 - External services (ClickHouse, Kafka, PostgreSQL, Redis, etc.) run in Docker via `docker compose`
-- Insights apps (Django, frontend, plugin-server, Celery) run on the host using `hogli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
+- Insights apps (Django, frontend, plugin-server, Celery) run on the host using `insightscli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
 
 This approach gives you fast iteration on the code you're developing while keeping infrastructure isolated.
 
@@ -52,7 +52,7 @@ For other Linux distros, adjust the steps as needed (e.g. use `dnf` or `pacman` 
 
 Windows isn't supported natively. But, Windows users can run a Linux virtual machine. The latest Ubuntu LTS Desktop is recommended. (Ubuntu Server is not recommended as debugging the frontend will require a browser that can access localhost.)
 
-In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/PostHog/posthog.com/blob/master/contents/handbook/engineering/developing-locally.md)!
+In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Hanzo Insights/hanzo.ai/blob/master/contents/handbook/engineering/developing-locally.md)!
 
 ## Option 1: Developing locally
 
@@ -93,16 +93,16 @@ This is the recommended option for most developers.
 
 #### Cloning the repository
 
-Clone the [Insights repo](https://github.com/posthog/posthog). All future commands assume you're inside the `posthog/` folder.
+Clone the [Insights repo](https://github.com/insights/insights). All future commands assume you're inside the `insights/` folder.
 
 ```bash
-git clone --filter=blob:none https://github.com/PostHog/posthog && cd posthog/
+git clone --filter=blob:none https://github.com/Hanzo Insights/insights && cd insights/
 ```
 
 **Performance tip:** The `--filter=blob:none` flag downloads all commit history and tree structure, but defers file contents (blobs) until needed. This reduces the clone from ~3 GB to a few hundred MB and makes the initial clone **15-17x faster**. You still get full git history for commands like `git log` and `git diff` – blobs are fetched on demand as you use them.
 
 > The `feature-flags` container relies on the presence of the GeoLite cities
-> database in the `/share` directory. If you haven't run `hogli start` this database may not exist.
+> database in the `/share` directory. If you haven't run `insightscli start` this database may not exist.
 > You can explicitly download it by running `./bin/download-mmdb`. You may also need to modify the
 > file permissions of the database with:
 >
@@ -132,7 +132,7 @@ To get Insights running in a dev environment:
 
    > Note on app dependencies: Python requirements get updated every time the environment is activated (`uv sync` is lightning fast). JS dependencies only get installed if `node_modules/` is not present (`pnpm install` still takes a couple lengthy seconds). Dependencies for other languages currently don't get auto-installed.
 
-3. After successful environment activation, run `hogli start`. This launches the Docker infrastructure and all Insights processes together via mprocs — a terminal UI that shows logs from every service side by side.
+3. After successful environment activation, run `insightscli start`. This launches the Docker infrastructure and all Insights processes together via mprocs — a terminal UI that shows logs from every service side by side.
 
 This is it – you should be seeing the Insights app at <a href="http://localhost:8010" target="_blank">http://localhost:8010</a>.
 
@@ -140,7 +140,7 @@ You can now change Insights in any way you want. See [Project structure](./proje
 
 ### Customizing which services run
 
-By default, `hogli start` runs a minimal set of services (enough for product analytics). To customize which services start, run `hogli dev:setup` which lets you select intents based on the products you're working on. Your choices are saved and used automatically by `hogli start`.
+By default, `insightscli start` runs a minimal set of services (enough for product analytics). To customize which services start, run `insightscli dev:setup` which lets you select intents based on the products you're working on. Your choices are saved and used automatically by `insightscli start`.
 
 ### Manual setup
 
@@ -157,16 +157,16 @@ If you see "Exit Code 137" or out-of-memory errors, your Docker container doesn'
 If you see `Error while fetching server API version: 500 Server Error for http+docker://localhost/version`, make sure Docker (or OrbStack) is actually running.
 
 **Port conflicts**
-If you see a port binding error for 5432, you have Postgres running locally. Use `lsof -i :5432` to find the process, then `sudo service postgresql stop` to stop it. You may also see errors like `role "posthog" does not exist`, which could indicate that a local PostgreSQL instance is being used instead of the expected containerized one.
+If you see a port binding error for 5432, you have Postgres running locally. Use `lsof -i :5432` to find the process, then `sudo service postgresql stop` to stop it. You may also see errors like `role "insights" does not exist`, which could indicate that a local PostgreSQL instance is being used instead of the expected containerized one.
 
 **GeoLite database missing**
 The feature-flags container needs the GeoLite database in `/share`. If it's missing, run `./bin/download-mmdb` and then `chmod 0755 ./share/GeoLite2-City.mmdb`.
 
 **ClickHouse "get_mempolicy" warning**
-You might see `get_mempolicy: Operation not permitted` in the ClickHouse logs. This is harmless and can be ignored. To verify ClickHouse started properly, run `docker exec -it posthog-clickhouse-1 bash` then `clickhouse-client --query "SELECT 1"`.
+You might see `get_mempolicy: Operation not permitted` in the ClickHouse logs. This is harmless and can be ignored. To verify ClickHouse started properly, run `docker exec -it insights-clickhouse-1 bash` then `clickhouse-client --query "SELECT 1"`.
 
 **Database migration errors**
-If you see `fe_sendauth: no password supplied`, set `DATABASE_URL=postgres://posthog:posthog@localhost:5432/posthog` and ensure containers are running. On ARM machines, you may also hit `psycopg2` errors – see [this comment](https://github.com/psycopg/psycopg2/issues/1216#issuecomment-820556849) for fixes.
+If you see `fe_sendauth: no password supplied`, set `DATABASE_URL=postgres://insights:insights@localhost:5432/insights` and ensure containers are running. On ARM machines, you may also hit `psycopg2` errors – see [this comment](https://github.com/psycopg/psycopg2/issues/1216#issuecomment-820556849) for fixes.
 
 **Frontend typegen stuck in loop**
 The first time you run typegen, it may get stuck. Cancel it (`Ctrl+C`), run `git reset --hard`, then try again. You may need to discard changes once more when the second round completes.
@@ -196,7 +196,7 @@ pnpm install --force
 If you see `import gyp  # noqa: E402` during nodejs install, run `brew install python-setuptools`.
 
 **OpenSSL certificate verification error**
-If you get `Configuration property "enable.ssl.certificate.verification" not supported in this build: OpenSSL not available at build time` when running `hogli start`, set the right OpenSSL environment variables as described in [this issue](https://github.com/xmlsec/python-xmlsec/issues/261#issuecomment-1630889826) and try again.
+If you get `Configuration property "enable.ssl.certificate.verification" not supported in this build: OpenSSL not available at build time` when running `insightscli start`, set the right OpenSSL environment variables as described in [this issue](https://github.com/xmlsec/python-xmlsec/issues/261#issuecomment-1630889826) and try again.
 
 **pyproject.toml parse warnings**
 When running `uv sync`, you may see a `Failed to parse` warning related to `pyproject.toml`. This is usually harmless – if you see the `Activate with:` line at the end, your environment was created successfully.
@@ -217,7 +217,7 @@ This is a faster option to get up and running if you can't or don't want to set 
 7. Install `sqlx-cli` with `cargo install sqlx-cli` (install Cargo following the [Cargo getting started guide](https://doc.rust-lang.org/cargo/getting-started/installation.html) if needed)
 8. Now run `DEBUG=1 ./bin/migrate`
 9. Install [mprocs](https://github.com/pvolok/mprocs#installation) (`cargo install mprocs`)
-10. Run `bin/hogli start` (or just `hogli start` if using Flox).
+10. Run `bin/insightscli start` (or just `insightscli start` if using Flox).
 11. Open browser to <http://localhost:8010/>.
 12. To get some practical test data into your brand-new instance of Insights, run `DEBUG=1 ./manage.py generate_demo_data`.
 
@@ -230,7 +230,7 @@ For a Insights PR to be merged, all tests must be green, and ideally you should 
 For frontend unit tests, run:
 
 ```bash
-pnpm --filter=@posthog/frontend test
+pnpm --filter=@hanzo/frontend test
 ```
 
 You can narrow the run down to only files under matching paths:
@@ -262,13 +262,13 @@ pytest
 You can narrow the run down to only files under matching paths:
 
 ```bash
-pytest posthog/test/test_example.py
+pytest insights/test/test_example.py
 ```
 
 Or to only test cases with matching function names:
 
 ```bash
-pytest posthog/test/test_example.py -k test_something
+pytest insights/test/test_example.py -k test_something
 ```
 
 To see debug logs (such as ClickHouse queries), add argument `--log-cli-level=DEBUG`.
@@ -291,7 +291,7 @@ For detailed guidance on non-blocking migrations, see the [Safe Django Migration
 
 Our database migrations must be applied linearly in order, to avoid any conflicts. With many developers working on the same codebase, this means it's common to run into merge conflicts when introducing a PR with migrations.
 
-To help with this, we have introduced a tool called [django-linear-migrations](https://github.com/adamchainz/django-linear-migrations). When a migration-caused merge conflict arises, you can solve it by running `python manage.py rebase_migration <conflicted Django app> && git add <app>/migrations` (in our case the app is either `posthog` or `ee`).
+To help with this, we have introduced a tool called [django-linear-migrations](https://github.com/adamchainz/django-linear-migrations). When a migration-caused merge conflict arises, you can solve it by running `python manage.py rebase_migration <conflicted Django app> && git add <app>/migrations` (in our case the app is either `insights` or `ee`).
 
 ## Extra: Working with feature flags
 
@@ -306,13 +306,13 @@ If you'd like to have ALL feature flags that exist in Insights at your disposal 
 
 This command automatically turns any feature flag ending in `_EXPERIMENT` as a multivariate flag with `control` and `test` variants.
 
-Backend side flags are only evaluated locally, which requires the `POSTHOG_PERSONAL_API_KEY` env var to be set. Generate the key in [your user settings](http://localhost:8010/settings/user#personal-api-keys).
+Backend side flags are only evaluated locally, which requires the `INSIGHTS_PERSONAL_API_KEY` env var to be set. Generate the key in [your user settings](http://localhost:8010/settings/user#personal-api-keys).
 
 ## Extra: Debugging with VS Code
 
-The Insights repository includes [VS Code launch options for debugging](https://github.com/PostHog/posthog/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
+The Insights repository includes [VS Code launch options for debugging](https://github.com/Hanzo Insights/insights/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
 
-> **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `hogli start` and only want to debug one (e.g. the backend), use `hogli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
+> **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `insightscli start` and only want to debug one (e.g. the backend), use `insightscli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
 
 ## Extra: Debugging the backend in PyCharm
 
@@ -321,12 +321,12 @@ With PyCharm's built in support for Django, it's fairly easy to setup debugging 
 ### Setup PyCharm
 
 1. Open the repository folder.
-2. Setup the python interpreter (Settings… > Project: posthog > Python interpreter > Add interpreter -> Existing):
-   - If using manual setup: `path_to_repo/posthog/.venv/bin/python`.
-   - If using Flox: `path_to_repo/posthog/.flox/cache/venv/bin/python`.
+2. Setup the python interpreter (Settings… > Project: insights > Python interpreter > Add interpreter -> Existing):
+   - If using manual setup: `path_to_repo/insights/.venv/bin/python`.
+   - If using Flox: `path_to_repo/insights/.flox/cache/venv/bin/python`.
 3. Setup Django support (Settings… > Languages & Frameworks > Django):
    - Django project root: `path_to_repo`
-   - Settings: `posthog/settings/__init__py`
+   - Settings: `insights/settings/__init__py`
 4. To run tests correctly in PyCharm, disable the Django test runner:
    - Go to Settings… > Languages & Frameworks > Django
    - Check "Do not use Django test runner"
@@ -342,7 +342,7 @@ With PyCharm's built in support for Django, it's fairly easy to setup debugging 
 
 ## Extra: Accessing Postgres
 
-While developing, there are times you may want to connect to the database to query the local database, make changes, etc. To connect to the database, use a tool like pgAdmin and enter these connection details: _host_:`localhost` _port_:`5432` _database_:`posthog`, _username_:`posthog`, _pwd_:`posthog`.
+While developing, there are times you may want to connect to the database to query the local database, make changes, etc. To connect to the database, use a tool like pgAdmin and enter these connection details: _host_:`localhost` _port_:`5432` _database_:`insights`, _username_:`insights`, _pwd_:`insights`.
 
 ## Extra: Accessing ClickHouse
 
@@ -350,11 +350,11 @@ To connect to ClickHouse using a tool like DataGrip or PyCharm, use these connec
 
 ## Extra: Accessing the Django Admin
 
-If you cannot access the Django admin <http://localhost:8000/admin/>, it could be that your local user is not set up as a staff user. You can connect to the database, find your `posthog_user` and set `is_staff` to `true`. This should make the admin page accessible.
+If you cannot access the Django admin <http://localhost:8000/admin/>, it could be that your local user is not set up as a staff user. You can connect to the database, find your `insights_user` and set `is_staff` to `true`. This should make the admin page accessible.
 
 ## Extra: Sending emails
 
-Emails are configured in `posthog/emails.py`.
+Emails are configured in `insights/emails.py`.
 
 To test email functionality during local development, we use Maildev, a lightweight SMTP server with a web interface to inspect sent emails.
 
@@ -374,7 +374,7 @@ With the default `docker-compose.dev.yml` setup, you can view emails in your bro
 
 This allows you to easily confirm that emails are being sent and formatted correctly without actually sending anything externally.
 
-Emails sent via SMTP are stored in HTML files in `posthog/templates/*/*.html`. They use Django Template Language (DTL).
+Emails sent via SMTP are stored in HTML files in `insights/templates/*/*.html`. They use Django Template Language (DTL).
 
 ## Extra: Integrating with slack
 
@@ -395,7 +395,7 @@ When creating the slack integration it will redirect you to `https://localhost..
 Tracing is disabled by default. To enable it (requires the `tracing` intent in your dev setup), use:
 
 ```bash
-hogli start --tracing
+insightscli start --tracing
 ```
 
 Jaeger will be available at [http://localhost:16686](http://localhost:16686).
@@ -418,10 +418,10 @@ Most, but not all, emails have been migrated to Customer.io. Some are still send
 
 ### Creating a new email
 
-When creating a new email, there are a few steps to take. It's important to add the template to both Customer.io and the `posthog/templates/` folder.
+When creating a new email, there are a few steps to take. It's important to add the template to both Customer.io and the `insights/templates/` folder.
 
 1. Create a new template in Customer.io. Ask @joe or @team-platform for help here if needed
-2. Add the new Customer.io template to the `CUSTOMER_IO_TEMPLATE_ID_MAP` in `posthog/email.py`
+2. Add the new Customer.io template to the `CUSTOMER_IO_TEMPLATE_ID_MAP` in `insights/email.py`
 3. Create a template in Insights as an SMTP backup. Make sure the file name matches the key used in the template map.
 4. Trigger the email with something like this:
 
@@ -441,7 +441,7 @@ When creating a new email, there are a few steps to take. It's important to add 
 
 ## Extra: Developing paid features (Insights employees only)
 
-If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/PostHog/billing?tab=readme-ov-file#licensing-your-local-instance).
+If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/Hanzo Insights/billing?tab=readme-ov-file#licensing-your-local-instance).
 
 ## Extra: Resetting your local database
 
@@ -450,7 +450,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 1. Stop all Insights services and remove all Docker volumes:
 
    ```bash
-   hogli dev:reset
+   insightscli dev:reset
    ```
 
    This will remove all data stored in Docker volumes, including your PostgreSQL, ClickHouse, and Redis data.
@@ -458,7 +458,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 2. Start Insights again:
 
    ```bash
-   hogli start
+   insightscli start
    ```
 
 3. Wait for all migrations to complete. You can monitor the logs to ensure migrations have finished running.
@@ -472,7 +472,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 When modifying Django serializers or views, you may need to regenerate TypeScript types:
 
 ```bash
-hogli build:openapi
+insightscli build:openapi
 ```
 
 See the [Type system guide](type-system) for details on how type generation works and best practices for documenting your API.

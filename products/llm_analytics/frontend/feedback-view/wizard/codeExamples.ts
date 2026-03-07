@@ -4,8 +4,8 @@ interface CodeExampleParams {
 }
 
 export function getReactExample({ surveyId = 'your-survey-id', followUpEnabled }: CodeExampleParams): string {
-    return `// requires @posthog/react 1.7.1+ (bundled with posthog-js 1.345.1+)
-import { useThumbSurvey } from 'posthog-js/react/surveys'
+    return `// requires @hanzo/react 1.7.1+ (bundled with insights-js 1.345.1+)
+import { useThumbSurvey } from '@hanzo/insights/react/surveys'
 
 function BotResponse({ traceId }: { traceId: string }) {
   const { respond, response${followUpEnabled ? ', triggerRef' : ''} } = useThumbSurvey({
@@ -78,12 +78,12 @@ const submissionId = crypto.randomUUID()
         : ''
 
     const base = `// (Optional) Track when the survey is shown to the user
-posthog.capture('survey shown', {
+insights.capture('survey shown', {
 ${generateProps(surveyShownProps)}
 })
 
 ${submissionIdLine}// When user clicks thumbs up/down, send a survey event
-posthog.capture('survey sent', {
+insights.capture('survey sent', {
 ${generateProps(thumbsProps)}
 })`
 
@@ -105,7 +105,7 @@ ${generateProps(thumbsProps)}
             `
 
 // If the user submitted follow-up text after thumbs down:
-posthog.capture('survey sent', {
+insights.capture('survey sent', {
 ${generateProps(followUpProps)}
 })`
         )

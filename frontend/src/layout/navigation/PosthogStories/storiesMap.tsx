@@ -70,7 +70,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/surveys_522e544094.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/surveys_cta_b32a2b0596.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/surveys',
+                seeMoreLink: 'https://insights.hanzo.ai/surveys',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Create a survey',
@@ -108,7 +108,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/experiments_icon_05539e123f.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/experiments_cta_18e8927447.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/experiments',
+                seeMoreLink: 'https://insights.hanzo.ai/experiments',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Create an experiment',
@@ -135,7 +135,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/feature_flags_fd5d9949a0.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/feature_flags_cta_image_3c1f74f6ed.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/feature_flags',
+                seeMoreLink: 'https://insights.hanzo.ai/feature_flags',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Get started',
@@ -162,7 +162,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/max_ai_f8c9cdf4e8.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/max_cta_frame_06906e3804.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/#panel=max:hi%20max',
+                seeMoreLink: 'https://insights.hanzo.ai/#panel=max:hi%20max',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Say hi',
@@ -214,7 +214,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_phone_9f7523e1a8.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/changelog_cta_f8c6037283.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://posthog.com/changelog',
+                seeMoreLink: 'https://hanzo.ai/changelog',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'See more updates',
@@ -249,7 +249,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_builder_dc64451e64.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_inspect_a284324d14_24631f27fd.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -262,7 +262,7 @@ export const storiesMap: storyGroup[] = [
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_builder_dc64451e64.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_heatmap_460f46f86b_04862b4e0a.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -276,7 +276,7 @@ export const storiesMap: storyGroup[] = [
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_feature_flags_31802301a3_41dacb9996.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -290,7 +290,7 @@ export const storiesMap: storyGroup[] = [
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_debug_events_90dcef3c7b_b7564ce9af.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -304,7 +304,7 @@ export const storiesMap: storyGroup[] = [
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_web_vitals_0150d8d8ca_6b9a790fb1.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -318,7 +318,7 @@ export const storiesMap: storyGroup[] = [
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_experiments_6745bae143_b82232edde.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -332,7 +332,7 @@ export const storiesMap: storyGroup[] = [
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_cool_features_357aa7fc36_dc294f7fca.png',
                 type: StoryType.Image,
-                seeMoreLink: 'https://app.posthog.com/toolbar',
+                seeMoreLink: 'https://insights.hanzo.ai/toolbar',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Launch the toolbar',
@@ -367,7 +367,7 @@ export const storiesMap: storyGroup[] = [
                 description: 'Open-source, 3D-printed, palm-sized',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_7d6d55ea31.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_kit_657f1da249.png',
-                seeMoreLink: 'https://posthog.com/deskhog',
+                seeMoreLink: 'https://hanzo.ai/deskhog',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Get your own',
@@ -380,7 +380,7 @@ export const storiesMap: storyGroup[] = [
                 description: 'Open-source, 3D-printed, palm-sized',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_7d6d55ea31.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_colors_84c91ae075.png',
-                seeMoreLink: 'https://posthog.com/deskhog',
+                seeMoreLink: 'https://hanzo.ai/deskhog',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Get your own',
@@ -393,7 +393,7 @@ export const storiesMap: storyGroup[] = [
                 description: 'Open-source, 3D-printed, palm-sized',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_7d6d55ea31.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/deskhog_cta_513a9e19f4.png',
-                seeMoreLink: 'https://posthog.com/deskhog',
+                seeMoreLink: 'https://hanzo.ai/deskhog',
                 seeMoreOptions: {
                     backgroundColor: 'black',
                     text: 'Get your own',

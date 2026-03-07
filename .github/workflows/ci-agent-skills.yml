@@ -7,7 +7,7 @@ on:
             - master
         paths:
             - 'products/*/skills/**'
-            - 'products/posthog_ai/scripts/**'
+            - 'products/insights_ai/scripts/**'
             - '.github/workflows/ci-agent-skills.yml'
 
 concurrency:
@@ -35,7 +35,7 @@ jobs:
                       skills:
                         - 'products/*/skills/**'
                         - 'products/*/backend/max_tools.py'
-                        - 'products/posthog_ai/**'
+                        - 'products/insights_ai/**'
                         - '.github/workflows/ci-agent-skills.yml'
 
     check-skills:
@@ -85,7 +85,7 @@ jobs:
               run: cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
 
             - name: Lint skills
-              run: ./bin/hogli lint:skills
+              run: ./bin/insightscli lint:skills
 
             - name: Wait for Docker services
               run: bin/wait-for-docker
@@ -93,15 +93,15 @@ jobs:
             - name: Run migrations and create test data
               env:
                   SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da'
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
                   REDIS_URL: 'redis://localhost'
                   OBJECT_STORAGE_ENABLED: 'False'
                   TEST: 1
                   DEBUG: 1
               run: |
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx database create
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx migrate run --source rust/persons_migrations/
                   python manage.py migrate --noinput
                   python manage.py setup_dev --no-data
@@ -109,12 +109,12 @@ jobs:
             - name: Build skills
               env:
                   SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da'
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
                   REDIS_URL: 'redis://localhost'
                   OBJECT_STORAGE_ENABLED: 'False'
                   TEST: 1
                   DEBUG: 1
-              run: ./bin/hogli build:skills
+              run: ./bin/insightscli build:skills
 
     release-skills:
         name: Release agent skills
@@ -170,15 +170,15 @@ jobs:
             - name: Run migrations and create test data
               env:
                   SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da'
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
                   REDIS_URL: 'redis://localhost'
                   OBJECT_STORAGE_ENABLED: 'False'
                   TEST: 1
                   DEBUG: 1
               run: |
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx database create
-                  DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons" \
+                  DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx migrate run --source rust/persons_migrations/
                   python manage.py migrate --noinput
                   python manage.py setup_dev --no-data
@@ -186,12 +186,12 @@ jobs:
             - name: Build skills ZIP
               env:
                   SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da'
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
                   REDIS_URL: 'redis://localhost'
                   OBJECT_STORAGE_ENABLED: 'False'
                   TEST: 1
                   DEBUG: 1
-              run: ./bin/hogli build:skills
+              run: ./bin/insightscli build:skills
 
             - name: Determine next version
               id: version
@@ -206,7 +206,7 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   gh release create "${{ steps.version.outputs.tag }}" \
-                      products/posthog_ai/dist/skills.zip \
+                      products/insights_ai/dist/skills.zip \
                       --title "Agent skills ${{ steps.version.outputs.tag }}" \
                       --notes "Build from ${{ github.sha }}" \
                       --target "${{ github.sha }}" \
@@ -218,12 +218,12 @@ jobs:
               run: |
                   if gh release view agent-skills-latest &>/dev/null; then
                       gh release upload agent-skills-latest \
-                          products/posthog_ai/dist/skills.zip --clobber
+                          products/insights_ai/dist/skills.zip --clobber
                       gh release edit agent-skills-latest \
                           --notes "Latest build — same as ${{ steps.version.outputs.tag }}"
                   else
                       gh release create agent-skills-latest \
-                          products/posthog_ai/dist/skills.zip \
+                          products/insights_ai/dist/skills.zip \
                           --title "Agent skills (Latest)" \
                           --notes "Latest build — same as ${{ steps.version.outputs.tag }}" \
                           --target "${{ github.sha }}" \

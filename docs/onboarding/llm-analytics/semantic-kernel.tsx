@@ -21,7 +21,7 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -53,7 +53,7 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a Insights `AsyncOpenAI` wrapper
+                        settings](https://insights.hanzo.ai/settings/project), then create a Insights `AsyncOpenAI` wrapper
                         and pass it to Semantic Kernel's `OpenAIChatCompletion` service.
                     </Markdown>
 
@@ -62,17 +62,17 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
                         code={dedent`
                             from semantic_kernel import Kernel
                             from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
-                            from posthog.ai.openai import AsyncOpenAI
-                            from posthog import Posthog
+                            from insights.ai.openai import AsyncOpenAI
+                            from insights import Insights
 
-                            posthog = Posthog(
+                            insights = Insights(
                                 "<ph_project_api_key>",
                                 host="<ph_client_api_host>"
                             )
 
                             openai_client = AsyncOpenAI(
                                 api_key="your_openai_api_key",
-                                posthog_client=posthog
+                                insights_client=insights
                             )
 
                             kernel = Kernel()

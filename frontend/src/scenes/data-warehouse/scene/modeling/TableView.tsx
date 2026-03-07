@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@posthog/icons'
+import { IconFilter } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -9,7 +9,7 @@ import {
     LemonTag,
     LemonTagType,
     Spinner,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

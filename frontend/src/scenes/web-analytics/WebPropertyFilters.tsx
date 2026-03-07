@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconFilter } from '@posthog/icons'
-import { Popover } from '@posthog/lemon-ui'
+import { IconFilter } from '@hanzo/icons'
+import { Popover } from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isWebAnalyticsPropertyFilter } from 'lib/components/PropertyFilters/utils'

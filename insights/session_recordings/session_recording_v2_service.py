@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.cache import cache
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from prometheus_client import Counter
 
 from insights.session_recordings.models.metadata import RecordingBlockListing
@@ -14,7 +14,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 logger = structlog.get_logger(__name__)
 
 BLOCK_URL_CACHE_HIT_COUNTER = Counter(
-    "posthog_session_recording_v2_block_url_cache_hit", "Number of times the block URL cache was hit", ["cache_hit"]
+    "insights_session_recording_v2_block_url_cache_hit", "Number of times the block URL cache was hit", ["cache_hit"]
 )
 
 
@@ -33,9 +33,9 @@ def listing_cache_key(recording: SessionRecording) -> str | None:
     try:
         # NB this has to be `team_id` and not `team.id` as it's called in an async context
         # and `team.id` can trigger a database query, and the Django ORM is synchronous
-        return f"@posthog/v2-blob-snapshots/v1/recording_block_listing_{recording.team_id}_{recording.session_id}"
+        return f"@insights/v2-blob-snapshots/v1/recording_block_listing_{recording.team_id}_{recording.session_id}"
     except Exception as e:
-        posthoganalytics.capture_exception(
+        hanzoanalytics.capture_exception(
             e,
             properties={
                 "location": "session_recording_v2_service.listing_cache_key",

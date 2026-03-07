@@ -1078,9 +1078,9 @@ Jane Smith,	user456	,jane@example.com
             "inconsistent_columns.csv",
             str.encode(
                 """email,distinct_id
-myemail@posthog.com,user123
+myemail@hanzo.ai,user123
 incomplete_row_missing_distinct_id
-anotheremail@posthog.com,user456
+anotheremail@hanzo.ai,user456
 another_incomplete_row
 user789
 """
@@ -1364,7 +1364,7 @@ email@example.org,
             filters={
                 "properties": {
                     "type": "OR",
-                    "values": [{"type": "person", "key": "email", "value": "test@posthog.com"}],
+                    "values": [{"type": "person", "key": "email", "value": "test@hanzo.ai"}],
                 }
             },
         )
@@ -1454,7 +1454,7 @@ email@example.org,
             filters={
                 "properties": {
                     "type": "OR",
-                    "values": [{"type": "person", "key": "email", "value": "test@posthog.com"}],
+                    "values": [{"type": "person", "key": "email", "value": "test@hanzo.ai"}],
                 }
             },
         )
@@ -1484,7 +1484,7 @@ email@example.org,
             cohort_id=cohort.pk,
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "scope": "Cohort",
                     "item_id": str(cohort.pk),
@@ -1511,7 +1511,7 @@ email@example.org,
             cohort_id=cohort.pk,
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "updated",
                     "scope": "Cohort",
                     "item_id": str(cohort.pk),
@@ -1568,7 +1568,7 @@ email@example.org,
                     "created_at": mock.ANY,
                 },
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "scope": "Cohort",
                     "item_id": str(cohort.pk),
@@ -1617,7 +1617,7 @@ email@example.org,
             cohort_id=cohort_id,
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "scope": "Cohort",
                     "item_id": str(cohort_id),
@@ -1677,7 +1677,7 @@ email@example.org,
             cohort_id=cohort_id,
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "updated",
                     "scope": "Cohort",
                     "item_id": str(cohort_id),
@@ -1706,7 +1706,7 @@ email@example.org,
                     "created_at": mock.ANY,
                 },
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "scope": "Cohort",
                     "item_id": str(cohort_id),
@@ -4343,7 +4343,7 @@ email@example.org,
                                         "type": "person",
                                         "key": "email",
                                         "operator": "icontains",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                     },
                                 ],
                             }
@@ -4638,7 +4638,7 @@ class TestCohortTypeIntegration(APIBaseTest):
                                 "type": "person",
                                 "key": "email",
                                 "operator": "icontains",
-                                "value": "@posthog.com",
+                                "value": "@hanzo.ai",
                             }
                         ],
                     }
@@ -4776,7 +4776,7 @@ class TestCohortTypeIntegration(APIBaseTest):
                             "type": "person",
                             "key": "email",
                             "operator": "icontains",
-                            "value": "@posthog.com",
+                            "value": "@hanzo.ai",
                         }
                     ],
                 }

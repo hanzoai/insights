@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import React, { useEffect, useState } from 'react'
 
-import { IconExpand45, IconInfo, IconLineGraph, IconOpenSidebar, IconX } from '@posthog/icons'
-import { LemonSegmentedButton, LemonSegmentedDropdown, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconExpand45, IconInfo, IconLineGraph, IconOpenSidebar, IconX } from '@hanzo/icons'
+import { LemonSegmentedButton, LemonSegmentedDropdown, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
@@ -634,7 +634,7 @@ const WebVitalsEmptyState = (): JSX.Element => {
                 description="Track Core Web Vitals like LCP, FID, and CLS to understand your site's performance. 
                 Enabling this will capture performance metrics from your visitors, which counts towards your event quota.
                 You can always disable this feature in the settings."
-                docsURL="https://posthog.com/docs/web-analytics/web-vitals"
+                docsURL="https://hanzo.ai/docs/web-analytics/web-vitals"
                 actionElementOverride={
                     <LemonButton
                         type="primary"

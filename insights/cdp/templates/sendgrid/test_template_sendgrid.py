@@ -14,7 +14,7 @@ class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "api_key": "API_KEY",
-            "email": "example@posthog.com",
+            "email": "example@hanzo.ai",
             "properties": {"last_name": "example"},
         }
         inputs.update(kwargs)
@@ -30,7 +30,7 @@ class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):
             {
                 "method": "PUT",
                 "headers": {"Authorization": "Bearer API_KEY", "Content-Type": "application/json"},
-                "body": {"contacts": [{"email": "example@posthog.com", "last_name": "example"}]},
+                "body": {"contacts": [{"email": "example@hanzo.ai", "last_name": "example"}]},
             },
         )
 
@@ -48,7 +48,7 @@ class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):
         assert res.result is None
 
         assert self.get_mock_fetch_calls()[0][1]["body"]["contacts"] == [
-            {"email": "example@posthog.com", "last_name": "included"}
+            {"email": "example@hanzo.ai", "last_name": "included"}
         ]
 
     def test_function_adds_custom_fields(self):
@@ -80,7 +80,7 @@ class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "contacts": [
                         {
-                            "email": "example@posthog.com",
+                            "email": "example@hanzo.ai",
                             "last_name": "example",
                             "custom_fields": {"id7": "custom_value"},
                         }

@@ -202,7 +202,7 @@ class SQLValueEscaper:
         self._timezone = timezone or "UTC"
         self._dialect = dialect
 
-    # Unlike posthog.insightsql.visitor.Visitor, this tiny visitor works on primitives.
+    # Unlike insights.insightsql.visitor.Visitor, this tiny visitor works on primitives.
     def visit(self, node: Any) -> str:
         method_name = f"visit_{node.__class__.__name__.lower()}"
         if hasattr(self, method_name):

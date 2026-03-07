@@ -12,7 +12,7 @@ from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 class TestNodeViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.dag_id = f"posthog_{self.team.id}"
+        self.dag_id = f"insights_{self.team.id}"
 
         self.saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
@@ -165,7 +165,7 @@ class TestNodeViewSet(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_client.start_workflow.assert_called_once()
 
-    @patch("products.data_modeling.backend.api.node.posthoganalytics.feature_enabled", return_value=True)
+    @patch("products.data_modeling.backend.api.node.hanzoanalytics.feature_enabled", return_value=True)
     @patch("products.data_modeling.backend.api.node.sync_connect")
     def test_run_uses_execute_dag_when_v2_enabled(self, mock_sync_connect, mock_feature_flag):
         mock_client = AsyncMock()
@@ -180,7 +180,7 @@ class TestNodeViewSet(APIBaseTest):
         call_args = mock_client.start_workflow.call_args
         self.assertEqual(call_args[0][0], "data-modeling-execute-dag")
 
-    @patch("products.data_modeling.backend.api.node.posthoganalytics.feature_enabled", return_value=False)
+    @patch("products.data_modeling.backend.api.node.hanzoanalytics.feature_enabled", return_value=False)
     @patch("products.data_modeling.backend.api.node.sync_connect")
     def test_run_uses_run_workflow_when_v2_disabled(self, mock_sync_connect, mock_feature_flag):
         mock_client = AsyncMock()
@@ -195,7 +195,7 @@ class TestNodeViewSet(APIBaseTest):
         call_args = mock_client.start_workflow.call_args
         self.assertEqual(call_args[0][0], "data-modeling-run")
 
-    @patch("products.data_modeling.backend.api.node.posthoganalytics.feature_enabled", return_value=True)
+    @patch("products.data_modeling.backend.api.node.hanzoanalytics.feature_enabled", return_value=True)
     @patch("products.data_modeling.backend.api.node.sync_connect")
     def test_materialize_uses_materialize_view_when_v2_enabled(self, mock_sync_connect, mock_feature_flag):
         mock_client = AsyncMock()
@@ -209,7 +209,7 @@ class TestNodeViewSet(APIBaseTest):
         call_args = mock_client.start_workflow.call_args
         self.assertEqual(call_args[0][0], "data-modeling-materialize-view")
 
-    @patch("products.data_modeling.backend.api.node.posthoganalytics.feature_enabled", return_value=False)
+    @patch("products.data_modeling.backend.api.node.hanzoanalytics.feature_enabled", return_value=False)
     @patch("products.data_modeling.backend.api.node.sync_connect")
     def test_materialize_uses_run_workflow_when_v2_disabled(self, mock_sync_connect, mock_feature_flag):
         mock_client = AsyncMock()
@@ -227,7 +227,7 @@ class TestNodeViewSet(APIBaseTest):
 class TestEdgeViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.dag_id = f"posthog_{self.team.id}"
+        self.dag_id = f"insights_{self.team.id}"
 
         self.source_node = Node.objects.create(
             team=self.team,

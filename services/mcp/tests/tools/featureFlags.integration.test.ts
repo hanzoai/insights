@@ -179,7 +179,7 @@ describe('Feature Flags', { concurrent: false }, () => {
                                 {
                                     key: 'email',
                                     type: 'person',
-                                    value: '@posthog.com',
+                                    value: '@hanzo.ai',
                                     operator: 'icontains',
                                 },
                             ],

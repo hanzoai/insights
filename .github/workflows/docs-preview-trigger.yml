@@ -15,7 +15,7 @@ permissions:
 
 jobs:
     trigger-preview:
-        name: Trigger posthog.com preview build
+        name: Trigger hanzo.ai preview build
         runs-on: ubuntu-latest
         steps:
             - name: Checkout

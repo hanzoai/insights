@@ -40,7 +40,7 @@ describe('SessionTracker', () => {
 
             expect(isNew).toBe(true)
             expect(mockRedisClient.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-seen:1:session-123',
+                '@hanzo/replay/session-seen:1:session-123',
                 '1',
                 'EX',
                 48 * 60 * 60,
@@ -67,14 +67,14 @@ describe('SessionTracker', () => {
             await sessionTracker.trackSession(2, 'session-123')
 
             expect(mockRedisClient.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-seen:1:session-123',
+                '@hanzo/replay/session-seen:1:session-123',
                 '1',
                 'EX',
                 48 * 60 * 60,
                 'NX'
             )
             expect(mockRedisClient.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-seen:2:session-123',
+                '@hanzo/replay/session-seen:2:session-123',
                 '1',
                 'EX',
                 48 * 60 * 60,

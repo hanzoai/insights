@@ -22,14 +22,14 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -70,7 +70,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         <Markdown>
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the background to send the data.
 
-                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
+                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -82,7 +82,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Initialize Insights with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass it to our Google Gen AI wrapper.
+                        Initialize Insights with your project API key and host from [your project settings](https://insights.hanzo.ai/settings/project), then pass it to our Google Gen AI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -91,17 +91,17 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog.ai.gemini import Client
-                                    from posthog import Posthog
+                                    from insights.ai.gemini import Client
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
 
                                     client = Client(
                                         api_key="...", # Replace with your Gemini API key
-                                        posthog_client=posthog # This is an optional parameter. If it is not provided, a default client will be used.
+                                        insights_client=insights # This is an optional parameter. If it is not provided, a default client will be used.
                                     )
                                 `,
                             },
@@ -109,8 +109,8 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { GoogleGenAI } from '@posthog/ai'
-                                    import { Insights } from 'posthog-node'
+                                    import { GoogleGenAI } from '@hanzo/ai'
+                                    import { Insights } from 'insights-node'
 
                                     const phClient = new Insights(
                                         '<ph_project_api_key>',
@@ -119,7 +119,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                                     const client = new GoogleGenAI({
                                         apiKey: '...', // Replace with your Gemini API key
-                                        posthog: phClient
+                                        insights: phClient
                                     })
                                 `,
                             },
@@ -142,11 +142,11 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog import Posthog
-                                    from posthog.ai.gemini import Client
+                                    from insights import Insights
+                                    from insights.ai.gemini import Client
 
                                     # Initialize Insights
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         project_api_key="<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
@@ -156,8 +156,8 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         vertexai=True,
                                         project="your-gcp-project-id",
                                         location="us-central1",
-                                        posthog_client=posthog,
-                                        posthog_distinct_id="user-123"
+                                        insights_client=insights,
+                                        insights_distinct_id="user-123"
                                     )
 
                                     # Use it
@@ -173,11 +173,11 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
-                                    import { InsightsGoogleGenAI } from '@posthog/ai'
+                                    import { Insights } from 'insights-node'
+                                    import { InsightsGoogleGenAI } from '@hanzo/ai'
 
                                     // Initialize Insights
-                                    const posthog = new Insights(
+                                    const insights = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     )
@@ -187,14 +187,14 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                       vertexai: true,
                                       project: 'your-gcp-project-id',
                                       location: 'us-central1',
-                                      posthog: posthog
+                                      insights: insights
                                     })
 
                                     // Use it
                                     const response = await client.models.generateContent({
                                       model: 'gemini-2.0-flash',
                                       contents: 'Hello, world!',
-                                      posthogDistinctId: 'user-123'
+                                      insightsDistinctId: 'user-123'
                                     })
 
                                     console.log(response.text)
@@ -225,11 +225,11 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     response = client.models.generate_content(
                                         model="gemini-2.5-flash",
                                         contents=["Tell me a fun fact about mascots"],
-                                        posthog_distinct_id="user_123", # optional
-                                        posthog_trace_id="trace_123", # optional
-                                        posthog_properties={"conversation_id": "abc123", "paid": True}, # optional
-                                        posthog_groups={"company": "company_id_in_your_db"},  # optional
-                                        posthog_privacy_mode=False # optional
+                                        insights_distinct_id="user_123", # optional
+                                        insights_trace_id="trace_123", # optional
+                                        insights_properties={"conversation_id": "abc123", "paid": True}, # optional
+                                        insights_groups={"company": "company_id_in_your_db"},  # optional
+                                        insights_privacy_mode=False # optional
                                     )
 
                                     print(response.text)
@@ -242,11 +242,11 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     const response = await client.models.generateContent({
                                       model: "gemini-2.5-flash",
                                       contents: ["Tell me a fun fact about mascots"],
-                                      posthogDistinctId: "user_123", // optional
-                                      posthogTraceId: "trace_123", // optional
-                                      posthogProperties: { conversationId: "abc123", paid: true }, // optional
-                                      posthogGroups: { company: "company_id_in_your_db" }, // optional
-                                      posthogPrivacyMode: false // optional
+                                      insightsDistinctId: "user_123", // optional
+                                      insightsTraceId: "trace_123", // optional
+                                      insightsProperties: { conversationId: "abc123", paid: true }, // optional
+                                      insightsGroups: { company: "company_id_in_your_db" }, // optional
+                                      insightsPrivacyMode: false // optional
                                     })
 
                                     console.log(response.text)
@@ -258,7 +258,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
 

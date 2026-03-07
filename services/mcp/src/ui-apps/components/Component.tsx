@@ -103,7 +103,7 @@ function inferVisualizationType(data: unknown): VisualizationType | null {
 interface DataPayload {
     query?: TrendsQuery | FunnelsQuery | Record<string, unknown>
     results: TrendsResult | FunnelResult | InsightsQLResult
-    _posthogUrl?: string
+    _insightsUrl?: string
 }
 
 export interface ComponentProps {
@@ -148,7 +148,7 @@ export function Component({ data, onOpenLink }: ComponentProps): ReactElement {
                     <div style={{ marginBottom: '0.5rem' }}>
                         This visualization type isn't supported in this view yet.
                     </div>
-                    {payload._posthogUrl && <InsightsLink url={payload._posthogUrl} onOpen={onOpenLink} />}
+                    {payload._insightsUrl && <InsightsLink url={payload._insightsUrl} onOpen={onOpenLink} />}
                 </div>
             </div>
         )
@@ -195,7 +195,7 @@ export function Component({ data, onOpenLink }: ComponentProps): ReactElement {
         <div style={containerStyle}>
             <div style={titleStyle}>{getTitle()}</div>
             {renderVisualization()}
-            {payload._posthogUrl && <InsightsLink url={payload._posthogUrl} onOpen={onOpenLink} />}
+            {payload._insightsUrl && <InsightsLink url={payload._insightsUrl} onOpen={onOpenLink} />}
         </div>
     )
 }

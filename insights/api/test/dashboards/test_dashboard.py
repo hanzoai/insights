@@ -359,7 +359,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         user_with_collaboration = User.objects.create_and_join(
-            self.organization, "no-collaboration-feature@posthog.com", None
+            self.organization, "no-collaboration-feature@hanzo.ai", None
         )
 
         # Grant access to the new user
@@ -402,10 +402,10 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         """
         this test only exists for the query snapshot
         which can be used to check if all dashboard tiles are being queried.
-        look for a query on posthog_dashboard_tile with
+        look for a query on insights_dashboard_tile with
         ```
-            AND "posthog_dashboardtile"."dashboard_id" = 2
-            AND "posthog_dashboardtile"."dashboard_id" IN (1,
+            AND "insights_dashboardtile"."dashboard_id" = 2
+            AND "insights_dashboardtile"."dashboard_id" IN (1,
          ```
         """
         dashboard_one_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard-1"})
@@ -1526,7 +1526,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         response = self.client.post(
             f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": valid_template, "creation_context": "onboarding"},
-            headers={"Referer": "https://posthog.com/my-referer", "X-Posthog-Session-Id": "my-session-id"},
+            headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
         )
         self.assertEqual(response.status_code, 200, response.content)
 
@@ -1537,7 +1537,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(dashboard["name"], valid_template["template_name"], dashboard)
         self.assertEqual(dashboard["description"], valid_template["dashboard_description"])
         self.assertEqual(
-            dashboard["created_by"], dashboard["created_by"] | {"first_name": "", "email": "user1@posthog.com"}
+            dashboard["created_by"], dashboard["created_by"] | {"first_name": "", "email": "user1@hanzo.ai"}
         )
 
         self.assertEqual(len(dashboard["tiles"]), 1)
@@ -1546,7 +1546,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             self.user,
             "dashboard created",
             {
-                "$current_url": "https://posthog.com/my-referer",
+                "$current_url": "https://hanzo.ai/my-referer",
                 "$session_id": "my-session-id",
                 "created_at": mock.ANY,
                 "creation_context": "onboarding",
@@ -1896,7 +1896,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_dashboard_access_control_filtering(self) -> None:
         """Test that dashboards are properly filtered based on access control."""
 
-        user2 = User.objects.create_and_join(self.organization, "test2@posthog.com", None)
+        user2 = User.objects.create_and_join(self.organization, "test2@hanzo.ai", None)
 
         visible_dashboard = Dashboard.objects.create(
             team=self.team,

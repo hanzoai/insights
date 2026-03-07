@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonSelect, Spinner } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonSelect, Spinner } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -36,7 +36,7 @@ export const IssueQueryOptions = (): JSX.Element => {
     const hasRevenueAnalytics = hasRevenueTables || hasRevenueEvents
 
     const onSelectRevenueEntity = (entity: ErrorTrackingQueryRevenueEntity): void => {
-        posthog.capture('error_tracking_sort_by_revenue_clicked', { entity })
+        insights.capture('error_tracking_sort_by_revenue_clicked', { entity })
         setOrderBy('revenue')
         setRevenueEntity(entity)
     }
@@ -96,7 +96,7 @@ export const IssueQueryOptions = (): JSX.Element => {
                                       }
                                     : {
                                           onClick: () => {
-                                              posthog.capture('error_tracking_sort_by_revenue_clicked')
+                                              insights.capture('error_tracking_sort_by_revenue_clicked')
                                               addProductIntentForCrossSell({
                                                   from: ProductKey.ERROR_TRACKING,
                                                   to: ProductKey.REVENUE_ANALYTICS,

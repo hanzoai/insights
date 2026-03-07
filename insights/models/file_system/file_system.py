@@ -35,9 +35,9 @@ class FileSystem(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["team"]),
-            models.Index(F("team_id"), F("path"), name="posthog_fs_team_path"),
-            models.Index(F("team_id"), F("depth"), name="posthog_fs_team_depth"),
-            models.Index(F("team_id"), F("type"), F("ref"), name="posthog_fs_team_typeref"),
+            models.Index(F("team_id"), F("path"), name="insights_fs_team_path"),
+            models.Index(F("team_id"), F("depth"), name="insights_fs_team_depth"),
+            models.Index(F("team_id"), F("type"), F("ref"), name="insights_fs_team_typeref"),
         ]
 
     def __str__(self):

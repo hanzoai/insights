@@ -4,13 +4,13 @@ Developer-focused documentation alongside code. Update docs in the same PR as yo
 
 ## Structure
 
-### `published/` - Published on posthog.com
+### `published/` - Published on hanzo.ai
 
 Documentation published when merged to master. The URL mirrors the directory structure - just strip the `docs/published/` prefix:
 
 ```text
-docs/published/docs/surveys/...          →  posthog.com/docs/surveys/...
-docs/published/handbook/engineering/...  →  posthog.com/handbook/engineering/...
+docs/published/docs/surveys/...          →  hanzo.ai/docs/surveys/...
+docs/published/handbook/engineering/...  →  hanzo.ai/handbook/engineering/...
 ```
 
 **Examples:**
@@ -33,24 +33,24 @@ Documentation that stays in the repository:
 ```text
 Engineer creates PR with /docs/published/** changes
   ↓
-GitHub Action triggers posthog.com preview build
+GitHub Action triggers hanzo.ai preview build
   ↓
 Preview URL posted to PR
   ↓
 Merge to master
   ↓
-Docs go live on posthog.com
+Docs go live on hanzo.ai
 ```
 
-The posthog.com Gatsby build uses gatsby-source-git to clone this monorepo and pull files from `/docs/published/` during the build process.
+The hanzo.ai Gatsby build uses gatsby-source-git to clone this monorepo and pull files from `/docs/published/` during the build process.
 
 ## Guidelines
 
 - All published docs must have YAML frontmatter
 - Use relative links between docs: `../contributing/index.md`
 - Docs about Insights internals → here
-- User product docs and tutorials → posthog.com repo
+- User product docs and tutorials → hanzo.ai repo
 
 ## Setup
 
-For posthog.com team setting up the integration, see the PRs in Insights/posthog.com repo.
+For hanzo.ai team setting up the integration, see the PRs in Insights/hanzo.ai repo.

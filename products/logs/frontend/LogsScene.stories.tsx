@@ -23,21 +23,21 @@ const attributeExamples: Record<
 > = {
     [PropertyFilterType.LogResourceAttribute]: {
         'service.name': [
-            'posthog-web',
-            'posthog-feature-flags',
-            'posthog-surveys',
-            'posthog-web-django',
+            'insights-web',
+            'insights-feature-flags',
+            'insights-surveys',
+            'insights-web-django',
             'cdp-precalculated-filters-consumer',
             'cdp-events-consumer',
             'cdp-legacy-events-consumer',
             'capture',
         ],
-        'k8s.namespace.name': ['posthog', 'internal', 'billing'],
+        'k8s.namespace.name': ['insights', 'internal', 'billing'],
         'k8s.pod.name': [
-            'posthog-web',
-            'posthog-feature-flags',
-            'posthog-surveys',
-            'posthog-web-django',
+            'insights-web',
+            'insights-feature-flags',
+            'insights-surveys',
+            'insights-web-django',
             'cdp-precalculated-filters-consumer',
             'cdp-events-consumer',
             'cdp-legacy-events-consumer',
@@ -71,21 +71,21 @@ const EXAMPLES: Record<
         logs: { message: string; level: LogSeverityLevel; attributes?: Record<string, string> }[]
     }
 > = {
-    'posthog-web': {
+    'insights-web': {
         resource_attributes: {
-            'k8s.namespace.name': 'posthog',
-            'service.name': 'posthog-web',
-            'k8s.pod.name': 'posthog-web',
-            'k8s.container.name': 'posthog-web',
+            'k8s.namespace.name': 'insights',
+            'service.name': 'insights-web',
+            'k8s.pod.name': 'insights-web',
+            'k8s.container.name': 'insights-web',
         },
         logs: [
             {
                 message:
-                    '{"request_id": "0904e6ff-da7e-4d66-af79-0c111bb47cab", "ip": "1.0.0.1", "event": "geoIP computation error: The address 172.0.1.1 is not in the database.",  "host": "us.i.posthog.com", "container_hostname": "posthog-web-django-c5f54bd98-cswsg", "timestamp": "2025-10-10T12:56:52.826524Z", "logger": "posthog.geoip", "level": "error", "pid": 65403, "tid": 281466655207264, "exception": "Traceback (most recent call last):\n File "/code/posthog/geoip.py", line 52, in get_geoip_properties\n geoip_properties = geoip.city(ip_address)\n ^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/django/contrib/gis/geoip2/base.py", line 181, in city\n return City(self._city.city(enc_query))\n ^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 150, in city\n return cast(City, self._model_for(geoip2.models.City, "City", ip_address))\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 253, in _model_for\n (record, prefix_len) = self._get(types, ip_address)\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 240, in _get\n raise geoip2.errors.AddressNotFoundError(\ngeoip2.errors.AddressNotFoundError: The address 172.0.1.1 is not in the database."}',
+                    '{"request_id": "0904e6ff-da7e-4d66-af79-0c111bb47cab", "ip": "1.0.0.1", "event": "geoIP computation error: The address 172.0.1.1 is not in the database.",  "host": "us.i.hanzo.ai", "container_hostname": "insights-web-django-c5f54bd98-cswsg", "timestamp": "2025-10-10T12:56:52.826524Z", "logger": "insights.geoip", "level": "error", "pid": 65403, "tid": 281466655207264, "exception": "Traceback (most recent call last):\n File "/code/insights/geoip.py", line 52, in get_geoip_properties\n geoip_properties = geoip.city(ip_address)\n ^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/django/contrib/gis/geoip2/base.py", line 181, in city\n return City(self._city.city(enc_query))\n ^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 150, in city\n return cast(City, self._model_for(geoip2.models.City, "City", ip_address))\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 253, in _model_for\n (record, prefix_len) = self._get(types, ip_address)\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n File "/python-runtime/lib/python3.11/site-packages/geoip2/database.py", line 240, in _get\n raise geoip2.errors.AddressNotFoundError(\ngeoip2.errors.AddressNotFoundError: The address 172.0.1.1 is not in the database."}',
                 level: 'error',
             },
             {
-                message: `{"request_id": "8cbf3d86-5270-4129-a9a7-5c0908a6a806", "ip": "1.0.0.1", "request": "<ASGIRequest: OPTIONS '/array/123/config'>", "user_agent": "Mozilla/5.0 (iPad; CPU OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15", "event": "request_started",  "host": "us-assets.i.posthog.com", "container_hostname": "posthog-web-django-c5f54bd98-z2kjj", "timestamp": "2025-10-10T12:58:08.090793Z", "logger": "django_structlog.middlewares.request", "level": "info", "pid": 44582, "tid": 281465917009760}`,
+                message: `{"request_id": "8cbf3d86-5270-4129-a9a7-5c0908a6a806", "ip": "1.0.0.1", "request": "<ASGIRequest: OPTIONS '/array/123/config'>", "user_agent": "Mozilla/5.0 (iPad; CPU OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15", "event": "request_started",  "host": "us-assets.i.hanzo.ai", "container_hostname": "insights-web-django-c5f54bd98-z2kjj", "timestamp": "2025-10-10T12:58:08.090793Z", "logger": "django_structlog.middlewares.request", "level": "info", "pid": 44582, "tid": 281465917009760}`,
                 level: 'info',
             },
             {
@@ -97,7 +97,7 @@ const EXAMPLES: Record<
     },
     'cdp-events-consumer': {
         resource_attributes: {
-            'k8s.namespace.name': 'posthog',
+            'k8s.namespace.name': 'insights',
             'service.name': 'cdp-events-consumer',
             'k8s.pod.name': 'cdp-events-consumer',
             'k8s.container.name': 'cdp-events-consumer',

@@ -1,5 +1,5 @@
-import { IconCheck, IconWarning, IconX } from '@posthog/icons'
-import { LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
+import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { ExternalDataSchemaStatus } from '~/types'
 

@@ -6,7 +6,7 @@ def create_inputs(**kwargs):
     inputs = {
         "apiKey": "abcdef123456",
         "include_all_properties": False,
-        "properties": {"name": "Max AI", "email": "max@posthog.com"},
+        "properties": {"name": "Max AI", "email": "max@hanzo.ai"},
     }
     inputs.update(kwargs)
 
@@ -73,7 +73,7 @@ class TestTemplateJune(BaseInsightsFunctionTemplateTest):
                         "referrer": "test15",
                         "search": "?billing",
                     },
-                    "traits": {"name": "Max AI", "email": "max@posthog.com"},
+                    "traits": {"name": "Max AI", "email": "max@hanzo.ai"},
                     "timestamp": "2024-10-24T23:03:50.941Z",
                     "context": {
                         "app": {"build": "1.0.0", "version": "2.0", "name": "Insights"},
@@ -143,7 +143,7 @@ class TestTemplateJune(BaseInsightsFunctionTemplateTest):
                         "title": "Hedgebox",
                         "search": "?billing",
                     },
-                    "traits": {"name": "Max AI", "email": "max@posthog.com", "title": "Hedgebox"},
+                    "traits": {"name": "Max AI", "email": "max@hanzo.ai", "title": "Hedgebox"},
                     "timestamp": "2024-10-24T23:03:50.941Z",
                     "context": {
                         "app": {},
@@ -194,7 +194,7 @@ class TestTemplateJune(BaseInsightsFunctionTemplateTest):
                     },
                     "traits": {
                         "name": "Max AI",
-                        "email": "max@posthog.com",
+                        "email": "max@hanzo.ai",
                     },
                     "timestamp": "2024-10-24T23:03:50.941Z",
                     "context": {
@@ -263,7 +263,7 @@ class TestTemplateJune(BaseInsightsFunctionTemplateTest):
                         "title": "Hedgebox",
                         "search": "?billing",
                     },
-                    "traits": {"name": "Max AI", "email": "max@posthog.com"},
+                    "traits": {"name": "Max AI", "email": "max@hanzo.ai"},
                     "timestamp": "2024-10-24T23:03:50.941Z",
                     "context": {
                         "app": {},
@@ -313,7 +313,7 @@ class TestTemplateJune(BaseInsightsFunctionTemplateTest):
                         "title": "Hedgebox",
                         "search": "?billing",
                     },
-                    "traits": {"name": "Max AI", "email": "max@posthog.com"},
+                    "traits": {"name": "Max AI", "email": "max@hanzo.ai"},
                     "timestamp": "2024-10-24T23:03:50.941Z",
                     "context": {
                         "app": {},

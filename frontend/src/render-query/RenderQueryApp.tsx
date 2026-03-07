@@ -28,7 +28,7 @@ interface ParsedPayload {
 
 declare global {
     interface Window {
-        POSTHOG_RENDER_QUERY_PAYLOAD?: RenderQueryExternalPayload
+        INSIGHTS_RENDER_QUERY_PAYLOAD?: RenderQueryExternalPayload
     }
 }
 
@@ -107,7 +107,7 @@ export function RenderQueryApp(): JSX.Element {
 
 function initializeState(): RenderQueryState {
     return [
-        parsePayload(window.POSTHOG_RENDER_QUERY_PAYLOAD, 'initial payload'),
+        parsePayload(window.INSIGHTS_RENDER_QUERY_PAYLOAD, 'initial payload'),
         extractFromSearch(),
         extractFromHash(),
         extractFromFrameDataset(),

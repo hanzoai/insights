@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { IconBadge, IconBolt, IconCursor, IconEye, IconLeave, IconList, IconLogomark, IconPlay } from '@posthog/icons'
+import { IconBadge, IconBolt, IconCursor, IconEye, IconLeave, IconList, IconLogomark, IconPlay } from '@hanzo/icons'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

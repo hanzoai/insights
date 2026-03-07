@@ -25,7 +25,7 @@ Prefer `rounded` (default) for most elements. Use `rounded-lg` for popovers and 
 
 **Borders-first.** Shadows are rare and intentional.
 
-- **Primary border**: `var(--color-border-primary)` — posthog-3000 warm gray
+- **Primary border**: `var(--color-border-primary)` — insights-3000 warm gray
 - **Secondary border**: `var(--color-border-secondary)` — darker variant
 - **Semantic borders**: `--color-border-info`, `--color-border-warning`, `--color-border-error`, `--color-border-success`
 - **Default shadow**: `var(--shadow-elevation-3000)` = `0 3px 0 <border-color>` — only for elevated cards and toasts
@@ -48,13 +48,13 @@ Do not add shadows for general UI. Reserve for modals, dropdowns, and hover-elev
 
 | Token                  | Light            | Dark             |
 | ---------------------- | ---------------- | ---------------- |
-| `bg-primary`           | posthog-3000-50  | neutral-cool-950 |
+| `bg-primary`           | insights-3000-50  | neutral-cool-950 |
 | `bg-surface-primary`   | white            | neutral-cool-850 |
-| `bg-surface-secondary` | posthog-3000-100 | neutral-cool-900 |
-| `bg-surface-tertiary`  | posthog-3000-150 | neutral-cool-950 |
+| `bg-surface-secondary` | insights-3000-100 | neutral-cool-900 |
+| `bg-surface-tertiary`  | insights-3000-150 | neutral-cool-950 |
 | `bg-fill-primary`      | white            | neutral-cool-900 |
-| `bg-fill-secondary`    | posthog-3000-25  | neutral-cool-850 |
-| `bg-fill-tertiary`     | posthog-3000-50  | neutral-cool-800 |
+| `bg-fill-secondary`    | insights-3000-25  | neutral-cool-850 |
+| `bg-fill-tertiary`     | insights-3000-50  | neutral-cool-800 |
 
 ### Highlight fills (opacity-based)
 
@@ -211,7 +211,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | `--z-tooltip`         | 1300  |
 | `--z-popover`         | 1200  |
 | `--z-modal`           | 1100  |
-| `--z-hedgehog-buddy`  | 1050  |
+| `--z-mascot-buddy`  | 1050  |
 | `--z-drawer`          | 900   |
 | `--z-main-nav`        | 750   |
 | `--z-lemon-sidebar`   | 700   |

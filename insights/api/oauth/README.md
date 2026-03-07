@@ -26,7 +26,7 @@
    ```bash
    python manage.py shell << 'EOF'
    import hashlib, base64, os
-   from posthog.models import OAuthApplication
+   from insights.models import OAuthApplication
 
    app = OAuthApplication.objects.filter(name__icontains="your-app-name").first()
    print(f"CLIENT_ID={app.client_id}")
@@ -80,11 +80,11 @@ curl -s -X POST http://localhost:8000/oauth/introspect/ \
 Run OAuth-specific tests:
 
 ```bash
-pytest posthog/api/oauth/test_views.py -v
+pytest insights/api/oauth/test_views.py -v
 ```
 
 Run a specific test:
 
 ```bash
-pytest posthog/api/oauth/test_views.py::TestOAuthAPI::test_name -v
+pytest insights/api/oauth/test_views.py::TestOAuthAPI::test_name -v
 ```

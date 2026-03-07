@@ -7,7 +7,7 @@ import { teamLogic } from 'scenes/teamLogic'
 function ElixirInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Elixir}>
-            {'def deps do\n    [\n        {:posthog, "~> 1.1.0"}\n    ]\nend'}
+            {'def deps do\n    [\n        {:insights, "~> 1.1.0"}\n    ]\nend'}
         </CodeSnippet>
     )
 }
@@ -18,7 +18,7 @@ function ElixirSetupSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Elixir}>
-            {'config :posthog,\n    api_url: "' + url + '",\n    api_key: "' + currentTeam?.api_token + '"'}
+            {'config :insights,\n    api_url: "' + url + '",\n    api_key: "' + currentTeam?.api_token + '"'}
         </CodeSnippet>
     )
 }

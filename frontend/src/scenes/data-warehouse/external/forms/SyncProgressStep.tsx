@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonTable, LemonTableColumns, LemonTag, LemonTagType } from '@posthog/lemon-ui'
+import { LemonButton, LemonTable, LemonTableColumns, LemonTag, LemonTagType } from '@hanzo/lemon-ui'
 
 import { sourceWizardLogic } from 'scenes/data-warehouse/new/sourceWizardLogic'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'

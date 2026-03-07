@@ -4,7 +4,7 @@
         "href": {
             "description": "Filter on the `href` attribute of the element.",
             "examples": [
-                "https://posthog.com/about"
+                "https://hanzo.ai/about"
             ],
             "label": "Target (href)"
         },
@@ -159,10 +159,10 @@
             "label": "AI Evaluation Key ID (LLM)"
         },
         "$ai_evaluation_key_type": {
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
+            "description": "The type of API key used for the evaluation (byok = user's own key, insights = Insights default).",
             "examples": [
                 "byok",
-                "posthog"
+                "insights"
             ],
             "label": "AI Evaluation Key Type (LLM)"
         },
@@ -445,7 +445,7 @@
         "$app_namespace": {
             "description": "The namespace of the app as identified in the app store.",
             "examples": [
-                "com.posthog.app"
+                "com.insights.app"
             ],
             "label": "App namespace"
         },
@@ -486,7 +486,7 @@
             "label": "Browser language prefix"
         },
         "$browser_type": {
-            "description": "This is only added when posthog-js config.opt_out_useragent_filter is true.",
+            "description": "This is only added when insights-js config.opt_out_useragent_filter is true.",
             "examples": [
                 "browser",
                 "bot"
@@ -866,14 +866,14 @@
             "label": "Exception capture enabled server side"
         },
         "$exception_capture_endpoint": {
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": [
                 "/e/"
             ],
             "label": "Exception capture endpoint"
         },
         "$exception_capture_endpoint_suffix": {
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": [
                 "/e/"
             ],
@@ -1238,7 +1238,7 @@
             "label": "Host"
         },
         "$initial_person_info": {
-            "description": "posthog-js initial person information. used in the $set_once flow",
+            "description": "insights-js initial person information. used in the $set_once flow",
             "label": "Initial person info",
             "system": true
         },
@@ -1279,7 +1279,7 @@
             "label": "Is emulator"
         },
         "$is_identified": {
-            "description": "Client-side property set by posthog-js indicating whether the user has been previously identified on the device.",
+            "description": "Client-side property set by insights-js indicating whether the user has been previously identified on the device.",
             "label": "Is identified"
         },
         "$is_ios_running_on_mac": {
@@ -1298,7 +1298,7 @@
             ],
             "label": "Is Mac Catalyst app"
         },
-        "$last_posthog_reset": {
+        "$last_insights_reset": {
             "description": "The timestamp of the last call to `Reset` in the web SDK. This can be useful for debugging.",
             "ignored_in_assistant": true,
             "label": "Timestamp of last call to `Reset` in the web sdk",
@@ -1309,7 +1309,7 @@
             "description": "What library was used to send the event.",
             "examples": [
                 "web",
-                "posthog-ios"
+                "insights-ios"
             ],
             "label": "Library"
         },
@@ -1321,7 +1321,7 @@
             "label": "Library custom API host"
         },
         "$lib_rate_limit_remaining_tokens": {
-            "description": "Remaining rate limit tokens for the posthog-js library client-side rate limiting implementation.",
+            "description": "Remaining rate limit tokens for the insights-js library client-side rate limiting implementation.",
             "examples": [
                 "100"
             ],
@@ -1456,14 +1456,14 @@
             "label": "Plugins succeeded"
         },
         "$prev_pageview_duration": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview duration"
         },
         "$prev_pageview_id": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 "1"
             ],
@@ -1471,63 +1471,63 @@
             "system": true
         },
         "$prev_pageview_last_content": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last content"
         },
         "$prev_pageview_last_content_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last content percentage"
         },
         "$prev_pageview_last_scroll": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last scroll"
         },
         "$prev_pageview_last_scroll_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last scroll percentage"
         },
         "$prev_pageview_max_content": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max content"
         },
         "$prev_pageview_max_content_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max content percentage"
         },
         "$prev_pageview_max_scroll": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max scroll"
         },
         "$prev_pageview_max_scroll_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max scroll percentage"
         },
         "$prev_pageview_pathname": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 "/pricing",
                 "/about-us/team"
@@ -1579,7 +1579,7 @@
         "$referrer": {
             "description": "URL of where the user came from.",
             "examples": [
-                "https://google.com/search?q=posthog&rlz=1C..."
+                "https://google.com/search?q=insights&rlz=1C..."
             ],
             "label": "Referrer URL"
         },
@@ -1897,7 +1897,7 @@
         "$session_entry_referrer": {
             "description": "URL of where the user came from. Captured at the start of the session and remains constant for the duration of the session.",
             "examples": [
-                "https://google.com/search?q=posthog&rlz=1C..."
+                "https://google.com/search?q=insights&rlz=1C..."
             ],
             "ignored_in_assistant": true,
             "label": "Session entry Referrer URL"
@@ -2054,13 +2054,13 @@
             "used_for_debug": true
         },
         "$session_recording_url_trigger_activated_session": {
-            "description": "Session recording URL trigger activated session config. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger activated session config. Used by insights-js to track URL activation of session replay.",
             "label": "Session recording URL trigger activated session",
             "system": true,
             "used_for_debug": true
         },
         "$session_recording_url_trigger_status": {
-            "description": "Session recording URL trigger status. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger status. Used by insights-js to track URL activation of session replay.",
             "label": "Session recording URL trigger status",
             "system": true,
             "used_for_debug": true
@@ -2175,7 +2175,7 @@
             "label": "Raw user agent"
         },
         "$user_id": {
-            "description": "This variable will be set to the distinct ID if you've called `posthog.identify('distinct id')`. If the user is anonymous, it'll be empty.",
+            "description": "This variable will be set to the distinct ID if you've called `insights.identify('distinct id')`. If the user is anonymous, it'll be empty.",
             "label": "User ID"
         },
         "$viewport_height": {
@@ -2344,7 +2344,7 @@
         "referring_application": {
             "description": "The namespace of the app that made the request.",
             "examples": [
-                "com.posthog.app"
+                "com.insights.app"
             ],
             "label": "Referrer application"
         },
@@ -2759,10 +2759,10 @@
             "label": "AI Evaluation Key ID (LLM)"
         },
         "$ai_evaluation_key_type": {
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
+            "description": "The type of API key used for the evaluation (byok = user's own key, insights = Insights default).",
             "examples": [
                 "byok",
-                "posthog"
+                "insights"
             ],
             "label": "AI Evaluation Key Type (LLM)"
         },
@@ -3045,7 +3045,7 @@
         "$app_namespace": {
             "description": "The namespace of the app as identified in the app store. Data from the last time this user was seen.",
             "examples": [
-                "com.posthog.app"
+                "com.insights.app"
             ],
             "label": "Latest app namespace"
         },
@@ -3086,7 +3086,7 @@
             "label": "Browser language prefix"
         },
         "$browser_type": {
-            "description": "This is only added when posthog-js config.opt_out_useragent_filter is true.",
+            "description": "This is only added when insights-js config.opt_out_useragent_filter is true.",
             "examples": [
                 "browser",
                 "bot"
@@ -3466,14 +3466,14 @@
             "label": "Exception capture enabled server side"
         },
         "$exception_capture_endpoint": {
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": [
                 "/e/"
             ],
             "label": "Exception capture endpoint"
         },
         "$exception_capture_endpoint_suffix": {
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": [
                 "/e/"
             ],
@@ -3852,7 +3852,7 @@
         "$initial_app_namespace": {
             "description": "The namespace of the app as identified in the app store. Data from the first time this user was seen.",
             "examples": [
-                "com.posthog.app"
+                "com.insights.app"
             ],
             "label": "Initial app namespace"
         },
@@ -4131,7 +4131,7 @@
             "label": "Initial path name"
         },
         "$initial_person_info": {
-            "description": "posthog-js initial person information. used in the $set_once flow",
+            "description": "insights-js initial person information. used in the $set_once flow",
             "label": "Initial person info",
             "system": true
         },
@@ -4153,7 +4153,7 @@
         "$initial_referrer": {
             "description": "URL of where the user came from. Data from the first time this user was seen.",
             "examples": [
-                "https://google.com/search?q=posthog&rlz=1C..."
+                "https://google.com/search?q=insights&rlz=1C..."
             ],
             "label": "Initial referrer URL"
         },
@@ -4283,7 +4283,7 @@
             "label": "Is emulator"
         },
         "$is_identified": {
-            "description": "Client-side property set by posthog-js indicating whether the user has been previously identified on the device.",
+            "description": "Client-side property set by insights-js indicating whether the user has been previously identified on the device.",
             "label": "Is identified"
         },
         "$is_ios_running_on_mac": {
@@ -4302,7 +4302,7 @@
             ],
             "label": "Is Mac Catalyst app"
         },
-        "$last_posthog_reset": {
+        "$last_insights_reset": {
             "description": "The timestamp of the last call to `Reset` in the web SDK. This can be useful for debugging.",
             "ignored_in_assistant": true,
             "label": "Timestamp of last call to `Reset` in the web sdk",
@@ -4313,7 +4313,7 @@
             "description": "What library was used to send the event.",
             "examples": [
                 "web",
-                "posthog-ios"
+                "insights-ios"
             ],
             "label": "Library"
         },
@@ -4325,7 +4325,7 @@
             "label": "Library custom API host"
         },
         "$lib_rate_limit_remaining_tokens": {
-            "description": "Remaining rate limit tokens for the posthog-js library client-side rate limiting implementation.",
+            "description": "Remaining rate limit tokens for the insights-js library client-side rate limiting implementation.",
             "examples": [
                 "100"
             ],
@@ -4460,14 +4460,14 @@
             "label": "Plugins succeeded"
         },
         "$prev_pageview_duration": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview duration"
         },
         "$prev_pageview_id": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 "1"
             ],
@@ -4475,63 +4475,63 @@
             "system": true
         },
         "$prev_pageview_last_content": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last content"
         },
         "$prev_pageview_last_content_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last content percentage"
         },
         "$prev_pageview_last_scroll": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last scroll"
         },
         "$prev_pageview_last_scroll_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview last scroll percentage"
         },
         "$prev_pageview_max_content": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max content"
         },
         "$prev_pageview_max_content_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max content percentage"
         },
         "$prev_pageview_max_scroll": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max scroll"
         },
         "$prev_pageview_max_scroll_percentage": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 0
             ],
             "label": "Previous pageview max scroll percentage"
         },
         "$prev_pageview_pathname": {
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [
                 "/pricing",
                 "/about-us/team"
@@ -4583,7 +4583,7 @@
         "$referrer": {
             "description": "URL of where the user came from. Data from the last time this user was seen.",
             "examples": [
-                "https://google.com/search?q=posthog&rlz=1C..."
+                "https://google.com/search?q=insights&rlz=1C..."
             ],
             "label": "Latest referrer URL"
         },
@@ -4901,7 +4901,7 @@
         "$session_entry_referrer": {
             "description": "URL of where the user came from. Captured at the start of the session and remains constant for the duration of the session.",
             "examples": [
-                "https://google.com/search?q=posthog&rlz=1C..."
+                "https://google.com/search?q=insights&rlz=1C..."
             ],
             "ignored_in_assistant": true,
             "label": "Session entry Referrer URL"
@@ -5058,13 +5058,13 @@
             "used_for_debug": true
         },
         "$session_recording_url_trigger_activated_session": {
-            "description": "Session recording URL trigger activated session config. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger activated session config. Used by insights-js to track URL activation of session replay.",
             "label": "Session recording URL trigger activated session",
             "system": true,
             "used_for_debug": true
         },
         "$session_recording_url_trigger_status": {
-            "description": "Session recording URL trigger status. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger status. Used by insights-js to track URL activation of session replay.",
             "label": "Session recording URL trigger status",
             "system": true,
             "used_for_debug": true
@@ -5179,7 +5179,7 @@
             "label": "Raw user agent"
         },
         "$user_id": {
-            "description": "This variable will be set to the distinct ID if you've called `posthog.identify('distinct id')`. If the user is anonymous, it'll be empty.",
+            "description": "This variable will be set to the distinct ID if you've called `insights.identify('distinct id')`. If the user is anonymous, it'll be empty.",
             "label": "User ID"
         },
         "$viewport_height": {
@@ -5199,7 +5199,7 @@
             "label": "Latest viewport width"
         },
         "$virt_initial_channel_type": {
-            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://posthog.com/docs/data/channel-type)",
+            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://hanzo.ai/docs/data/channel-type)",
             "examples": [
                 "Paid Search",
                 "Organic Video",
@@ -5309,7 +5309,7 @@
             "description": "The email address of the user.",
             "examples": [
                 "johnny.appleseed@icloud.com",
-                "sales@posthog.com",
+                "sales@hanzo.ai",
                 "test@example.com"
             ],
             "label": "Email address",
@@ -5392,7 +5392,7 @@
         "referring_application": {
             "description": "The namespace of the app that made the request.",
             "examples": [
-                "com.posthog.app"
+                "com.insights.app"
             ],
             "label": "Referrer application"
         },
@@ -5881,7 +5881,7 @@
             "type": "Numeric"
         },
         "$session_duration": {
-            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
+            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://hanzo.ai/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
             "examples": [
                 "30",
                 "146",

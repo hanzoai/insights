@@ -1,7 +1,7 @@
 import { Menu } from '@base-ui/react/menu'
 import { useActions, useValues } from 'kea'
 
-import { IconCloud, IconCode, IconDatabase, IconStethoscope, IconWarning } from '@posthog/icons'
+import { IconCloud, IconCode, IconDatabase, IconStethoscope, IconWarning } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Link } from 'lib/lemon-ui/Link/Link'
@@ -29,10 +29,10 @@ export const HealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.El
 const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Element => {
     const {
         isHealthMenuOpen,
-        postHogStatus,
-        postHogStatusTooltip,
-        postHogStatusBadgeContent,
-        postHogStatusBadgeStatus,
+        insightsStatus,
+        insightsStatusTooltip,
+        insightsStatusBadgeContent,
+        insightsStatusBadgeStatus,
     } = useValues(healthMenuLogic)
     const { setHealthMenuOpen } = useActions(healthMenuLogic)
     const { needsAttention, needsUpdatingCount, sdkHealth } = useValues(sidePanelSdkDoctorLogic)
@@ -55,9 +55,9 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
 
     const hasPipelineIssues = pipelineStatusEnabled && pipelineIssueCount > 0
     const triggerBadgeContent =
-        postHogStatus !== 'operational' || needsAttention || needsUpdatingCount > 0 || hasPipelineIssues ? '!' : '✓'
+        insightsStatus !== 'operational' || needsAttention || needsUpdatingCount > 0 || hasPipelineIssues ? '!' : '✓'
     const triggerBadgeStatus =
-        postHogStatus !== 'operational' || needsAttention || needsUpdatingCount > 0 || hasPipelineIssues
+        insightsStatus !== 'operational' || needsAttention || needsUpdatingCount > 0 || hasPipelineIssues
             ? 'danger'
             : 'success'
 
@@ -76,16 +76,16 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
                         targetBlankIcon
                         target="_blank"
                         buttonProps={{ menuItem: true }}
-                        to="https://posthogstatus.com"
-                        tooltip={postHogStatusTooltip}
+                        to="https://insightsstatus.com"
+                        tooltip={insightsStatusTooltip}
                         tooltipPlacement="right"
                         tooltipCloseDelayMs={0}
-                        data-attr="health-menu-posthog-status-button"
+                        data-attr="health-menu-insights-status-button"
                     >
                         <IconWithBadge
-                            content={postHogStatusBadgeContent}
+                            content={insightsStatusBadgeContent}
                             size="xsmall"
-                            status={postHogStatusBadgeStatus}
+                            status={insightsStatusBadgeStatus}
                             className="flex"
                         >
                             <IconCloud />
@@ -155,18 +155,18 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
 }
 
 const UnifiedHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Element => {
-    const { isHealthMenuOpen, postHogStatusBadgeContent, postHogStatusBadgeStatus, postHogStatusTooltip } =
+    const { isHealthMenuOpen, insightsStatusBadgeContent, insightsStatusBadgeStatus, insightsStatusTooltip } =
         useValues(healthMenuLogic)
     const { setHealthMenuOpen } = useActions(healthMenuLogic)
     const { triggerBadgeContent, triggerBadgeStatus, totalIssues } = useValues(unifiedHealthMenuLogic)
     const { featureFlags } = useValues(featureFlagLogic)
     const pipelineStatusEnabled = !!featureFlags[FEATURE_FLAGS.PIPELINE_STATUS_PAGE]
 
-    const combinedBadgeContent = postHogStatusBadgeContent === '!' || triggerBadgeContent === '!' ? '!' : '✓'
+    const combinedBadgeContent = insightsStatusBadgeContent === '!' || triggerBadgeContent === '!' ? '!' : '✓'
     const combinedBadgeStatus: 'danger' | 'warning' | 'success' =
-        postHogStatusBadgeStatus === 'danger' || triggerBadgeStatus === 'danger'
+        insightsStatusBadgeStatus === 'danger' || triggerBadgeStatus === 'danger'
             ? 'danger'
-            : postHogStatusBadgeStatus === 'warning' || triggerBadgeStatus === 'warning'
+            : insightsStatusBadgeStatus === 'warning' || triggerBadgeStatus === 'warning'
               ? 'warning'
               : 'success'
 
@@ -185,16 +185,16 @@ const UnifiedHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.El
                         targetBlankIcon
                         target="_blank"
                         buttonProps={{ menuItem: true }}
-                        to="https://posthogstatus.com"
-                        tooltip={postHogStatusTooltip}
+                        to="https://insightsstatus.com"
+                        tooltip={insightsStatusTooltip}
                         tooltipPlacement="right"
                         tooltipCloseDelayMs={0}
-                        data-attr="health-menu-posthog-status-button"
+                        data-attr="health-menu-insights-status-button"
                     >
                         <IconWithBadge
-                            content={postHogStatusBadgeContent}
+                            content={insightsStatusBadgeContent}
                             size="xsmall"
-                            status={postHogStatusBadgeStatus}
+                            status={insightsStatusBadgeStatus}
                             className="flex"
                         >
                             <IconCloud />

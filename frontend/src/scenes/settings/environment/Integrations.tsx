@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { PropsWithChildren, useMemo, useState } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { IntegrationView } from 'lib/integrations/IntegrationView'

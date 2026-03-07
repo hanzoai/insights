@@ -17,7 +17,7 @@ OBJECT_STORAGE_ENDPOINT=http://localhost:19000 \
     HUBSPOT_REFRESH_TOKEN="..." \
     HUBSPOT_APP_CLIENT_SECRET="..." \
     HUBSPOT_APP_CLIENT_ID="..." \
-pytest posthog/temporal/tests/data_imports/test_hubspot_source.py
+pytest insights/temporal/tests/data_imports/test_hubspot_source.py
 ```
 """
 

@@ -48,7 +48,7 @@ def create_destination() -> BatchExportDestination:
         config={
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },

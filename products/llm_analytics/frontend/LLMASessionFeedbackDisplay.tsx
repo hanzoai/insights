@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconSupport } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconSupport } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { Link } from 'lib/lemon-ui/Link'
 
@@ -81,7 +81,7 @@ export function LLMASessionFeedbackDisplay({ sessionId }: LLMASessionFeedbackDis
                     {sessionSupportTickets.map((ticket: { ticketId: string }, index: number) => (
                         <Link
                             key={`ticket-${index}`}
-                            to={`https://posthoghelp.zendesk.com/agent/tickets/${ticket.ticketId}`}
+                            to={`https://insightshelp.zendesk.com/agent/tickets/${ticket.ticketId}`}
                             target="_blank"
                             className="flex"
                         >

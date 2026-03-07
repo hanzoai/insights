@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCode, IconCopy, IconPlus, IconX } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@posthog/lemon-ui'
+import { IconCode, IconCopy, IconPlus, IconX } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@hanzo/lemon-ui'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { LemonField } from 'lib/lemon-ui/LemonField/LemonField'

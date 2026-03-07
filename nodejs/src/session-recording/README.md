@@ -25,7 +25,7 @@ The `SessionRecordingIngester` consumes session recording events from Kafka and:
 1. Start the required services (Kafka, MinIO, Postgres, Redis, ClickHouse):
 
    ```bash
-   hogli dev:setup
+   insightscli dev:setup
    ```
 
    Or manually:
@@ -34,7 +34,7 @@ The `SessionRecordingIngester` consumes session recording events from Kafka and:
    docker compose -f docker-compose.dev.yml up
    ```
 
-2. Set up the test database (creates test_posthog DB and runs migrations):
+2. Set up the test database (creates test_insights DB and runs migrations):
 
    ```bash
    pnpm setup:test

@@ -84,9 +84,9 @@ def handler500(request):
 
 @ensure_csrf_cookie
 def home(request, *args, **kwargs):
-    if request.get_host().split(":")[0] == "app.posthog.com" and get_instance_setting("REDIRECT_APP_TO_US"):
-        url = "https://us.posthog.com{}".format(request.get_full_path())
-        if url_has_allowed_host_and_scheme(url, "us.posthog.com", True):
+    if request.get_host().split(":")[0] == "insights.hanzo.ai" and get_instance_setting("REDIRECT_APP_TO_US"):
+        url = "https://insights.hanzo.ai{}".format(request.get_full_path())
+        if url_has_allowed_host_and_scheme(url, "insights.hanzo.ai", True):
             return HttpResponseRedirect(url)
     response = render_template("index.html", request)
     return apply_auth_brand_cookie(request, response)
@@ -283,7 +283,7 @@ if settings.DEBUG:
 
 
 if settings.TEST:
-    # Used in posthog-js e2e tests
+    # Used in insights-js e2e tests
     @csrf_exempt
     def delete_events(request):
         from insights.clickhouse.client import sync_execute

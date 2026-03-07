@@ -6,11 +6,11 @@ from uuid import uuid4
 from django.conf import settings
 from django.core.files import File
 
-import posthoganalytics
-import posthoganalytics.ai.openai
+import hanzoanalytics
+import hanzoanalytics.ai.openai
 from drf_spectacular.utils import extend_schema
 from elevenlabs import ElevenLabs
-from posthoganalytics.ai.openai import OpenAI
+from hanzoanalytics.ai.openai import OpenAI
 from rest_framework import serializers, viewsets
 from rest_framework.parsers import JSONParser, MultiPartParser
 
@@ -84,11 +84,11 @@ class UserInterviewSerializer(serializers.ModelSerializer):
     def _attempt_to_map_speaker_names(self, transcript: str, interviewee_emails: list[str]) -> dict[str, str] | None:
         participant_emails_joined = "\n".join(f"- {email}" for email in interviewee_emails)
         assignment_response = OpenAI(
-            posthog_client=posthoganalytics.default_client, base_url=settings.OPENAI_BASE_URL
+            analytics_client=hanzoanalytics.default_client, base_url=settings.OPENAI_BASE_URL
         ).responses.create(  # type: ignore
             model="gpt-4.1-mini",
-            posthog_trace_id=self._ai_trace_id,
-            posthog_distinct_id=self.context["request"].user.distinct_id,
+            insights_trace_id=self._ai_trace_id,
+            insights_distinct_id=self.context["request"].user.distinct_id,
             input=[
                 {
                     "role": "system",
@@ -158,14 +158,14 @@ Map the speakers in the following transcript:
         try:
             return json.loads(assignment_response.output_text)
         except json.JSONDecodeError as e:
-            posthoganalytics.capture_exception(e)
+            hanzoanalytics.capture_exception(e)
             return None
 
     def _summarize_transcript(self, transcript: str):
-        summary_response = OpenAI(posthog_client=posthoganalytics.default_client).responses.create(  # type: ignore
+        summary_response = OpenAI(analytics_client=hanzoanalytics.default_client).responses.create(  # type: ignore
             model="gpt-4.1-mini",
-            posthog_trace_id=self._ai_trace_id,
-            posthog_distinct_id=self.context["request"].user.distinct_id,
+            insights_trace_id=self._ai_trace_id,
+            insights_distinct_id=self.context["request"].user.distinct_id,
             input=[
                 {
                     "role": "system",

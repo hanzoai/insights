@@ -1,6 +1,6 @@
 import type { APIScopeAction, APIScopeObject } from '~/types'
 
-export const MAX_API_KEYS_PER_USER = 10 // Same as in posthog/api/personal_api_key.py
+export const MAX_API_KEYS_PER_USER = 10 // Same as in insights/api/personal_api_key.py
 
 export type APIScope = {
     key: APIScopeObject
@@ -166,7 +166,7 @@ export const APIScopeActionLabels: Record<APIScopeAction, string> = {
 
 export const DEFAULT_OAUTH_SCOPES = ['openid', 'email', 'profile']
 
-// Scopes required by the Insights MCP server (https://mcp.posthog.com)
+// Scopes required by the Insights MCP server (https://mcp.hanzo.ai)
 // These match the scopes_supported in the MCP server's OAuth protected resource metadata
 export const MCP_SERVER_OAUTH_SCOPES = [
     'openid',

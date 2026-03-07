@@ -8,8 +8,8 @@ import StarterKit, { StarterKitOptions } from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
 import { useThrottledCallback } from 'use-debounce'
 
-import { IconComment } from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { IconComment } from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { RichContentEditor } from 'lib/components/RichContentEditor'
 import { RichContentNodeMention } from 'lib/components/RichContentEditor/RichContentNodeMention'

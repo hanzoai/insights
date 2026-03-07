@@ -16,8 +16,8 @@ import {
 } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconSearch, IconSparkles, IconX } from '@posthog/icons'
-import { LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { IconSearch, IconSparkles, IconX } from '@hanzo/icons'
+import { LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

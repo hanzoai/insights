@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { IconEllipsis } from '@posthog/icons'
+import { IconEllipsis } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -10,7 +10,7 @@ import {
     LemonInput,
     LemonLabel,
     LemonSelect,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { InsightsFunctionMapping, MappingSummary } from 'scenes/insights-functions/mapping/InsightsFunctionMappings'

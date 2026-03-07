@@ -6,7 +6,7 @@ import {
 } from 'frimousse'
 import { useState } from 'react'
 
-import { IconEmojiAdd } from '@posthog/icons'
+import { IconEmojiAdd } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { Popover } from 'lib/lemon-ui/Popover'

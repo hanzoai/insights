@@ -1,7 +1,7 @@
-import { eventWithTime } from '@posthog/rrweb-types'
-import { fullSnapshotEvent } from '@posthog/rrweb-types'
-import { EventType } from '@posthog/rrweb-types'
-import { serializedNodeWithId } from '@posthog/rrweb-types'
+import { eventWithTime } from '@hanzo/rrweb-types'
+import { fullSnapshotEvent } from '@hanzo/rrweb-types'
+import { EventType } from '@hanzo/rrweb-types'
+import { serializedNodeWithId } from '@hanzo/rrweb-types'
 
 import { RecordingSnapshot } from '~/types'
 

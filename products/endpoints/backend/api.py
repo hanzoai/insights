@@ -352,7 +352,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             raise ValidationError(
                 {
                     "query": f"Query references undefined variable(s): {', '.join(undefined)}. "
-                    "See https://posthog.com/docs/endpoints/variables for detail."
+                    "See https://hanzo.ai/docs/endpoints/variables for detail."
                 }
             )
 
@@ -385,7 +385,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 raise ValidationError(
                     {
                         "query": f"Variable ID(s) not found: {', '.join(sorted(invalid_ids))}. "
-                        "Make sure the variables exist in https://app.posthog.com/data-management/variables."
+                        "Make sure the variables exist in https://insights.hanzo.ai/data-management/variables."
                     }
                 )
 
@@ -1136,7 +1136,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             # For insight endpoints: filters_override takes precedence over variables (backwards compat)
             if query_kind != "InsightsQLQuery" and data.filters_override is not None:
                 deprecation_headers = {
-                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
+                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://hanzo.ai/docs/api/endpoints"
                 }
                 # Extract breakdown filter from properties
                 if data.filters_override.properties:
@@ -1345,7 +1345,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             if query_kind != "InsightsQLQuery" and data.filters_override is not None:
                 filters_override = data.filters_override
                 deprecation_headers = {
-                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
+                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://hanzo.ai/docs/api/endpoints"
                 }
             elif data.variables:
                 if query_kind == "InsightsQLQuery":

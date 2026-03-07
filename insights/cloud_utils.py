@@ -31,8 +31,8 @@ def TEST_clear_instance_license_cache(
 
 
 def get_api_host():
-    if settings.SITE_URL == "https://us.posthog.com":
-        return "https://us.i.posthog.com"
-    elif settings.SITE_URL == "https://eu.posthog.com":
-        return "https://eu.i.posthog.com"
+    if settings.SITE_URL == "https://insights.hanzo.ai":
+        return "https://us.i.hanzo.ai"
+    elif settings.SITE_URL == "https://insights.hanzo.ai":
+        return "https://eu.i.hanzo.ai"
     return settings.SITE_URL

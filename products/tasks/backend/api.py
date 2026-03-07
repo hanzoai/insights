@@ -60,7 +60,7 @@ class TaskViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, APIScopePermission, InsightsFeatureFlagPermission]
     scope_object = "task"
     queryset = Task.objects.all()
-    posthog_feature_flag = {
+    insights_feature_flag = {
         "tasks": [
             "list",
             "retrieve",
@@ -219,7 +219,7 @@ class TaskRunViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, APIScopePermission, InsightsFeatureFlagPermission]
     scope_object = "task"
     queryset = TaskRun.objects.select_related("task").all()
-    posthog_feature_flag = {
+    insights_feature_flag = {
         "tasks": [
             "list",
             "retrieve",
@@ -649,7 +649,7 @@ class TaskRunViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     def _get_event_type(entry: dict) -> str:
         """Extract the event type from a log entry for filtering purposes.
 
-        For _posthog/* events, returns the notification method (e.g., '_posthog/console').
+        For _insights/* events, returns the notification method (e.g., '_insights/console').
         For session/update events, returns the sessionUpdate value (e.g., 'agent_message_chunk').
         """
         notification = entry.get("notification", {})

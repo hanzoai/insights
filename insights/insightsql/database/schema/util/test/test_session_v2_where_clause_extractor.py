@@ -311,7 +311,7 @@ SELECT
         assert expected == actual
 
     def test_not_like(self):
-        # based on a bug here: https://posthog.slack.com/archives/C05LJK1N3CP/p1719916566421079
+        # based on a bug here: https://insights.slack.com/archives/C05LJK1N3CP/p1719916566421079
         where = ast.And(
             exprs=[
                 ast.CompareOperation(

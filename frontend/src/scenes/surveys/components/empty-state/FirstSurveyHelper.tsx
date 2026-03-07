@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBell, IconGraph, IconRocket, IconTarget } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { ProfessorHog } from 'lib/components/mascots'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
@@ -77,7 +77,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                         <p className="text-xs text-muted mb-2 leading-relaxed">
                                             Show to specific users.{' '}
                                             <Link
-                                                to="https://posthog.com/docs/surveys/creating-surveys#display-conditions"
+                                                to="https://hanzo.ai/docs/surveys/creating-surveys#display-conditions"
                                                 target="_blank"
                                                 className="text-primary-3000"
                                             >
@@ -109,7 +109,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                         <p className="text-xs text-muted mb-2 leading-relaxed">
                                             See sample analytics.{' '}
                                             <Link
-                                                to="https://posthog.com/docs/surveys/viewing-results#1-on-the-survey-page"
+                                                to="https://hanzo.ai/docs/surveys/viewing-results#1-on-the-survey-page"
                                                 target="_blank"
                                                 className="text-primary-3000"
                                             >
@@ -137,7 +137,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                         <p className="text-xs text-muted mb-2 leading-relaxed">
                                             Slack notifications.{' '}
                                             <Link
-                                                to="https://posthog.com/tutorials/slack-surveys"
+                                                to="https://hanzo.ai/tutorials/slack-surveys"
                                                 target="_blank"
                                                 className="text-primary-3000"
                                             >

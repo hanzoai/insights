@@ -6,7 +6,7 @@ from types import UnionType
 from typing import Any, Generic, Optional, Protocol, TypeGuard, TypeVar, Union, cast, get_args, get_origin
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from pydantic import BaseModel, ConfigDict
 
 from insights.schema import (
@@ -979,7 +979,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
         refresh_requested: bool = False,
         user: Optional[User] = None,
     ) -> QueryStatus:
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=user.distinct_id if user else str(self.team.uuid),
             event="query async recalculation initiated",
             properties={
@@ -1159,20 +1159,20 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
         start_time = perf_counter()
         cache_key = self.get_cache_key()
 
-        with posthoganalytics.new_context():
-            posthoganalytics.tag("cache_key", cache_key)
-            posthoganalytics.tag("query_type", getattr(self.query, "kind", "Other"))
+        with hanzoanalytics.new_context():
+            hanzoanalytics.tag("cache_key", cache_key)
+            hanzoanalytics.tag("query_type", getattr(self.query, "kind", "Other"))
 
             if insight_id:
-                posthoganalytics.tag("insight_id", str(insight_id))
+                hanzoanalytics.tag("insight_id", str(insight_id))
             if dashboard_id:
-                posthoganalytics.tag("dashboard_id", str(dashboard_id))
+                hanzoanalytics.tag("dashboard_id", str(dashboard_id))
             if tags := getattr(self.query, "tags", None):
                 if tags.productKey:
-                    posthoganalytics.tag("product_key", tags.productKey)
+                    hanzoanalytics.tag("product_key", tags.productKey)
                     tag_queries(product=tags.productKey)
                 if tags.scene:
-                    posthoganalytics.tag("scene", tags.scene)
+                    hanzoanalytics.tag("scene", tags.scene)
                     tag_queries(scene=tags.scene)
 
             # Abort early if the user doesn't have access to the query runner
@@ -1182,7 +1182,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                 try:
                     self.validate_query_runner_access(user)
                 except UserAccessControlError as error:
-                    posthoganalytics.capture(
+                    hanzoanalytics.capture(
                         distinct_id=user.distinct_id,
                         event="query access control error",
                         properties={
@@ -1245,7 +1245,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                             "last_refresh": last_refresh.isoformat() if last_refresh else None,
                         }
 
-                    posthoganalytics.capture(
+                    hanzoanalytics.capture(
                         distinct_id=user.distinct_id if user else str(self.team.uuid),
                         event="query executed",
                         properties={
@@ -1316,7 +1316,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                     target_age=target_age,
                 )
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=user.distinct_id if user else str(self.team.uuid),
                 event="query executed",
                 properties={

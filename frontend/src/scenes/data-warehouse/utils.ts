@@ -1,4 +1,4 @@
-import { LemonTagType } from '@posthog/lemon-ui'
+import { LemonTagType } from '@hanzo/lemon-ui'
 
 import { DataVisualizationNode, DatabaseSchemaField, NodeKind } from '~/queries/schema/schema-general'
 import {

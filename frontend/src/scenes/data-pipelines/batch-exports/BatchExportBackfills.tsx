@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonTable } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonTable } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'

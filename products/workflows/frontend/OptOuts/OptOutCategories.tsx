@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconDownload, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonDialog, LemonSkeleton, LemonTag } from '@posthog/lemon-ui'
+import { IconDownload, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonDialog, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { BuilderHog3 } from 'lib/components/mascots'
@@ -142,7 +142,7 @@ export function OptOutCategories(): JSX.Element {
                             productName="Message Categories"
                             thingName="category"
                             description="Configure message categories to manage user opt-out preferences for different types of communications."
-                            docsURL="https://posthog.com/docs/workflows/customerio-import"
+                            docsURL="https://hanzo.ai/docs/workflows/customerio-import"
                             actionElementOverride={
                                 <>
                                     <LemonButton type="primary" icon={<IconDownload />} onClick={openImportModal}>

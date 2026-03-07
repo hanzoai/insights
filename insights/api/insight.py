@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema_view
@@ -164,7 +164,7 @@ def log_and_report_insight_activity(
         organization = Organization.objects.get(id=organization_id)
         team = Team.objects.get(id=team_id)
         if not was_impersonated and user.distinct_id:
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 f"insight {activity}",
                 distinct_id=user.distinct_id,
                 properties={"insight_id": insight_short_id, **properties},
@@ -177,7 +177,7 @@ def is_legacy_insight_endpoint_blocked(user: Any, team: Team) -> bool:
     if not distinct_id:
         return False
 
-    return posthoganalytics.feature_enabled(
+    return hanzoanalytics.feature_enabled(
         LEGACY_INSIGHT_ENDPOINTS_BLOCKED_FLAG,
         str(distinct_id),
         groups={
@@ -208,7 +208,7 @@ def capture_legacy_api_call(request: request.Request, team: Team) -> None:
             "user_agent": request.headers.get("user-agent"),
         }
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             event, distinct_id=distinct_id, properties=properties, groups=(groups(team.organization, team))
         )
     except Exception as e:
@@ -456,7 +456,7 @@ class InsightSerializer(InsightBasicSerializer):
         tags = validated_data.pop("tags", None)  # tags are created separately as global tag relationships
         team_id = self.context["team_id"]
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         created_by = validated_data.pop("created_by", request.user)
         dashboards = validated_data.pop("dashboards", None)
@@ -503,7 +503,7 @@ class InsightSerializer(InsightBasicSerializer):
     @monitor(feature=Feature.INSIGHT, endpoint="insight", method="PATCH")
     def update(self, instance: Insight, validated_data: dict, **kwargs) -> Insight:
         current_url = self.context["request"].headers.get("Referer")
-        session_id = self.context["request"].headers.get("X-Posthog-Session-Id")
+        session_id = self.context["request"].headers.get("X-Insights-Session-Id")
         dashboards_before_change: list[Union[str, dict]] = []
         try:
             # since it is possible to be restoring a soft deleted insight

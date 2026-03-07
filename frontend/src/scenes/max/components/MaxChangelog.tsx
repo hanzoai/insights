@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconSparkles, IconWarning, IconX } from '@posthog/icons'
-import { LemonButton, LemonTag } from '@posthog/lemon-ui'
+import { IconSparkles, IconWarning, IconX } from '@hanzo/icons'
+import { LemonButton, LemonTag } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Popover } from 'lib/lemon-ui/Popover/Popover'

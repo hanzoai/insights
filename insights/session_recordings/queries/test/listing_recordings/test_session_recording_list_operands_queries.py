@@ -270,9 +270,9 @@ class TestSessionRecordingsNegativeFiltersWithMultipleEvents(ClickhouseTestMixin
             ),
             (
                 "not_icontains_top_level_property",
-                {"email": "test@posthog.com"},
+                {"email": "test@hanzo.ai"},
                 {"email": "test@gmail.com"},
-                {"properties": [{"key": "email", "type": "event", "value": "posthog", "operator": "not_icontains"}]},
+                {"properties": [{"key": "email", "type": "event", "value": "insights", "operator": "not_icontains"}]},
             ),
         ]
     )

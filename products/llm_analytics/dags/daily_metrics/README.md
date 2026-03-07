@@ -148,11 +148,11 @@ Runs daily at 6 AM UTC for the previous day's partition.
 Query results in ClickHouse:
 
 ```bash
-docker exec posthog-clickhouse-1 clickhouse-client --query \
+docker exec insights-clickhouse-1 clickhouse-client --query \
   "SELECT * FROM llma_metrics_daily WHERE date = today() FORMAT Pretty"
 ```
 
-Or use HogQL in Insights UI:
+Or use InsightsQL in Insights UI:
 
 ```sql
 SELECT

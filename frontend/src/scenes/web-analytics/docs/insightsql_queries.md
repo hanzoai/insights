@@ -6,7 +6,7 @@ This document explains how web analytics queries work in Insights and how to vie
 
 The best way to see what InsightsQL queries are generated for web analytics is to look at the snapshot tests:
 
-**File:** `posthog/insightsql_queries/web_analytics/test/test_sample_web_analytics_queries.py`
+**File:** `insights/insightsql_queries/web_analytics/test/test_sample_web_analytics_queries.py`
 
 This test file contains comprehensive examples of all web analytics query types:
 
@@ -21,11 +21,11 @@ This test file contains comprehensive examples of all web analytics query types:
 To regenerate the InsightsQL query snapshots:
 
 ```bash
-pytest posthog/insightsql_queries/web_analytics/test/test_sample_web_analytics_queries.py --snapshot-update
+pytest insights/insightsql_queries/web_analytics/test/test_sample_web_analytics_queries.py --snapshot-update
 ```
 
 The snapshots are stored in:
-`posthog/insightsql_queries/web_analytics/test/__snapshots__/test_sample_web_analytics_queries.insightsql.ambr`
+`insights/insightsql_queries/web_analytics/test/__snapshots__/test_sample_web_analytics_queries.insightsql.ambr`
 
 ## Testing Queries with the API
 
@@ -33,8 +33,8 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 
 **Resources:**
 
-- [Insights Query API Documentation](https://posthog.com/docs/api/query)
-- [API Schema (Swagger UI)](https://app.posthog.com/api/schema/swagger-ui)
+- [Insights Query API Documentation](https://hanzo.ai/docs/api/query)
+- [API Schema (Swagger UI)](https://insights.hanzo.ai/api/schema/swagger-ui)
 
 ### 1. Create a Personal Access Token
 
@@ -48,7 +48,7 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 #### Example: Web Overview Query
 
 ```bash
-curl -X POST https://app.posthog.com/api/projects/:project_id/query \
+curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -66,7 +66,7 @@ curl -X POST https://app.posthog.com/api/projects/:project_id/query \
 #### Example: Web Stats Table Query with Breakdown
 
 ```bash
-curl -X POST https://app.posthog.com/api/projects/:project_id/query \
+curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -86,7 +86,7 @@ curl -X POST https://app.posthog.com/api/projects/:project_id/query \
 #### Example: With Event Property Filter
 
 ```bash
-curl -X POST https://app.posthog.com/api/projects/:project_id/query \
+curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -114,7 +114,7 @@ curl -X POST https://app.posthog.com/api/projects/:project_id/query \
 This query powers the "Unique visitors" trend line in the web analytics graphs tab:
 
 ```bash
-curl -X POST https://app.posthog.com/api/projects/:project_id/query \
+curl -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -156,7 +156,7 @@ The examples above use high-level query types like `WebOverviewQuery` and `WebSt
 1. Open the snapshot file:
 
    ```bash
-   posthog/insightsql_queries/web_analytics/test/__snapshots__/test_sample_web_analytics_queries.insightsql.ambr
+   insights/insightsql_queries/web_analytics/test/__snapshots__/test_sample_web_analytics_queries.insightsql.ambr
    ```
 
 2. Find the query you want. Each snapshot is named like:
@@ -172,7 +172,7 @@ The examples above use high-level query types like `WebOverviewQuery` and `WebSt
 Use the `InsightsQLQuery` kind instead of web analytics-specific kinds:
 
 ```bash
-curl -s -X POST https://app.posthog.com/api/projects/:project_id/query \
+curl -s -X POST https://insights.hanzo.ai/api/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
@@ -227,7 +227,7 @@ LIMIT 50000
 **2. API request:**
 
 ```bash
-curl -X POST https://app.posthog.com/api/projects/123/query \
+curl -X POST https://insights.hanzo.ai/api/projects/123/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
@@ -340,9 +340,9 @@ The query types and their schemas are defined in TypeScript:
 `frontend/src/queries/schema/schema-general.ts`
 
 These are automatically converted to Python Pydantic models in:
-`posthog/schema.py`
+`insights/schema.py`
 
-**Note:** For raw InsightsQL queries, use the `InsightsQLQuery` kind instead of web analytics-specific kinds (`WebOverviewQuery`, `WebStatsTableQuery`). See the [InsightsQL documentation](https://posthog.com/docs/insightsql) for complete query syntax reference.
+**Note:** For raw InsightsQL queries, use the `InsightsQLQuery` kind instead of web analytics-specific kinds (`WebOverviewQuery`, `WebStatsTableQuery`). See the [InsightsQL documentation](https://hanzo.ai/docs/insightsql) for complete query syntax reference.
 
 ## Query Structure Patterns
 
@@ -389,7 +389,7 @@ This means "bounce rate for /pricing" shows bounces from sessions that **started
 ## Available Breakdown Fields
 
 Different breakdown types use different fields:
-Refer to `posthog/schema.py` → `WebStatsBreakdown` for an up-to-date list.
+Refer to `insights/schema.py` → `WebStatsBreakdown` for an up-to-date list.
 
 | Breakdown Type                   | Field                                  | Type    |
 | -------------------------------- | -------------------------------------- | ------- |
@@ -440,8 +440,8 @@ WHERE or(equals(event, '$pageview'), equals(event, '$screen'))
 To print the InsightsQL syntax in tests instead of ClickHouse SQL:
 
 ```python
-from posthog.insightsql.printer import print_ast
-from posthog.insightsql.context import InsightsQLContext
+from insights.insightsql.printer import print_ast
+from insights.insightsql.context import InsightsQLContext
 
 # In your test
 runner = WebOverviewQueryRunner(team=team, query=query)
@@ -458,5 +458,5 @@ print(insightsql)
 ## More Resources
 
 - [Web Analytics Contributing Guide](./contributing.md) - Frontend architecture and development workflow
-- [InsightsQL History](https://posthog.slack.com/archives/C0351B1DMUY/p1754326078444019) - Marius and Eric explain the origins of InsightsQL
-- [InsightsQL Python Handbook](https://posthog.com/handbook/engineering/databases/insightsql-python) - Internal documentation
+- [InsightsQL History](https://insights.slack.com/archives/C0351B1DMUY/p1754326078444019) - Marius and Eric explain the origins of InsightsQL
+- [InsightsQL Python Handbook](https://hanzo.ai/handbook/engineering/databases/insightsql-python) - Internal documentation

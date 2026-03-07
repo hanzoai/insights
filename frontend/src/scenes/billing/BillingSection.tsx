@@ -3,7 +3,7 @@ import './Billing.scss'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonTabs } from '@posthog/lemon-ui'
+import { LemonTabs } from '@hanzo/lemon-ui'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

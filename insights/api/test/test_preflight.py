@@ -146,7 +146,7 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     @pytest.mark.ee
     def test_cloud_preflight_request(self):
         with self.is_cloud(True):
-            with self.settings(SITE_URL="https://app.posthog.com", OBJECT_STORAGE_ENABLED=False):
+            with self.settings(SITE_URL="https://insights.hanzo.ai", OBJECT_STORAGE_ENABLED=False):
                 response = self.client.get("/_preflight/")
                 assert response.status_code == status.HTTP_200_OK
                 response = response.json()
@@ -163,7 +163,7 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
                             "disable_paid_fs": False,
                             "cloudflare_proxy_enabled": False,
                         },
-                        "site_url": "https://app.posthog.com",
+                        "site_url": "https://insights.hanzo.ai",
                         "email_service_available": True,
                         "object_storage": True,
                     }

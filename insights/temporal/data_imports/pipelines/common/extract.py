@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, NoReturn
 from django.conf import settings
 
 import pyarrow as pa
-import posthoganalytics
+import hanzoanalytics
 from structlog.typing import FilteringBoundLogger
 from temporalio import activity
 
@@ -48,7 +48,7 @@ async def _get_redis():
 
 
 def build_non_retryable_errors_redis_key(team_id: int, source_id: str, run_id: str) -> str:
-    return f"posthog:data_warehouse:non_retryable_errors:{team_id}:{source_id}:{run_id}"
+    return f"insights:data_warehouse:non_retryable_errors:{team_id}:{source_id}:{run_id}"
 
 
 async def trim_source_job_inputs(source: "ExternalDataSource") -> None:
@@ -127,7 +127,7 @@ def report_heartbeat_timeout(inputs: "ImportDataActivityInputs", logger: Filteri
                 heartbeat_timeout_seconds=heartbeat_timeout.total_seconds(),
             )
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 "dwh_pod_heartbeat_timeout",
                 distinct_id=None,
                 properties={

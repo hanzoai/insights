@@ -2507,9 +2507,9 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('posthog_test.channel_definition_dict', 'domain_type', "
+            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
             "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
-            "dictGetOrNull('posthog_test.channel_definition_dict', 'domain_type', "
+            "dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
             "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS domain "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
             "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
@@ -2523,9 +2523,9 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_paid', "
+            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
             "(coalesce(%(insightsql_val_0)s, ''), 'source')) , "
-            "dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_paid', "
+            "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
             "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
             "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
@@ -2539,7 +2539,7 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_paid', "
+            "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
             "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
             "readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
@@ -2551,9 +2551,9 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_organic', "
+            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
             "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
-            "dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_organic', "
+            "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
             "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
             "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
@@ -2567,7 +2567,7 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT dictGetOrNull('posthog_test.channel_definition_dict', 'type_if_organic', "
+            "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
             "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
             "readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
@@ -3663,7 +3663,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                             ),
                         ]
                     ),
-                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/PostHog/posthog/pull/44346 but test for equivalence here
+                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Hanzo Insights/insights/pull/44346 but test for equivalence here
             ],
             select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
             where=ast.CompareOperation(
@@ -3697,7 +3697,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(set(result.results), expected_results)
 
         # The query should never touch the json properties object if we are using the materialized column, these asserts protect against regression of the performance the bug fixed in
-        # https://posthog.slack.com/archives/C09B0SSQEDA/p1767698123669229?thread_ts=1767672165.250289&cid=C09B0SSQEDA
+        # https://insights.slack.com/archives/C09B0SSQEDA/p1767698123669229?thread_ts=1767672165.250289&cid=C09B0SSQEDA
         sql_lower = result.clickhouse.lower()
         # JSONHas is used in calculating is_not_set_result_historical, but nowhere else
         assert sql_lower.count("jsonhas") == 1
@@ -3711,9 +3711,9 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # For non-nullable columns, ILIKE uses raw column directly
         with materialized("events", "test_prop", is_nullable=False) as mat_col:
             self._test_materialized_column_comparison(
-                "properties.test_prop ilike '%@posthog.com%'",
+                "properties.test_prop ilike '%@hanzo.ai%'",
                 f"ilike(events.{mat_col.name}, %(insightsql_val_0)s)",
-                {"insightsql_val_0": "%@posthog.com%"},
+                {"insightsql_val_0": "%@hanzo.ai%"},
             )
             # should also work if wrapped with toString()
             self._test_materialized_column_comparison(
@@ -3766,9 +3766,9 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # For non-nullable columns, NOT ILIKE uses raw column directly
         with materialized("events", "test_prop", is_nullable=False) as mat_col:
             self._test_materialized_column_comparison(
-                "properties.test_prop not ilike '%@posthog.com%'",
+                "properties.test_prop not ilike '%@hanzo.ai%'",
                 f"notILike(events.{mat_col.name}, %(insightsql_val_0)s)",
-                {"insightsql_val_0": "%@posthog.com%"},
+                {"insightsql_val_0": "%@hanzo.ai%"},
             )
 
     def test_materialized_column_ilike_bails_out_for_sentinel_pattern_on_non_nullable(self) -> None:
@@ -3790,18 +3790,18 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # For non-nullable columns, LIKE uses raw column directly
         with materialized("events", "test_prop", is_nullable=False) as mat_col:
             self._test_materialized_column_comparison(
-                "properties.test_prop like '%@posthog.com%'",
+                "properties.test_prop like '%@hanzo.ai%'",
                 f"like(events.{mat_col.name}, %(insightsql_val_0)s)",
-                {"insightsql_val_0": "%@posthog.com%"},
+                {"insightsql_val_0": "%@hanzo.ai%"},
             )
 
     def test_materialized_column_not_like_uses_raw_column_for_non_nullable(self) -> None:
         # For non-nullable columns, NOT LIKE uses raw column directly
         with materialized("events", "test_prop", is_nullable=False) as mat_col:
             self._test_materialized_column_comparison(
-                "properties.test_prop not like '%@posthog.com%'",
+                "properties.test_prop not like '%@hanzo.ai%'",
                 f"notLike(events.{mat_col.name}, %(insightsql_val_0)s)",
-                {"insightsql_val_0": "%@posthog.com%"},
+                {"insightsql_val_0": "%@hanzo.ai%"},
             )
 
     def test_materialized_column_like_case_sensitivity(self) -> None:
@@ -3926,14 +3926,14 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
 
         # do multiple test cases per test run, as setup and teardown are a bit slow
         cases: set[str] = {
-            "hello@posthog.com",
+            "hello@hanzo.ai",
             "Hello@Insights.com",
             "other_value",
             "null",
             "NULL",
             "'null'",
             "contains null in the middle",
-            "null@posthog.com",
+            "null@hanzo.ai",
             "",
             "None",  # Store None (i.e. actual NULL value) as a string, because we can't have a NULL distinct_id and it makes things easier
         }
@@ -3943,32 +3943,32 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # In this case we bail out of our optimization and fall back to default NULL handling/wrapping.
         # It'd be a good thing to fix this! And remove these special-cases from the tests! but my top priority was making sure that I didn't change any behavior.
         patterns_and_expected = {
-            "%@posthog.com": ({"hello@posthog.com", "Hello@Insights.com", "null@posthog.com"}, None),
-            "hello@posthog.com": ({"hello@posthog.com", "Hello@Insights.com"}, None),
+            "%@hanzo.ai": ({"hello@hanzo.ai", "Hello@Insights.com", "null@hanzo.ai"}, None),
+            "hello@hanzo.ai": ({"hello@hanzo.ai", "Hello@Insights.com"}, None),
             "%null%": (
-                {"null", "NULL", "'null'", "null@posthog.com", "contains null in the middle"},
-                {"NULL", "'null'", "null@posthog.com", "contains null in the middle"},
+                {"null", "NULL", "'null'", "null@hanzo.ai", "contains null in the middle"},
+                {"NULL", "'null'", "null@hanzo.ai", "contains null in the middle"},
             ),
             "%": (
                 {
                     "",
-                    "hello@posthog.com",
+                    "hello@hanzo.ai",
                     "Hello@Insights.com",
                     "other_value",
                     "null",
                     "NULL",
                     "'null'",
                     "contains null in the middle",
-                    "null@posthog.com",
+                    "null@hanzo.ai",
                 },
                 {
-                    "hello@posthog.com",
+                    "hello@hanzo.ai",
                     "Hello@Insights.com",
                     "other_value",
                     "NULL",
                     "'null'",
                     "contains null in the middle",
-                    "null@posthog.com",
+                    "null@hanzo.ai",
                 },
             ),
             "": ({""}, set()),
@@ -4036,14 +4036,14 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
             mat_col = None
 
         cases: set[str] = {
-            "hello@posthog.com",
+            "hello@hanzo.ai",
             "Hello@Insights.com",
             "other_value",
             "null",
             "NULL",
             "'null'",
             "contains null in the middle",
-            "null@posthog.com",
+            "null@hanzo.ai",
             "",
             "None",
         }
@@ -4051,14 +4051,14 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # Map of IN values to (in_expected, in_expected_if_non_nullable). If in_expected_if_non_nullable is None, use in_expected.
         # Non-nullable mat columns treat '' and 'null' values as NULL.
         in_values_and_expected: dict[tuple[str, ...], tuple[set[str], set[str] | None]] = {
-            ("hello@posthog.com",): ({"hello@posthog.com"}, None),
-            ("hello@posthog.com", "other_value"): ({"hello@posthog.com", "other_value"}, None),
+            ("hello@hanzo.ai",): ({"hello@hanzo.ai"}, None),
+            ("hello@hanzo.ai", "other_value"): ({"hello@hanzo.ai", "other_value"}, None),
             ("null",): ({"null"}, set()),
             ("NULL",): ({"NULL"}, None),
             ("null", "NULL"): ({"null", "NULL"}, {"NULL"}),
             ("",): ({""}, set()),
-            ("hello@posthog.com", "null"): ({"hello@posthog.com", "null"}, {"hello@posthog.com"}),
-            ("hello@posthog.com", ""): ({"hello@posthog.com", ""}, {"hello@posthog.com"}),
+            ("hello@hanzo.ai", "null"): ({"hello@hanzo.ai", "null"}, {"hello@hanzo.ai"}),
+            ("hello@hanzo.ai", ""): ({"hello@hanzo.ai", ""}, {"hello@hanzo.ai"}),
         }
 
         for case in cases:

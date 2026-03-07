@@ -6,12 +6,12 @@ import type { z } from 'zod'
 import { ApiClient } from '@/api/client'
 import { SessionManager } from '@/lib/SessionManager'
 import { StateManager } from '@/lib/StateManager'
-import { AnalyticsEvent, getPostHogClient } from '@/lib/analytics'
+import { AnalyticsEvent, getInsightsClient } from '@/lib/analytics'
 import { DurableObjectCache } from '@/lib/cache/DurableObjectCache'
 import {
     CUSTOM_API_BASE_URL,
-    POSTHOG_EU_BASE_URL,
-    POSTHOG_US_BASE_URL,
+    INSIGHTS_EU_BASE_URL,
+    INSIGHTS_US_BASE_URL,
     getBaseUrlForRegion,
     toCloudRegion,
 } from '@/lib/constants'
@@ -36,7 +36,7 @@ ${SHARED_PROMPT}
 
 const INSTRUCTIONS_V2 = `
 - IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any Insights tasks.
-- The \`posthog-query-data\` skill is the root skill for all data retrieval tasks in Insights. Read it first and then use the \`posthog:execute-sql\` tool to execute SQL queries.
+- The \`insights-query-data\` skill is the root skill for all data retrieval tasks in Insights. Read it first and then use the \`insights:execute-sql\` tool to execute SQL queries.
 ${SHARED_PROMPT}
 `.trim()
 
@@ -96,12 +96,12 @@ export class MCP extends McpAgent<Env> {
     async detectRegion(): Promise<CloudRegion | undefined> {
         const usClient = new ApiClient({
             apiToken: this.requestProperties.apiToken,
-            baseUrl: POSTHOG_US_BASE_URL,
+            baseUrl: INSIGHTS_US_BASE_URL,
         })
 
         const euClient = new ApiClient({
             apiToken: this.requestProperties.apiToken,
-            baseUrl: POSTHOG_EU_BASE_URL,
+            baseUrl: INSIGHTS_EU_BASE_URL,
         })
 
         const [usResult, euResult] = await Promise.all([usClient.users().me(), euClient.users().me()])
@@ -184,7 +184,7 @@ export class MCP extends McpAgent<Env> {
     async trackEvent(event: AnalyticsEvent, properties: Record<string, any> = {}): Promise<void> {
         try {
             const distinctId = await this.getDistinctId()
-            const client = getPostHogClient()
+            const client = getInsightsClient()
 
             client.capture({
                 distinctId,

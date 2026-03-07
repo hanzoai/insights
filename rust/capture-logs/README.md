@@ -20,7 +20,7 @@ The service is configured using environment variables:
 |----------|---------|-------------|
 | HOST | 0.0.0.0 | Host to bind the HTTP server |
 | PORT | 8000 | Port for the HTTP server |
-| JWT_SECRET | posthog_default_jwt_secret | Secret key for JWT validation |
+| JWT_SECRET | insights_default_jwt_secret | Secret key for JWT validation |
 
 ## Authentication
 
@@ -51,8 +51,8 @@ cargo run --bin capture_logs
 ### With Docker
 
 ```bash
-docker build -t posthog/capture-logs .
-docker run -p 8000:8000 posthog/capture-logs
+docker build -t insights/capture-logs .
+docker run -p 8000:8000 insights/capture-logs
 ```
 
 ## Sending Logs

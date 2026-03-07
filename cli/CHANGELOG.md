@@ -1,4 +1,4 @@
-# posthog-cli
+# insights-cli
 
 # 0.6.1
 
@@ -14,7 +14,7 @@
 
 # 0.5.29
 
-- chore: introduce env variable `POSTHOG_CLI_API_KEY` and `POSTHOG_CLI_PROJECT_ID` (backwards compatible)
+- chore: introduce env variable `INSIGHTS_CLI_API_KEY` and `INSIGHTS_CLI_PROJECT_ID` (backwards compatible)
 
 # 0.5.28
 
@@ -42,7 +42,7 @@
 
 # 0.5.20
 
-- chore: add global `--rate-limit` option for Posthog client
+- chore: add global `--rate-limit` option for Insights client
 
 # 0.5.19
 

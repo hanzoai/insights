@@ -14,7 +14,7 @@ export interface HotkeyInterface {
 export type HotkeysInterface = Partial<Record<HotKey, HotkeyInterface>>
 /**
  * input boxes in the hovering toolbar do not have event target of input.
- * they are detected as for e.g.div#__POSTHOG_TOOLBAR__.ph-no-capture
+ * they are detected as for e.g.div#__INSIGHTS_TOOLBAR__.ph-no-capture
  * see https://developer.mozilla.org/en-US/docs/Web/API/Event/composedPath
  * @param event
  * @param ignorableElements

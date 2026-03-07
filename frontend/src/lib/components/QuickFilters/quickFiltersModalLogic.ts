@@ -1,5 +1,5 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { QuickFilter } from '~/types'
 
@@ -85,7 +85,7 @@ export const quickFiltersModalLogic = kea<quickFiltersModalLogicType>([
             actions.setView('list')
         },
         openModal: () => {
-            posthog.capture(QuickFiltersEvents.QuickFiltersModalOpened, {
+            insights.capture(QuickFiltersEvents.QuickFiltersModalOpened, {
                 context: props.context,
             })
         },

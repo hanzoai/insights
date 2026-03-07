@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { CSSProperties, useEffect } from 'react'
 import { List, useListRef } from 'react-window'
 
-import { IconHome } from '@posthog/icons'
+import { IconHome } from '@hanzo/icons'
 
 import { addToDashboardModalLogic } from 'lib/components/AddToDashboard/addToDashboardModalLogic'
 import { AutoSizer } from 'lib/components/AutoSizer'

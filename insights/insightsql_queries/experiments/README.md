@@ -30,7 +30,7 @@ WHERE ...
 
 **Benefits of this approach:**
 
-- **Property resolution**: Complex property filters (including nested properties) are resolved at the SQL level where the HogQL type system works correctly
+- **Property resolution**: Complex property filters (including nested properties) are resolved at the SQL level where the InsightsQL type system works correctly
 - **Performance**: Property filtering happens early in the query pipeline
 - **Compatibility**: Works with all property types and operators without UDF limitations
 

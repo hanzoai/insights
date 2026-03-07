@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { Counter, Histogram } from 'prom-client'
 
-import { ExecResult, convertScriptToJS } from '@insights/scriptvm'
+import { ExecResult, convertScriptToJS } from '@hanzo/scriptvm'
 
 import { instrumented } from '~/common/tracing/tracing-utils'
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'

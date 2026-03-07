@@ -166,7 +166,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.assertEqual(self.organization.is_active, True)
         self.assertIsNone(self.organization.is_not_active_reason)
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_enforce_2fa_for_everyone(self, mock_capture):
         # Only admins should be able to enforce 2fa
         response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_2fa": True})
@@ -197,7 +197,7 @@ class TestOrganizationAPI(APIBaseTest):
             groups={"instance": ANY, "organization": str(self.organization.id)},
         )
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_ai_data_processing_consent_capture_event(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
@@ -538,7 +538,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
     def test_idor_protection_patch(self):
         """Test that users cannot modify organizations they don't belong to using PATCH."""
         # Create another organization with a different owner
-        other_org, _, other_user = Organization.objects.bootstrap(self._create_user("other_user@posthog.com"))
+        other_org, _, other_user = Organization.objects.bootstrap(self._create_user("other_user@hanzo.ai"))
 
         # Make current user an admin of their own org
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -636,8 +636,8 @@ class TestOrganizationRbacMigrations(APIBaseTest):
         )
 
         # Create test users with different permissions
-        self.admin_user = self._create_user("rbac_admin+1@posthog.com", level=OrganizationMembership.Level.ADMIN)
-        self.member_user = self._create_user("rbac_member+1@posthog.com")
+        self.admin_user = self._create_user("rbac_admin+1@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
+        self.member_user = self._create_user("rbac_member+1@hanzo.ai")
 
         # Bind admin role to admin user
         RoleMembership.objects.create(
@@ -724,13 +724,13 @@ class TestOrganizationRbacMigrations(APIBaseTest):
         )
 
         # Create inactive user
-        self.inactive_user = self._create_user("rbac_inactive@posthog.com")
+        self.inactive_user = self._create_user("rbac_inactive@hanzo.ai")
         self.inactive_user.is_active = False
         self.inactive_user.save()
 
         # Create users with different org membership levels
-        self.org_admin = self._create_user("rbac_org_admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
-        self.org_member = self._create_user("rbac_org_member@posthog.com", level=OrganizationMembership.Level.MEMBER)
+        self.org_admin = self._create_user("rbac_org_admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
+        self.org_member = self._create_user("rbac_org_member@hanzo.ai", level=OrganizationMembership.Level.MEMBER)
 
         self.client.force_login(self.admin_user)
 
@@ -814,14 +814,14 @@ class TestOrganizationRbacMigrations(APIBaseTest):
         )
 
     def test_migrate_team_rbac_as_member_without_permissions(self):
-        self.member_user = self._create_user("rbac_member+3@posthog.com")
+        self.member_user = self._create_user("rbac_member+3@hanzo.ai")
         self.client.force_login(self.member_user)
 
         response = self.client.post(f"/api/organizations/{self.organization.id}/migrate_access_control/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_migrate_team_rbac_wrong_organization(self):
-        self.admin_user = self._create_user("rbac_admin+4@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        self.admin_user = self._create_user("rbac_admin+4@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
         self.client.force_login(self.admin_user)
 
         other_org = Organization.objects.create(name="Other Org")
@@ -838,8 +838,8 @@ class TestOrganizationRbacMigrations(APIBaseTest):
         )
 
         # Set up users
-        self.admin_user = self._create_user("rbac_admin+5@posthog.com", level=OrganizationMembership.Level.ADMIN)
-        self.member_user = self._create_user("rbac_member+5@posthog.com")
+        self.admin_user = self._create_user("rbac_admin+5@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
+        self.member_user = self._create_user("rbac_member+5@hanzo.ai")
 
         self.client.force_login(self.admin_user)
 

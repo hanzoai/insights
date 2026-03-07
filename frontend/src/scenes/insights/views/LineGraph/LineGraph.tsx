@@ -6,7 +6,7 @@ import ChartjsPluginStacked100, { ExtendedChartData } from 'chartjs-plugin-stack
 import chartTrendline from 'chartjs-plugin-trendline'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useRef } from 'react'
 
 import {
@@ -336,7 +336,7 @@ export function LineGraph_({
                     console.error(event)
                 }
 
-                posthog.captureException(event)
+                insights.captureException(event)
             }
 
             canvas.addEventListener('contextlost', handleEvent)

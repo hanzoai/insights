@@ -2,7 +2,7 @@ import { BuiltLogic, connect, kea, listeners, path, reducers, selectors } from '
 import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { uuid } from 'lib/utils'

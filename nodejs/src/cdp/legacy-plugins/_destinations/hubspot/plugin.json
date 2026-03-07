@@ -1,6 +1,6 @@
 {
     "name": "Hubspot",
-    "url": "https://github.com/PostHog/hubspot-plugin",
+    "url": "https://github.com/Hanzo Insights/hubspot-plugin",
     "description": "Send contact data to Hubspot on Insights identify events.",
     "main": "index.ts",
     "config": [
@@ -42,11 +42,11 @@
             "hint": "Deprecated",
             "name": "Insights Instance",
             "type": "string",
-            "default": "https://app.posthog.com",
+            "default": "https://insights.hanzo.ai",
             "required": false
         },
         {
-            "key": "posthogApiKey",
+            "key": "insightsApiKey",
             "hint": "Deprecated",
             "name": "Insights API Key",
             "type": "string",
@@ -55,7 +55,7 @@
             "required": false
         },
         {
-            "key": "posthogProjectKey",
+            "key": "insightsProjectKey",
             "hint": "Deprecated",
             "name": "Project API Key",
             "type": "string",

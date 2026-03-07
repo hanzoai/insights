@@ -6,10 +6,10 @@ export const FlagPayloadSnippet = memo(({ language = 'javascript' }: { language?
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            const matchedFlagPayload = posthog.getFeatureFlagPayload('flag-key')
+            const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
         `,
         react: dedent`
-            import { useFeatureFlagPayload, useFeatureFlagEnabled } from '@posthog/react'
+            import { useFeatureFlagPayload, useFeatureFlagEnabled } from '@hanzo/react'
 
             function App() {
                 const variant = useFeatureFlagEnabled('show-welcome-message')
@@ -35,13 +35,13 @@ export const FlagPayloadSnippet = memo(({ language = 'javascript' }: { language?
             const matchedFlagPayload = await client.getFeatureFlagPayload('flag-key', 'distinct_id_of_your_user', isFeatureFlagEnabled)
         `,
         python: dedent`
-            matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+            matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
         `,
         php: dedent`
             // Payloads are returned as part of the flag evaluation
         `,
         ruby: dedent`
-            matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+            matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
         `,
         go: dedent`
             // Payloads are returned as part of the flag evaluation
