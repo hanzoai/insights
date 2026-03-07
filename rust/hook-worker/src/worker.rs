@@ -221,14 +221,14 @@ impl<'p> WebhookWorker<'p> {
 
 async fn log_kafka_error_and_sleep(step: &str, error: Option<KafkaError>) {
     match error {
-        Some(error) => error!("error sending hog message to kafka ({}): {}", step, error),
-        None => error!("error sending hog message to kafka ({})", step),
+        Some(error) => error!("error sending IQL message to kafka ({}): {}", step, error),
+        None => error!("error sending IQL message to kafka ({})", step),
     }
 
     // Errors producing to Kafka *should* be exceedingly rare, but when they happen we don't want
     // to enter a tight loop where we re-send the hook payload, fail to produce to Kafka, and
     // repeat over and over again. We also don't want to commit the job as done and not produce
-    // something to Kafka, as the Hog task would then be lost.
+    // something to Kafka, as the IQL task would then be lost.
     //
     // For this reason, we sleep before aborting the batch, in hopes that Kafka has recovered by the
     // time we retry.
@@ -585,7 +585,7 @@ async fn process_webhook_job<W: WebhookJob>(
                 WebhookRequestError::RetryableRequestError {
                     error,
                     retry_after,
-                    response, // Grab the response so we can send it back to hog for debug
+                    response, // Grab the response so we can send it back to IQL for debug
                     ..
                 } => {
                     let retry_interval =

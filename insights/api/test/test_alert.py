@@ -203,7 +203,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             team=self.team,
             name="Slack notification for alert",
             type="internal_destination",
-            hog="return 1",
+            iql="return 1",
             enabled=True,
             filters={
                 "events": [{"id": "$insight_alert_firing", "type": "events"}],
@@ -214,7 +214,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             team=self.team,
             name="Unrelated destination",
             type="internal_destination",
-            hog="return 1",
+            iql="return 1",
             enabled=True,
             filters={
                 "events": [{"id": "$insight_alert_firing", "type": "events"}],

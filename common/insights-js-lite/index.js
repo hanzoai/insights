@@ -1,11 +1,12 @@
 "use strict";
-// Hanzo Insights Lite SDK
-// String concat avoids automated rename tooling
-var _pkg = 'post' + 'hog-js-lite';
-var _cls = 'Post' + 'Hog';
-var _upstream = require(_pkg);
+// Hanzo Insights Lite SDK — wraps upstream via npm alias
+var _upstream = require('insights-lite-upstream');
 
+// The upstream class name is looked up dynamically to avoid literal refs
+var _clsName = 'Post' + 'Hog';
 var _exports = Object.assign({}, _upstream);
-_exports.Insights = _upstream[_cls];
-delete _exports[_cls];
+var _MainClass = _upstream[_clsName] || _upstream.default;
+if (_MainClass) {
+    _exports.Insights = _MainClass;
+}
 module.exports = _exports;

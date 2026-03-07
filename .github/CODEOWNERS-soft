@@ -38,24 +38,24 @@ insights/api/data_color_theme.py @hanzoai/team-product-analytics
 insights/api/insight_serializers.py @hanzoai/team-product-analytics
 insights/api/insight_variable.py @hanzoai/team-product-analytics
 insights/api/insight.py @hanzoai/team-product-analytics
-insights/hogql_queries/insights/ @hanzoai/team-product-analytics
-insights/hogql_queries/legacy_compatibility/ @hanzoai/team-product-analytics
-insights/hogql_queries/test/test_actors_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/test/test_events_dashboard_filters.py @hanzoai/team-product-analytics
-insights/hogql_queries/test/test_events_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/test/test_events_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/utils/formula_ast.py @hanzoai/team-product-analytics
-insights/hogql_queries/utils/query_compare_to_date_range.py @hanzoai/team-product-analytics
-insights/hogql_queries/utils/query_date_range.py @hanzoai/team-product-analytics
-insights/hogql_queries/utils/query_previous_period_date_range.py @hanzoai/team-product-analytics
-insights/hogql_queries/utils/timestamp_utils.py @hanzoai/team-product-analytics
-insights/hogql_queries/actor_strategies.py @hanzoai/team-product-analytics
-insights/hogql_queries/actors_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/events_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/actor_strategies.py @hanzoai/team-product-analytics
-insights/hogql_queries/actors_query_runner.py @hanzoai/team-product-analytics
-insights/hogql_queries/apply_dashboard_filters.py @hanzoai/team-product-analytics
-insights/hogql_queries/events_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/insights/ @hanzoai/team-product-analytics
+insights/insightsql_queries/legacy_compatibility/ @hanzoai/team-product-analytics
+insights/insightsql_queries/test/test_actors_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/test/test_events_dashboard_filters.py @hanzoai/team-product-analytics
+insights/insightsql_queries/test/test_events_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/test/test_events_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/utils/formula_ast.py @hanzoai/team-product-analytics
+insights/insightsql_queries/utils/query_compare_to_date_range.py @hanzoai/team-product-analytics
+insights/insightsql_queries/utils/query_date_range.py @hanzoai/team-product-analytics
+insights/insightsql_queries/utils/query_previous_period_date_range.py @hanzoai/team-product-analytics
+insights/insightsql_queries/utils/timestamp_utils.py @hanzoai/team-product-analytics
+insights/insightsql_queries/actor_strategies.py @hanzoai/team-product-analytics
+insights/insightsql_queries/actors_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/events_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/actor_strategies.py @hanzoai/team-product-analytics
+insights/insightsql_queries/actors_query_runner.py @hanzoai/team-product-analytics
+insights/insightsql_queries/apply_dashboard_filters.py @hanzoai/team-product-analytics
+insights/insightsql_queries/events_query_runner.py @hanzoai/team-product-analytics
 insights/models/filters/ @hanzoai/team-product-analytics
 insights/models/annotation.py @hanzoai/team-product-analytics
 insights/models/dashboard_templates.py @hanzoai/team-product-analytics
@@ -108,7 +108,7 @@ nodejs/src/session-replay/shared/ @hanzoai/team-replay @hanzoai/team-ingestion
 # Web Analytics - owned by @hanzoai/team-web-analytics
 products/web_analytics/** @hanzoai/team-web-analytics
 frontend/src/scenes/web-analytics/** @hanzoai/team-web-analytics
-insights/hogql_queries/web_analytics/** @hanzoai/team-web-analytics
+insights/insightsql_queries/web_analytics/** @hanzoai/team-web-analytics
 frontend/src/toolbar/web-vitals/** @hanzoai/team-web-analytics
 rust/common/cookieless/** @hanzoai/team-web-analytics
 nodejs/src/ingestion/cookieless/** @hanzoai/team-web-analytics
@@ -117,7 +117,7 @@ nodejs/src/ingestion/cookieless/** @hanzoai/team-web-analytics
 insights/dags/locations/analytics*platform.py @hanzoai/team-analytics-platform
 frontend/src/scenes/data-management/schema/** @hanzoai/team-analytics-platform
 insights/api/schema_property_group.py @hanzoai/team-analytics-platform
-insights/hogql/database/schema/sessions*\*.py @hanzoai/team-analytics-platform
+insights/insightsql/database/schema/sessions*\*.py @hanzoai/team-analytics-platform
 insights/models/raw_sessions/** @hanzoai/team-analytics-platform
 insights/models/schema.py @hanzoai/team-analytics-platform
 insights/models/sessions/** @hanzoai/team-analytics-platform
@@ -158,15 +158,15 @@ frontend/src/scenes/data-warehouse/\*\* @hanzoai/team-data-stack
 insights/management/commands/generate_source_configs.py @hanzoai/team-warehouse-sources
 insights/settings/data_warehouse.py @hanzoai/team-data-stack
 
-# HogQL - owned by @hanzoai/team-data-tools
-# and also hard owned by the @hanzoai/hogql on `CODEOWNERS` file
-insights/hogql/\*\* @hanzoai/team-data-tools
+# InsightsQL - owned by @hanzoai/team-data-tools
+# and also hard owned by the @hanzoai/insightsql on `CODEOWNERS` file
+insights/insightsql/\*\* @hanzoai/team-data-tools
 
 # Error Tracking - owned by @hanzoai/team-error-tracking
 products/error_tracking/backend/** @hanzoai/team-error-tracking
 products/error_tracking/frontend/** @hanzoai/team-error-tracking
-insights/hogql_queries/error_tracking/error_tracking_query_runner.py @hanzoai/team-error-tracking
-insights/hogql_queries/error_tracking/error_tracking_issue_correlation_query_runner.py @hanzoai/team-error-tracking
+insights/insightsql_queries/error_tracking/error_tracking_query_runner.py @hanzoai/team-error-tracking
+insights/insightsql_queries/error_tracking/error_tracking_issue_correlation_query_runner.py @hanzoai/team-error-tracking
 
 # Notebooks - owned by @hanzoai/team-platform-features
 frontend/src/scenes/notebooks/ @hanzoai/team-platform-features

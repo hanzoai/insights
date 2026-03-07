@@ -1864,7 +1864,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
             created_by=self.user,
             type=InsightsFunctionType.DESTINATION,
             enabled=True,
-            hog="return 1",
+            iql="return 1",
         )
         file_type = f"insights_function/{insights_function.type}"
         fs_entry = self._ensure_file_system_entry(

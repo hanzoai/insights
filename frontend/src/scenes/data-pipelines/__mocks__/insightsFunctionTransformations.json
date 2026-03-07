@@ -86,7 +86,7 @@
             },
             "masking": null,
             "mappings": null,
-            "icon_url": "/static/mascot/builder-hog-01.png",
+            "icon_url": "/static/mascot/builder-fn-01.png",
             "template": {
                 "mapping_templates": null,
                 "mappings": null,
@@ -110,7 +110,7 @@
                     ]
                 },
                 "masking": null,
-                "icon_url": "/static/mascot/builder-hog-01.png",
+                "icon_url": "/static/mascot/builder-fn-01.png",
                 "kind": null
             },
             "status": {

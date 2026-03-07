@@ -55,7 +55,7 @@ describe('reddit template', () => {
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
+                "User-Agent": "iql:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",
@@ -90,7 +90,7 @@ describe('reddit template', () => {
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
+                "User-Agent": "iql:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",
@@ -125,7 +125,7 @@ describe('reddit template', () => {
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
+                "User-Agent": "iql:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",

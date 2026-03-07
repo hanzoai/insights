@@ -25,7 +25,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
             [/\\./, 'text.escape.invalid'],
         ],
 
-        hog: [
+        iql: [
             // whitespace
             { include: '@whitespace' },
 
@@ -125,7 +125,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
         bracketCounting: [
             [/\{/, 'delimiter.bracket', '@bracketCounting'],
             [/\}/, 'delimiter.bracket', '@pop'],
-            { include: 'hog' },
+            { include: 'iql' },
         ],
     },
 })
@@ -134,7 +134,7 @@ export function initHogTemplateLanguage(monaco: Monaco): void {
     if (!monaco.languages.getLanguages().some(({ id }) => id === 'scriptTemplate')) {
         monaco.languages.register({
             id: 'scriptTemplate',
-            mimetypes: ['application/hog+template'],
+            mimetypes: ['application/iql+template'],
         })
         monaco.languages.setLanguageConfiguration('scriptTemplate', conf())
         monaco.languages.setMonarchTokensProvider('scriptTemplate', language())

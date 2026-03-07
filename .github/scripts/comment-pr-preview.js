@@ -40,7 +40,7 @@ module.exports = async ({github, context, prNumber, triggerStatus, deploymentUrl
 
   if (triggerStatus === 'success') {
     const previewUrl = deploymentUrl || 'https://hanzo.ai';
-    const inspectorUrl = deploymentId ? `https://vercel.com/post-hog/insights/${deploymentId}` : 'https://vercel.com/post-hog/insights';
+    const inspectorUrl = deploymentId ? `https://vercel.com/hanzoai/insights/${deploymentId}` : 'https://vercel.com/hanzoai/insights';
 
     message = `${commentHash}\nDocs from this PR will be published at hanzo.ai\n\n` +
               `| Project | Deployment | Preview | Updated (UTC) |\n` +

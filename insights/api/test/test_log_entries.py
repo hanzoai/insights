@@ -43,7 +43,7 @@ class TestLogEntries(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             team=self.team,
             name="Fetch URL",
             description="Test description",
-            hog="fetch(inputs.url);",
+            iql="fetch(inputs.url);",
         )
 
     def get_log_entries(self, params=None):

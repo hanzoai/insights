@@ -11,7 +11,7 @@ args = [arg for arg in sys.argv if arg != "" and not arg.startswith("-")]
 filename = args[1]
 
 if not filename.endswith(".iql") and not filename.endswith(".iqle"):
-    raise ValueError("Filename must end with '.hog' or '.hoge'")
+    raise ValueError("Filename must end with '.iql' or '.iqle'")
 
 with open(filename) as file:
     code = file.read()

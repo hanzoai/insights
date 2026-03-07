@@ -53,7 +53,7 @@ fn setup_tracing() {
 }
 
 pub async fn index() -> &'static str {
-    "log hog hogs logs
+    "log insights captures logs
 
 .|||||||||.
 |||||||||||||  gimme ur logs 🔫

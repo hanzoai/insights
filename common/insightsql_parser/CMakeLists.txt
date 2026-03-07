@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(hogql_parser LANGUAGES CXX)
+project(insightsql_parser LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -36,32 +36,32 @@ set(PARSER_SOURCES
 )
 
 add_library(
-    hogql_parser
+    insightsql_parser
     ${PARSER_SOURCES})
 
 target_include_directories(
-    hogql_parser
+    insightsql_parser
     PRIVATE ${ANTLR_INCLUDE_DIR}
 )
 
-target_link_libraries(hogql_parser
+target_link_libraries(insightsql_parser
     PRIVATE antlr4_static
 )
 
 if(EMSCRIPTEN)
-    add_executable(hogql_parser_wasm parser_wasm.cpp)
-    target_include_directories(hogql_parser_wasm PRIVATE ${ANTLR_INCLUDE_DIR})
-    target_link_libraries(hogql_parser_wasm PRIVATE hogql_parser antlr4_static)
+    add_executable(insightsql_parser_wasm parser_wasm.cpp)
+    target_include_directories(insightsql_parser_wasm PRIVATE ${ANTLR_INCLUDE_DIR})
+    target_link_libraries(insightsql_parser_wasm PRIVATE insightsql_parser antlr4_static)
 
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions") # Native WASM exceptions for better exception handling
-    set_target_properties(hogql_parser_wasm PROPERTIES
+    set_target_properties(insightsql_parser_wasm PROPERTIES
         LINK_FLAGS "\
             -lembind \
             -s WASM=1 \
             -s MODULARIZE=1 \
             -s EXPORT_ES6=1 \
-            -s EXPORT_NAME='createHogQLParser' \
+            -s EXPORT_NAME='createInsightsQLParser' \
             -s ALLOW_MEMORY_GROWTH=1 \
             -s SINGLE_FILE=1 \
         "
@@ -70,7 +70,7 @@ if(EMSCRIPTEN)
     # Install WASM outputs to dist/
     # Usage: cmake --install build_wasm --prefix .
     set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR} CACHE PATH "" FORCE)
-    install(TARGETS hogql_parser_wasm RUNTIME DESTINATION dist)
+    install(TARGETS insightsql_parser_wasm RUNTIME DESTINATION dist)
     install(FILES
         ${PROJECT_SOURCE_DIR}/index.d.ts
         ${PROJECT_SOURCE_DIR}/index.cjs

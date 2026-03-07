@@ -49,7 +49,7 @@ const _commonActionFields = {
 
 const CyclotronInputSchema = z.object({
     value: z.any(),
-    templating: z.enum(['hog', 'liquid']).optional(),
+    templating: z.enum(['iql', 'liquid']).optional(),
     secret: z.boolean().optional(),
     bytecode: z.any().optional(),
     order: z.number().optional(),

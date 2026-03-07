@@ -47,7 +47,7 @@ class AppMetricsViewSet(TeamAndOrgViewSetMixin, mixins.RetrieveModelMixin, views
         filter = AppMetricsRequestSerializer(data=request.query_params)
         filter.is_valid(raise_exception=True)
 
-        if "hog-" in kwargs["pk"]:
+        if "fn-" in kwargs["pk"]:
             # TODO: Make app metrics work with string IDs
             metric_results = {
                 "dates": [],

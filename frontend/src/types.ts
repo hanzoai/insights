@@ -6083,7 +6083,7 @@ export type InsightsFunctionConfigurationType = Omit<
     InsightsFunctionType,
     'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'fn'
 > & {
-    hog?: InsightsFunctionType['hog'] // In the config it can be empty if using a template
+    iql?: InsightsFunctionType['iql'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
 export type InsightsFlowConfigurationType = Omit<InsightsFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
@@ -6110,7 +6110,7 @@ export type InsightsFunctionTemplateType = Pick<
     mapping_templates?: InsightsFunctionMappingTemplateType[]
     description?: string | JSX.Element
     code: string
-    code_language: 'javascript' | 'hog'
+    code_language: 'javascript' | 'iql'
     /** Whether the template should be conditionally rendered based on a feature flag */
     flag?: string
     /** Whether this is a featured/recommended source */

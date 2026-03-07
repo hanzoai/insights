@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ("deleted", models.BooleanField(default=False)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("enabled", models.BooleanField(default=False)),
-                ("hog", models.TextField()),
+                ("iql", models.TextField()),
                 ("bytecode", models.JSONField(blank=True, null=True)),
                 ("inputs_schema", models.JSONField(null=True)),
                 ("inputs", models.JSONField(null=True)),

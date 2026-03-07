@@ -4,7 +4,7 @@ use serde_json::{Number, Value as JsonValue};
 
 use crate::VmError;
 
-// A top-level hog program - functionally the body of a "main" function, if hog had such a thing
+// A top-level iql program - functionally the body of a "main" function, if iql had such a thing
 pub struct Program {
     bytecode: Vec<JsonValue>,
     version: u64,
