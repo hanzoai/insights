@@ -10,7 +10,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 
 import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 
-import { ReplChunk as ReplChunkType, hogReplLogic } from './hogReplLogic'
+import { ReplChunk as ReplChunkType, iqlReplLogic } from './iqlReplLogic'
 
 export interface ReplResultsTableProps {
     response: {
@@ -145,8 +145,8 @@ export function ReplChunk({
 }
 
 export function ScriptRepl(): JSX.Element {
-    const { replChunks, currentCode, lastLocalGlobals } = useValues(hogReplLogic)
-    const { runCurrentCode, setCurrentCode, editFromHere } = useActions(hogReplLogic)
+    const { replChunks, currentCode, lastLocalGlobals } = useValues(iqlReplLogic)
+    const { runCurrentCode, setCurrentCode, editFromHere } = useActions(iqlReplLogic)
 
     return (
         <div className="p-4 bg-white text-black font-mono">
@@ -176,7 +176,7 @@ export function ScriptRepl(): JSX.Element {
                             onPressUpNoValue={() => {
                                 // TRICKY: This function will be memoified, so find the actual latest value,
                                 // not the one we had in the ScriptRepl component's chunk when this first rendered.
-                                const replChunks: ReplChunkType[] = hogReplLogic.findMounted()?.values.replChunks ?? []
+                                const replChunks: ReplChunkType[] = iqlReplLogic.findMounted()?.values.replChunks ?? []
                                 if (replChunks.length > 0) {
                                     editFromHere(replChunks.length - 1)
                                 }
@@ -197,5 +197,5 @@ export function ScriptRepl(): JSX.Element {
 
 export const scene: SceneExport = {
     component: ScriptRepl,
-    logic: hogReplLogic,
+    logic: iqlReplLogic,
 }

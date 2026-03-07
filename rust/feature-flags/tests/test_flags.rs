@@ -1543,7 +1543,7 @@ async fn test_super_condition_with_complex_request() -> Result<()> {
     let flag_json = json!([{
         "id": 13651,
         "key": "my-flag",
-        "name": "Generate HogQL with AI in Insights",
+        "name": "Generate InsightsQL with AI in Insights",
         "active": true,
         "deleted": false,
         "team_id": team.id,

@@ -6,7 +6,7 @@ from insights.cdp.templates.intercom.template_intercom import (
     template_send_event as template_intercom_event,
 )
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
@@ -166,7 +166,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                 "body": {"error": "error"},
             },
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from intercom api (status 400): {'error': 'error'}"
 
@@ -180,7 +180,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                 "body": {"ok": True},
             },
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from intercom api (status 400): {'error': 'error'}"
 
@@ -189,7 +189,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
             "status": 200,
             "body": {"total_count": 2},
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Found multiple contacts with the same email address. Skipping..."
 
@@ -354,7 +354,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "body": {"error": "error"},
             },
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from intercom api (status 400): {'error': 'error'}"
 
@@ -368,7 +368,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "body": {"ok": True},
             },
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "Error from intercom api (status 400): {'error': 'error'}"
 
@@ -377,7 +377,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
             "status": 200,
             "body": {"total_count": 0},
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "No unique contact found. Skipping..."
 
@@ -385,6 +385,6 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
             "status": 200,
             "body": {"total_count": 2},
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(inputs=self.create_inputs())
         assert e.value.message == "No unique contact found. Skipping..."

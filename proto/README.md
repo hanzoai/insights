@@ -7,7 +7,7 @@ Language-agnostic protobuf definitions for Insights services.
 ```text
 proto/
 ├── buf.yaml              # Linting and breaking change config
-└── personhog/            # Person data service
+└── personinsights/            # Person data service
     ├── types/v1/         # Shared message types
     ├── replica/v1/       # Read API
     └── service/v1/       # Public API
@@ -17,7 +17,7 @@ proto/
 
 | Language | Package                                         | Notes                             |
 | -------- | ----------------------------------------------- | --------------------------------- |
-| Rust     | [`rust/personhog-proto`](/rust/personhog-proto) | Generated at build time via tonic |
+| Rust     | [`rust/personinsights-proto`](/rust/personinsights-proto) | Generated at build time via tonic |
 
 ## CI Checks
 

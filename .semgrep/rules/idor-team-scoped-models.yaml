@@ -115,9 +115,9 @@ rules:
                               |FeatureFlag
                               |FileSystem
                               |HealthIssue
-                              |HogFlow
-                              |HogFlowBatchJob
-                              |HogFlowTemplate
+                              |InsightsFlow
+                              |InsightsFlowBatchJob
+                              |InsightsFlowTemplate
                               |HogFunction
                               |Hook
                               |Insight
@@ -276,9 +276,9 @@ rules:
                         |FeatureFlag
                         |FileSystem
                         |HealthIssue
-                        |HogFlow
-                        |HogFlowBatchJob
-                        |HogFlowTemplate
+                        |InsightsFlow
+                        |InsightsFlowBatchJob
+                        |InsightsFlowTemplate
                         |HogFunction
                         |Hook
                         |Insight

@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "customflow_templates",
-                "indexes": [models.Index(fields=["team"], name="hogflow_tem_team_id_cb8b2b_idx")],
+                "indexes": [models.Index(fields=["team"], name="insightsflow_tem_team_id_cb8b2b_idx")],
             },
         ),
     ]

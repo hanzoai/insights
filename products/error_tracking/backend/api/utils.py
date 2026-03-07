@@ -14,7 +14,7 @@ from insights.insightsql.property import property_to_expr
 from insights.api.utils import action
 from insights.models.team.team import Team
 
-from products.error_tracking.backend.hogvm_stl import RUST_HOGVM_STL
+from products.error_tracking.backend.scriptvm_stl import RUST_SCRIPTVM_STL
 from products.error_tracking.backend.models import ErrorTrackingIssueAssignment
 
 from common.scriptvm.python.operation import Operation
@@ -60,7 +60,7 @@ class RuleReorderingMixin:
 
 def generate_byte_code(team: Team, props: PropertyGroupFilterValue):
     expr = property_to_expr(props, team, strict=True)
-    # The rust HogVM expects a return statement, so we wrap the compiled filter expression in one
+    # The rust ScriptVM expects a return statement, so we wrap the compiled filter expression in one
     with_return = ast.ReturnStatement(expr=expr)
     bytecode = create_bytecode(with_return).bytecode
     validate_bytecode(bytecode)
@@ -75,5 +75,5 @@ def validate_bytecode(bytecode: list[Any]) -> None:
             name = bytecode[i + 1]
             if not isinstance(name, str):
                 raise ValidationError(f"Expected string for global function name, got {type(name)}")
-            if name not in RUST_HOGVM_STL:
+            if name not in RUST_SCRIPTVM_STL:
                 raise ValidationError(f"Unknown global function: {name}")

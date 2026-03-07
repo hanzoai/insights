@@ -20,7 +20,7 @@ import {
     Tooltip,
 } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { InsightLabel } from 'lib/components/InsightLabel'
 import { PropertyFilterButton } from 'lib/components/PropertyFilters/components/PropertyFilterButton'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -294,16 +294,16 @@ export function PageHeaderCustom(): JSX.Element {
         createExposureCohort,
         createExperimentDashboard,
         updateExperiment,
-        setHogfettiTrigger,
+        setConfettiTrigger,
     } = useActions(experimentLogic)
     const { openFinishExperimentModal, openPauseExperimentModal, openResumeExperimentModal } = useActions(modalsLogic)
     const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
     const [surveyModalOpen, setSurveyModalOpen] = useState(false)
     const { newTab } = useActions(sceneLogic)
-    const { trigger, HogfettiComponent } = useHogfetti()
+    const { trigger, ConfettiComponent } = useConfetti()
 
     useOnMountEffect(() => {
-        setHogfettiTrigger(trigger)
+        setConfettiTrigger(trigger)
     })
 
     const exposureCohortId = experiment?.exposure_cohort
@@ -410,7 +410,7 @@ export function PageHeaderCustom(): JSX.Element {
                     </>
                 }
             />
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {experiment && isExperimentRunning && (
                 <ScenePanel>

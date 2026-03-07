@@ -19,10 +19,10 @@ from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INS
 from common.scriptvm.python.stl import STL
 from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 from common.scriptvm.python.utils import (
-    HogVMException,
-    HogVMMemoryExceededException,
-    HogVMRuntimeExceededException,
-    UncaughtHogVMException,
+    ScriptVMException,
+    ScriptVMMemoryExceededException,
+    ScriptVMRuntimeExceededException,
+    UncaughtScriptVMException,
     calculate_cost,
     get_nested_value,
     like,
@@ -61,7 +61,7 @@ def execute_bytecode(
         or len(root_bytecode) == 0
         or (root_bytecode[0] != INSIGHTSQL_BYTECODE_IDENTIFIER and root_bytecode[0] != INSIGHTSQL_BYTECODE_IDENTIFIER_V0)
     ):
-        raise HogVMException(f"Invalid bytecode. Must start with '{INSIGHTSQL_BYTECODE_IDENTIFIER}'")
+        raise ScriptVMException(f"Invalid bytecode. Must start with '{INSIGHTSQL_BYTECODE_IDENTIFIER}'")
     version = root_bytecode[1] if len(root_bytecode) >= 2 and root_bytecode[0] == INSIGHTSQL_BYTECODE_IDENTIFIER else 0
     start_time = time.time()
     last_op = len(root_bytecode) - 1
@@ -115,7 +115,7 @@ def execute_bytecode(
             chunk_bytecode = bytecodes[frame.chunk].get("bytecode", [])
             chunk_globals = bytecodes[frame.chunk].get("globals", {})
         else:
-            raise HogVMException(f"Unknown chunk: {frame.chunk}")
+            raise ScriptVMException(f"Unknown chunk: {frame.chunk}")
         last_op = len(chunk_bytecode) - 1
         if debug:
             debug_bytecode = color_bytecode(chunk_bytecode)
@@ -128,7 +128,7 @@ def execute_bytecode(
     def stack_keep_first_elements(count: int) -> list[Any]:
         nonlocal stack, mem_stack, mem_used
         if count < 0 or len(stack) < count:
-            raise HogVMException("Stack underflow")
+            raise ScriptVMException("Stack underflow")
         for upvalue in reversed(upvalues):
             if upvalue["location"] >= count:
                 if not upvalue["closed"]:
@@ -145,13 +145,13 @@ def execute_bytecode(
     def next_token():
         nonlocal frame, chunk_bytecode
         if frame.ip >= last_op:
-            raise HogVMException("Unexpected end of bytecode")
+            raise ScriptVMException("Unexpected end of bytecode")
         frame.ip += 1
         return chunk_bytecode[frame.ip]
 
     def pop_stack():
         if not stack:
-            raise HogVMException("Stack underflow")
+            raise ScriptVMException("Stack underflow")
         nonlocal mem_used
         mem_used -= mem_stack.pop()
         return stack.pop()
@@ -164,11 +164,11 @@ def execute_bytecode(
         nonlocal max_mem_used
         max_mem_used = max(mem_used, max_mem_used)
         if mem_used > MAX_MEMORY:
-            raise HogVMMemoryExceededException(memory_limit=MAX_MEMORY, attempted_memory=mem_used)
+            raise ScriptVMMemoryExceededException(memory_limit=MAX_MEMORY, attempted_memory=mem_used)
 
     def check_timeout():
         if time.time() - start_time > timeout.total_seconds() and not debug:
-            raise HogVMRuntimeExceededException(timeout_seconds=timeout.total_seconds(), ops_performed=ops)
+            raise ScriptVMRuntimeExceededException(timeout_seconds=timeout.total_seconds(), ops_performed=ops)
 
     def capture_upvalue(index) -> dict:
         nonlocal upvalues
@@ -196,7 +196,7 @@ def execute_bytecode(
             last_call_frame = call_stack.pop()
             if len(call_stack) == 0 or last_call_frame is None:
                 if len(stack) > 1:
-                    raise HogVMException("Invalid bytecode. More than one value left on stack")
+                    raise ScriptVMException("Invalid bytecode. More than one value left on stack")
                 return BytecodeResult(
                     result=pop_stack() if len(stack) > 0 else None, stdout=stdout, bytecodes=bytecodes
                 )
@@ -339,7 +339,7 @@ def execute_bytecode(
                         )
                     )
                 else:
-                    raise HogVMException(f"Global variable not found: {chain[0]}")
+                    raise ScriptVMException(f"Global variable not found: {chain[0]}")
             case Operation.POP:
                 pop_stack()
             case Operation.CLOSE_UPVALUE:
@@ -448,7 +448,7 @@ def execute_bytecode(
                 stack_start = frame.stack_start
                 upvalue_count = next_token()
                 if upvalue_count != closure_callable["upvalueCount"]:
-                    raise HogVMException(
+                    raise ScriptVMException(
                         f"Invalid upvalue count. Expected {closure_callable['upvalueCount']}, got {upvalue_count}"
                     )
                 for _ in range(closure_callable["upvalueCount"]):
@@ -462,10 +462,10 @@ def execute_bytecode(
                 index = next_token()
                 closure = frame.closure
                 if index >= len(closure["upvalues"]):
-                    raise HogVMException(f"Invalid upvalue index: {index}")
+                    raise ScriptVMException(f"Invalid upvalue index: {index}")
                 upvalue = upvalues_by_id[closure["upvalues"][index]]
                 if not is_hog_upvalue(upvalue):
-                    raise HogVMException(f"Invalid upvalue: {upvalue}")
+                    raise ScriptVMException(f"Invalid upvalue: {upvalue}")
                 if upvalue["closed"]:
                     push_stack(upvalue["value"])
                 else:
@@ -474,10 +474,10 @@ def execute_bytecode(
                 index = next_token()
                 closure = frame.closure
                 if index >= len(closure["upvalues"]):
-                    raise HogVMException(f"Invalid upvalue index: {index}")
+                    raise ScriptVMException(f"Invalid upvalue index: {index}")
                 upvalue = upvalues_by_id[closure["upvalues"][index]]
                 if not is_hog_upvalue(upvalue):
-                    raise HogVMException(f"Invalid upvalue: {upvalue}")
+                    raise ScriptVMException(f"Invalid upvalue: {upvalue}")
                 if upvalue["closed"]:
                     upvalue["value"] = pop_stack()
                 else:
@@ -515,7 +515,7 @@ def execute_bytecode(
                 else:
                     if name == "import":
                         if arg_count != 1:
-                            raise HogVMException("Function import requires exactly 1 argument")
+                            raise ScriptVMException("Function import requires exactly 1 argument")
                         module_name = pop_stack()
                         frame.ip += 1  # advance for when we return
                         frame = CallFrame(
@@ -552,7 +552,7 @@ def execute_bytecode(
                     elif name in BYTECODE_STL:
                         arg_names = BYTECODE_STL[name][0]
                         if len(arg_names) != arg_count:
-                            raise HogVMException(f"Function {name} requires exactly {len(arg_names)} arguments")
+                            raise ScriptVMException(f"Function {name} requires exactly {len(arg_names)} arguments")
                         frame.ip += 1  # advance for when we return
                         frame = CallFrame(
                             ip=0,
@@ -574,18 +574,18 @@ def execute_bytecode(
                         call_stack.append(frame)
                         continue  # resume the loop without incrementing frame.ip
                     else:
-                        raise HogVMException(f"Unsupported function call: {name}")
+                        raise ScriptVMException(f"Unsupported function call: {name}")
             case Operation.CALL_LOCAL:
                 check_timeout()
                 closure = pop_stack()
                 if not isinstance(closure, dict) or closure.get("__hogClosure__") is None:
-                    raise HogVMException(f"Invalid closure: {closure}")
+                    raise ScriptVMException(f"Invalid closure: {closure}")
                 callable = closure.get("callable")
                 if not isinstance(callable, dict) or callable.get("__hogCallable__") is None:
-                    raise HogVMException(f"Invalid callable: {callable}")
+                    raise ScriptVMException(f"Invalid callable: {callable}")
                 args_length = next_token()
                 if args_length > MAX_FUNCTION_ARGS_LENGTH:
-                    raise HogVMException("Too many arguments")
+                    raise ScriptVMException("Too many arguments")
 
                 if callable.get("__hogCallable__") == "local":
                     if callable["argCount"] > args_length:
@@ -593,7 +593,7 @@ def execute_bytecode(
                         for _ in range(callable["argCount"] - args_length):
                             push_stack(None)
                     elif callable["argCount"] < args_length:
-                        raise HogVMException(
+                        raise ScriptVMException(
                             f"Too many arguments. Passed {args_length}, expected {callable['argCount']}"
                         )
                     frame.ip += 1  # advance for when we return
@@ -610,14 +610,14 @@ def execute_bytecode(
 
                 elif callable.get("__hogCallable__") == "stl":
                     if callable["name"] not in STL:
-                        raise HogVMException(f"Unsupported function call: {callable['name']}")
+                        raise ScriptVMException(f"Unsupported function call: {callable['name']}")
                     stl_fn = STL[callable["name"]]
                     if stl_fn.minArgs is not None and args_length < stl_fn.minArgs:
-                        raise HogVMException(
+                        raise ScriptVMException(
                             f"Function {callable['name']} requires at least {stl_fn.minArgs} arguments"
                         )
                     if stl_fn.maxArgs is not None and args_length > stl_fn.maxArgs:
-                        raise HogVMException(f"Function {callable['name']} requires at most {stl_fn.maxArgs} arguments")
+                        raise ScriptVMException(f"Function {callable['name']} requires at most {stl_fn.maxArgs} arguments")
                     if version == 0:
                         args = [pop_stack() for _ in range(args_length)]
                     else:
@@ -627,10 +627,10 @@ def execute_bytecode(
                     push_stack(stl_fn.fn(args, team, stdout, timeout.total_seconds()))
 
                 elif callable.get("__hogCallable__") == "async":
-                    raise HogVMException("Async functions are not supported")
+                    raise ScriptVMException("Async functions are not supported")
 
                 else:
-                    raise HogVMException("Invalid callable")
+                    raise ScriptVMException("Invalid callable")
 
             case Operation.TRY:
                 throw_stack.append(
@@ -642,11 +642,11 @@ def execute_bytecode(
                 if throw_stack:
                     throw_stack.pop()
                 else:
-                    raise HogVMException("Invalid operation POP_TRY: no try block to pop")
+                    raise ScriptVMException("Invalid operation POP_TRY: no try block to pop")
             case Operation.THROW:
                 exception = pop_stack()
                 if not is_hog_error(exception):
-                    raise HogVMException("Can not throw: value is not of type Error")
+                    raise ScriptVMException("Can not throw: value is not of type Error")
                 if throw_stack:
                     last_throw = throw_stack.pop()
                     call_stack_len, stack_len, catch_ip = (
@@ -662,13 +662,13 @@ def execute_bytecode(
                     frame.ip = catch_ip
                     continue
                 else:
-                    raise UncaughtHogVMException(
+                    raise UncaughtScriptVMException(
                         type=exception.get("type"),
                         message=exception.get("message"),
                         payload=exception.get("payload"),
                     )
             case _:
-                raise HogVMException(
+                raise ScriptVMException(
                     f'Unexpected node while running bytecode in chunk "{frame.chunk}": {chunk_bytecode[frame.ip]}'
                 )
 
@@ -703,16 +703,16 @@ def validate_bytecode(bytecode: list[Any] | dict, inputs: Optional[dict] = None)
         )
         return True, None
 
-    except HogVMRuntimeExceededException as e:
+    except ScriptVMRuntimeExceededException as e:
         return (
             False,
             f"Your function is taking too long to run (over {e.timeout_seconds} seconds). Please simplify your code.",
         )
-    except HogVMMemoryExceededException as e:
+    except ScriptVMMemoryExceededException as e:
         memory_mb = e.memory_limit / (1024 * 1024)
         attempted_mb = e.attempted_memory / (1024 * 1024)
         return False, f"Your function needs too much memory ({attempted_mb:.1f}MB). The limit is {memory_mb:.1f}MB."
-    except HogVMException as e:
+    except ScriptVMException as e:
         return False, f"Function execution error: {str(e)}"
     except Exception as e:
         return False, f"Unexpected error during function validation: {str(e)}"

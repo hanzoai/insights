@@ -85,7 +85,7 @@ from products.endpoints.backend.rate_limit import (
     clear_endpoint_materialization_cache,
 )
 
-from common.scriptvm.python.utils import HogVMException
+from common.scriptvm.python.utils import ScriptVMException
 
 MIN_CACHE_AGE_SECONDS = 300
 MAX_CACHE_AGE_SECONDS = 86400
@@ -1492,9 +1492,9 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 code_name=getattr(e, "code_name", None),
             )
             raise ValidationError("Query execution failed.", getattr(e, "code_name", None))
-        except HogVMException:
+        except ScriptVMException:
             logger.exception(
-                "Endpoint execution failed (HogVM)",
+                "Endpoint execution failed (ScriptVM)",
                 endpoint_name=endpoint.name,
             )
             raise ValidationError("Query execution failed: InsightsQL virtual machine error")

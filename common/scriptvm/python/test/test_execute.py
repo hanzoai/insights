@@ -11,7 +11,7 @@ from common.scriptvm.python.operation import (
     INSIGHTSQL_BYTECODE_VERSION as VERSION,
     Operation as op,
 )
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestBytecodeExecute:
@@ -991,7 +991,7 @@ class TestBytecodeExecute:
     def test_bytecode_uncaught_errors(self):
         try:
             self._run_program("throw Error('Not a good day')")
-        except UncaughtHogVMException as e:
+        except UncaughtScriptVMException as e:
             assert str(e) == "Error('Not a good day')"
             assert e.type == "Error"
             assert e.message == "Not a good day"
@@ -1001,7 +1001,7 @@ class TestBytecodeExecute:
 
         try:
             self._run_program("throw RetryError('Not a good day', {'key': 'value'})")
-        except UncaughtHogVMException as e:
+        except UncaughtScriptVMException as e:
             assert str(e) == "RetryError('Not a good day')"
             assert e.type == "RetryError"
             assert e.message == "Not a good day"

@@ -371,7 +371,7 @@ impl WebhookCleaner {
         Ok(rows)
     }
 
-    async fn get_completed_agg_rows_for_hoghooks(
+    async fn get_completed_agg_rows_for_insightshooks(
         &self,
         tx: &mut SerializableTxn<'_>,
     ) -> Result<Vec<HoghookCompletedRow>> {
@@ -415,7 +415,7 @@ impl WebhookCleaner {
         Ok(rows)
     }
 
-    async fn get_failed_agg_rows_for_hoghooks(
+    async fn get_failed_agg_rows_for_insightshooks(
         &self,
         tx: &mut SerializableTxn<'_>,
     ) -> Result<Vec<HoghookFailedRow>> {
@@ -497,7 +497,7 @@ impl WebhookCleaner {
 
         let completed_row_count = self.get_row_count_for_status(&mut tx, "completed").await?;
         let completed_agg_row_count = if self.hog_mode {
-            let completed_agg_rows = self.get_completed_agg_rows_for_hoghooks(&mut tx).await?;
+            let completed_agg_rows = self.get_completed_agg_rows_for_insightshooks(&mut tx).await?;
             let completed_agg_row_count = completed_agg_rows.len() as u64;
             let completed_app_metrics: Vec<AppMetric2> =
                 completed_agg_rows.into_iter().map(Into::into).collect();
@@ -524,7 +524,7 @@ impl WebhookCleaner {
 
         let failed_row_count = self.get_row_count_for_status(&mut tx, "failed").await?;
         let failed_agg_row_count = if self.hog_mode {
-            let failed_agg_rows = self.get_failed_agg_rows_for_hoghooks(&mut tx).await?;
+            let failed_agg_rows = self.get_failed_agg_rows_for_insightshooks(&mut tx).await?;
             let failed_agg_row_count = failed_agg_rows.len() as u64;
             let failed_app_metrics: Vec<AppMetric2> =
                 failed_agg_rows.into_iter().map(Into::into).collect();
@@ -854,8 +854,8 @@ mod tests {
         check_app_metric_vector_equality(&expected_app_metrics, &received_app_metrics);
     }
 
-    #[sqlx::test(migrations = "../migrations", fixtures("hoghook_cleanup"))]
-    async fn test_cleanup_impl_hoghooks(db: PgPool) {
+    #[sqlx::test(migrations = "../migrations", fixtures("insightshook_cleanup"))]
+    async fn test_cleanup_impl_insightshooks(db: PgPool) {
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
         mock_cluster
             .create_topic(APP_METRICS2_TOPIC, 1, 1)
@@ -870,16 +870,16 @@ mod tests {
         consumer.subscribe(&[APP_METRICS2_TOPIC]).unwrap();
 
         let hog_mode = true;
-        let hoghook_cleaner = WebhookCleaner::new_from_pool(
+        let insightshook_cleaner = WebhookCleaner::new_from_pool(
             db,
             mock_producer,
             APP_METRICS_TOPIC.to_owned(),
             APP_METRICS2_TOPIC.to_owned(),
             hog_mode,
         )
-        .expect("unable to create hoghook cleaner");
+        .expect("unable to create insightshook cleaner");
 
-        let cleanup_stats = hoghook_cleaner
+        let cleanup_stats = insightshook_cleaner
             .cleanup_impl()
             .await
             .expect("webbook cleanup_impl failed");

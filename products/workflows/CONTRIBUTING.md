@@ -20,7 +20,7 @@ When you add a new "insights function" action node, the wiring is:
 Concrete end-to-end example:
 
 - Frontend action node uses `template_id: 'template-insights-get-ticket'`:
-  - products/workflows/frontend/Workflows/hogflows/registry/actions/conversations.ts
+  - products/workflows/frontend/Workflows/insightsflows/registry/actions/conversations.ts
 - Backend template defines `id: 'template-insights-get-ticket'` and calls `insightsGetTicket(...)`:
   - nodejs/src/cdp/templates/\_destinations/insights_conversations/insights-get-ticket.template.ts
 - Backend async function registers `insightsGetTicket`:
@@ -39,22 +39,22 @@ Trigger types extend the trigger selector UI in the workflow editor. A trigger t
 
 Create a new file under:
 
-- products/workflows/frontend/Workflows/hogflows/registry/triggers/
+- products/workflows/frontend/Workflows/insightsflows/registry/triggers/
 
 Then call `registerTriggerType(...)` from:
 
-- products/workflows/frontend/Workflows/hogflows/registry/triggers/triggerTypeRegistry.ts
+- products/workflows/frontend/Workflows/insightsflows/registry/triggers/triggerTypeRegistry.ts
 
 Example implementation:
 
-- products/workflows/frontend/Workflows/hogflows/registry/triggers/conversations.tsx
+- products/workflows/frontend/Workflows/insightsflows/registry/triggers/conversations.tsx
 
 Minimal skeleton:
 
 ```tsx
 import { IconBolt } from '@hanzo/icons'
 
-import { registerTriggerType } from 'products/workflows/frontend/Workflows/hogflows/registry/triggers/triggerTypeRegistry'
+import { registerTriggerType } from 'products/workflows/frontend/Workflows/insightsflows/registry/triggers/triggerTypeRegistry'
 
 registerTriggerType({
   value: 'my_product_something_happened',
@@ -79,7 +79,7 @@ Registration is done via module side effects. Your trigger file must be imported
 
 The workflows registry entrypoint is:
 
-- products/workflows/frontend/Workflows/hogflows/registry/triggers/index.ts
+- products/workflows/frontend/Workflows/insightsflows/registry/triggers/index.ts
 
 Add an import for your file there (pattern shown by `conversations`).
 
@@ -89,7 +89,7 @@ If your trigger needs extra UI beyond the standard "Event" filters, provide a `C
 
 Reference:
 
-- products/workflows/frontend/Workflows/hogflows/registry/triggers/conversations.tsx
+- products/workflows/frontend/Workflows/insightsflows/registry/triggers/conversations.tsx
 
 Notes:
 
@@ -100,29 +100,29 @@ Notes:
 
 Action nodes shown in the "Build" toolbar come from:
 
-- Built-ins in products/workflows/frontend/Workflows/hogflows/panel/HogFlowEditorPanelBuild.tsx
-- Registered categories from products/workflows/frontend/Workflows/hogflows/registry/actions/actionNodeRegistry.ts
+- Built-ins in products/workflows/frontend/Workflows/insightsflows/panel/InsightsFlowEditorPanelBuild.tsx
+- Registered categories from products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry.ts
 
-Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/hogflows/hogFlowEditorLogic.tsx).
+Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/insightsflows/hogFlowEditorLogic.tsx).
 
 ### 1) Add an action node category
 
 Create a new file under:
 
-- products/workflows/frontend/Workflows/hogflows/registry/actions/
+- products/workflows/frontend/Workflows/insightsflows/registry/actions/
 
 Then call `registerActionNodeCategory(...)` from:
 
-- products/workflows/frontend/Workflows/hogflows/registry/actions/actionNodeRegistry.ts
+- products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry.ts
 
 Example category:
 
-- products/workflows/frontend/Workflows/hogflows/registry/actions/conversations.ts
+- products/workflows/frontend/Workflows/insightsflows/registry/actions/conversations.ts
 
 Minimal skeleton:
 
 ```ts
-import { registerActionNodeCategory } from 'products/workflows/frontend/Workflows/hogflows/registry/actions/actionNodeRegistry'
+import { registerActionNodeCategory } from 'products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry'
 
 registerActionNodeCategory({
   label: 'My product',
@@ -145,11 +145,11 @@ As with triggers, registration is done via side-effect imports.
 
 Add your file to:
 
-- products/workflows/frontend/Workflows/hogflows/registry/actions/index.ts
+- products/workflows/frontend/Workflows/insightsflows/registry/actions/index.ts
 
 The editor imports the registry entrypoint here:
 
-- products/workflows/frontend/Workflows/hogflows/panel/HogFlowEditorPanelBuild.tsx
+- products/workflows/frontend/Workflows/insightsflows/panel/InsightsFlowEditorPanelBuild.tsx
 
 ## Backend: adding an insights function template (`template_id`)
 

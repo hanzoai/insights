@@ -25,7 +25,7 @@ We also have a growing collection of Rust services that handle performance-criti
 - cymbal – processes source maps for error tracking
 - property-defs-rs – extracts and infers property definitions from events
 - hook services – manages webhooks with high performance
-- hogvm – evaluates InsightsQL bytecode via a stack machine implementation
+- scriptvm – evaluates InsightsQL bytecode via a stack machine implementation
 
 These components rely on a few external services:
 

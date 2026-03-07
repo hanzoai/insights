@@ -95,7 +95,7 @@ capabilities:
         docker_profiles: []
 
     nodejs_cdp_workflows:
-        description: 'Node.js CDP + Workflows - full CDP with HogFlow workflow automation'
+        description: 'Node.js CDP + Workflows - full CDP with InsightsFlow workflow automation'
         requires: [event_ingestion]
         docker_profiles: []
 

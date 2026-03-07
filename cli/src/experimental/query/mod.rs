@@ -20,8 +20,8 @@ pub struct QueryRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind")]
 pub enum Query {
-    HogQLQuery { query: String },
-    HogQLMetadata(MetadataQuery),
+    InsightsQLQuery { query: String },
+    InsightsQLMetadata(MetadataQuery),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,13 +41,13 @@ pub struct MetadataQuery {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum MetadataLanguage {
     #[serde(rename = "hogQL")]
-    HogQL,
+    InsightsQL,
 }
 
-pub type HogQLQueryResult = Result<HogQLQueryResponse, HogQLQueryErrorResponse>;
+pub type InsightsQLQueryResult = Result<InsightsQLQueryResponse, InsightsQLQueryErrorResponse>;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct HogQLQueryResponse {
+pub struct InsightsQLQueryResponse {
     pub cache_key: Option<String>,
     pub cache_target_age: Option<String>,
     pub clickhouse: Option<String>, // Clickhouse query text
@@ -58,7 +58,7 @@ pub struct HogQLQueryResponse {
     pub explain: Vec<String>,
     #[serde(default, rename = "hasMore", deserialize_with = "null_is_false")]
     pub has_more: bool,
-    pub hogql: Option<String>, // HogQL query text
+    pub insightsql: Option<String>, // InsightsQL query text
     #[serde(default, deserialize_with = "null_is_false")]
     pub is_cached: bool,
     pub last_refresh: Option<String>, // Last time the query was refreshed
@@ -77,7 +77,7 @@ pub struct HogQLQueryResponse {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct HogQLQueryErrorResponse {
+pub struct InsightsQLQueryErrorResponse {
     pub code: String,
     pub detail: String,
     #[serde(rename = "type")]
@@ -159,10 +159,10 @@ where
     }
 }
 
-pub fn run_query(to_run: &str) -> Result<HogQLQueryResult, Error> {
+pub fn run_query(to_run: &str) -> Result<InsightsQLQueryResult, Error> {
     let client = &context().client;
     let request = QueryRequest {
-        query: Query::HogQLQuery {
+        query: Query::InsightsQLQuery {
             query: to_run.to_string(),
         },
         refresh: Some(QueryRefresh::Blocking),
@@ -179,12 +179,12 @@ pub fn run_query(to_run: &str) -> Result<HogQLQueryResult, Error> {
     let value: Value = serde_json::from_str(&body)?;
 
     if !code.is_success() {
-        let error: HogQLQueryErrorResponse = serde_json::from_value(value)?;
+        let error: InsightsQLQueryErrorResponse = serde_json::from_value(value)?;
         return Ok(Err(error));
     }
 
-    // NOTE: We don't do any pagination here, because the HogQLQuery runner doesn't support it
-    let response: HogQLQueryResponse = serde_json::from_value(value)?;
+    // NOTE: We don't do any pagination here, because the InsightsQLQuery runner doesn't support it
+    let response: InsightsQLQueryResponse = serde_json::from_value(value)?;
     Ok(Ok(response))
 }
 
@@ -192,12 +192,12 @@ pub fn check_query(to_run: &str) -> Result<MetadataResponse, Error> {
     let client = &context().client;
 
     let query = MetadataQuery {
-        language: MetadataLanguage::HogQL,
+        language: MetadataLanguage::InsightsQL,
         query: to_run.to_string(),
         source: None, // TODO - allow for this to be set? Idk if it matters much
     };
 
-    let query = Query::HogQLMetadata(query);
+    let query = Query::InsightsQLMetadata(query);
 
     let request = QueryRequest {
         query,
@@ -224,9 +224,9 @@ pub fn check_query(to_run: &str) -> Result<MetadataResponse, Error> {
     Ok(response)
 }
 
-impl std::error::Error for HogQLQueryErrorResponse {}
+impl std::error::Error for InsightsQLQueryErrorResponse {}
 
-impl std::fmt::Display for HogQLQueryErrorResponse {
+impl std::fmt::Display for InsightsQLQueryErrorResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} ({}): {}", self.error_type, self.code, self.detail)
     }

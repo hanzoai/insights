@@ -27,10 +27,10 @@ pub fn run_endpoint(args: &RunArgs) -> Result<()> {
 
         let query = if let Some(query_def) = endpoint.query_definition {
             query_def
-        } else if let Some(hogql) = endpoint.query {
+        } else if let Some(insightsql) = endpoint.query {
             serde_json::json!({
-                "kind": "HogQLQuery",
-                "query": hogql
+                "kind": "InsightsQLQuery",
+                "query": insightsql
             })
         } else {
             anyhow::bail!("No query found in YAML file");

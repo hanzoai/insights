@@ -15,16 +15,16 @@ use tui_textarea::TextArea;
 
 use crate::{
     experimental::query::{
-        run_query, HogQLQueryErrorResponse, HogQLQueryResponse, HogQLQueryResult,
+        run_query, InsightsQLQueryErrorResponse, InsightsQLQueryResponse, InsightsQLQueryResult,
     },
     invocation_context::context,
     utils::homedir::insights_home_dir,
 };
 
 pub struct QueryTui {
-    current_result: Option<HogQLQueryResult>,
+    current_result: Option<InsightsQLQueryResult>,
     lower_panel_state: Option<LowerPanelState>,
-    bg_query_handle: Option<JoinHandle<Result<HogQLQueryResult, Error>>>,
+    bg_query_handle: Option<JoinHandle<Result<InsightsQLQueryResult, Error>>>,
     focus: Focus,
     debug: bool,
     state_dirty: bool,
@@ -45,7 +45,7 @@ enum Focus {
 #[derive(Serialize, Deserialize)]
 struct PersistedEditorState {
     lines: Vec<String>,
-    current_result: Option<HogQLQueryResult>,
+    current_result: Option<InsightsQLQueryResult>,
 }
 
 impl QueryTui {
@@ -314,7 +314,7 @@ pub fn start_query_editor(debug: bool) -> Result<String, Error> {
     res
 }
 
-fn get_response_table<'a>(response: &HogQLQueryResponse, is_focus: bool) -> Table<'a> {
+fn get_response_table<'a>(response: &InsightsQLQueryResponse, is_focus: bool) -> Table<'a> {
     let cols = &response.columns;
     let widths = cols.iter().map(|_| Constraint::Fill(1)).collect::<Vec<_>>();
     let mut rows: Vec<Row> = Vec::with_capacity(response.results.len());
@@ -349,7 +349,7 @@ fn get_response_table<'a>(response: &HogQLQueryResponse, is_focus: bool) -> Tabl
     table
 }
 
-fn get_error_display<'c>(err: &HogQLQueryErrorResponse, is_focus: bool) -> Paragraph<'c> {
+fn get_error_display<'c>(err: &InsightsQLQueryErrorResponse, is_focus: bool) -> Paragraph<'c> {
     let mut lines = vec![format!("Error: {}", err.error_type)];
     lines.push(format!("Code: {}", err.code));
     lines.push(format!("Detail: {}", err.detail));
@@ -372,7 +372,7 @@ fn get_error_display<'c>(err: &HogQLQueryErrorResponse, is_focus: bool) -> Parag
 }
 
 // A function that returns a text area with the json
-fn get_debug_display(response: &HogQLQueryResponse) -> TextArea<'static> {
+fn get_debug_display(response: &InsightsQLQueryResponse) -> TextArea<'static> {
     let json = serde_json::to_string_pretty(&response)
         .expect("Can serialize response to json")
         .lines()
