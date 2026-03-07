@@ -912,7 +912,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
     }
 
     // enterprise prop defs rows are a bit different - these mostly serve to join in metadata
-    // on popsthog_propertydefinition rows we defined above, so we seed using those rows
+    // on insights_propertydefinition rows we defined above, so we seed using those rows
     for (ndx, row) in pd_rows.iter().enumerate() {
         // for now, only assign joinable enterprise prop rows for
         // PropertyParentType(s) of Event and Person

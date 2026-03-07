@@ -30,17 +30,17 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
     "members_can_use_personal_api_keys": true,
     "membership_level": 8,
     "metadata": {},
-    "name": "MockHog",
+    "name": "MockInsights",
     "plugins_access_level": 9,
     "projects": [
       {
         "created_at": "2020-06-30T09:53:35.932534Z",
         "id": 997,
-        "name": "MockHog App + Marketing",
+        "name": "MockInsights App + Marketing",
         "organization_id": "ABCD",
       },
     ],
-    "slug": "mockhog-fstn",
+    "slug": "mockinsights-fstn",
     "teams": [
       {
         "anonymize_ips": false,
@@ -138,7 +138,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "marketing_analytics_config": {
           "sources_map": {},
         },
-        "name": "MockHog App + Marketing",
+        "name": "MockInsights App + Marketing",
         "onboarding_tasks": {
           "ingest_first_event": "completed",
           "setup_session_recordings": "completed",

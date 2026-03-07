@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import { RE2JS } from 're2js'
 
-import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@hanzo/scriptvm'
+import { ExecOptions, ExecResult, VMState, exec as iqlExec, execAsync as iqlExecAsync } from '@hanzo/scriptvm'
 
 import { performQuery } from '~/queries/query'
 import { InsightsQLASTQuery, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
@@ -22,14 +22,14 @@ const external = {
 }
 
 export function execHog(code: any[] | VMState, options?: ExecOptions): ExecResult {
-    return hogExec(code, {
+    return iqlExec(code, {
         external,
         ...options,
     })
 }
 
 export function execHogAsync(code: any[] | VMState, options?: ExecOptions): Promise<ExecResult> {
-    return hogExecAsync(code, {
+    return iqlExecAsync(code, {
         external,
         ...options,
         asyncFunctions: {

@@ -83,12 +83,12 @@ pub struct WebhookWorker<'p> {
     max_concurrent_jobs: usize,
     /// The retry policy used to calculate retry intervals when a job fails with a retryable error.
     retry_policy: RetryPolicy,
-    /// Kafka producer used to send results when in Hog mode
+    /// Kafka producer used to send results when in IQL mode
     kafka_producer: FutureProducer<KafkaContext>,
-    /// The topic to send results to when in Hog mode
+    /// The topic to send results to when in IQL mode
     cdp_function_callbacks_topic: &'static str,
-    /// Whether we are running in Hog mode or not
-    hog_mode: bool,
+    /// Whether we are running in IQL mode or not
+    iql_mode: bool,
     /// The liveness check handle, to call on a schedule to report healthy
     liveness: HealthHandle,
 }
@@ -125,7 +125,7 @@ impl<'p> WebhookWorker<'p> {
         allow_internal_ips: bool,
         kafka_producer: FutureProducer<KafkaContext>,
         cdp_function_callbacks_topic: String,
-        hog_mode: bool,
+        iql_mode: bool,
         liveness: HealthHandle,
     ) -> Self {
         let http_client = build_http_client(request_timeout, allow_internal_ips)
@@ -141,7 +141,7 @@ impl<'p> WebhookWorker<'p> {
             retry_policy,
             kafka_producer,
             cdp_function_callbacks_topic: cdp_function_callbacks_topic.leak(),
-            hog_mode,
+            iql_mode,
             liveness,
         }
     }
@@ -199,7 +199,7 @@ impl<'p> WebhookWorker<'p> {
             let retry_policy = self.retry_policy.clone();
             let kafka_producer = self.kafka_producer.clone();
             let cdp_function_callbacks_topic = self.cdp_function_callbacks_topic;
-            let hog_mode = self.hog_mode;
+            let iql_mode = self.iql_mode;
 
             tokio::spawn(async move {
                 // Move `permits` into the closure so they will be dropped when the scope ends.
@@ -211,7 +211,7 @@ impl<'p> WebhookWorker<'p> {
                     retry_policy,
                     kafka_producer,
                     cdp_function_callbacks_topic,
-                    hog_mode,
+                    iql_mode,
                 )
                 .await
             });
@@ -244,7 +244,7 @@ async fn process_batch<'a>(
     retry_policy: RetryPolicy,
     kafka_producer: FutureProducer<KafkaContext>,
     cdp_function_callbacks_topic: &'static str,
-    hog_mode: bool,
+    iql_mode: bool,
 ) {
     let mut futures = Vec::with_capacity(batch.jobs.len());
     let mut metadata_vec = Vec::with_capacity(batch.jobs.len());
@@ -257,7 +257,7 @@ async fn process_batch<'a>(
 
         metadata_vec.push(job.take_metadata());
 
-        let read_body = hog_mode;
+        let read_body = iql_mode;
         let future =
             async move { process_webhook_job(http_client, job, &retry_policy, read_body).await };
 
@@ -266,7 +266,7 @@ async fn process_batch<'a>(
 
     let results = join_all(futures).await;
 
-    if hog_mode
+    if iql_mode
         && push_insightshook_results_to_kafka(
             results,
             metadata_vec,
@@ -317,13 +317,13 @@ async fn push_insightshook_results_to_kafka(
                                 .and_then(|t| t.as_number())
                                 .map(|t| t.to_string())
                                 .unwrap_or_else(|| "?".to_string());
-                            let hog_function_id = metadata
-                                .get("hogFunctionId")
+                            let insights_function_id = metadata
+                                .get("insightsFunctionId")
                                 .and_then(|h| h.as_str())
                                 .map(|h| h.to_string())
                                 .unwrap_or_else(|| "?".to_string());
 
-                            error!("dropping message due to size limit, team_id: {}, hog_function_id: {}", team_id, hog_function_id);
+                            error!("dropping message due to size limit, team_id: {}, insights_function_id: {}", team_id, insights_function_id);
                         }
                         Err((error, _)) => {
                             // Return early to avoid committing the batch.
@@ -875,7 +875,7 @@ mod tests {
         .await
         .expect("failed to enqueue job");
         let (_mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = false;
+        let iql_mode = false;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -887,7 +887,7 @@ mod tests {
             false,
             mock_producer,
             "cdp_function_callbacks".to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -932,7 +932,7 @@ mod tests {
             .await;
 
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -944,7 +944,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -981,7 +981,7 @@ mod tests {
             worker.retry_policy.clone(),
             worker.kafka_producer.clone(),
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
 
@@ -1048,7 +1048,7 @@ mod tests {
             .await;
 
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -1060,7 +1060,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -1097,7 +1097,7 @@ mod tests {
             worker.retry_policy.clone(),
             worker.kafka_producer.clone(),
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
 
@@ -1189,7 +1189,7 @@ mod tests {
             .await;
 
         let (_, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -1201,7 +1201,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -1213,7 +1213,7 @@ mod tests {
             worker.retry_policy,
             worker.kafka_producer,
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
     }

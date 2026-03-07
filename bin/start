@@ -116,15 +116,15 @@ if [[ "$*" == *"--custom"* ]]; then
 else
     GENERATED_CONFIG="$REPOSITORY_ROOT/.insights/.generated/mprocs.yaml"
     
-    # Generate/regenerate config using hogli (defaults to product_analytics if no config exists)
-    if command -v hogli &>/dev/null; then
-        hogli dev:generate 2>/dev/null || true
+    # Generate/regenerate config using insightscli (defaults to product_analytics if no config exists)
+    if command -v insightscli &>/dev/null; then
+        insightscli dev:generate 2>/dev/null || true
     fi
     
     if [[ -f "$GENERATED_CONFIG" ]]; then
         exec mprocs --config "$GENERATED_CONFIG"
     else
-        # Fallback if hogli not available
+        # Fallback if insightscli not available
         exec mprocs --config bin/mprocs.yaml
     fi
 fi

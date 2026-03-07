@@ -13,7 +13,7 @@ export function delay(ms: number): Promise<void> {
 
 const map = (obj: Record<string, any>): Map<any, any> => new Map(Object.entries(obj))
 const tuple = (array: any[]): any[] => {
-    ;(array as any).__isHogTuple = true
+    ;(array as any).__isIQLTuple = true
     return array
 }
 
@@ -615,9 +615,9 @@ describe('scriptvm execute', () => {
                         argCount: 0,
                         chunk: 'root',
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 chunk: 'root',
@@ -2039,9 +2039,9 @@ describe('scriptvm execute', () => {
                         argCount: 0,
                         chunk: 'root',
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 chunk: 'root',
@@ -2131,9 +2131,9 @@ describe('scriptvm execute', () => {
                 stack: [
                     2,
                     {
-                        __hogClosure__: true,
+                        __iqlClosure__: true,
                         callable: {
-                            __hogCallable__: 'local',
+                            __iqlCallable__: 'local',
                             name: 'lambda',
                             argCount: 2,
                             upvalueCount: 1,
@@ -2145,7 +2145,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __hogUpValue__: true,
+                        __iqlUpValue__: true,
                         location: 0,
                         id: 1,
                         closed: false,
@@ -2159,9 +2159,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2277,9 +2277,9 @@ describe('scriptvm execute', () => {
                 bytecodes: { root: { bytecode } },
                 stack: [
                     {
-                        __hogClosure__: true,
+                        __iqlClosure__: true,
                         callable: {
-                            __hogCallable__: 'local',
+                            __iqlCallable__: 'local',
                             name: 'outer',
                             argCount: 0,
                             upvalueCount: 0,
@@ -2289,9 +2289,9 @@ describe('scriptvm execute', () => {
                         upvalues: [],
                     },
                     {
-                        __hogClosure__: true,
+                        __iqlClosure__: true,
                         callable: {
-                            __hogCallable__: 'local',
+                            __iqlCallable__: 'local',
                             name: 'inner',
                             argCount: 0,
                             upvalueCount: 1,
@@ -2303,7 +2303,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __hogUpValue__: true,
+                        __iqlUpValue__: true,
                         id: 1,
                         location: 1,
                         closed: true,
@@ -2317,9 +2317,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2440,9 +2440,9 @@ describe('scriptvm execute', () => {
                 bytecodes: { root: { bytecode } },
                 stack: [
                     {
-                        __hogClosure__: true,
+                        __iqlClosure__: true,
                         callable: {
-                            __hogCallable__: 'local',
+                            __iqlCallable__: 'local',
                             name: 'outer',
                             argCount: 0,
                             upvalueCount: 0,
@@ -2452,9 +2452,9 @@ describe('scriptvm execute', () => {
                         upvalues: [],
                     },
                     {
-                        __hogClosure__: true,
+                        __iqlClosure__: true,
                         callable: {
-                            __hogCallable__: 'local',
+                            __iqlCallable__: 'local',
                             name: 'inner',
                             argCount: 0,
                             upvalueCount: 1,
@@ -2466,7 +2466,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __hogUpValue__: true,
+                        __iqlUpValue__: true,
                         id: 1,
                         location: 1,
                         closed: true,
@@ -2480,9 +2480,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2498,9 +2498,9 @@ describe('scriptvm execute', () => {
                         stackStart: 2,
                         argCount: 0,
                         closure: {
-                            __hogClosure__: true,
+                            __iqlClosure__: true,
                             callable: {
-                                __hogCallable__: 'local',
+                                __iqlCallable__: 'local',
                                 name: 'inner',
                                 argCount: 0,
                                 upvalueCount: 1,

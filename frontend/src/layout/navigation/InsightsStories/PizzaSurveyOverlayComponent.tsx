@@ -11,7 +11,7 @@ interface PizzaSurveyOverlayComponentProps {
 export const PizzaSurveyOverlayComponent = ({ closeOverlay }: PizzaSurveyOverlayComponentProps): JSX.Element => {
     const clickPollButton = (): void => {
         setTimeout(() => {
-            const button = document.getElementById('hogtok-pineapple-pizza-poll-button')
+            const button = document.getElementById('insightstok-pineapple-pizza-poll-button')
             if (button) {
                 button.click()
             }
@@ -35,7 +35,7 @@ export const PizzaSurveyOverlayComponent = ({ closeOverlay }: PizzaSurveyOverlay
     return (
         <div className="flex flex-col h-full bg-primary p-8">
             <div className="flex-1 flex items-start justify-center">
-                <LemonButton id="hogtok-pineapple-pizza-poll-button" type="secondary">
+                <LemonButton id="insightstok-pineapple-pizza-poll-button" type="secondary">
                     Take survey
                 </LemonButton>
             </div>

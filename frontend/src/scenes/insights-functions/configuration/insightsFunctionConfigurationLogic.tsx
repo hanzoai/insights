@@ -53,7 +53,7 @@ import {
     InsightsFunctionTemplateType,
     InsightsFunctionType,
     InsightsFunctionTypeType,
-    HogWatcherState,
+    InsightsWatcherState,
     PersonType,
     PropertyFilterType,
     PropertyGroupFilter,
@@ -335,9 +335,9 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         setSampleGlobalsError: (error) => ({ error }),
         setSampleGlobals: (sampleGlobals: CyclotronJobInvocationGlobals | null) => ({ sampleGlobals }),
         setShowEventsList: (showEventsList: boolean) => ({ showEventsList }),
-        setOldHogCode: (oldHogCode: string) => ({ oldHogCode }),
-        setNewHogCode: (newScriptCode: string) => ({ newScriptCode }),
-        clearHogCodeDiff: true,
+        setOldIQLCode: (oldIQLCode: string) => ({ oldIQLCode }),
+        setNewIQLCode: (newScriptCode: string) => ({ newScriptCode }),
+        clearIQLCodeDiff: true,
         reportAIInsightsFunctionPrompted: true,
         reportAIInsightsFunctionAccepted: true,
         reportAIInsightsFunctionRejected: true,
@@ -401,18 +401,18 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 setShowEventsList: (_, { showEventsList }) => showEventsList,
             },
         ],
-        oldHogCode: [
+        oldIQLCode: [
             null as string | null,
             {
-                setOldHogCode: (_, { oldHogCode }) => oldHogCode,
-                clearHogCodeDiff: () => null,
+                setOldIQLCode: (_, { oldIQLCode }) => oldIQLCode,
+                clearIQLCodeDiff: () => null,
             },
         ],
         newScriptCode: [
             null as string | null,
             {
-                setNewHogCode: (_, { newScriptCode }) => newScriptCode,
-                clearHogCodeDiff: () => null,
+                setNewIQLCode: (_, { newScriptCode }) => newScriptCode,
+                clearIQLCodeDiff: () => null,
             },
         ],
         oldFilters: [
@@ -799,8 +799,8 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         willReEnableOnSave: [
             (s) => [s.configuration, s.insightsFunction],
             (configuration, insightsFunction) => {
-                const hogState = insightsFunction?.status?.state ?? 0
-                return configuration?.enabled && hogState === HogWatcherState.disabled
+                const iqlState = insightsFunction?.status?.state ?? 0
+                return configuration?.enabled && iqlState === InsightsWatcherState.disabled
             },
         ],
 

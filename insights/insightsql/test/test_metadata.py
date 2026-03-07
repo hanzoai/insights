@@ -322,7 +322,7 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    def test_hog_program(self):
+    def test_iql_program(self):
         metadata = self._program("let i := 3")
         self.assertEqual(
             metadata.dict(),
@@ -333,7 +333,7 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    def test_hog_program_invalid(self):
+    def test_iql_program_invalid(self):
         metadata = self._program("let i := NONO()")
         self.assertEqual(
             metadata.dict(),
@@ -347,7 +347,7 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    def test_hog_program_globals(self):
+    def test_iql_program_globals(self):
         metadata = self._program("print(event, region)", globals={"event": "banana"})
         self.assertEqual(
             metadata.dict(),

@@ -129,7 +129,7 @@ describe('Script Inputs', () => {
                 enabled: true,
                 type: 'destination',
                 inputs: {
-                    hog_templated: {
+                    iql_templated: {
                         value: 'event: "{event.event}"',
                         templating: 'fn',
                         bytecode: await compileFn('return f\'event: "{event.event}"\''),
@@ -141,7 +141,7 @@ describe('Script Inputs', () => {
                     oauth: { value: 1 },
                 },
                 inputs_schema: [
-                    { key: 'hog_templated', type: 'string', required: true },
+                    { key: 'iql_templated', type: 'string', required: true },
                     { key: 'oauth', type: 'integration', required: true },
                 ],
             })
@@ -151,7 +151,7 @@ describe('Script Inputs', () => {
 
         it('should template out script inputs', async () => {
             const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
-            expect(inputs.hog_templated).toMatchInlineSnapshot(`"event: "test""`)
+            expect(inputs.iql_templated).toMatchInlineSnapshot(`"event: "test""`)
         })
 
         it('should template out liquid inputs', async () => {
@@ -180,7 +180,7 @@ describe('Script Inputs', () => {
                 enabled: true,
                 type: 'destination',
                 inputs: {
-                    hog_templated: {
+                    iql_templated: {
                         value: 'event: "{event.event}"',
                         templating: 'fn',
                         bytecode: await compileFn('return f\'event: "{event.event}"\''),
@@ -192,7 +192,7 @@ describe('Script Inputs', () => {
                     auth: { value: 2 },
                 },
                 inputs_schema: [
-                    { key: 'hog_templated', type: 'string', required: true },
+                    { key: 'iql_templated', type: 'string', required: true },
                     { key: 'auth', type: 'integration', required: true },
                 ],
             })
