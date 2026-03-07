@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
 

@@ -45,35 +45,35 @@ Second, verify via `docker ps` and `docker logs` (or via the OrbStack dashboard)
 ```shell
 # docker ps                                                                                     NAMES
 CONTAINER ID   IMAGE                                      COMMAND                  CREATED          STATUS                    PORTS                                                                                            NAMES
-5a38d4e55447   temporalio/ui:2.10.3                       "./start-ui-server.sh"   51 seconds ago   Up 44 seconds             0.0.0.0:8081->8080/tcp                                                                           posthog-temporal-ui-1
-89b969801426   temporalio/admin-tools:1.20.0              "tail -f /dev/null"      51 seconds ago   Up 44 seconds                                                                                                              posthog-temporal-admin-tools-1
-81fd1b6d7b1b   clickhouse/clickhouse-server:23.6.1.1524   "/entrypoint.sh"         51 seconds ago   Up 50 seconds             0.0.0.0:8123->8123/tcp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9009->9009/tcp, 0.0.0.0:9440->9440/tcp   posthog-clickhouse-1
-f876f8bff35f   bitnami/kafka:2.8.1-debian-10-r99          "/opt/bitnami/script…"   51 seconds ago   Up 50 seconds             0.0.0.0:9092->9092/tcp                                                                           posthog-kafka-1
-d22559261575   temporalio/auto-setup:1.20.0               "/etc/temporal/entry…"   51 seconds ago   Up 45 seconds             6933-6935/tcp, 6939/tcp, 7234-7235/tcp, 7239/tcp, 0.0.0.0:7233->7233/tcp                         posthog-temporal-1
-5313fc278a70   postgres:12-alpine                         "docker-entrypoint.s…"   51 seconds ago   Up 50 seconds (healthy)   0.0.0.0:5432->5432/tcp                                                                           posthog-db-1
-c04358d8309f   zookeeper:3.7.0                            "/docker-entrypoint.…"   51 seconds ago   Up 50 seconds             2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp                                                           posthog-zookeeper-1
-09add699866e   maildev/maildev:2.0.5                      "bin/maildev"            51 seconds ago   Up 50 seconds (healthy)   0.0.0.0:1025->1025/tcp, 0.0.0.0:1080->1080/tcp                                                   posthog-maildev-1
-61a44c094753   elasticsearch:7.16.2                       "/bin/tini -- /usr/l…"   51 seconds ago   Up 50 seconds             9200/tcp, 9300/tcp                                                                               posthog-elasticsearch-1
-a478cadf6911   minio/minio:RELEASE.2022-06-25T15-50-16Z   "sh -c 'mkdir -p /da…"   51 seconds ago   Up 50 seconds             9000/tcp, 0.0.0.0:19000-19001->19000-19001/tcp                                                   posthog-object_storage-1
-91f838afe40e   redis:6.2.7-alpine                         "docker-entrypoint.s…"   51 seconds ago   Up 50 seconds             0.0.0.0:6379->6379/tcp                                                                           posthog-redis-1
+5a38d4e55447   temporalio/ui:2.10.3                       "./start-ui-server.sh"   51 seconds ago   Up 44 seconds             0.0.0.0:8081->8080/tcp                                                                           insights-temporal-ui-1
+89b969801426   temporalio/admin-tools:1.20.0              "tail -f /dev/null"      51 seconds ago   Up 44 seconds                                                                                                              insights-temporal-admin-tools-1
+81fd1b6d7b1b   clickhouse/clickhouse-server:23.6.1.1524   "/entrypoint.sh"         51 seconds ago   Up 50 seconds             0.0.0.0:8123->8123/tcp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9009->9009/tcp, 0.0.0.0:9440->9440/tcp   insights-clickhouse-1
+f876f8bff35f   bitnami/kafka:2.8.1-debian-10-r99          "/opt/bitnami/script…"   51 seconds ago   Up 50 seconds             0.0.0.0:9092->9092/tcp                                                                           insights-kafka-1
+d22559261575   temporalio/auto-setup:1.20.0               "/etc/temporal/entry…"   51 seconds ago   Up 45 seconds             6933-6935/tcp, 6939/tcp, 7234-7235/tcp, 7239/tcp, 0.0.0.0:7233->7233/tcp                         insights-temporal-1
+5313fc278a70   postgres:12-alpine                         "docker-entrypoint.s…"   51 seconds ago   Up 50 seconds (healthy)   0.0.0.0:5432->5432/tcp                                                                           insights-db-1
+c04358d8309f   zookeeper:3.7.0                            "/docker-entrypoint.…"   51 seconds ago   Up 50 seconds             2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp                                                           insights-zookeeper-1
+09add699866e   maildev/maildev:2.0.5                      "bin/maildev"            51 seconds ago   Up 50 seconds (healthy)   0.0.0.0:1025->1025/tcp, 0.0.0.0:1080->1080/tcp                                                   insights-maildev-1
+61a44c094753   elasticsearch:7.16.2                       "/bin/tini -- /usr/l…"   51 seconds ago   Up 50 seconds             9200/tcp, 9300/tcp                                                                               insights-elasticsearch-1
+a478cadf6911   minio/minio:RELEASE.2022-06-25T15-50-16Z   "sh -c 'mkdir -p /da…"   51 seconds ago   Up 50 seconds             9000/tcp, 0.0.0.0:19000-19001->19000-19001/tcp                                                   insights-object_storage-1
+91f838afe40e   redis:6.2.7-alpine                         "docker-entrypoint.s…"   51 seconds ago   Up 50 seconds             0.0.0.0:6379->6379/tcp                                                                           insights-redis-1
 
-# docker logs posthog-db-1 -n 1
+# docker logs insights-db-1 -n 1
 2021-12-06 13:47:08.325 UTC [1] LOG:  database system is ready to accept connections
 
-# docker logs posthog-redis-1 -n 1
+# docker logs insights-redis-1 -n 1
 1:M 06 Dec 2021 13:47:08.435 * Ready to accept connections
 
-# docker logs posthog-clickhouse-1 -n 1
+# docker logs insights-clickhouse-1 -n 1
 Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/users.xml'.
 
 # ClickHouse writes logs to `/var/log/clickhouse-server/clickhouse-server.log` and error logs to `/var/log/clickhouse-server/clickhouse-server.err.log` instead of stdout/stsderr. It can be useful to `cat` these files if there are any issues:
-# docker exec posthog-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.log
-# docker exec posthog-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.err.log
+# docker exec insights-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.log
+# docker exec insights-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.err.log
 
-# docker logs posthog-kafka-1
+# docker logs insights-kafka-1
 [2021-12-06 13:47:23,814] INFO [KafkaServer id=1001] started (kafka.server.KafkaServer)
 
-# docker logs posthog-zookeeper-1
+# docker logs insights-zookeeper-1
 # Because ClickHouse and Kafka connect to Zookeeper, there will be a lot of noise here. That's good.
 ```
 
@@ -82,8 +82,8 @@ Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/us
 > **Friendly tip 2:** Checking the last Clickhouse log could show a `get_mempolicy: Operation not permitted` message. However, it shouldn't affect the app startup - checking the whole log should clarify that Clickhouse started properly. To double-check you can get into the container and run a basic query.
 >
 > ```bash
-> # docker logs posthog-clickhouse-1
-> # docker exec -it posthog-clickhouse-1 bash
+> # docker logs insights-clickhouse-1
+> # docker exec -it insights-clickhouse-1 bash
 > # clickhouse-client --query "SELECT 1"
 > ```
 
@@ -130,7 +130,7 @@ On Linux you often have separate packages: `postgres` for the tools, `postgres-s
 
 4. Install Node packages by running `pnpm i`.
 
-5. Run `pnpm --filter=@posthog/frontend typegen:write` to generate types for [Kea](https://keajs.org/) state management logics used all over the frontend.
+5. Run `pnpm --filter=@hanzo/frontend typegen:write` to generate types for [Kea](https://keajs.org/) state management logics used all over the frontend.
 
 > The first time you run typegen, it may get stuck in a loop. If so, cancel the process (`Ctrl+C`), discard all changes in the working directory (`git reset --hard`), and run `pnpm typegen:write` again. You may need to discard all changes once more when the second round of type generation completes.
 
@@ -155,14 +155,14 @@ On Linux you often have separate packages: `postgres` for the tools, `postgres-s
   # Select 1 to proceed with default installation
   ```
 
-2. Run `pnpm --filter=@posthog/nodejs install` to install all required packages. We'll actually run the nodejs services in a later step.
+2. Run `pnpm --filter=@hanzo/nodejs install` to install all required packages. We'll actually run the nodejs services in a later step.
 
 > **Note:** If you face an error like `ld: symbol(s) not found for architecture arm64`, most probably your openssl build flags are coming from the wrong place. To fix this, run:
 
 ```bash
 export CPPFLAGS=-I/opt/homebrew/opt/openssl/include
 export LDFLAGS=-L/opt/homebrew/opt/openssl/lib
-pnpm --filter=@posthog/nodejs install
+pnpm --filter=@hanzo/nodejs install
 ```
 
 > **Note:** If you face an error like `import gyp  # noqa: E402`, most probably need to install `python-setuptools`. To fix this, run:
@@ -259,7 +259,7 @@ cargo install sqlx-cli # If you haven't already
 DEBUG=1 ./bin/migrate
 ```
 
-> **Friendly tip 1:** The error `fe_sendauth: no password supplied` connecting to Postgres happens when the database is set up with a password and the user:pass isn't specified in `DATABASE_URL`. Try `export DATABASE_URL=postgres://posthog:posthog@localhost:5432/posthog`.
+> **Friendly tip 1:** The error `fe_sendauth: no password supplied` connecting to Postgres happens when the database is set up with a password and the user:pass isn't specified in `DATABASE_URL`. Try `export DATABASE_URL=postgres://insights:insights@localhost:5432/insights`.
 
 > **Friendly tip 2:** You may run into `psycopg2` errors while migrating on an ARM machine. Try out the steps in this [comment](https://github.com/psycopg/psycopg2/issues/1216#issuecomment-820556849) to resolve this.
 
@@ -270,14 +270,14 @@ DEBUG=1 ./bin/migrate
 Now start all of Insights (backend, worker, nodejs services, and frontend – simultaneously):
 
 ```bash
-hogli start
+insightscli start
 ```
 
-To customize which services to run, use `hogli dev:setup` to configure your dev environment interactively. This creates a profile that `hogli start` will use automatically.
+To customize which services to run, use `insightscli dev:setup` to configure your dev environment interactively. This creates a profile that `insightscli start` will use automatically.
 
 > **Note:** This command uses [mprocs](https://github.com/pvolok/mprocs) to run all development processes in a single terminal window. It will be installed automatically for macOS, while for Linux you can install it manually (`cargo` or `npm`) using the official repo guide.
 
-> **Friendly tip:** If you get the error `Configuration property "enable.ssl.certificate.verification" not supported in this build: OpenSSL not available at build time`, make sure your environment is using the right `openssl` version by setting [those](https://github.com/xmlsec/python-xmlsec/issues/261#issuecomment-1630889826) environment variables, and then run `hogli start` again.
+> **Friendly tip:** If you get the error `Configuration property "enable.ssl.certificate.verification" not supported in this build: OpenSSL not available at build time`, make sure your environment is using the right `openssl` version by setting [those](https://github.com/xmlsec/python-xmlsec/issues/261#issuecomment-1630889826) environment variables, and then run `insightscli start` again.
 
 Open [http://localhost:8010](http://localhost:8010) to see the app.
 
@@ -285,7 +285,7 @@ Open [http://localhost:8010](http://localhost:8010) to see the app.
 
 To get some practical test data into your brand-new instance of Insights, run `DEBUG=1 ./manage.py generate_demo_data`. For a list of useful arguments of the command, run `DEBUG=1 ./manage.py generate_demo_data --help`.
 
-> **Friendly Tip** The first time you run the app, you can log in with a test account: _user_:`test@posthog.com` _pwd_:`12345678`.
+> **Friendly Tip** The first time you run the app, you can log in with a test account: _user_:`test@hanzo.ai` _pwd_:`12345678`.
 
 ## 7. Develop
 

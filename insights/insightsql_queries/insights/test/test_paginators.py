@@ -30,7 +30,7 @@ class TestInsightsQLHasMorePaginator(ClickhouseTestMixin, APIBaseTest):
         for index in range(10):
             _create_person(
                 properties={
-                    "email": f"jacob{index}@{random_uuid}.posthog.com",
+                    "email": f"jacob{index}@{random_uuid}.hanzo.ai",
                     "name": f"Mr Jacob {random_uuid}",
                     "random_uuid": random_uuid,
                     "index": index,
@@ -60,7 +60,7 @@ class TestInsightsQLHasMorePaginator(ClickhouseTestMixin, APIBaseTest):
             ActorsQuery(select=["properties.email"], orderBy=["properties.email DESC"], limit=1)
         )
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob9@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob9@{self.random_uuid}.hanzo.ai"]])
         self.assertEqual(response.hasMore, True)
 
         runner = self._create_runner(
@@ -72,7 +72,7 @@ class TestInsightsQLHasMorePaginator(ClickhouseTestMixin, APIBaseTest):
             )
         )
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob7@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob7@{self.random_uuid}.hanzo.ai"]])
         self.assertEqual(response.hasMore, True)
 
     def test_zero_limit(self):

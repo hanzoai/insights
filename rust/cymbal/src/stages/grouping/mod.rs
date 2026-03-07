@@ -22,7 +22,7 @@ pub struct GroupingStage {
 impl From<&Arc<AppContext>> for GroupingStage {
     fn from(ctx: &Arc<AppContext>) -> Self {
         Self {
-            connection: ctx.posthog_pool.clone(),
+            connection: ctx.insights_pool.clone(),
             team_manager: ctx.team_manager.clone(),
         }
     }

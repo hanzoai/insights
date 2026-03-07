@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconGear } from '@posthog/icons'
-import { LemonBanner, LemonButton, Link } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonBanner, LemonButton, Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -64,7 +64,7 @@ export function ErrorTrackingScene(): JSX.Element {
                 filter_groups: ERROR_TRACKING_ALERT_FILTER_GROUPS,
             })
             .then((res) => {
-                posthog.capture('error_tracking_issues_list_viewed', {
+                insights.capture('error_tracking_issues_list_viewed', {
                     active_tab: activeTab,
                     alert_destination_count: res.results.length,
                     ...(utmSource ? { utm_source: utmSource } : {}),
@@ -149,7 +149,7 @@ const Header = (): JSX.Element => {
                                 <LemonButton
                                     size="small"
                                     onClick={() => {
-                                        posthog.captureException(new Error('Kaboom !'))
+                                        insights.captureException(new Error('Kaboom !'))
                                     }}
                                 >
                                     Send an exception
@@ -161,7 +161,7 @@ const Header = (): JSX.Element => {
                         ) : null}
                         <LemonButton
                             size="small"
-                            to="https://posthog.com/docs/error-tracking"
+                            to="https://hanzo.ai/docs/error-tracking"
                             type="secondary"
                             targetBlank
                         >
@@ -190,7 +190,7 @@ const IngestionStatusCheck = (): JSX.Element | null => {
             </p>
             <p>
                 To use the Error tracking product, please{' '}
-                <Link to="https://posthog.com/docs/error-tracking/installation">
+                <Link to="https://hanzo.ai/docs/error-tracking/installation">
                     enable exception capture within the Insights SDK
                 </Link>{' '}
                 (otherwise it'll be a little empty!)

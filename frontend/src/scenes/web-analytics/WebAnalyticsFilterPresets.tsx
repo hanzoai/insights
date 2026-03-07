@@ -11,7 +11,7 @@ import {
     IconPlus,
     IconTrash,
     IconX,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonButton,
     LemonDivider,
@@ -20,7 +20,7 @@ import {
     LemonSkeleton,
     LemonTextArea,
     Popover,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { IconSync } from 'lib/lemon-ui/icons'
 

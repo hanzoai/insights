@@ -4,7 +4,7 @@ import sys
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-import posthoganalytics
+import hanzoanalytics
 
 from insights.temporal.ingestion_acceptance_test.client import InsightsClient
 from insights.temporal.ingestion_acceptance_test.config import Config
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     config = Config()
 
-    posthog_sdk = posthoganalytics.Posthog(
+    insights_sdk = hanzoanalytics.Insights(
         config.project_api_key,
         host=config.api_host,
         debug=True,
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
 
     tests = discover_tests()
-    client = InsightsClient(config, posthog_sdk)
+    client = InsightsClient(config, insights_sdk)
     with ThreadPoolExecutor() as executor:
         result = run_tests(config, tests, client, executor)
     logger.info(format_terminal_report(result))

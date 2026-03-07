@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheck, IconWarning } from '@posthog/icons'
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { IconCheck, IconWarning } from '@hanzo/icons'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { HEALTH_CATEGORY_CONFIG } from '../healthCategories'
 import type { HealthIssueCategory } from '../healthCategories'

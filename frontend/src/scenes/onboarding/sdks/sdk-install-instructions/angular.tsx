@@ -15,7 +15,7 @@ function EnvVarsSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Bash}>
-            {[`POSTHOG_KEY=${currentTeam?.api_token}`, `POSTHOG_HOST=${apiHostOrigin()}`].join('\n')}
+            {[`INSIGHTS_KEY=${currentTeam?.api_token}`, `INSIGHTS_HOST=${apiHostOrigin()}`].join('\n')}
         </CodeSnippet>
     )
 }
@@ -30,12 +30,12 @@ function AngularInitializeCodeSnippet(): JSX.Element {
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-posthog.init(
-  process.env.POSTHOG_KEY,
+insights.init(
+  process.env.INSIGHTS_KEY,
   {
-    api_host:process.env.POSTHOG_HOST,
+    api_host:process.env.INSIGHTS_HOST,
     ${
         !isPersonProfilesDisabled
             ? `person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well`
@@ -54,7 +54,7 @@ bootstrapApplication(AppComponent, appConfig)
 export function SDKInstallAngularInstructions(): JSX.Element {
     return (
         <>
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
             <h3>Add environment variables</h3>
             <p>

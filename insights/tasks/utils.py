@@ -3,7 +3,7 @@
 # The goal should be to split up queues based on the type of work being done, so that we can scale effectively
 # and change the consumer configs without the need for code changes
 #
-# Worker consumers config here https://github.com/PostHog/charts/blob/main/config/posthog/prod-us.yaml.gotmpl#L538
+# Worker consumers config here https://github.com/Hanzo Insights/charts/blob/main/config/insights/prod-us.yaml.gotmpl#L538
 # e.g.
 #   consumers:
 #     - name: priority
@@ -66,12 +66,12 @@ class PushGatewayTask(Task):
             self._local.registry = registry
 
             duration_gauge = Gauge(
-                f"posthog_celery_{task_name}_duration_seconds",
+                f"insights_celery_{task_name}_duration_seconds",
                 f"Duration of {task_name}",
                 registry=registry,
             )
             success_gauge = Gauge(
-                f"posthog_celery_{task_name}_success",
+                f"insights_celery_{task_name}_success",
                 f"Whether {task_name} succeeded (1) or failed (0)",
                 registry=registry,
             )

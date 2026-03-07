@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, Link, Spinner } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { ListHog } from 'lib/components/mascots'
@@ -22,13 +22,13 @@ import { useOpenLogsSettingsPanel } from '../../hooks/useOpenLogsSettingsPanel'
 import { logsIngestionLogic } from './logsIngestionLogic'
 
 const FRAMEWORK_LINKS: { name: string; image?: string; docsLink: string }[] = [
-    { name: 'Node.js', image: nodejsImage, docsLink: 'https://posthog.com/docs/logs/installation/nodejs' },
-    { name: 'Next.js', image: nextjsImage, docsLink: 'https://posthog.com/docs/logs/installation/nextjs' },
-    { name: 'Python', image: pythonImage, docsLink: 'https://posthog.com/docs/logs/installation/python' },
-    { name: 'Java', image: javaImage, docsLink: 'https://posthog.com/docs/logs/installation/java' },
-    { name: 'Go', image: goImage, docsLink: 'https://posthog.com/docs/logs/installation/go' },
-    { name: 'Datadog', docsLink: 'https://posthog.com/docs/logs/installation/datadog' },
-    { name: 'Other', docsLink: 'https://posthog.com/docs/logs/installation' },
+    { name: 'Node.js', image: nodejsImage, docsLink: 'https://hanzo.ai/docs/logs/installation/nodejs' },
+    { name: 'Next.js', image: nextjsImage, docsLink: 'https://hanzo.ai/docs/logs/installation/nextjs' },
+    { name: 'Python', image: pythonImage, docsLink: 'https://hanzo.ai/docs/logs/installation/python' },
+    { name: 'Java', image: javaImage, docsLink: 'https://hanzo.ai/docs/logs/installation/java' },
+    { name: 'Go', image: goImage, docsLink: 'https://hanzo.ai/docs/logs/installation/go' },
+    { name: 'Datadog', docsLink: 'https://hanzo.ai/docs/logs/installation/datadog' },
+    { name: 'Other', docsLink: 'https://hanzo.ai/docs/logs/installation' },
 ]
 
 const POLLING_INTERVAL_MS = 5000
@@ -70,7 +70,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
     const hasLogsSettings = useFeatureFlag('LOGS_SETTINGS')
 
     useEffect(() => {
-        posthog.capture('logs setup prompt viewed')
+        insights.capture('logs setup prompt viewed')
     }, [])
 
     useInterval(() => {
@@ -80,7 +80,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
     }, POLLING_INTERVAL_MS)
 
     const onDocsLinkClick = (docsType: string): void => {
-        posthog.capture('logs onboarding docs clicked', { docs_type: docsType })
+        insights.capture('logs onboarding docs clicked', { docs_type: docsType })
         addProductIntent({
             product_type: ProductKey.LOGS,
             intent_context: ProductIntentContext.LOGS_DOCS_VIEWED,
@@ -101,7 +101,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
                 <div className="flex flex-col items-start gap-4">
                     <p className="text-sm text-secondary m-0">
                         Read our{' '}
-                        <Link to="https://posthog.com/docs/logs" onClick={() => onDocsLinkClick('Logs')}>
+                        <Link to="https://hanzo.ai/docs/logs" onClick={() => onDocsLinkClick('Logs')}>
                             logs docs
                         </Link>
                         , learn more about{' '}
@@ -135,7 +135,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
                     </div>
                     {hasLogsSettings && (
                         <p className="text-sm text-secondary m-0">
-                            Already using <code>posthog-js</code>?{' '}
+                            Already using <code>insights-js</code>?{' '}
                             <LemonButton type="tertiary" size="xsmall" icon={<IconGear />} onClick={openLogsSettings}>
                                 Enable console log capture
                             </LemonButton>

@@ -8,8 +8,8 @@ import {
     IconExpand45,
     IconPin,
     IconPinFilled,
-} from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { IconLink } from 'lib/lemon-ui/icons'

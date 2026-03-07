@@ -53,7 +53,7 @@ class TestTask(TestCase):
             description="Test Description",
             origin_product=Task.OriginProduct.USER_CREATED,
             user_id=user.id,
-            repository="posthog/posthog",
+            repository="hanzoai/insights",
         )
 
         self.assertIsNotNone(task.id)
@@ -62,7 +62,7 @@ class TestTask(TestCase):
         self.assertEqual(task.origin_product, Task.OriginProduct.USER_CREATED)
         self.assertEqual(task.team, self.team)
         self.assertEqual(task.created_by, user)
-        self.assertEqual(task.repository, "posthog/posthog")
+        self.assertEqual(task.repository, "insights/insights")
 
         mock_execute_workflow.assert_called_once()
         call_args = mock_execute_workflow.call_args
@@ -85,10 +85,10 @@ class TestTask(TestCase):
             description="Test Description",
             origin_product=Task.OriginProduct.USER_CREATED,
             user_id=user.id,
-            repository="posthog/posthog-js",
+            repository="hanzoai/insights-js",
         )
 
-        self.assertEqual(task.repository, "posthog/posthog-js")
+        self.assertEqual(task.repository, "hanzoai/insights-js")
 
         mock_execute_workflow.assert_called_once()
 
@@ -121,7 +121,7 @@ class TestTask(TestCase):
             description="Test Description",
             origin_product=Task.OriginProduct.USER_CREATED,
             user_id=user.id,
-            repository="posthog/posthog",
+            repository="hanzoai/insights",
         )
 
         self.assertEqual(task.github_integration, integration)
@@ -129,7 +129,7 @@ class TestTask(TestCase):
 
     @parameterized.expand(
         [
-            ("posthog-repo",),
+            ("insights-repo",),
             ("noslashhere",),
         ]
     )
@@ -147,11 +147,11 @@ class TestTask(TestCase):
 
     @parameterized.expand(
         [
-            ("PostHog/posthog", "posthog/posthog"),
-            ("posthog/Insights-JS", "posthog/posthog-js"),
-            ("Insights/Insights", "posthog/posthog"),
-            ("POSTHOG/POSTHOG-JS", "posthog/posthog-js"),
-            ("posthog/posthog-js", "posthog/posthog-js"),
+            ("Hanzo Insights/insights", "insights/insights"),
+            ("insights/Insights-JS", "hanzoai/insights-js"),
+            ("Insights/Insights", "insights/insights"),
+            ("INSIGHTS/INSIGHTS-JS", "hanzoai/insights-js"),
+            ("hanzoai/insights-js", "hanzoai/insights-js"),
         ]
     )
     def test_repository_converts_to_lowercase(self, input_repo, expected_repo):
@@ -512,7 +512,7 @@ class TestTaskRun(TestCase):
         self.assertEqual(entry["type"], "notification")
         self.assertIn("timestamp", entry)
         self.assertEqual(entry["notification"]["jsonrpc"], "2.0")
-        self.assertEqual(entry["notification"]["method"], "_posthog/console")
+        self.assertEqual(entry["notification"]["method"], "_insights/console")
         self.assertEqual(entry["notification"]["params"]["sessionId"], str(run.id))
         self.assertEqual(entry["notification"]["params"]["level"], "info")
         self.assertEqual(entry["notification"]["params"]["message"], "Test message")
@@ -539,7 +539,7 @@ class TestTaskRun(TestCase):
         self.assertEqual(entry["type"], "notification")
         self.assertIn("timestamp", entry)
         self.assertEqual(entry["notification"]["jsonrpc"], "2.0")
-        self.assertEqual(entry["notification"]["method"], "_posthog/sandbox_output")
+        self.assertEqual(entry["notification"]["method"], "_insights/sandbox_output")
         self.assertEqual(entry["notification"]["params"]["sessionId"], str(run.id))
         self.assertEqual(entry["notification"]["params"]["stdout"], stdout)
         self.assertEqual(entry["notification"]["params"]["stderr"], stderr)
@@ -564,12 +564,12 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=external_id,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
             status=status,
         )
         self.assertEqual(snapshot.integration, self.integration)
         self.assertEqual(snapshot.external_id, external_id)
-        self.assertEqual(snapshot.repos, ["PostHog/posthog", "PostHog/posthog-js"])
+        self.assertEqual(snapshot.repos, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"])
         self.assertEqual(snapshot.status, status)
 
     def test_snapshot_default_values(self):
@@ -582,7 +582,7 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=f"snapshot-{uuid.uuid4()}",
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
             status=SandboxSnapshot.Status.COMPLETE,
         )
         self.assertEqual(str(snapshot), f"Snapshot {snapshot.external_id} (Complete, 2 repos)")
@@ -601,9 +601,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], "PostHog/posthog", True),
-            (["PostHog/posthog", "PostHog/posthog-js"], "Insights/other", False),
-            ([], "PostHog/posthog", False),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], "Hanzo Insights/insights", True),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], "Insights/other", False),
+            ([], "Hanzo Insights/insights", False),
         ]
     )
     def test_has_repo(self, repos, check_repo, expected):
@@ -614,10 +614,10 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], ["PostHog/posthog"], True),
-            (["PostHog/posthog", "PostHog/posthog-js"], ["PostHog/posthog", "PostHog/posthog-js"], True),
-            (["PostHog/posthog"], ["PostHog/posthog", "PostHog/posthog-js"], False),
-            ([], ["PostHog/posthog"], False),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["Hanzo Insights/insights"], True),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["Hanzo Insights/insights", "Hanzo Insights/insights-js"], True),
+            (["Hanzo Insights/insights"], ["Hanzo Insights/insights", "Hanzo Insights/insights-js"], False),
+            ([], ["Hanzo Insights/insights"], False),
         ]
     )
     def test_has_repos(self, snapshot_repos, required_repos, expected):
@@ -643,9 +643,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog"], "posthog/posthog", True),
-            (["PostHog/posthog"], "POSTHOG/POSTHOG", True),
-            (["posthog/posthog-js"], "Insights/Insights-JS", True),
+            (["Hanzo Insights/insights"], "insights/insights", True),
+            (["Hanzo Insights/insights"], "INSIGHTS/INSIGHTS", True),
+            (["hanzoai/insights-js"], "Insights/Insights-JS", True),
         ]
     )
     def test_has_repo_case_insensitive(self, repos, check_repo, expected):
@@ -656,8 +656,8 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], ["posthog/posthog"], True),
-            (["PostHog/posthog", "PostHog/posthog-js"], ["POSTHOG/POSTHOG", "posthog/posthog-js"], True),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["insights/insights"], True),
+            (["Hanzo Insights/insights", "Hanzo Insights/insights-js"], ["INSIGHTS/INSIGHTS", "hanzoai/insights-js"], True),
         ]
     )
     def test_has_repos_case_insensitive(self, snapshot_repos, required_repos, expected):
@@ -714,54 +714,54 @@ class TestSandboxSnapshot(TestCase):
     def test_get_latest_snapshot_with_repos(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Hanzo Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         snapshot2 = SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
-        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["PostHog/posthog"])
+        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["Hanzo Insights/insights"])
         self.assertEqual(result, snapshot2)
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "PostHog/posthog-js"]
+            self.integration.id, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"]
         )
         self.assertEqual(result, snapshot2)
 
     def test_get_latest_snapshot_with_repos_not_found(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Hanzo Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "Insights/other"]
+            self.integration.id, ["Hanzo Insights/insights", "Insights/other"]
         )
         self.assertIsNone(result)
 
     def test_get_latest_snapshot_with_repos_ignores_in_progress(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Hanzo Insights/insights"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Hanzo Insights/insights", "Hanzo Insights/insights-js"],
             status=SandboxSnapshot.Status.IN_PROGRESS,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "PostHog/posthog-js"]
+            self.integration.id, ["Hanzo Insights/insights", "Hanzo Insights/insights-js"]
         )
         self.assertIsNone(result)
 
@@ -798,7 +798,7 @@ class TestSandboxEnvironment(TestCase):
     def setUp(self):
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create(email="test@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
 
     def test_default_values(self):
         env = SandboxEnvironment.objects.create(
@@ -841,7 +841,7 @@ class TestSandboxEnvironment(TestCase):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT environment_variables FROM posthog_sandbox_environment WHERE id = %s",
+                "SELECT environment_variables FROM insights_sandbox_environment WHERE id = %s",
                 [str(env.id)],
             )
             raw_value = cursor.fetchone()[0]

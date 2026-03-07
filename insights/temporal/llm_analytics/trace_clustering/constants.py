@@ -92,7 +92,7 @@ LLMA_TRACE_DOCUMENT_TYPE_LEGACY = "llm-trace-summary"
 # Legacy rendering value for detailed summaries
 LLMA_TRACE_RENDERING_LEGACY = "llma_trace_detailed"
 
-# Product for LLM trace summaries (matches sorting key in posthog_document_embeddings)
+# Product for LLM trace summaries (matches sorting key in insights_document_embeddings)
 LLMA_TRACE_PRODUCT = "llm-analytics"
 
 # Cluster labeling agent configuration

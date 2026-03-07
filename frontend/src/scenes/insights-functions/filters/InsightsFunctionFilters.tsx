@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconCheck, IconFilter, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonLabel, LemonSelect } from '@posthog/lemon-ui'
+import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { ExcludedProperties, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

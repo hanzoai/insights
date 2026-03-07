@@ -22,8 +22,8 @@ class TestRBACDashboardMigration(BaseTest):
         self.organization.save()
 
         # Create additional users and team members
-        self.user2 = User.objects.create_and_join(self.organization, "user2@posthog.com", "password123")
-        self.user3 = User.objects.create_and_join(self.organization, "user3@posthog.com", "password123")
+        self.user2 = User.objects.create_and_join(self.organization, "user2@hanzo.ai", "password123")
+        self.user3 = User.objects.create_and_join(self.organization, "user3@hanzo.ai", "password123")
 
         # Get organization memberships
         self.user1_membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)

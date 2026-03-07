@@ -1,6 +1,6 @@
 //! Ingestion events pipeline implementation.
 //!
-//! This module contains the deduplication logic specific to PostHog's
+//! This module contains the deduplication logic specific to Insights'
 //! ingestion events (CapturedEvent/RawEvent from the capture service).
 //!
 //! # Event Types

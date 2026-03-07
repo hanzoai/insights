@@ -15,7 +15,7 @@ pub async fn get_suppression_rules(
 ) -> Result<Vec<Value>, FlagError> {
     let mut conn = client.get_connection().await?;
 
-    let query = "SELECT filters FROM posthog_errortrackingsuppressionrule WHERE team_id = $1";
+    let query = "SELECT filters FROM insights_errortrackingsuppressionrule WHERE team_id = $1";
 
     let rows = sqlx::query_as::<_, SuppressionRuleRow>(query)
         .bind(team.id)

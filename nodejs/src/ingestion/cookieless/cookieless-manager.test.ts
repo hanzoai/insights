@@ -2,7 +2,7 @@ import fs from 'fs'
 import { Message } from 'node-rdkafka'
 import path from 'path'
 
-import type { PluginEvent } from '@posthog/plugin-scaffold'
+import type { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { createTestEventHeaders } from '~/tests/helpers/event-headers'
 import { createOrganization, createTeam, getTeam } from '~/tests/helpers/sql'
@@ -213,7 +213,7 @@ describe('CookielessManager', () => {
         const setModeForTeam = async (mode: CookielessServerHashMode) => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [mode, teamId],
                 'set team to cookieless'
             )

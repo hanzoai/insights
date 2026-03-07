@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconGear, IconPlusSmall } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconCheck, IconGear, IconPlusSmall } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { IconBlank } from 'lib/lemon-ui/icons'

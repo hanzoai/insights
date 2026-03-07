@@ -47,7 +47,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
         response += "function getInputsKey(key, initial) { try { switch (key) {\n"
         response += inputs_switch
         response += "default: return null; }\n"
-        response += "} catch (e) { if(!initial) {console.error('[POSTHOG-JS] Unable to compute value for inputs', key, e);} return null } }\n"
+        response += "} catch (e) { if(!initial) {console.error('[INSIGHTS-JS] Unable to compute value for inputs', key, e);} return null } }\n"
         response += "\n".join(inputs_append) + "\n"
 
     response += "return inputs;}\n"
@@ -89,7 +89,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
                 )
             else:
                 mapping_code += f"newInputs[{json.dumps(key)}] = {json.dumps(value)};\n"
-        mapping_code += "source.onEvent({ inputs: newInputs, posthog });"
+        mapping_code += "source.onEvent({ inputs: newInputs, insights });"
         mapping_code += "})();"
         mapping_code += "}\n"
 
@@ -99,7 +99,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
         """
     let processEvent = undefined;
     if ('onEvent' in source) {
-        processEvent = function processEvent(globals, posthog) {
+        processEvent = function processEvent(globals, insights) {
             if (!('onEvent' in source)) { return; };
             const inputs = buildInputs(globals);
             const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -115,15 +115,15 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
     }
 
     function init(config) {
-        const posthog = config.posthog;
+        const insights = config.insights;
         const callback = config.callback;
         if ('onLoad' in source) {
             const globals = {
                 person: {
-                    properties: posthog.get_property('$stored_person_properties'),
+                    properties: insights.get_property('$stored_person_properties'),
                 }
             }
-            const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+            const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
             if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
         } else {
             callback(true);
@@ -132,7 +132,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
         const response = {}
 
         if (processEvent) {
-            response.processEvent = (globals) => processEvent(globals, posthog)
+            response.processEvent = (globals) => processEvent(globals, insights)
         }
 
         return response

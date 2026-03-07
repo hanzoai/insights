@@ -29,7 +29,7 @@ class ExportedAssetAdmin(admin.ModelAdmin):
     def team_link(self, asset: ExportedAsset):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[asset.team.pk]),
+            reverse("admin:insights_team_change", args=[asset.team.pk]),
             asset.team.name,
         )
 

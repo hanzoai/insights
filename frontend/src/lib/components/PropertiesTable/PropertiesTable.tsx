@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconPencil, IconTrash, IconWarning } from '@posthog/icons'
-import { LemonCheckbox, LemonDialog, LemonInput, LemonMenu, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash, IconWarning } from '@hanzo/icons'
+import { LemonCheckbox, LemonDialog, LemonInput, LemonMenu, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -22,7 +22,7 @@ import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import {
     KNOWN_PROMOTED_PROPERTY_PARENTS,
-    POSTHOG_EVENT_PROMOTED_PROPERTIES,
+    INSIGHTS_EVENT_PROMOTED_PROPERTIES,
     isInsightsProperty,
 } from '~/taxonomy/taxonomy'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, PROPERTY_KEYS } from '~/taxonomy/taxonomy'
@@ -196,7 +196,7 @@ interface PropertiesTableType extends BasePropertyType {
     embedded?: boolean
     onDelete?: (key: string) => void
     className?: string
-    /* only event types are detected and so describe-able. see https://github.com/PostHog/posthog/issues/9245 */
+    /* only event types are detected and so describe-able. see https://github.com/hanzoai/insights/issues/9245 */
     useDetectedPropertyType?: boolean
     tableProps?: Partial<LemonTableProps<Record<string, any>>>
     highlightedKeys?: string[]
@@ -239,7 +239,7 @@ export function PropertiesTable({
         let entries = Object.entries(properties)
         if (sortProperties) {
             entries = entries.sort((a, b) => {
-                // if this is a posthog property we want to sort by its label
+                // if this is a insights property we want to sort by its label
                 const propertyTypeMap: Record<PropertyDefinitionType, TaxonomicFilterGroupType> = {
                     [PropertyDefinitionType.Event]: TaxonomicFilterGroupType.EventProperties,
                     [PropertyDefinitionType.EventMetadata]: TaxonomicFilterGroupType.EventMetadata,
@@ -271,7 +271,7 @@ export function PropertiesTable({
                 return 0
             })
             if (parent) {
-                const promotedProperties = POSTHOG_EVENT_PROMOTED_PROPERTIES[parent]
+                const promotedProperties = INSIGHTS_EVENT_PROMOTED_PROPERTIES[parent]
                 const promotedItems = promotedProperties?.length
                     ? entries
                           .filter(([key]) => promotedProperties.includes(key))

@@ -31,8 +31,8 @@ def example_rollback_fn(uuid: str):
 class Migration(AsyncMigrationDefinition):
     description = "An example async migration."
 
-    posthog_min_version = "1.29.0"
-    posthog_max_version = "1.30.0"
+    insights_min_version = "1.29.0"
+    insights_max_version = "1.30.0"
 
     service_version_requirements = [
         ServiceVersionRequirement(service="clickhouse", supported_version=">=21.6.0,<21.7.0")

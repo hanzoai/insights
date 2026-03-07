@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { ApiError } from 'lib/api'
 
@@ -79,7 +79,7 @@ describe('query', () => {
     })
 
     it('emits an event when a query is run', async () => {
-        const captureSpy = jest.spyOn(posthog, 'capture')
+        const captureSpy = jest.spyOn(insights, 'capture')
         const q: EventsQuery = setLatestVersionsOnQuery({
             kind: NodeKind.EventsQuery,
             select: ['timestamp'],
@@ -93,7 +93,7 @@ describe('query', () => {
     })
 
     it('emits a specific event on a InsightsQLQuery', async () => {
-        const captureSpy = jest.spyOn(posthog, 'capture')
+        const captureSpy = jest.spyOn(insights, 'capture')
         const q: InsightsQLQuery = setLatestVersionsOnQuery({
             kind: NodeKind.InsightsQLQuery,
             query: 'select * from events',
@@ -111,7 +111,7 @@ describe('query', () => {
     })
 
     it('emits an event when a query errors', async () => {
-        const captureSpy = jest.spyOn(posthog, 'capture')
+        const captureSpy = jest.spyOn(insights, 'capture')
         const q: EventsQuery = setLatestVersionsOnQuery({
             kind: NodeKind.EventsQuery,
             select: ['error'],

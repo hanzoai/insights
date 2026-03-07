@@ -209,7 +209,7 @@ fn get_person_mode(raw_event: &RawEvent, team: &Team) -> PersonMode {
     }
 }
 
-// This function exists because of https://github.com/PostHog/posthog/blob/6c2f119571edb10a23ec711c6f6e2b6155d76ef9/plugin-server/src/worker/ingestion/timestamps.ts#L81.
+// This function exists because of https://github.com/hanzoai/insights/blob/6c2f119571edb10a23ec711c6f6e2b6155d76ef9/plugin-server/src/worker/ingestion/timestamps.ts#L81.
 // We specifically diverge by only filtering out timestamps dated in the future.
 pub fn resolve_timestamp(
     found_timestamp: DateTime<Utc>, // The instant the exception occurred, or was caught.

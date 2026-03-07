@@ -121,7 +121,7 @@ pub fn is_likely_urlencoded_form(payload: &[u8]) -> bool {
 }
 
 // relatively cheap check for base64 encoded payload since these can show up at
-// various decoding layers in requests from different PostHog SDKs and versions
+// various decoding layers in requests from different Insights SDKs and versions
 pub fn is_likely_base64(payload: &[u8], opt: Base64Option) -> bool {
     if payload.is_empty() {
         return false;

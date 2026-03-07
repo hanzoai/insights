@@ -5,7 +5,7 @@ This test validates that the trends query and actors query handle
 null/empty/missing property values consistently, ensuring that events
 with these property states are correctly counted and returned.
 
-Regression test for: https://github.com/PostHog/posthog/issues/40577
+Regression test for: https://github.com/Hanzo Insights/insights/issues/40577
 """
 
 from freezegun import freeze_time
@@ -118,7 +118,7 @@ class TestTrendsBreakdownEmptyNullProperties(ClickhouseTestMixin, APIBaseTest):
 
         # The "None" breakdown should have count of 3 (null, empty, missing)
         self.assertEqual(
-            breakdown_results.get("$$_posthog_breakdown_null_$$"),
+            breakdown_results.get("$$_insights_breakdown_null_$$"),
             3,
             "Trends query should count 3 events for None breakdown (null + empty string + missing property)",
         )

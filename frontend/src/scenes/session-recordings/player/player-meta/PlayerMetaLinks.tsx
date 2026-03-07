@@ -9,8 +9,8 @@ import {
     IconNotebook,
     IconPlusSmall,
     IconTrash,
-} from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonDialog, LemonMenu, LemonMenuItems, LemonTag } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonDialog, LemonMenu, LemonMenuItems, LemonTag } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { IconBlank } from 'lib/lemon-ui/icons'
@@ -192,7 +192,7 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
                 onClick: () => exportRecordingToFile(),
                 tooltip:
                     'Export Insights recording data to a JSON file. This can be loaded later into Insights for playback.',
-                'data-attr': 'replay-export-posthog-json',
+                'data-attr': 'replay-export-insights-json',
             },
             isStandardMode && {
                 label: (

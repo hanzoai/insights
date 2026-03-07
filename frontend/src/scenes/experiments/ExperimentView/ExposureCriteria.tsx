@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonSelect, LemonTag } from '@posthog/lemon-ui'
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'

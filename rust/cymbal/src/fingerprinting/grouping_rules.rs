@@ -44,7 +44,7 @@ impl GroupingRule {
             GroupingRule,
             r#"
                 SELECT id, team_id, user_id, role_id, order_key, bytecode, created_at, updated_at
-                FROM posthog_errortrackinggroupingrule
+                FROM insights_errortrackinggroupingrule
                 WHERE team_id = $1 AND disabled_data IS NULL
             "#,
             team_id
@@ -72,7 +72,7 @@ impl GroupingRule {
 
         sqlx::query!(
             r#"
-                UPDATE posthog_errortrackinggroupingrule
+                UPDATE insights_errortrackinggroupingrule
                 SET disabled_data = $1, updated_at = NOW()
                 WHERE id = $2
             "#,

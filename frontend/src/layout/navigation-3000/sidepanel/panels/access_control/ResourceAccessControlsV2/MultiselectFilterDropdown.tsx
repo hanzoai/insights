@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonInput, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonCheckbox, LemonInput, Link } from '@hanzo/lemon-ui'
 
 export function MultiSelectFilterDropdown<T extends string = string>(props: {
     title: string

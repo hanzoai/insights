@@ -18,21 +18,21 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -40,7 +40,7 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
                     <CalloutBox type="fyi" title="Nuxt version">
                         <Markdown>
                             This guide is for Nuxt v3.0 and above. For Nuxt v2.16 and below, see our [Nuxt
-                            docs](https://posthog.com/docs/libraries/nuxt-js#nuxt-v216-and-below).
+                            docs](https://hanzo.ai/docs/libraries/nuxt-js#nuxt-v216-and-below).
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -61,9 +61,9 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
                                     export default defineNuxtConfig({
                                       runtimeConfig: {
                                         public: {
-                                          posthogPublicKey: '<ph_project_api_key>',
-                                          posthogHost: '<ph_client_api_host>',
-                                          posthogDefaults: '2026-01-30'
+                                          insightsPublicKey: '<ph_project_api_key>',
+                                          insightsHost: '<ph_client_api_host>',
+                                          insightsDefaults: '2026-01-30'
                                         }
                                       }
                                     })
@@ -80,30 +80,30 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Create a new plugin by creating a new file `posthog.client.js` in your plugins directory:
+                        Create a new plugin by creating a new file `insights.client.js` in your plugins directory:
                     </Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'javascript',
-                                file: 'plugins/posthog.client.js',
+                                file: 'plugins/insights.client.js',
                                 code: dedent`
                                     import { defineNuxtPlugin } from '#app'
-                                    import posthog from 'posthog-js'
+                                    import insights from '@hanzo/insights'
 
                                     export default defineNuxtPlugin(nuxtApp => {
                                       const runtimeConfig = useRuntimeConfig();
-                                      const posthogClient = posthog.init(runtimeConfig.public.posthogPublicKey, {
-                                        api_host: runtimeConfig.public.posthogHost,
-                                        defaults: runtimeConfig.public.posthogDefaults,
-                                        loaded: (posthog) => {
-                                          if (import.meta.env.MODE === 'development') posthog.debug();
+                                      const insightsClient = insights.init(runtimeConfig.public.insightsPublicKey, {
+                                        api_host: runtimeConfig.public.insightsHost,
+                                        defaults: runtimeConfig.public.insightsDefaults,
+                                        loaded: (insights) => {
+                                          if (import.meta.env.MODE === 'development') insights.debug();
                                         }
                                       })
 
                                       return {
                                         provide: {
-                                          posthog: () => posthogClient
+                                          insights: () => insightsClient
                                         }
                                       }
                                     })
@@ -127,7 +127,7 @@ export const getNuxtServerSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        To capture events from server routes, install `posthog-node` and instantiate it directly. You
+                        To capture events from server routes, install `insights-node` and instantiate it directly. You
                         can also use it to evaluate feature flags on the server:
                     </Markdown>
                     <CodeBlock
@@ -136,21 +136,21 @@ export const getNuxtServerSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-node
+                                    npm install insights-node
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-node
+                                    yarn add insights-node
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-node
+                                    pnpm add insights-node
                                 `,
                             },
                         ]}
@@ -161,22 +161,22 @@ export const getNuxtServerSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'javascript',
                                 file: 'server/api/example.js',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
+                                    import { Insights } from 'insights-node'
 
                                     export default defineEventHandler(async (event) => {
                                         const runtimeConfig = useRuntimeConfig()
 
-                                        const posthog = new Insights(
-                                            runtimeConfig.public.posthogPublicKey,
-                                            { host: runtimeConfig.public.posthogHost }
+                                        const insights = new Insights(
+                                            runtimeConfig.public.insightsPublicKey,
+                                            { host: runtimeConfig.public.insightsHost }
                                         )
 
-                                        posthog.capture({
+                                        insights.capture({
                                             distinctId: 'distinct_id_of_the_user',
                                             event: 'event_name'
                                         })
 
-                                        await posthog.shutdown()
+                                        await insights.shutdown()
                                     })
                                 `,
                             },

@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { Editor, EmailEditorProps, EditorRef as _EditorRef } from 'react-email-editor'
 
-import { LemonDialog } from '@posthog/lemon-ui'
+import { LemonDialog } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'

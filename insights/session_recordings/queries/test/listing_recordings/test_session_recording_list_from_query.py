@@ -1522,10 +1522,10 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     @snapshot_clickhouse_queries
     def test_operand_or_person_filters(self):
         user = "test_operand_or_filter-user"
-        Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@posthog.com"})
+        Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@hanzo.ai"})
 
         second_user = "test_operand_or_filter-second_user"
-        Person.objects.create(team=self.team, distinct_ids=[second_user], properties={"email": "david@posthog.com"})
+        Person.objects.create(team=self.team, distinct_ids=[second_user], properties={"email": "david@hanzo.ai"})
 
         session_id_one = "session_id_one"
         produce_replay_summary(
@@ -1550,13 +1550,13 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                 "properties": [
                     {
                         "key": "email",
-                        "value": ["test@posthog.com"],
+                        "value": ["test@hanzo.ai"],
                         "operator": "exact",
                         "type": "person",
                     },
                     {
                         "key": "email",
-                        "value": ["david@posthog.com"],
+                        "value": ["david@hanzo.ai"],
                         "operator": "exact",
                         "type": "person",
                     },
@@ -1571,13 +1571,13 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                 "properties": [
                     {
                         "key": "email",
-                        "value": ["test@posthog.com"],
+                        "value": ["test@hanzo.ai"],
                         "operator": "exact",
                         "type": "person",
                     },
                     {
                         "key": "email",
-                        "value": ["david@posthog.com"],
+                        "value": ["david@hanzo.ai"],
                         "operator": "exact",
                         "type": "person",
                     },
@@ -1590,10 +1590,10 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     @snapshot_clickhouse_queries
     def test_operand_or_event_filters(self):
         user = "test_operand_or_filter-user"
-        Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@posthog.com"})
+        Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@hanzo.ai"})
 
         second_user = "test_operand_or_filter-second_user"
-        Person.objects.create(team=self.team, distinct_ids=[second_user], properties={"email": "david@posthog.com"})
+        Person.objects.create(team=self.team, distinct_ids=[second_user], properties={"email": "david@hanzo.ai"})
 
         session_id_one = "session_id_one"
         produce_replay_summary(
@@ -2908,7 +2908,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id=user,
             session_id=session_id_one,
             team_id=self.team.id,
-            snapshot_library="posthog-ios",
+            snapshot_library="insights-ios",
         )
 
         session_id_two = f"test_library_filter-{str(uuid4())}"
@@ -2916,19 +2916,19 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id=user,
             session_id=session_id_two,
             team_id=self.team.id,
-            snapshot_library="posthog-react-native",
+            snapshot_library="insights-react-native",
         )
 
         self._assert_query_matches_session_ids(
             {
-                "having_predicates": '[{"key": "snapshot_library", "value": ["posthog-ios"], "operator": "exact", "type": "recording"}]'
+                "having_predicates": '[{"key": "snapshot_library", "value": ["insights-ios"], "operator": "exact", "type": "recording"}]'
             },
             [session_id_one],
         )
 
         self._assert_query_matches_session_ids(
             {
-                "having_predicates": '[{"key": "snapshot_library", "value": ["posthog-react-native"], "operator": "exact", "type": "recording"}]'
+                "having_predicates": '[{"key": "snapshot_library", "value": ["insights-react-native"], "operator": "exact", "type": "recording"}]'
             },
             [session_id_two],
         )
@@ -2947,7 +2947,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id=user,
             session_id=session_id_one,
             team_id=self.team.id,
-            snapshot_library="posthog-ios",
+            snapshot_library="insights-ios",
         )
 
         session_id_two = f"test_lib_conversion-{str(uuid4())}"
@@ -2955,19 +2955,19 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id=user,
             session_id=session_id_two,
             team_id=self.team.id,
-            snapshot_library="posthog-react-native",
+            snapshot_library="insights-react-native",
         )
 
         # Using $lib event property filter should work the same as snapshot_library
         # because the backend converts it automatically
         self._assert_query_matches_session_ids(
-            {"properties": '[{"key": "$lib", "value": ["posthog-ios"], "operator": "exact", "type": "event"}]'},
+            {"properties": '[{"key": "$lib", "value": ["insights-ios"], "operator": "exact", "type": "event"}]'},
             [session_id_one],
         )
 
         self._assert_query_matches_session_ids(
             {
-                "properties": '[{"key": "$lib", "value": ["posthog-react-native"], "operator": "exact", "type": "event"}]'
+                "properties": '[{"key": "$lib", "value": ["insights-react-native"], "operator": "exact", "type": "event"}]'
             },
             [session_id_two],
         )
@@ -3050,7 +3050,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             },
@@ -3871,7 +3871,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     @snapshot_clickhouse_queries
     def test_top_level_event_host_property_test_account_filter(self):
         """
-        This is a regression test. See: https://posthoghelp.zendesk.com/agent/tickets/18059
+        This is a regression test. See: https://insightshelp.zendesk.com/agent/tickets/18059
         """
         self.team.test_account_filters = [
             {"key": "$host", "type": "event", "value": "^(localhost|127\\.0\\.0\\.1)($|:)", "operator": "not_regex"},

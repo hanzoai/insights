@@ -1,4 +1,4 @@
-import { Tooltip } from '@posthog/lemon-ui'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { ScreenPosition, SurveyPosition } from '~/types'
 

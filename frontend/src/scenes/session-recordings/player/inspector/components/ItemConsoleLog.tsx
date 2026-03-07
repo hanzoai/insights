@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'

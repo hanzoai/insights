@@ -130,6 +130,6 @@ class PersonDBRouter:
         return db != "persons_db_writer"
 
     def is_persons_model(self, app_label, model_name):
-        # only route posthog app models, not auth.Group (there is a name clash between posthog_group
+        # only route insights app models, not auth.Group (there is a name clash between insights_group
         # and Django's auth_group
         return app_label == "insights" and model_name in PERSONS_DB_MODELS

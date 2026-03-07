@@ -2,8 +2,8 @@ import { BindLogic, BuiltLogic, Logic, LogicWrapper, useActions, useValues } fro
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 
-import { IconClock, IconCopy, IconRefresh, IconTrash, IconUpload, IconWarning } from '@posthog/icons'
-import { LemonBanner, LemonDialog, LemonDivider, LemonFileInput, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconClock, IconCopy, IconRefresh, IconTrash, IconUpload, IconWarning } from '@hanzo/icons'
+import { LemonBanner, LemonDialog, LemonDivider, LemonFileInput, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneAddToNotebookDropdownMenu } from 'lib/components/Scenes/InsightOrDashboard/SceneAddToNotebookDropdownMenu'

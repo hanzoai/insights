@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonInput } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 

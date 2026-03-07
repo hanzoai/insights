@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useRef } from 'react'
 
-import { LemonBanner, LemonButton, LemonInput } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonInput } from '@hanzo/lemon-ui'
 
 import { SocialLoginButtons } from 'lib/components/SocialLoginButton/SocialLoginButton'
 import { LemonField } from 'lib/lemon-ui/LemonField'

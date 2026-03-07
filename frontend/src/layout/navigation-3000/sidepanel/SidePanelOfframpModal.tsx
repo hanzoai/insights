@@ -2,8 +2,8 @@ import { Tabs } from '@base-ui/react/tabs'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconSidePanel } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconArrowRight, IconSidePanel } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { IconBlank } from 'lib/lemon-ui/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

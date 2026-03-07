@@ -16,7 +16,7 @@ Explore the `ee/hogai/core/agent_modes/presets` directory and check if there are
 Add a new AgentMode to `frontend/src/queries/schema/schema-assistant-messages.ts` and regenerate the schema using:
 
 ```bash
-hogli build:schema
+insightscli build:schema
 ```
 
 Alternatively, you may use this command:

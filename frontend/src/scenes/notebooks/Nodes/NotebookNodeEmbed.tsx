@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { LemonButton, LemonInput, SpinnerOverlay } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'

@@ -48,28 +48,28 @@ const { existsSync, readFileSync, writeFileSync } = require('fs')
 // Service configurations
 const SERVICES = {
     'session-recordings': {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'session_recordings/',
         description: 'Session recording blobs (V2)',
         bidirectional: true,
         conflictResolution: 'newest',
     },
     'session-recordings-lts': {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'session_recordings_lts/',
         description: 'Long-term storage session recordings',
         bidirectional: true,
         conflictResolution: 'newest',
     },
     'query-cache': {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'query_cache/',
         description: 'Query result cache (ephemeral)',
         bidirectional: true,
         conflictResolution: 'skip', // Cache can be regenerated
     },
     'media-uploads': {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'media_uploads/',
         description: 'User uploaded media files',
         bidirectional: true,
@@ -77,7 +77,7 @@ const SERVICES = {
         critical: true,
     },
     exports: {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'exports/',
         description: 'Exported assets (CSV, PNG, PDF, videos)',
         bidirectional: true,
@@ -85,7 +85,7 @@ const SERVICES = {
         critical: true,
     },
     'source-maps': {
-        bucket: 'posthog',
+        bucket: 'insights',
         prefix: 'symbolsets/',
         description: 'Error tracking source maps',
         bidirectional: true,

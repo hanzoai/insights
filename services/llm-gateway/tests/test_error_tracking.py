@@ -14,7 +14,7 @@ def _reset_initialized():
 
 def _make_settings(**overrides):
     settings = MagicMock()
-    settings.posthog_project_token = overrides.get("posthog_project_token", "test-token")
+    settings.insights_project_token = overrides.get("insights_project_token", "test-token")
     return settings
 
 
@@ -22,7 +22,7 @@ class TestCaptureException:
     def test_uses_sdk_capture_exception(self):
         with (
             patch.object(error_tracking_module, "get_settings", return_value=_make_settings()),
-            patch.object(error_tracking_module, "posthoganalytics") as mock_ph,
+            patch.object(error_tracking_module, "hanzoanalytics") as mock_ph,
         ):
             error = ValueError("test")
             error_tracking_module.capture_exception(error)
@@ -33,7 +33,7 @@ class TestCaptureException:
     def test_passes_properties(self):
         with (
             patch.object(error_tracking_module, "get_settings", return_value=_make_settings()),
-            patch.object(error_tracking_module, "posthoganalytics") as mock_ph,
+            patch.object(error_tracking_module, "hanzoanalytics") as mock_ph,
         ):
             error = ValueError("test")
             error_tracking_module.capture_exception(error, additional_properties={"key": "value"})
@@ -44,7 +44,7 @@ class TestCaptureException:
     def test_preserves_distinct_id(self):
         with (
             patch.object(error_tracking_module, "get_settings", return_value=_make_settings()),
-            patch.object(error_tracking_module, "posthoganalytics") as mock_ph,
+            patch.object(error_tracking_module, "hanzoanalytics") as mock_ph,
         ):
             error_tracking_module.capture_exception(ValueError("test"))
 
@@ -54,9 +54,9 @@ class TestCaptureException:
     def test_skips_when_not_initialized(self):
         with (
             patch.object(
-                error_tracking_module, "get_settings", return_value=_make_settings(posthog_project_token=None)
+                error_tracking_module, "get_settings", return_value=_make_settings(insights_project_token=None)
             ),
-            patch.object(error_tracking_module, "posthoganalytics") as mock_ph,
+            patch.object(error_tracking_module, "hanzoanalytics") as mock_ph,
         ):
             error_tracking_module.capture_exception(ValueError("test"))
 

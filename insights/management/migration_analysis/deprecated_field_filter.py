@@ -110,14 +110,14 @@ class DeprecatedFieldFilter:
             current_migration_ops = []
 
         for line in lines:
-            # Check if this is an app header (e.g., "Migrations for 'posthog':")
+            # Check if this is an app header (e.g., "Migrations for 'insights':")
             if line.startswith("Migrations for '"):
                 # Finalize previous migration
                 finalize_migration()
                 # Add app header (we'll remove it later if it has no migrations)
                 result_lines.append(line)
 
-            # Check if this is a migration file line (e.g., "  posthog/migrations/...")
+            # Check if this is a migration file line (e.g., "  insights/migrations/...")
             elif line.strip() and line.startswith("  ") and "/" in line and ".py" in line:
                 # Finalize previous migration
                 finalize_migration()

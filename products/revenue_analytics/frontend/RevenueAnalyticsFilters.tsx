@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconFilter, IconGear, IconGraph, IconLineGraph, IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonSelect, LemonSelectOptions, Popover, Tooltip } from '@posthog/lemon-ui'
+import { IconFilter, IconGear, IconGraph, IconLineGraph, IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonSelect, LemonSelectOptions, Popover, Tooltip } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

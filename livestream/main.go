@@ -13,12 +13,12 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/posthog/posthog/livestream/auth"
-	"github.com/posthog/posthog/livestream/configs"
-	"github.com/posthog/posthog/livestream/events"
-	"github.com/posthog/posthog/livestream/geo"
-	"github.com/posthog/posthog/livestream/handlers"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/auth"
+	"github.com/hanzoai/insights/livestream/configs"
+	"github.com/hanzoai/insights/livestream/events"
+	"github.com/hanzoai/insights/livestream/geo"
+	"github.com/hanzoai/insights/livestream/handlers"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -28,13 +28,13 @@ func main() {
 
 	config, err := configs.LoadConfig()
 	if err != nil {
-		// TODO capture error to PostHog
+		// TODO capture error to Insights
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
 	geolocator, err := geo.NewMaxMindGeoLocator(config.MMDB.Path)
 	if err != nil {
-		// TODO capture error to PostHog
+		// TODO capture error to Insights
 		log.Fatalf("Failed to open MMDB: %v", err)
 	}
 
@@ -58,7 +58,7 @@ func main() {
 	stats := events.NewStatsKeeper()
 	sessionStats := events.NewSessionStatsKeeper(config.SessionRecording.MaxLRUEntries, 0)
 
-	phEventChan := make(chan events.PostHogEvent, 10000)
+	insightsEventChan := make(chan events.InsightsEvent, 10000)
 	statsChan := make(chan events.CountEvent, 10000)
 	sessionStatsChan := make(chan events.SessionRecordingEvent, 10000)
 	subChan := make(chan events.Subscription, 10000)
@@ -67,7 +67,7 @@ func main() {
 	go stats.KeepStats(statsChan)
 	go sessionStats.KeepStats(ctx, sessionStatsChan)
 
-	consumer, err := events.NewPostHogKafkaConsumer(config.Kafka, geolocator, phEventChan, statsChan, config.Parallelism)
+	consumer, err := events.NewInsightsKafkaConsumer(config.Kafka, geolocator, insightsEventChan, statsChan, config.Parallelism)
 	if err != nil {
 		log.Fatalf("Failed to create Kafka consumer: %v", err)
 	}
@@ -98,7 +98,7 @@ func main() {
 				return
 			case <-ticker.C:
 				metrics.IncomingQueue.Set(consumer.IncomingRatio())
-				metrics.EventQueue.Set(float64(len(phEventChan)) / float64(cap(phEventChan)))
+				metrics.EventQueue.Set(float64(len(insightsEventChan)) / float64(cap(insightsEventChan)))
 				metrics.StatsQueue.Set(float64(len(statsChan)) / float64(cap(statsChan)))
 				metrics.SessionRecordingStatsQueue.Set(float64(len(sessionStatsChan)) / float64(cap(sessionStatsChan)))
 				metrics.SubQueue.Set(float64(len(subChan)) / float64(cap(subChan)))
@@ -107,7 +107,7 @@ func main() {
 		}
 	}()
 
-	filter := events.NewFilter(subChan, unSubChan, phEventChan)
+	filter := events.NewFilter(subChan, unSubChan, insightsEventChan)
 	go filter.Run()
 
 	// Echo instance

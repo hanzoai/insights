@@ -100,12 +100,12 @@ class TestInstanceSettings(APIBaseTest):
         with self.settings(SITE_URL="http://localhost:8000", CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.patch(
                 f"/api/instance_settings/EMAIL_DEFAULT_FROM",
-                {"value": "hellohello@posthog.com"},
+                {"value": "hellohello@hanzo.ai"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()["value"], "hellohello@posthog.com")
+        self.assertEqual(response.json()["value"], "hellohello@hanzo.ai")
 
-        self.assertEqual(mail.outbox[0].from_email, "hellohello@posthog.com")
+        self.assertEqual(mail.outbox[0].from_email, "hellohello@hanzo.ai")
         self.assertEqual(mail.outbox[0].subject, "This is a test email of your Insights instance")
         html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
         self.validate_basic_html(

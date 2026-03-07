@@ -1,13 +1,13 @@
 {
-    "name": "@posthog/products-user-interviews",
+    "name": "@hanzo/products-user-interviews",
     "dependencies": {
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "posthog-js": "catalog:"
+        "@hanzo/insights": "workspace:*"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "clsx": "*",
         "react": "*"

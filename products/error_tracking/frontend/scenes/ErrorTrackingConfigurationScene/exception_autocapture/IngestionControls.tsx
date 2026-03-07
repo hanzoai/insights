@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonButton, LemonLabel } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonLabel } from '@hanzo/lemon-ui'
 
 import IngestionControls from 'lib/components/IngestionControls'
 import { IngestionControlsSummary } from 'lib/components/IngestionControls/Summary'

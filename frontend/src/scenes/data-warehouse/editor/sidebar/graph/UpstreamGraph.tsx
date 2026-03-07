@@ -19,8 +19,8 @@ import {
 import { useActions, useValues } from 'kea'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { IconArchive, IconPencil, IconTarget } from '@posthog/icons'
-import { LemonButton, LemonTag, LemonTagType, lemonToast } from '@posthog/lemon-ui'
+import { IconArchive, IconPencil, IconTarget } from '@hanzo/icons'
+import { LemonButton, LemonTag, LemonTagType, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'

@@ -95,15 +95,15 @@ impl FeatureFlagList {
                       '{}'::text[]
                   ) AS evaluation_tags,
                   bucketing_identifier
-              FROM posthog_featureflag AS f
-              JOIN posthog_team AS t ON (f.team_id = t.id)
+              FROM insights_featureflag AS f
+              JOIN insights_team AS t ON (f.team_id = t.id)
               -- Evaluation tags are distinct from organizational tags. This bridge table links
               -- flags to tags that constrain runtime evaluation. We use LEFT JOIN to retain flags
               -- with zero evaluation tags, so ARRAY_AGG(...) returns an empty array rather than
               -- dropping the flag row entirely.
-              LEFT JOIN posthog_featureflagevaluationtag AS et ON (f.id = et.feature_flag_id)
+              LEFT JOIN insights_featureflagevaluationtag AS et ON (f.id = et.feature_flag_id)
               -- Only fetch names for tags that are evaluation constraints (not all org tags)
-              LEFT JOIN posthog_tag AS tag ON (et.tag_id = tag.id)
+              LEFT JOIN insights_tag AS tag ON (et.tag_id = tag.id)
             WHERE t.id = $1
               AND f.deleted = false
               -- Exclude encrypted remote config flags - they can only be accessed via
@@ -416,7 +416,7 @@ mod tests {
         // Insert a regular feature flag via raw SQL (is_remote_configuration = false)
         let regular_flag_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, false, false, '2024-06-17')"#,
@@ -433,7 +433,7 @@ mod tests {
         // Insert an unencrypted remote config flag via raw SQL
         let unencrypted_remote_config_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, true, false, '2024-06-17')"#,
@@ -450,7 +450,7 @@ mod tests {
         // Insert an encrypted remote config flag via raw SQL
         let encrypted_remote_config_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, true, true, '2024-06-17')"#,
@@ -499,7 +499,7 @@ mod tests {
         // Insert flag with is_remote_configuration = NULL, has_encrypted_payloads = false
         let null_remote_config_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, NULL, false, '2024-06-17')"#,
@@ -516,7 +516,7 @@ mod tests {
         // Insert flag with is_remote_configuration = true, has_encrypted_payloads = NULL
         let null_encrypted_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, true, NULL, '2024-06-17')"#,
@@ -533,7 +533,7 @@ mod tests {
         // Insert legacy flag with both fields NULL
         let legacy_flag_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, NULL, NULL, '2024-06-17')"#,
@@ -551,7 +551,7 @@ mod tests {
         // This should still be included because is_remote_configuration is not TRUE
         let null_remote_encrypted_true_id = rand::thread_rng().gen_range(1_000_000..100_000_000);
         sqlx::query(
-            r#"INSERT INTO posthog_featureflag
+            r#"INSERT INTO insights_featureflag
             (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity,
              is_remote_configuration, has_encrypted_payloads, created_at)
             VALUES ($1, $2, $3, $4, $5, false, true, false, NULL, true, '2024-06-17')"#,

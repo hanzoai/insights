@@ -11,11 +11,11 @@
     "remoteUser": "vscode",
     "remoteEnv": {
         "DEBUG": "1",
-        "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+        "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
         "KAFKA_ENABLED": "true",
         "KAFKA_HOSTS": "kafka:9092",
         "CLICKHOUST_HOST": "localhost",
-        "CLICKHOUSE_DATABASE": "posthog_test",
+        "CLICKHOUSE_DATABASE": "insights_test",
         "CLICKHOUSE_VERIFY": "False",
         "REDIS_URL": "redis://localhost:6379",
         "SECRET_KEY": "<randomly generated secret key>"
@@ -31,7 +31,7 @@
         "--add-host",
         "kafka:127.0.0.1"
     ],
-    "workspaceFolder": "/workspaces/posthog",
+    "workspaceFolder": "/workspaces/insights",
     // Set *default* container specific settings.json values on container create.
     "settings": {
         /*

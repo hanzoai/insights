@@ -198,7 +198,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         assert test_annotation.date_marker is None
 
     def test_deleting_annotation(self) -> None:
-        new_user = User.objects.create_and_join(self.organization, "new_annotations@posthog.com", None)
+        new_user = User.objects.create_and_join(self.organization, "new_annotations@hanzo.ai", None)
 
         instance = Annotation.objects.create(organization=self.organization, team=self.team, created_by=self.user)
         self.client.force_login(new_user)

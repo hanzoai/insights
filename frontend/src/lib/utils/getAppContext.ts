@@ -2,13 +2,13 @@ import { AppContext, OrganizationType, PathType, TeamType, UserType } from '~/ty
 
 declare global {
     export interface Window {
-        POSTHOG_APP_CONTEXT?: AppContext
+        INSIGHTS_APP_CONTEXT?: AppContext
         STRIPE_PUBLIC_KEY?: string
     }
 }
 
 export function getAppContext(): AppContext | undefined {
-    return window.POSTHOG_APP_CONTEXT || undefined
+    return window.INSIGHTS_APP_CONTEXT || undefined
 }
 
 export function getProjectEventExistence(): { hasPageview: boolean; hasScreen: boolean } {

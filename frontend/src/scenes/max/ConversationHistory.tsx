@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconExternal, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { IconExternal, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { urls } from 'scenes/urls'
@@ -81,7 +81,7 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                         thingName="chat"
                         titleOverride="Start getting things done with Insights AI"
                         description="Insights AI is an agent that answers data questions, gets things done in UI, and provides insights from Insights's documentation."
-                        docsURL="https://posthog.com/docs/data/max-ai"
+                        docsURL="https://hanzo.ai/docs/data/max-ai"
                         actionElementOverride={
                             <LemonButton
                                 type="primary"

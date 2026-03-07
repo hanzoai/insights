@@ -248,7 +248,7 @@ class TestESPSuppressionAnalytics(SimpleTestCase):
         ]
     )
     @override_settings(CUSTOMER_IO_API_KEY="test-app-api-key")
-    @patch("insights.helpers.email_utils.posthoganalytics.capture")
+    @patch("insights.helpers.email_utils.hanzoanalytics.capture")
     @patch("insights.helpers.email_utils.cache")
     @patch("insights.helpers.email_utils.requests.get")
     def test_analytics_captured_for_each_scenario(

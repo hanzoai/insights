@@ -74,7 +74,7 @@ func (v *StatusBarView) ViewHeader() string {
 		logo += lipgloss.NewStyle().Background(c).Render(" ")
 	}
 
-	title := headerStyle.Render(" PostHog Live ") + " " + logo
+	title := headerStyle.Render(" Insights Live ") + " " + logo
 
 	var state string
 	switch v.connState {

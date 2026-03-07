@@ -1,4 +1,4 @@
-import { IconServer } from '@posthog/icons'
+import { IconServer } from '@hanzo/icons'
 import {
     IconCSharp,
     IconFlutter,
@@ -8,7 +8,7 @@ import {
     IconPython,
     IconReact,
     IconRuby,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/lemon-ui/icons'
 
@@ -34,7 +34,7 @@ import {
     iOSSnippet,
 } from './FeatureFlagSnippets'
 
-const DOC_BASE_URL = 'https://posthog.com/docs/'
+const DOC_BASE_URL = 'https://hanzo.ai/docs/'
 export const FF_ANCHOR = '#feature-flags'
 export const PAYLOADS_ANCHOR = '#feature-flag-payloads'
 export const LOCAL_EVAL_ANCHOR = '#local-evaluation'

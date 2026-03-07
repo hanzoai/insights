@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconSort } from '@posthog/icons'
-import { LemonButton, LemonCard } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand, IconSort } from '@hanzo/icons'
+import { LemonButton, LemonCard } from '@hanzo/lemon-ui'
 
 import { RecordingEventType, SessionEventType } from '~/types'
 

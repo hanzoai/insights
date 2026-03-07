@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from django.db.models import Prefetch, Q
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict
 
@@ -161,7 +161,7 @@ logger = structlog.get_logger(__name__)
 
 # READ BEFORE EDITING:
 # --------------------
-# Do NOT add any new table to this, add them to the `posthog` table node.
+# Do NOT add any new table to this, add them to the `insights` table node.
 # This is so that we don't pollute the global namespace any further than it already is
 ROOT_TABLES__DO_NOT_ADD_ANY_MORE: dict[str, TableNode] = {
     "events": TableNode(name="events", table=EventsTable()),
@@ -299,14 +299,14 @@ class Database(BaseModel):
         warehouse_table_names = list(filter(lambda x: "." in x, self._warehouse_table_names))
 
         return (
-            self.get_posthog_table_names()
+            self.get_insights_table_names()
             + warehouse_table_names
             + self._warehouse_self_managed_table_names
             + self._view_table_names
         )
 
     # These are the tables exposed via SQL editor autocomplete and data management
-    def get_posthog_table_names(self, include_hidden: bool = False) -> list[str]:
+    def get_insights_table_names(self, include_hidden: bool = False) -> list[str]:
         if include_hidden:
             return sorted(ROOT_TABLES__DO_NOT_ADD_ANY_MORE.keys())
 
@@ -347,7 +347,7 @@ class Database(BaseModel):
         self,
         context: InsightsQLContext,
         include_only: set[str] | None = None,
-        include_hidden_posthog_tables: bool = False,
+        include_hidden_insights_tables: bool = False,
     ) -> dict[str, DatabaseSchemaTable]:
         from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
         from products.revenue_analytics.backend.views import RevenueAnalyticsBaseView
@@ -358,8 +358,8 @@ class Database(BaseModel):
             raise ResolutionError("Must provide team_id to serialize database")
 
         # Insights tables
-        posthog_table_names = self.get_posthog_table_names(include_hidden=include_hidden_posthog_tables)
-        for table_name in posthog_table_names:
+        insights_table_names = self.get_insights_table_names(include_hidden=include_hidden_insights_tables)
+        for table_name in insights_table_names:
             if include_only and table_name not in include_only:
                 continue
 
@@ -590,7 +590,7 @@ class Database(BaseModel):
             span.set_attribute("team_id", team.pk)
 
         with timings.measure("feature_flags"):
-            is_managed_viewset_enabled = posthoganalytics.feature_enabled(
+            is_managed_viewset_enabled = hanzoanalytics.feature_enabled(
                 "managed-viewsets",
                 str(team.uuid),
                 groups={

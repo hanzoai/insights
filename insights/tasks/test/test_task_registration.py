@@ -11,7 +11,7 @@ from insights.celery import app
 class TestAllTasksRegistered(TestCase):
     snapshot: Any
 
-    def test_all_posthog_tasks_registered_snapshot(self) -> None:
+    def test_all_insights_tasks_registered_snapshot(self) -> None:
         all_tasks = sorted([name for name in app.tasks.keys() if name.startswith("insights.")])
 
         self.assertGreater(len(all_tasks), 0, "No Insights tasks found. This likely indicates a registration problem.")

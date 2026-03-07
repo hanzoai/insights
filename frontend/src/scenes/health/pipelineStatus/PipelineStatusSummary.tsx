@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconDatabase, IconPlug, IconServer } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconDatabase, IconPlug, IconServer } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import type { DataHealthIssue } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
 

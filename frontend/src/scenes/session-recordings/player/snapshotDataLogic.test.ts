@@ -2,7 +2,7 @@ import { api } from 'lib/api.mock'
 
 import { expectLogic } from 'kea-test-utils'
 
-import { EventType, IncrementalSource, NodeType, mutationData } from '@posthog/rrweb-types'
+import { EventType, IncrementalSource, NodeType, mutationData } from '@hanzo/rrweb-types'
 
 import { RecordingDeletedError } from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

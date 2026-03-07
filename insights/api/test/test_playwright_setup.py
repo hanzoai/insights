@@ -63,7 +63,7 @@ class TestPlaywrightSetup(APIBaseTest):
         api_key = PersonalAPIKey.objects.get(user=user)
         self.assertEqual(api_key.label, "Test API Key")
         self.assertIn("*", api_key.scopes)  # Should have full access
-        self.assertTrue(result["personal_api_key"].startswith("phx_"))
+        self.assertTrue(result["personal_api_key"].startswith("hix_"))
 
     @override_settings(DEBUG=True)
     def test_endpoint_allowed_in_debug_mode(self):

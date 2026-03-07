@@ -94,7 +94,7 @@ class UserProductList(UUIDModel, UpdatedMetaFields):
     class Meta:
         unique_together = (("team", "user", "product_path"),)
         indexes = [
-            models.Index(F("team_id"), F("user_id"), name="posthog_upl_team_user"),
+            models.Index(F("team_id"), F("user_id"), name="insights_upl_team_user"),
         ]
         verbose_name = "User Product List"
         verbose_name_plural = "User Product Lists"

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTableColumn, Tooltip } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

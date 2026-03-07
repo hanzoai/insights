@@ -29,7 +29,7 @@ class GolangGenerator(EventDefinitionGenerator):
             if any(prop.property_type == "DateTime" for prop in properties):
                 imports.append('\t"time"')
                 break
-        imports.append('\t"github.com/posthog/posthog-go"')
+        imports.append('\t"github.com/hanzoai/insights-go"')
         imports_section = "\n".join(imports)
 
         event_blocks: list[str] = []
@@ -48,10 +48,10 @@ class GolangGenerator(EventDefinitionGenerator):
 // Generated at: {now}
 // Generator version: {self.generator_version()}
 //
-// This package provides type-safe helper functions to build posthog.Capture
+// This package provides type-safe helper functions to build insights.Capture
 // structs for your defined events. It provides:
-// - A `<EventName>FromBase` function to allow full control over the `posthog.Capture` object.
-// - A `<EventName>` function providing sane defaults for the `posthog.Capture` object.
+// - A `<EventName>FromBase` function to allow full control over the `insights.Capture` object.
+// - A `<EventName>` function providing sane defaults for the `insights.Capture` object.
 //
 // Optional properties can be passed through the `Option` functions / argument.
 //
@@ -76,14 +76,14 @@ import (
 //    a) func <EventName>Capture
 //    b) func <EventName>CaptureFromBase
 //    generally we would recommend to use option A, unless you want to exercise full control over the underlying
-//    `posthog.Capture` model.
+//    `insights.Capture` model.
 //
 //    Optional properties can be passed through the option pattern, where all available options are type hinted
 //    as: <EventName>Option.
 //    Finally, any untyped optional parameters can be passed through the `<EventName>WithExtraProps` function.
-// 4. Pass the typed object to `posthog.Enqueue`. For example:
+// 4. Pass the typed object to `insights.Enqueue`. For example:
 // ```
-// err := posthog.Enqueue(typed.UserSignedUpCapture("user_456", "user@example.com", "premium"))
+// err := insights.Enqueue(typed.UserSignedUpCapture("user_456", "user@example.com", "premium"))
 // ```
 """
 
@@ -98,26 +98,26 @@ import (
 
         return f"""// {func_name} creates a capture for the {event_name} event.
 // This event has no defined schema properties.
-func {func_name}(distinctId string, properties ...posthog.Properties) posthog.Capture {{
-\tprops := posthog.Properties{{}}
+func {func_name}(distinctId string, properties ...insights.Properties) insights.Capture {{
+\tprops := insights.Properties{{}}
 \tfor _, p := range properties {{
 \t\tfor k, v := range p {{
 \t\t\tprops[k] = v
 \t\t}}
 \t}}
 
-\treturn posthog.Capture{{
+\treturn insights.Capture{{
 \t\tDistinctId: distinctId,
 \t\tEvent:      {event_name},
 \t\tProperties: props,
 \t}}
 }}
 
-// {func_name_from_base} creates a posthog.Capture for the {event_name} event
+// {func_name_from_base} creates a insights.Capture for the {event_name} event
 // starting from an existing base capture. The event name is overridden, and
 // any additional properties can be passed via the properties parameter.
-func {func_name_from_base}(base posthog.Capture, properties ...posthog.Properties) posthog.Capture {{
-\tprops := posthog.Properties{{}}
+func {func_name_from_base}(base insights.Capture, properties ...insights.Properties) insights.Capture {{
+\tprops := insights.Properties{{}}
 \tfor _, p := range properties {{
 \t\tfor k, v := range p {{
 \t\t\tprops[k] = v
@@ -126,7 +126,7 @@ func {func_name_from_base}(base posthog.Capture, properties ...posthog.Propertie
 
 \tbase.Event = {event_name}
 \tif base.Properties == nil {{
-\t\tbase.Properties = posthog.Properties{{}}
+\t\tbase.Properties = insights.Properties{{}}
 \t}}
 \tbase.Properties = base.Properties.Merge(props)
 
@@ -147,7 +147,7 @@ func {func_name_from_base}(base posthog.Capture, properties ...posthog.Propertie
 
         block_lines: list[str] = [
             f"// {option_type_name} configures optional properties for a {event_name} capture.",
-            f"type {option_type_name} func(*posthog.Capture)\n",
+            f"type {option_type_name} func(*insights.Capture)\n",
         ]
 
         # Generate option functions for optional properties
@@ -162,10 +162,10 @@ func {func_name_from_base}(base posthog.Capture, properties ...posthog.Propertie
         func_name_extra = self._get_unique_name(f"{base_name}WithExtraProps", used_function_names)
         block_lines.append(
             f"""// {func_name_extra} adds additional properties to a {event_name} event.
-func {func_name_extra}(props posthog.Properties) {option_type_name} {{
-\treturn func(c *posthog.Capture) {{
+func {func_name_extra}(props insights.Properties) {option_type_name} {{
+\treturn func(c *insights.Capture) {{
 \t\tif c.Properties == nil {{
-\t\t\tc.Properties = posthog.Properties{{}}
+\t\t\tc.Properties = insights.Properties{{}}
 \t\t}}
 \t\tfor k, v := range props {{
 \t\t\tc.Properties[k] = v
@@ -204,9 +204,9 @@ func {func_name_extra}(props posthog.Properties) {option_type_name} {{
 
         return f"""// {func_name} sets the {prop_name} property on a {event_name} event.
 func {func_name}({param_name} {param_type}) {option_type_name} {{
-\treturn func(c *posthog.Capture) {{
+\treturn func(c *insights.Capture) {{
 \t\tif c.Properties == nil {{
-\t\t\tc.Properties = posthog.Properties{{}}
+\t\t\tc.Properties = insights.Properties{{}}
 \t\t}}
 \t\tc.Properties[{prop_name}] = {param_name}
 \t}}
@@ -234,19 +234,19 @@ func {func_name}({param_name} {param_type}) {option_type_name} {{
         params_str = ",\n\t".join(params)
 
         return f"""// {func_name} is a wrapper for the {event_name} event.
-// It manages the creation of the `posthog.Capture`. If you need control over this, please make use of
+// It manages the creation of the `insights.Capture`. If you need control over this, please make use of
 // the {func_name}FromBase function.
 // Required properties from the schema are explicit parameters; optional properties
 // should be passed via {base_name}With* option functions.
 func {func_name}(
 \t{params_str},
 \toptions ...{option_type_name},
-) posthog.Capture {{
-\tprops := posthog.Properties{{
+) insights.Capture {{
+\tprops := insights.Properties{{
 {chr(10).join(props_init_lines)}
 \t}}
 
-\tc := posthog.Capture{{
+\tc := insights.Capture{{
 \t\tDistinctId: distinctId,
 \t\tEvent:      {event_name},
 \t\tProperties: props,
@@ -266,7 +266,7 @@ func {func_name}(
         func_name = f"{base_name}CaptureFromBase"
 
         # Build parameters list
-        params = ["base posthog.Capture"]
+        params = ["base insights.Capture"]
         props_init_lines = []
         used_param_names: set[str] = {"base"}
 
@@ -280,21 +280,21 @@ func {func_name}(
 
         params_str = ",\n\t".join(params)
 
-        return f"""// {func_name} creates a posthog.Capture for the {event_name} event
+        return f"""// {func_name} creates a insights.Capture for the {event_name} event
 // starting from an existing base capture. The event name is overridden, and
 // required properties from the schema are merged on top. Optional properties
 // should be passed via {base_name}With* option functions.
 func {func_name}(
 \t{params_str},
 \toptions ...{option_type_name},
-) posthog.Capture {{
-\tprops := posthog.Properties{{
+) insights.Capture {{
+\tprops := insights.Properties{{
 {chr(10).join(props_init_lines)}
 \t}}
 
 \tbase.Event = {event_name}
 \tif base.Properties == nil {{
-\t\tbase.Properties = posthog.Properties{{}}
+\t\tbase.Properties = insights.Properties{{}}
 \t}}
 \tbase.Properties = base.Properties.Merge(props)
 

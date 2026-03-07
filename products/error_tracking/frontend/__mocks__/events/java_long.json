@@ -22,7 +22,7 @@
                             "mangled_name": "onClick",
                             "line": 3,
                             "source": "MyCustomException.kt",
-                            "module": "com.posthog.android.sample.MyCustomException",
+                            "module": "com.insights.android.sample.MyCustomException",
                             "in_app": false,
                             "resolved_name": "<init>",
                             "lang": "java",
@@ -47,7 +47,7 @@
                             "mangled_name": "onClick",
                             "line": 8,
                             "source": "DoSomething.kt",
-                            "module": "com.posthog.android.sample.DoSomething",
+                            "module": "com.insights.android.sample.DoSomething",
                             "in_app": false,
                             "resolved_name": "doSomethingNow",
                             "lang": "java",
@@ -72,7 +72,7 @@
                             "mangled_name": "onClick",
                             "line": 47,
                             "source": "NormalActivity.kt",
-                            "module": "com.posthog.android.sample.NormalActivity",
+                            "module": "com.insights.android.sample.NormalActivity",
                             "in_app": false,
                             "resolved_name": "onCreate$lambda$3",
                             "lang": "java",
@@ -96,7 +96,7 @@
                             "raw_id": "566d84a7993e4e8694d362e7fcfb93d0bef411de9f8e2544bd5408e65b133ef4eeed6e931d0e7efa2f98bde222518bfa2aa2ca36c932ef211cde64932d9072ba/3",
                             "mangled_name": "onClick",
                             "line": 0,
-                            "module": "com.posthog.android.sample.NormalActivity$$InternalSyntheticLambda$1$bea1b6b256e56e30625eaffa6860fa0b42a6fe15ee15a3ea5ad83f4b464e3deb$0",
+                            "module": "com.insights.android.sample.NormalActivity$$InternalSyntheticLambda$1$bea1b6b256e56e30625eaffa6860fa0b42a6fe15ee15a3ea5ad83f4b464e3deb$0",
                             "in_app": false,
                             "resolved_name": "onClick",
                             "lang": "java",
@@ -454,14 +454,14 @@
         "$ip": "83.64.69.206",
         "$app_version": "1.0",
         "$device_name": "emu64a16k",
-        "$lib": "posthog-android",
+        "$lib": "insights-android",
         "$is_identified": false,
         "$screen_density": 2.625,
         "$screen_height": 923,
         "$device_model": "sdk_gphone16k_arm64",
         "$geoip_city_name": "Vienna",
         "$app_name": "Insights Android Sample",
-        "$app_namespace": "com.posthog.android.sample",
+        "$app_namespace": "com.insights.android.sample",
         "$network_wifi": true,
         "$screen_width": 411,
         "$network_cellular": false,
@@ -473,14 +473,14 @@
         "$exception_releases": {
             "91731dae7b53a1ec38467f3f813ae6d790a2b62c1a6f5607c7378dcf752168dbdfd48990d6e1647e5bb10a12b00f6d2f36d409967e99dbf1609166d665fa5452": {
                 "version": "bd1373f1b02ffb849572aa5d953b223c142b0e0f",
-                "project": "posthog-android",
+                "project": "insights-android",
                 "timestamp": "2025-11-28T11:07:55.159862Z",
                 "metadata": {
                     "git": {
                         "branch": "chore/progaurd-support",
                         "commit_id": "bd1373f1b02ffb849572aa5d953b223c142b0e0f",
-                        "remote_url": "git@github.com:Insights/posthog-android.git",
-                        "repo_name": "posthog-android"
+                        "remote_url": "git@github.com:Insights/insights-android.git",
+                        "repo_name": "insights-android"
                     }
                 }
             }

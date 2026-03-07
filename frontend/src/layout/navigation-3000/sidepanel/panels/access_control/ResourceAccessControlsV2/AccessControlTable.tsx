@@ -1,5 +1,5 @@
-import { IconPencil } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTableColumns, ProfilePicture } from '@posthog/lemon-ui'
+import { IconPencil } from '@hanzo/icons'
+import { LemonButton, LemonTable, LemonTableColumns, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { APIScopeObject } from '~/types'
 

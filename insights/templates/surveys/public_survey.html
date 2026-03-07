@@ -504,7 +504,7 @@
         }
 
         /* Hide loading when survey is rendered */
-        #posthog-survey-container:has(.ph-survey) .loading {
+        #insights-survey-container:has(.ph-survey) .loading {
             display: none;
         }
 
@@ -629,7 +629,7 @@
             if (!surveyCard) return;
             new ResizeObserver(function() {
                 window.parent.postMessage({
-                    type: 'posthog:survey:height',
+                    type: 'insights:survey:height',
                     surveyId: '{{ survey_id }}',
                     height: Math.ceil(surveyCard.getBoundingClientRect().height)
                 }, '*');
@@ -647,7 +647,7 @@
             </div>
 
             <div class="survey-content">
-                <div id="posthog-survey-container">
+                <div id="insights-survey-container">
                     <div class="loading">
                         <div class="loading-spinner"></div>
                         <div class="loading-text">Loading survey...</div>
@@ -657,7 +657,7 @@
         </div>
     </div>
 
-    <!-- PostHog JavaScript -->
+    <!-- Hanzo Insights JavaScript -->
     {{ survey_data|json_script:"survey-data" }}
     {{ project_config|json_script:"project-config" }}
     <script nonce="{{ request.csp_nonce }}">
@@ -950,10 +950,10 @@
             // - boxPadding: we have our own padding
             // - fontFamily: we have our own font stack
             // - whiteLabel: not relevant for this context
-            // - placeholder: handled by PostHog survey rendering
+            // - placeholder: handled by Hanzo Insights survey rendering
             // - shuffleQuestions: behavioral setting, not appearance
-            // - thankYouMessageHeader/thankYouMessageDescription: handled by PostHog survey rendering
-            // - displayThankYouMessage: handled by PostHog survey rendering
+            // - thankYouMessageHeader/thankYouMessageDescription: handled by Hanzo Insights survey rendering
+            // - displayThankYouMessage: handled by Hanzo Insights survey rendering
         }
 
         // Apply survey appearance if available
@@ -962,16 +962,16 @@
         }
     </script>
     <script nonce="{{ request.csp_nonce }}">
-        // Load PostHog from CDN
-        !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.full.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "init Ie Ts Ms Ee Es Rs capture Ge calculateEventProperties Os register register_once register_for_session unregister unregister_for_session js getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ds Fs createPersonProfile Ls Ps opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Cs debug I As getPageViewId captureTraceFeedback captureTraceMetric".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+        // Load Hanzo Insights from CDN
+        !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.hanzo.ai", "-assets.i.hanzo.ai") + "/static/array.full.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "init Ie Ts Ms Ee Es Rs capture Ge calculateEventProperties Os register register_once register_for_session unregister unregister_for_session js getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ds Fs createPersonProfile Ls Ps opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Cs debug I As getPageViewId captureTraceFeedback captureTraceMetric".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
         const searchParams = new URLSearchParams(window.location.search);
 
-        // Initialize PostHog with project configuration
+        // Initialize Hanzo Insights with project configuration
         const config = {
             api_host: projectConfig.api_host,
             disable_surveys_automatic_display: true,
-            debug: searchParams.get('__posthog_debug__') === 'true',
+            debug: searchParams.get('__insights_debug__') === 'true',
             // Disable all non-essential features
             advanced_disable_toolbar_metrics: true,
             capture_pageview: false,
@@ -1000,7 +1000,7 @@
         }
 
         // Extract additional survey event properties from URL parameters
-        const URL_PARAMS_TO_IGNORE = ['distinct_id', '__posthog_debug__', '__posthog_debug', 'auto_submit'];
+        const URL_PARAMS_TO_IGNORE = ['distinct_id', '__insights_debug__', '__insights_debug', 'auto_submit'];
         const surveyEventProperties = {};
 
         for (const [key, value] of searchParams.entries()) {
@@ -1024,7 +1024,7 @@
             config.ui_host = projectConfig.ui_host;
         }
 
-        posthog.init(projectConfig.token, {
+        insights.init(projectConfig.token, {
             ...config,
             surveys: {
                 prefillFromUrl: true,
@@ -1034,7 +1034,7 @@
             loaded: (instance) => {
                 instance.surveys["_surveyManager"].renderSurvey(
                     survey,
-                    document.getElementById('posthog-survey-container'),
+                    document.getElementById('insights-survey-container'),
                     surveyEventProperties
                 );
             }

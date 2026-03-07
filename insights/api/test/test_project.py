@@ -233,7 +233,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         response = self.client.patch(
             f"/api/projects/{self.project.id}/complete_product_onboarding/",
             {"intent_context": "onboarding product selected - primary", "metadata": {}},
-            headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+            headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -249,7 +249,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
                 "intent_context": "onboarding product selected - primary",
                 "metadata": {},
             },
-            headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+            headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

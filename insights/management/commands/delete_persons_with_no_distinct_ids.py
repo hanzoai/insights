@@ -43,7 +43,7 @@ def delete_persons_without_distinct_ids_raw_sql(team_id, max_delete):
             WITH persons_to_delete AS (
                 SELECT p.id
                 FROM {person_table} p
-                LEFT JOIN posthog_persondistinctid pd ON p.id = pd.person_id AND p.team_id = pd.team_id
+                LEFT JOIN insights_persondistinctid pd ON p.id = pd.person_id AND p.team_id = pd.team_id
                 WHERE p.team_id = %(team_id)s AND pd.id IS NULL
                 LIMIT %(max_delete)s
             )
@@ -69,7 +69,7 @@ def delete_persons_without_distinct_ids_raw_sql_dry_run(team_id, max_delete):
             WITH persons_to_delete AS (
                 SELECT p.id
                 FROM {person_table} p
-                LEFT JOIN posthog_persondistinctid pd ON p.id = pd.person_id AND p.team_id = pd.team_id
+                LEFT JOIN insights_persondistinctid pd ON p.id = pd.person_id AND p.team_id = pd.team_id
                 WHERE p.team_id = %(team_id)s AND pd.id IS NULL
                 LIMIT %(max_delete)s
             )

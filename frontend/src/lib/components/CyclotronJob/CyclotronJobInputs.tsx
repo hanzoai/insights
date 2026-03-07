@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconGear, IconLock, IconPlus, IconTrash, IconX } from '@posthog/icons'
+import { IconGear, IconLock, IconPlus, IconTrash, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -18,7 +18,7 @@ import {
     LemonTag,
     LemonTextArea,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown/LemonMarkdown'

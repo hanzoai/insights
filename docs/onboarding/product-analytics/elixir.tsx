@@ -20,7 +20,7 @@ export const getElixirSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                 def deps do
                                     [
-                                        {:posthog, "~> 2.2.0"}
+                                        {:insights, "~> 2.2.0"}
                                     ]
                                 end
                             `,
@@ -42,7 +42,7 @@ export const getElixirSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'elixir',
                                 file: 'config/config.exs',
                                 code: dedent`
-                                config :posthog,
+                                config :insights,
                                     api_url: "<ph_client_api_host>",
                                     api_key: "<ph_project_api_key>"
                             `,

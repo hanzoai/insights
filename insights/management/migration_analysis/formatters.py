@@ -159,7 +159,7 @@ class ConsoleTreeFormatter(RiskFormatter):
         """Format Insights policy violations."""
         lines = []
         lines.append("  │")
-        lines.append(f"  └──> {self.COLOR_RED}📋 POSTHOG POLICY VIOLATIONS:{self.COLOR_RESET}")
+        lines.append(f"  └──> {self.COLOR_RED}📋 INSIGHTS POLICY VIOLATIONS:{self.COLOR_RESET}")
 
         for violation in violations:
             wrapped = textwrap.fill(violation, width=72, initial_indent="       ", subsequent_indent="       ")

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCalculator, IconCheck, IconClock, IconGear } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCalculator, IconCheck, IconClock, IconGear } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { LemonProgressCircle } from 'lib/lemon-ui/LemonProgressCircle/LemonProgressCircle'
 import { Label } from 'lib/ui/Label/Label'

@@ -272,7 +272,7 @@ def create_channel_type_expr(
 
 @cache
 def _initial_default_channel_rules_expr():
-    # This logic is referenced in our docs https://posthog.com/docs/data/channel-type, be sure to update both if you
+    # This logic is referenced in our docs https://hanzo.ai/docs/data/channel-type, be sure to update both if you
     # update either.
     return parse_expr(
         """

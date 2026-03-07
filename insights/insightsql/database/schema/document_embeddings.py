@@ -18,7 +18,7 @@ from insights.insightsql.transforms.order_by_pushdown import push_down_order_by,
 from products.error_tracking.backend.indexed_embedding import EMBEDDING_TABLES
 
 VECTOR_DISTANCE_FUNCTIONS = {"cosineDistance", "L2Distance"}
-DOCUMENT_EMBEDDINGS_VIEW = "posthog_document_embeddings_union_view"
+DOCUMENT_EMBEDDINGS_VIEW = "insights_document_embeddings_union_view"
 
 DOCUMENT_EMBEDDINGS_FIELDS: dict[str, FieldOrTable] = {
     "team_id": IntegerDatabaseField(name="team_id", nullable=False),

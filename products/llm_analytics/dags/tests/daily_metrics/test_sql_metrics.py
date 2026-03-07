@@ -114,7 +114,7 @@ def mock_events_data():
             "team_id": 1,
             "event": "$pageview",
             "properties": {
-                "$current_url": "https://app.posthog.com/project/123/llm-analytics/traces?filter=active",
+                "$current_url": "https://insights.hanzo.ai/project/123/llm-analytics/traces?filter=active",
             },
         },
         {
@@ -122,7 +122,7 @@ def mock_events_data():
             "team_id": 1,
             "event": "$pageview",
             "properties": {
-                "$current_url": "https://app.posthog.com/project/123/llm-analytics/traces",
+                "$current_url": "https://insights.hanzo.ai/project/123/llm-analytics/traces",
             },
         },
         {
@@ -130,7 +130,7 @@ def mock_events_data():
             "team_id": 1,
             "event": "$pageview",
             "properties": {
-                "$current_url": "https://app.posthog.com/project/123/llm-analytics/generations",
+                "$current_url": "https://insights.hanzo.ai/project/123/llm-analytics/generations",
             },
         },
     ]

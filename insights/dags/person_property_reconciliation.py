@@ -1404,7 +1404,7 @@ def fetch_person_from_postgres(cursor, team_id: int, person_uuid: str) -> dict |
             version,
             is_identified,
             created_at
-        FROM posthog_person
+        FROM insights_person
         WHERE team_id = %s AND uuid = %s::uuid
         """,
         (team_id, person_uuid),
@@ -1456,7 +1456,7 @@ def backup_person_with_computed_state(
 
     cursor.execute(
         """
-        INSERT INTO posthog_person_reconciliation_backup (
+        INSERT INTO insights_person_reconciliation_backup (
             job_id, team_id, person_id, uuid,
             properties, properties_last_updated_at, properties_last_operation,
             version, is_identified, created_at, is_user_id,
@@ -1573,7 +1573,7 @@ def update_person_with_version_check(
         # Write with version check
         cursor.execute(
             """
-            UPDATE posthog_person SET
+            UPDATE insights_person SET
                 properties = %s,
                 properties_last_updated_at = %s,
                 properties_last_operation = %s,

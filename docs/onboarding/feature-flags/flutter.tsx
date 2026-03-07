@@ -27,11 +27,11 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'dart',
                                 file: 'Dart',
                                 code: dedent`
-                                    final isMyFlagEnabled = await Posthog().isFeatureEnabled('flag-key');
+                                    final isMyFlagEnabled = await Insights().isFeatureEnabled('flag-key');
                                     if (isMyFlagEnabled) {
                                         // Do something differently for this user
                                         // Optional: fetch the payload
-                                        final matchedFlagPayload = await Posthog().getFeatureFlagPayload('flag-key');
+                                        final matchedFlagPayload = await Insights().getFeatureFlagPayload('flag-key');
                                     }
                                 `,
                             },
@@ -56,11 +56,11 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'dart',
                                 file: 'Dart',
                                 code: dedent`
-                                    final enabledVariant = await Posthog().getFeatureFlag('flag-key');
+                                    final enabledVariant = await Insights().getFeatureFlag('flag-key');
                                     if (enabledVariant == 'variant-key') { // replace 'variant-key' with the key of your variant
                                         // Do something differently for this user
                                         // Optional: fetch the payload
-                                        final matchedFlagPayload = await Posthog().getFeatureFlagPayload('flag-key');
+                                        final matchedFlagPayload = await Insights().getFeatureFlagPayload('flag-key');
                                     }
                                 `,
                             },

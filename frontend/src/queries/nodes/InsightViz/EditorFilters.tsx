@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import { IconInfo, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { NON_BREAKDOWN_DISPLAY_TYPES } from 'lib/constants'
 import { pluralize } from 'lib/utils'
@@ -354,7 +354,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                                               </ul>
                                               <div>
                                                   Read more in the{' '}
-                                                  <Link to="https://posthog.com/docs/product-analytics/funnels#attribution-types">
+                                                  <Link to="https://hanzo.ai/docs/product-analytics/funnels#attribution-types">
                                                       documentation.
                                                   </Link>
                                               </div>
@@ -430,7 +430,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                     <LemonBanner type="info" className="mb-4">
                         When using sessions and session properties, events without session IDs will be excluded from the
                         set of results.{' '}
-                        <Link to="https://posthog.com/docs/user-guides/sessions">Learn more about sessions.</Link>
+                        <Link to="https://hanzo.ai/docs/user-guides/sessions">Learn more about sessions.</Link>
                     </LemonBanner>
                 ) : null}
 

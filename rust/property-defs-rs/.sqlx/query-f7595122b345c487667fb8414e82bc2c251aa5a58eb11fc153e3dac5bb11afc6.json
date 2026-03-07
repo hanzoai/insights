@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT count(*) from posthog_eventproperty",
+  "query": "SELECT count(*) from insights_eventproperty",
   "describe": {
     "columns": [
       {

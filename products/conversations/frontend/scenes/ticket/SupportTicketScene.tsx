@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconChevronDown } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonSelect, Link, Spinner } from '@posthog/lemon-ui'
+import { IconChevronDown } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonSelect, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'

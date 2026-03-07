@@ -42,6 +42,6 @@ class ProductTourAdmin(admin.ModelAdmin):
     def team_link(self, tour: ProductTour):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[tour.team.pk]),
+            reverse("admin:insights_team_change", args=[tour.team.pk]),
             tour.team.name,
         )

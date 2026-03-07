@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSwitch, Link, Spinner, Tooltip, lemonToast } from '@posthog/lemon-ui'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSwitch, Link, Spinner, Tooltip, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'

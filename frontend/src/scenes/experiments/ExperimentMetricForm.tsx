@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconPencil } from '@posthog/icons'
-import { LemonBanner, LemonInput } from '@posthog/lemon-ui'
+import { IconInfo, IconPencil } from '@hanzo/icons'
+import { LemonBanner, LemonInput } from '@hanzo/lemon-ui'
 
 import { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
@@ -305,7 +305,7 @@ export function ExperimentMetricForm({
                                             ? 'The exposure event is shared across all metrics in this experiment.'
                                             : 'The exposure event will be configured at the experiment level and shared across all metrics.'}
                                     </p>
-                                    <Link to="https://posthog.com/docs/experiments/exposures">
+                                    <Link to="https://hanzo.ai/docs/experiments/exposures">
                                         Learn more in the docs
                                     </Link>
                                 </div>
@@ -338,7 +338,7 @@ export function ExperimentMetricForm({
                                 SQL expressions allow you to write custom computations and aggregations. The expression
                                 should return a numeric value and will be evaluated for each user in the experiment.{' '}
                                 <Link
-                                    to="https://posthog.com/docs/insightsql/expressions"
+                                    to="https://hanzo.ai/docs/insightsql/expressions"
                                     target="_blank"
                                     disableDocsPanel={true}
                                 >

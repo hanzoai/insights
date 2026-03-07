@@ -83,8 +83,8 @@ fi
 
 run_persons_migrations() {
     local db_type="persons"
-    PERSONS_DATABASE_NAME=${PERSONS_DATABASE_NAME:-posthog_persons}
-    PERSONS_DATABASE_URL=${PERSONS_DATABASE_URL:-postgres://posthog:posthog@localhost:5432/$PERSONS_DATABASE_NAME}
+    PERSONS_DATABASE_NAME=${PERSONS_DATABASE_NAME:-insights_persons}
+    PERSONS_DATABASE_URL=${PERSONS_DATABASE_URL:-postgres://insights:insights@localhost:5432/$PERSONS_DATABASE_NAME}
 
     log_json "info" "Starting migrations" "starting" "$db_type" "\"database_name\":\"$PERSONS_DATABASE_NAME\",\"fresh_mode\":$FRESH_MODE"
 
@@ -103,7 +103,7 @@ run_persons_migrations() {
 run_cyclotron_migrations() {
     local db_type="cyclotron"
     CYCLOTRON_DATABASE_NAME=${CYCLOTRON_DATABASE_NAME:-cyclotron}
-    CYCLOTRON_DATABASE_URL=${CYCLOTRON_DATABASE_URL:-postgres://posthog:posthog@localhost:5432/$CYCLOTRON_DATABASE_NAME}
+    CYCLOTRON_DATABASE_URL=${CYCLOTRON_DATABASE_URL:-postgres://insights:insights@localhost:5432/$CYCLOTRON_DATABASE_NAME}
 
     log_json "info" "Starting migrations" "starting" "$db_type" "\"database_name\":\"$CYCLOTRON_DATABASE_NAME\",\"fresh_mode\":$FRESH_MODE"
 
@@ -122,7 +122,7 @@ run_cyclotron_migrations() {
 run_cyclotron_shadow_migrations() {
     local db_type="cyclotron-shadow"
     CYCLOTRON_SHADOW_DATABASE_NAME=${CYCLOTRON_SHADOW_DATABASE_NAME:-cyclotron_shadow}
-    CYCLOTRON_SHADOW_DATABASE_URL=${CYCLOTRON_SHADOW_DATABASE_URL:-postgres://posthog:posthog@localhost:5432/$CYCLOTRON_SHADOW_DATABASE_NAME}
+    CYCLOTRON_SHADOW_DATABASE_URL=${CYCLOTRON_SHADOW_DATABASE_URL:-postgres://insights:insights@localhost:5432/$CYCLOTRON_SHADOW_DATABASE_NAME}
 
     log_json "info" "Starting migrations" "starting" "$db_type" "\"database_name\":\"$CYCLOTRON_SHADOW_DATABASE_NAME\",\"fresh_mode\":$FRESH_MODE"
 
@@ -144,8 +144,8 @@ run_behavioral_cohorts_migrations() {
 
     # Use environment variables with defaults
     DB_HOST="${POSTGRES_BEHAVIORAL_COHORTS_HOST:-localhost}"
-    DB_USER="${POSTGRES_BEHAVIORAL_COHORTS_USER:-posthog}"
-    DB_PASS="${POSTGRES_BEHAVIORAL_COHORTS_PASSWORD:-posthog}"
+    DB_USER="${POSTGRES_BEHAVIORAL_COHORTS_USER:-insights}"
+    DB_PASS="${POSTGRES_BEHAVIORAL_COHORTS_PASSWORD:-insights}"
 
     BEHAVIORAL_COHORTS_DATABASE_URL=${BEHAVIORAL_COHORTS_DATABASE_URL:-postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:5432/$BEHAVIORAL_COHORTS_DATABASE_NAME}
 

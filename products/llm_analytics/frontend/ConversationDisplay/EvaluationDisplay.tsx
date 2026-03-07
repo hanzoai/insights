@@ -1,5 +1,5 @@
-import { IconCheck, IconMinus, IconX } from '@posthog/icons'
-import { LemonTag, Link } from '@posthog/lemon-ui'
+import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
+import { LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { lowercaseFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'

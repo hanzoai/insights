@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-workflows",
+    "name": "@hanzo/products-workflows",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -9,14 +9,14 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "posthog-js": "catalog:",
-        "use-debounce": "catalog:"
+        "use-debounce": "catalog:",
+        "@hanzo/insights": "workspace:*"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "@xyflow/react": "*",
         "clsx": "*",

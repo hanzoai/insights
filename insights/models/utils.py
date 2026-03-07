@@ -290,7 +290,7 @@ def generate_random_oauth_refresh_token(_request) -> str:
 
 
 def mask_key_value(value: str) -> str:
-    """Turn 'phx_123456abcd' into 'phx_...abcd'."""
+    """Turn 'hix_123456abcd' into 'hix_...abcd'."""
     if len(value) < 16:
         # If the token is less than 16 characters, mask the whole token.
         # This should never happen, but want to be safe.

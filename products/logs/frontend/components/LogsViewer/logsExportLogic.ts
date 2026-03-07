@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props } from 'kea'
 import Papa from 'papaparse'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
@@ -72,13 +72,13 @@ export const logsExportLogic = kea<logsExportLogicType>([
     listeners(({ actions, values }) => ({
         copySelectedLogs: () => {
             const selectedLogs = values.selectedLogsArray
-            posthog.capture('logs bulk copy', { count: selectedLogs.length })
+            insights.capture('logs bulk copy', { count: selectedLogs.length })
             const text = selectedLogs.map((log: ParsedLogMessage) => log.body).join('\n')
             void copyToClipboard(text, `${selectedLogs.length} log message${selectedLogs.length === 1 ? '' : 's'}`)
         },
         exportSelectedAsCsv: () => {
             const selectedLogs = values.selectedLogsArray
-            posthog.capture('logs exported', { format: 'csv', count: selectedLogs.length, source: 'selection' })
+            insights.capture('logs exported', { format: 'csv', count: selectedLogs.length, source: 'selection' })
             const columns = getExportColumns(values.attributeColumns)
             const rows = selectedLogs.map((log: ParsedLogMessage) => {
                 const row = [
@@ -106,7 +106,7 @@ export const logsExportLogic = kea<logsExportLogicType>([
                 serviceNames: values.filters.serviceNames,
                 orderBy: values.orderBy,
             }
-            posthog.capture('logs exported', { format: 'csv', source: 'server', totalLogsCount })
+            insights.capture('logs exported', { format: 'csv', source: 'server', totalLogsCount })
             try {
                 await api.logs.exportQuery({
                     query,

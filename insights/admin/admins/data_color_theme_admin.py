@@ -20,6 +20,6 @@ class DataColorThemeAdmin(admin.ModelAdmin):
             return "-"
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[data_color_theme.team.pk]),
+            reverse("admin:insights_team_change", args=[data_color_theme.team.pk]),
             data_color_theme.team.name,
         )

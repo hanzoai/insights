@@ -191,7 +191,7 @@ class TeamAdmin(admin.ModelAdmin):
         if team.organization:
             return format_html(
                 '<a href="{}">{}</a>',
-                reverse("admin:posthog_organization_change", args=[team.organization.pk]),
+                reverse("admin:insights_organization_change", args=[team.organization.pk]),
                 team.organization.name,
             )
         return "-"
@@ -200,7 +200,7 @@ class TeamAdmin(admin.ModelAdmin):
         if team.project:
             return format_html(
                 '<a href="{}">{}</a>',
-                reverse("admin:posthog_project_change", args=[team.project.pk]),
+                reverse("admin:insights_project_change", args=[team.project.pk]),
                 team.project.name,
             )
         return "-"
@@ -226,11 +226,11 @@ class TeamAdmin(admin.ModelAdmin):
         # nosemgrep: python.django.security.audit.avoid-mark-safe.avoid-mark-safe (admin-only, renders trusted template)
         return mark_safe(
             render_to_string(
-                "admin/posthog/team/export_individual_replay.html",
+                "admin/insights/team/export_individual_replay.html",
                 {
                     "team": team,
-                    "export_url": f"/admin/posthog/team/{team.pk}/export-replay/",
-                    "export_history_url": f"/admin/posthog/team/{team.pk}/export-history/",
+                    "export_url": f"/admin/insights/team/{team.pk}/export-replay/",
+                    "export_history_url": f"/admin/insights/team/{team.pk}/export-history/",
                 },
                 request=getattr(self, "_current_request", None),
             )
@@ -243,10 +243,10 @@ class TeamAdmin(admin.ModelAdmin):
         # nosemgrep: python.django.security.audit.avoid-mark-safe.avoid-mark-safe (admin-only, renders trusted template)
         return mark_safe(
             render_to_string(
-                "admin/posthog/team/import_individual_replay.html",
+                "admin/insights/team/import_individual_replay.html",
                 {
                     "team": team,
-                    "import_url": f"/admin/posthog/team/{team.pk}/import-replay/",
+                    "import_url": f"/admin/insights/team/{team.pk}/import-replay/",
                 },
                 request=getattr(self, "_current_request", None),
             )
@@ -260,10 +260,10 @@ class TeamAdmin(admin.ModelAdmin):
         # nosemgrep: python.django.security.audit.avoid-mark-safe.avoid-mark-safe (admin-only, renders trusted template)
         return mark_safe(
             render_to_string(
-                "admin/posthog/team/remote_config_cache_actions.html",
+                "admin/insights/team/remote_config_cache_actions.html",
                 {
-                    "view_url": reverse("admin:posthog_team_view_cache", args=[team.pk]),
-                    "rebuild_url": reverse("admin:posthog_team_rebuild_cache", args=[team.pk]),
+                    "view_url": reverse("admin:insights_team_view_cache", args=[team.pk]),
+                    "rebuild_url": reverse("admin:insights_team_rebuild_cache", args=[team.pk]),
                     "team_name_escaped": escapejs(team.name),
                     "cache_key": RemoteConfig.get_hypercache().get_cache_key(team.api_token),
                 },
@@ -276,32 +276,32 @@ class TeamAdmin(admin.ModelAdmin):
             path(
                 "<path:object_id>/view-cache/",
                 self.admin_site.admin_view(self.view_cache),
-                name="posthog_team_view_cache",
+                name="insights_team_view_cache",
             ),
             path(
                 "<path:object_id>/rebuild-cache/",
                 self.admin_site.admin_view(self.rebuild_cache),
-                name="posthog_team_rebuild_cache",
+                name="insights_team_rebuild_cache",
             ),
             path(
                 "<path:object_id>/export-replay/",
                 self.admin_site.admin_view(self.export_replay_view),
-                name="posthog_team_export_replay",
+                name="insights_team_export_replay",
             ),
             path(
                 "<path:object_id>/import-replay/",
                 self.admin_site.admin_view(self.import_replay_view),
-                name="posthog_team_import_replay",
+                name="insights_team_import_replay",
             ),
             path(
                 "<path:object_id>/export-history/",
                 self.admin_site.admin_view(self.export_history_view),
-                name="posthog_team_export_history",
+                name="insights_team_export_history",
             ),
             path(
                 "<path:object_id>/download-export/<uuid:export_id>/",
                 self.admin_site.admin_view(self.download_export_view),
-                name="posthog_team_download_export",
+                name="insights_team_download_export",
             ),
         ]
         return custom_urls + urls
@@ -315,18 +315,18 @@ class TeamAdmin(admin.ModelAdmin):
                 "team": team,
                 "title": f"Export Session Replay - {team.name}",
             }
-            return render(request, "admin/posthog/team/export_replay_form.html", context)
+            return render(request, "admin/insights/team/export_replay_form.html", context)
 
         session_id = request.POST.get("session_id", "").strip()
         reason = request.POST.get("reason", "").strip()
 
         if not session_id:
             messages.error(request, "Session ID is required")
-            return redirect(reverse("admin:posthog_team_export_replay", args=[object_id]))
+            return redirect(reverse("admin:insights_team_export_replay", args=[object_id]))
 
         if not reason:
             messages.error(request, "Reason is required")
-            return redirect(reverse("admin:posthog_team_export_replay", args=[object_id]))
+            return redirect(reverse("admin:insights_team_export_replay", args=[object_id]))
 
         logger.info(
             "export_replay_triggered",
@@ -390,7 +390,7 @@ class TeamAdmin(admin.ModelAdmin):
             )
             messages.error(request, f"Export failed: {e}")
 
-        return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+        return redirect(reverse("admin:insights_team_export_history", args=[object_id]))
 
     def view_cache(self, request, object_id):
         team = Team.objects.get(pk=object_id)
@@ -419,12 +419,12 @@ class TeamAdmin(admin.ModelAdmin):
         RemoteConfig.get_hypercache().update_cache(team.api_token)
 
         self.message_user(request, f"Cache rebuilt for team '{team.name}' (token: {team.api_token})")
-        return redirect(reverse("admin:posthog_team_change", args=[object_id]))
+        return redirect(reverse("admin:insights_team_change", args=[object_id]))
 
     def import_replay_view(self, request, object_id):
         if is_cloud():
             messages.error(request, "Importing session replays is not allowed on cloud")
-            return redirect(reverse("admin:posthog_team_change", args=[object_id]))
+            return redirect(reverse("admin:insights_team_change", args=[object_id]))
 
         team = Team.objects.get(pk=object_id)
 
@@ -434,22 +434,22 @@ class TeamAdmin(admin.ModelAdmin):
                 "team": team,
                 "title": f"Import Session Replay - {team.name}",
             }
-            return render(request, "admin/posthog/team/import_replay_form.html", context)
+            return render(request, "admin/insights/team/import_replay_form.html", context)
 
         reason = request.POST.get("reason", "").strip()
         import_file: UploadedFile | None = request.FILES.get("import_file")
 
         if not import_file:
             messages.error(request, "Import file is required")
-            return redirect(reverse("admin:posthog_team_import_replay", args=[object_id]))
+            return redirect(reverse("admin:insights_team_import_replay", args=[object_id]))
 
         if not reason:
             messages.error(request, "Reason is required")
-            return redirect(reverse("admin:posthog_team_import_replay", args=[object_id]))
+            return redirect(reverse("admin:insights_team_import_replay", args=[object_id]))
 
         if not import_file.name or not import_file.name.endswith(".zip"):
             messages.error(request, "Import file must be a .zip file")
-            return redirect(reverse("admin:posthog_team_import_replay", args=[object_id]))
+            return redirect(reverse("admin:insights_team_import_replay", args=[object_id]))
 
         logger.info(
             "import_replay_triggered",
@@ -510,7 +510,7 @@ class TeamAdmin(admin.ModelAdmin):
             )
             messages.error(request, f"Import failed: {e}")
 
-        return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+        return redirect(reverse("admin:insights_team_export_history", args=[object_id]))
 
     def export_history_view(self, request, object_id):
         team = Team.objects.get(pk=object_id)
@@ -523,7 +523,7 @@ class TeamAdmin(admin.ModelAdmin):
             "exports": exports,
             "title": f"Export History - {team.name}",
         }
-        return render(request, "admin/posthog/team/export_history.html", context)
+        return render(request, "admin/insights/team/export_history.html", context)
 
     def download_export_view(self, request, object_id, export_id):
         from insights.storage import session_recording_v2_object_storage
@@ -534,14 +534,14 @@ class TeamAdmin(admin.ModelAdmin):
 
             if not export.export_location:
                 messages.error(request, "Export content not available yet")
-                return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+                return redirect(reverse("admin:insights_team_export_history", args=[object_id]))
 
             storage = session_recording_v2_object_storage.client()
             content = storage.read_all_bytes(export.export_location)
 
             if not content:
                 messages.error(request, "Failed to read export content from storage")
-                return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+                return redirect(reverse("admin:insights_team_export_history", args=[object_id]))
 
             response = HttpResponse(content, content_type="application/zip")
             filename = f"export-{export.session_id}.zip"
@@ -550,7 +550,7 @@ class TeamAdmin(admin.ModelAdmin):
 
         except ExportedRecording.DoesNotExist:
             messages.error(request, "Export not found")
-            return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+            return redirect(reverse("admin:insights_team_export_history", args=[object_id]))
         except Exception as e:
             messages.error(request, f"Failed to download export: {e}")
-            return redirect(reverse("admin:posthog_team_export_history", args=[object_id]))
+            return redirect(reverse("admin:insights_team_export_history", args=[object_id]))

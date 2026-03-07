@@ -29,7 +29,7 @@ python ${DEBUG:+ -m debugpy --listen 127.0.0.1:5678} -m granian \
     --interface asgi \
     insights.asgi:application \
     --reload \
-    --reload-paths ./posthog \
+    --reload-paths ./insights \
     --reload-paths ./ee \
     --reload-paths ./products \
     --reload-paths ./frontend/src/products.json \

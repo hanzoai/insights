@@ -1,5 +1,5 @@
-import { IconLetter } from '@posthog/icons'
-import { LemonSelectOptions } from '@posthog/lemon-ui'
+import { IconLetter } from '@hanzo/icons'
+import { LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { IconSlack } from 'lib/lemon-ui/icons'
 import { range } from 'lib/utils'

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Agent, PermissionMode } from '@posthog/agent'
+import { Agent, PermissionMode } from '@hanzo/agent'
 
 function parseArgs() {
     const args = process.argv.slice(2)
@@ -18,29 +18,29 @@ export async function runAgent({
     taskId,
     runId,
     repositoryPath,
-    posthogApiUrl,
-    posthogApiKey,
-    posthogProjectId,
+    insightsApiUrl,
+    insightsApiKey,
+    insightsProjectId,
     prompt,
     maxTurns,
     createPR,
 }) {
     const envOverrides = {
-        POSTHOG_API_KEY: posthogApiKey,
-        POSTHOG_API_HOST: posthogApiUrl,
-        POSTHOG_AUTH_HEADER: `Bearer ${posthogApiKey}`,
-        ANTHROPIC_API_KEY: posthogApiKey,
-        ANTHROPIC_AUTH_TOKEN: posthogApiKey,
-        ANTHROPIC_BASE_URL: `${posthogApiUrl}/api/projects/${parseInt(posthogProjectId, 10)}/llm_gateway`,
+        INSIGHTS_API_KEY: insightsApiKey,
+        INSIGHTS_API_HOST: insightsApiUrl,
+        INSIGHTS_AUTH_HEADER: `Bearer ${insightsApiKey}`,
+        ANTHROPIC_API_KEY: insightsApiKey,
+        ANTHROPIC_AUTH_TOKEN: insightsApiKey,
+        ANTHROPIC_BASE_URL: `${insightsApiUrl}/api/projects/${parseInt(insightsProjectId, 10)}/llm_gateway`,
     }
 
     Object.assign(process.env, envOverrides)
 
     const agent = new Agent({
         workingDirectory: repositoryPath,
-        posthogApiUrl,
-        posthogApiKey,
-        posthogProjectId: parseInt(posthogProjectId, 10),
+        insightsApiUrl,
+        insightsApiKey,
+        insightsProjectId: parseInt(insightsProjectId, 10),
         debug: true,
     })
 
@@ -84,22 +84,22 @@ async function main() {
         process.exit(1)
     }
 
-    const posthogApiUrl = process.env.POSTHOG_API_URL
-    const posthogApiKey = process.env.POSTHOG_PERSONAL_API_KEY
-    const posthogProjectId = process.env.POSTHOG_PROJECT_ID
+    const insightsApiUrl = process.env.INSIGHTS_API_URL
+    const insightsApiKey = process.env.INSIGHTS_PERSONAL_API_KEY
+    const insightsProjectId = process.env.INSIGHTS_PROJECT_ID
 
-    if (!posthogApiUrl) {
-        console.error('Missing required environment variable: POSTHOG_API_URL')
+    if (!insightsApiUrl) {
+        console.error('Missing required environment variable: INSIGHTS_API_URL')
         process.exit(1)
     }
 
-    if (!posthogApiKey) {
-        console.error('Missing required environment variable: POSTHOG_PERSONAL_API_KEY')
+    if (!insightsApiKey) {
+        console.error('Missing required environment variable: INSIGHTS_PERSONAL_API_KEY')
         process.exit(1)
     }
 
-    if (taskId && !posthogProjectId) {
-        console.error('Missing required environment variable: POSTHOG_PROJECT_ID')
+    if (taskId && !insightsProjectId) {
+        console.error('Missing required environment variable: INSIGHTS_PROJECT_ID')
         process.exit(1)
     }
 
@@ -108,9 +108,9 @@ async function main() {
             taskId,
             runId,
             repositoryPath,
-            posthogApiUrl,
-            posthogApiKey,
-            posthogProjectId,
+            insightsApiUrl,
+            insightsApiKey,
+            insightsProjectId,
             prompt,
             maxTurns,
             createPR: createPR === 'true',

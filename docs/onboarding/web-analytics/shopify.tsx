@@ -20,7 +20,7 @@ export const getShopifySteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <>
                         {WebFinalSteps && <WebFinalSteps />}
                         <Markdown>
-                            See the [Shopify integration docs](https://posthog.com/docs/libraries/shopify) for tracking
+                            See the [Shopify integration docs](https://hanzo.ai/docs/libraries/shopify) for tracking
                             checkout events and revenue.
                         </Markdown>
                     </>

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy } from '@posthog/icons'
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -27,7 +27,7 @@ export function TemplateJsonModal(props: WorkflowTemplateLogicProps = {}): JSX.E
         >
             <div className="space-y-4">
                 <div className="p-3 bg-primary-highlight rounded border">
-                    Copy your template and create or edit the template file in the posthog repository under{' '}
+                    Copy your template and create or edit the template file in the insights repository under{' '}
                     <code className="text-xs">products/workflows/backend/templates</code>
                 </div>
                 <div className="relative">

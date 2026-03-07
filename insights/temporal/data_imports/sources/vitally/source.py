@@ -88,7 +88,7 @@ class VitallySource(SimpleSource[VitallySourceConfig]):
         return SourceConfig(
             name=SchemaExternalDataSourceType.VITALLY,
             iconPath="/static/services/vitally.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/vitally",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/vitally",
             fields=cast(
                 list[FieldType],
                 [

@@ -35,8 +35,8 @@ class AsyncMigration(models.Model):
     # Can finish with status 'CompletedSuccessfully', 'Errored', or 'RolledBack'
     finished_at = models.DateTimeField(null=True, blank=True)
 
-    posthog_min_version = models.CharField(max_length=20, null=True, blank=True)
-    posthog_max_version = models.CharField(max_length=20, null=True, blank=True)
+    insights_min_version = models.CharField(max_length=20, null=True, blank=True)
+    insights_max_version = models.CharField(max_length=20, null=True, blank=True)
 
     parameters = models.JSONField(default=dict)
 
@@ -45,7 +45,7 @@ class AsyncMigration(models.Model):
 
     def get_name_with_requirements(self) -> str:
         return (
-            f"{self.name} - must be ran on Insights version {self.posthog_min_version} up to {self.posthog_max_version}"
+            f"{self.name} - must be ran on Insights version {self.insights_min_version} up to {self.insights_max_version}"
         )
 
 

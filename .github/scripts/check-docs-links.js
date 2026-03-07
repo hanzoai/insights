@@ -2,10 +2,10 @@
 
 // Validates links in docs/ markdown files:
 // 1. Relative links (./foo, ../bar) must resolve to existing files
-//    - published/ docs: links must stay within docs/published/ (they get served on posthog.com)
+//    - published/ docs: links must stay within docs/published/ (they get served on hanzo.ai)
 //    - internal/ docs: links can point anywhere in the repo (GitHub-only)
-// 2. Absolute posthog.com links that point to local docs should be relative instead
-// 3. Absolute posthog.com links must return HTTP 200/301/302
+// 2. Absolute hanzo.ai links that point to local docs should be relative instead
+// 3. Absolute hanzo.ai links must return HTTP 200/301/302
 
 const fs = require('fs')
 const path = require('path')
@@ -13,7 +13,7 @@ const path = require('path')
 const DOCS_ROOT = path.resolve(__dirname, '../../docs')
 const PUBLISHED_ROOT = path.join(DOCS_ROOT, 'published')
 const LINK_RE = /\[.*?\]\(([^)]+)\)/g
-const POSTHOG_URL_RE = /https:\/\/posthog\.com\/[^\s)"]+/g
+const INSIGHTS_URL_RE = /https:\/\/insights\.com\/[^\s)"]+/g
 const MAX_CONCURRENT = 10
 const RETRIES = 3
 const TIMEOUT_MS = 10_000
@@ -98,10 +98,10 @@ function findAbsoluteLinksToLocalDocs(files, publishedIndex) {
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        const re = new RegExp(POSTHOG_URL_RE.source, 'g')
+        const re = new RegExp(INSIGHTS_URL_RE.source, 'g')
         while ((match = re.exec(content)) !== null) {
             const url = match[0].replace(/[,.)]+$/, '')
-            const urlPath = url.replace('https://posthog.com/', '').split('#')[0].replace(/\/$/, '')
+            const urlPath = url.replace('https://hanzo.ai/', '').split('#')[0].replace(/\/$/, '')
             if (publishedIndex.has(urlPath)) {
                 issues.push({ file: path.relative(DOCS_ROOT, file), url })
             }
@@ -110,12 +110,12 @@ function findAbsoluteLinksToLocalDocs(files, publishedIndex) {
     return issues
 }
 
-function collectPosthogUrls(files) {
+function collectInsightsUrls(files) {
     const urls = new Set()
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf8')
         let match
-        while ((match = POSTHOG_URL_RE.exec(content)) !== null) {
+        while ((match = INSIGHTS_URL_RE.exec(content)) !== null) {
             // Strip trailing punctuation that regex might capture
             let url = match[0].replace(/[,.)]+$/, '')
             urls.add(url)
@@ -157,7 +157,7 @@ async function fetchWithRetry(url) {
     }
 }
 
-async function checkPosthogUrls(urls) {
+async function checkInsightsUrls(urls) {
     const failures = []
     // Process in batches to avoid hammering the server
     for (let i = 0; i < urls.length; i += MAX_CONCURRENT) {
@@ -219,25 +219,25 @@ async function main() {
         console.log(`  ✅ No absolute links to local docs found\n`)
     }
 
-    // 3. Check posthog.com links
-    console.log('--- Checking posthog.com links ---')
-    const urls = collectPosthogUrls(files)
+    // 3. Check hanzo.ai links
+    console.log('--- Checking hanzo.ai links ---')
+    const urls = collectInsightsUrls(files)
 
     if (urls.length === 0) {
-        console.log('  No posthog.com links found, skipping.\n')
+        console.log('  No hanzo.ai links found, skipping.\n')
     } else {
-        console.log(`  Found ${urls.length} unique posthog.com URLs to check`)
-        const brokenUrls = await checkPosthogUrls(urls)
+        console.log(`  Found ${urls.length} unique hanzo.ai URLs to check`)
+        const brokenUrls = await checkInsightsUrls(urls)
 
         if (brokenUrls.length > 0) {
             for (const { url, status } of brokenUrls) {
                 console.log(`  ❌ ${url} (${status})`)
             }
-            console.log(`\n${brokenUrls.length} broken posthog.com link(s) found.`)
+            console.log(`\n${brokenUrls.length} broken hanzo.ai link(s) found.`)
             console.log('These may be stale references to moved or deleted pages.\n')
             exitCode = 1
         } else {
-            console.log(`  ✅ All ${urls.length} posthog.com links are reachable\n`)
+            console.log(`  ✅ All ${urls.length} hanzo.ai links are reachable\n`)
         }
     }
 

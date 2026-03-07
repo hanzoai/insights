@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { JudgeHog } from 'lib/components/mascots'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
@@ -26,7 +26,7 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
 
     useEffect(() => {
         if (shouldShow && !isDismissed) {
-            posthog.capture('feature flags approvals promo shown')
+            insights.capture('feature flags approvals promo shown')
         }
     }, [shouldShow, isDismissed])
 
@@ -48,14 +48,14 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
                             type="primary"
                             className="w-fit"
                             to={urls.approvals()}
-                            onClick={() => posthog.capture('feature flags approvals promo cta clicked')}
+                            onClick={() => insights.capture('feature flags approvals promo cta clicked')}
                         >
                             Set up approvals
                         </LemonButton>
                         <LemonButton
                             type="tertiary"
                             onClick={() => {
-                                posthog.capture('feature flags approvals promo dismissed')
+                                insights.capture('feature flags approvals promo dismissed')
                                 dismiss()
                             }}
                         >

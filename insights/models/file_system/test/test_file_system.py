@@ -10,7 +10,7 @@ from products.notebooks.backend.models import Notebook
 class TestFileSystemModel(TestCase):
     def setUp(self):
         # Create a Team and a User
-        self.user = User.objects.create_user("test@posthog.com", "testpassword", first_name="Bob")
+        self.user = User.objects.create_user("test@hanzo.ai", "testpassword", first_name="Bob")
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(name="Test Team", organization=self.organization)
 

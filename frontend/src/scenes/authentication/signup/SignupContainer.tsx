@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCheckCircle } from '@posthog/icons'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { CLOUD_HOSTNAMES, FEATURE_FLAGS } from 'lib/constants'
 import { Link } from 'lib/lemon-ui/Link'

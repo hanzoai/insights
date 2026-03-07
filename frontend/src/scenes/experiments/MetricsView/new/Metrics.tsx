@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconList } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconList } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconAreaChart } from 'lib/lemon-ui/icons'
 import { AddMetricButton } from 'scenes/experiments/Metrics/AddMetricButton'

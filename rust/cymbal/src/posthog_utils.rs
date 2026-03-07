@@ -1,4 +1,4 @@
-use posthog_rs::Event;
+use insights_rs::Event;
 use tracing::error;
 use uuid::Uuid;
 
@@ -45,7 +45,7 @@ pub fn capture_symbol_set_deleted(team_id: i32, set_ref: &str, storage_ptr: Opti
 
 pub fn spawning_capture(event: Event) {
     tokio::spawn(async move {
-        if let Err(e) = posthog_rs::capture(event).await {
+        if let Err(e) = insights_rs::capture(event).await {
             error!("Error capturing issue created event: {:?}", e);
         }
     });

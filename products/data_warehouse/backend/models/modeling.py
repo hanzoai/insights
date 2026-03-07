@@ -217,7 +217,7 @@ def get_parents_from_model_query(team: Team, model_name: str, model_query: str) 
 
 class NodeType(enum.Enum):
     SAVED_QUERY = "SavedQuery"
-    POSTHOG = "Insights"
+    INSIGHTS = "Insights"
     TABLE = "Table"
 
 
@@ -235,7 +235,7 @@ class DAG:
 
 
 UPDATE_PATHS_QUERY = """\
-insert into posthog_datawarehousemodelpath (
+insert into insights_datawarehousemodelpath (
   id,
   team_id,
   table_id,
@@ -255,11 +255,11 @@ insert into posthog_datawarehousemodelpath (
     created_at,
     now() as updated_at
   from
-    posthog_datawarehousemodelpath as model_path,
+    insights_datawarehousemodelpath as model_path,
     (
       select
         path
-      from posthog_datawarehousemodelpath
+      from insights_datawarehousemodelpath
       where path ~ ('*.' || %(parent)s)::lquery
       and team_id = %(team_id)s
     ) as parent
@@ -275,14 +275,14 @@ update
 """
 
 DELETE_DUPLICATE_PATHS_QUERY = """\
-delete from posthog_datawarehousemodelpath
+delete from insights_datawarehousemodelpath
 where
   team_id = %(team_id)s
   and id in (
     select id
     from (
       select id, row_number() over (partition by team_id, path) as row_number
-      from posthog_datawarehousemodelpath
+      from insights_datawarehousemodelpath
     ) partitioned
     where partitioned.row_number > 1
 );
@@ -291,7 +291,7 @@ where
 CYCLE_CHECK_QUERY = """\
 select exists (
   select 1
-  from posthog_datawarehousemodelpath
+  from insights_datawarehousemodelpath
   where team_id = %(team_id)s
   and path ~ ('*.' || %(child)s || '.*.' || %(parent)s)::lquery
 )
@@ -393,8 +393,8 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
 
         return results
 
-    def get_or_create_root_path_for_posthog_source(
-        self, posthog_source_name: str, team: Team
+    def get_or_create_root_path_for_insights_source(
+        self, insights_source_name: str, team: Team
     ) -> tuple["DataWarehouseModelPath", bool]:
         """Get a root path for a Insights source, creating it if it doesn't exist.
 
@@ -402,17 +402,17 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
         to ensure that the source exists before creating the path.
 
         Raises:
-            ValueError: If the provided `posthog_source_name` is not a Insights table.
+            ValueError: If the provided `insights_source_name` is not a Insights table.
 
         Returns:
             A tuple with the model path and a `bool` indicating whether it was created or not.
         """
         try:
-            self.get_insightsql_database(team).get_table(posthog_source_name)
+            self.get_insightsql_database(team).get_table(insights_source_name)
         except QueryError:
-            raise ValueError(f"Provided source {posthog_source_name} is not a Insights table")
+            raise ValueError(f"Provided source {insights_source_name} is not a Insights table")
 
-        return self.get_or_create(path=[posthog_source_name], team=team, defaults={"saved_query": None})
+        return self.get_or_create(path=[insights_source_name], team=team, defaults={"saved_query": None})
 
     def get_insightsql_database(self, team: Team) -> Database:
         """Get the InsightsQL database for given team."""
@@ -484,7 +484,7 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
                 continue
 
             try:
-                parent_path, _ = self.get_or_create_root_path_for_posthog_source(parent, team)
+                parent_path, _ = self.get_or_create_root_path_for_insights_source(parent, team)
             except ValueError:
                 pass
             else:
@@ -527,7 +527,7 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
         the transaction and clean them up.
         """
         parents = get_parents_from_model_query(team, model_name, model_query)
-        posthog_table_names = self.get_insightsql_database(team).get_posthog_table_names()
+        insights_table_names = self.get_insightsql_database(team).get_insights_table_names()
 
         base_params = {
             "team_id": team.pk,
@@ -540,7 +540,7 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
                 cursor.execute("SET CONSTRAINTS ALL DEFERRED")
 
                 for parent in parents:
-                    if parent in posthog_table_names:
+                    if parent in insights_table_names:
                         parent_id = parent
                     else:
                         try:
@@ -606,7 +606,7 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
             elif model_path.table is not None:
                 node_type = NodeType.TABLE
             else:
-                node_type = NodeType.POSTHOG
+                node_type = NodeType.INSIGHTS
 
             for index, node_id in enumerate(model_path.path):
                 try:

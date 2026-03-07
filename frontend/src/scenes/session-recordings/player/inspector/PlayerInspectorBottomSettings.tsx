@@ -2,7 +2,7 @@ import './PlayerInspectorList.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { BaseIcon, IconCheck } from '@posthog/icons'
+import { BaseIcon, IconCheck } from '@hanzo/icons'
 
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
 import { SettingsBar, SettingsMenu, SettingsToggle } from 'scenes/session-recordings/components/PanelSettings'

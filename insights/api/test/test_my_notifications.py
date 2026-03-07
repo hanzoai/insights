@@ -31,12 +31,12 @@ class TestMyNotifications(APIBaseTest, QueryMatchingTest):
         super().setUp()
         self.other_user = User.objects.create_and_join(
             organization=self.organization,
-            email="other_user@posthog.com",
+            email="other_user@hanzo.ai",
             password="",
         )
         self.third_user = User.objects.create_and_join(
             organization=self.organization,
-            email="third_user@posthog.com",
+            email="third_user@hanzo.ai",
             password="",
         )
 

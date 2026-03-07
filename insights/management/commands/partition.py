@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                """SELECT exists(SELECT FROM information_schema.tables where table_name = \'posthog_event_default\')"""
+                """SELECT exists(SELECT FROM information_schema.tables where table_name = \'insights_event_default\')"""
             )
             exists = cursor.fetchone()
             if exists[0]:

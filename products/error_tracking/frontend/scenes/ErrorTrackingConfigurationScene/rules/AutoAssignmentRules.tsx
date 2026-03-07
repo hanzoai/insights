@@ -1,4 +1,4 @@
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 

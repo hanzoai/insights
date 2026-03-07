@@ -434,7 +434,7 @@ fn test_decode_request_form_urlencoded() {
 
 #[test]
 fn test_decode_form_data_kludges() {
-    // see https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L686-L708
+    // see https://github.com/hanzoai/insights/blob/main/insights/utils.py#L686-L708
     // for the list of kludges we need to support
     let test_cases = vec![
         // No padding needed
@@ -586,7 +586,7 @@ fn test_decode_form_data_real_world_payload() {
 
     // Verify key fields from the decoded request
     assert_eq!(request.token, Some("sTMFPsFhdP1Ssg".to_string()));
-    assert_eq!(request.distinct_id, Some("$posthog_cookieless".to_string()));
+    assert_eq!(request.distinct_id, Some("$insights_cookieless".to_string()));
 
     // Verify we can handle the biography with newlines
     let person_properties = request

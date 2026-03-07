@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconChevronDown, IconRefresh } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonCheckbox, LemonDropdown, LemonTable, LemonTag } from '@posthog/lemon-ui'
+import { IconChevronDown, IconRefresh } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonCheckbox, LemonDropdown, LemonTable, LemonTag } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'

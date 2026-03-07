@@ -98,4 +98,4 @@ let query3a = {"__hx_ast": "SelectQuery", "select": [{"__hx_ast": "Alias", "alia
 let query3b = {"__hx_ast": "SelectQuery", "select": [{"__hx_ast": "Alias", "alias": "name", "expr": {"__hx_ast": "Field", "chain": ["properties", "name"], "from_asterisk": false}, "hidden": false, "from_asterisk": false}, {"__hx_ast": "Alias", "alias": "email", "expr": {"__hx_ast": "Call", "name": "distinct", "args": [{"__hx_ast": "Field", "chain": ["properties", "email"], "from_asterisk": false}], "distinct": false}, "hidden": false, "from_asterisk": false}], "distinct": true, "select_from": {"__hx_ast": "JoinExpr", "table": {"__hx_ast": "Field", "chain": ["events"], "from_asterisk": false}}, "where": Filter({"name": {"__hx_ast": "Constant", "value": "John"}, "email": {"__hx_ast": "Constant", "value": "john@gmail.com"}})};
 printQ(query3a);
 printQ(query3b);
-print(((jsonStringify(query3b).includes("HogQLXAttribute")) ? "FAILED" : "PASSED"));
+print(((jsonStringify(query3b).includes("InsightsQLXAttribute")) ? "FAILED" : "PASSED"));

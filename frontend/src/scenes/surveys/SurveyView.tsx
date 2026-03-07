@@ -3,8 +3,8 @@ import './SurveyView.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconArchive, IconGraph, IconLlmAnalytics, IconThumbsDown, IconThumbsUp, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonDivider, Tooltip } from '@posthog/lemon-ui'
+import { IconArchive, IconGraph, IconLlmAnalytics, IconThumbsDown, IconThumbsUp, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonDivider, Tooltip } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'

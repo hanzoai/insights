@@ -4,7 +4,7 @@ import { DraggableSyntheticListeners } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { BuiltLogic, useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useState } from 'react'
 
 import {
@@ -15,7 +15,7 @@ import {
     IconPencil,
     IconTrash,
     IconWarning,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonBadge,
     LemonCheckbox,
@@ -25,7 +25,7 @@ import {
     LemonSelectOption,
     LemonSelectOptions,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
@@ -567,7 +567,7 @@ export function ActionFilterRow({
             noPadding
             onClick={() => {
                 convertFilterToGroup(index)
-                posthog.capture('combine_events', {
+                insights.capture('combine_events', {
                     insight_type: insightType,
                     team_id: currentTeamId,
                 })
@@ -577,7 +577,7 @@ export function ActionFilterRow({
                     Combine events
                     <br />
                     <Link
-                        to="https://posthog.com/docs/product-analytics/trends/overview#combine-events-inline"
+                        to="https://hanzo.ai/docs/product-analytics/trends/overview#combine-events-inline"
                         target="_blank"
                     >
                         Read the docs

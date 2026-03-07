@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js'
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -81,17 +81,17 @@ export const sceneDashboardChoiceModalLogic = kea<sceneDashboardChoiceModalLogic
             if (props.scene === Scene.ProjectHomepage) {
                 // TODO be able to save individual or team level home dashboard
                 actions.updateCurrentTeam({ primary_dashboard: dashboardId ?? null })
-                posthog.capture('primary dashboard changed')
+                insights.capture('primary dashboard changed')
             } else {
                 actions.setUserScenePersonalisation(props.scene, dashboardId ?? 0)
-                posthog.capture('scene dashboard choice set', { scene: props.scene, dashboardId: dashboardId })
+                insights.capture('scene dashboard choice set', { scene: props.scene, dashboardId: dashboardId })
             }
         },
         showSceneDashboardChoiceModal: async () => {
             if (props.scene === Scene.ProjectHomepage) {
-                posthog.capture('primary dashboard modal opened')
+                insights.capture('primary dashboard modal opened')
             } else {
-                posthog.capture('scene dashboard choice modal opened', { scene: props.scene })
+                insights.capture('scene dashboard choice modal opened', { scene: props.scene })
             }
         },
     })),

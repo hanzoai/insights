@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form, Group } from 'kea-forms'
 import { useCallback } from 'react'
 
-import { IconChevronLeft, IconInfo } from '@posthog/icons'
+import { IconChevronLeft, IconInfo } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonCheckbox,
@@ -12,7 +12,7 @@ import {
     LemonSelect,
     SpinnerOverlay,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AlertStateIndicator } from 'lib/components/Alerts/views/ManageAlertsModal'
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'

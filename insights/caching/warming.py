@@ -6,7 +6,7 @@ from typing import Optional
 from django.db.models import Q
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from celery import shared_task
 from celery.canvas import chain
 from prometheus_client import Counter, Gauge
@@ -28,12 +28,12 @@ from insights.tasks.utils import CeleryQueue
 logger = structlog.get_logger(__name__)
 
 STALE_INSIGHTS_GAUGE = Gauge(
-    "posthog_cache_warming_stale_insights_gauge",
+    "insights_cache_warming_stale_insights_gauge",
     "Number of stale insights present",
     ["team_id"],
 )
 PRIORITY_INSIGHTS_COUNTER = Counter(
-    "posthog_cache_warming_priority_insights",
+    "insights_cache_warming_priority_insights",
     "Number of priority insights warmed",
     ["team_id", "dashboard", "is_cached"],
 )
@@ -50,7 +50,7 @@ def teams_enabled_for_cache_warming() -> list[int]:
         "organization_id",
         "uuid",
     ).iterator(chunk_size=1000):
-        enabled = posthoganalytics.feature_enabled(
+        enabled = hanzoanalytics.feature_enabled(
             "cache-warming",
             str(uuid),
             groups={

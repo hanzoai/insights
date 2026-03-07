@@ -34,14 +34,14 @@ class Authenticator(ABC):
 
 
 class PersonalApiKeyAuthenticator(Authenticator):
-    """Authenticator for personal API keys (phx_ prefix)."""
+    """Authenticator for personal API keys (hix_ prefix)."""
 
     @property
     def auth_type(self) -> str:
         return "personal_api_key"
 
     def matches(self, token: str) -> bool:
-        return token.startswith("phx_")
+        return token.startswith("hix_")
 
     def hash_token(self, token: str) -> str:
         hashed = hashlib.sha256(token.encode()).hexdigest()
@@ -52,8 +52,8 @@ class PersonalApiKeyAuthenticator(Authenticator):
             row = await conn.fetchrow(
                 """
                 SELECT pak.id, pak.user_id, pak.scopes, u.current_team_id, u.distinct_id
-                FROM posthog_personalapikey pak
-                JOIN posthog_user u ON pak.user_id = u.id
+                FROM insights_personalapikey pak
+                JOIN insights_user u ON pak.user_id = u.id
                 WHERE pak.secure_value = $1 AND u.is_active = true
                 """,
                 token_hash,
@@ -76,14 +76,14 @@ class PersonalApiKeyAuthenticator(Authenticator):
 
 
 class OAuthAccessTokenAuthenticator(Authenticator):
-    """Authenticator for OAuth access tokens (pha_ prefix)."""
+    """Authenticator for OAuth access tokens (hia_ prefix)."""
 
     @property
     def auth_type(self) -> str:
         return "oauth_access_token"
 
     def matches(self, token: str) -> bool:
-        return token.startswith("pha_")
+        return token.startswith("hia_")
 
     def hash_token(self, token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()
@@ -94,8 +94,8 @@ class OAuthAccessTokenAuthenticator(Authenticator):
                 """
                 SELECT oat.id, oat.user_id, oat.scope, oat.expires,
                        oat.application_id, u.current_team_id, u.distinct_id
-                FROM posthog_oauthaccesstoken oat
-                JOIN posthog_user u ON oat.user_id = u.id
+                FROM insights_oauthaccesstoken oat
+                JOIN insights_user u ON oat.user_id = u.id
                 WHERE oat.token_checksum = $1 AND u.is_active = true
                 """,
                 token_hash,

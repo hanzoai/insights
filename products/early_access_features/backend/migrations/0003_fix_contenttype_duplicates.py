@@ -8,7 +8,7 @@ def fix_contenttype_duplicates(apps, schema_editor):
     Fix duplicate ContentType entries for EarlyAccessFeature.
 
     Background:
-    When early_access_features was migrated from posthog app to products app
+    When early_access_features was migrated from insights app to products app
     in PR #26693 (Jan 2025), migration 0548_migrate_early_access_features used
     SeparateDatabaseAndState to move the model, but did not update ContentType.
 

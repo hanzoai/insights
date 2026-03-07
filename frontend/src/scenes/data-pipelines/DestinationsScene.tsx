@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonTabs } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonTabs } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'

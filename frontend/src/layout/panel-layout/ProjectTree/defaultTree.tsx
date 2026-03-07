@@ -21,7 +21,7 @@ import {
     IconFunnels,
     IconGear,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconHome,
     IconLifecycle,
     IconLive,
@@ -52,7 +52,7 @@ import {
     IconUser,
     IconUserPaths,
     IconWarning,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 
@@ -253,7 +253,7 @@ const iconTypes: Record<FileSystemIconType, { icon: JSX.Element; iconColor?: Fil
         iconColor: ['var(--color-insight-stickiness-light)'],
     },
     'insight/sql': {
-        icon: <IconHogQL />,
+        icon: <IconInsightsQL />,
         iconColor: ['var(--color-insight-sql-light)'],
     },
     team_activity: {

@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
+import { IconPlus } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDialog,
@@ -16,7 +16,7 @@ import {
     LemonTag,
     ProfileBubbles,
     ProfilePicture,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'

@@ -1,5 +1,5 @@
 {
-    "name": "@insights/cyclotron",
+    "name": "@hanzo/cyclotron",
     "version": "0.1.12",
     "description": "Node bindings for cyclotron",
     "main": "dist/index.js",
@@ -13,7 +13,7 @@
         "build:cross": "cross build --message-format=json > cross.log",
         "build:typescript": "tsc",
         "clean": "rm -rf index.node",
-        "package": "NODE_ENV=development pnpm --filter=@insights/cyclotron run build"
+        "package": "NODE_ENV=development pnpm --filter=@hanzo/cyclotron run build"
     },
     "author": "",
     "license": "MIT",

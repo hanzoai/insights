@@ -11,7 +11,7 @@ from django.utils import timezone
 
 import jwt
 
-from insights.jwt import PosthogJwtAudience
+from insights.jwt import InsightsJwtAudience
 from insights.models.insight import Insight
 from insights.models.subscription import (
     UNSUBSCRIBE_TOKEN_EXP_DAYS,
@@ -32,7 +32,7 @@ class TestSubscription(BaseTest):
             "title": "My Subscription",
             "insight": insight,
             "target_type": "email",
-            "target_value": "tests@posthog.com",
+            "target_value": "tests@hanzo.ai",
             "frequency": "weekly",
             "interval": 2,
             "start_date": datetime(2022, 1, 1, 0, 0, 0, 0).replace(tzinfo=ZoneInfo("UTC")),
@@ -80,7 +80,7 @@ class TestSubscription(BaseTest):
             team=self.team,
             title="Daily Subscription",
             target_type="email",
-            target_value="tests@posthog.com",
+            target_value="tests@hanzo.ai",
             frequency="daily",
             start_date=datetime(2022, 1, 1, 10, 0, 0, 0).replace(tzinfo=ZoneInfo("UTC")),
             next_delivery_date=datetime(2022, 1, 11, 10, 0, 0, 0).replace(tzinfo=ZoneInfo("UTC")),
@@ -97,7 +97,7 @@ class TestSubscription(BaseTest):
             team=self.team,
             title="Daily Subscription",
             target_type="email",
-            target_value="tests@posthog.com",
+            target_value="tests@hanzo.ai",
             frequency="daily",
             start_date=datetime(2022, 1, 1, 10, 0, 0, 0).replace(tzinfo=ZoneInfo("UTC")),
             next_delivery_date=datetime(2022, 1, 2, 10, 0, 0, 0).replace(tzinfo=ZoneInfo("UTC")),
@@ -109,41 +109,41 @@ class TestSubscription(BaseTest):
 
     def test_generating_token(self):
         subscription = self._create_insight_subscription(
-            target_value="test1@posthog.com,test2@posthog.com,test3@posthog.com"
+            target_value="test1@hanzo.ai,test2@hanzo.ai,test3@hanzo.ai"
         )
         subscription.save()
 
-        token = get_unsubscribe_token(subscription, "test2@posthog.com")
+        token = get_unsubscribe_token(subscription, "test2@hanzo.ai")
         assert token.startswith("ey")
 
         info = jwt.decode(
             token,
             "not-so-secret",
-            audience=PosthogJwtAudience.UNSUBSCRIBE.value,
+            audience=InsightsJwtAudience.UNSUBSCRIBE.value,
             algorithms=["HS256"],
         )
 
         assert info["id"] == subscription.id
-        assert info["email"] == "test2@posthog.com"
+        assert info["email"] == "test2@hanzo.ai"
         assert info["exp"] == 1643587200
 
     def test_unsubscribe_using_token_succeeds(self):
         subscription = self._create_insight_subscription(
-            target_value="test1@posthog.com,test2@posthog.com,test3@posthog.com"
+            target_value="test1@hanzo.ai,test2@hanzo.ai,test3@hanzo.ai"
         )
         subscription.save()
 
-        token = get_unsubscribe_token(subscription, "test2@posthog.com")
+        token = get_unsubscribe_token(subscription, "test2@hanzo.ai")
         subscription = unsubscribe_using_token(token)
-        assert subscription.target_value == "test1@posthog.com,test3@posthog.com"
+        assert subscription.target_value == "test1@hanzo.ai,test3@hanzo.ai"
 
     def test_unsubscribe_using_token_fails_if_too_old(self):
         subscription = self._create_insight_subscription(
-            target_value="test1@posthog.com,test2@posthog.com,test3@posthog.com"
+            target_value="test1@hanzo.ai,test2@hanzo.ai,test3@hanzo.ai"
         )
         subscription.save()
 
-        token = get_unsubscribe_token(subscription, "test2@posthog.com")
+        token = get_unsubscribe_token(subscription, "test2@hanzo.ai")
 
         with freeze_time(datetime(2022, 1, 1) + timedelta(days=UNSUBSCRIBE_TOKEN_EXP_DAYS + 1)):
             with pytest.raises(jwt.exceptions.ExpiredSignatureError):
@@ -151,27 +151,27 @@ class TestSubscription(BaseTest):
 
         with freeze_time(datetime(2022, 1, 1) + timedelta(days=UNSUBSCRIBE_TOKEN_EXP_DAYS - 1)):
             subscription = unsubscribe_using_token(token)
-            assert "test2@posthog.com" not in subscription.target_value
+            assert "test2@hanzo.ai" not in subscription.target_value
 
     def test_unsubscribe_does_nothing_if_already_unsubscribed(self):
-        subscription = self._create_insight_subscription(target_value="test1@posthog.com,test3@posthog.com")
+        subscription = self._create_insight_subscription(target_value="test1@hanzo.ai,test3@hanzo.ai")
         subscription.save()
 
-        token = get_unsubscribe_token(subscription, "test2@posthog.com")
+        token = get_unsubscribe_token(subscription, "test2@hanzo.ai")
 
-        assert subscription.target_value == "test1@posthog.com,test3@posthog.com"
+        assert subscription.target_value == "test1@hanzo.ai,test3@hanzo.ai"
         subscription = unsubscribe_using_token(token)
-        assert subscription.target_value == "test1@posthog.com,test3@posthog.com"
+        assert subscription.target_value == "test1@hanzo.ai,test3@hanzo.ai"
 
     def test_unsubscribe_deletes_subscription_if_last_subscriber(self):
-        subscription = self._create_insight_subscription(target_value="test1@posthog.com,test2@posthog.com")
+        subscription = self._create_insight_subscription(target_value="test1@hanzo.ai,test2@hanzo.ai")
         subscription.save()
 
         assert not subscription.deleted
-        token = get_unsubscribe_token(subscription, "test1@posthog.com")
+        token = get_unsubscribe_token(subscription, "test1@hanzo.ai")
         subscription = unsubscribe_using_token(token)
         assert not subscription.deleted
-        token = get_unsubscribe_token(subscription, "test2@posthog.com")
+        token = get_unsubscribe_token(subscription, "test2@hanzo.ai")
         subscription = unsubscribe_using_token(token)
         assert subscription.deleted
 

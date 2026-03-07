@@ -3,7 +3,7 @@
 import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react'
 
 import { sampleUsers } from './data'
-import { posthog } from './posthog'
+import { insights } from './insights'
 
 interface User {
     id: string
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
                 const userData = JSON.parse(savedUser)
                 setUser(userData)
                 // Re-identify user on page load
-                posthog.identify(userData.id, userData)
+                insights.identify(userData.id, userData)
             } catch {
                 localStorage.removeItem('hedgebox_user')
             }
@@ -75,8 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
             localStorage.setItem('hedgebox_user', JSON.stringify(userWithAvatar))
 
             // Track successful login
-            posthog.capture('logged_in')
-            posthog.identify(userWithAvatar.id, userWithAvatar)
+            insights.capture('logged_in')
+            insights.identify(userWithAvatar.id, userWithAvatar)
 
             return true
         } catch {
@@ -105,10 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
             localStorage.setItem('hedgebox_user', JSON.stringify(userData))
 
             // Track successful signup
-            posthog.capture('signed_up', {
+            insights.capture('signed_up', {
                 from_invite: false,
             })
-            posthog.identify(userData.id, userData)
+            insights.identify(userData.id, userData)
 
             return true
         } catch {
@@ -121,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     const logout = (): void => {
         setUser(null)
         localStorage.removeItem('hedgebox_user')
-        posthog.capture('logged_out')
-        posthog.reset()
+        insights.capture('logged_out')
+        insights.reset()
     }
 
     return <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>{children}</AuthContext.Provider>

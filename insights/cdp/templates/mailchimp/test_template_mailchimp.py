@@ -7,7 +7,7 @@ def create_inputs(**kwargs):
         "apiKey": "abcdef",
         "audienceId": "a1b2c3",
         "dataCenterId": "us1",
-        "email": "max@posthog.com",
+        "email": "max@hanzo.ai",
         "include_all_properties": False,
         "doubleOptIn": False,
         "properties": {"FNAME": "Max", "LNAME": "AI", "COMPANY": "Insights"},
@@ -89,13 +89,13 @@ class TestTemplateMailchimp(BaseInsightsFunctionTemplateTest):
     def test_email_case_normalization(self):
         # Test with lowercase email
         self.run_function(
-            inputs=create_inputs(email="max@posthog.com"),
+            inputs=create_inputs(email="max@hanzo.ai"),
         )
         lowercase_url = self.get_mock_fetch_calls()[0][0]
 
         # Test with mixed case email
         self.run_function(
-            inputs=create_inputs(email="Max@Posthog.com"),
+            inputs=create_inputs(email="Max@Insights.com"),
         )
         mixed_case_url = self.get_mock_fetch_calls()[0][0]
 

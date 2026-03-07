@@ -3,8 +3,8 @@ import './LiveUserCount.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPerson, IconVideoCamera } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconPerson, IconVideoCamera } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { humanFriendlyLargeNumber, humanFriendlyNumber, pluralize } from 'lib/utils'

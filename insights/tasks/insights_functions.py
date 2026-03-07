@@ -97,7 +97,7 @@ def queue_sync_insights_function_templates() -> None:
     """Queue the sync_insights_function_templates_task with Redis lock to ensure it only runs once."""
     try:
         r = get_client()
-        lock_key = "posthog_sync_insights_function_templates_task_lock"
+        lock_key = "insights_sync_insights_function_templates_task_lock"
         # setnx returns True if the key was set, False if it already exists
         if r.setnx(lock_key, 1):
             r.expire(lock_key, 60 * 60)  # expire after 1 hour

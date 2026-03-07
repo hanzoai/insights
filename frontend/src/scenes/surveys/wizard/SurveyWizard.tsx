@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import { getNextSurveyStep } from 'posthog-js/dist/surveys-preview'
+import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonDialog } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'

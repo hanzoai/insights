@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { IconChip } from '@posthog/icons'
+import { IconChip } from '@hanzo/icons'
 
 import { Popover } from 'lib/lemon-ui/Popover'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
@@ -116,7 +116,7 @@ export function QueryExecutionDetails(): JSX.Element | null {
                     const newVisible = !popoverVisible
                     setPopoverVisible(newVisible)
                     if (newVisible) {
-                        posthog.capture('query execution details viewed')
+                        insights.capture('query execution details viewed')
                     }
                 }}
                 onMouseEnter={() => {
@@ -125,7 +125,7 @@ export function QueryExecutionDetails(): JSX.Element | null {
                     }
                     if (!popoverVisible) {
                         setPopoverVisible(true)
-                        posthog.capture('query execution details viewed')
+                        insights.capture('query execution details viewed')
                     }
                 }}
                 onMouseLeave={() => setPopoverVisible(false)}

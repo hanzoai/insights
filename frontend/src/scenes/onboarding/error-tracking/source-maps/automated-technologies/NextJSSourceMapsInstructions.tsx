@@ -22,11 +22,11 @@ export function NextJSSourceMapsInstructions(): JSX.Element {
             </p>
             <CodeSnippet language={Language.Bash}>
                 {[
-                    'npm install @posthog/nextjs-config',
+                    'npm install @hanzo/nextjs-config',
                     '# OR',
-                    'yarn add @posthog/nextjs-config',
+                    'yarn add @hanzo/nextjs-config',
                     '# OR',
-                    'pnpm add @posthog/nextjs-config',
+                    'pnpm add @hanzo/nextjs-config',
                 ].join('\n')}
             </CodeSnippet>
 
@@ -52,7 +52,7 @@ export function NextJSSourceMapsInstructions(): JSX.Element {
 const nextConfig = (
     teamId: string,
     host: string
-): string => `import { withInsightsConfig } from "@posthog/nextjs-config";
+): string => `import { withInsightsConfig } from "@hanzo/nextjs-config";
 
 const nextConfig = {
   //...your nextjs config,
@@ -61,7 +61,7 @@ const nextConfig = {
 export default withInsightsConfig(nextConfig, {
   personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings
   envId: '${teamId}', // Your environment ID (project ID)
-  host: '${host}', // Optional: Your Insights instance URL, defaults to https://us.posthog.com
+  host: '${host}', // Optional: Your Insights instance URL, defaults to https://insights.hanzo.ai
   sourcemaps: { // Optional
     enabled: true, // Optional: Enable sourcemaps generation and upload, defaults to true on production builds
     project: "my-application", // Optional: Project name, defaults to git repository name

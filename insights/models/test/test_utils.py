@@ -46,9 +46,9 @@ class TestValidateRateLimit(BaseTest):
 
 
 def test_mask_key_value():
-    assert mask_key_value("phx_1234567891011121314151617181920") == "phx_...1920"  # Normal case
-    assert mask_key_value("phx_shortenedAB") == "********"  # String shorter than 16 chars
-    assert mask_key_value("phx_00000000ABCD") == "phx_...ABCD"  # Exactly 8 chars
+    assert mask_key_value("hix_1234567891011121314151617181920") == "hix_...1920"  # Normal case
+    assert mask_key_value("hix_shortenedAB") == "********"  # String shorter than 16 chars
+    assert mask_key_value("hix_00000000ABCD") == "hix_...ABCD"  # Exactly 8 chars
     assert mask_key_value("") == "********"  # Empty string
 
 

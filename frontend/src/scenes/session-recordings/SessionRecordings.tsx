@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconDocument, IconEllipsis, IconGear, IconHeadset, IconOpenSidebar } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonMenu, Link } from '@posthog/lemon-ui'
+import { IconDocument, IconEllipsis, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonMenu, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -177,7 +177,7 @@ function Warnings(): JSX.Element {
                                 <LemonButton
                                     type="tertiary"
                                     sideIcon={<IconOpenSidebar className="w-4 h-4" />}
-                                    to="https://posthog.com/docs/session-replay?utm_medium=in-product&utm_campaign=empty-state-docs-link"
+                                    to="https://hanzo.ai/docs/session-replay?utm_medium=in-product&utm_campaign=empty-state-docs-link"
                                     data-attr="product-introduction-docs-link"
                                     targetBlank
                                 >
@@ -231,13 +231,13 @@ function MainPanel({ tabId }: { tabId: string }): JSX.Element {
 const ReplayPageTabs: ReplayTab[] = [
     {
         label: 'Recordings',
-        tooltipDocLink: 'https://posthog.com/docs/session-replay/tutorials',
+        tooltipDocLink: 'https://hanzo.ai/docs/session-replay/tutorials',
         key: ReplayTabs.Home,
         'data-attr': 'session-recordings-home-tab',
     },
     {
         label: 'Collections',
-        tooltipDocLink: 'https://posthog.com/docs/session-replay/how-to-watch-recordings',
+        tooltipDocLink: 'https://hanzo.ai/docs/session-replay/how-to-watch-recordings',
         key: ReplayTabs.Playlists,
         tooltip: 'View & create collections',
         'data-attr': 'session-recordings-collections-tab',

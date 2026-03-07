@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconPencil, IconPlus, IconTrash } from '@posthog/icons'
+import { IconCopy, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
@@ -177,7 +177,7 @@ export function AuthorizedUrlList({
                                                                 You can copy the launch code and paste it into the
                                                                 browser console on your site.
                                                             </p>
-                                                            <p>NB you need to have added posthog to the `window`</p>
+                                                            <p>NB you need to have added insights to the `window`</p>
                                                             <LemonButton
                                                                 icon={<IconCopy />}
                                                                 size="small"

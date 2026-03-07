@@ -20,21 +20,21 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -60,9 +60,9 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 <Markdown>
                                     {dedent`
                                         For Angular v17 and above, you can set up Insights as a singleton service. 
-                                        To do this, start by creating and injecting a \`PosthogService\` instance.
+                                        To do this, start by creating and injecting a \`InsightsService\` instance.
 
-                                        Create a service by running \`ng g service services/posthog\`. The 
+                                        Create a service by running \`ng g service services/insights\`. The 
                                         service should look like this:
                                     `}
                                 </Markdown>
@@ -72,13 +72,13 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             language: 'typescript',
                                             file: 'src/main.ts',
                                             code: dedent`
-                                              // src/app/services/posthog.service.ts
+                                              // src/app/services/insights.service.ts
                                               import { DestroyRef, Injectable, NgZone } from "@angular/core";
-                                              import posthog from "posthog-js";
+                                              import insights from "insights-js";
                                               import { environment } from "../../environments/environment";
                                               import { Router } from "@angular/router";
                                               @Injectable({ providedIn: "root" })
-                                              export class PosthogService {
+                                              export class InsightsService {
                                                 constructor(
                                                   private ngZone: NgZone,
                                                   private router: Router,
@@ -88,8 +88,8 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                                 }
                                                 private initInsights() {
                                                   this.ngZone.runOutsideAngular(() => {
-                                                    posthog.init(environment.posthogKey, {
-                                                      api_host: environment.posthogHost,
+                                                    insights.init(environment.insightsKey, {
+                                                      api_host: environment.insightsHost,
                                                       defaults: '2026-01-30',
                                                     });
                                                   });
@@ -117,7 +117,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                               // src/app/app.component.ts
                                               import { Component } from "@angular/core";
                                               import { RouterOutlet } from "@angular/router";
-                                              import { PosthogService } from "./services/posthog.service";
+                                              import { InsightsService } from "./services/insights.service";
                                               @Component({
                                                 selector: "app-root",
                                                 styleUrls: ["./app.component.scss"],
@@ -127,7 +127,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                               })
                                               export class AppComponent {
                                                 title = "angular-app";
-                                                constructor(posthogService: PosthogService) {}
+                                                constructor(insightsService: InsightsService) {}
                                               }
                                             `,
                                         },
@@ -139,7 +139,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     {dedent`
                                         In your \`src/main.ts\`, initialize Insights using your project API 
                                         key and instance address. You can find both in your 
-                                        [project settings](https://us.posthog.com/project/settings).
+                                        [project settings](https://insights.hanzo.ai/project/settings).
                                     `}
                                 </Markdown>
                                 <CodeBlock
@@ -153,9 +153,9 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                               import { appConfig } from './app/app.config';
                                               import { AppComponent } from './app/app.component';
                                               import { environment } from "./environments/environment";
-                                              import posthog from 'posthog-js'
-                                              posthog.init(environment.posthogKey, {
-                                                api_host: environment.posthogHost,
+                                              import insights from '@hanzo/insights'
+                                              insights.init(environment.insightsKey, {
+                                                api_host: environment.insightsHost,
                                                 defaults: '2025-11-30'
                                               })
                                               bootstrapApplication(AppComponent, appConfig)

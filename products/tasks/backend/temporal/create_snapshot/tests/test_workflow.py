@@ -100,7 +100,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
         try:
             result = await self._run_workflow(
                 github_integration_id=github_integration.id,
-                repository="posthog/posthog-js",
+                repository="hanzoai/insights-js",
                 team_id=test_team.id,
             )
 
@@ -115,7 +115,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
 
             assert len(snapshots) >= 1
             latest_snapshot = snapshots[0]
-            assert "posthog/posthog-js" in latest_snapshot.repos
+            assert "hanzoai/insights-js" in latest_snapshot.repos
             assert latest_snapshot.status == SandboxSnapshot.Status.COMPLETE
             assert latest_snapshot.external_id is not None
 
@@ -131,7 +131,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
         try:
             result = await self._run_workflow(
                 github_integration_id=github_integration.id,
-                repository="posthog/posthog-js",
+                repository="hanzoai/insights-js",
                 team_id=test_team.id,
             )
 
@@ -140,7 +140,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
             snapshot = await sync_to_async(SandboxSnapshot.objects.get)(id=result.snapshot_id)
             created_snapshots.append(snapshot)
 
-            assert snapshot.repos == ["posthog/posthog-js"]
+            assert snapshot.repos == ["hanzoai/insights-js"]
             assert len(snapshot.repos) == 1
 
         finally:
@@ -152,7 +152,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
 
         result = await self._run_workflow(
             github_integration_id=invalid_integration_id,
-            repository="posthog/posthog-js",
+            repository="hanzoai/insights-js",
             team_id=test_team.id,
         )
 
@@ -163,7 +163,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
     async def test_workflow_handles_clone_failure(self, github_integration, test_team):
         result = await self._run_workflow(
             github_integration_id=github_integration.id,
-            repository="posthog/nonexistent-repo-12345",
+            repository="hanzoai/nonexistent-repo-12345",
             team_id=test_team.id,
         )
 
@@ -177,7 +177,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
         try:
             result = await self._run_workflow(
                 github_integration_id=github_integration.id,
-                repository="posthog/posthog-js",
+                repository="hanzoai/insights-js",
                 team_id=test_team.id,
             )
 
@@ -199,7 +199,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
     async def test_workflow_cleans_up_sandbox_on_failure(self, github_integration, test_team):
         result = await self._run_workflow(
             github_integration_id=github_integration.id,
-            repository="posthog/nonexistent-repo-12345",
+            repository="hanzoai/nonexistent-repo-12345",
             team_id=test_team.id,
         )
 
@@ -216,7 +216,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
         try:
             result1 = await self._run_workflow(
                 github_integration_id=github_integration.id,
-                repository="posthog/posthog-js",
+                repository="hanzoai/insights-js",
                 team_id=test_team.id,
             )
 
@@ -226,7 +226,7 @@ class TestCreateSnapshotForRepositoryWorkflow:
 
             result2 = await self._run_workflow(
                 github_integration_id=github_integration.id,
-                repository="posthog/posthog-js",
+                repository="hanzoai/insights-js",
                 team_id=test_team.id,
             )
 
@@ -235,8 +235,8 @@ class TestCreateSnapshotForRepositoryWorkflow:
             created_snapshots.append(snapshot2)
 
             assert result1.snapshot_id != result2.snapshot_id
-            assert snapshot1.repos == ["posthog/posthog-js"]
-            assert snapshot2.repos == ["posthog/posthog-js"]
+            assert snapshot1.repos == ["hanzoai/insights-js"]
+            assert snapshot2.repos == ["hanzoai/insights-js"]
 
         finally:
             for snapshot in created_snapshots:

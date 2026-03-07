@@ -237,7 +237,7 @@ def get_insight_analysis(
         content, _, _ = hit_openai(
             messages,
             f"team/{team.id}/analysis",
-            posthog_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-analysis"},
+            insights_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-analysis"},
         )
         return content
 
@@ -286,7 +286,7 @@ def get_ai_suggestions(
         content, _, _ = hit_openai(
             messages,
             f"team/{team.id}/suggestions",
-            posthog_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-suggestions"},
+            insights_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-suggestions"},
         )
 
         # Parse JSON from content
@@ -356,7 +356,7 @@ def generate_insight_name(query: InsightVizNode, team: Team) -> str:
         content, _, _ = hit_openai(
             messages,
             f"team/{team.id}/generate-insight-name",
-            posthog_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-name-generation"},
+            insights_properties={"ai_product": "product-analytics", "ai_feature": "insight-ai-name-generation"},
         )
 
         name = content.strip().strip('"').strip("'")

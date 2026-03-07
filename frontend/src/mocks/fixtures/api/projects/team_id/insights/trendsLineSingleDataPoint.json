@@ -116,7 +116,7 @@
         "uuid": "017f7913-c1ee-0000-faff-0fe5ace3849a",
         "distinct_id": "test_user",
         "first_name": "Test",
-        "email": "test@posthog.com"
+        "email": "test@hanzo.ai"
     },
     "description": "Visual regression test for single data point visibility",
     "updated_at": "2026-01-20T12:00:00.000000Z",
@@ -129,7 +129,7 @@
         "uuid": "017f7913-c1ee-0000-faff-0fe5ace3849a",
         "distinct_id": "test_user",
         "first_name": "Test",
-        "email": "test@posthog.com"
+        "email": "test@hanzo.ai"
     },
     "is_sample": false,
     "query": {

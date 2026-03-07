@@ -26,12 +26,12 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'javascript',
                             file: 'src/hooks.client.js',
                             code: dedent`
-                              import posthog from 'posthog-js';
+                              import insights from '@hanzo/insights';
                               import type { HandleClientError } from '@sveltejs/kit';
                               export const handleError = ({ error, status }: HandleClientError) => {
                                 // SvelteKit 2.0 offers a reliable way to check for a 404 error:
                                 if (status !== 404) {
-                                    posthog.captureException(error);
+                                    insights.captureException(error);
                                 }
                               };
                             `,
@@ -59,10 +59,10 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'src/hooks.server.ts',
                             code: dedent`
                               import type { HandleServerError } from '@sveltejs/kit';
-                              import { Insights } from 'posthog-node';
+                              import { Insights } from 'insights-node';
                               const client = new Insights(
                                 '<ph_project_api_key>',
-                                { host: 'https://us.i.posthog.com' }
+                                { host: 'https://us.i.hanzo.ai' }
                               )
                               export const handleError = async ({ error, status }: HandleServerError) => {
                                 if (status !== 404) {
@@ -87,7 +87,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

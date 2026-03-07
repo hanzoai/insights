@@ -17,7 +17,7 @@
 
 <!-- Docs reminder: If this change requires updated docs, please do that! Engineers are the primary people responsible for their documentation. 🙌 -->
 
-👉 _Stay up-to-date with [Insights coding conventions](https://posthog.com/docs/contribute/coding-conventions) for a smoother review._
+👉 _Stay up-to-date with [Insights coding conventions](https://hanzo.ai/docs/contribute/coding-conventions) for a smoother review._
 
 ## Publish to changelog?
 

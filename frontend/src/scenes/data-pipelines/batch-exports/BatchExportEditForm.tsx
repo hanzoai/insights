@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 import {
     LemonCalendarSelectInput,
     LemonCheckbox,
@@ -10,7 +10,7 @@ import {
     LemonTextArea,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -165,7 +165,7 @@ export function BatchExportsEditFields({
                             <>
                                 Template variables are supported. Please check out the{' '}
                                 <Link
-                                    to="https://posthog.com/docs/cdp/batch-exports/s3#s3-key-prefix-template-variables"
+                                    to="https://hanzo.ai/docs/cdp/batch-exports/s3#s3-key-prefix-template-variables"
                                     target="_blank"
                                 >
                                     docs
@@ -174,7 +174,7 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonInput placeholder="e.g. posthog-events/" />
+                        <LemonInput placeholder="e.g. insights-events/" />
                     </LemonField>
 
                     <div className="flex gap-4">
@@ -562,7 +562,7 @@ export function BatchExportsEditFields({
                             </div>
 
                             <LemonField name="redshift_s3_key_prefix" label="S3 key prefix" className="flex-1">
-                                <LemonInput placeholder="e.g. /posthog-copy-files" />
+                                <LemonInput placeholder="e.g. /insights-copy-files" />
                             </LemonField>
 
                             <div className="flex gap-4">
@@ -770,7 +770,7 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonInput placeholder="posthog/events/" />
+                        <LemonInput placeholder="insights/events/" />
                     </LemonField>
 
                     <div className="flex gap-4">
@@ -866,13 +866,13 @@ export function BatchExportsEditFields({
                     <LemonField name="url" label="Insights region">
                         <LemonSelect
                             options={[
-                                { value: 'https://us.i.posthog.com/batch/', label: 'US' },
-                                { value: 'https://eu.i.posthog.com/batch/', label: 'EU' },
+                                { value: 'https://us.i.hanzo.ai/batch/', label: 'US' },
+                                { value: 'https://eu.i.hanzo.ai/batch/', label: 'EU' },
                             ]}
                         />
                     </LemonField>
                     <LemonField name="token" label="Destination project API Key">
-                        <LemonInput placeholder="e.g. phc_12345..." />
+                        <LemonInput placeholder="e.g. hi_12345..." />
                     </LemonField>
                 </>
             ) : null}

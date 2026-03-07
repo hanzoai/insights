@@ -6,7 +6,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            if (posthog.getFeatureFlag('your-experiment-feature-flag') === 'test') {
+            if (insights.getFeatureFlag('your-experiment-feature-flag') === 'test') {
                 // Do something differently for this user
             } else {
                 // It's a good idea to let control variant always be the default behaviour,
@@ -14,14 +14,14 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
 
             // Test that it works
-            posthog.featureFlags.overrideFeatureFlags({ flags: {'your-experiment-feature-flag': 'test'} })
+            insights.featureFlags.overrideFeatureFlags({ flags: {'your-experiment-feature-flag': 'test'} })
         `,
         react: dedent`
             // You can either use the useFeatureFlagVariantKey hook,
-            // or you can use the feature flags component - https://posthog.com/docs/libraries/react#feature-flags-react-component
+            // or you can use the feature flags component - https://hanzo.ai/docs/libraries/react#feature-flags-react-component
 
             // Method one: using the useFeatureFlagVariantKey hook
-            import { useFeatureFlagVariantKey } from 'posthog-js/react'
+            import { useFeatureFlagVariantKey } from '@hanzo/insights/react'
 
             function App() {
                 const variant = useFeatureFlagVariantKey('your-experiment-feature-flag')
@@ -31,23 +31,23 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
 
             // Method two: using the feature flags component
-            import { PostHogFeature } from 'posthog-js/react'
+            import { InsightsFeature } from '@hanzo/insights/react'
 
             function App() {
                 return (
-                    <PostHogFeature flag='your-experiment-feature-flag' match='test'>
+                    <InsightsFeature flag='your-experiment-feature-flag' match='test'>
                         <div>
                             {/* the component to show */}
                         </div>
-                    </PostHogFeature>
+                    </InsightsFeature>
                 )
             }
 
             // You can also test your code by overriding the feature flag:
-            posthog.featureFlags.overrideFeatureFlags({ flags: {'your-experiment-feature-flag': 'test'} })
+            insights.featureFlags.overrideFeatureFlags({ flags: {'your-experiment-feature-flag': 'test'} })
         `,
         'react-native': dedent`
-            if (posthog.getFeatureFlag('your-experiment-feature-flag') === 'test') {
+            if (insights.getFeatureFlag('your-experiment-feature-flag') === 'test') {
                 // Do something differently for this user
             } else {
                 // It's a good idea to let control variant always be the default behaviour,
@@ -65,7 +65,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
         `,
         python: dedent`
-            experiment_flag_value = posthog.get_feature_flag("your-experiment-feature-flag", "user_distinct_id")
+            experiment_flag_value = insights.get_feature_flag("your-experiment-feature-flag", "user_distinct_id")
 
             if experiment_flag_value == 'test':
                 # Do something differently for this user
@@ -82,7 +82,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
         `,
         ruby: dedent`
-            experimentFlagValue = posthog.get_feature_flag('your-experiment-feature-flag', 'user distinct id')
+            experimentFlagValue = insights.get_feature_flag('your-experiment-feature-flag', 'user distinct id')
 
             if experimentFlagValue == 'test'
                 # Do something differently for this user
@@ -92,7 +92,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             end
         `,
         go: dedent`
-            experimentFlagValue, err := client.GetFeatureFlag(posthog.FeatureFlagPayload{
+            experimentFlagValue, err := client.GetFeatureFlag(insights.FeatureFlagPayload{
                 Key:        "your-experiment-feature-flag",
                 DistinctId: "distinct-id",
             })
@@ -123,7 +123,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
         `,
         flutter: dedent`
-            if (await Posthog().getFeatureFlag('your-experiment-feature-flag') == 'test') {
+            if (await Insights().getFeatureFlag('your-experiment-feature-flag') == 'test') {
                 // Do something differently for this user
             } else {
                 // It's a good idea to let control variant always be the default behaviour,

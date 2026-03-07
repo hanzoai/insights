@@ -1,7 +1,7 @@
-//! Generic cache system for PostHog services
+//! Generic cache system for Insights services
 //!
 //! This crate provides a generic read-through cache implementation that can be used
-//! across all PostHog services. It supports:
+//! across all Insights services. It supports:
 //!
 //! - Generic key-value caching with Redis
 //! - Configurable TTL and cache prefixes

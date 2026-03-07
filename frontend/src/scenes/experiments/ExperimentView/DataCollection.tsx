@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonModal, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonModal, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
 import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
@@ -149,7 +149,7 @@ export function DataCollection(): JSX.Element {
                                     </div>
                                     <div>
                                         Read more in the{' '}
-                                        <Link to="https://posthog.com/docs/experiments/sample-size-running-time#minimum-detectable-effect-mde">
+                                        <Link to="https://hanzo.ai/docs/experiments/sample-size-running-time#minimum-detectable-effect-mde">
                                             documentation.
                                         </Link>
                                     </div>

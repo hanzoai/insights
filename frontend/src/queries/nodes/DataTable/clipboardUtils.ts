@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { asDisplay } from 'scenes/persons/person-utils'

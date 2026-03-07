@@ -2,7 +2,7 @@ import { api } from 'lib/api.mock'
 
 import { expectLogic } from 'kea-test-utils'
 
-import { EventType } from '@posthog/rrweb-types'
+import { EventType } from '@hanzo/rrweb-types'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

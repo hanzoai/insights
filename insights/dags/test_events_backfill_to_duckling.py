@@ -152,12 +152,12 @@ class TestTableExists:
 class TestEventsDDL:
     def test_events_ddl_is_valid_sql(self):
         conn = duckdb.connect()
-        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.posthog")
+        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.insights")
         ddl = EVENTS_TABLE_DDL.format(catalog="memory")
         conn.execute(ddl)
 
         # Verify table was created with expected columns
-        result = conn.execute("DESCRIBE memory.posthog.events").fetchall()
+        result = conn.execute("DESCRIBE memory.insights.events").fetchall()
         column_names = {row[0] for row in result}
 
         assert column_names == EXPECTED_DUCKLAKE_COLUMNS
@@ -165,7 +165,7 @@ class TestEventsDDL:
 
     def test_events_ddl_is_idempotent(self):
         conn = duckdb.connect()
-        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.posthog")
+        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.insights")
         ddl = EVENTS_TABLE_DDL.format(catalog="memory")
         # Should not raise on second execution
         conn.execute(ddl)
@@ -176,12 +176,12 @@ class TestEventsDDL:
 class TestPersonsDDL:
     def test_persons_ddl_is_valid_sql(self):
         conn = duckdb.connect()
-        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.posthog")
+        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.insights")
         ddl = PERSONS_TABLE_DDL.format(catalog="memory")
         conn.execute(ddl)
 
         # Verify table was created with expected columns
-        result = conn.execute("DESCRIBE memory.posthog.persons").fetchall()
+        result = conn.execute("DESCRIBE memory.insights.persons").fetchall()
         column_names = {row[0] for row in result}
 
         assert column_names == EXPECTED_DUCKLAKE_PERSONS_COLUMNS
@@ -189,7 +189,7 @@ class TestPersonsDDL:
 
     def test_persons_ddl_is_idempotent(self):
         conn = duckdb.connect()
-        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.posthog")
+        conn.execute("CREATE SCHEMA IF NOT EXISTS memory.insights")
         ddl = PERSONS_TABLE_DDL.format(catalog="memory")
         # Should not raise on second execution
         conn.execute(ddl)
@@ -299,8 +299,8 @@ class TestSetTablePartitioning:
         conn = duckdb.connect()
         conn.execute("INSTALL ducklake; LOAD ducklake;")
         conn.execute("ATTACH ':memory:' AS test_catalog (TYPE DUCKLAKE, DATA_PATH ':memory:')")
-        conn.execute("CREATE SCHEMA test_catalog.posthog")
-        conn.execute("CREATE TABLE test_catalog.posthog.events (timestamp TIMESTAMP, event VARCHAR)")
+        conn.execute("CREATE SCHEMA test_catalog.insights")
+        conn.execute("CREATE TABLE test_catalog.insights.events (timestamp TIMESTAMP, event VARCHAR)")
 
         mock_context = MagicMock()
 
@@ -329,8 +329,8 @@ class TestSetTablePartitioning:
         conn = duckdb.connect()
         conn.execute("INSTALL ducklake; LOAD ducklake;")
         conn.execute("ATTACH ':memory:' AS test_catalog (TYPE DUCKLAKE, DATA_PATH ':memory:')")
-        conn.execute("CREATE SCHEMA test_catalog.posthog")
-        conn.execute("CREATE TABLE test_catalog.posthog.events (timestamp TIMESTAMP, event VARCHAR)")
+        conn.execute("CREATE SCHEMA test_catalog.insights")
+        conn.execute("CREATE TABLE test_catalog.insights.events (timestamp TIMESTAMP, event VARCHAR)")
 
         mock_context = MagicMock()
 
@@ -347,8 +347,8 @@ class TestSetTablePartitioning:
         """Verify that partitioning failures return False and log warning."""
         conn = duckdb.connect()
         # Don't load ducklake - table won't support SET PARTITIONED BY
-        conn.execute("CREATE SCHEMA posthog")
-        conn.execute("CREATE TABLE posthog.events (timestamp TIMESTAMP, event VARCHAR)")
+        conn.execute("CREATE SCHEMA insights")
+        conn.execute("CREATE TABLE insights.events (timestamp TIMESTAMP, event VARCHAR)")
 
         mock_context = MagicMock()
 

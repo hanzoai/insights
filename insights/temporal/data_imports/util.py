@@ -29,7 +29,7 @@ class NonRetryableException(Exception):
 S3_DELETE_TIME_BUFFER = 600
 
 
-def is_posthog_team(team_id: int) -> bool:
+def is_insights_team(team_id: int) -> bool:
     DEBUG: bool = get_from_env("DEBUG", False, type_cast=str_to_bool)
     if DEBUG:
         return True

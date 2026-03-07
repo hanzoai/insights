@@ -9,20 +9,20 @@ from insights.models import Team
 
 from products.signals.backend.api import emit_signal
 
-DEFAULT_INPUT_DIR = Path(__file__).resolve().parent.parent.parent / "github_issues" / "posthog" / "posthog"
+DEFAULT_INPUT_DIR = Path(__file__).resolve().parent.parent.parent / "github_issues" / "insights" / "insights"
 
 
 def _extract_repo(issue: dict) -> str:
     """Extract owner/repo from the issue's html_url or repository_url."""
     html_url = issue.get("html_url", "")
-    # html_url looks like https://github.com/posthog/posthog/issues/12345
+    # html_url looks like https://github.com/hanzoai/insights/issues/12345
     parts = html_url.split("/")
     try:
         idx = parts.index("github.com")
         return f"{parts[idx + 1]}/{parts[idx + 2]}"
     except (ValueError, IndexError):
         repo_url = issue.get("repository_url", "")
-        # repository_url looks like https://api.github.com/repos/posthog/posthog
+        # repository_url looks like https://api.github.com/repos/insights/insights
         return "/".join(repo_url.rstrip("/").split("/")[-2:])
 
 

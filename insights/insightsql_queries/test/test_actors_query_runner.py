@@ -55,7 +55,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         for index in range(10):
             _create_person(
                 properties={
-                    "email": f"jacob{index}@{random_uuid}.posthog.com",
+                    "email": f"jacob{index}@{random_uuid}.hanzo.ai",
                     "name": f"Mr Jacob {random_uuid}",
                     "random_uuid": random_uuid,
                     "index": index,
@@ -139,9 +139,9 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
     def test_persons_query_search_email(self):
         self.random_uuid = self._create_random_persons()
         self._create_random_persons()
-        runner = self._create_runner(ActorsQuery(search=f"jacob4@{self.random_uuid}.posthog"))
+        runner = self._create_runner(ActorsQuery(search=f"jacob4@{self.random_uuid}.insights"))
         self.assertEqual(len(runner.calculate().results), 1)
-        runner = self._create_runner(ActorsQuery(search=f"JACOB4@{self.random_uuid}.posthog"))
+        runner = self._create_runner(ActorsQuery(search=f"JACOB4@{self.random_uuid}.insights"))
         self.assertEqual(len(runner.calculate().results), 1)
 
     def test_persons_query_search_name(self):
@@ -173,7 +173,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.random_uuid = self._create_random_persons()
         runner = self._create_runner(ActorsQuery(select=["properties.email"], orderBy=["properties.email DESC"]))
         results = runner.calculate().results
-        self.assertEqual(results[0], [f"jacob9@{self.random_uuid}.posthog.com"])
+        self.assertEqual(results[0], [f"jacob9@{self.random_uuid}.hanzo.ai"])
 
     def test_persons_query_order_by_virtual_property(self):
         self.random_uuid = self._create_random_persons()
@@ -186,7 +186,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
     def test_persons_query_with_insight_actors_source_order_by_last_seen(self):
         _create_person(
             properties={
-                "email": f"first@posthog.com",
+                "email": f"first@hanzo.ai",
                 "name": "Mr Jump the Gun",
             },
             team=self.team,
@@ -201,7 +201,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.random_uuid = self._create_random_persons()
         _create_person(
             properties={
-                "email": "last@posthog.com",
+                "email": "last@hanzo.ai",
                 "name": "Mr Sleepy",
             },
             team=self.team,
@@ -215,7 +215,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
         flush_persons_and_events()
 
-        for direction, expected_email in [("DESC", "last@posthog.com"), ("ASC", "first@posthog.com")]:
+        for direction, expected_email in [("DESC", "last@hanzo.ai"), ("ASC", "first@hanzo.ai")]:
             with self.subTest(direction):
                 # Create ActorsQuery with InsightActorsQuery source, similar to PowerUsersTable
                 query = ActorsQuery(
@@ -241,21 +241,21 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.random_uuid = self._create_random_persons()
         runner = self._create_runner(ActorsQuery(select=["properties.email as email"]))
         results = runner.calculate().results
-        self.assertEqual(results[0], [f"jacob0@{self.random_uuid}.posthog.com"])
+        self.assertEqual(results[0], [f"jacob0@{self.random_uuid}.hanzo.ai"])
 
     def test_persons_query_order_by_person_display_name(self):
         _create_person(
-            properties={"email": "tom@posthog.com"},
+            properties={"email": "tom@hanzo.ai"},
             distinct_ids=["2", "some-random-uid"],
             team=self.team,
         )
         _create_person(
-            properties={"email": "arthur@posthog.com"},
+            properties={"email": "arthur@hanzo.ai"},
             distinct_ids=["7", "another-random-uid"],
             team=self.team,
         )
         _create_person(
-            properties={"email": "chris@posthog.com"},
+            properties={"email": "chris@hanzo.ai"},
             distinct_ids=["3", "yet-another-random-uid"],
             team=self.team,
         )
@@ -264,14 +264,14 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             (
                 "ascending",
                 ["person_display_name -- Person ASC"],
-                ["arthur@posthog.com", "chris@posthog.com", "tom@posthog.com"],
+                ["arthur@hanzo.ai", "chris@hanzo.ai", "tom@hanzo.ai"],
             ),
             (
                 "descending",
                 ["person_display_name -- Person DESC"],
-                ["tom@posthog.com", "chris@posthog.com", "arthur@posthog.com"],
+                ["tom@hanzo.ai", "chris@hanzo.ai", "arthur@hanzo.ai"],
             ),
-            ("no ordering", [], ["tom@posthog.com", "arthur@posthog.com", "chris@posthog.com"]),
+            ("no ordering", [], ["tom@hanzo.ai", "arthur@hanzo.ai", "chris@hanzo.ai"]),
         ]
         for msg, order_by, expected in test_cases:
             with self.subTest(msg):
@@ -282,17 +282,17 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
     def test_persons_query_order_by_person_display_name_when_column_is_not_selected(self):
         _create_person(
-            properties={"email": "tom@posthog.com", "name": "Tom"},
+            properties={"email": "tom@hanzo.ai", "name": "Tom"},
             distinct_ids=["2", "some-random-uid"],
             team=self.team,
         )
         _create_person(
-            properties={"email": "arthur@posthog.com", "name": "Arthur"},
+            properties={"email": "arthur@hanzo.ai", "name": "Arthur"},
             distinct_ids=["7", "another-random-uid"],
             team=self.team,
         )
         _create_person(
-            properties={"email": "chris@posthog.com", "name": "Chris"},
+            properties={"email": "chris@hanzo.ai", "name": "Chris"},
             distinct_ids=["3", "yet-another-random-uid"],
             team=self.team,
         )
@@ -323,7 +323,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ActorsQuery(select=["properties.email"], orderBy=["properties.email DESC"], limit=1)
         )
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob9@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob9@{self.random_uuid}.hanzo.ai"]])
         self.assertEqual(response.hasMore, True)
 
         runner = self._create_runner(
@@ -335,7 +335,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             )
         )
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob7@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob7@{self.random_uuid}.hanzo.ai"]])
         self.assertEqual(response.hasMore, True)
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=True)
@@ -349,7 +349,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
         runner = self._create_runner(query)
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.hanzo.ai"]])
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_source_insightsql_query_poe_off(self):
@@ -362,7 +362,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
         runner = self._create_runner(query)
         response = runner.calculate()
-        self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.posthog.com"]])
+        self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.hanzo.ai"]])
 
     def test_source_lifecycle_query(self):
         with freeze_time("2021-01-01T12:00:00Z"):
@@ -387,13 +387,13 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             )
             runner = self._create_runner(query)
             response = runner.calculate()
-            self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.posthog.com"]])
+            self.assertEqual(response.results, [[f"jacob4@{self.random_uuid}.hanzo.ai"]])
 
     def test_persons_query_grouping(self):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         _create_person(
             properties={
-                "email": f"jacob0@{random_uuid}.posthog.com",
+                "email": f"jacob0@{random_uuid}.hanzo.ai",
                 "name": f"Mr Jacob {random_uuid}",
                 "random_uuid": random_uuid,
                 "index": 0,

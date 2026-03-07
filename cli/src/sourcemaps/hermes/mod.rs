@@ -12,9 +12,9 @@ pub mod upload;
 
 #[derive(Subcommand)]
 pub enum HermesSubcommand {
-    /// Inject your bundled chunk with a posthog chunk ID
+    /// Inject your bundled chunk with an insights chunk ID
     Inject(InjectArgs),
-    /// Upload the bundled chunk to PostHog
+    /// Upload the bundled chunk to Insights
     Upload(upload::Args),
     /// Clone chunk_id and release_id metadata from bundle maps to composed maps
     Clone(clone::CloneArgs),

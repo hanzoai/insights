@@ -29,11 +29,11 @@ class TestPersonSchemaConsistency(TestCase):
 
     databases = {"default", "persons_db_writer"}
 
-    def test_posthog_person_exists(self):
-        """Verify posthog_person table exists in persons_db after Rust sqlx migrations."""
+    def test_insights_person_exists(self):
+        """Verify insights_person table exists in persons_db after Rust sqlx migrations."""
         self.assertTrue(
-            table_exists("posthog_person"),
-            "posthog_person table does not exist in persons_db. "
+            table_exists("insights_person"),
+            "insights_person table does not exist in persons_db. "
             "Rust sqlx migrations from rust/persons_migrations/ should have created and renamed it.",
         )
 

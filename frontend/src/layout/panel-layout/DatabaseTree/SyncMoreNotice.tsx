@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { queryDatabaseLogic } from 'scenes/data-warehouse/editor/sidebar/queryDatabaseLogic'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
@@ -14,12 +14,12 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 import { panelLayoutLogic } from '../panelLayoutLogic'
 
 export const SyncMoreNotice = (): JSX.Element | null => {
-    const { hasNonPosthogSources, syncMoreNoticeDismissed, databaseLoading } = useValues(queryDatabaseLogic)
+    const { hasNonInsightsSources, syncMoreNoticeDismissed, databaseLoading } = useValues(queryDatabaseLogic)
     const { setSyncMoreNoticeDismissed } = useActions(queryDatabaseLogic)
     const { addProductIntent } = useActions(teamLogic)
     const { showLayoutPanel, clearActivePanelIdentifier } = useActions(panelLayoutLogic)
 
-    if (hasNonPosthogSources || syncMoreNoticeDismissed || databaseLoading) {
+    if (hasNonInsightsSources || syncMoreNoticeDismissed || databaseLoading) {
         return null
     }
 

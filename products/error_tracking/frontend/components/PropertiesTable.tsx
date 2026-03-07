@@ -1,5 +1,5 @@
-import { IconCopy, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonTable, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCopy, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonTable, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -59,8 +59,8 @@ export function PropertiesTable({ entries, alternatingColors = true }: Propertie
 }
 
 const SENTINELS = {
-    Redacted: '$$_posthog_redacted_based_on_masking_rules_$$',
-    ValueTooLong: '$$_posthog_value_too_long_$$',
+    Redacted: '$$_insights_redacted_based_on_masking_rules_$$',
+    ValueTooLong: '$$_insights_value_too_long_$$',
 }
 
 const SENTINEL_REPLACEMENTS: Record<string, string> = {

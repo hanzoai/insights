@@ -16,14 +16,14 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
             <SourceMapsAPIKeyBanner />
 
             <p>
-                For Nuxt v3.7 and above, the official <code>@posthog/nuxt</code> module provides automatic source map
+                For Nuxt v3.7 and above, the official <code>@hanzo/nuxt</code> module provides automatic source map
                 generation and upload.
             </p>
 
             <h3>Install the Insights Nuxt module</h3>
             <p>Install the Insights Nuxt module using your package manager:</p>
             <CodeSnippet language={Language.Bash}>
-                {['npm install @posthog/nuxt', '# OR', 'yarn add @posthog/nuxt', '# OR', 'pnpm add @posthog/nuxt'].join(
+                {['npm install @hanzo/nuxt', '# OR', 'yarn add @hanzo/nuxt', '# OR', 'pnpm add @hanzo/nuxt'].join(
                     '\n'
                 )}
             </CodeSnippet>
@@ -52,7 +52,7 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
 }
 
 const nuxtModuleConfig = (apiKey: string, host: string, teamId: string): string => `export default defineNuxtConfig({
-  modules: ['@posthog/nuxt'],
+  modules: ['@hanzo/nuxt'],
 
   // Enable source maps generation in both vue and nitro
   sourcemap: { 
@@ -66,9 +66,9 @@ const nuxtModuleConfig = (apiKey: string, host: string, teamId: string): string 
     },
   },
 
-  posthogConfig: {
+  insightsConfig: {
     publicKey: '${apiKey}',
-    host: '${host}', // Optional: Your Insights instance URL, defaults to https://us.posthog.com
+    host: '${host}', // Optional: Your Insights instance URL, defaults to https://insights.hanzo.ai
     clientConfig: {
       capture_exceptions: true, // Enables automatic exception capture on the client side (Vue)
     },

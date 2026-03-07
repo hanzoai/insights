@@ -1,7 +1,7 @@
 {
-    "name": "@posthog/scripts",
+    "name": "@hanzo/scripts",
     "version": "1.0.0",
-    "description": "Standalone PostHog Node.js scripts",
+    "description": "Standalone Hanzo Insights Node.js scripts",
     "private": true,
     "dependencies": {
         "puppeteer": "19.0.0",

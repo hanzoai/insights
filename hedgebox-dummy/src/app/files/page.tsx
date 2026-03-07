@@ -7,7 +7,7 @@ import Header from '@/components/Header'
 import { useAuth } from '@/lib/auth'
 import { sampleFiles } from '@/lib/data'
 import { useAuthRedirect } from '@/lib/hooks'
-import { posthog } from '@/lib/posthog'
+import { insights } from '@/lib/insights'
 import { formatFileSize, getFileIcon } from '@/lib/utils'
 import { HedgeboxFile } from '@/types'
 
@@ -27,7 +27,7 @@ export default function FilesPage(): React.JSX.Element {
         setIsUploading(true)
         const fileSize = Math.floor(Math.random() * 5000000)
 
-        posthog.capture('uploaded_file', {
+        insights.capture('uploaded_file', {
             file_type: 'image/jpeg',
             file_size_b: fileSize,
             used_mb: Math.floor((usedStorage + fileSize) / 1000000),
@@ -48,7 +48,7 @@ export default function FilesPage(): React.JSX.Element {
     }
 
     const trackFileAction = (action: string, file: HedgeboxFile): void => {
-        posthog.capture(`${action}_file`, {
+        insights.capture(`${action}_file`, {
             file_type: file.type,
             file_size_b: file.size,
         })

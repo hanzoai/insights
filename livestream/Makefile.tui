@@ -1,7 +1,7 @@
 .PHONY: build build-linux build-darwin build-all clean test run deps lint fmt help
 
 # Binary name
-BINARY_NAME=posthog-live
+BINARY_NAME=insights-live
 
 # Go parameters
 GOCMD=go
@@ -66,7 +66,7 @@ lint:
 
 # Show help
 help:
-	@echo "PostHog Live TUI - Build Targets"
+	@echo "Insights Live TUI - Build Targets"
 	@echo ""
 	@echo "  make -f Makefile.tui build              Build for current platform"
 	@echo "  make -f Makefile.tui build-linux         Build Linux amd64 binary"

@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 from django.core.cache import cache
 
-import posthoganalytics
+import hanzoanalytics
 
 from insights.schema import RecordingOrder, RecordingsQuery
 
@@ -723,7 +723,7 @@ def get_synthetic_playlist(short_id: str, team: Team | None = None) -> Synthetic
             # Gate new URL collections behind feature flag
             if isinstance(source, NewUrlsSyntheticPlaylistSource):
                 try:
-                    flag_result = posthoganalytics.get_feature_flag(
+                    flag_result = hanzoanalytics.get_feature_flag(
                         "replay-new-detected-url-collections",
                         str(team.uuid),
                         groups={"organization": str(team.organization_id)},
@@ -752,7 +752,7 @@ def get_all_synthetic_playlists(team: Team) -> list[SyntheticPlaylistDefinition]
         # Gate new URL collections behind feature flag
         if isinstance(source, NewUrlsSyntheticPlaylistSource):
             try:
-                flag_result = posthoganalytics.get_feature_flag(
+                flag_result = hanzoanalytics.get_feature_flag(
                     "replay-new-detected-url-collections",
                     str(team.uuid),
                     groups={"organization": str(team.organization_id)},

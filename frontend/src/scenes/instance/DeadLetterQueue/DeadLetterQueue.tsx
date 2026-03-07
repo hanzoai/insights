@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDatabase } from '@posthog/icons'
+import { IconDatabase } from '@hanzo/icons'
 
 import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -38,7 +38,7 @@ export function DeadLetterQueue(): JSX.Element {
                 </p>
                 <p>
                     If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the
-                    PostgreSQL <code>posthog_user</code> table.
+                    PostgreSQL <code>insights_user</code> table.
                 </p>
             </>
         )

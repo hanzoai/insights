@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
-import { IconBug, IconInfo, IconQuestion } from '@posthog/icons'
+import { IconBug, IconInfo, IconQuestion } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonInput,
@@ -11,7 +11,7 @@ import {
     Link,
     Tooltip,
     lemonToast,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -176,7 +176,7 @@ export function SupportForm(): JSX.Element | null {
                     <Link
                         target="_blank"
                         disableDocsPanel
-                        to="https://posthog.com/docs/support-options#severity-levels"
+                        to="https://hanzo.ai/docs/support-options#severity-levels"
                     >
                         Definitions
                     </Link>

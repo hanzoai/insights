@@ -35,7 +35,7 @@ pub struct AppContext {
     // sentinel flag used to identify the "mirror" deployments (property-defs-rs-v2) in
     // production environments to special case code that only works in those envs. Primary
     // use so far is to condition which database the service writes to. When disabled, it
-    // targets the shared PostHog cloud DB. When enabled, it targets the new, isolated
+    // targets the shared Insights cloud DB. When enabled, it targets the new, isolated
     // property definitions database instace.
     pub enable_mirror: bool,
 }
@@ -49,7 +49,7 @@ impl AppContext {
 
         // this pool is only created if DATABASE_PERSONS_URL is set in the deploy env.
         // if the read_groups_from_persons_db flag is set, we will use this pool to
-        // read posthog_grouptypemappings from the new persons DB. Otherwise, we
+        // read insights_grouptypemappings from the new persons DB. Otherwise, we
         // fall back to the std. cloud DB pool above.
         let persons_options = PgPoolOptions::new().max_connections(config.max_pg_connections);
         let persons_pool: Option<PgPool> =
@@ -138,7 +138,7 @@ impl AppContext {
             };
 
             let results = sqlx::query!(
-                "SELECT group_type, team_id, group_type_index FROM posthog_grouptypemapping
+                "SELECT group_type, team_id, group_type_index FROM insights_grouptypemapping
                  WHERE (group_type, team_id) = ANY(SELECT * FROM UNNEST($1::text[], $2::int[]))",
                 &group_names,
                 &team_ids

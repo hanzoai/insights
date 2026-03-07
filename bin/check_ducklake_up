@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def _load_ducklake_common() -> ModuleType:
     """Load ducklake helpers directly from the repo without relying on editable installs."""
-    module_path = REPO_ROOT / "posthog" / "ducklake" / "common.py"
+    module_path = REPO_ROOT / "insights" / "ducklake" / "common.py"
     spec = importlib_util.spec_from_file_location("ducklake_common", module_path)
     if not spec or not spec.loader:
         raise ImportError(f"Unable to locate DuckLake helpers at {module_path}")

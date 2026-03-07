@@ -1,11 +1,11 @@
 # Livestream TUI Build Workflow
 #
-# This workflow builds the posthog-live TUI binaries and publishes them as GitHub releases.
+# This workflow builds the insights-live TUI binaries and publishes them as GitHub releases.
 #
 # Download the latest version:
-#   curl -L https://github.com/hanzoai/insights/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live
+#   curl -L https://github.com/hanzoai/insights/releases/download/insights-live-latest/insights-live-linux-amd64 -o insights-live && chmod +x insights-live
 #
-# Or browse all versions at: https://github.com/hanzoai/insights/releases?q=posthog-live&expanded=true
+# Or browse all versions at: https://github.com/hanzoai/insights/releases?q=insights-live&expanded=true
 
 name: Build Livestream TUI
 
@@ -40,31 +40,31 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
-                  VERSION="posthog-live-$(date +%Y%m%d-%H%M%S)"
+                  VERSION="insights-live-$(date +%Y%m%d-%H%M%S)"
 
                   # Versioned release for history
                   gh release create "$VERSION" \
-                      livestream/posthog-live-linux-amd64 \
-                      livestream/posthog-live-linux-arm64 \
-                      livestream/posthog-live-darwin-amd64 \
-                      livestream/posthog-live-darwin-arm64 \
+                      livestream/insights-live-linux-amd64 \
+                      livestream/insights-live-linux-arm64 \
+                      livestream/insights-live-darwin-amd64 \
+                      livestream/insights-live-darwin-arm64 \
                       --title "Insights Live TUI $VERSION" \
                       --notes "Build from commit ${{ github.sha }}" \
                       --latest=false
 
                   # Update floating latest release
-                  gh release delete posthog-live-latest --yes || true
-                  git push origin :refs/tags/posthog-live-latest || true
-                  gh release create posthog-live-latest \
-                      livestream/posthog-live-linux-amd64 \
-                      livestream/posthog-live-linux-arm64 \
-                      livestream/posthog-live-darwin-amd64 \
-                      livestream/posthog-live-darwin-arm64 \
+                  gh release delete insights-live-latest --yes || true
+                  git push origin :refs/tags/insights-live-latest || true
+                  gh release create insights-live-latest \
+                      livestream/insights-live-linux-amd64 \
+                      livestream/insights-live-linux-arm64 \
+                      livestream/insights-live-darwin-amd64 \
+                      livestream/insights-live-darwin-arm64 \
                       --title "Insights Live TUI (Latest)" \
-                      --notes "Latest posthog-live build - same as $VERSION
+                      --notes "Latest insights-live build - same as $VERSION
 
-                  Download (Linux amd64): \`curl -L https://github.com/hanzoai/insights/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live\`
-                  Download (Linux arm64): \`curl -L https://github.com/hanzoai/insights/releases/download/posthog-live-latest/posthog-live-linux-arm64 -o posthog-live && chmod +x posthog-live\`
-                  Download (macOS amd64): \`curl -L https://github.com/hanzoai/insights/releases/download/posthog-live-latest/posthog-live-darwin-amd64 -o posthog-live && chmod +x posthog-live\`
-                  Download (macOS arm64): \`curl -L https://github.com/hanzoai/insights/releases/download/posthog-live-latest/posthog-live-darwin-arm64 -o posthog-live && chmod +x posthog-live\`" \
+                  Download (Linux amd64): \`curl -L https://github.com/hanzoai/insights/releases/download/insights-live-latest/insights-live-linux-amd64 -o insights-live && chmod +x insights-live\`
+                  Download (Linux arm64): \`curl -L https://github.com/hanzoai/insights/releases/download/insights-live-latest/insights-live-linux-arm64 -o insights-live && chmod +x insights-live\`
+                  Download (macOS amd64): \`curl -L https://github.com/hanzoai/insights/releases/download/insights-live-latest/insights-live-darwin-amd64 -o insights-live && chmod +x insights-live\`
+                  Download (macOS arm64): \`curl -L https://github.com/hanzoai/insights/releases/download/insights-live-latest/insights-live-darwin-arm64 -o insights-live && chmod +x insights-live\`" \
                       --latest=false

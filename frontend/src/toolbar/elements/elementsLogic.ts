@@ -9,7 +9,7 @@ import { actionsTabLogic } from '~/toolbar/actions/actionsTabLogic'
 import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
 import { currentPageLogic } from '~/toolbar/stats/currentPageLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ActionElementWithMetadata, ElementWithMetadata } from '~/toolbar/types'
 
 import { elementToActionStep, getAllClickTargets, getElementForStep, getRectForElement } from '../utils'
@@ -438,11 +438,11 @@ export const elementsLogic = kea<elementsLogicType>([
     }),
     listeners(({ actions, values }) => ({
         enableInspect: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'inspect', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'inspect', enabled: true })
             actionsLogic.actions.getActions()
         },
         disableInspect: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'inspect', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'inspect', enabled: false })
         },
         selectElement: ({ element }) => {
             const inspectForAction =
@@ -491,7 +491,7 @@ export const elementsLogic = kea<elementsLogicType>([
             )
             const selector = meta?.actionStep?.selector
 
-            toolbarPosthogJS.capture('toolbar selected HTML element', {
+            toolbarInsightsJS.capture('toolbar selected HTML element', {
                 element_tag: element?.tagName.toLowerCase() ?? null,
                 element_type: (element as HTMLInputElement)?.type ?? null,
                 has_href: !!(element as HTMLAnchorElement)?.href,

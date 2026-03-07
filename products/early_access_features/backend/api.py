@@ -32,7 +32,7 @@ logger = structlog.get_logger(__name__)
 class MinimalEarlyAccessFeatureSerializer(serializers.ModelSerializer):
     """
     A more minimal serializer, intended specificaly for non-generally-available features to be provided
-    to posthog-js via the /early_access_features/ endpoint. Sync with posthog-js's FeaturePreview interface!
+    to insights-js via the /early_access_features/ endpoint. Sync with insights-js's FeaturePreview interface!
     """
 
     documentationUrl = serializers.URLField(source="documentation_url")

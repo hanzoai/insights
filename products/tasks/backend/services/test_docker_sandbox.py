@@ -70,7 +70,7 @@ class TestDockerSandboxUnit:
             ("http://localhost:8000", "http://host.docker.internal:8000"),
             ("http://127.0.0.1:8000", "http://host.docker.internal:8000"),
             ("https://localhost:8000/api", "https://host.docker.internal:8000/api"),
-            ("https://app.posthog.com", "https://app.posthog.com"),
+            ("https://insights.hanzo.ai", "https://insights.hanzo.ai"),
             ("http://localhost:8000/api/v1", "http://host.docker.internal:8000/api/v1"),
         ],
     )
@@ -80,7 +80,7 @@ class TestDockerSandboxUnit:
 
     @patch("products.tasks.backend.services.docker_sandbox.subprocess.run")
     @patch("products.tasks.backend.services.docker_sandbox.os.path.exists")
-    def test_create_transforms_posthog_api_url(self, mock_exists, mock_run):
+    def test_create_transforms_insights_api_url(self, mock_exists, mock_run):
         mock_exists.return_value = False
         mock_run.return_value = MagicMock(stdout="abc123container", returncode=0)
 
@@ -88,20 +88,20 @@ class TestDockerSandboxUnit:
             name="test-sandbox",
             template=SandboxTemplate.DEFAULT_BASE,
             environment_variables={
-                "POSTHOG_API_URL": "http://localhost:8000",
-                "POSTHOG_PROJECT_ID": "1",
+                "INSIGHTS_API_URL": "http://localhost:8000",
+                "INSIGHTS_PROJECT_ID": "1",
             },
         )
 
-        with patch.object(DockerSandbox, "_get_image", return_value="posthog-sandbox-base"):
+        with patch.object(DockerSandbox, "_get_image", return_value="insights-sandbox-base"):
             DockerSandbox.create(config)
 
         docker_run_call = mock_run.call_args_list[-1]
         docker_args = docker_run_call[0][0]
 
         env_args = " ".join(docker_args)
-        assert "POSTHOG_API_URL=http://host.docker.internal:8000" in env_args
-        assert "POSTHOG_PROJECT_ID=1" in env_args
+        assert "INSIGHTS_API_URL=http://host.docker.internal:8000" in env_args
+        assert "INSIGHTS_PROJECT_ID=1" in env_args
 
     @patch("products.tasks.backend.services.docker_sandbox.subprocess.run")
     def test_get_status_running(self, mock_run):
@@ -152,7 +152,7 @@ class TestDockerSandboxIntegration:
 
     def test_create_execute_destroy_lifecycle(self):
         config = SandboxConfig(
-            name="posthog-test-docker-lifecycle",
+            name="insights-test-docker-lifecycle",
             template=SandboxTemplate.DEFAULT_BASE,
         )
 
@@ -179,7 +179,7 @@ class TestDockerSandboxIntegration:
         ],
     )
     def test_command_execution(self, command, expected_exit_code, expected_in_stdout):
-        config = SandboxConfig(name="posthog-test-docker-commands")
+        config = SandboxConfig(name="insights-test-docker-commands")
 
         with DockerSandbox.create(config) as sandbox:
             result = sandbox.execute(command)
@@ -187,7 +187,7 @@ class TestDockerSandboxIntegration:
             assert expected_in_stdout in result.stdout
 
     def test_context_manager_auto_cleanup(self):
-        config = SandboxConfig(name="posthog-test-docker-context")
+        config = SandboxConfig(name="insights-test-docker-context")
 
         with DockerSandbox.create(config) as sandbox:
             assert sandbox.is_running()
@@ -201,10 +201,10 @@ class TestDockerSandboxIntegration:
 
     def test_environment_variables_passed(self):
         config = SandboxConfig(
-            name="posthog-test-docker-env",
+            name="insights-test-docker-env",
             environment_variables={
                 "TEST_VAR": "test_value",
-                "POSTHOG_API_URL": "http://localhost:8000",
+                "INSIGHTS_API_URL": "http://localhost:8000",
             },
         )
 
@@ -212,11 +212,11 @@ class TestDockerSandboxIntegration:
             result = sandbox.execute("echo $TEST_VAR")
             assert "test_value" in result.stdout
 
-            result = sandbox.execute("echo $POSTHOG_API_URL")
+            result = sandbox.execute("echo $INSIGHTS_API_URL")
             assert "host.docker.internal" in result.stdout
 
     def test_snapshot_create_and_use(self):
-        config = SandboxConfig(name="posthog-test-docker-snapshot")
+        config = SandboxConfig(name="insights-test-docker-snapshot")
 
         with DockerSandbox.create(config) as sandbox:
             sandbox.execute("echo 'snapshot test' > /tmp/snapshot_file.txt")
@@ -226,7 +226,7 @@ class TestDockerSandboxIntegration:
 
         try:
             result = subprocess.run(
-                ["docker", "images", "-q", f"posthog-sandbox-snapshot:{snapshot_id}"],
+                ["docker", "images", "-q", f"insights-sandbox-snapshot:{snapshot_id}"],
                 capture_output=True,
                 text=True,
             )

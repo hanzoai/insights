@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconSort, IconTrash } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonCheckbox, LemonInput, LemonModal, Spinner } from '@posthog/lemon-ui'
+import { IconEllipsis, IconSort, IconTrash } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonCheckbox, LemonInput, LemonModal, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonMenuItem } from 'lib/lemon-ui/LemonMenu/LemonMenu'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'

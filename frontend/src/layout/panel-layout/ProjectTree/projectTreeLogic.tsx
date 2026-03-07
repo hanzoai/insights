@@ -2,8 +2,8 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, propsCh
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 
-import { IconPlus } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { LemonTreeSelectMode, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'

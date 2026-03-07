@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { Language } from 'lib/components/CodeSnippet'
 import { CodeSnippet } from 'lib/components/CodeSnippet'
@@ -14,7 +14,7 @@ export function useWizardCommand(): { wizardCommand: string; isCloudOrDev: boole
     const { preflight, isCloudOrDev } = useValues(preflightLogic)
     const region = preflight?.region || Region.US
     return {
-        wizardCommand: `npx -y @posthog/wizard@latest${region === Region.EU ? ' --region eu' : ''}`,
+        wizardCommand: `npx -y @hanzo/wizard@latest${region === Region.EU ? ' --region eu' : ''}`,
         isCloudOrDev: isCloudOrDev ?? false,
     }
 }

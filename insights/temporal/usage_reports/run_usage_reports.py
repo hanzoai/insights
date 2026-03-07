@@ -53,9 +53,9 @@ async def query_usage_reports(
     inputs: QueryUsageReportsInputs,
 ) -> None:
     async with Heartbeater():
-        import posthoganalytics
+        import hanzoanalytics
 
-        are_usage_reports_disabled = posthoganalytics.feature_enabled(
+        are_usage_reports_disabled = hanzoanalytics.feature_enabled(
             "disable-usage-reports", "internal_billing_events"
         )
         if are_usage_reports_disabled:
@@ -114,12 +114,12 @@ async def query_usage_reports(
 
         producer = None
 
-        pha_client = get_ph_client(sync_mode=True)
+        hia_client = get_ph_client(sync_mode=True)
 
         total_orgs = len(org_reports)
         total_orgs_sent = 0
 
-        pha_client.capture(
+        hia_client.capture(
             distinct_id="internal_billing_events",
             event="usage reports - starting to send",
             properties={
@@ -182,7 +182,7 @@ async def query_usage_reports(
         print(f"Total orgs: {total_orgs}")  # noqa: T201
         print(f"Total orgs sent: {total_orgs_sent}")  # noqa: T201
 
-        pha_client.capture(
+        hia_client.capture(
             distinct_id="internal_billing_events",
             event="usage reports - sending complete",
             properties={
@@ -194,7 +194,7 @@ async def query_usage_reports(
             },
             groups={"instance": settings.SITE_URL},
         )
-        pha_client.flush()  # Flush and close the client
+        hia_client.flush()  # Flush and close the client
 
         return None
 

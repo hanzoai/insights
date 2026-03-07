@@ -1,5 +1,5 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
-import { EarlyAccessFeature } from 'posthog-js'
+import { EarlyAccessFeature } from '@hanzo/insights'
 
 import { setFeatureFlags, useStorybookMocks } from '~/mocks/browser'
 
@@ -23,7 +23,7 @@ export default meta
 const Template: StoryFn<StoryProps> = ({ earlyAccessFeatures, enabledFeatureFlags }) => {
     useStorybookMocks({
         get: {
-            'https://us.i.posthog.com/api/early_access_features/': { earlyAccessFeatures },
+            'https://us.i.hanzo.ai/api/early_access_features/': { earlyAccessFeatures },
         },
     })
     setFeatureFlags(enabledFeatureFlags)

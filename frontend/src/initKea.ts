@@ -6,7 +6,7 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 import { identifierToHuman } from 'lib/utils'
@@ -123,7 +123,7 @@ export function initKea({
                 if (!errorsSilenced) {
                     console.error({ error, reducerKey, actionKey })
                 }
-                posthog.captureException(error)
+                insights.captureException(error)
             },
         }),
         subscriptionsPlugin,
@@ -132,7 +132,7 @@ export function initKea({
 
     if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
         // oxlint-disable-next-line no-console
-        console.log('NB Redux Dev Tools are disabled on Insights. See: https://github.com/PostHog/posthog/issues/17482')
+        console.log('NB Redux Dev Tools are disabled on Insights. See: https://github.com/hanzoai/insights/issues/17482')
     }
 
     resetContext({

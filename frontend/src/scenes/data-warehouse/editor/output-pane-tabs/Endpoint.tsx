@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCode2 } from '@posthog/icons'
+import { IconCode2 } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -10,7 +10,7 @@ import {
     LemonTextArea,
     Link,
     lemonToast,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 
@@ -107,7 +107,7 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
                     Endpoints allows you to pre-define a query that you'd like to expose as an API endpoint to use in
                     your customer-facing dashboard, on your landing page or in your internal tool.
                     <br />
-                    <Link data-attr="endpoints-help" to="https://posthog.com/docs/endpoints" target="_blank">
+                    <Link data-attr="endpoints-help" to="https://hanzo.ai/docs/endpoints" target="_blank">
                         Learn more about endpoints.
                     </Link>
                 </p>

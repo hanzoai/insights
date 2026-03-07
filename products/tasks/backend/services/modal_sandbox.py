@@ -29,10 +29,10 @@ from .sandbox import AgentServerResult, ExecutionResult, ExecutionStream, Sandbo
 logger = logging.getLogger(__name__)
 
 WORKING_DIR = "/tmp/workspace"
-DEFAULT_MODAL_APP_NAME = "posthog-sandbox-default"
-NOTEBOOK_MODAL_APP_NAME = "posthog-sandbox-notebook"
-SANDBOX_BASE_IMAGE = "ghcr.io/posthog/posthog-sandbox-base"
-SANDBOX_NOTEBOOK_IMAGE = "ghcr.io/posthog/posthog-sandbox-notebook"
+DEFAULT_MODAL_APP_NAME = "insights-sandbox-default"
+NOTEBOOK_MODAL_APP_NAME = "insights-sandbox-notebook"
+SANDBOX_BASE_IMAGE = "ghcr.io/insights/insights-sandbox-base"
+SANDBOX_NOTEBOOK_IMAGE = "ghcr.io/insights/insights-sandbox-notebook"
 SANDBOX_IMAGE = SANDBOX_BASE_IMAGE
 AGENT_SERVER_PORT = 8080  # Modal connect tokens require port 8080
 

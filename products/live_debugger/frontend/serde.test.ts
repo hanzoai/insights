@@ -132,11 +132,11 @@ describe('parseJsonPickleVariable', () => {
 
     describe('jsonpickle metadata handling', () => {
         it('should extract py/object type name', () => {
-            const result = parseJsonPickleVariable('{"py/object": "posthog.models.User", "name": "Alice"}')
+            const result = parseJsonPickleVariable('{"py/object": "insights.models.User", "name": "Alice"}')
             expect(result).toEqual({
                 type: 'complex',
                 value: { name: 'Alice' },
-                typeName: 'posthog.models.User',
+                typeName: 'insights.models.User',
             })
         })
 
@@ -363,7 +363,7 @@ describe('parseJsonPickleVariable', () => {
     describe('real-world jsonpickle examples', () => {
         it('should parse a typical Django model instance', () => {
             const djangoModel = {
-                'py/object': 'posthog.models.User',
+                'py/object': 'insights.models.User',
                 'py/id': 42,
                 id: 123,
                 email: 'user@example.com',
@@ -379,20 +379,20 @@ describe('parseJsonPickleVariable', () => {
                     is_active: true,
                     created_at: '2024-01-01T00:00:00Z',
                 },
-                typeName: 'posthog.models.User',
+                typeName: 'insights.models.User',
             })
         })
 
         it('should parse a list of model instances', () => {
             const modelList = [
                 {
-                    'py/object': 'posthog.models.Event',
+                    'py/object': 'insights.models.Event',
                     'py/id': 1,
                     event: 'pageview',
                     distinct_id: 'user1',
                 },
                 {
-                    'py/object': 'posthog.models.Event',
+                    'py/object': 'insights.models.Event',
                     'py/id': 2,
                     event: 'click',
                     distinct_id: 'user2',

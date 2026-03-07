@@ -12,8 +12,8 @@ import {
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconArrowRight, IconCollapse, IconDatabase, IconExpand } from '@posthog/icons'
-import { LemonButton, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCollapse, IconDatabase, IconExpand } from '@hanzo/icons'
+import { LemonButton, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { IconArrowDown } from 'lib/lemon-ui/icons'
 

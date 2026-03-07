@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBolt, IconPlus, IconPlusSmall, IconX } from '@posthog/icons'
+import { IconBolt, IconPlus, IconPlusSmall, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

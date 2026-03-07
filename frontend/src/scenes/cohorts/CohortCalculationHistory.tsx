@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock } from '@posthog/icons'
-import { LemonSkeleton, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { IconClock } from '@hanzo/icons'
+import { LemonSkeleton, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'

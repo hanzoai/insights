@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-error-tracking",
+    "name": "@hanzo/products-error-tracking",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -9,14 +9,14 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "posthog-js": "catalog:"
+        "@hanzo/insights": "workspace:*"
     },
     "peerDependencies": {
         "@dnd-kit/core": "*",
         "@dnd-kit/modifiers": "*",
         "@dnd-kit/sortable": "*",
         "@dnd-kit/utilities": "*",
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/addon-actions": "*",
         "@storybook/react": "*",
         "@types/d3": "*",

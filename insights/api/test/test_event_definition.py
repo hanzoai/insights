@@ -128,7 +128,7 @@ class TestEventDefinitionAPI(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert [(r["name"], r["last_seen_at"]) for r in response.json()["results"]] == expected_results
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_delete_event_definition(self, mock_capture):
         event_definition: EventDefinition = EventDefinition.objects.create(team=self.demo_team, name="test_event")
         response = self.client.delete(f"/api/projects/@current/event_definitions/{event_definition.id}/")
@@ -241,8 +241,8 @@ class TestEventDefinitionAPI(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 5
 
-    def test_event_type_event_posthog(self):
-        response = self.client.get("/api/projects/@current/event_definitions/?event_type=event_posthog")
+    def test_event_type_event_insights(self):
+        response = self.client.get("/api/projects/@current/event_definitions/?event_type=event_insights")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         assert response.json()["results"][0]["name"] == "$pageview"

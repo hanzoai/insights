@@ -23,7 +23,7 @@ class TestEvaluationModel(BaseTest):
                     "id": "cond-1",
                     "rollout_percentage": 100,
                     "properties": [
-                        {"key": "email", "value": "@posthog.com", "operator": "icontains", "type": "person"}
+                        {"key": "email", "value": "@hanzo.ai", "operator": "icontains", "type": "person"}
                     ],
                 }
             ],
@@ -113,7 +113,7 @@ class TestEvaluationModel(BaseTest):
                     "id": "cond-1",
                     "rollout_percentage": 100,
                     "properties": [
-                        {"key": "email", "value": "@posthog.com", "operator": "icontains", "type": "person"}
+                        {"key": "email", "value": "@hanzo.ai", "operator": "icontains", "type": "person"}
                     ],
                 },
                 {

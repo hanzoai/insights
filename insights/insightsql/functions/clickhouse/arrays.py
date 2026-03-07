@@ -14,7 +14,7 @@ from insights.insightsql.ast import (
 from ..core import InsightsQLFunctionMeta
 
 # arrays and strings common
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 ARRAY_STRING_COMMON_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "empty": InsightsQLFunctionMeta(
         "empty",
@@ -50,7 +50,7 @@ ARRAY_STRING_COMMON_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # arrays
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 ARRAY_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "array": InsightsQLFunctionMeta("array", 0, None),
     "range": InsightsQLFunctionMeta("range", 1, 3),

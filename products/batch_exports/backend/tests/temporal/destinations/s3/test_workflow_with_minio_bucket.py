@@ -238,10 +238,10 @@ async def test_s3_export_workflow_with_minio_bucket_without_events(
 @pytest.mark.parametrize(
     "s3_key_prefix",
     [
-        "posthog-{table}/{year}-{month}-{day}/{hour}:{minute}:{second}",
-        "posthog-{table}/{hour}:{minute}:{second}/{year}-{month}-{day}",
-        "posthog-{table}/{hour}:{minute}:{second}",
-        "posthog/{year}-{month}-{day}/{hour}:{minute}:{second}",
+        "insights-{table}/{year}-{month}-{day}/{hour}:{minute}:{second}",
+        "insights-{table}/{hour}:{minute}:{second}/{year}-{month}-{day}",
+        "insights-{table}/{hour}:{minute}:{second}",
+        "insights/{year}-{month}-{day}/{hour}:{minute}:{second}",
         "{year}-{month}-{day}",
     ],
     indirect=True,

@@ -1,4 +1,4 @@
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 

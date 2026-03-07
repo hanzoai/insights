@@ -3,8 +3,8 @@ import './ImpersonationNotice.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCollapse, IconEllipsis, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonMenu, Tooltip } from '@posthog/lemon-ui'
+import { IconCollapse, IconEllipsis, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Tooltip } from '@hanzo/lemon-ui'
 
 import { DraggableWithSnapZones, DraggableWithSnapZonesRef } from 'lib/components/DraggableWithSnapZones'
 import { dayjs } from 'lib/dayjs'

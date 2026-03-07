@@ -3,7 +3,7 @@ import { MOCK_DEFAULT_ORGANIZATION } from 'lib/api.mock'
 import { Meta } from '@storybook/react'
 import { useState } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { mswDecorator } from '~/mocks/browser'
 import { ProductKey } from '~/queries/schema/schema-general'

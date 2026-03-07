@@ -34,28 +34,28 @@ configure({ testIdAttribute: 'data-attr' })
 // Mock DecompressionWorkerManager globally to avoid import.meta.url issues in tests
 jest.mock('scenes/session-recordings/player/snapshot-processing/DecompressionWorkerManager')
 
-// Mock posthog-js surveys-preview to avoid ESM import issues in tests
-jest.mock('posthog-js/dist/surveys-preview', () => ({
+// Mock insights-js surveys-preview to avoid ESM import issues in tests
+jest.mock('insights-js/dist/surveys-preview', () => ({
     renderFeedbackWidgetPreview: jest.fn(),
     renderSurveysPreview: jest.fn(),
     getNextSurveyStep: jest.fn(),
 }))
 
-// Mock posthog-js product-tours-preview to avoid ESM import issues in tests
-jest.mock('posthog-js/dist/product-tours-preview', () => ({
+// Mock insights-js product-tours-preview to avoid ESM import issues in tests
+jest.mock('insights-js/dist/product-tours-preview', () => ({
     renderProductTourPreview: jest.fn(),
 }))
 
-// Mock posthog-js element-inference to avoid ESM import issues in tests
-jest.mock('posthog-js/dist/element-inference', () => ({
+// Mock insights-js element-inference to avoid ESM import issues in tests
+jest.mock('insights-js/dist/element-inference', () => ({
     findElement: jest.fn(),
     getElementPath: jest.fn(),
 }))
 
-// Mock posthog-js to avoid issues in tests
-jest.mock('posthog-js', () => {
+// Mock insights-js to avoid issues in tests
+jest.mock('insights-js', () => {
     // Get the actual module to preserve type exports (enums, etc.)
-    const actual = jest.requireActual('posthog-js')
+    const actual = jest.requireActual('insights-js')
 
     const mock: Record<string, any> = {
         capture: jest.fn(),
@@ -84,7 +84,7 @@ jest.mock('posthog-js', () => {
     mock.init = jest.fn(() => mock)
 
     // Return mock functions but preserve actual type exports
-    return { ...actual, __esModule: true, default: mock, posthog: mock }
+    return { ...actual, __esModule: true, default: mock, insights: mock }
 })
 
 jest.mock('@tiptap/extension-code-block-lowlight', () => {

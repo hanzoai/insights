@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconCheck, IconCopy, IconWarning, IconX } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonModal } from '@posthog/lemon-ui'
+import { IconCheck, IconCopy, IconWarning, IconX } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonModal } from '@hanzo/lemon-ui'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -22,7 +22,7 @@ function generateCleanupPrompt(deletedFlags: DeletedFlagInfo[]): string {
 
     sections.push('Find and remove all references to these deleted feature flags in the codebase.')
     sections.push(
-        'For each flag, search for all usages: isFeatureEnabled, useFeatureFlag, getFeatureFlag, posthog.isFeatureEnabled, posthog.getFeatureFlag, etc.'
+        'For each flag, search for all usages: isFeatureEnabled, useFeatureFlag, getFeatureFlag, insights.isFeatureEnabled, insights.getFeatureFlag, etc.'
     )
 
     if (fullyRolledOut.length > 0) {

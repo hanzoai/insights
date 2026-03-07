@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonDivider, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonDivider, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -180,7 +180,7 @@ export function SessionDetailsCard(): JSX.Element | null {
                     {supportTicketEvents.map((event, index) => {
                         const ticketId = event.properties?.zendesk_ticket_id
                         // only support zendesk ticket for our organization through feature flag
-                        const zendeskUrl = ticketId ? `https://posthoghelp.zendesk.com/agent/tickets/${ticketId}` : null
+                        const zendeskUrl = ticketId ? `https://insightshelp.zendesk.com/agent/tickets/${ticketId}` : null
 
                         return (
                             <div key={event.id} className="flex flex-col gap-1">

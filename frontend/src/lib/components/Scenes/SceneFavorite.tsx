@@ -1,4 +1,4 @@
-import { IconStar, IconStarFilled } from '@posthog/icons'
+import { IconStar, IconStarFilled } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 

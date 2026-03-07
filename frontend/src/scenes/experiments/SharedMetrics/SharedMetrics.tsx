@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCopy, IconPencil } from '@posthog/icons'
+import { IconCopy, IconPencil } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -10,7 +10,7 @@ import {
     LemonTableColumns,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
@@ -47,7 +47,7 @@ export function SharedMetrics(): JSX.Element {
                                 {isLegacySharedMetric(sharedMetric) && (
                                     <Tooltip
                                         title="This metric uses the legacy engine, so some features and improvements may be missing."
-                                        docLink="https://posthog.com/docs/experiments/new-experimentation-engine"
+                                        docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
                                     >
                                         <LemonTag type="warning" className="ml-1">
                                             Legacy

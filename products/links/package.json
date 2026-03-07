@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-links",
+    "name": "@hanzo/products-links",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -11,7 +11,7 @@
         "qrcode.react": "^4.2.0"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/react": "*",
         "@types/react": "*",
         "clsx": "*",

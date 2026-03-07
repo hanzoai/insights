@@ -40,8 +40,8 @@ class ConversationRestoreToken(models.Model):
     class Meta:
         db_table = "insights_conversations_restore_token"
         indexes = [
-            models.Index(fields=["team", "recipient_email"], name="posthog_crt_team_email_idx"),
-            models.Index(fields=["expires_at"], name="posthog_crt_expires_idx"),
+            models.Index(fields=["team", "recipient_email"], name="insights_crt_team_email_idx"),
+            models.Index(fields=["expires_at"], name="insights_crt_expires_idx"),
         ]
 
     def __str__(self) -> str:

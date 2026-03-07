@@ -20,7 +20,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -50,7 +50,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -98,7 +98,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -131,7 +131,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -164,7 +164,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -210,7 +210,7 @@ class TestEmailMFAAPI(APIBaseTest):
         # Try to verify with non-existent user
         response = self.client.post(
             "/api/login/email-mfa/",
-            {"email": "nonexistent@posthog.com", "token": "some_token"},
+            {"email": "nonexistent@hanzo.ai", "token": "some_token"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_data = response.json()
@@ -221,7 +221,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -247,7 +247,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -275,7 +275,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)
@@ -319,7 +319,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
     @pytest.mark.disable_mock_email_mfa_verifier
     @patch("insights.helpers.two_factor_session.check_esp_suppression", side_effect=mock_esp_not_suppressed)
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     @patch("insights.tasks.email.send_email_mfa_link")
     @patch("insights.helpers.two_factor_session.is_email_available", return_value=True)
     @patch("insights.helpers.two_factor_session.is_http_email_service_available", return_value=True)

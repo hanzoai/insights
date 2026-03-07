@@ -18,7 +18,7 @@ function IOSInstallSPMSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Swift}>
             {`dependencies: [
-  .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+  .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
 ]`}
         </CodeSnippet>
     )
@@ -29,7 +29,7 @@ function IOSSetupSnippet(props: iOSSetupProps): JSX.Element {
 
     const configOptions = [
         props.includeReplay &&
-            `// check https://posthog.com/docs/session-replay/installation?tab=iOS
+            `// check https://hanzo.ai/docs/session-replay/installation?tab=iOS
         // for more config and to learn about how we capture sessions on mobile
         // and what to expect
         config.sessionReplay = true
@@ -54,10 +54,10 @@ import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        let POSTHOG_API_KEY = "${currentTeam?.api_token}"
-        let POSTHOG_HOST = "${apiHostOrigin()}"
+        let INSIGHTS_API_KEY = "${currentTeam?.api_token}"
+        let INSIGHTS_HOST = "${apiHostOrigin()}"
 
-        let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+        let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
         ${configSection}
         InsightsSDK.shared.setup(config)
 

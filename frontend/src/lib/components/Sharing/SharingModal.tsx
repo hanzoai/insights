@@ -3,11 +3,11 @@ import './SharingModal.scss'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { ReactNode, useEffect, useState } from 'react'
 
-import { IconCollapse, IconExpand, IconInfo, IconLock } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonModal, LemonSkeleton, LemonSwitch } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand, IconInfo, IconLock } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDivider, LemonModal, LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TemplateLinkSection } from 'lib/components/Sharing/TemplateLinkSection'
@@ -268,7 +268,7 @@ export function SharingModalContent({
                                             // even when it succeeded, so we're explicitly ignoring the promise success
                                             // and naming the error when reported to error tracking - @pauldambra
                                             copyToClipboard(shareLink, shareLink).catch((e) =>
-                                                posthog.captureException(
+                                                insights.captureException(
                                                     new Error('unexpected sharing modal clipboard error: ' + e.message)
                                                 )
                                             )
@@ -465,7 +465,7 @@ export function SharingModalContent({
 
 function getRenderQueryIframeId(insightShortId?: InsightShortId): string {
     const suffix = (insightShortId || 'insight').replace(/[^a-zA-Z0-9_-]/g, '')
-    return `posthog-render-query-${suffix || 'embed'}`
+    return `insights-render-query-${suffix || 'embed'}`
 }
 
 function createRenderQuerySnippet({

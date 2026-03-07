@@ -1,7 +1,7 @@
 import { kea, key, listeners, path, props, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Dayjs, now } from 'lib/dayjs'
@@ -53,7 +53,7 @@ export const onCellClick = (colIndex: number, rowIndex: number | undefined, time
         endDate = endDate.add(1, 'day')
     }
 
-    posthog.capture('clicked_replay_active_hours_heatmap_cell', {
+    insights.capture('clicked_replay_active_hours_heatmap_cell', {
         isColumnHeader: rowIndex == undefined,
         isIndividualCell: rowIndex != undefined,
         timezone,

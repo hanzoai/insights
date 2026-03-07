@@ -1,11 +1,11 @@
 ---
 name: query-data
-description: 'MANDATORY first step before any Insights data retrieval. Must be invoked before using any Insights MCP data tools. Provides querying guidelines, schema references, and HogQL syntax. Retrieve system data (insights, dashboards, cohorts, feature flags, experiments, surveys, groups, group type mappings, data warehouse tables, teams), analytics data captured with SDKs (events, properties, property values), and connected data warehouse.'
+description: 'MANDATORY first step before any Insights data retrieval. Must be invoked before using any Insights MCP data tools. Provides querying guidelines, schema references, and InsightsQL syntax. Retrieve system data (insights, dashboards, cohorts, feature flags, experiments, surveys, groups, group type mappings, data warehouse tables, teams), analytics data captured with SDKs (events, properties, property values), and connected data warehouse.'
 ---
 
 # Querying data in Insights
 
-Use the `posthog:execute-sql` MCP tool to execute HogQL queries. HogQL is Insights's variant of SQL that supports most of ClickHouse SQL. We use terms "HogQL" and "SQL" interchangeably.
+Use the `insights:execute-sql` MCP tool to execute InsightsQL queries. InsightsQL is Insights's variant of SQL that supports most of ClickHouse SQL. We use terms "InsightsQL" and "SQL" interchangeably.
 
 Do not assume that data exists. Use the SQL tool proactively to find the right data.
 
@@ -91,7 +91,7 @@ Table | Description
 `sessions` | Session data captured by the SDK
 Data warehouse tables | Connected external data sources and custom views
 
-Use `posthog:read-data-warehouse-schema` to retrieve the full schema of the tables above.
+Use `insights:read-data-warehouse-schema` to retrieve the full schema of the tables above.
 
 **Key concepts:**
 
@@ -122,19 +122,19 @@ Before writing analytical queries, always verify that:
 
 Follow this workflow:
 
-1. **Fetch the tool schema** - Use `posthog:read-data-schema` to get the latest schema from the MCP.
-1. **Verify data exist** - Use `posthog:read-data-schema` with different data types to check if the data you need is captured
+1. **Fetch the tool schema** - Use `insights:read-data-schema` to get the latest schema from the MCP.
+1. **Verify data exist** - Use `insights:read-data-schema` with different data types to check if the data you need is captured
 1. **Only then write the query** - Once you've confirmed the data exists, write and execute your analytical query
 
 <example>
 User: Find AI traces with human feedback
 Assistant:
 1. First, verify the events exist:
-   - Call `posthog:read-data-schema` with `schema_type: "events"`
+   - Call `insights:read-data-schema` with `schema_type: "events"`
    - Check if `$ai_trace`, `$ai_generation`, `$ai_feedback` events are in the results
 2. If required events don't exist, inform the user immediately instead of running queries that will return empty results
 3. If events exist, verify the properties:
-   - Call `posthog:read-data-schema` with `schema_type: "event_properties"` and `event_name: "$ai_trace"`
+   - Call `insights:read-data-schema` with `schema_type: "event_properties"` and `event_name: "$ai_trace"`
    - Check if `$ai_feedback`, `$ai_trace_id` properties exist
 4. Only then execute the analytical query
 </example>
@@ -228,7 +228,7 @@ WHERE g.event = '$ai_generation'
 
 ---
 
-## HogQL Differences from Standard SQL
+## InsightsQL Differences from Standard SQL
 
 ### Property access
 
@@ -262,9 +262,9 @@ JOIN persons p ON e.person_id = p.id AND e.timestamp > p.created_at
 CROSS JOIN persons p WHERE e.person_id = p.id AND e.timestamp > p.created_at
 ```
 
-### Syntax extensions and HogQL functions
+### Syntax extensions and InsightsQL functions
 
-Find the reference for [Sparkline, SemVer, Session replays, Actions, Translation, HTML tags and links, Text effects, and more](./references/hogql-extensions.md).
+Find the reference for [Sparkline, SemVer, Session replays, Actions, Translation, HTML tags and links, Text effects, and more](./references/insightsql-extensions.md).
 
 ### Other rules
 
@@ -278,7 +278,7 @@ Find the reference for [Sparkline, SemVer, Session replays, Actions, Translation
 
 Review the [reference](./references/models-variables.md) for SQL variables and dashboard filters.
 
-### Available HogQL functions
+### Available InsightsQL functions
 
 Verify what functions are available using [the reference list](./references/available-functions.md) with suitable bash commands.
 

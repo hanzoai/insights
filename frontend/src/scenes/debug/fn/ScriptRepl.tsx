@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { printHogStringOutput } from '@insights/scriptvm'
-import { LemonButton, LemonTable, LemonTabs } from '@posthog/lemon-ui'
+import { printHogStringOutput } from '@hanzo/scriptvm'
+import { LemonButton, LemonTable, LemonTabs } from '@hanzo/lemon-ui'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
@@ -167,7 +167,7 @@ export function ScriptRepl(): JSX.Element {
                         style={{ marginLeft: -10, marginTop: -7, marginRight: -5, marginBottom: -5 }}
                     >
                         <CodeEditorInline
-                            language="hog"
+                            language="iql"
                             embedded
                             className="flex-1 bg-transparent focus:outline-hidden resize-none ml-2 p-0"
                             value={currentCode}

@@ -13,7 +13,7 @@ export interface InsightsFunctionHclExportOptions extends HclExportOptions {
 }
 
 /**
- * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/insights_function
+ * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/insights_function
  */
 const INSIGHTS_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions>[] = [
     {
@@ -122,7 +122,7 @@ function validateInsightsFunction(
 }
 
 const INSIGHTS_FUNCTION_EXPORTER: ResourceExporter<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions> = {
-    resourceType: 'posthog_insights_function',
+    resourceType: 'insights_insights_function',
     resourceLabel: 'insights_function',
     fieldMappings: INSIGHTS_FUNCTION_FIELD_MAPPINGS,
     validate: validateInsightsFunction,

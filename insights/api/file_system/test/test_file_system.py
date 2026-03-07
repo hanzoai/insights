@@ -1088,7 +1088,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self.user.save()
 
         # Another user in the same organization
-        self.other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "testpass")
+        self.other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "testpass")
 
         # Create two files:
         # file_a => (type="dashboard", ref=str(dashboard_a.id))
@@ -1133,7 +1133,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             role=role,
         )
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_list_excludes_items_with_none_access(self, mock_flag):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
         # The user is not staff, not the creator of file_b => 'none' should exclude it
@@ -1157,7 +1157,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self.assertIn("Docs/FileA", paths2)
         self.assertIn("Docs/FileB", paths2)
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_destroy_excludes_none_access_objects(self, mock_flag):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
 
@@ -1172,7 +1172,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self.assertEqual(resp_a.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystem.objects.filter(pk=self.file_a.pk).exists())
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_move_excludes_none_access_objects(self, mock_flag):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
         url = f"/api/projects/{self.team.id}/file_system/{self.file_b.id}/move"
@@ -1180,7 +1180,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # Because user doesn't see file_b => 404
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_link_and_count_on_none_access(self, mock_flag):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
 
@@ -1193,7 +1193,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         resp = self.client.post(count_url)
         self.assertEqual(resp.json()["count"], 1)
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_project_admin_override_none_access(self, mock_flag):
         # Mark file_b => none for everyone
         AccessControl.objects.create(
@@ -1223,7 +1223,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         paths2 = {item["path"] for item in resp2.json()["results"]}
         self.assertIn("Docs/FileB", paths2)
 
-    @patch("posthoganalytics.feature_enabled", return_value=True)
+    @patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_staff_user_sees_all_despite_none(self, mock_flag):
         # Mark the user staff => skip ACL
         self.user.is_staff = True
@@ -1302,7 +1302,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         for file in FileSystem.objects.all():
             file.delete()
         # Create another user in the same org/team
-        second_user = User.objects.create_and_join(self.organization, "second@posthog.com", "testpass")
+        second_user = User.objects.create_and_join(self.organization, "second@hanzo.ai", "testpass")
 
         # Create two files with different created_by users
         FileSystem.objects.create(

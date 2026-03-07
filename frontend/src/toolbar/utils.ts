@@ -11,11 +11,11 @@ import { ActionStepType } from '~/types'
 
 import { ActionStepPropertyKey } from './actions/ActionStep'
 
-export const TOOLBAR_ID = '__POSTHOG_TOOLBAR__'
+export const TOOLBAR_ID = '__INSIGHTS_TOOLBAR__'
 
 const elementToQueryCache = new WeakMap<HTMLElement, string | undefined>()
 export const TOOLBAR_CONTAINER_CLASS = 'toolbar-global-fade-container'
-export const LOCALSTORAGE_KEY = '_postHogToolbarParams'
+export const LOCALSTORAGE_KEY = '_insightsToolbarParams'
 
 export function getSafeText(el: HTMLElement): string {
     if (!el.childNodes || !el.childNodes.length) {

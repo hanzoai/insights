@@ -3,8 +3,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { forwardRef, useRef, useState } from 'react'
 
-import { IconCalendar, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonDivider, LemonSwitch, Popover } from '@posthog/lemon-ui'
+import { IconCalendar, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonDivider, LemonSwitch, Popover } from '@hanzo/lemon-ui'
 
 import {
     CUSTOM_OPTION_DESCRIPTION,

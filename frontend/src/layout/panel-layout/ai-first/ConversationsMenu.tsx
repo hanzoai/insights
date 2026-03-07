@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconChevronRight, IconEllipsis } from '@posthog/icons'
-import { Link, Spinner } from '@posthog/lemon-ui'
+import { IconChevronRight, IconEllipsis } from '@hanzo/icons'
+import { Link, Spinner } from '@hanzo/lemon-ui'
 
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

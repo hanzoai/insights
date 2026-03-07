@@ -25,15 +25,15 @@ class TestEmail(BaseTest):
         super().setUp()
         self.organization = Organization.objects.create()
         self.team = Team.objects.create(organization=self.organization, name="The Bakery")
-        self.user = User.objects.create(email="test@posthog.com")
-        self.user2 = User.objects.create(email="test2@posthog.com")
-        self.user_red_herring = User.objects.create(email="test+redherring@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
+        self.user2 = User.objects.create(email="test2@hanzo.ai")
+        self.user_red_herring = User.objects.create(email="test+redherring@hanzo.ai")
         self.organization.members.add(self.user)
         self.organization.members.add(self.user2)
         self.organization.members.add(self.user_red_herring)
 
         MessagingRecord.objects.get_or_create(
-            raw_email="test+redherring@posthog.com",
+            raw_email="test+redherring@hanzo.ai",
             campaign_key=f"weekly_report_for_team_{self.team.pk}_on_2020-09-14",
             defaults={"sent_at": timezone.now()},
         )  # This user should not get the emails
@@ -53,7 +53,7 @@ class TestEmail(BaseTest):
         with override_instance_config("EMAIL_HOST", "localhost"):
             sent_at = timezone.now()
 
-            record, _ = MessagingRecord.objects.get_or_create(raw_email="test0@posthog.com", campaign_key="campaign_1")
+            record, _ = MessagingRecord.objects.get_or_create(raw_email="test0@hanzo.ai", campaign_key="campaign_1")
             record.sent_at = sent_at
             record.save()
 
@@ -62,8 +62,8 @@ class TestEmail(BaseTest):
                     campaign_key="campaign_1",
                     to=[
                         {
-                            "raw_email": "test0@posthog.com",
-                            "recipient": "Test Insights <test0@posthog.com>",
+                            "raw_email": "test0@hanzo.ai",
+                            "recipient": "Test Insights <test0@hanzo.ai>",
                         }
                     ],
                     subject="Test email",
@@ -81,11 +81,11 @@ class TestEmail(BaseTest):
             message = EmailMessage(campaign_key="test_campaign", subject="Subject", template_name=template)
 
             assert (
-                f"https://posthog.com/questions?utm_source=posthog&amp;utm_medium=email&amp;utm_campaign={template}"
+                f"https://hanzo.ai/questions?utm_source=insights&amp;utm_medium=email&amp;utm_campaign={template}"
                 in message.html_body
             )
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("requests.post")
     def test_send_via_http_success(self, mock_post, mock_capture) -> None:
         mock_response = MagicMock()
@@ -97,7 +97,7 @@ class TestEmail(BaseTest):
             message = EmailMessage(
                 campaign_key="test_campaign", subject="Test subject", template_name="2fa_enabled", use_http=True
             )
-            message.add_recipient("test@posthog.com", "Test User")
+            message.add_recipient("test@hanzo.ai", "Test User")
             message.send(send_async=False)
 
             mock_post.assert_called_once_with(
@@ -107,20 +107,20 @@ class TestEmail(BaseTest):
                     "Content-Type": "application/json",
                 },
                 json={
-                    "to": "test@posthog.com",
-                    "identifiers": {"email": "test@posthog.com"},
+                    "to": "test@hanzo.ai",
+                    "identifiers": {"email": "test@hanzo.ai"},
                     "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["2fa_enabled"],
-                    "message_data": {"utm_tags": "utm_source=posthog&utm_medium=email&utm_campaign=2fa_enabled"},
+                    "message_data": {"utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=2fa_enabled"},
                 },
             )
 
             mock_capture.assert_called_once_with(
-                distinct_id="test@posthog.com",
+                distinct_id="test@hanzo.ai",
                 event="transactional email triggered",
                 properties={
                     "template_name": "2fa_enabled",
                     "campaign_key": "test_campaign",
-                    "recipient_email": "test@posthog.com",
+                    "recipient_email": "test@hanzo.ai",
                     "delivery_id": "test_delivery_id",
                     "queued_at": 1604977406,
                 },
@@ -140,7 +140,7 @@ class TestEmail(BaseTest):
                 template_context={"decimal_value": Decimal("1.23")},
                 use_http=True,
             )
-            message.add_recipient("test@posthog.com")
+            message.add_recipient("test@hanzo.ai")
             message.send(send_async=False)
 
             mock_post.assert_called_once_with(
@@ -150,12 +150,12 @@ class TestEmail(BaseTest):
                     "Content-Type": "application/json",
                 },
                 json={
-                    "to": "test@posthog.com",
-                    "identifiers": {"email": "test@posthog.com"},
+                    "to": "test@hanzo.ai",
+                    "identifiers": {"email": "test@hanzo.ai"},
                     "transactional_message_id": CUSTOMER_IO_TEMPLATE_ID_MAP["2fa_enabled"],
                     "message_data": {
                         "decimal_value": 1.23,
-                        "utm_tags": "utm_source=posthog&utm_medium=email&utm_campaign=2fa_enabled",
+                        "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=2fa_enabled",
                     },
                 },
             )
@@ -171,7 +171,7 @@ class TestEmail(BaseTest):
             message = EmailMessage(
                 campaign_key="test_campaign", subject="Test subject", template_name="2fa_enabled", use_http=True
             )
-            message.add_recipient("test@posthog.com")
+            message.add_recipient("test@hanzo.ai")
 
             # The error should be caught and logged, not raised
             message.send(send_async=False)
@@ -193,7 +193,7 @@ class TestEmail(BaseTest):
             "decimal_value": Decimal("1.23"),
             "boolean_value": True,
             "none_value": None,
-            "utm_tags": "utm_source=posthog&utm_medium=email&utm_campaign=test",
+            "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=test",
         }
 
         sanitized = sanitize_email_properties(properties)
@@ -220,7 +220,7 @@ class TestEmail(BaseTest):
         self.assertEqual(sanitized["list_with_html"][2], 42)
 
         # Check that utm_tags are not sanitized (to preserve valid URL query parameters)
-        self.assertEqual(sanitized["utm_tags"], "utm_source=posthog&utm_medium=email&utm_campaign=test")
+        self.assertEqual(sanitized["utm_tags"], "utm_source=insights&utm_medium=email&utm_campaign=test")
 
     def test_sanitize_email_properties_raises_for_unsupported_types(self) -> None:
         # Test that sanitize_email_properties raises TypeError for unsupported types
@@ -241,7 +241,7 @@ class TestEmail(BaseTest):
             template_context = {
                 "name": 'User"><img src=x onerror=alert(1)>',
                 "project_name": '<script>alert("XSS")</script>',
-                "utm_tags": "utm_source=posthog&utm_medium=email&utm_campaign=test_custom",
+                "utm_tags": "utm_source=insights&utm_medium=email&utm_campaign=test_custom",
             }
 
             message = EmailMessage(
@@ -257,11 +257,11 @@ class TestEmail(BaseTest):
 
             # Verify utm_tags are preserved without sanitization
             self.assertEqual(
-                message.properties["utm_tags"], "utm_source=posthog&utm_medium=email&utm_campaign=test_custom"
+                message.properties["utm_tags"], "utm_source=insights&utm_medium=email&utm_campaign=test_custom"
             )
 
             # Original template_context should be used for rendering (Django templates have their own escaping)
-            self.assertIn("utm_source=posthog", message.properties["utm_tags"])
+            self.assertIn("utm_source=insights", message.properties["utm_tags"])
 
     def test_add_recipient_sanitizes_name(self) -> None:
         # Test that add_recipient properly sanitizes the name parameter

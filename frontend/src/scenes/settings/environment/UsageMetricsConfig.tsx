@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconEllipsis, IconPlusSmall } from '@posthog/icons'
+import { IconEllipsis, IconPlusSmall } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDialog,
@@ -12,7 +12,7 @@ import {
     LemonSelect,
     LemonTable,
     LemonTableColumns,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

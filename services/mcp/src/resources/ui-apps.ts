@@ -48,7 +48,7 @@ interface RegisterAppParams {
 }
 
 function registerApp(server: McpServer, context: Context, { name, uri, description, html }: RegisterAppParams): void {
-    const analyticsBaseUrl = context.env.POSTHOG_MCP_APPS_ANALYTICS_BASE_URL
+    const analyticsBaseUrl = context.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL
     const uiMetadata: McpUiResourceMeta = {}
     if (analyticsBaseUrl) {
         uiMetadata.csp = {

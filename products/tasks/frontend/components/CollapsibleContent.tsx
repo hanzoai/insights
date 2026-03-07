@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { IconChevronDown } from '@posthog/icons'
+import { IconChevronDown } from '@hanzo/icons'
 
 const DEFAULT_MAX_HEIGHT = 120
 

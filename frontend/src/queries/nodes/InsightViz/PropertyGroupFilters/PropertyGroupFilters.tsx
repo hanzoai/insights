@@ -3,8 +3,8 @@ import './PropertyGroupFilters.scss'
 import { BindLogic, useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconCopy, IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyGroupFilterLike } from 'lib/components/PropertyFilters/utils'

@@ -108,7 +108,7 @@ class TestStickinessQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         distinct_ids=[person.distinct_id],
                         properties={
                             "name": person.distinct_id,
-                            **({"email": "test@posthog.com"} if person.distinct_id == "p1" else {}),
+                            **({"email": "test@hanzo.ai"} if person.distinct_id == "p1" else {}),
                         },
                     )
                 )

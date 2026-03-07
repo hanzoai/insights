@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PostHog flox on-activate hook
+# Hanzo Insights flox on-activate hook
 # Sourced (not executed) from manifest.toml — env vars persist into profile scripts.
 
 set -euo pipefail
@@ -138,26 +138,26 @@ fi
 
 # ── Header ──────────────────────────────────────────────────────────
 _branch=$(git -C "$FLOX_ENV_PROJECT" branch --show-current 2>/dev/null || echo "???")
-echo -e "\n${C_CYAN}PostHog dev${C_RESET} ${C_DIM}── ${_branch}${C_RESET}\n"
+echo -e "\n${C_CYAN}Hanzo Insights dev${C_RESET} ${C_DIM}── ${_branch}${C_RESET}\n"
 
 _activation_start=$(date +%s)
 
-# ── Step 1: Python packages (must run before hogli — it needs Click) ─
+# ── Step 1: Python packages (must run before insightscli — it needs Click) ─
 run_step "Python packages" uv sync
 
-# Expose hogli on PATH via the uv-managed venv
+# Expose insightscli on PATH via the uv-managed venv
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
-  ln -sf "$FLOX_ENV_PROJECT/bin/hogli" "$UV_PROJECT_ENVIRONMENT/bin/hogli"
+  ln -sf "$FLOX_ENV_PROJECT/bin/insightscli" "$UV_PROJECT_ENVIRONMENT/bin/insightscli"
 fi
 
-# Install shell completions for hogli
-HOGLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
-mkdir -p "$HOGLI_COMPLETION_DIR"
+# Install shell completions for insightscli
+INSIGHTSCLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
+mkdir -p "$INSIGHTSCLI_COMPLETION_DIR"
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
   PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m hogli.core.completion --shell bash > "$HOGLI_COMPLETION_DIR/hogli.bash" 2>/dev/null || true
+    -m insightscli.core.completion --shell bash > "$INSIGHTSCLI_COMPLETION_DIR/insightscli.bash" 2>/dev/null || true
   PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m hogli.core.completion --shell zsh > "$HOGLI_COMPLETION_DIR/_hogli" 2>/dev/null || true
+    -m insightscli.core.completion --shell zsh > "$INSIGHTSCLI_COMPLETION_DIR/_insightscli" 2>/dev/null || true
 fi
 
 # ── Step 2: Node packages ──────────────────────────────────────────
@@ -193,7 +193,7 @@ echo -e "\n${C_DIM}Ready in ${_activation_time}s${C_RESET}"
 # ── Interactive welcome ─────────────────────────────────────────────
 if [[ -t 0 ]]; then
   quotes=(
-    "At PostHog, we don't follow trends, we set them, like records."
+    "At Hanzo Insights, we don't follow trends, we set them, like records."
     "Be bold, be fearless, and let's lead the way in tech innovation with beast mode."
     "The future belongs to the bold and the strong."
     "Break the mold, push the limits, and let's redefine what's possible with beast mode on."
@@ -212,12 +212,12 @@ if [[ -t 0 ]]; then
 ${C_ITALIC}You're all set! Here's what you can do:${C_RESET}
 
 ${C_GREEN}Start the development environment:${C_RESET}
-${C_GREEN}${C_BOLD}hogli start${C_RESET}
+${C_GREEN}${C_BOLD}insightscli start${C_RESET}
 
 ${C_DIM}Interactive wizard to configure which services to run:${C_RESET}
-${C_GREEN}hogli dev:setup${C_RESET}
+${C_GREEN}insightscli dev:setup${C_RESET}
 
-${C_ITALIC}Useful processes available in hogli start (mprocs)${C_RESET}
+${C_ITALIC}Useful processes available in insightscli start (mprocs)${C_RESET}
 ${C_DIM}  press ${C_BOLD}r${C_RESET}${C_DIM} to start manually:${C_RESET}
 ${C_DIM}  generate-demo-data${C_RESET}          Create a user with demo data
 ${C_DIM}  storybook${C_RESET}                   Run storybook locally
@@ -226,10 +226,10 @@ ${C_DIM}  hedgebox-dummy${C_RESET}              Demo environment using your loca
 ${C_DIM}─────────────────────────────────────────────────────────${C_RESET}
 
 ${C_ITALIC}Tips:${C_RESET}
-${C_DIM}  hogli --help${C_RESET}                Browse all available commands
-${C_DIM}  hogli migrations:run${C_RESET}        Run pending migrations
-${C_DIM}  hogli dev:reset${C_RESET}             Wipe volumes, migrate, load demo data
-${C_DIM}  hogli doctor:disk${C_RESET}           Free up disk space from dev bloat
+${C_DIM}  insightscli --help${C_RESET}                Browse all available commands
+${C_DIM}  insightscli migrations:run${C_RESET}        Run pending migrations
+${C_DIM}  insightscli dev:reset${C_RESET}             Wipe volumes, migrate, load demo data
+${C_DIM}  insightscli doctor:disk${C_RESET}           Free up disk space from dev bloat
 ${C_DIM}  ${C_BOLD}q${C_RESET}${C_DIM} / ${C_BOLD}r${C_RESET}${C_DIM} in mprocs${C_RESET}             Quit / restart a process
 "
 fi
@@ -237,9 +237,9 @@ fi
 # ── Silent background cleanup ──────────────────────────────────────
 # Clean old flox log files (>7 days). Fire-and-forget after activation.
 (
-  if [[ -x "$UV_PROJECT_ENVIRONMENT/bin/python" && -f "$FLOX_ENV_PROJECT/bin/hogli" ]]; then
+  if [[ -x "$UV_PROJECT_ENVIRONMENT/bin/python" && -f "$FLOX_ENV_PROJECT/bin/insightscli" ]]; then
     PYTHONPATH="$FLOX_ENV_PROJECT/common" "$UV_PROJECT_ENVIRONMENT/bin/python" \
-      -m hogli.core doctor:disk --area=flox-logs --yes >/dev/null 2>&1
+      -m insightscli.core doctor:disk --area=flox-logs --yes >/dev/null 2>&1
   else
     find "$FLOX_ENV_PROJECT/.flox/log" -name "*.log" -type f -mtime +7 -delete 2>/dev/null
   fi

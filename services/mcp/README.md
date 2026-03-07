@@ -1,6 +1,6 @@
 # Insights MCP
 
-Documentation: https://posthog.com/docs/model-context-protocol
+Documentation: https://hanzo.ai/docs/model-context-protocol
 
 ## Use the MCP Server
 
@@ -9,29 +9,29 @@ Documentation: https://posthog.com/docs/model-context-protocol
 You can install the MCP server automatically into Cursor, Claude, Claude Code, VS Code and Zed by running the following command:
 
 ```bash
-npx @posthog/wizard@latest mcp add
+npx @hanzo/wizard@latest mcp add
 ```
 
 ### Manual install
 
-1. Obtain a personal API key using the [MCP Server preset](https://app.posthog.com/settings/user-api-keys?preset=mcp_server).
+1. Obtain a personal API key using the [MCP Server preset](https://insights.hanzo.ai/settings/user-api-keys?preset=mcp_server).
 
 2. Add the MCP configuration to your desktop client (e.g. Cursor, Windsurf, Claude Desktop) and add your personal API key
 
 ```json
 {
   "mcpServers": {
-    "posthog": {
+    "insights": {
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote@latest",
-        "https://mcp.posthog.com/mcp", // You can replace this with https://mcp.posthog.com/sse if your client does not support Streamable HTTP
+        "https://mcp.hanzo.ai/mcp", // You can replace this with https://mcp.hanzo.ai/sse if your client does not support Streamable HTTP
         "--header",
-        "Authorization:${POSTHOG_AUTH_HEADER}"
+        "Authorization:${INSIGHTS_AUTH_HEADER}"
       ],
       "env": {
-        "POSTHOG_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
+        "INSIGHTS_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
       }
     }
   }
@@ -55,11 +55,11 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { URL } from 'node:url'
 
-const AUTH = process.env.POSTHOG_AUTH_HEADER // "Bearer phx_…"
-const MCP_URL = process.env.MCP_URL || 'https://mcp.posthog.com/mcp'
+const AUTH = process.env.INSIGHTS_AUTH_HEADER // "Bearer phx_…"
+const MCP_URL = process.env.MCP_URL || 'https://mcp.hanzo.ai/mcp'
 
 if (!AUTH?.startsWith('Bearer ')) {
-  console.error('Set POSTHOG_AUTH_HEADER="Bearer phx_..."')
+  console.error('Set INSIGHTS_AUTH_HEADER="Bearer phx_..."')
   process.exit(1)
 }
 
@@ -97,7 +97,7 @@ await client.close()
 - Streamable HTTP requires the `Accept` header to include **both** JSON and SSE.
 - After `initialize`, the client must send `notifications/initialized`; the SDK does this for you in `connect()`.
 
-See also the main Insights MCP docs for available tools and setup flows: [https://posthog.com/docs/model-context-protocol](https://posthog.com/docs/model-context-protocol)
+See also the main Insights MCP docs for available tools and setup flows: [https://hanzo.ai/docs/model-context-protocol](https://hanzo.ai/docs/model-context-protocol)
 
 ### Docker install
 
@@ -108,7 +108,7 @@ If you prefer to use Docker instead of running npx directly:
 ```bash
 pnpm docker:build
 # or
-docker build -t posthog-mcp .
+docker build -t insights-mcp .
 ```
 
 2. Configure your MCP client with Docker:
@@ -116,7 +116,7 @@ docker build -t posthog-mcp .
 ```json
 {
   "mcpServers": {
-    "posthog": {
+    "insights": {
       "type": "stdio",
       "command": "docker",
       "args": [
@@ -124,14 +124,14 @@ docker build -t posthog-mcp .
         "-i",
         "--rm",
         "--env",
-        "POSTHOG_AUTH_HEADER=${POSTHOG_AUTH_HEADER}",
+        "INSIGHTS_AUTH_HEADER=${INSIGHTS_AUTH_HEADER}",
         "--env",
-        "POSTHOG_REMOTE_MCP_URL=${POSTHOG_REMOTE_MCP_URL:-https://mcp.posthog.com/mcp}",
-        "posthog-mcp"
+        "INSIGHTS_REMOTE_MCP_URL=${INSIGHTS_REMOTE_MCP_URL:-https://mcp.hanzo.ai/mcp}",
+        "insights-mcp"
       ],
       "env": {
-        "POSTHOG_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}",
-        "POSTHOG_REMOTE_MCP_URL": "https://mcp.posthog.com/mcp"
+        "INSIGHTS_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}",
+        "INSIGHTS_REMOTE_MCP_URL": "https://mcp.hanzo.ai/mcp"
       }
     }
   }
@@ -143,13 +143,13 @@ docker build -t posthog-mcp .
 ```bash
 pnpm docker:inspector
 # or
-npx @modelcontextprotocol/inspector docker run -i --rm --env POSTHOG_AUTH_HEADER=${POSTHOG_AUTH_HEADER} posthog-mcp
+npx @modelcontextprotocol/inspector docker run -i --rm --env INSIGHTS_AUTH_HEADER=${INSIGHTS_AUTH_HEADER} insights-mcp
 ```
 
 **Environment Variables:**
 
-- `POSTHOG_AUTH_HEADER`: Your Insights API token (required)
-- `POSTHOG_REMOTE_MCP_URL`: The MCP server URL (optional, defaults to `https://mcp.posthog.com/mcp`)
+- `INSIGHTS_AUTH_HEADER`: Your Insights API token (required)
+- `INSIGHTS_REMOTE_MCP_URL`: The MCP server URL (optional, defaults to `https://mcp.hanzo.ai/mcp`)
 
 This approach allows you to use the Insights MCP server without needing Node.js or npm installed locally.
 
@@ -173,7 +173,7 @@ Created feature flag 'new-checkout-flow':
 - Key: new-checkout-flow
 - Active: true
 - Rollout: 20% of all users
-- URL: https://app.posthog.com/feature_flags/12345
+- URL: https://insights.hanzo.ai/feature_flags/12345
 ```
 
 #### Example 2: Analytics query
@@ -218,7 +218,7 @@ Created experiment 'Pricing page test':
 - Variants: control (50%), test (50%)
 - Primary metric: Funnel conversion (pricing_page → checkout)
 - Status: Draft (ready to launch)
-- URL: https://app.posthog.com/experiments/789
+- URL: https://insights.hanzo.ai/experiments/789
 ```
 
 #### Example 4: Error investigation
@@ -261,21 +261,21 @@ For simpler queries, you can use shorter prompts:
 You can limit which tools are available by adding query parameters to the MCP URL:
 
 ```text
-https://mcp.posthog.com/mcp?features=flags,workspace
+https://mcp.hanzo.ai/mcp?features=flags,workspace
 ```
 
 Available features:
 
 - `workspace` - Organization and project management
-- `error-tracking` - [Error monitoring and debugging](https://posthog.com/docs/errors)
-- `dashboards` - [Dashboard creation and management](https://posthog.com/docs/product-analytics/dashboards)
-- `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
-- `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
-- `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
-- `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
+- `error-tracking` - [Error monitoring and debugging](https://hanzo.ai/docs/errors)
+- `dashboards` - [Dashboard creation and management](https://hanzo.ai/docs/product-analytics/dashboards)
+- `insights` - [Analytics insights and SQL queries](https://hanzo.ai/docs/product-analytics/insights)
+- `experiments` - [A/B testing experiments](https://hanzo.ai/docs/experiments)
+- `flags` - [Feature flag management](https://hanzo.ai/docs/feature-flags)
+- `llm-analytics` - [LLM usage and cost tracking](https://hanzo.ai/docs/llm-analytics)
 - `docs` - Insights documentation search
 
-To view which tools are available per feature, see our [documentation](https://posthog.com/docs/model-context-protocol) or alternatively check out `schema/tool-definitions.json`,
+To view which tools are available per feature, see our [documentation](https://hanzo.ai/docs/model-context-protocol) or alternatively check out `schema/tool-definitions.json`,
 
 ### Data processing
 
@@ -283,7 +283,7 @@ The MCP server is hosted on a Cloudflare worker which can be located outside of 
 
 ### Using self-hosted instances
 
-If you're using a self-hosted instance of Insights, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://posthog.example.com`
+If you're using a self-hosted instance of Insights, you can specify a custom base URL by adding the `INSIGHTS_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `INSIGHTS_BASE_URL=https://insights.example.com`
 
 # Development
 
@@ -293,13 +293,13 @@ To run the MCP server locally, run the following command:
 pnpm run dev
 ```
 
-And replace `https://mcp.posthog.com/mcp` with `http://localhost:8787/mcp` in the MCP configuration.
+And replace `https://mcp.hanzo.ai/mcp` with `http://localhost:8787/mcp` in the MCP configuration.
 
 ### Developing with local resources
 
 To develop with warm loading for MCP resources (workflows, prompts, examples):
 
-1. Start the [context-mill](https://github.com/PostHog/context-mill) dev server: `cd ../context-mill && npm run dev`
+1. Start the [context-mill](https://github.com/Hanzo Insights/context-mill) dev server: `cd ../context-mill && npm run dev`
 2. Start the MCP server with local resources: `pnpm run dev:local-resources`
 
 Changes in the examples repo will be reflected on the next request.
@@ -358,13 +358,13 @@ npx
 
 ## Privacy & Support
 
-- **Privacy Policy:** https://posthog.com/privacy
-- **Terms of Service:** https://posthog.com/terms
-- **Support:** https://posthog.com/questions or email support@posthog.com
-- **GitHub Issues:** https://github.com/PostHog/posthog/issues
+- **Privacy Policy:** https://hanzo.ai/privacy
+- **Terms of Service:** https://hanzo.ai/terms
+- **Support:** https://hanzo.ai/questions or email support@hanzo.ai
+- **GitHub Issues:** https://github.com/Hanzo Insights/insights/issues
 
 ### Data handling
 
 The MCP server acts as a proxy to your Insights instance. It does not store your analytics data - all queries are executed against your Insights project and results are returned directly to your AI client. Session state (active project/organization) is cached temporarily using Cloudflare Durable Objects tied to your API key hash.
 
-For EU users, use the `mcp-eu.posthog.com` endpoint to ensure OAuth flows route to the EU Insights instance.
+For EU users, use the `mcp-insights.hanzo.ai` endpoint to ensure OAuth flows route to the EU Insights instance.

@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonBanner, Link, SpinnerOverlay } from '@posthog/lemon-ui'
+import { LemonBanner, Link, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

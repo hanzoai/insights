@@ -377,7 +377,7 @@ def simulate_prestop_marker():
     original_exists = os.path.exists
 
     def mock_exists(path):
-        if path == "/tmp/posthog_prestop":
+        if path == "/tmp/insights_prestop":
             return True
         return original_exists(path)
 

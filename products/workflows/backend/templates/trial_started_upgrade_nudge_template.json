@@ -11,9 +11,9 @@
         "distinct_id": "A9CjZG1AUbA0EKdinlV8Hm7oieSx9iPaHFsJRtXrBdc",
         "first_name": "Sara",
         "last_name": "Miteva",
-        "email": "sara@posthog.com",
+        "email": "sara@hanzo.ai",
         "is_email_verified": true,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": null
     },
     "updated_at": "2025-12-30T15:00:50.152629Z",

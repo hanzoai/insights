@@ -3,8 +3,8 @@ import './FeatureFlagInstructions.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonCheckbox, LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonCheckbox, LemonSelect, Link } from '@hanzo/lemon-ui'
 
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'

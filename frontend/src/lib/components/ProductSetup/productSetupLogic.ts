@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -21,7 +21,7 @@ export interface ProductSetupLogicProps {
     productKey: ProductKey
 }
 
-const DISMISSED_STORAGE_KEY = 'posthog_product_setup_dismissed'
+const DISMISSED_STORAGE_KEY = 'insights_product_setup_dismissed'
 
 /**
  * Product setup logic - handles product-specific state and UI for the setup experience.
@@ -231,7 +231,7 @@ export const productSetupLogic = kea<productSetupLogicType>([
             }
         },
         dismissSetup: () => {
-            posthog.capture('product setup dismissed', {
+            insights.capture('product setup dismissed', {
                 product: props.productKey,
                 completed_count: values.completedCount,
                 total_count: values.totalTasks,
@@ -241,7 +241,7 @@ export const productSetupLogic = kea<productSetupLogicType>([
             // Attempt to capture whether reverse proxy is enabled
             actions.loadHasReverseProxy()
 
-            posthog.capture('product setup modal opened', {
+            insights.capture('product setup modal opened', {
                 product: props.productKey,
                 remaining_tasks: values.remainingCount,
             })

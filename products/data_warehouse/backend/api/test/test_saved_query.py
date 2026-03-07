@@ -185,7 +185,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             response = self.client.post(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/materialize",
             )
@@ -304,7 +304,7 @@ class TestSavedQuery(APIBaseTest):
         assert saved_query.deleted is True
         assert saved_query.deleted_at is not None
         assert saved_query.deleted_name == query_name
-        assert saved_query.name.startswith("POSTHOG_DELETED_")
+        assert saved_query.name.startswith("INSIGHTS_DELETED_")
 
     def test_listing_deleted_queries(self):
         DataWarehouseSavedQuery.objects.create(
@@ -1067,7 +1067,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             response = self.client.patch(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
                 {
@@ -1097,7 +1097,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             response = self.client.delete(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
             )
@@ -1123,7 +1123,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             response = self.client.post(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/revert_materialization",
             )

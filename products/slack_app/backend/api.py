@@ -37,8 +37,8 @@ HANDLED_EVENT_TYPES = ["app_mention"]
 # The secondary region does the same Integration lookup, but if it doesn't find a match either, it stops processing.
 # We use EU as the primary region, as it's more important to EU customers that their requests don't leave the EU,
 # than to US users that their requests don't leave the US.
-SLACK_PRIMARY_REGION_DOMAIN = "eu.posthog.com"
-SLACK_SECONDARY_REGION_DOMAIN = "us.posthog.com"
+SLACK_PRIMARY_REGION_DOMAIN = "insights.hanzo.ai"
+SLACK_SECONDARY_REGION_DOMAIN = "insights.hanzo.ai"
 
 if settings.DEBUG:
     # In local dev, we implicitly test the regional routing by ALWAYS proxying once. When the request first arrives via
@@ -149,7 +149,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                     text="Sorry, I couldn't find your email address in Slack. Please make sure your email is visible in your Slack profile.",
                 )
                 return
-            if get_instance_region() == "DEV" and not slack_email.endswith("@posthog.com"):
+            if get_instance_region() == "DEV" and not slack_email.endswith("@hanzo.ai"):
                 # In dev deployment, always go to the test account - this is to let the Slack folks test on the test account
                 slack_email = "twixes3d+slacktest@gmail.com"
             # Find Insights user by email
@@ -173,14 +173,14 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                 )
                 return
 
-            posthog_user = membership.user
+            insights_user = membership.user
 
             # Check if the user has access to the specific team (handles private teams and RBAC)
-            user_permissions = UserPermissions(user=posthog_user, team=integration.team)
+            user_permissions = UserPermissions(user=insights_user, team=integration.team)
             if user_permissions.current_team.effective_membership_level is None:
                 logger.warning(
                     "slack_app_no_team_access",
-                    user_id=posthog_user.id,
+                    user_id=insights_user.id,
                     team_id=integration.team_id,
                     organization_id=integration.team.organization_id,
                 )
@@ -332,7 +332,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
             messages=messages,
             slack_thread_key=slack_thread_key,
             conversation_id=conversation_id,
-            user_id=posthog_user.id,
+            user_id=insights_user.id,
         )
 
         # Deterministic workflow ID ensures only one workflow runs per Slack thread at a time

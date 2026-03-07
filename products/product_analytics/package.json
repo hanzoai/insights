@@ -1,12 +1,12 @@
 {
-    "name": "@posthog/products-product-analytics",
+    "name": "@hanzo/products-product-analytics",
     "dependencies": {
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

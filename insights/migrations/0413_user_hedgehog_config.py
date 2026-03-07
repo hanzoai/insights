@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="user",
-            name="hedgehog_config",
+            name="mascot_config",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

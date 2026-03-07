@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconPerson } from '@posthog/icons'
+import { IconPerson } from '@hanzo/icons'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -49,16 +49,16 @@ export const FlagsToolbarMenu = (): JSX.Element => {
         setDraftDistinctId,
         setImpersonationOpen,
     } = useActions(flagsToolbarLogic)
-    const { uiHost, posthog: posthogClient, toolbarFlagsKey } = useValues(toolbarConfigLogic)
+    const { uiHost, insights: insightsClient, toolbarFlagsKey } = useValues(toolbarConfigLogic)
 
     useOnMountEffect(() => {
-        posthogClient?.onFeatureFlags(setFeatureFlagValueFromInsightsClient)
+        insightsClient?.onFeatureFlags(setFeatureFlagValueFromInsightsClient)
 
-        if (toolbarFlagsKey && posthogClient) {
+        if (toolbarFlagsKey && insightsClient) {
             // When toolbarFlagsKey is present, flags were pre-loaded via overrideFeatureFlags
 
             // Read the current values directly and update state
-            const currentFlags = posthogClient.featureFlags.getFlagVariants()
+            const currentFlags = insightsClient.featureFlags.getFlagVariants()
             setFeatureFlagValueFromInsightsClient(Object.keys(currentFlags), currentFlags)
         }
 

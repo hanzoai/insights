@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import React, { useEffect } from 'react'
 
-import { IconPlusSmall } from '@posthog/icons'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { DataWarehousePopoverField, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopoverProps } from 'lib/components/TaxonomicPopover/TaxonomicPopover'

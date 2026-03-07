@@ -15,7 +15,7 @@ class TestTemplateKlaviyoUser(BaseInsightsFunctionTemplateTest):
     def create_inputs(self, **kwargs):
         inputs = {
             "apiKey": "API_KEY",
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "externalId": "EXTERNAL_ID",
             "include_all_properties": False,
             "customProperties": {
@@ -59,7 +59,7 @@ class TestTemplateKlaviyoUser(BaseInsightsFunctionTemplateTest):
                                 "organization": "Insights",
                                 "phone_number": "+0123456789",
                             },
-                            "email": "max@posthog.com",
+                            "email": "max@hanzo.ai",
                             "external_id": "EXTERNAL_ID",
                         },
                     }
@@ -111,7 +111,7 @@ class TestTemplateKlaviyoEvent(BaseInsightsFunctionTemplateTest):
     def create_inputs(self, **kwargs):
         inputs = {
             "apiKey": "API_KEY",
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "externalId": "EXTERNAL_ID",
             "include_all_properties": False,
             "attributes": {"price": "25.99", "currency": "USD"},
@@ -150,7 +150,7 @@ class TestTemplateKlaviyoEvent(BaseInsightsFunctionTemplateTest):
                             "profile": {
                                 "data": {
                                     "type": "profile",
-                                    "attributes": {"email": "max@posthog.com", "external_id": "EXTERNAL_ID"},
+                                    "attributes": {"email": "max@hanzo.ai", "external_id": "EXTERNAL_ID"},
                                 }
                             },
                         },

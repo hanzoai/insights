@@ -1,5 +1,5 @@
 -- Add grouping rule table for fingerprinting tests
-CREATE TABLE IF NOT EXISTS posthog_errortrackinggroupingrule (
+CREATE TABLE IF NOT EXISTS insights_errortrackinggroupingrule (
     id UUID PRIMARY KEY,
     team_id INTEGER NOT NULL,
     user_id INTEGER,
@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS posthog_errortrackinggroupingrule (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_grouping_rule_team_id ON posthog_errortrackinggroupingrule(team_id);
+CREATE INDEX IF NOT EXISTS idx_grouping_rule_team_id ON insights_errortrackinggroupingrule(team_id);
 
 -- Add assignment rule table for issue processing tests
-CREATE TABLE IF NOT EXISTS posthog_errortrackingassignmentrule (
+CREATE TABLE IF NOT EXISTS insights_errortrackingassignmentrule (
     id UUID PRIMARY KEY,
     team_id INTEGER NOT NULL,
     user_id INTEGER,
@@ -26,4 +26,4 @@ CREATE TABLE IF NOT EXISTS posthog_errortrackingassignmentrule (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_assignment_rule_team_id ON posthog_errortrackingassignmentrule(team_id);
+CREATE INDEX IF NOT EXISTS idx_assignment_rule_team_id ON insights_errortrackingassignmentrule(team_id);

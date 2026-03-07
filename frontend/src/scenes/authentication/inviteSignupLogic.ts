@@ -3,7 +3,7 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
@@ -139,7 +139,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
                     const res = await api.create(`api/signup/${values.invite.id}/`, submitPayload)
                     location.href = res.redirect_url || '/' // hard refresh because the current_organization changed
                 } catch (e) {
-                    posthog.captureException(e)
+                    insights.captureException(e)
                     actions.setSignupManualErrors({
                         generic: {
                             code: (e as Record<string, any>).code,

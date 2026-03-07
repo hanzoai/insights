@@ -5,14 +5,14 @@ Extract failed team IDs from person property reconciliation job runs via Dagster
 
 Usage:
     export DAGSTER_CLOUD_TOKEN="<USER_TOKEN>"
-    python posthog/dags/scripts/extract_reconciliation_results.py \
-        --org posthog \
+    python insights/dags/scripts/extract_reconciliation_results.py \
+        --org insights \
         --deployment <prod-us | prod-eu> \
         [--all | --limit <INT> | --since "2026-01-01" --until "2026-01-12"]
 
 Prerequisites:
     1. Get a Dagster Cloud user token:
-       - Go to Dagster Cloud UI (e.g., https://posthog.dagster.cloud/)
+       - Go to Dagster Cloud UI (e.g., https://insights.dagster.cloud/)
        - Click your avatar (top-right) > "Organization settings" > "Tokens" tab
        - Create a User Token and copy it
        - REMEMBER: revoke the token when you're done!
@@ -395,7 +395,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--org", required=True, help="Dagster Cloud organization name (e.g., 'posthog')")
+    parser.add_argument("--org", required=True, help="Dagster Cloud organization name (e.g., 'insights')")
     parser.add_argument("--deployment", required=True, help="Dagster Cloud deployment name (e.g., 'prod')")
     parser.add_argument(
         "--token",
@@ -448,7 +448,7 @@ def main():
     if not args.token:
         print("Error: DAGSTER_CLOUD_TOKEN environment variable not set and --token not provided", file=sys.stderr)
         print("\nTo get a token:", file=sys.stderr)
-        print("  1. Go to Dagster Cloud UI (e.g., https://posthog.dagster.cloud/)", file=sys.stderr)
+        print("  1. Go to Dagster Cloud UI (e.g., https://insights.dagster.cloud/)", file=sys.stderr)
         print("  2. Click your avatar (top-right) > 'Organization settings' > 'Tokens' tab", file=sys.stderr)
         print("  3. Create and copy the token", file=sys.stderr)
         sys.exit(1)

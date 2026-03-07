@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { IconCopy, IconPencil, IconStack } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonDropdown, LemonTag } from '@posthog/lemon-ui'
+import { IconCopy, IconPencil, IconStack } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonDropdown, LemonTag } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

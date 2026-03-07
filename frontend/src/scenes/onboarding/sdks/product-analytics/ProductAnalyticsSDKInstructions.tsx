@@ -44,7 +44,7 @@ import {
     WebflowInstallation,
     WordpressInstallation,
     ZapierInstallation,
-} from '@posthog/shared-onboarding/product-analytics'
+} from '@hanzo/shared-onboarding/product-analytics'
 
 import { SDKInstructionsMap, SDKKey, SDKTag, SDKTagOverrides } from '~/types'
 

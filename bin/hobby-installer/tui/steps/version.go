@@ -5,7 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 type versionMode int
@@ -103,21 +103,21 @@ func (m VersionModel) View() string {
 	if m.mode == versionModeCustom {
 		content = lipgloss.JoinVertical(
 			lipgloss.Left,
-			ui.TitleStyle.Render("Enter PostHog Version"),
+			ui.TitleStyle.Render("Enter Insights Version"),
 			"",
 			ui.SubtitleStyle.Render("Enter a version tag or commit hash:"),
 			"",
 			m.textInput.View(),
 			"",
 			ui.MutedStyle.Render("Check available versions at:"),
-			ui.MutedStyle.Render("https://hub.docker.com/r/posthog/posthog/tags"),
+			ui.MutedStyle.Render("https://hub.docker.com/r/hanzoai/insights/tags"),
 			"",
 			ui.HelpStyle.Render("enter confirm • esc back"),
 		)
 	} else {
 		content = lipgloss.JoinVertical(
 			lipgloss.Left,
-			ui.TitleStyle.Render("Select PostHog Version"),
+			ui.TitleStyle.Render("Select Insights Version"),
 			"",
 			ui.SubtitleStyle.Render("Which version would you like to install?"),
 			"",

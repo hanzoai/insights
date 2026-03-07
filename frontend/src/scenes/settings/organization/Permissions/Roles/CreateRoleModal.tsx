@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonInput } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

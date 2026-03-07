@@ -94,7 +94,7 @@ This is very minimal at the moment, but the tasks page can be used to see what i
 
 ## 7. Testing with local agent packages
 
-To test changes to `@posthog/agent` before publishing:
+To test changes to `@hanzo/agent` before publishing:
 
 ```bash
 # Set the twig monorepo root
@@ -106,7 +106,7 @@ cd /path/to/twig/packages/agent && pnpm build
 # Run a task from the UI
 ```
 
-This builds a `posthog-sandbox-base-local` Docker image that overlays your local `packages/agent`, `packages/shared`, and `packages/git` onto the base image. The local image is rebuilt each time; the base image is cached. If you make changes to the base image, you can rebuild it.
+This builds a `insights-sandbox-base-local` Docker image that overlays your local `packages/agent`, `packages/shared`, and `packages/git` onto the base image. The local image is rebuilt each time; the base image is cached. If you make changes to the base image, you can rebuild it.
 
 ## Troubleshooting
 

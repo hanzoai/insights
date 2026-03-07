@@ -1,7 +1,7 @@
 import { formatHclValue, sanitizeResourceName } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 // Schema version this exporter targets - update when provider schema changes
-export const POSTHOG_PROVIDER_VERSION = '1.0.2'
+export const INSIGHTS_PROVIDER_VERSION = '1.0.2'
 
 export interface HclExportResult {
     hcl: string
@@ -16,7 +16,7 @@ export interface HclExportOptions {
 }
 
 export interface ResourceExporter<T, O extends HclExportOptions = HclExportOptions> {
-    /** Terraform resource type (e.g., 'posthog_insight') */
+    /** Terraform resource type (e.g., 'insights_insight') */
     resourceType: string
     /** Human-readable label for comments (e.g., 'insight') */
     resourceLabel: string
@@ -58,7 +58,7 @@ export function generateHCL<T, O extends HclExportOptions = HclExportOptions>(
 
     // Header comment with metadata
     lines.push(`# Terraform configuration for Insights ${exporter.resourceLabel}`)
-    lines.push(`# Compatible with posthog provider v${POSTHOG_PROVIDER_VERSION}`)
+    lines.push(`# Compatible with insights provider v${INSIGHTS_PROVIDER_VERSION}`)
     if (resourceId !== undefined) {
         lines.push(`# Source ${exporter.resourceLabel} ID: ${resourceId}`)
     }
@@ -71,7 +71,7 @@ export function generateHCL<T, O extends HclExportOptions = HclExportOptions>(
 
     // Import block for existing resources only
     if (includeImport && resourceId !== undefined) {
-        // Since v1.0.2 of the TF provider (https://github.com/PostHog/terraform-provider-posthog/pull/24/)
+        // Since v1.0.2 of the TF provider (https://github.com/hanzoai/terraform-provider-insights/pull/24/)
         // we can specify the project to which a resource belongs when importing it.
         const importId = options.projectId ? `${options.projectId}/${resourceId}` : String(resourceId)
         lines.push(`import {`)

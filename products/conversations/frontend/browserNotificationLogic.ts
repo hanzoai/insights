@@ -9,9 +9,9 @@ import { urls } from 'scenes/urls'
 import type { browserNotificationLogicType } from './browserNotificationLogicType'
 import type { NotificationPermission } from './types'
 
-const STORAGE_KEY_PREFIX = 'posthog-support-notifications'
-const NOTIFICATION_TAG = 'posthog-support-ticket'
-const NOTIFICATION_ICON = '/static/posthog-icon.svg'
+const STORAGE_KEY_PREFIX = 'insights-support-notifications'
+const NOTIFICATION_TAG = 'insights-support-ticket'
+const NOTIFICATION_ICON = '/static/insights-icon.svg'
 const NOTIFICATION_AUTO_CLOSE_MS = 5000
 
 const getStorageKey = (): string => {

@@ -175,7 +175,7 @@ class TestExports(APIBaseTest):
 
     @patch("insights.api.exports.exporter")
     def test_swallow_missing_schema_and_allow_front_end_to_poll(self, mock_exporter_task) -> None:
-        # regression test see https://github.com/PostHog/posthog/issues/11204
+        # regression test see https://github.com/Hanzo Insights/insights/issues/11204
 
         mock_exporter_task.get.side_effect = requests.exceptions.MissingSchema("why is this raised?")
 
@@ -351,7 +351,7 @@ class TestExports(APIBaseTest):
             test_account_filters=[
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 }
@@ -383,7 +383,7 @@ class TestExports(APIBaseTest):
             test_account_filters=[
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 }
@@ -1030,7 +1030,7 @@ class TestGenerateAssetsAsyncCounters:
     def subscription(self, django_user_model: Any) -> Generator[Any, None, None]:
         organization = Organization.objects.create(name="Test Org for Async")
         team = Team.objects.create(organization=organization, name="Test Team for Async")
-        user = django_user_model.objects.create(email="async-test@posthog.com")
+        user = django_user_model.objects.create(email="async-test@hanzo.ai")
         user.join(organization=organization)
 
         dashboard = Dashboard.objects.create(team=team, name="test dashboard", created_by=user)

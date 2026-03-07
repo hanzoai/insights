@@ -1,4 +1,4 @@
-import { IconCursorClick, IconPencil } from '@posthog/icons'
+import { IconCursorClick, IconPencil } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -45,7 +45,7 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                                             <span className="text-xs text-secondary font-normal">
                                                 Match events by name, URL patterns, or custom properties.{' '}
                                                 <Link
-                                                    to="https://posthog.com/docs/data/actions"
+                                                    to="https://hanzo.ai/docs/data/actions"
                                                     target="_blank"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
@@ -65,7 +65,7 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                                             <span className="text-xs text-secondary font-normal">
                                                 Use the toolbar to visually select elements on your site.{' '}
                                                 <Link
-                                                    to="https://posthog.com/docs/toolbar/create-toolbar-actions"
+                                                    to="https://hanzo.ai/docs/toolbar/create-toolbar-actions"
                                                     target="_blank"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >

@@ -2,10 +2,10 @@ import { BreakPointFunction, actions, afterMount, connect, kea, listeners, path,
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import { windowValues } from 'kea-window-values'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconGear } from '@posthog/icons'
-import { errorTrackingQuery } from '@posthog/products-error-tracking/frontend/queries'
+import { IconGear } from '@hanzo/icons'
+import { errorTrackingQuery } from '@hanzo/products-error-tracking/frontend/queries'
 
 import api from 'lib/api'
 import { AuthorizedUrlListType, authorizedUrlListLogic } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -123,7 +123,7 @@ export interface DateFilterState {
     isIntervalManuallySet: boolean
 }
 
-const teamId = window.POSTHOG_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}__` }
 export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
     path(['scenes', 'webAnalytics', 'webAnalyticsSceneLogic']),
@@ -1082,7 +1082,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                         limit: 4,
                     })
                 } catch (e) {
-                    posthog.captureException(e, { dateRange, replayFilters, filterTestAccounts })
+                    insights.captureException(e, { dateRange, replayFilters, filterTestAccounts })
                 }
 
                 if (productTab === ProductTab.WEB_VITALS) {
@@ -1294,7 +1294,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                           },
                                           {
                                               docs: {
-                                                  url: 'https://posthog.com/docs/web-analytics/dashboard#paths',
+                                                  url: 'https://hanzo.ai/docs/web-analytics/dashboard#paths',
                                                   title: 'Paths',
                                                   description: (
                                                       <div>
@@ -1311,7 +1311,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                                           ) : (
                                                               <p>
                                                                   The{' '}
-                                                                  <Link to="https://posthog.com/docs/web-analytics/dashboard#bounce-rate">
+                                                                  <Link to="https://hanzo.ai/docs/web-analytics/dashboard#bounce-rate">
                                                                       bounce rate
                                                                   </Link>{' '}
                                                                   indicates the percentage of users who left your page
@@ -1339,7 +1339,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                           },
                                           {
                                               docs: {
-                                                  url: 'https://posthog.com/docs/web-analytics/dashboard#paths',
+                                                  url: 'https://hanzo.ai/docs/web-analytics/dashboard#paths',
                                                   title: 'Entry Path',
                                                   description: (
                                                       <div>
@@ -1372,7 +1372,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                           },
                                           {
                                               docs: {
-                                                  url: 'https://posthog.com/docs/web-analytics/dashboard#paths',
+                                                  url: 'https://hanzo.ai/docs/web-analytics/dashboard#paths',
                                                   title: 'End Path',
                                                   description: (
                                                       <div>
@@ -1455,7 +1455,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                         </div>
                                     ),
                                     docs: {
-                                        url: 'https://posthog.com/docs/data/channel-type',
+                                        url: 'https://hanzo.ai/docs/data/channel-type',
                                         title: 'Channels',
                                         description: (
                                             <div>
@@ -1492,7 +1492,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#referrers-channels-utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#referrers-channels-utms',
                                         title: 'Referrers',
                                         description: 'Understand where your users are coming from',
                                     },
@@ -1507,7 +1507,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM source',
                                         description: (
                                             <>
@@ -1527,7 +1527,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM medium',
                                         description: (
                                             <>
@@ -1547,7 +1547,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM campaign',
                                         description: (
                                             <>
@@ -1567,7 +1567,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM content',
                                         description: (
                                             <>
@@ -1587,7 +1587,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM term',
                                         description: (
                                             <>
@@ -1607,7 +1607,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                 {},
                                 {
                                     docs: {
-                                        url: 'https://posthog.com/docs/web-analytics/dashboard#utms',
+                                        url: 'https://hanzo.ai/docs/web-analytics/dashboard#utms',
                                         title: 'UTM parameters',
                                         description: (
                                             <>
@@ -1824,7 +1824,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                               canOpenInsight: true,
                               canOpenModal: true,
                               docs: {
-                                  url: 'https://posthog.com/docs/web-analytics/dashboard#retention',
+                                  url: 'https://hanzo.ai/docs/web-analytics/dashboard#retention',
                                   title: 'Retention',
                                   description: (
                                       <>
@@ -1884,7 +1884,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                     },
                                 },
                                 docs: {
-                                    url: 'https://posthog.com/docs/web-analytics/dashboard#active-hours',
+                                    url: 'https://hanzo.ai/docs/web-analytics/dashboard#active-hours',
                                     title: 'Active hours - Unique users',
                                     description: (
                                         <>
@@ -1948,7 +1948,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                     },
                                 },
                                 docs: {
-                                    url: 'https://posthog.com/docs/web-analytics/dashboard#active-hours',
+                                    url: 'https://hanzo.ai/docs/web-analytics/dashboard#active-hours',
                                     title: 'Active hours - Total pageviews',
                                     description: (
                                         <>
@@ -2015,7 +2015,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                               insightProps: createInsightProps(TileId.GOALS),
                               canOpenInsight: false,
                               docs: {
-                                  url: 'https://posthog.com/docs/web-analytics/dashboard#goals',
+                                  url: 'https://hanzo.ai/docs/web-analytics/dashboard#goals',
                                   title: 'Goals',
                                   description: (
                                       <>
@@ -2024,7 +2024,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                                   Goals shows your pinned or most recently created actions and the
                                                   number of conversions they've had. You can set a custom event or
                                                   action as a{' '}
-                                                  <Link to="https://posthog.com/docs/web-analytics/conversion-goals">
+                                                  <Link to="https://hanzo.ai/docs/web-analytics/conversion-goals">
                                                       conversion goal
                                                   </Link>{' '}
                                                   at the top of the dashboard for more specific metrics.
@@ -2045,7 +2045,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                       : '@4xl/main-content:col-span-1',
                               },
                               docs: {
-                                  url: 'https://posthog.com/docs/session-replay',
+                                  url: 'https://hanzo.ai/docs/session-replay',
                                   title: 'Session Replay',
                                   description:
                                       'Play back sessions to diagnose UI issues, improve support, and get context for nuanced user behavior.',
@@ -2061,7 +2061,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                               },
                               query: errorTrackingQ,
                               docs: {
-                                  url: 'https://posthog.com/docs/error-tracking',
+                                  url: 'https://hanzo.ai/docs/error-tracking',
                                   title: 'Error Tracking',
                                   description: (
                                       <>

@@ -97,7 +97,7 @@ class TestWidgetAPI(BaseTest):
             distinct_id=self.distinct_id,
             channel_source="widget",
             session_id="old-session-id",
-            session_context={"current_url": "/some-page", "replay_url": "https://app.posthog.com/replay/old"},
+            session_context={"current_url": "/some-page", "replay_url": "https://insights.hanzo.ai/replay/old"},
         )
         response = self.client.post(
             "/api/conversations/v1/widget/message",
@@ -107,7 +107,7 @@ class TestWidgetAPI(BaseTest):
                 "distinct_id": self.distinct_id,
                 "ticket_id": str(ticket.id),
                 "session_id": "new-session-id",
-                "session_context": {"replay_url": "https://app.posthog.com/replay/new"},
+                "session_context": {"replay_url": "https://insights.hanzo.ai/replay/new"},
             },
             **self._get_headers(),
         )
@@ -117,7 +117,7 @@ class TestWidgetAPI(BaseTest):
         self.assertEqual(ticket.session_id, "new-session-id")
         # session_context should merge, not replace - preserves current_url while updating replay_url
         self.assertEqual(ticket.session_context["current_url"], "/some-page")
-        self.assertEqual(ticket.session_context["replay_url"], "https://app.posthog.com/replay/new")
+        self.assertEqual(ticket.session_context["replay_url"], "https://insights.hanzo.ai/replay/new")
 
     def test_create_message_wrong_widget_session_forbidden(self):
         ticket = Ticket.objects.create_with_number(

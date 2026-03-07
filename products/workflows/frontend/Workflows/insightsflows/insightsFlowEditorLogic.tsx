@@ -16,7 +16,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import type { DragEvent, RefObject } from 'react'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { AppMetricsTotalsRequest, loadAppMetricsTotals } from 'lib/components/AppMetrics/appMetricsLogic'
 import { uuid } from 'lib/utils'
@@ -504,7 +504,7 @@ export const insightsFlowEditorLogic = kea<insightsFlowEditorLogicType>([
                     actions.setEdges(edges)
                     actions.setNodes(nodes)
                 } catch (error) {
-                    console.error('Error resetting flow from hog flow', error)
+                    console.error('Error resetting flow from iql flow', error)
                     lemonToast.error('Error updating workflow')
                 }
             },

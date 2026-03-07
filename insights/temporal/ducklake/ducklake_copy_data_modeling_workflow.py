@@ -5,7 +5,7 @@ import dataclasses
 
 import duckdb
 import deltalake
-import posthoganalytics
+import hanzoanalytics
 from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
@@ -91,7 +91,7 @@ async def ducklake_copy_workflow_gate_activity(inputs: DuckLakeCopyWorkflowGateI
         return False
 
     try:
-        return posthoganalytics.feature_enabled(
+        return hanzoanalytics.feature_enabled(
             "ducklake-data-modeling-copy-workflow",
             str(team.uuid),
             groups={

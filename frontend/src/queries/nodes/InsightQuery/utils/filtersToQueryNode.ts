@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { objectCleanWithEmpty } from 'lib/utils'
 import { transformLegacyHiddenLegendKeys } from 'scenes/funnels/funnelUtils'
@@ -326,7 +326,7 @@ const strToBool = (value: any): boolean | undefined => {
 
 export const filtersToQueryNode = (filters: Partial<FilterType>): InsightQueryNode => {
     const captureException = (message: string): void => {
-        posthog.captureException(new Error(message), { filters, DataExploration: true })
+        insights.captureException(new Error(message), { filters, DataExploration: true })
     }
 
     if (!filters.insight) {

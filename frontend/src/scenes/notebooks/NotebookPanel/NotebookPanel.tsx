@@ -3,8 +3,8 @@ import './NotebookPanel.scss'
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconExpand45 } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconExpand45 } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

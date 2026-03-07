@@ -952,7 +952,7 @@ def load_activity(
     limit: int = 10,
     page: int = 1,
 ) -> ActivityPage:
-    # TODO in follow-up to posthog #8931 selecting specific fields into a return type from this query
+    # TODO in follow-up to insights #8931 selecting specific fields into a return type from this query
 
     activity_query = (
         ActivityLog.objects.select_related("user").filter(team_id=team_id, scope=scope).order_by("-created_at")

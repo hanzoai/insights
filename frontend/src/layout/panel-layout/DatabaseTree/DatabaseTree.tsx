@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
-import { IconSidebarClose } from '@posthog/icons'
+import { IconSidebarClose } from '@hanzo/icons'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'

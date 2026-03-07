@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import posthog, { JsonRecord } from 'posthog-js'
+import insights, { JsonRecord } from '@hanzo/insights'
 
 import api from 'lib/api'
 import { describerFor } from 'lib/components/ActivityLog/activityLogLogic'
@@ -26,7 +26,7 @@ export interface ChangelogFlagPayload {
     // For optimal display, ensure images are reasonably sized (e.g., width < 800px)
     // and optimized for web (e.g., < 500KB).
     // We suggest you upload it to a CDN to reduce load times/server load.
-    // If you're an Insights employee, check https://posthog.com/handbook/engineering/posthog-com/assets out
+    // If you're an Insights employee, check https://hanzo.ai/handbook/engineering/insights-com/assets out
     markdown: string
 
     // Optional fields used if you want to override this to a specific person rather than Joe
@@ -133,7 +133,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                 try {
                     let importantChangesHumanized = humanize(importantChanges?.results || [], describerFor, true)
 
-                    const flagPayload = posthog.getFeatureFlagPayload('changelog-notification')
+                    const flagPayload = insights.getFeatureFlagPayload('changelog-notification')
                     const changelogNotifications = flagPayload
                         ? (flagPayload as JsonRecord[]).map(
                               (notification) =>
@@ -154,7 +154,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                             ...changelogNotifications.map(
                                 (changelogNotification) =>
                                     ({
-                                        email: changelogNotification.email || 'joe@posthog.com',
+                                        email: changelogNotification.email || 'joe@hanzo.ai',
                                         name: changelogNotification.name || 'Joe',
                                         isSystem: true,
                                         description: <LemonMarkdown>{changelogNotification.markdown}</LemonMarkdown>,

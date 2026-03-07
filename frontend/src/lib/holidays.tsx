@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from './constants'
 import { inStorybook, inStorybookTestRunner } from './utils'
@@ -29,7 +29,7 @@ const wrapWithStorybookCheck = <F extends (...args: any[]) => boolean>(
 }
 
 export const isChristmas = wrapWithStorybookCheck(() => {
-    if (posthog.getFeatureFlag(FEATURE_FLAGS.CHRISTMAS_OVERRIDE)) {
+    if (insights.getFeatureFlag(FEATURE_FLAGS.CHRISTMAS_OVERRIDE)) {
         return true
     }
 
@@ -39,7 +39,7 @@ export const isChristmas = wrapWithStorybookCheck(() => {
 })
 
 export const isHalloween = wrapWithStorybookCheck(() => {
-    if (posthog.getFeatureFlag(FEATURE_FLAGS.HALLOWEEN_OVERRIDE)) {
+    if (insights.getFeatureFlag(FEATURE_FLAGS.HALLOWEEN_OVERRIDE)) {
         return true
     }
 

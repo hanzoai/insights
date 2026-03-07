@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
 import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
@@ -93,7 +93,7 @@ const UniversalSearch = (): JSX.Element => {
                     size="small"
                     autoFocus={false}
                     fullWidth
-                    docLink="https://posthog.com/docs/error-tracking/filter-and-search-issues"
+                    docLink="https://hanzo.ai/docs/error-tracking/filter-and-search-issues"
                 />
             </LemonDropdown>
         </BindLogic>

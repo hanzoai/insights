@@ -13,16 +13,16 @@ DECLARE
     inner_partition_name TEXT;
     row TEXT;
 BEGIN 
-    new_table_name := 'new_posthog_event';
+    new_table_name := 'new_insights_event';
 
     EXECUTE ('SET TIME ZONE UTC ');
-    EXECUTE format('CREATE TABLE %s (like posthog_event including defaults) partition by list (event)', new_table_name);
+    EXECUTE format('CREATE TABLE %s (like insights_event including defaults) partition by list (event)', new_table_name);
 
     -- Add dummy timestamp column so that constraints can be met between new partitioned table
-    EXECUTE('ALTER TABLE posthog_action_events ADD COLUMN timestamp timestamp, ADD COLUMN event varchar(200);');
-    EXECUTE('ALTER TABLE posthog_element ADD COLUMN timestamp timestamp, ADD COLUMN event varchar(200)');
+    EXECUTE('ALTER TABLE insights_action_events ADD COLUMN timestamp timestamp, ADD COLUMN event varchar(200);');
+    EXECUTE('ALTER TABLE insights_element ADD COLUMN timestamp timestamp, ADD COLUMN event varchar(200)');
 
-    range_begin := (SELECT date_trunc('week', MIN(timestamp)) as range_begin from posthog_event);
+    range_begin := (SELECT date_trunc('week', MIN(timestamp)) as range_begin from insights_event);
     range_end := (SELECT date_trunc('week', CURRENT_TIMESTAMP) as range_end) + interval '1 week';
 
     IF range_begin < '2020-01-01 00:00:00-00' THEN
@@ -30,17 +30,17 @@ BEGIN
     END IF;
 
     -- Create the partitions from the earliest date until now
-    EXECUTE('CREATE TABLE posthog_event_partitions_manifest (event varchar(200) NOT NULL);');
+    EXECUTE('CREATE TABLE insights_event_partitions_manifest (event varchar(200) NOT NULL);');
     FOREACH row IN ARRAY $1 LOOP
-        EXECUTE format('INSERT INTO posthog_event_partitions_manifest (event) VALUES (''%s'')', row);
-        partition_name := 'posthog_event_' || row;
+        EXECUTE format('INSERT INTO insights_event_partitions_manifest (event) VALUES (''%s'')', row);
+        partition_name := 'insights_event_' || row;
         IF NOT EXISTS
             (SELECT 1
             FROM   information_schema.tables 
             WHERE  table_name = partition_name)
             THEN
             RAISE NOTICE 'Partition created: %', partition_name;
-            EXECUTE format('CREATE TABLE %I PARTITION OF public.new_posthog_event FOR VALUES IN ($var$%s$var$) partition by range (timestamp)', partition_name, row);
+            EXECUTE format('CREATE TABLE %I PARTITION OF public.new_insights_event FOR VALUES IN ($var$%s$var$) partition by range (timestamp)', partition_name, row);
             temp_range_begin := range_begin;
             WHILE temp_range_begin <= range_end
             LOOP
@@ -65,15 +65,15 @@ BEGIN
 
     END LOOP;
 
-    partition_name := 'posthog_event_' || 'default';
-    EXECUTE ('INSERT INTO posthog_event_partitions_manifest (event) VALUES (''default'')');
+    partition_name := 'insights_event_' || 'default';
+    EXECUTE ('INSERT INTO insights_event_partitions_manifest (event) VALUES (''default'')');
     IF NOT EXISTS
         (SELECT 1
         FROM   information_schema.tables 
         WHERE  table_name = partition_name)
         THEN
         RAISE NOTICE 'Partition created: %', partition_name;
-        EXECUTE format('CREATE TABLE %I PARTITION OF public.new_posthog_event DEFAULT partition by range (timestamp)', partition_name);
+        EXECUTE format('CREATE TABLE %I PARTITION OF public.new_insights_event DEFAULT partition by range (timestamp)', partition_name);
         temp_range_begin := range_begin;
         WHILE temp_range_begin <= range_end
         LOOP
@@ -97,26 +97,26 @@ BEGIN
     END IF;
 
     -- Move all data from old table into new table
-    EXECUTE ('INSERT INTO public.new_posthog_event (id, event, properties, elements, timestamp, team_id, distinct_id, elements_hash)
+    EXECUTE ('INSERT INTO public.new_insights_event (id, event, properties, elements, timestamp, team_id, distinct_id, elements_hash)
     SELECT id, event, properties, elements, timestamp, team_id, distinct_id, elements_hash
-    FROM public.posthog_event;');
+    FROM public.insights_event;');
 
     -- replace old table with new partitioned table
-    EXECUTE ('ALTER TABLE posthog_event RENAME TO old_posthog_event');
-    EXECUTE ('ALTER TABLE new_posthog_event RENAME TO posthog_event');
+    EXECUTE ('ALTER TABLE insights_event RENAME TO old_insights_event');
+    EXECUTE ('ALTER TABLE new_insights_event RENAME TO insights_event');
 
-    EXECUTE ('ALTER SEQUENCE posthog_event_id_seq OWNED BY posthog_event."id"');
-    EXECUTE ('DROP TABLE old_posthog_event CASCADE');
+    EXECUTE ('ALTER SEQUENCE insights_event_id_seq OWNED BY insights_event."id"');
+    EXECUTE ('DROP TABLE old_insights_event CASCADE');
 
-    EXECUTE ('CREATE UNIQUE INDEX posthog_event_pkey ON public.posthog_event USING btree (id, timestamp, event)');
-    EXECUTE ('CREATE INDEX posthog_event_team_id_a8b4c6dc ON public.posthog_event USING btree (team_id)');
-    EXECUTE ('CREATE INDEX posthog_event_idx_distinct_id ON public.posthog_event USING btree (distinct_id)');
-    EXECUTE ('CREATE INDEX posthog_eve_element_48becd_idx ON public.posthog_event USING btree (elements_hash)');
-    EXECUTE ('CREATE INDEX posthog_eve_timesta_1f6a8c_idx ON public.posthog_event USING btree ("timestamp", team_id, event)');
+    EXECUTE ('CREATE UNIQUE INDEX insights_event_pkey ON public.insights_event USING btree (id, timestamp, event)');
+    EXECUTE ('CREATE INDEX insights_event_team_id_a8b4c6dc ON public.insights_event USING btree (team_id)');
+    EXECUTE ('CREATE INDEX insights_event_idx_distinct_id ON public.insights_event USING btree (distinct_id)');
+    EXECUTE ('CREATE INDEX insights_eve_element_48becd_idx ON public.insights_event USING btree (elements_hash)');
+    EXECUTE ('CREATE INDEX insights_eve_timesta_1f6a8c_idx ON public.insights_event USING btree ("timestamp", team_id, event)');
     
-    EXECUTE ('ALTER TABLE posthog_event ADD CONSTRAINT posthog_event_team_id_a8b4c6dc_fk_posthog_team_id FOREIGN KEY (team_id) REFERENCES posthog_team(id) DEFERRABLE INITIALLY DEFERRED');
-    EXECUTE ('ALTER TABLE posthog_action_events ADD CONSTRAINT posthog_action_events_event_id_7077ea70_fk_posthog_event_id FOREIGN KEY (event_id, timestamp, event) REFERENCES posthog_event(id, timestamp, event) DEFERRABLE INITIALLY DEFERRED');
-    EXECUTE ('ALTER TABLE posthog_element ADD CONSTRAINT posthog_element_event_id_bb6549a0_fk_posthog_event_id FOREIGN KEY (event_id, timestamp, event) REFERENCES posthog_event(id, timestamp, event) DEFERRABLE INITIALLY DEFERRED');
+    EXECUTE ('ALTER TABLE insights_event ADD CONSTRAINT insights_event_team_id_a8b4c6dc_fk_insights_team_id FOREIGN KEY (team_id) REFERENCES insights_team(id) DEFERRABLE INITIALLY DEFERRED');
+    EXECUTE ('ALTER TABLE insights_action_events ADD CONSTRAINT insights_action_events_event_id_7077ea70_fk_insights_event_id FOREIGN KEY (event_id, timestamp, event) REFERENCES insights_event(id, timestamp, event) DEFERRABLE INITIALLY DEFERRED');
+    EXECUTE ('ALTER TABLE insights_element ADD CONSTRAINT insights_element_event_id_bb6549a0_fk_insights_event_id FOREIGN KEY (event_id, timestamp, event) REFERENCES insights_event(id, timestamp, event) DEFERRABLE INITIALLY DEFERRED');
 END
 $$
 LANGUAGE plpgsql;
@@ -139,13 +139,13 @@ BEGIN
     IF NOT EXISTS
         (SELECT 1
         FROM   information_schema.tables 
-        WHERE  table_name = 'posthog_event') 
+        WHERE  table_name = 'insights_event') 
     THEN
         RETURN;
     END IF;
 
-    FOR row IN(SELECT * FROM posthog_event_partitions_manifest) LOOP
-        event_table_name := 'posthog_event_' || row.event;
+    FOR row IN(SELECT * FROM insights_event_partitions_manifest) LOOP
+        event_table_name := 'insights_event_' || row.event;
         event_table_default_name := 'temp_' || event_table_name || '_default';
         EXECUTE format('CREATE TABLE %s AS TABLE %s_default' , event_table_default_name, event_table_name);
         EXECUTE format('DROP TABLE %s_default CASCADE', event_table_name);

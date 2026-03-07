@@ -1,11 +1,11 @@
 import { SURVEY_SDK_REQUIREMENTS, SurveySdkType } from './surveyVersionRequirements'
 
 const ALL_SDK_TYPES: SurveySdkType[] = [
-    'posthog-js',
-    'posthog-react-native',
-    'posthog-ios',
-    'posthog-android',
-    'posthog_flutter',
+    'insights-js',
+    'insights-react-native',
+    'insights-ios',
+    'insights-android',
+    'insights_flutter',
 ]
 
 describe('SURVEY_SDK_REQUIREMENTS', () => {

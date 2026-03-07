@@ -1,4 +1,4 @@
-import { EventType, IncrementalSource, eventWithTime } from '@posthog/rrweb-types'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/rrweb-types'
 
 import { Dayjs } from 'lib/dayjs'
 

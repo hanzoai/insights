@@ -1,6 +1,6 @@
 {
     "name": "Braze",
-    "url": "https://github.com/posthog/posthog-braze-plugin",
+    "url": "https://github.com/insights/insights-braze-plugin",
     "description": "Import analytics from Braze and export Insights events to Braze.",
     "main": "index.ts",
     "config": [

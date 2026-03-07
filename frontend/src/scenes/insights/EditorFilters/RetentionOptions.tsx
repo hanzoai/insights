@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -59,7 +59,7 @@ export function RetentionOptions(): JSX.Element {
             <div>
                 <p className="text-secondary mt-4">
                     <Link
-                        to="https://posthog.com/docs/product-analytics/retention?utm_campaign=learn-more-horizontal&utm_medium=in-product"
+                        to="https://hanzo.ai/docs/product-analytics/retention?utm_campaign=learn-more-horizontal&utm_medium=in-product"
                         target="_blank"
                         className="inline-flex items-center"
                     >

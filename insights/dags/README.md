@@ -1,4 +1,4 @@
-# Posthog DAGs
+# Insights DAGs
 
 This directory contains [Dagster](https://dagster.io/) data pipelines (DAGs) for Insights. Dagster is a data orchestration framework that allows us to define, schedule, and monitor data workflows.
 
@@ -22,9 +22,9 @@ Dagster is an open-source data orchestration tool designed to help you define an
 
 Each individual product can also define their own DAGs on `products/<product>/dags`. They will be instantiated into a location in here. We'll eventually move all of the individual DAGs from this folder to inside one of the products but that's WIP.
 
-### Cloud access for posthog employees
+### Cloud access for insights employees
 
-Ask someone on the #team-infrastructure or #team-clickhouse to add you to Dagster Cloud. You might also want to join the #dagster-posthog slack channel.
+Ask someone on the #team-infrastructure or #team-clickhouse to add you to Dagster Cloud. You might also want to join the #dagster-insights slack channel.
 
 ### Adding a New Team
 
@@ -35,7 +35,7 @@ To set up a new team with their own Dagster definitions and Slack alerts, follow
    ```python
    import dagster
 
-   from posthog.dags import my_module  # Import your DAGs
+   from insights.dags import my_module  # Import your DAGs
 
    from . import resources  # Import shared resources (if needed)
 
@@ -64,16 +64,16 @@ To set up a new team with their own Dagster definitions and Slack alerts, follow
 
    ```yaml
    load_from:
-     - python_module: posthog.dags.locations.your_team
+     - python_module: insights.dags.locations.your_team
    ```
 
    **Note**: Only add locations that should run locally. Heavy operations should remain commented out.
 
 3. **Configure production deployment**:
 
-   For Insights employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/PostHog/charts) (see `argocd/dagster/`).
+   For Insights employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/Hanzo Insights/charts) (see `argocd/dagster/`).
 
-   Sample PR: https://github.com/PostHog/charts/pull/6366
+   Sample PR: https://github.com/Hanzo Insights/charts/pull/6366
 
 4. **Add team to the `JobOwners` enum** in `common/common.py`:
 
@@ -173,7 +173,7 @@ When adding a new DAG:
 
 1. Create a new Python file for your DAG
 2. Define your assets, ops, and jobs
-3. Import and register them in the relevant file in `posthog/dags/locations/`
+3. Import and register them in the relevant file in `insights/dags/locations/`
 4. Add appropriate tests in the `tests/` directory
 
 ## Running Tests
@@ -182,7 +182,7 @@ Tests are implemented using pytest. You can use your usual `pytest` commands
 
 ```bash
 # From the project root
-pytest posthog/dags/ products/**/dags/
+pytest insights/dags/ products/**/dags/
 ```
 
 ### Web Analytics Pre-Aggregated Tables
@@ -190,7 +190,7 @@ pytest posthog/dags/ products/**/dags/
 **Note:** For materializing web analytics preaggregated tables locally (e.g., during development or testing), you may want to use a higher partition count to process more data in a single run:
 
 ```bash
-DAGSTER_WEB_PREAGGREGATED_MAX_PARTITIONS_PER_RUN=3000 DEBUG=1 dagster dev -m posthog.dags.definitions
+DAGSTER_WEB_PREAGGREGATED_MAX_PARTITIONS_PER_RUN=3000 DEBUG=1 dagster dev -m insights.dags.definitions
 ```
 
 This will allow backfills to process up to 3000 partitions per run instead of the default, significantly reducing the number of individual runs needed for large historical backfills.
@@ -236,7 +236,7 @@ concurrency:
 DAGSTER_WEB_PREAGGREGATED_MAX_PARTITIONS_PER_RUN=1  # Force small partitions per run to create multiple runs
 
 ```bash
-export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTITIONS_PER_RUN=1 DEBUG=1 dagster dev -m posthog.dags.definitions
+export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTITIONS_PER_RUN=1 DEBUG=1 dagster dev -m insights.dags.definitions
 ````
 
 #### Testing
@@ -251,9 +251,9 @@ export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTIT
 #### Production Configuration
 
 For production deployments, configure similar concurrency settings in your `dagster.yaml`.
-For Insights employees, it is on our charts repo: https://github.com/PostHog/charts/tree/master/argocd/dagster
+For Insights employees, it is on our charts repo: https://github.com/Hanzo Insights/charts/tree/master/argocd/dagster
 
 ## Additional Resources
 
 - [Dagster Documentation](https://docs.dagster.io/)
-- [Insights Documentation](https://posthog.com/docs)
+- [Insights Documentation](https://hanzo.ai/docs)

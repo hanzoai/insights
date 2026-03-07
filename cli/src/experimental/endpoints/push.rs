@@ -44,7 +44,7 @@ enum PushAction {
     },
 }
 
-/// Push local YAML files to PostHog
+/// Push local YAML files to Insights
 pub fn push_endpoints(args: &PushArgs) -> Result<()> {
     context().capture_command_invoked("endpoints_push");
 
@@ -79,7 +79,7 @@ pub fn push_endpoints(args: &PushArgs) -> Result<()> {
     }
 
     println!();
-    println!("Comparing local files with PostHog...");
+    println!("Comparing local files with Insights...");
     println!();
 
     // 3. Fetch remote endpoints and insight variables

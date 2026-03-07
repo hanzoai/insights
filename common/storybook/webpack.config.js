@@ -9,20 +9,20 @@ const webpackDevServerHost = process.env.WEBPACK_HOT_RELOAD_HOST || '127.0.0.1'
 const webpackDevServerFrontendAddr = webpackDevServerHost === '0.0.0.0' ? '127.0.0.1' : webpackDevServerHost
 
 function createEntry(entry) {
-    // Copy hedgehog-mode assets to dist
-    const hedgehogModeSrc = path.resolve(
+    // Copy mascot-mode assets to dist
+    const mascotModeSrc = path.resolve(
         __dirname,
         '..',
         '..',
         'frontend',
         'node_modules',
-        '@posthog',
-        'hedgehog-mode',
+        '@insights',
+        'mascot-mode',
         'assets'
     )
-    const hedgehogModeDest = path.resolve(__dirname, 'dist', 'hedgehog-mode')
-    if (fs.existsSync(hedgehogModeSrc)) {
-        fs.copySync(hedgehogModeSrc, hedgehogModeDest, { overwrite: true })
+    const mascotModeDest = path.resolve(__dirname, 'dist', 'mascot-mode')
+    if (fs.existsSync(mascotModeSrc)) {
+        fs.copySync(mascotModeSrc, mascotModeDest, { overwrite: true })
     }
 
     const commonLoadersForSassAndLess = [
@@ -74,8 +74,8 @@ function createEntry(entry) {
                 '~': path.resolve(__dirname, '..', '..', 'frontend', 'src'),
                 lib: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'lib'),
                 scenes: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'scenes'),
-                '@posthog/lemon-ui': path.resolve(__dirname, '..', '..', 'frontend', '@posthog', 'lemon-ui', 'src'),
-                '@posthog/shared-onboarding': path.resolve(__dirname, '..', '..', 'docs', 'onboarding'),
+                '@hanzo/lemon-ui': path.resolve(__dirname, '..', '..', 'frontend', '@insights', 'lemon-ui', 'src'),
+                '@hanzo/shared-onboarding': path.resolve(__dirname, '..', '..', 'docs', 'onboarding'),
                 storybook: path.resolve(__dirname, '..', '..', 'frontend', '.storybook'),
                 types: path.resolve(__dirname, '..', '..', 'frontend', 'types'),
                 public: path.resolve(__dirname, '..', '..', 'frontend', 'public'),
@@ -240,13 +240,13 @@ function createEntry(entry) {
                       // we need these only once per build
                       new HtmlWebpackPlugin({
                           alwaysWriteToDisk: true,
-                          title: 'PostHog',
+                          title: 'Insights',
                           template: path.join(__dirname, 'src', 'index.html'),
                       }),
 
                       new HtmlWebpackPlugin({
                           alwaysWriteToDisk: true,
-                          title: 'PostHog',
+                          title: 'Insights',
                           filename: 'layout.html',
                           inject: false,
                           template: path.join(__dirname, 'src', 'layout.ejs'),

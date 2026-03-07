@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
 from insights.models.team.team import Team
@@ -50,7 +50,7 @@ async def execute_task_processing_workflow_async(
 
         if skip_user_check:
             logger.info(f"Skipping user check for automated task {task_id}")
-            tasks_enabled = posthoganalytics.feature_enabled(
+            tasks_enabled = hanzoanalytics.feature_enabled(
                 "tasks",
                 f"team_{team_id}",
                 groups={"organization": str(team.organization_id)},
@@ -67,7 +67,7 @@ async def execute_task_processing_workflow_async(
             user = await User.objects.aget(id=user_id)
 
             logger.info(f"Checking feature flag for user {user.distinct_id}, org {team.organization_id}")
-            tasks_enabled = posthoganalytics.feature_enabled(
+            tasks_enabled = hanzoanalytics.feature_enabled(
                 "tasks",
                 user.distinct_id,
                 groups={"organization": str(team.organization_id)},
@@ -132,7 +132,7 @@ def execute_task_processing_workflow(
 
         if skip_user_check:
             logger.info(f"Skipping user check for automated task {task_id}")
-            tasks_enabled = posthoganalytics.feature_enabled(
+            tasks_enabled = hanzoanalytics.feature_enabled(
                 "tasks",
                 f"team_{team_id}",
                 groups={"organization": str(team.organization.id)},
@@ -147,7 +147,7 @@ def execute_task_processing_workflow(
 
             user = User.objects.get(id=user_id)
 
-            tasks_enabled = posthoganalytics.feature_enabled(
+            tasks_enabled = hanzoanalytics.feature_enabled(
                 "tasks",
                 user.distinct_id,
                 groups={"organization": str(team.organization.id)},

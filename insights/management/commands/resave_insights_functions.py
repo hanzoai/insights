@@ -16,7 +16,7 @@ class Command(BaseCommand):
         SELECT DISTINCT hf.id
         FROM insights_function hf
         CROSS JOIN LATERAL jsonb_array_elements(hf.inputs_schema) AS schema
-        JOIN posthog_integration i
+        JOIN insights_integration i
         ON i.id = CAST((hf.inputs -> (schema->>'key')) ->> 'value' AS INTEGER)
         WHERE jsonb_typeof(hf.inputs) IS NOT NULL
         AND schema->>'type' = 'integration'

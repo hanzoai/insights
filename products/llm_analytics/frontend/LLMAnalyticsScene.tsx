@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import React, { useMemo } from 'react'
 
-import { LemonBanner, LemonButton, LemonTab, LemonTabs, LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonTab, LemonTabs, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -359,12 +359,12 @@ function LLMAnalyticsGenerations(): JSX.Element {
     )
 }
 
-const DEFAULT_DOCS_URL = 'https://posthog.com/docs/llm-analytics/installation'
+const DEFAULT_DOCS_URL = 'https://hanzo.ai/docs/llm-analytics/installation'
 const DOCS_URLS_BY_TAB: Record<string, string> = {
-    traces: 'https://posthog.com/docs/llm-analytics/traces',
-    generations: 'https://posthog.com/docs/llm-analytics/generations',
-    sessions: 'https://posthog.com/docs/llm-analytics/sessions',
-    errors: 'https://posthog.com/docs/llm-analytics/errors',
+    traces: 'https://hanzo.ai/docs/llm-analytics/traces',
+    generations: 'https://hanzo.ai/docs/llm-analytics/generations',
+    sessions: 'https://hanzo.ai/docs/llm-analytics/sessions',
+    errors: 'https://hanzo.ai/docs/llm-analytics/errors',
 }
 
 const TAB_DESCRIPTIONS: Record<string, string> = {

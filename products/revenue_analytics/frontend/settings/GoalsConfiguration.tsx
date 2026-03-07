@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonSwitch, LemonTag } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { dayjs } from 'lib/dayjs'

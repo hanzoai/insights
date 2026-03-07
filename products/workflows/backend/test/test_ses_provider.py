@@ -8,7 +8,7 @@ from django.test import override_settings
 
 from products.workflows.backend.providers.ses import SESProvider
 
-TEST_DOMAIN = "test.posthog.com"
+TEST_DOMAIN = "test.hanzo.ai"
 
 
 class TestSESProvider(TestCase):
@@ -132,28 +132,28 @@ class TestSESProvider(TestCase):
                 {
                     "type": "verification",
                     "recordType": "TXT",
-                    "recordHostname": "_amazonses.test.posthog.com",
+                    "recordHostname": "_amazonses.test.hanzo.ai",
                     "recordValue": "test-token-123",
                     "status": "pending",
                 },
                 {
                     "type": "dkim",
                     "recordType": "CNAME",
-                    "recordHostname": "token1._domainkey.test.posthog.com",
+                    "recordHostname": "token1._domainkey.test.hanzo.ai",
                     "recordValue": "token1.dkim.amazonses.com",
                     "status": "pending",
                 },
                 {
                     "type": "dkim",
                     "recordType": "CNAME",
-                    "recordHostname": "token2._domainkey.test.posthog.com",
+                    "recordHostname": "token2._domainkey.test.hanzo.ai",
                     "recordValue": "token2.dkim.amazonses.com",
                     "status": "pending",
                 },
                 {
                     "type": "dkim",
                     "recordType": "CNAME",
-                    "recordHostname": "token3._domainkey.test.posthog.com",
+                    "recordHostname": "token3._domainkey.test.hanzo.ai",
                     "recordValue": "token3.dkim.amazonses.com",
                     "status": "pending",
                 },
@@ -165,7 +165,7 @@ class TestSESProvider(TestCase):
                     "status": "pending",
                 },
                 {
-                    "recordHostname": "mail.test.posthog.com",
+                    "recordHostname": "mail.test.hanzo.ai",
                     "recordType": "MX",
                     "recordValue": "feedback-smtp.us-east-1.amazonses.com",
                     "status": "pending",
@@ -173,7 +173,7 @@ class TestSESProvider(TestCase):
                     "priority": 10,
                 },
                 {
-                    "recordHostname": "mail.test.posthog.com",
+                    "recordHostname": "mail.test.hanzo.ai",
                     "recordType": "TXT",
                     "recordValue": "v=spf1 include:amazonses.com ~all",
                     "status": "pending",

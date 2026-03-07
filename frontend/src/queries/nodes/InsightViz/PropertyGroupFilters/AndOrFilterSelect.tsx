@@ -1,4 +1,4 @@
-import { LemonButtonProps, LemonSelect } from '@posthog/lemon-ui'
+import { LemonButtonProps, LemonSelect } from '@hanzo/lemon-ui'
 
 import { FilterLogicalOperator } from '~/types'
 

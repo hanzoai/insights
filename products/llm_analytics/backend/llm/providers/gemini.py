@@ -8,11 +8,11 @@ from typing import Any
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from google import genai
 from google.genai.errors import APIError
 from google.genai.types import GenerateContentConfig, HttpOptions
-from posthoganalytics.ai.gemini import genai as posthog_genai
+from hanzoanalytics.ai.gemini import genai as insights_genai
 from pydantic import BaseModel
 
 from products.llm_analytics.backend.llm.errors import (
@@ -67,12 +67,12 @@ class GeminiAdapter:
         """Non-streaming completion with optional structured output."""
         effective_api_key = api_key or self._get_default_api_key()
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         http_options = HttpOptions(timeout=GeminiConfig.TIMEOUT)
         client: Any
-        if analytics.capture and posthog_client:
-            client = posthog_genai.Client(
-                api_key=effective_api_key, posthog_client=posthog_client, http_options=http_options
+        if analytics.capture and analytics_client:
+            client = insights_genai.Client(
+                api_key=effective_api_key, analytics_client=analytics_client, http_options=http_options
             )
         else:
             client = genai.Client(api_key=effective_api_key, http_options=http_options)
@@ -144,12 +144,12 @@ class GeminiAdapter:
         effective_api_key = api_key or self._get_default_api_key()
         model_id = request.model
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         http_options = HttpOptions(timeout=GeminiConfig.TIMEOUT)
         client: Any
-        if analytics.capture and posthog_client:
-            client = posthog_genai.Client(
-                api_key=effective_api_key, posthog_client=posthog_client, http_options=http_options
+        if analytics.capture and analytics_client:
+            client = insights_genai.Client(
+                api_key=effective_api_key, analytics_client=analytics_client, http_options=http_options
             )
         else:
             client = genai.Client(api_key=effective_api_key, http_options=http_options)
@@ -166,10 +166,10 @@ class GeminiAdapter:
         analytics_kwargs: dict[str, Any] = {}
         if analytics.capture:
             analytics_kwargs = {
-                "posthog_distinct_id": analytics.distinct_id,
-                "posthog_trace_id": analytics.trace_id or str(uuid.uuid4()),
-                "posthog_properties": analytics.properties or {},
-                "posthog_groups": analytics.groups or {},
+                "insights_distinct_id": analytics.distinct_id,
+                "insights_trace_id": analytics.trace_id or str(uuid.uuid4()),
+                "insights_properties": analytics.properties or {},
+                "insights_groups": analytics.groups or {},
             }
 
         try:
@@ -258,12 +258,12 @@ class GeminiAdapter:
 
     def _build_analytics_kwargs(self, analytics: AnalyticsContext, client) -> dict:
         """Build Insights analytics kwargs if using instrumented client."""
-        if analytics.capture and isinstance(client, posthog_genai.Client):
+        if analytics.capture and isinstance(client, insights_genai.Client):
             return {
-                "posthog_distinct_id": analytics.distinct_id,
-                "posthog_trace_id": analytics.trace_id or str(uuid.uuid4()),
-                "posthog_properties": analytics.properties or {},
-                "posthog_groups": analytics.groups or {},
+                "insights_distinct_id": analytics.distinct_id,
+                "insights_trace_id": analytics.trace_id or str(uuid.uuid4()),
+                "insights_properties": analytics.properties or {},
+                "insights_groups": analytics.groups or {},
             }
         return {}
 

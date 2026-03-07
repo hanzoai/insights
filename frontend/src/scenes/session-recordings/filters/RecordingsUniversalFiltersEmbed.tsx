@@ -15,7 +15,7 @@ import {
     IconRevert,
     IconTrash,
     IconX,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonBadge,
     LemonButton,
@@ -26,7 +26,7 @@ import {
     LemonTabs,
     LemonTag,
     Popover,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'

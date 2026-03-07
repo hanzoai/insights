@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconWrench } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconWrench } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { CodeEditor } from 'lib/monaco/CodeEditor'

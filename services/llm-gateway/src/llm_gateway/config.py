@@ -20,7 +20,7 @@ DEFAULT_PRODUCT_COST_LIMITS: dict[str, "ProductCostLimit"] = {
 class Settings(BaseSettings):
     debug: bool = False
 
-    database_url: str = "postgres://posthog:posthog@localhost:5432/posthog"
+    database_url: str = "postgres://insights:insights@localhost:5432/insights"
     db_pool_min_size: int = 2
     db_pool_max_size: int = 10
 
@@ -44,8 +44,8 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
 
     # Project token for LLM analytics events
-    posthog_project_token: str | None = None
-    posthog_host: str = "https://us.i.posthog.com"
+    insights_project_token: str | None = None
+    insights_host: str = "https://us.i.hanzo.ai"
 
     metrics_enabled: bool = True
 

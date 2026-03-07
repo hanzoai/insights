@@ -1,4 +1,4 @@
-import { InitiatorType } from 'posthog-js'
+import { InitiatorType } from '@hanzo/insights'
 
 import { mapRRWebNetworkRequest } from 'scenes/session-recordings/apm/performance-event-utils'
 import { calculatePerformanceParts } from 'scenes/session-recordings/apm/waterfall/TimingBar'

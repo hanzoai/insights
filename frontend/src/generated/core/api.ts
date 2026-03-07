@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - core
@@ -815,7 +815,7 @@ export const rolesDestroy = async (organizationId: string, id: string, options?:
 }
 
 /**
- * Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+ * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsListUrl = (projectId: string, params?: AnnotationsListParams) => {
     const normalizedParams = new URLSearchParams()
@@ -845,7 +845,7 @@ export const annotationsList = async (
 }
 
 /**
- * Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+ * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsCreateUrl = (projectId: string) => {
     return `/api/projects/${projectId}/annotations/`
@@ -865,7 +865,7 @@ export const annotationsCreate = async (
 }
 
 /**
- * Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+ * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsRetrieveUrl = (projectId: string, id: number) => {
     return `/api/projects/${projectId}/annotations/${id}/`
@@ -883,7 +883,7 @@ export const annotationsRetrieve = async (
 }
 
 /**
- * Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+ * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsUpdateUrl = (projectId: string, id: number) => {
     return `/api/projects/${projectId}/annotations/${id}/`
@@ -904,7 +904,7 @@ export const annotationsUpdate = async (
 }
 
 /**
- * Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+ * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsPartialUpdateUrl = (projectId: string, id: number) => {
     return `/api/projects/${projectId}/annotations/${id}/`

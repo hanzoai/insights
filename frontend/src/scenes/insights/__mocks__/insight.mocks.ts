@@ -3,11 +3,11 @@ export const sampleRetentionPeopleResponse = {
         {
             person: {
                 id: 195158300,
-                name: 'test_user@posthog.com',
+                name: 'test_user@hanzo.ai',
                 distinct_ids: ['1234'],
                 properties: {
                     $os: 'Mac OS X',
-                    email: 'test_user@posthog.com',
+                    email: 'test_user@hanzo.ai',
                 },
                 is_identified: true,
                 created_at: '2021-11-15T15:23:54.099000Z',
@@ -18,11 +18,11 @@ export const sampleRetentionPeopleResponse = {
         {
             person: {
                 id: 194626019,
-                name: 'test@posthog.com',
+                name: 'test@hanzo.ai',
                 distinct_ids: ['abc'],
                 properties: {
                     $os: 'Mac OS X',
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                 },
                 is_identified: false,
                 created_at: '2021-11-15T14:12:41.919000Z',
@@ -31,7 +31,7 @@ export const sampleRetentionPeopleResponse = {
             appearances: [true, true, true, true, true, false, true, true, true],
         },
     ],
-    next: 'https://app.posthog.com/api/projects/1/persons/retention/?insight=RETENTION&target_entity=%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%7D&returning_entity=%7B%22id%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22name%22%3A%22%24pageview%22%7D&period=Day&retention_type=retention_first_time&display=ActionsTable&properties=%5B%5D&selected_interval=2&offset=100',
+    next: 'https://insights.hanzo.ai/api/projects/1/persons/retention/?insight=RETENTION&target_entity=%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%7D&returning_entity=%7B%22id%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22name%22%3A%22%24pageview%22%7D&period=Day&retention_type=retention_first_time&display=ActionsTable&properties=%5B%5D&selected_interval=2&offset=100',
 }
 
 export const samplePersonProperties = [

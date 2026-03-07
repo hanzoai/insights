@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
-import { SupportedWebVitalsMetrics } from 'posthog-js'
+import { SupportedWebVitalsMetrics } from '@hanzo/insights'
 
-import { LemonDivider, LemonSwitch } from '@posthog/lemon-ui'
+import { LemonDivider, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -61,7 +61,7 @@ export function AutocaptureSettings(): JSX.Element {
         <>
             <div className="deprecated-space-y-2">
                 <LemonSwitch
-                    id="posthog-autocapture-switch"
+                    id="insights-autocapture-switch"
                     onChange={(checked) => {
                         updateCurrentTeam({
                             autocapture_opt_out: !checked,
@@ -86,7 +86,7 @@ export function WebVitalsAutocaptureSettings(): JSX.Element {
     return (
         <>
             <LemonSwitch
-                id="posthog-autocapture-web-vitals-switch"
+                id="insights-autocapture-web-vitals-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
                         autocapture_web_vitals_opt_in: checked,

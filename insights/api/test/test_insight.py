@@ -85,7 +85,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         ]
     )
     def test_legacy_insight_endpoints_blocked_with_feature_flag(self, _name: str, path: str) -> None:
-        with patch("insights.api.insight.posthoganalytics.feature_enabled", return_value=True) as mock_feature_enabled:
+        with patch("insights.api.insight.hanzoanalytics.feature_enabled", return_value=True) as mock_feature_enabled:
             response = self.client.get(path.format(team_id=self.team.id))
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -149,9 +149,9 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual({insight["id"] for insight in response_env_current["results"]}, {insight_a.id, insight_b.id})
         self.assertEqual({insight["id"] for insight in response_env_other["results"]}, {insight_a.id, insight_b.id})
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_created_updated_and_last_modified(self, mock_capture: mock.Mock) -> None:
-        alt_user = User.objects.create_and_join(self.organization, "team2@posthog.com", None)
+        alt_user = User.objects.create_and_join(self.organization, "team2@hanzo.ai", None)
         self_user_basic_serialized = {
             "id": self.user.id,
             "uuid": str(self.user.uuid),
@@ -179,7 +179,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             response_1 = self.client.post(
                 f"/api/projects/{self.team.id}/insights/",
                 {"name": "test"},
-                headers={"Referer": "https://posthog.com/my-referer", "X-Posthog-Session-Id": "my-session-id"},
+                headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
             )
             self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
             self.assertLessEqual(
@@ -197,7 +197,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_id=self.user.distinct_id,
                 properties={
                     "insight_id": response_1.json()["short_id"],
-                    "$current_url": "https://posthog.com/my-referer",
+                    "$current_url": "https://hanzo.ai/my-referer",
                     "$session_id": "my-session-id",
                 },
                 groups=ANY,
@@ -212,7 +212,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             response_2 = self.client.patch(
                 f"/api/projects/{self.team.id}/insights/{insight_id}",
                 {"favorited": True},
-                headers={"Referer": "https://posthog.com/my-referer", "X-Posthog-Session-Id": "my-session-id"},
+                headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
             )
             self.assertEqual(response_2.status_code, status.HTTP_200_OK)
             self.assertLessEqual(
@@ -232,7 +232,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_id=self.user.distinct_id,
                 properties={
                     "insight_id": insight_short_id,
-                    "$current_url": "https://posthog.com/my-referer",
+                    "$current_url": "https://hanzo.ai/my-referer",
                     "$session_id": "my-session-id",
                 },
                 groups=ANY,
@@ -551,7 +551,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         queries = []
 
         for i in range(5):
-            user = User.objects.create(email=f"testuser{i}@posthog.com")
+            user = User.objects.create(email=f"testuser{i}@hanzo.ai")
             OrganizationMembership.objects.create(user=user, organization=self.organization)
             dashboard = Dashboard.objects.create(name=f"Dashboard {i}", team=self.team)
 
@@ -685,7 +685,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             response_data["id"],
             [
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "created_at": "2012-01-14T03:21:34Z",
                     "scope": "Insight",
@@ -940,7 +940,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                     },
                     "item_id": str(insight_id),
                     "scope": "Insight",
-                    "user": {"email": "user1@posthog.com", "first_name": ""},
+                    "user": {"email": "user1@hanzo.ai", "first_name": ""},
                 },
                 {
                     "activity": "updated",
@@ -965,7 +965,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                     },
                     "item_id": str(insight_id),
                     "scope": "Insight",
-                    "user": {"email": "user1@posthog.com", "first_name": ""},
+                    "user": {"email": "user1@hanzo.ai", "first_name": ""},
                 },
                 {
                     "activity": "created",
@@ -979,7 +979,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                     },
                     "item_id": str(insight_id),
                     "scope": "Insight",
-                    "user": {"email": "user1@posthog.com", "first_name": ""},
+                    "user": {"email": "user1@hanzo.ai", "first_name": ""},
                 },
             ],
         )
@@ -1057,7 +1057,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             response_data["id"],
             [
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "created_at": "2012-01-14T03:21:34Z",
                     "scope": "Insight",
@@ -1107,7 +1107,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                 insight_id,
                 [
                     {
-                        "user": {"first_name": "", "email": "user1@posthog.com"},
+                        "user": {"first_name": "", "email": "user1@hanzo.ai"},
                         "activity": "updated",
                         "scope": "Insight",
                         "item_id": str(insight_id),
@@ -1136,7 +1136,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                         "created_at": "2012-01-14T03:31:34Z",
                     },
                     {
-                        "user": {"first_name": "", "email": "user1@posthog.com"},
+                        "user": {"first_name": "", "email": "user1@hanzo.ai"},
                         "activity": "created",
                         "scope": "Insight",
                         "item_id": str(insight_id),
@@ -3486,7 +3486,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     def test_insight_access_control_filtering(self) -> None:
         """Test that insights are properly filtered based on access control."""
 
-        user2 = self._create_user("test2@posthog.com")
+        user2 = self._create_user("test2@hanzo.ai")
 
         visible_insight = Insight.objects.create(
             team=self.team,

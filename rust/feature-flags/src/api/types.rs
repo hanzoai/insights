@@ -94,7 +94,7 @@ pub struct FlagsQueryParams {
     /// Optional boolean indicating whether to include the config field in the response
     /// This lets us have parity with the legacy /decide endpoint so that we can support
     /// JS and other mobile clients need more config data than /flags supplied originally.
-    /// e.g. https://us.posthog.com/flags?v=2&config=true
+    /// e.g. https://us.insights.hanzo.ai/flags?v=2&config=true
     #[serde(default, deserialize_with = "deserialize_optional_bool")]
     pub config: Option<bool>,
 }

@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonTagType, PaginationManual } from '@posthog/lemon-ui'
+import { LemonTagType, PaginationManual } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'

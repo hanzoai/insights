@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput } from '@hanzo/lemon-ui'
 
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
 import { AddEventButton } from 'scenes/surveys/AddEventButton'

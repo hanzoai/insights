@@ -8,7 +8,7 @@ from insights.products import Products
 class TestUserProductList(BaseTest):
     def test_sync_filters_out_existing_products_with_precomputed_counts(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -45,7 +45,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_ranks_by_precomputed_counts(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -70,7 +70,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_respects_count_limit(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -91,7 +91,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_respects_allow_sidebar_suggestions_false(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=False
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=False
         )
         user.join(organization=self.organization)
 
@@ -108,13 +108,13 @@ class TestUserProductList(BaseTest):
 
     def test_sync_computes_counts_when_not_provided(self):
         colleague1 = User.objects.create_user(
-            email="colleague1@posthog.com", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
+            email="colleague1@hanzo.ai", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
         )
         colleague2 = User.objects.create_user(
-            email="colleague2@posthog.com", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
+            email="colleague2@hanzo.ai", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
         )
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
 
         colleague1.join(organization=self.organization)
@@ -134,7 +134,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_does_not_duplicate_existing_products(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -157,16 +157,16 @@ class TestUserProductList(BaseTest):
 
     def test_get_user_product_list_count(self):
         colleague1 = User.objects.create_user(
-            email="colleague1@posthog.com", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
+            email="colleague1@hanzo.ai", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
         )
         colleague2 = User.objects.create_user(
-            email="colleague2@posthog.com", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
+            email="colleague2@hanzo.ai", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
         )
         colleague3 = User.objects.create_user(
-            email="colleague3@posthog.com", password="password", first_name="Colleague3", allow_sidebar_suggestions=True
+            email="colleague3@hanzo.ai", password="password", first_name="Colleague3", allow_sidebar_suggestions=True
         )
         colleague4 = User.objects.create_user(
-            email="colleague4@posthog.com", password="password", first_name="Colleague4", allow_sidebar_suggestions=True
+            email="colleague4@hanzo.ai", password="password", first_name="Colleague4", allow_sidebar_suggestions=True
         )
 
         colleague1.join(organization=self.organization)
@@ -204,10 +204,10 @@ class TestUserProductList(BaseTest):
 
     def test_get_user_product_list_count_excludes_disabled_products(self):
         colleague1 = User.objects.create_user(
-            email="colleague1@posthog.com", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
+            email="colleague1@hanzo.ai", password="password", first_name="Colleague1", allow_sidebar_suggestions=True
         )
         colleague2 = User.objects.create_user(
-            email="colleague2@posthog.com", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
+            email="colleague2@hanzo.ai", password="password", first_name="Colleague2", allow_sidebar_suggestions=True
         )
 
         colleague1.join(organization=self.organization)
@@ -230,7 +230,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_suggests_same_category(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -250,7 +250,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_excludes_existing_products(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -270,7 +270,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_respects_allow_sidebar_suggestions_false(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=False
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=False
         )
         user.join(organization=self.organization)
 
@@ -281,7 +281,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_respects_max_products(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -292,7 +292,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_handles_empty_cross_sell_options(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -301,7 +301,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_suggests_from_analytics_category(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -319,7 +319,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_ignores_tools_and_unreleased_categories(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -342,7 +342,7 @@ class TestUserProductList(BaseTest):
 
     def test_sync_cross_sell_products_respects_custom_ignored_categories(self):
         user = User.objects.create_user(
-            email="user@posthog.com", password="password", first_name="User", allow_sidebar_suggestions=True
+            email="user@hanzo.ai", password="password", first_name="User", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 

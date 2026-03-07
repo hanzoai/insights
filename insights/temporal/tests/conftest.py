@@ -66,7 +66,7 @@ async def ateam(aorganization):
 @pytest_asyncio.fixture
 async def auser(aorganization):
     user = await sync_to_async(User.objects.create_and_join)(
-        aorganization, f"test-{random.randint(1, 99999)}@posthog.com", "testpassword123", "Test"
+        aorganization, f"test-{random.randint(1, 99999)}@hanzo.ai", "testpassword123", "Test"
     )
     yield user
     await sync_to_async(user.delete)()

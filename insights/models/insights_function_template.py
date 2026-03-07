@@ -26,7 +26,7 @@ class InsightsFunctionTemplate(UUIDTModel):
 
     # Core Template Content
     code = models.TextField()
-    code_language = models.CharField(max_length=20, default="hog")  # "hog" or "javascript"
+    code_language = models.CharField(max_length=20, default="iql")  # "iql" or "javascript"
     inputs_schema = models.JSONField()
     bytecode = models.JSONField(null=True, blank=True)
 
@@ -137,7 +137,7 @@ class InsightsFunctionTemplate(UUIDTModel):
         try:
             from insights.cdp.validation import compile_script
 
-            # Compile the hog code_language to bytecode and store it in the database field
+            # Compile the iql code_language to bytecode and store it in the database field
             self.bytecode = compile_script(self.code, self.type)
         except Exception as e:
             logger.error(

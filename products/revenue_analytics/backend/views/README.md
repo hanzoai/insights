@@ -9,13 +9,13 @@ The system follows a builder pattern where:
 1. **Sources** define how to extract data from different systems (events, Stripe, etc.)
 2. **Schemas** define the standardized output format for each view type
 3. **Orchestrator** coordinates the process and builds concrete view instances
-4. **Views** are the final HogQL queries registered in the database schema
+4. **Views** are the final InsightsQL queries registered in the database schema
 
 ```text
 ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐    ┌───────────────┐
 │   Sources   │───▶│   Builders   │───▶│   Orchestrator  │───▶│  View Objects │
 │             │    │              │    │                 │    │               │
-│ • Events    │    │ • Transform  │    │ • Coordinates   │    │ • HogQL Query │
+│ • Events    │    │ • Transform  │    │ • Coordinates   │    │ • InsightsQL Query │
 │ • Stripe    │    │ • Normalize  │    │ • Applies       │    │ • Schema      │
 │ • Other DW  │    │ • Convert    │    │   schemas       │    │ • Metadata    │
 └─────────────┘    └──────────────┘    └─────────────────┘    └───────────────┘
@@ -90,7 +90,7 @@ Each builder must implement the `Builder` function signature:
 ```python
 # sources/chargebee/charge.py
 from typing import Iterable
-from posthog.hogql import ast
+from insights.insightsql import ast
 from products.revenue_analytics.backend.views.core import BuiltQuery, SourceHandle, view_prefix_for_source
 
 def build(handle: SourceHandle) -> Iterable[BuiltQuery]:
@@ -107,7 +107,7 @@ def build(handle: SourceHandle) -> Iterable[BuiltQuery]:
     table = charge_schema.table
     prefix = view_prefix_for_source(source)
 
-    # Build HogQL AST that transforms source data to match charge schema
+    # Build InsightsQL AST that transforms source data to match charge schema
     query = ast.SelectQuery(
         select=[
             ast.Alias(alias="id", expr=ast.Field(chain=["id"])),
@@ -134,7 +134,7 @@ def build(handle: SourceHandle) -> Iterable[BuiltQuery]:
 Create the builder registry in `sources/chargebee/__init__.py`:
 
 ```python
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 from products.revenue_analytics.backend.views.core import Builder
 
 from .charge import build as charge_builder
@@ -350,7 +350,7 @@ class TestChargeChargebeeBuilder(ChargebeeSourceBaseTest):
 
 #### Snapshot Testing
 
-Use snapshot testing for regression protection on generated HogQL queries:
+Use snapshot testing for regression protection on generated InsightsQL queries:
 
 ```python
 def test_build_charge_query_snapshot(self):
@@ -360,7 +360,7 @@ def test_build_charge_query_snapshot(self):
     queries = list(build(self.chargebee_handle))
     charge_query = queries[0]
 
-    query_sql = charge_query.query.to_hogql()
+    query_sql = charge_query.query.to_insightsql()
     self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 ```
 
@@ -405,21 +405,21 @@ pytest products/revenue_analytics/backend/views/sources/test/stripe/ -v --snapsh
 pytest products/revenue_analytics/backend/views/sources/test/stripe/test_stripe_charge.py -v --snapshot-update
 ```
 
-**3. HogQL Query Integration Tests**
+**3. InsightsQL Query Integration Tests**
 
 These are useful to know whether changes in your code produced any change on the output queries
 
 ```bash
-pytest products/revenue_analytics/backend/hogql_queries/test/ -v --snapshot-update
+pytest products/revenue_analytics/backend/insightsql_queries/test/ -v --snapshot-update
 ```
 
 ### Testing your implementation via queries
 
-There are many more tests in `products/revenue_analytics/backend/hogql_queries/test/` which are currently only testing Stripe and events. It's usually a wise idea to extend that with your new source.
+There are many more tests in `products/revenue_analytics/backend/insightsql_queries/test/` which are currently only testing Stripe and events. It's usually a wise idea to extend that with your new source.
 
 ## View Registration
 
-Views are automatically registered in Insights's HogQL database schema through the orchestrator. The system will:
+Views are automatically registered in Insights's InsightsQL database schema through the orchestrator. The system will:
 
 1. Discover your source through `ExternalDataSource` records
 2. Run your builders for each supported view type

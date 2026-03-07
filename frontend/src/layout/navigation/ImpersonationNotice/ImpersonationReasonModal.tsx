@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 export interface ImpersonationReasonModalProps {
     isOpen: boolean

@@ -9,9 +9,9 @@ from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from celery import shared_task
-from posthoganalytics import new_context, tag
+from hanzoanalytics import new_context, tag
 
 from insights.batch_exports.models import BatchExportRun
 from insights.caching.login_device_cache import check_and_cache_login_device
@@ -302,7 +302,7 @@ def send_email_verification(user_id: int, token: str, next_url: str | None = Non
     )
     message.add_user_recipient(user, email_override=user.pending_email)
     message.send(send_async=False)
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         distinct_id=str(user.distinct_id),
         event="verification email sent",
         groups={"organization": str(user.current_organization.id)},  # type: ignore
@@ -330,7 +330,7 @@ def send_email_mfa_link(user_id: int, token: str) -> None:
     )
     message.add_user_recipient(user)
     message.send(send_async=False)
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         distinct_id=str(user.distinct_id),
         event="email mfa link sent",
         groups={"organization": str(user.current_organization.id)},  # type: ignore
@@ -676,7 +676,7 @@ def login_from_new_device_notification(
     elif user.current_organization is None:
         enabled = False
     else:
-        enabled = posthoganalytics.feature_enabled(
+        enabled = hanzoanalytics.feature_enabled(
             key="login-from-new-device-notification",
             distinct_id=str(user.distinct_id),
             groups={"organization": str(user.current_organization.id)},
@@ -1480,8 +1480,8 @@ def send_error_tracking_weekly_digest_for_team(
                 "crash_free": crash_free,
                 "error_tracking_url": error_tracking_url,
                 "ingestion_failures_url": ingestion_failures_url,
-                "contact_support_url": "https://posthog.com/support",
-                "feedback_survey_url": f"https://us.posthog.com/external_surveys/019c7fd6-7cfa-0000-2b03-a8e5d4c03743?distinct_id={membership.user.distinct_id}",
+                "contact_support_url": "https://hanzo.ai/support",
+                "feedback_survey_url": f"https://insights.hanzo.ai/external_surveys/019c7fd6-7cfa-0000-2b03-a8e5d4c03743?distinct_id={membership.user.distinct_id}",
             },
         )
         message.add_user_recipient(membership.user)

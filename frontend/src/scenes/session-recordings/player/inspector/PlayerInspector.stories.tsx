@@ -30,7 +30,7 @@ const meta: Meta<typeof PlayerInspector> = {
                                 distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
                                 first_name: 'fasda',
                                 last_name: '',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
                                 role_at_organization: 'other',
                             },

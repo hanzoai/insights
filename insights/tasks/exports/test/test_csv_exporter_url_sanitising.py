@@ -7,9 +7,9 @@ from insights.utils import PotentialSecurityProblemException, absolute_uri
 
 class TestCSVExporterURLSanitization(APIBaseTest):
     def test_sanitize_url_when_provided_path(self) -> None:
-        with self.settings(SITE_URL="https://something.posthog.com"):
+        with self.settings(SITE_URL="https://something.hanzo.ai"):
             sanitised = absolute_uri(None or "/some/location")
-            assert sanitised == "https://something.posthog.com/some/location"
+            assert sanitised == "https://something.hanzo.ai/some/location"
 
     def test_sanitize_url_when_provided_path_and_site_url_has_a_port(self) -> None:
         with self.settings(SITE_URL="https://localhost:8000"):
@@ -29,12 +29,12 @@ class TestCSVExporterURLSanitization(APIBaseTest):
         ),
         (
             "changing port and url",
-            "https://something.posthog.com:8000",
+            "https://something.hanzo.ai:8000",
             "https://localhost:8123/some/location",
         ),
         (
             "changing domain",
-            "https://app.posthog.com",
+            "https://insights.hanzo.ai",
             "https://google.com/some/location",
         ),
     ]

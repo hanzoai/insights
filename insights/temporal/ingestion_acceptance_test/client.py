@@ -16,7 +16,7 @@ from urllib3.util.retry import Retry
 from .config import Config
 
 if TYPE_CHECKING:
-    from posthoganalytics import Posthog
+    from hanzoanalytics import Insights
 
 logger = structlog.get_logger(__name__)
 
@@ -68,9 +68,9 @@ class InsightsClient:
     # Retry on server errors only (not rate limiting - retrying immediately won't help)
     HTTP_RETRY_STATUS_FORCELIST = (500, 502, 503, 504)
 
-    def __init__(self, config: Config, posthog_sdk: "Posthog"):
+    def __init__(self, config: Config, insights_sdk: "Insights"):
         self.config = config
-        self._posthog = posthog_sdk
+        self._insights = insights_sdk
         self._session = self._create_http_session()
         # Store test start date for efficient event queries.
         # ClickHouse ORDER BY uses toDate(timestamp) (day granularity), so filtering by date
@@ -111,7 +111,7 @@ class InsightsClient:
             sdk_host=self.config.api_host,
         )
 
-        self._posthog.capture(
+        self._insights.capture(
             distinct_id=distinct_id,
             event=event_name,
             properties=properties or {},
@@ -129,7 +129,7 @@ class InsightsClient:
         person as `distinct_id`.
         """
         logger.info("Creating alias", alias=alias, distinct_id=distinct_id)
-        self._posthog.alias(alias, distinct_id)
+        self._insights.alias(alias, distinct_id)
         logger.info("Alias created", alias=alias, distinct_id=distinct_id)
 
     def merge_dangerously(self, merge_into_distinct_id: str, merge_from_distinct_id: str) -> str:
@@ -157,7 +157,7 @@ class InsightsClient:
             event_uuid=event_uuid,
         )
 
-        self._posthog.capture(
+        self._insights.capture(
             distinct_id=merge_into_distinct_id,
             event="$merge_dangerously",
             properties={"alias": merge_from_distinct_id},
@@ -206,7 +206,7 @@ class InsightsClient:
 
     def shutdown(self) -> None:
         """Shutdown the client and flush any pending events."""
-        self._posthog.shutdown()
+        self._insights.shutdown()
         self._session.close()
 
     # Polling configuration

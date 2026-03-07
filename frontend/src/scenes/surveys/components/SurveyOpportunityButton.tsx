@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
-import { IconMessage } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconMessage } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -66,7 +66,7 @@ export function SurveyOpportunityButton({
             return
         }
 
-        posthog.capture('survey opportunity displayed', {
+        insights.capture('survey opportunity displayed', {
             linked_insight_id: insight.id,
             conversionRate: funnelContext.conversionRate,
             source: source,
@@ -101,7 +101,7 @@ export function SurveyOpportunityButton({
     })
 
     const handleClick = (): void => {
-        posthog.capture('survey opportunity clicked', {
+        insights.capture('survey opportunity clicked', {
             linked_insight_id: insight.id,
             conversionRate: funnelContext?.conversionRate,
             source: source,

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonButtonPropsBase } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonButtonPropsBase } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { inviteLogic } from 'scenes/settings/organization/inviteLogic'

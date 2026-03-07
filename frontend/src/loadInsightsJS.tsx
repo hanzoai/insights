@@ -1,5 +1,7 @@
-import posthog, { PostHogInterface } from 'posthog-js'
-import { sampleOnProperty } from 'posthog-js/lib/src/extensions/sampling'
+import insights from '@hanzo/insights'
+import { sampleOnProperty } from '@hanzo/insights/lib/src/extensions/sampling'
+
+type InsightsInterface = typeof insights
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
@@ -9,30 +11,30 @@ import { startFramerateTracking } from './framerateTracker'
 export const SDK_DEFAULTS_DATE = '2026-01-30'
 
 const shouldDefer = (): boolean => {
-    const sessionId = posthog.get_session_id()
+    const sessionId = insights.get_session_id()
     return sampleOnProperty(sessionId, 0.5)
 }
 
-const shouldTrackFramerate = (loadedInstance: PostHogInterface): boolean => {
+const shouldTrackFramerate = (loadedInstance: InsightsInterface): boolean => {
     return (
-        !!window.POSTHOG_APP_CONTEXT?.preflight?.is_debug ||
+        !!window.INSIGHTS_APP_CONTEXT?.preflight?.is_debug ||
         (!!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE) &&
             sampleOnProperty(loadedInstance.get_session_id(), 0.5))
     )
 }
 
 export function loadInsightsJS(): void {
-    if (window.JS_POSTHOG_API_KEY) {
-        posthog.init(window.JS_POSTHOG_API_KEY, {
+    if (window.JS_INSIGHTS_API_KEY) {
+        insights.init(window.JS_INSIGHTS_API_KEY, {
             opt_out_useragent_filter: window.location.hostname === 'localhost', // we ARE a bot when running in localhost, so we need to enable this opt-out
-            api_host: window.JS_POSTHOG_HOST,
-            ui_host: window.JS_POSTHOG_UI_HOST,
+            api_host: window.JS_INSIGHTS_HOST,
+            ui_host: window.JS_INSIGHTS_UI_HOST,
             defaults: SDK_DEFAULTS_DATE,
             persistence: 'localStorage+cookie',
             cookie_persisted_properties: [
-                'prod_interest', // posthog.com sets these based on what docs were browsed
+                'prod_interest', // hanzo.ai sets these based on what docs were browsed
             ],
-            bootstrap: window.POSTHOG_USER_IDENTITY_WITH_FLAGS ? window.POSTHOG_USER_IDENTITY_WITH_FLAGS : {},
+            bootstrap: window.INSIGHTS_USER_IDENTITY_WITH_FLAGS ? window.INSIGHTS_USER_IDENTITY_WITH_FLAGS : {},
             opt_in_site_apps: true,
             disable_surveys: window.IMPERSONATED_SESSION,
             disable_product_tours: window.IMPERSONATED_SESSION,
@@ -127,7 +129,7 @@ export function loadInsightsJS(): void {
                 }
 
                 // Make sure we have access to the object in window for debugging
-                window.posthog = loadedInstance
+                window.insights = loadedInstance
             },
             scroll_root_selector: ['main', 'html'],
             autocapture: {
@@ -137,28 +139,28 @@ export function loadInsightsJS(): void {
                 blockSelector: '.ph-replay-block',
             },
             person_profiles: 'always',
-            __add_tracing_headers: ['eu.posthog.com', 'us.posthog.com'],
+            __add_tracing_headers: ['insights.hanzo.ai', 'insights.hanzo.ai'],
             __preview_disable_xhr_credentials: true,
             external_scripts_inject_target: 'head',
             capture_performance: {
-                //disabling to investigate if this is associated with memory leak in the posthog app
+                //disabling to investigate if this is associated with memory leak in the insights app
                 web_vitals_attribution: false,
             },
         })
 
-        posthog.onFeatureFlags((_flags, _variants, context) => {
+        insights.onFeatureFlags((_flags, _variants, context) => {
             if (inStorybook() || inStorybookTestRunner() || !context?.errorsLoading) {
                 return
             }
 
-            posthog.capture('onFeatureFlags error')
+            insights.capture('onFeatureFlags error')
 
             // Track that we failed to load feature flags
-            window.POSTHOG_GLOBAL_ERRORS ||= {}
-            window.POSTHOG_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
+            window.INSIGHTS_GLOBAL_ERRORS ||= {}
+            window.INSIGHTS_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
         })
     } else {
-        posthog.init('fake_token', {
+        insights.init('fake_token', {
             autocapture: false,
             loaded: function (ph) {
                 ph.opt_out_capturing()

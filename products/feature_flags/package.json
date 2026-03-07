@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-feature-flags",
+    "name": "@hanzo/products-feature-flags",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -7,10 +7,10 @@
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "posthog-js": "catalog:"
+        "@hanzo/insights": "workspace:*"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

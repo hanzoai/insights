@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { defineKnownException } from '../registry'
 import { KnownExceptionBanner } from './base'
@@ -13,7 +13,7 @@ defineKnownException({
                 This error occurs when JavaScript exceptions are thrown from a third-party script but details are hidden
                 due to cross-origin restrictions.{' '}
                 <Link
-                    to="https://posthog.com/docs/error-tracking/common-questions#what-is-a-script-error-with-no-stack-traces"
+                    to="https://hanzo.ai/docs/error-tracking/common-questions#what-is-a-script-error-with-no-stack-traces"
                     target="_blank"
                 >
                     Read our docs

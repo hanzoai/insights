@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const posthogRepoURL = "https://github.com/PostHog/posthog.git"
+const insightsRepoURL = "https://github.com/hanzoai/insights.git"
 
 // Function variables for testability - tests swap these to mock command execution
 var (
@@ -16,45 +16,45 @@ var (
 	runCmdDir = RunCommandWithDir
 )
 
-func ClonePostHog() error {
+func CloneInsights() error {
 	logger := GetLogger()
 
-	if DirExists("posthog") {
-		logger.WriteString("PostHog repository already exists\n")
+	if DirExists("insights") {
+		logger.WriteString("Insights repository already exists\n")
 		return nil
 	}
 
-	logger.WriteString("Cloning PostHog repository...\n")
-	_, err := runCmd("git", "clone", "--filter=blob:none", posthogRepoURL)
+	logger.WriteString("Cloning Insights repository...\n")
+	_, err := runCmd("git", "clone", "--filter=blob:none", insightsRepoURL)
 	if err == nil {
 		logger.WriteString("Repository cloned successfully\n")
 	}
 	return err
 }
 
-func UpdatePostHog() error {
+func UpdateInsights() error {
 	logger := GetLogger()
 
-	if !DirExists("posthog") {
-		return ClonePostHog()
+	if !DirExists("insights") {
+		return CloneInsights()
 	}
 
 	logger.WriteString("Fetching latest changes...\n")
-	_, err := runCmdDir("posthog", "git", "fetch", "--prune")
+	_, err := runCmdDir("insights", "git", "fetch", "--prune")
 	if err != nil {
 		return err
 	}
 
 	// Check if on a branch before pulling - detached HEAD can't pull
 	// This happens when CI checks out a specific commit SHA
-	branch, _ := runCmdDir("posthog", "git", "branch", "--show-current")
+	branch, _ := runCmdDir("insights", "git", "branch", "--show-current")
 	if strings.TrimSpace(branch) == "" {
 		logger.WriteString("On detached HEAD, skipping pull (CheckoutVersion will handle it)\n")
 		return nil
 	}
 
 	logger.WriteString("Pulling updates...\n")
-	_, err = runCmdDir("posthog", "git", "pull")
+	_, err = runCmdDir("insights", "git", "pull")
 	return err
 }
 
@@ -62,9 +62,9 @@ func CheckoutVersion(version string) error {
 	logger := GetLogger()
 	logger.Debug("CheckoutVersion called with version=%q", version)
 
-	if !DirExists("posthog") {
-		logger.Debug("posthog directory not found")
-		return fmt.Errorf("posthog directory not found")
+	if !DirExists("insights") {
+		logger.Debug("insights directory not found")
+		return fmt.Errorf("insights directory not found")
 	}
 
 	switch version {
@@ -81,37 +81,37 @@ func CheckoutVersion(version string) error {
 }
 
 func checkoutLatest() error {
-	if _, err := runCmdDir("posthog", "git", "fetch", "origin"); err != nil {
+	if _, err := runCmdDir("insights", "git", "fetch", "origin"); err != nil {
 		return err
 	}
 
-	branch, err := runCmdDir("posthog", "git", "branch", "--show-current")
+	branch, err := runCmdDir("insights", "git", "branch", "--show-current")
 	if err != nil {
 		return err
 	}
 	branch = strings.TrimSpace(branch)
 
 	if branch != "" {
-		_, err = runCmdDir("posthog", "git", "reset", "--hard", "origin/"+branch)
+		_, err = runCmdDir("insights", "git", "reset", "--hard", "origin/"+branch)
 	}
 	return err
 }
 
 func checkoutLatestRelease() error {
-	if _, err := runCmdDir("posthog", "git", "fetch", "--tags"); err != nil {
+	if _, err := runCmdDir("insights", "git", "fetch", "--tags"); err != nil {
 		return err
 	}
 
-	out, err := runCmdDir("posthog", "git", "describe", "--tags", "--abbrev=0")
+	out, err := runCmdDir("insights", "git", "describe", "--tags", "--abbrev=0")
 	if err != nil {
-		out, err = runCmdDir("posthog", "sh", "-c", "git describe --tags $(git rev-list --tags --max-count=1)")
+		out, err = runCmdDir("insights", "sh", "-c", "git describe --tags $(git rev-list --tags --max-count=1)")
 		if err != nil {
 			return fmt.Errorf("no release tags found")
 		}
 	}
 	tag := strings.TrimSpace(out)
 
-	_, err = runCmdDir("posthog", "git", "checkout", tag)
+	_, err = runCmdDir("insights", "git", "checkout", tag)
 	return err
 }
 
@@ -119,21 +119,21 @@ func checkoutSpecific(version string) error {
 	isCommit := regexp.MustCompile(`^[0-9a-f]{40}$`).MatchString(version)
 
 	if isCommit {
-		_, err := runCmdDir("posthog", "git", "checkout", version)
+		_, err := runCmdDir("insights", "git", "checkout", version)
 		return err
 	}
 
-	if _, err := runCmdDir("posthog", "git", "fetch", "--tags"); err != nil {
+	if _, err := runCmdDir("insights", "git", "fetch", "--tags"); err != nil {
 		return err
 	}
 
 	releaseTag := strings.TrimPrefix(version, "release-")
-	_, err := runCmdDir("posthog", "git", "checkout", releaseTag)
+	_, err := runCmdDir("insights", "git", "checkout", releaseTag)
 	return err
 }
 
 func GetCurrentCommit() (string, error) {
-	out, err := runCmdDir("posthog", "git", "rev-parse", "--short", "HEAD")
+	out, err := runCmdDir("insights", "git", "rev-parse", "--short", "HEAD")
 	if err != nil {
 		return "", err
 	}
@@ -146,12 +146,12 @@ func CopyComposeFiles(version string) error {
 
 	_ = os.Remove("docker-compose.yml") // Ignore error if file doesn't exist
 
-	if err := copyFile("posthog/docker-compose.base.yml", "docker-compose.base.yml"); err != nil {
+	if err := copyFile("insights/docker-compose.base.yml", "docker-compose.base.yml"); err != nil {
 		logger.Debug("Failed to copy docker-compose.base.yml: %v", err)
 		return err
 	}
 
-	return copyFileWithEnvSubst("posthog/docker-compose.hobby.yml", "docker-compose.yml", version)
+	return copyFileWithEnvSubst("insights/docker-compose.hobby.yml", "docker-compose.yml", version)
 }
 
 func copyFileWithEnvSubst(src, dst, version string) error {
@@ -169,31 +169,31 @@ func copyFileWithEnvSubst(src, dst, version string) error {
 		registryURL = ReadEnvValue("REGISTRY_URL")
 	}
 	if registryURL == "" {
-		registryURL = "posthog/posthog"
+		registryURL = "hanzoai/insights"
 	}
 
 	if version == "" {
 		version = "latest"
 	}
 
-	nodeTag := os.Getenv("POSTHOG_NODE_TAG")
+	nodeTag := os.Getenv("INSIGHTS_NODE_TAG")
 	if nodeTag == "" {
-		nodeTag = ReadEnvValue("POSTHOG_NODE_TAG")
+		nodeTag = ReadEnvValue("INSIGHTS_NODE_TAG")
 	}
 	if nodeTag == "" {
 		nodeTag = "latest"
 	}
 
-	logger.Debug("copyFileWithEnvSubst: REGISTRY_URL=%q, POSTHOG_APP_TAG=%q, POSTHOG_NODE_TAG=%q", registryURL, version, nodeTag)
+	logger.Debug("copyFileWithEnvSubst: REGISTRY_URL=%q, INSIGHTS_APP_TAG=%q, INSIGHTS_NODE_TAG=%q", registryURL, version, nodeTag)
 
 	content = strings.ReplaceAll(content, "${REGISTRY_URL}", registryURL)
 	content = strings.ReplaceAll(content, "$REGISTRY_URL", registryURL)
-	content = strings.ReplaceAll(content, "${POSTHOG_APP_TAG}", version)
-	content = strings.ReplaceAll(content, "$POSTHOG_APP_TAG", version)
-	// Replace POSTHOG_NODE_TAG, preserving the :-latest default syntax for Docker Compose
-	content = strings.ReplaceAll(content, "${POSTHOG_NODE_TAG:-latest}", nodeTag)
-	content = strings.ReplaceAll(content, "${POSTHOG_NODE_TAG}", nodeTag)
-	content = strings.ReplaceAll(content, "$POSTHOG_NODE_TAG", nodeTag)
+	content = strings.ReplaceAll(content, "${INSIGHTS_APP_TAG}", version)
+	content = strings.ReplaceAll(content, "$INSIGHTS_APP_TAG", version)
+	// Replace INSIGHTS_NODE_TAG, preserving the :-latest default syntax for Docker Compose
+	content = strings.ReplaceAll(content, "${INSIGHTS_NODE_TAG:-latest}", nodeTag)
+	content = strings.ReplaceAll(content, "${INSIGHTS_NODE_TAG}", nodeTag)
+	content = strings.ReplaceAll(content, "$INSIGHTS_NODE_TAG", nodeTag)
 
 	return os.WriteFile(dst, []byte(content), 0644)
 }

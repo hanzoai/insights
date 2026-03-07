@@ -1,5 +1,5 @@
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
 
@@ -83,7 +83,7 @@ class ErrorTrackingGroupingRuleViewSet(TeamAndOrgViewSetMixin, viewsets.ModelVie
             description=description,
         )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "error_tracking_grouping_rule_created",
             groups=groups(self.team.organization, self.team),
         )

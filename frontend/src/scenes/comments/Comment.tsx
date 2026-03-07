@@ -4,8 +4,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useRef } from 'react'
 
-import { IconEllipsis, IconEye, IconPencil, IconShare, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonMenu, ProfilePicture } from '@posthog/lemon-ui'
+import { IconEllipsis, IconEye, IconPencil, IconShare, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonMenu, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconCopy } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonInput, LemonModal, LemonTabs, SpinnerOverlay } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconArrowRight, IconCopy } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonInput, LemonModal, LemonTabs, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { InviteMembersButton } from 'lib/components/Account/InviteMembersButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -182,7 +182,7 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
                         ))}
 
                         {/* This will open a survey to collect feedback on the SDKs we don't support yet */}
-                        {/* https://us.posthog.com/project/2/surveys/019b47ab-5f19-0000-7f31-4f9681cde589 */}
+                        {/* https://insights.hanzo.ai/project/2/surveys/019b47ab-5f19-0000-7f31-4f9681cde589 */}
                         {searchTerm && (
                             <LemonCard className="p-4 cursor-pointer flex flex-col items-start justify-center col-span-1 sm:col-span-2">
                                 <div className="flex flex-col items-start gap-2">

@@ -1,7 +1,7 @@
 import { Dialog } from '@base-ui/react/dialog'
 import { Suspense, lazy } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

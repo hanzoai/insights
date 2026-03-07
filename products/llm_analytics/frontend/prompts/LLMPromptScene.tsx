@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTabs, LemonTag, LemonTextArea, Link } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTabs, LemonTag, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { NotFound } from 'lib/components/NotFound'
@@ -297,7 +297,7 @@ function PromptUsage({ prompt }: { prompt: LLMPrompt }): JSX.Element {
             <LemonBanner type="info" className="mb-4">
                 During the alpha and beta period, each prompt fetch is currently charged as a Product analytics event.
                 See the{' '}
-                <Link to="https://posthog.com/pricing" target="_blank">
+                <Link to="https://hanzo.ai/pricing" target="_blank">
                     pricing page
                 </Link>
                 .

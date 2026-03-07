@@ -70,21 +70,21 @@ describe('URL Routing', () => {
         const idParsingTests = [
             {
                 description: 'organization ID from header',
-                headers: { 'x-posthog-organization-id': 'org-123' },
+                headers: { 'x-insights-organization-id': 'org-123' },
                 params: '',
                 expectedOrgId: 'org-123',
                 expectedProjectId: undefined,
             },
             {
                 description: 'project ID from header',
-                headers: { 'x-posthog-project-id': '456' },
+                headers: { 'x-insights-project-id': '456' },
                 params: '',
                 expectedOrgId: undefined,
                 expectedProjectId: '456',
             },
             {
                 description: 'both IDs from headers',
-                headers: { 'x-posthog-organization-id': 'org-123', 'x-posthog-project-id': '456' },
+                headers: { 'x-insights-organization-id': 'org-123', 'x-insights-project-id': '456' },
                 params: '',
                 expectedOrgId: 'org-123',
                 expectedProjectId: '456',
@@ -112,7 +112,7 @@ describe('URL Routing', () => {
             },
             {
                 description: 'header takes precedence over query param',
-                headers: { 'x-posthog-organization-id': 'header-org', 'x-posthog-project-id': 'header-proj' },
+                headers: { 'x-insights-organization-id': 'header-org', 'x-insights-project-id': 'header-proj' },
                 params: '?organization_id=param-org&project_id=param-proj',
                 expectedOrgId: 'header-org',
                 expectedProjectId: 'header-proj',
@@ -136,8 +136,8 @@ describe('URL Routing', () => {
                     },
                 }
 
-                const organizationId = parseIdFromRequest(request, url, 'x-posthog-organization-id', 'organization_id')
-                const projectId = parseIdFromRequest(request, url, 'x-posthog-project-id', 'project_id')
+                const organizationId = parseIdFromRequest(request, url, 'x-insights-organization-id', 'organization_id')
+                const projectId = parseIdFromRequest(request, url, 'x-insights-project-id', 'project_id')
 
                 expect(organizationId).toBe(expectedOrgId)
                 expect(projectId).toBe(expectedProjectId)

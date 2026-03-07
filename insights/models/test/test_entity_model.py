@@ -15,10 +15,10 @@ class TestEntity(TestCase):
                 "id": "e1",
                 "type": TREND_FILTER_TYPE_EVENTS,
                 "properties": [
-                    {"key": "email", "value": "test@posthog.com", "type": "person"},
+                    {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     },
                 ],
@@ -31,7 +31,7 @@ class TestEntity(TestCase):
                 "properties": [
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     }
                 ],
@@ -50,10 +50,10 @@ class TestEntity(TestCase):
                     {"key": "browser", "value": "chrome", "type": "person"},
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     },
-                    {"key": "email", "value": "test@posthog.com", "type": "person"},
+                    {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                 ],
             }
         )
@@ -64,7 +64,7 @@ class TestEntity(TestCase):
                 "properties": [
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     }
                 ],
@@ -101,10 +101,10 @@ class TestEntity(TestCase):
                 "id": "e1",
                 "type": TREND_FILTER_TYPE_EVENTS,
                 "properties": [
-                    {"key": "email", "value": "test@posthog.com", "type": "person"},
+                    {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     },
                 ],
@@ -117,10 +117,10 @@ class TestEntity(TestCase):
                 "properties": [
                     {
                         "key": "current_url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     },
-                    {"key": "email", "value": "test@posthog.com", "type": "person"},
+                    {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                 ],
             }
         )
@@ -134,10 +134,10 @@ class TestEntity(TestCase):
                 "properties": [
                     {
                         "key": "current$url",
-                        "value": "test@posthog.com",
+                        "value": "test@hanzo.ai",
                         "type": "element",
                     },
-                    {"key": "email", "value": "test@posthog.com", "type": "person"},
+                    {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                 ],
             }
         )

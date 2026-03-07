@@ -64,11 +64,11 @@ impl ServerHandle {
         // Create a mock client that handles both quota limit checks and token verification
         let mut mock_client = MockRedisClient::new()
             .zrangebyscore_ret(
-                "@posthog/quota-limits/feature_flag_requests",
+                "@hanzo/quota-limits/feature_flag_requests",
                 limited_tokens.clone(),
             )
             .zrangebyscore_ret(
-                "@posthog/quota-limits/recordings",
+                "@hanzo/quota-limits/recordings",
                 recordings_limited_tokens.clone(),
             );
 

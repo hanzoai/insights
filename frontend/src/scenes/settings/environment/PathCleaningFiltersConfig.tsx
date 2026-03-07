@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput, Link } from '@posthog/lemon-ui'
+import { LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { PathCleanFilterAddItemButton } from 'lib/components/PathCleanFilters/PathCleanFilterAddItemButton'
@@ -41,7 +41,7 @@ export function PathCleaningFiltersConfig(): JSX.Element | null {
         return (
             <p>
                 Advanced path cleaning is a premium feature. Check{' '}
-                <Link to="https://posthog.com/docs/product-analytics/paths#path-cleaning-rules">
+                <Link to="https://hanzo.ai/docs/product-analytics/paths#path-cleaning-rules">
                     our path cleaning rules documentation
                 </Link>{' '}
                 to learn more about it.

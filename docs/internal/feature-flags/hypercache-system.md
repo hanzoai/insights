@@ -35,19 +35,19 @@ Insights's HyperCache provides multi-tier caching with Redis → S3 → Database
 
 | Component        | File                                              | Purpose                          |
 | ---------------- | ------------------------------------------------- | -------------------------------- |
-| HyperCache class | `posthog/storage/hypercache.py`                   | Multi-tier cache with fallback   |
-| Local evaluation | `posthog/models/feature_flag/local_evaluation.py` | Feature flag caching for SDKs    |
-| Remote config    | `posthog/models/remote_config.py`                 | Client configuration caching     |
-| Team caching     | `posthog/models/team/team_caching.py`             | Authentication team lookup cache |
+| HyperCache class | `insights/storage/hypercache.py`                   | Multi-tier cache with fallback   |
+| Local evaluation | `insights/models/feature_flag/local_evaluation.py` | Feature flag caching for SDKs    |
+| Remote config    | `insights/models/remote_config.py`                 | Client configuration caching     |
+| Team caching     | `insights/models/team/team_caching.py`             | Authentication team lookup cache |
 
 ## HyperCache class
 
-The `HyperCache` class in `posthog/storage/hypercache.py` provides the core caching logic.
+The `HyperCache` class in `insights/storage/hypercache.py` provides the core caching logic.
 
 ### Creating an instance
 
 ```python
-from posthog.storage.hypercache import HyperCache
+from insights.storage.hypercache import HyperCache
 
 cache = HyperCache(
     namespace="feature_flags",           # Category name for metrics
@@ -95,7 +95,7 @@ ETags are computed as SHA256 hashes of the JSON content.
 
 ## Local evaluation caching
 
-Feature flag local evaluation uses two separate HyperCache instances in `posthog/models/feature_flag/local_evaluation.py`:
+Feature flag local evaluation uses two separate HyperCache instances in `insights/models/feature_flag/local_evaluation.py`:
 
 ```python
 # Full flags with cohort definitions (for smart clients)
@@ -171,7 +171,7 @@ When remote config changes, the system:
 
 ## Team authentication caching
 
-Team objects are cached by API token in `posthog/models/team/team_caching.py` to avoid database lookups during authentication.
+Team objects are cached by API token in `insights/models/team/team_caching.py` to avoid database lookups during authentication.
 
 ### Cache format
 
@@ -186,7 +186,7 @@ FIVE_DAYS = 60 * 60 * 24 * 5
 ### Usage
 
 ```python
-from posthog.models.team.team_caching import get_team_in_cache, set_team_in_cache
+from insights.models.team.team_caching import get_team_in_cache, set_team_in_cache
 
 # Check cache first
 team = get_team_in_cache(api_token)
@@ -218,10 +218,10 @@ The cached team is serialized using `CachingTeamSerializer` and reconstructed as
 
 | Metric                                     | Labels                         | Purpose                         |
 | ------------------------------------------ | ------------------------------ | ------------------------------- |
-| `posthog_hypercache_get_from_cache`        | `result`, `namespace`, `value` | Cache hit/miss tracking         |
-| `posthog_hypercache_sync`                  | `result`, `namespace`, `value` | Cache sync task outcomes        |
-| `posthog_hypercache_sync_duration_seconds` | `result`, `namespace`, `value` | Cache sync timing               |
-| `posthog_remote_config_via_cache`          | `result`                       | Remote config cache performance |
+| `insights_hypercache_get_from_cache`        | `result`, `namespace`, `value` | Cache hit/miss tracking         |
+| `insights_hypercache_sync`                  | `result`, `namespace`, `value` | Cache sync task outcomes        |
+| `insights_hypercache_sync_duration_seconds` | `result`, `namespace`, `value` | Cache sync timing               |
+| `insights_remote_config_via_cache`          | `result`                       | Remote config cache performance |
 
 Result labels: `hit_redis`, `hit_s3`, `hit_db`, `missing`, `batch_miss`
 
@@ -242,13 +242,13 @@ redis-cli get "team_token:{api_token}"
 
 ### Check cache source in responses
 
-Local evaluation responses include cache source information via Prometheus metrics. Check the `posthog_hypercache_get_from_cache` metric with the appropriate labels.
+Local evaluation responses include cache source information via Prometheus metrics. Check the `insights_hypercache_get_from_cache` metric with the appropriate labels.
 
 ### Force cache refresh
 
 ```python
-from posthog.models.feature_flag.local_evaluation import update_flag_caches
-from posthog.models.team import Team
+from insights.models.feature_flag.local_evaluation import update_flag_caches
+from insights.models.team import Team
 
 team = Team.objects.get(id=123)
 update_flag_caches(team)
@@ -276,7 +276,7 @@ FLAGS_REDIS_URL=redis://flags-redis:6379  # Separate instance for flags
 When `FLAGS_REDIS_URL` is set, the system uses a dual-write pattern:
 
 ```python
-# posthog/caching/flags_redis_cache.py
+# insights/caching/flags_redis_cache.py
 def write_flags_to_cache(key: str, value: Any, timeout: Optional[int] = None) -> None:
     # Always write to shared cache (Django reads from here)
     cache.set(key, value, timeout)
@@ -313,7 +313,7 @@ Cache freshness is maintained through scheduled Celery tasks.
 The hourly refresh job prevents cache misses by proactively refreshing entries before they expire:
 
 ```python
-# posthog/tasks/feature_flags.py
+# insights/tasks/feature_flags.py
 @shared_task
 def refresh_expiring_flags_cache_entries():
     successful, failed = refresh_expiring_flags_caches(
@@ -368,7 +368,7 @@ Django signals automatically invalidate the cache when models change.
 All signal handlers use `transaction.on_commit()` to avoid race conditions:
 
 ```python
-# posthog/models/feature_flag/flags_cache.py
+# insights/models/feature_flag/flags_cache.py
 @receiver([post_save, post_delete], sender=FeatureFlag)
 def feature_flag_changed_flags_cache(sender, instance, **kwargs):
     transaction.on_commit(lambda: update_team_service_flags_cache.delay(instance.team_id))
@@ -378,7 +378,7 @@ This ensures the cache update task runs after the database transaction commits, 
 
 ### Cohort invalidation
 
-The local evaluation cache (for SDKs) also invalidates when cohorts change. See `posthog/models/feature_flag/local_evaluation.py` for the full signal handler list.
+The local evaluation cache (for SDKs) also invalidates when cohorts change. See `insights/models/feature_flag/local_evaluation.py` for the full signal handler list.
 
 ## Configuration
 
@@ -400,7 +400,7 @@ FLAGS_CACHE_VERIFICATION_GRACE_PERIOD_MINUTES=5  # Skip recently updated flags
 
 # For S3 fallback
 OBJECT_STORAGE_ENABLED=true
-AWS_S3_BUCKET_NAME=posthog-cache
+AWS_S3_BUCKET_NAME=insights-cache
 
 # Remote config CDN purge (optional)
 REMOTE_CONFIG_CDN_PURGE_ENDPOINT=https://api.cloudflare.com/...
@@ -410,20 +410,20 @@ REMOTE_CONFIG_CDN_PURGE_DOMAINS=["cdn.example.com"]
 
 ## Related files
 
-- `posthog/storage/hypercache.py` - Core HyperCache implementation
-- `posthog/models/feature_flag/local_evaluation.py` - Local evaluation caching
-- `posthog/models/feature_flag/flags_cache.py` - Flags cache, signal handlers, verification
-- `posthog/caching/flags_redis_cache.py` - Dual-write pattern for dedicated Redis
-- `posthog/models/remote_config.py` - Remote config caching
-- `posthog/models/team/team_caching.py` - Team authentication caching
-- `posthog/tasks/feature_flags.py` - Cache update and refresh Celery tasks
-- `posthog/tasks/hypercache_verification.py` - Cache verification task
-- `posthog/tasks/remote_config.py` - Remote config sync tasks
-- `posthog/tasks/scheduled.py` - Task schedule definitions
+- `insights/storage/hypercache.py` - Core HyperCache implementation
+- `insights/models/feature_flag/local_evaluation.py` - Local evaluation caching
+- `insights/models/feature_flag/flags_cache.py` - Flags cache, signal handlers, verification
+- `insights/caching/flags_redis_cache.py` - Dual-write pattern for dedicated Redis
+- `insights/models/remote_config.py` - Remote config caching
+- `insights/models/team/team_caching.py` - Team authentication caching
+- `insights/tasks/feature_flags.py` - Cache update and refresh Celery tasks
+- `insights/tasks/hypercache_verification.py` - Cache verification task
+- `insights/tasks/remote_config.py` - Remote config sync tasks
+- `insights/tasks/scheduled.py` - Task schedule definitions
 
 ## See also
 
-- [Server-side local evaluation](https://posthog.com/docs/feature-flags/local-evaluation) - Public docs on local evaluation
-- [Local evaluation in distributed environments](https://posthog.com/docs/feature-flags/local-evaluation/distributed-environments) - Using external cache providers
-- [Remote config](https://posthog.com/docs/feature-flags/remote-config) - Client-side configuration delivery
-- [Cutting feature flag costs](https://posthog.com/docs/feature-flags/cutting-costs) - Cost optimization strategies
+- [Server-side local evaluation](https://hanzo.ai/docs/feature-flags/local-evaluation) - Public docs on local evaluation
+- [Local evaluation in distributed environments](https://hanzo.ai/docs/feature-flags/local-evaluation/distributed-environments) - Using external cache providers
+- [Remote config](https://hanzo.ai/docs/feature-flags/remote-config) - Client-side configuration delivery
+- [Cutting feature flag costs](https://hanzo.ai/docs/feature-flags/cutting-costs) - Cost optimization strategies

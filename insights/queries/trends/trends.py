@@ -6,7 +6,7 @@ from itertools import accumulate
 from typing import Any, Optional, cast
 from zoneinfo import ZoneInfo
 
-import posthoganalytics
+import hanzoanalytics
 from dateutil import parser
 
 from insights.clickhouse.query_tagging import QueryTags, get_query_tags, update_tags
@@ -129,12 +129,12 @@ class Trends(TrendsTotalVolume, Lifecycle):
 
     def _run_query(self, filter: Filter, team: Team, entity: Entity) -> list[dict[str, Any]]:
         adjusted_filter, cached_result = self.adjusted_filter(filter, team)
-        with posthoganalytics.new_context():
+        with hanzoanalytics.new_context():
             query_type, sql, params, parse_function = self._get_sql_for_entity(adjusted_filter, team, entity)
-            posthoganalytics.tag("filter", filter.to_dict())
-            posthoganalytics.tag("team_id", str(team.pk))
+            hanzoanalytics.tag("filter", filter.to_dict())
+            hanzoanalytics.tag("team_id", str(team.pk))
             query_params = {**params, **adjusted_filter.insightsql_context.values}
-            posthoganalytics.tag("query", {"sql": sql, "params": query_params})
+            hanzoanalytics.tag("query", {"sql": sql, "params": query_params})
             result = insight_sync_execute(
                 sql,
                 query_params,
@@ -171,8 +171,8 @@ class Trends(TrendsTotalVolume, Lifecycle):
         team_id: int,
     ):
         update_tags(query_tags)
-        with posthoganalytics.new_context():
-            posthoganalytics.tag("query", {"sql": sql, "params": params})
+        with hanzoanalytics.new_context():
+            hanzoanalytics.tag("query", {"sql": sql, "params": params})
             result[index] = insight_sync_execute(sql, params, query_type=query_type, filter=filter, team_id=team_id)
 
     def _run_parallel(self, filter: Filter, team: Team) -> list[dict[str, Any]]:
@@ -212,9 +212,9 @@ class Trends(TrendsTotalVolume, Lifecycle):
             j.join()
 
         # Parse results for each thread
-        with posthoganalytics.new_context():
-            posthoganalytics.tag("filter", filter.to_dict())
-            posthoganalytics.tag("team_id", str(team.pk))
+        with hanzoanalytics.new_context():
+            hanzoanalytics.tag("filter", filter.to_dict())
+            hanzoanalytics.tag("team_id", str(team.pk))
             for entity in filter.entities:
                 serialized_data = cast(list[Callable], parse_functions)[entity.index](result[entity.index])
                 serialized_data = self._format_serialized(entity, serialized_data)

@@ -10,7 +10,7 @@ The **Signals** product is a signal clustering and summarization pipeline. Signa
 
 There are two Temporal workflows. The grouping workflow is defined in `backend/temporal/grouping.py`. The summary workflow is defined in `backend/temporal/summary.py`, with its LLM activities split across dedicated files.
 
-Both workflows and all activities are registered in `backend/temporal/__init__.py` and wired into the `VIDEO_EXPORT_TASK_QUEUE` worker via `posthog/temporal/ai/__init__.py`.
+Both workflows and all activities are registered in `backend/temporal/__init__.py` and wired into the `VIDEO_EXPORT_TASK_QUEUE` worker via `insights/temporal/ai/__init__.py`.
 
 ### `TeamSignalGroupingWorkflow` (`team-signal-grouping`)
 
@@ -128,7 +128,7 @@ Binary artefacts attached to reports. Used for video segments and judge results.
 
 ## ClickHouse Storage
 
-Signals are stored in the **`posthog_document_embeddings`** table, which is shared across products (error tracking, session replay, LLM analytics, etc.).
+Signals are stored in the **`insights_document_embeddings`** table, which is shared across products (error tracking, session replay, LLM analytics, etc.).
 
 ### Table Schema
 
@@ -159,9 +159,9 @@ emit_embedding_request() → Kafka (document_embeddings_input topic)
     → Kafka table → Materialized View → Writable Distributed table → Sharded ReplacingMergeTree
 ```
 
-### HogQL Queries
+### InsightsQL Queries
 
-Activities query via `execute_hogql_query()` using the HogQL alias `document_embeddings`. All queries filter to `product = 'signals'` and `document_type = 'signal'`, and use `argMax(..., inserted_at)` grouped by `document_id` to handle deduplication from the `ReplacingMergeTree`. Three main queries:
+Activities query via `execute_insightsql_query()` using the InsightsQL alias `document_embeddings`. All queries filter to `product = 'signals'` and `document_type = 'signal'`, and use `argMax(..., inserted_at)` grouped by `document_id` to handle deduplication from the `ReplacingMergeTree`. Three main queries:
 
 1. **Fetch signal type examples** (`fetch_signal_type_examples_activity`): Fetches one example signal per unique `(source_product, source_type)` pair from the last month, selecting the most recent example per type via `argMax(content, timestamp)`. Used to give the query generation LLM context about the heterogeneous signal landscape.
 2. **Semantic search** (`run_signal_semantic_search_activity`): Uses `cosineDistance(embedding, {embedding})` to find nearest neighbors that have a `report_id`, limited to the last 1 month.
@@ -195,7 +195,7 @@ Uses `signal_with_start` to atomically create the per-team `TeamSignalGroupingWo
 
 ### REST Endpoints
 
-Registered directly in `posthog/api/__init__.py` (imported as `products.signals.backend.views`).
+Registered directly in `insights/api/__init__.py` (imported as `products.signals.backend.views`).
 
 #### `SignalViewSet` (DEBUG only)
 

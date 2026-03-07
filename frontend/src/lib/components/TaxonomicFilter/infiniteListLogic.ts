@@ -367,13 +367,13 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     const itemGroup = getItemGroup(item, taxonomicGroups, group)
                     return {
                         name: itemGroup?.getName?.(item) || '',
-                        posthogName: asInsightsName(itemGroup, item),
+                        insightsName: asInsightsName(itemGroup, item),
                         item: item,
                     }
                 })
 
                 return new Fuse(haystack, {
-                    keys: ['name', 'posthogName'],
+                    keys: ['name', 'insightsName'],
                     threshold: 0.3,
                 })
             },

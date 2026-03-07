@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconUpload } from '@posthog/icons'
+import { IconUpload } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -33,7 +33,7 @@ export function SessionRecordingFilePlaybackScene(): JSX.Element {
             <PayGateMini
                 feature={AvailableFeature.RECORDINGS_FILE_EXPORT}
                 className="py-8"
-                docsLink="https://posthog.com/docs/user-guides/session-recordings"
+                docsLink="https://hanzo.ai/docs/user-guides/session-recordings"
             />
         )
     }

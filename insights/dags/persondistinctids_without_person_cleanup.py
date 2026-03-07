@@ -1,4 +1,4 @@
-"""Dagster job for deleting posthog_persondistinctid rows that have no associated posthog_person_new rows."""
+"""Dagster job for deleting insights_persondistinctid rows that have no associated insights_person_new rows."""
 
 import os
 import time
@@ -23,7 +23,7 @@ class PersonsDistinctIdsNoPersonCleanupConfig(dagster.Config):
     batch_size: int = (
         5000  # persondistinctid rows to scan for missing parent person row & delete in a single transaction
     )
-    persons_table: str = "posthog_person_new"  # set safe default we can override after name swap!
+    persons_table: str = "insights_person_new"  # set safe default we can override after name swap!
     max_id: int | None = None  # Optional override for max ID to resume from partial state
     min_id: int | None = None  # Optional override for min ID to resume from partial state
 
@@ -35,7 +35,7 @@ def get_id_range_for_pdwp(
     database: dagster.ResourceParam[psycopg2.extensions.connection],
 ) -> tuple[int, int]:
     """
-    Query source database for MIN(id) and MAX(id) from posthog_persondistinctid
+    Query source database for MIN(id) and MAX(id) from insights_persondistinctid
     table. If min_id and max_id are provided in config, uses that instead of querying.
     Returns tuple (min_id, max_id).
     """
@@ -45,7 +45,7 @@ def get_id_range_for_pdwp(
             min_id = config.min_id
             context.log.info(f"Using configured min_id override: {min_id}")
         else:
-            min_query = f"SELECT MIN(id) as min_id FROM posthog_persondistinctid"
+            min_query = f"SELECT MIN(id) as min_id FROM insights_persondistinctid"
             context.log.info(f"Querying min ID: {min_query}")
             cursor.execute(min_query)
             min_result = cursor.fetchone()
@@ -62,7 +62,7 @@ def get_id_range_for_pdwp(
             max_id = config.max_id
             context.log.info(f"Using configured max_id override: {max_id}")
         else:
-            max_query = f"SELECT MAX(id) as max_id FROM posthog_persondistinctid"
+            max_query = f"SELECT MAX(id) as max_id FROM insights_persondistinctid"
             context.log.info(f"Querying max ID: {max_query}")
             cursor.execute(max_query)
             max_result = cursor.fetchone()
@@ -142,8 +142,8 @@ def scan_delete_chunk_for_pdwp(
     cluster: dagster.ResourceParam[ClickhouseCluster],
 ) -> dict[str, Any]:
     """
-    Scan posthog_person_new table for records that have no associated posthog_persondistinctid row,
-    and deletes the corresponding posthog_person_new row.
+    Scan insights_person_new table for records that have no associated insights_persondistinctid row,
+    and deletes the corresponding insights_person_new row.
     Processes in batches of batch_size records.
     """
     chunk_min, chunk_max = chunk
@@ -198,10 +198,10 @@ def scan_delete_chunk_for_pdwp(
                     # Begin transaction (settings already applied at session level)
                     cursor.execute("BEGIN")
 
-                    # Delete orphaned posthog_persondistinctid rows and return their IDs
+                    # Delete orphaned insights_persondistinctid rows and return their IDs
                     # Using DELETE...RETURNING for efficiency (single query instead of scan + delete)
                     delete_query = f"""
-DELETE FROM posthog_persondistinctid pd
+DELETE FROM insights_persondistinctid pd
 WHERE pd.id >= %s AND pd.id <= %s
   AND NOT EXISTS (
     SELECT 1
@@ -516,8 +516,8 @@ def postgres_env_check(context: dagster.AssetExecutionContext) -> None:
 )
 def persondistinctids_without_person_cleanup_job():
     """
-    Scan posthog_persondistinctid table for records that have no associated posthog_person_new row,
-    and deletes the corresponding posthog_persondistinctid rows that carry the missing person_id.
+    Scan insights_persondistinctid table for records that have no associated insights_person_new row,
+    and deletes the corresponding insights_persondistinctid rows that carry the missing person_id.
     Divides the ID space into chunks and processes them in parallel.
     """
     id_range = get_id_range_for_pdwp()

@@ -339,7 +339,7 @@ def _feature_flag_pre_restore(context: RestoreContext, feature_flag: Any) -> Non
 def register_core_file_system_types() -> None:
     register_file_system_type(
         "action",
-        "posthog",
+        "insights",
         "Action",
         undo_message="Send PATCH /api/projects/@current/actions/{id} with deleted=false.",
     )
@@ -348,7 +348,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "dashboard",
-        "posthog",
+        "insights",
         "Dashboard",
         undo_message="Send PATCH /api/projects/@current/dashboards/{id} with deleted=false.",
     )
@@ -357,7 +357,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "feature_flag",
-        "posthog",
+        "insights",
         "FeatureFlag",
         undo_message="Send PATCH /api/projects/@current/feature_flags/{id} with deleted=false.",
     )
@@ -368,7 +368,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "experiment",
-        "posthog",
+        "insights",
         "Experiment",
         undo_message="Send PATCH /api/projects/@current/experiments/{id} with deleted=false.",
     )
@@ -377,7 +377,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "insight",
-        "posthog",
+        "insights",
         "Insight",
         lookup_field="short_id",
         undo_message="Send PATCH /api/projects/@current/insights/{id} with deleted=false.",
@@ -387,7 +387,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "link",
-        "posthog",
+        "insights",
         "Link",
         allow_restore=False,
         undo_message="Create a new link with the same details.",
@@ -396,7 +396,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "session_recording_playlist",
-        "posthog",
+        "insights",
         "SessionRecordingPlaylist",
         lookup_field="short_id",
         undo_message="Send PATCH /api/projects/@current/session_recordings/playlists/{id} with deleted=false.",
@@ -406,7 +406,7 @@ def register_core_file_system_types() -> None:
 
     register_file_system_type(
         "cohort",
-        "posthog",
+        "insights",
         "Cohort",
         undo_message="Send PATCH /api/projects/@current/cohorts/{id} with deleted=false.",
     )
@@ -417,7 +417,7 @@ def register_core_file_system_types() -> None:
         type_string = f"insights_function/{hog_type}"
         register_file_system_type(
             type_string,
-            "posthog",
+            "insights",
             "InsightsFunction",
             undo_message="Send PATCH /api/projects/@current/insights_functions/{id} with deleted=false.",
         )

@@ -43,7 +43,7 @@ describe('CdpLegacyEventsConsumer', () => {
         // Create a plugin in the database with onEvent capability
         const { rows: pluginRows } = await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO posthog_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
+            `INSERT INTO insights_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
              VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13::jsonb)
              RETURNING *`,
             [
@@ -52,7 +52,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 'Customer.io',
                 'custom',
                 false,
-                'https://github.com/PostHog/customerio-plugin',
+                'https://github.com/hanzoai/customerio-plugin',
                 JSON.stringify({}),
                 false,
                 false,
@@ -84,7 +84,7 @@ describe('CdpLegacyEventsConsumer', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'INSERT INTO posthog_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
+            'INSERT INTO insights_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
             [
                 pluginConfigData.id,
                 pluginConfigData.team_id,
@@ -104,15 +104,15 @@ describe('CdpLegacyEventsConsumer', () => {
         const { rows } = await hub.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
-                posthog_pluginconfig.id,
-                posthog_pluginconfig.team_id,
-                posthog_plugin.capabilities
-            FROM posthog_pluginconfig
-            LEFT JOIN posthog_plugin ON posthog_plugin.id = posthog_pluginconfig.plugin_id
-            WHERE posthog_pluginconfig.id = $1
-                AND posthog_pluginconfig.enabled = 't'
-                AND (posthog_pluginconfig.deleted IS NULL OR posthog_pluginconfig.deleted != 't')
-                AND posthog_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
+                insights_pluginconfig.id,
+                insights_pluginconfig.team_id,
+                insights_plugin.capabilities
+            FROM insights_pluginconfig
+            LEFT JOIN insights_plugin ON insights_plugin.id = insights_pluginconfig.plugin_id
+            WHERE insights_pluginconfig.id = $1
+                AND insights_pluginconfig.enabled = 't'
+                AND (insights_pluginconfig.deleted IS NULL OR insights_pluginconfig.deleted != 't')
+                AND insights_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
             [pluginConfigData.id],
             'verifyPluginConfig'
         )
@@ -180,7 +180,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/hanzoai/customerio-plugin',
                 },
             }
 
@@ -212,7 +212,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/hanzoai/customerio-plugin',
                 },
             }
 
@@ -252,7 +252,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/hanzoai/customerio-plugin',
                 },
             }
 
@@ -341,7 +341,7 @@ describe('CdpLegacyEventsConsumer', () => {
             // Insert an attachment for the plugin config
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `INSERT INTO posthog_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
+                `INSERT INTO insights_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     1001,
@@ -452,7 +452,7 @@ describe('CdpLegacyEventsConsumer', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `INSERT INTO posthog_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
+                `INSERT INTO insights_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     2001,

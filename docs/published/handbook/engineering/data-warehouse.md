@@ -4,13 +4,13 @@ sidebar: Docs
 showTitle: true
 ---
 
-This is an internal guide to setting up and working with the data warehouse for Insights engineers. If you're a Insights user, check out our [data warehouse docs](https://posthog.com/docs/data-warehouse) instead.
+This is an internal guide to setting up and working with the data warehouse for Insights engineers. If you're a Insights user, check out our [data warehouse docs](https://hanzo.ai/docs/data-warehouse) instead.
 
 ## Adding a new source
 
-Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/PostHog/posthog/blob/master/posthog/temporal/data_imports/sources/README.md).
+Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/Hanzo Insights/insights/blob/master/insights/temporal/data_imports/sources/README.md).
 
-> If you're a customer of Insights Cloud and are looking to import data into your project, then you're likely looking for [this section of the docs instead](https://posthog.com/docs/cdp/sources)
+> If you're a customer of Insights Cloud and are looking to import data into your project, then you're likely looking for [this section of the docs instead](https://hanzo.ai/docs/cdp/sources)
 
 ## Importing your local Postgres instance
 
@@ -18,11 +18,11 @@ Looking to add a new source to data warehouse? [We have a detailed guide in the 
 2. Use the following settings:
    1. host = 127.0.0.1
    2. port = 5432
-   3. database = posthog
-   4. user = posthog
-   5. password = posthog
+   3. database = insights
+   4. user = insights
+   5. password = insights
    6. schema = public
-3. Hit next, then select which tables you'd like to import. [More info on the sync types can be found here](https://posthog.com/docs/cdp/sources#incremental-vs-append-only-vs-full-table)
+3. Hit next, then select which tables you'd like to import. [More info on the sync types can be found here](https://hanzo.ai/docs/cdp/sources#incremental-vs-append-only-vs-full-table)
 4. Hit next and finish the import - `temporal-worker-data-warehouse` will then import the data into your local MinIO instance
 
 ## Accessing MinIO
@@ -47,27 +47,27 @@ mysql -u root
 ```
 
 ```sql runInInsights=false
-CREATE DATABASE posthog_dw_test;
+CREATE DATABASE insights_dw_test;
 CREATE TABLE IF NOT EXISTS payments (id INT AUTO_INCREMENT PRIMARY KEY, timestamp DATETIME, distinct_id VARCHAR(255), amount DECIMAL(10,2));
 
 INSERT INTO payments (timestamp, distinct_id, amount) VALUES (NOW(), 'testuser@example.com', 99.99);
 
-CREATE USER 'posthog'@'%' IDENTIFIED BY 'posthog';
-GRANT ALL PRIVILEGES ON posthog_dw_test.* TO 'posthog'@'%';
+CREATE USER 'insights'@'%' IDENTIFIED BY 'insights';
+GRANT ALL PRIVILEGES ON insights_dw_test.* TO 'insights'@'%';
 FLUSH PRIVILEGES;
 ```
 
 To verify everything is working as expected:
 
 1. Navigate to "Data pipeline" in the Insights application.
-2. Create a new MySQL source using the settings above (username and password both being `posthog`)
+2. Create a new MySQL source using the settings above (username and password both being `insights`)
 3. Once the source is created, click on the "MySQL" item. In the schemas table, click on the triple dot menu and select the "Reload" option.
 
 After the job runs, clicking on the synced table name should take you to your data.
 
 ## Working with a MS SQL source
 
-You'll need to install MS SQL drivers for the Insights app to connect to a MS SQL database. Learn the entire process in [posthog/warehouse/README.md](https://github.com/PostHog/posthog/blob/master/posthog/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
+You'll need to install MS SQL drivers for the Insights app to connect to a MS SQL database. Learn the entire process in [insights/warehouse/README.md](https://github.com/Hanzo Insights/insights/blob/master/insights/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
 
 ```text
 symbol not found in flat namespace '_bcp_batch'

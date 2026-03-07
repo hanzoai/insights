@@ -16,7 +16,7 @@ from django.db.models import QuerySet
 
 import requests
 import structlog
-import posthoganalytics
+import hanzoanalytics
 
 if TYPE_CHECKING:
     from insights.models.user import User
@@ -89,7 +89,7 @@ class EmailMultiRecordHandler:
             email_variations = list(case_insensitive_matches.values_list("email", flat=True))
             last_logged_in_user_id = last_logged_in_user.id if last_logged_in_user else None
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 "multiple users with email case variations",
                 properties={
                     "email": email,
@@ -197,7 +197,7 @@ def _capture_esp_suppression_analytics(
     suppressions: Optional[list[dict]] = None,
 ) -> None:
     try:
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=_hash_email(email),
             event="esp_suppression_check",
             properties={

@@ -111,7 +111,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
                 "viewport_height": round(viewport_height / 16),
                 "type": type,
                 "pointer_target_fixed": True,
-                "current_url": current_url if current_url else "http://posthog.com",
+                "current_url": current_url if current_url else "http://hanzo.ai",
             },
         )
 

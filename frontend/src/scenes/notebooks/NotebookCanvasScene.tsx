@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useMemo } from 'react'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, lemonToast } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, lemonToast } from '@hanzo/lemon-ui'
 
 import { uuid } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

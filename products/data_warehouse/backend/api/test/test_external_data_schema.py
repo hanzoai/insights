@@ -142,12 +142,12 @@ class TestExternalDataSchema(APIBaseTest):
             postgres_connection = self.postgres_connection
 
         await postgres_connection.execute(
-            "CREATE TABLE IF NOT EXISTS {schema}.posthog_test (id integer)".format(
+            "CREATE TABLE IF NOT EXISTS {schema}.insights_test (id integer)".format(
                 schema=self.postgres_config["schema"]
             )
         )
         await postgres_connection.execute(
-            "INSERT INTO {schema}.posthog_test (id) VALUES (1)".format(schema=self.postgres_config["schema"])
+            "INSERT INTO {schema}.insights_test (id) VALUES (1)".format(schema=self.postgres_config["schema"])
         )
         await postgres_connection.commit()
 
@@ -170,7 +170,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         schema = await sync_to_async(ExternalDataSchema.objects.create)(
-            name="posthog_test",
+            name="insights_test",
             team=self.team,
             source=source,
         )

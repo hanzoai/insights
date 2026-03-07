@@ -29,7 +29,7 @@ class TestAnalyzeMigrationRisk(TestCase):
             import sys
 
             sys.stdout.write("Migrations for 'insights':\n")
-            sys.stdout.write("  posthog/migrations/0001_test.py\n")
+            sys.stdout.write("  insights/migrations/0001_test.py\n")
             sys.stdout.write("    - Add field new_field to testmodel\n")
             raise SystemExit(1)
 
@@ -67,7 +67,7 @@ class TestAnalyzeMigrationRisk(TestCase):
             if command_name == "makemigrations":
                 # Simulate Django's output to stdout with mixed operations
                 sys.stdout.write("Migrations for 'insights':\n")
-                sys.stdout.write("  posthog/migrations/0001_test.py\n")
+                sys.stdout.write("  insights/migrations/0001_test.py\n")
                 sys.stdout.write("    - Add field new_field to testmodel\n")
                 raise SystemExit(1)
             else:
@@ -124,7 +124,7 @@ class TestAnalyzeMigrationRisk(TestCase):
             import sys
 
             sys.stdout.write("Migrations for 'insights':\n")
-            sys.stdout.write("  posthog/migrations/0886_remove_annotation_is_emoji_and_more.py\n")
+            sys.stdout.write("  insights/migrations/0886_remove_annotation_is_emoji_and_more.py\n")
             sys.stdout.write("    - Remove field is_emoji from annotation\n")
             sys.stdout.write("    - Remove field recording_id from annotation\n")
             raise SystemExit(1)
@@ -146,7 +146,7 @@ class TestAnalyzeMigrationRisk(TestCase):
             import sys
 
             sys.stdout.write("Migrations for 'insights':\n")
-            sys.stdout.write("  posthog/migrations/0887_test.py\n")
+            sys.stdout.write("  insights/migrations/0887_test.py\n")
             sys.stdout.write("    - Remove field is_emoji from annotation\n")
             sys.stdout.write("    - Add field new_field to testmodel\n")
             raise SystemExit(1)
@@ -171,7 +171,7 @@ class TestAnalyzeMigrationRisk(TestCase):
             import sys
 
             sys.stdout.write("Migrations for 'insights':\n")
-            sys.stdout.write("  posthog/migrations/0887_test.py\n")
+            sys.stdout.write("  insights/migrations/0887_test.py\n")
             sys.stdout.write("    - Remove field is_emoji from annotation\n")  # deprecated
             sys.stdout.write("    - Remove field nonexistent_field from testmodel\n")  # NOT deprecated!
             raise SystemExit(1)

@@ -1,4 +1,4 @@
-import { LemonMenuItem } from '@posthog/lemon-ui'
+import { LemonMenuItem } from '@hanzo/lemon-ui'
 
 import { DatabaseSchemaTable } from '~/queries/schema/schema-general'
 

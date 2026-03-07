@@ -101,7 +101,7 @@ class TestProcessTaskWorkflow:
             )
             sandbox = Sandbox.create(config)
 
-            clone_result = sandbox.clone_repository("posthog/posthog-js", github_token="")
+            clone_result = sandbox.clone_repository("hanzoai/insights-js", github_token="")
             if clone_result.exit_code != 0:
                 raise Exception(f"Failed to clone repository: {clone_result.stderr}")
 
@@ -109,7 +109,7 @@ class TestProcessTaskWorkflow:
 
             snapshot = SandboxSnapshot.objects.create(
                 integration=github_integration,
-                repos=["posthog/posthog-js"],
+                repos=["hanzoai/insights-js"],
                 external_id=snapshot_id,
                 status=SandboxSnapshot.Status.COMPLETE,
             )

@@ -63,7 +63,7 @@ impl Team {
         let mut conn =
             get_connection_with_metrics(&client, "non_persons_reader", "fetch_team").await?;
 
-        let query = format!("SELECT {TEAM_COLUMNS} FROM posthog_team WHERE api_token = $1");
+        let query = format!("SELECT {TEAM_COLUMNS} FROM insights_team WHERE api_token = $1");
         let row = sqlx::query_as::<_, Team>(&query)
             .bind(token)
             .fetch_one(&mut *conn)
@@ -81,7 +81,7 @@ impl Team {
                 .await?;
 
         let query = format!(
-            "SELECT {TEAM_COLUMNS} FROM posthog_team WHERE secret_api_token = $1 OR secret_api_token_backup = $1"
+            "SELECT {TEAM_COLUMNS} FROM insights_team WHERE secret_api_token = $1 OR secret_api_token_backup = $1"
         );
         let row = sqlx::query_as::<_, Team>(&query)
             .bind(token)
@@ -173,7 +173,7 @@ mod tests {
 
         // Update with an array containing NULL elements: {NULL, 'valid_event', NULL, 'another_event'}
         sqlx::query(
-            "UPDATE posthog_team SET session_recording_event_trigger_config = $1 WHERE id = $2",
+            "UPDATE insights_team SET session_recording_event_trigger_config = $1 WHERE id = $2",
         )
         .bind(vec![
             None,
@@ -222,11 +222,11 @@ mod tests {
         .expect("Failed to get connection");
 
         let extra_settings = serde_json::json!({
-            "recorder_script": "posthog-recorder",
+            "recorder_script": "insights-recorder",
             "something_else": 123
         });
 
-        sqlx::query("UPDATE posthog_team SET extra_settings = $1 WHERE id = $2")
+        sqlx::query("UPDATE insights_team SET extra_settings = $1 WHERE id = $2")
             .bind(&extra_settings)
             .bind(team.id)
             .execute(&mut *conn)
@@ -242,7 +242,7 @@ mod tests {
         let config = team_from_pg.extra_settings.unwrap();
         assert_eq!(
             config.get("recorder_script").and_then(|v| v.as_str()),
-            Some("posthog-recorder")
+            Some("insights-recorder")
         );
     }
 
@@ -268,7 +268,7 @@ mod tests {
             "recorder_script": ""
         });
 
-        sqlx::query("UPDATE posthog_team SET extra_settings = $1 WHERE id = $2")
+        sqlx::query("UPDATE insights_team SET extra_settings = $1 WHERE id = $2")
             .bind(&extra_settings)
             .bind(team.id)
             .execute(&mut *conn)
@@ -289,7 +289,7 @@ mod tests {
     #[tokio::test]
     async fn test_from_hypercache_value_parses_extra_settings() {
         let extra_settings = json!({
-            "recorder_script": "posthog-recorder",
+            "recorder_script": "insights-recorder",
             "something_else": 123
         });
 
@@ -311,7 +311,7 @@ mod tests {
         let config = team.extra_settings.unwrap();
         assert_eq!(
             config.get("recorder_script").and_then(|v| v.as_str()),
-            Some("posthog-recorder")
+            Some("insights-recorder")
         );
     }
 

@@ -21,33 +21,33 @@ describe('OAuth Region Routing', () => {
 
     describe('getBaseUrlForRegion', () => {
         it('returns EU URL for eu region', () => {
-            expect(getBaseUrlForRegion('eu')).toBe('https://eu.posthog.com')
+            expect(getBaseUrlForRegion('eu')).toBe('https://insights.hanzo.ai')
         })
 
         it('returns US URL for us region', () => {
-            expect(getBaseUrlForRegion('us')).toBe('https://us.posthog.com')
+            expect(getBaseUrlForRegion('us')).toBe('https://insights.hanzo.ai')
         })
     })
 
     describe('getAuthorizationServerUrl', () => {
         it('returns EU URL when region is eu', () => {
-            expect(getAuthorizationServerUrl('eu')).toBe('https://eu.posthog.com')
+            expect(getAuthorizationServerUrl('eu')).toBe('https://insights.hanzo.ai')
         })
 
         it('returns EU URL when region is EU (case insensitive)', () => {
-            expect(getAuthorizationServerUrl('EU')).toBe('https://eu.posthog.com')
+            expect(getAuthorizationServerUrl('EU')).toBe('https://insights.hanzo.ai')
         })
 
         it('returns US URL when region is us', () => {
-            expect(getAuthorizationServerUrl('us')).toBe('https://us.posthog.com')
+            expect(getAuthorizationServerUrl('us')).toBe('https://insights.hanzo.ai')
         })
 
         it('returns US URL when region is null', () => {
-            expect(getAuthorizationServerUrl(null)).toBe('https://us.posthog.com')
+            expect(getAuthorizationServerUrl(null)).toBe('https://insights.hanzo.ai')
         })
 
         it('returns US URL for unknown region', () => {
-            expect(getAuthorizationServerUrl('unknown')).toBe('https://us.posthog.com')
+            expect(getAuthorizationServerUrl('unknown')).toBe('https://insights.hanzo.ai')
         })
     })
 
@@ -56,32 +56,32 @@ describe('OAuth Region Routing', () => {
             {
                 name: 'defaults to US when no region param',
                 params: '',
-                expectedServer: 'https://us.posthog.com',
+                expectedServer: 'https://insights.hanzo.ai',
             },
             {
                 name: 'returns EU server when region=eu',
                 params: '?region=eu',
-                expectedServer: 'https://eu.posthog.com',
+                expectedServer: 'https://insights.hanzo.ai',
             },
             {
                 name: 'returns EU server when region=EU (case insensitive)',
                 params: '?region=EU',
-                expectedServer: 'https://eu.posthog.com',
+                expectedServer: 'https://insights.hanzo.ai',
             },
             {
                 name: 'returns US server when region=us',
                 params: '?region=us',
-                expectedServer: 'https://us.posthog.com',
+                expectedServer: 'https://insights.hanzo.ai',
             },
             {
                 name: 'defaults to US for unknown region',
                 params: '?region=unknown',
-                expectedServer: 'https://us.posthog.com',
+                expectedServer: 'https://insights.hanzo.ai',
             },
         ]
 
         it.each(testCases)('$name', ({ params, expectedServer }) => {
-            const url = new URL(`https://mcp.posthog.com/.well-known/oauth-protected-resource${params}`)
+            const url = new URL(`https://mcp.hanzo.ai/.well-known/oauth-protected-resource${params}`)
             const regionParam = url.searchParams.get('region')
 
             // Uses actual helpers from constants.ts
@@ -99,28 +99,28 @@ describe('OAuth Region Routing', () => {
         const testCases = [
             {
                 name: 'includes region param and resource path /mcp in metadata URL',
-                requestUrl: 'https://mcp.posthog.com/mcp?region=eu',
-                expectedMetadataUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp?region=eu',
+                requestUrl: 'https://mcp.hanzo.ai/mcp?region=eu',
+                expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp?region=eu',
             },
             {
                 name: 'includes resource path /mcp when no region param',
-                requestUrl: 'https://mcp.posthog.com/mcp',
-                expectedMetadataUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp',
+                requestUrl: 'https://mcp.hanzo.ai/mcp',
+                expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp',
             },
             {
                 name: 'includes resource path /sse for SSE endpoint',
-                requestUrl: 'https://mcp.posthog.com/sse',
-                expectedMetadataUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/sse',
+                requestUrl: 'https://mcp.hanzo.ai/sse',
+                expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/sse',
             },
             {
                 name: 'preserves region param with resource path',
-                requestUrl: 'https://mcp.posthog.com/mcp?features=flags&region=eu',
-                expectedMetadataUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp?region=eu',
+                requestUrl: 'https://mcp.hanzo.ai/mcp?features=flags&region=eu',
+                expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp?region=eu',
             },
             {
                 name: 'normalizes uppercase region to lowercase for consistency',
-                requestUrl: 'https://mcp.posthog.com/mcp?region=EU',
-                expectedMetadataUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp?region=eu',
+                requestUrl: 'https://mcp.hanzo.ai/mcp?region=EU',
+                expectedMetadataUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp?region=eu',
             },
         ]
 
@@ -147,18 +147,18 @@ describe('OAuth Region Routing', () => {
         const testCases = [
             {
                 name: 'extracts /mcp resource from well-known path',
-                wellKnownUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp',
-                expectedResource: 'https://mcp.posthog.com/mcp',
+                wellKnownUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp',
+                expectedResource: 'https://mcp.hanzo.ai/mcp',
             },
             {
                 name: 'extracts /sse resource from well-known path',
-                wellKnownUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource/sse',
-                expectedResource: 'https://mcp.posthog.com/sse',
+                wellKnownUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource/sse',
+                expectedResource: 'https://mcp.hanzo.ai/sse',
             },
             {
                 name: 'returns root for well-known without path suffix',
-                wellKnownUrl: 'https://mcp.posthog.com/.well-known/oauth-protected-resource',
-                expectedResource: 'https://mcp.posthog.com',
+                wellKnownUrl: 'https://mcp.hanzo.ai/.well-known/oauth-protected-resource',
+                expectedResource: 'https://mcp.hanzo.ai',
             },
         ]
 

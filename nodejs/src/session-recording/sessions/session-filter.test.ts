@@ -56,7 +56,7 @@ describe('SessionFilter', () => {
             await sessionFilter.handleNewSession(1, 'session-123')
 
             expect(mockRedis.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-blocked:1:session-123',
+                '@hanzo/replay/session-blocked:1:session-123',
                 '1',
                 'EX',
                 48 * 60 * 60
@@ -104,7 +104,7 @@ describe('SessionFilter', () => {
             const result = await sessionFilter.isBlocked(1, 'session-123')
 
             expect(result).toBe(false)
-            expect(mockRedis.exists).toHaveBeenCalledWith('@posthog/replay/session-blocked:1:session-123')
+            expect(mockRedis.exists).toHaveBeenCalledWith('@hanzo/replay/session-blocked:1:session-123')
         })
 
         it('should return true for blocked session in Redis', async () => {
@@ -220,13 +220,13 @@ describe('SessionFilter', () => {
             await sessionFilter.handleNewSession(2, 'session-123')
 
             expect(mockRedis.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-blocked:1:session-123',
+                '@hanzo/replay/session-blocked:1:session-123',
                 '1',
                 'EX',
                 expect.any(Number)
             )
             expect(mockRedis.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-blocked:2:session-123',
+                '@hanzo/replay/session-blocked:2:session-123',
                 '1',
                 'EX',
                 expect.any(Number)
@@ -240,13 +240,13 @@ describe('SessionFilter', () => {
             await sessionFilter.handleNewSession(1, 'session-456')
 
             expect(mockRedis.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-blocked:1:session-123',
+                '@hanzo/replay/session-blocked:1:session-123',
                 '1',
                 'EX',
                 expect.any(Number)
             )
             expect(mockRedis.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-blocked:1:session-456',
+                '@hanzo/replay/session-blocked:1:session-456',
                 '1',
                 'EX',
                 expect.any(Number)

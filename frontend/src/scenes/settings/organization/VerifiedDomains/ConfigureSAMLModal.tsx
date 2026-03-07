@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -35,7 +35,7 @@ export function ConfigureSAMLModal(): JSX.Element {
                 </LemonModal.Header>
                 <LemonModal.Content className="deprecated-space-y-2">
                     <p>
-                        <Link to="https://posthog.com/docs/data/sso#setting-up-saml" target="_blank" targetBlankIcon>
+                        <Link to="https://hanzo.ai/docs/data/sso#setting-up-saml" target="_blank" targetBlankIcon>
                             Read the docs
                         </Link>
                     </p>

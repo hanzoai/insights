@@ -51,7 +51,7 @@ from products.data_warehouse.backend.models.join import DataWarehouseJoin
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
 
-TEST_BUCKET = "test_storage_bucket-posthog.insightsql.datawarehouse.trendquery"
+TEST_BUCKET = "test_storage_bucket-insights.insightsql.datawarehouse.trendquery"
 
 
 @override_settings(IN_UNIT_TESTING=True)
@@ -836,7 +836,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 "person_properties",
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 },
@@ -948,7 +948,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 groups=[
                     {
                         "properties": [
-                            {"key": "email", "operator": "not_icontains", "value": "@posthog.com", "type": "person"},
+                            {"key": "email", "operator": "not_icontains", "value": "@hanzo.ai", "type": "person"},
                         ]
                     }
                 ],
@@ -1019,17 +1019,17 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team=self.team,
             distinct_ids=["user_control_3"],
-            properties={"email": "user_control_3@posthog.com"},
+            properties={"email": "user_control_3@hanzo.ai"},
         )
         _create_person(
             team=self.team,
             distinct_ids=["user_control_6"],
-            properties={"email": "user_control_6@posthog.com"},
+            properties={"email": "user_control_6@hanzo.ai"},
         )
         _create_person(
             team=self.team,
             distinct_ids=["user_test_2"],
-            properties={"email": "user_test_2@posthog.com"},
+            properties={"email": "user_test_2@hanzo.ai"},
         )
         _create_person(
             team=self.team,
@@ -1331,7 +1331,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 "person_properties",
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 },
@@ -1450,7 +1450,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 groups=[
                     {
                         "properties": [
-                            {"key": "email", "operator": "not_icontains", "value": "@posthog.com", "type": "person"}
+                            {"key": "email", "operator": "not_icontains", "value": "@hanzo.ai", "type": "person"}
                         ]
                     }
                 ],
@@ -1527,7 +1527,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team=self.team,
             distinct_ids=["internal_test_1"],
-            properties={"email": "internal_test_1@posthog.com"},
+            properties={"email": "internal_test_1@hanzo.ai"},
         )
         # 10th exposure for 'test'
         # filtered out by "event_properties" , "person_properties", and "group"
@@ -1684,7 +1684,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             },
@@ -1742,7 +1742,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             team=self.team,
             uuid="018f14b8-6cf3-7ffd-80bb-5ef1a9e4d328",
             distinct_ids=["018f14b8-6cf3-7ffd-80bb-5ef1a9e4d328", "internal_test_1"],
-            properties={"email": "internal_test_1@posthog.com"},
+            properties={"email": "internal_test_1@hanzo.ai"},
         )
 
         _create_event(
@@ -1928,7 +1928,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             },
@@ -1986,7 +1986,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             team=self.team,
             uuid="018f14b8-6cf3-7ffd-80bb-5ef1a9e4d328",
             distinct_ids=["018f14b8-6cf3-7ffd-80bb-5ef1a9e4d328", "internal_test_1"],
-            properties={"email": "internal_test_1@posthog.com"},
+            properties={"email": "internal_test_1@hanzo.ai"},
         )
 
         _create_event(

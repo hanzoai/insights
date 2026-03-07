@@ -3,7 +3,7 @@ import './Variables.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCodeInsert, IconCopy, IconGear, IconTrash, IconX } from '@posthog/icons'
+import { IconCodeInsert, IconCopy, IconGear, IconTrash, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDivider,
@@ -13,7 +13,7 @@ import {
     LemonSwitch,
     Popover,
     lemonToast,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { LemonField } from 'lib/lemon-ui/LemonField'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal } from '@posthog/icons'
-import { LemonTable, LemonTableColumns, Link } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { LemonTable, LemonTableColumns, Link } from '@hanzo/lemon-ui'
 
 import { ErrorTrackingRelease } from 'lib/components/Errors/types'
 import { humanFriendlyDetailedTime } from 'lib/utils'
@@ -116,7 +116,7 @@ const ReleasesTable = (): JSX.Element => {
             <div className="text-secondary">
                 Releases are automatically created when Insights detects version information in your error tracking data.
                 Learn more in the{' '}
-                <Link to="https://posthog.com/docs/error-tracking" target="_blank">
+                <Link to="https://hanzo.ai/docs/error-tracking" target="_blank">
                     docs
                 </Link>
                 .

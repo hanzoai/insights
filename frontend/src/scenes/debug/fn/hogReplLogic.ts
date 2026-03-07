@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { actionToUrl, urlToAction } from 'kea-router'
 
-import { VMState, newHogCallable, newHogClosure } from '@insights/scriptvm'
+import { VMState, newHogCallable, newHogClosure } from '@hanzo/scriptvm'
 
 import api from 'lib/api'
 import { execHogAsync } from 'lib/hog'
