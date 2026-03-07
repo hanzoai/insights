@@ -3,7 +3,7 @@ use inquire::{
     validator::{ErrorMessage, Validation},
     CustomUserError,
 };
-use posthog_rs::Event;
+use insights_rs::Event;
 use reqwest::blocking::Client;
 use std::{
     io::{self, IsTerminal},
@@ -50,12 +50,12 @@ pub fn init_context(host: Option<String>, skip_ssl: bool, rate_limit: Option<usi
 
     // This is pulled at compile time, not runtime - we set it at build.
     if let Some(token) = option_env!("POSTHOG_API_TOKEN") {
-        let ph_config = posthog_rs::ClientOptionsBuilder::default()
+        let ph_config = insights_rs::ClientOptionsBuilder::default()
             .api_key(token.to_string())
             .request_timeout_seconds(5) // It's a CLI, 5 seconds is an eternity
             .build()
             .expect("Building PH config succeeds");
-        posthog_rs::init_global(ph_config).expect("Initializing PostHog client");
+        insights_rs::init_global(ph_config).expect("Initializing PostHog client");
     } else {
         warn!("Posthog api token not set at build time - is this a debug build?");
     };
@@ -124,7 +124,7 @@ impl InvocationContext {
 
         let handle = std::thread::spawn(move || {
             debug!("Capturing event");
-            let res = posthog_rs::capture(event); // Purposefully ignore errors here
+            let res = insights_rs::capture(event); // Purposefully ignore errors here
             if let Err(err) = res {
                 debug!("Failed to capture event: {:?}", err);
             } else {

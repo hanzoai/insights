@@ -194,7 +194,7 @@
         },
         {
             "id": 1498,
-            "name": "Feature https://github.com/Hanzo Insights/insights/issues/3636.",
+            "name": "Feature https://github.com/hanzoai/insights/issues/3636.",
             "key": "dashboard-permissions",
             "filters": {
                 "groups": [

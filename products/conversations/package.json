@@ -8,8 +8,8 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:",
-        "ts-pattern": "catalog:"
+        "ts-pattern": "catalog:",
+        "@hanzo/insights": "workspace:*"
     },
     "peerDependencies": {
         "@hanzo/icons": "*",

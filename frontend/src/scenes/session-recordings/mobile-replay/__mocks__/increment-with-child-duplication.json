@@ -22,7 +22,7 @@
                                         "paddingTop": 0,
                                         "verticalAlign": "top"
                                     },
-                                    "text": "Hanzo Insights/insights-ios",
+                                    "text": "PostHog/posthog-ios",
                                     "type": "text",
                                     "width": 368,
                                     "x": 66,
@@ -110,7 +110,7 @@
                                 "paddingTop": 0,
                                 "verticalAlign": "top"
                             },
-                            "text": "Hanzo Insights/insights-ios",
+                            "text": "PostHog/posthog-ios",
                             "type": "text",
                             "width": 368,
                             "x": 66,
@@ -185,7 +185,7 @@
                         "paddingTop": 0,
                         "verticalAlign": "top"
                     },
-                    "text": "Hanzo Insights/insights-ios",
+                    "text": "PostHog/posthog-ios",
                     "type": "text",
                     "width": 368,
                     "x": 66,

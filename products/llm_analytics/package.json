@@ -9,9 +9,9 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:",
         "partial-json": "^0.1.7",
-        "torph": "^0.0.5"
+        "torph": "^0.0.5",
+        "@hanzo/insights": "workspace:*"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"

@@ -50,7 +50,7 @@ class TestGitHubPRWebhook(TestCase):
             task=self.task,
             team=self.team,
             status=TaskRun.Status.COMPLETED,
-            output={"pr_url": "https://github.com/insights/insights/pull/123"},
+            output={"pr_url": "https://github.com/hanzoai/insights/pull/123"},
         )
 
     def _make_webhook_request(self, payload: dict, event_type: str = "pull_request"):
@@ -75,7 +75,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "closed",
             "pull_request": {
-                "html_url": "https://github.com/insights/insights/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": True,
             },
         }
@@ -88,7 +88,7 @@ class TestGitHubPRWebhook(TestCase):
         mock_capture.assert_called_once()
         call_kwargs = mock_capture.call_args[1]
         self.assertEqual(call_kwargs["event"], "pr_merged")
-        self.assertEqual(call_kwargs["properties"]["pr_url"], "https://github.com/insights/insights/pull/123")
+        self.assertEqual(call_kwargs["properties"]["pr_url"], "https://github.com/hanzoai/insights/pull/123")
         self.assertEqual(call_kwargs["properties"]["task_id"], str(self.task.id))
         self.assertEqual(call_kwargs["properties"]["run_id"], str(self.task_run.id))
 
@@ -101,7 +101,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "closed",
             "pull_request": {
-                "html_url": "https://github.com/insights/insights/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": False,
             },
         }
@@ -124,7 +124,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "opened",
             "pull_request": {
-                "html_url": "https://github.com/insights/insights/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": False,
             },
         }
@@ -211,7 +211,7 @@ class TestGitHubPRWebhook(TestCase):
             payload = {
                 "action": action,
                 "pull_request": {
-                    "html_url": "https://github.com/insights/insights/pull/123",
+                    "html_url": "https://github.com/hanzoai/insights/pull/123",
                     "merged": False,
                 },
             }

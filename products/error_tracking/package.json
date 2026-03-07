@@ -9,7 +9,7 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:"
+        "@hanzo/insights": "workspace:*"
     },
     "peerDependencies": {
         "@dnd-kit/core": "*",

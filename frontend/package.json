@@ -4,13 +4,13 @@
     "version": "0.0.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/insights/insights.git"
+        "url": "https://github.com/hanzoai/insights.git"
     },
     "author": "Hanzo Insights Inc.",
     "bugs": {
-        "url": "https://github.com/insights/insights/issues"
+        "url": "https://github.com/hanzoai/insights/issues"
     },
-    "homepage": "https://github.com/insights/insights#readme",
+    "homepage": "https://github.com/hanzoai/insights#readme",
     "license": "MIT",
     "engines": {
         "node": ">=24 <25"
@@ -71,7 +71,7 @@
         "@hanzo/insightsql-parser": "workspace:*",
         "@hanzo/scriptvm": "workspace:*",
         "@hanzo/icons": "^0.36.6",
-        "@hanzo/plugin-scaffold": "^1.4.4",
+        "@hanzo/plugin-scaffold": "workspace:*",
         "@hanzo/products-actions": "workspace:*",
         "@hanzo/products-cohorts": "workspace:*",
         "@hanzo/products-conversations": "workspace:*",
@@ -154,7 +154,7 @@
         "chartjs-plugin-annotation": "^3.1.0",
         "chartjs-plugin-crosshair": "2.0.0",
         "chartjs-plugin-datalabels": "^2.2.0",
-        "chartjs-plugin-stacked100": "github:Hanzo Insights/chartjs-plugin-stacked100#built-1.7.1",
+        "chartjs-plugin-stacked100": "github:PostHog/chartjs-plugin-stacked100#built-1.7.1",
         "chartjs-plugin-trendline": "^3.2.0",
         "chartjs-plugin-zoom": "^2.2.0",
         "chokidar": "^3.5.3",
@@ -216,8 +216,8 @@
         "openai": "^4.81.0",
         "papaparse": "^5.4.1",
         "pmtiles": "^2.11.0",
-        "@hanzo/insights": "catalog:",
-        "@hanzo/insights-lite": "4.2.2",
+        "@hanzo/insights": "workspace:*",
+        "@hanzo/insights-lite": "workspace:*",
         "prettier": "catalog:",
         "prop-types": "^15.7.2",
         "protomaps-themes-base": "2.0.0-alpha.1",
