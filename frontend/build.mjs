@@ -11,7 +11,7 @@ import {
     createHashlessEntrypoints,
     isDev,
     startDevServer,
-} from '@posthog/esbuilder'
+} from '@hanzo/esbuilder'
 
 import { getToolbarBuildConfig } from './toolbar-config.mjs'
 
