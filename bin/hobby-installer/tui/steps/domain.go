@@ -6,8 +6,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/core"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 type DomainModel struct {
@@ -16,7 +16,7 @@ type DomainModel struct {
 
 func NewDomainModel() DomainModel {
 	ti := textinput.New()
-	ti.Placeholder = "e.g., posthog.example.com"
+	ti.Placeholder = "e.g., insights.example.com"
 	ti.CharLimit = 256
 	ti.Width = 50
 	ti.Focus()
@@ -54,7 +54,7 @@ func (m DomainModel) View() string {
 		lipgloss.Left,
 		ui.TitleStyle.Render("Configure Domain"),
 		"",
-		ui.SubtitleStyle.Render("Enter the domain where PostHog will be accessible:"),
+		ui.SubtitleStyle.Render("Enter the domain where Insights will be accessible:"),
 		"",
 		m.textInput.View(),
 		"",

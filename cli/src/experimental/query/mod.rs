@@ -8,7 +8,7 @@ use crate::invocation_context::context;
 
 pub mod command;
 
-// TODO - we could formalise a lot of this and move it into posthog-rs, tbh
+// TODO - we could formalise a lot of this and move it into insights-rs, tbh
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryRequest {

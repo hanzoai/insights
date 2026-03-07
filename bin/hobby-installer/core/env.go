@@ -10,13 +10,13 @@ import (
 )
 
 type EnvConfig struct {
-	PosthogSecret        string
+	InsightsSecret        string
 	EncryptionSaltKeys   string
 	Domain               string
 	TLSBlock             string
 	RegistryURL          string
-	PosthogAppTag        string
-	PosthogNodeTag       string
+	InsightsAppTag        string
+	InsightsNodeTag       string
 	SessionRecordingDate string
 }
 
@@ -33,49 +33,49 @@ func NewEnvConfig(domain, version string) (*EnvConfig, error) {
 
 	registryURL := os.Getenv("REGISTRY_URL")
 	if registryURL == "" {
-		registryURL = "posthog/posthog"
+		registryURL = "hanzoai/insights"
 	}
 
 	tlsBlock := os.Getenv("TLS_BLOCK")
 
-	nodeTag := os.Getenv("POSTHOG_NODE_TAG")
+	nodeTag := os.Getenv("INSIGHTS_NODE_TAG")
 	if nodeTag == "" {
 		nodeTag = "latest"
 	}
 
 	return &EnvConfig{
-		PosthogSecret:        secret,
+		InsightsSecret:        secret,
 		EncryptionSaltKeys:   encryptionKey,
 		Domain:               domain,
 		TLSBlock:             tlsBlock,
 		RegistryURL:          registryURL,
-		PosthogAppTag:        version,
-		PosthogNodeTag:       nodeTag,
+		InsightsAppTag:        version,
+		InsightsNodeTag:       nodeTag,
 		SessionRecordingDate: time.Now().Format(time.RFC3339),
 	}, nil
 }
 
 func (c *EnvConfig) WriteEnvFile() error {
-	content := fmt.Sprintf(`POSTHOG_SECRET=%s
+	content := fmt.Sprintf(`INSIGHTS_SECRET=%s
 ENCRYPTION_SALT_KEYS=%s
 DOMAIN=%s
 TLS_BLOCK=%s
 REGISTRY_URL=%s
 CADDY_TLS_BLOCK=%s
 CADDY_HOST="%s, http://, https://"
-POSTHOG_APP_TAG=%s
-POSTHOG_NODE_TAG=%s
+INSIGHTS_APP_TAG=%s
+INSIGHTS_NODE_TAG=%s
 SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 `,
-		c.PosthogSecret,
+		c.InsightsSecret,
 		c.EncryptionSaltKeys,
 		c.Domain,
 		c.TLSBlock,
 		c.RegistryURL,
 		c.TLSBlock,
 		c.Domain,
-		c.PosthogAppTag,
-		c.PosthogNodeTag,
+		c.InsightsAppTag,
+		c.InsightsNodeTag,
 		c.SessionRecordingDate,
 	)
 
@@ -85,13 +85,13 @@ SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 func LoadExistingEnv() map[string]string {
 	values := make(map[string]string)
 	keys := []string{
-		"POSTHOG_SECRET",
+		"INSIGHTS_SECRET",
 		"ENCRYPTION_SALT_KEYS",
 		"DOMAIN",
 		"TLS_BLOCK",
 		"REGISTRY_URL",
-		"POSTHOG_APP_TAG",
-		"POSTHOG_NODE_TAG",
+		"INSIGHTS_APP_TAG",
+		"INSIGHTS_NODE_TAG",
 		"SESSION_RECORDING_V2_METADATA_SWITCHOVER",
 		"SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS",
 	}
@@ -176,7 +176,7 @@ func FixEnvQuoting() error {
 }
 
 func ValidateEnvForUpgrade() error {
-	required := []string{"POSTHOG_SECRET", "DOMAIN"}
+	required := []string{"INSIGHTS_SECRET", "DOMAIN"}
 	for _, key := range required {
 		if ReadEnvValue(key) == "" {
 			return fmt.Errorf("missing required env var: %s", key)

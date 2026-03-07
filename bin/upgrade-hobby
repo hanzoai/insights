@@ -16,7 +16,7 @@ then
 export REGISTRY_URL="posthog/posthog"
 fi
 
-export POSTHOG_APP_TAG="${POSTHOG_APP_TAG:-latest}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest}"
 
 echo "Checking for named postgres and clickhouse volumes to avoid data loss when upgrading from < 1.39"
 if docker volume ls | grep -Pzoq 'clickhouse-data\n(.|\n)*postgres-data\n'
@@ -86,7 +86,7 @@ if [[ -f ".env" ]]; then
     . ./.env         # or: source .env
     set +a
 else
-    echo "No .env file found. Please create it with POSTHOG_SECRET and DOMAIN set."
+    echo "No .env file found. Please create it with INSIGHTS_SECRET and DOMAIN set."
     exit 1
 fi
 
@@ -172,7 +172,7 @@ if ! grep -q "SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS" .env; then
   source .env
 fi
 
-export POSTHOG_APP_TAG="${POSTHOG_APP_TAG:-latest-release}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest-release}"
 
 # Check if current compose file uses postgres:12-alpine (needs migration before upgrade)
 if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>/dev/null; then

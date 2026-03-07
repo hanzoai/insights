@@ -38,7 +38,7 @@ pub const ENTERPRISE_PROP_DEFS_TABLE_COLUMNS: [&str; 7] = [
 ];
 
 // property definitions we don't want customers querying
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L343-L361
+// https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L343-L361
 pub const EVENTS_HIDDEN_PROPERTY_DEFINITIONS: [&str; 14] = [
     // distinct_id is set in properties by some libraries, but not consistently, so we shouldn't allow users to filter on it
     "distinct_id",
@@ -66,8 +66,8 @@ pub const EVENTS_HIDDEN_PROPERTY_DEFINITIONS: [&str; 14] = [
 // 2. dropped all records with the work "deprecated" in the entry's value object (same as Django does)
 // 3. lowercased all value["label"] entries eligible for capture here (Django does this on the fly)
 // **IMPORTANT** we need to keep this in sync the w/Django original!! see below for more details:
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L326-L339
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/taxonomy.py#L1627-L1631
+// https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/property_definition_api.py#L326-L339
+// https://github.com/hanzoai/insights/blob/main/posthog/taxonomy/taxonomy.py#L1627-L1631
 pub static PROPERTY_DEFINITION_ALIASES: [(&str, &str); 242] = [
     (
         "$last_posthog_reset",

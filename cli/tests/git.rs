@@ -18,15 +18,15 @@ fn test_get_repo_infos_https_with_dot_git() {
 [core]
     repositoryformatversion = 0
 [remote "origin"]
-    url = https://github.com/PostHog/posthog.git
+    url = https://github.com/hanzoai/insights.git
     fetch = +refs/heads/*:refs/remotes/origin/*
 "#;
     let git_dir = make_git_dir_with_config(cfg);
     assert_eq!(
         get_remote_url(&git_dir).as_deref(),
-        Some("https://github.com/PostHog/posthog.git")
+        Some("https://github.com/hanzoai/insights.git")
     );
-    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("posthog"));
+    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("insights"));
     let _ = fs::remove_dir_all(git_dir.parent().unwrap());
 }
 
@@ -36,15 +36,15 @@ fn test_get_repo_infos_https_without_dot_git() {
 [core]
     repositoryformatversion = 0
 [remote "origin"]
-    url = https://github.com/PostHog/posthog
+    url = https://github.com/hanzoai/insights
     fetch = +refs/heads/*:refs/remotes/origin/*
 "#;
     let git_dir = make_git_dir_with_config(cfg);
     assert_eq!(
         get_remote_url(&git_dir).as_deref(),
-        Some("https://github.com/PostHog/posthog.git")
+        Some("https://github.com/hanzoai/insights.git")
     );
-    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("posthog"));
+    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("insights"));
     let _ = fs::remove_dir_all(git_dir.parent().unwrap());
 }
 
@@ -54,15 +54,15 @@ fn test_get_repo_infos_ssh_with_dot_git() {
 [core]
     repositoryformatversion = 0
 [remote "origin"]
-    url = git@github.com:PostHog/posthog.git
+    url = git@github.com:hanzoai/insights.git
     fetch = +refs/heads/*:refs/remotes/origin/*
 "#;
     let git_dir = make_git_dir_with_config(cfg);
     assert_eq!(
         get_remote_url(&git_dir).as_deref(),
-        Some("git@github.com:PostHog/posthog.git")
+        Some("git@github.com:hanzoai/insights.git")
     );
-    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("posthog"));
+    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("insights"));
     let _ = fs::remove_dir_all(git_dir.parent().unwrap());
 }
 
@@ -72,15 +72,15 @@ fn test_get_repo_infos_ssh_without_dot_git() {
 [core]
     repositoryformatversion = 0
 [remote "origin"]
-    url = git@github.com:PostHog/posthog
+    url = git@github.com:hanzoai/insights
     fetch = +refs/heads/*:refs/remotes/origin/*
 "#;
     let git_dir = make_git_dir_with_config(cfg);
     assert_eq!(
         get_remote_url(&git_dir).as_deref(),
-        Some("git@github.com:PostHog/posthog.git")
+        Some("git@github.com:hanzoai/insights.git")
     );
-    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("posthog"));
+    assert_eq!(get_repo_name(&git_dir).as_deref(), Some("insights"));
     let _ = fs::remove_dir_all(git_dir.parent().unwrap());
 }
 
@@ -88,8 +88,8 @@ fn test_get_repo_infos_ssh_without_dot_git() {
 fn test_get_git_info_from_vercel_env() {
     std::env::set_var("VERCEL", "1");
     std::env::set_var("VERCEL_GIT_PROVIDER", "github");
-    std::env::set_var("VERCEL_GIT_REPO_OWNER", "PostHog");
-    std::env::set_var("VERCEL_GIT_REPO_SLUG", "posthog");
+    std::env::set_var("VERCEL_GIT_REPO_OWNER", "hanzoai");
+    std::env::set_var("VERCEL_GIT_REPO_SLUG", "insights");
     std::env::set_var("VERCEL_GIT_COMMIT_REF", "main");
     std::env::set_var("VERCEL_GIT_COMMIT_SHA", "abc123def456");
 
@@ -99,10 +99,10 @@ fn test_get_git_info_from_vercel_env() {
 
     assert_eq!(info.branch, "main");
     assert_eq!(info.commit_id, "abc123def456");
-    assert_eq!(info.repo_name.as_deref(), Some("posthog"));
+    assert_eq!(info.repo_name.as_deref(), Some("insights"));
     assert_eq!(
         info.remote_url.as_deref(),
-        Some("https://github.com/PostHog/posthog.git")
+        Some("https://github.com/hanzoai/insights.git")
     );
 
     std::env::remove_var("VERCEL");
@@ -118,7 +118,7 @@ fn test_get_git_info_from_github_env() {
     std::env::set_var("GITHUB_ACTIONS", "true");
     std::env::set_var("GITHUB_SHA", "abc123def456");
     std::env::set_var("GITHUB_REF_NAME", "main");
-    std::env::set_var("GITHUB_REPOSITORY", "PostHog/posthog");
+    std::env::set_var("GITHUB_REPOSITORY", "hanzoai/insights");
     std::env::set_var("GITHUB_SERVER_URL", "https://github.com");
 
     let info = get_git_info(None)
@@ -127,10 +127,10 @@ fn test_get_git_info_from_github_env() {
 
     assert_eq!(info.branch, "main");
     assert_eq!(info.commit_id, "abc123def456");
-    assert_eq!(info.repo_name.as_deref(), Some("posthog"));
+    assert_eq!(info.repo_name.as_deref(), Some("insights"));
     assert_eq!(
         info.remote_url.as_deref(),
-        Some("https://github.com/PostHog/posthog.git")
+        Some("https://github.com/hanzoai/insights.git")
     );
 
     std::env::remove_var("GITHUB_ACTIONS");

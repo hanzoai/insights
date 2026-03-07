@@ -1,6 +1,6 @@
 {
     "name": "First Time Event Tracker",
-    "url": "https://github.com/PostHog/first-time-event-tracker",
+    "url": "https://github.com/hanzoai/first-time-event-tracker",
     "description": "Deprecated.",
     "main": "index.js",
     "config": [

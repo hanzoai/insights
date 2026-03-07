@@ -485,7 +485,7 @@ fn parse_float_timestamp(value: f64) -> Option<DateTime<Utc>> {
     DateTime::from_timestamp(whole_seconds, nanos)
 }
 
-/// Copy of https://github.com/PostHog/posthog/blob/master/posthog/queries/test/test_base.py#L35
+/// Copy of https://github.com/hanzoai/insights/blob/main/posthog/queries/test/test_base.py#L35
 /// with some modifications to match Rust's behavior
 /// and to test the match_property function
 #[cfg(test)]

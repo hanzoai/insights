@@ -3,9 +3,9 @@ package ui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	// Colors - PostHog brand colors
-	ColorPrimary   = lipgloss.Color("#F54E00") // PostHog orange
-	ColorSecondary = lipgloss.Color("#1D4AFF") // PostHog blue
+	// Colors - Insights brand colors
+	ColorPrimary   = lipgloss.Color("#F54E00") // Insights orange
+	ColorSecondary = lipgloss.Color("#1D4AFF") // Insights blue
 	ColorSuccess   = lipgloss.Color("#77B96C") // Green
 	ColorWarning   = lipgloss.Color("#F1A82C") // Yellow/orange
 	ColorError     = lipgloss.Color("#F54E00") // Red/orange

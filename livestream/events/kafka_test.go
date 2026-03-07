@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/posthog/posthog/livestream/geo"
-	"github.com/posthog/posthog/livestream/mocks"
+	"github.com/hanzoai/insights/livestream/geo"
+	"github.com/hanzoai/insights/livestream/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

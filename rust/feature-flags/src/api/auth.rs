@@ -78,7 +78,7 @@ pub async fn validate_secret_api_token_for_team(
 }
 
 /// Hash a personal API key value using legacy PBKDF2 mode
-/// Ported from PostHog's `hash_key_value` function in `posthog/models/personal_api_key.py`
+/// Ported from Insights's `hash_key_value` function in `posthog/models/personal_api_key.py`
 fn hash_legacy_pbkdf2_key(value: &str, iterations: u32) -> String {
     use pbkdf2::pbkdf2_hmac;
     use sha2::Sha256;
@@ -100,7 +100,7 @@ fn hash_legacy_pbkdf2_key(value: &str, iterations: u32) -> String {
 }
 
 /// Hash a personal API key value using the specified mode
-/// Ported from PostHog's `hash_key_value` function in `posthog/models/personal_api_key.py`
+/// Ported from Insights's `hash_key_value` function in `posthog/models/personal_api_key.py`
 fn hash_personal_api_key(value: &str, mode: &str, iterations: Option<u32>) -> String {
     use sha2::{Digest, Sha256};
 
@@ -314,7 +314,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported from PostHog's `test_hash_key_values` function in `posthog/api/test/test_personal_api_keys.py`
+    // Ported from Insights's `test_hash_key_values` function in `posthog/api/test/test_personal_api_keys.py`
     #[rstest]
     #[case(
         "sha256",

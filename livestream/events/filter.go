@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
