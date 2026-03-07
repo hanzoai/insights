@@ -11,7 +11,7 @@ if [ ! -f "$DIR/../share/GeoLite2-City.mmdb" ] || [ ! -f "$DIR/../share/GeoLite2
     rm -f "$DIR/../share/GeoLite2-City.mmdb" "$DIR/../share/GeoLite2-City.json"
 
     echo "Downloading GeoLite2-City.mmdb..."
-    if curl -L "https://mmdbcdn.posthog.net/" \
+    if curl -L "https://mmdbcdn.insights.hanzo.ai/" \
         --http1.1 \
         --fail \
         --retry 10 \

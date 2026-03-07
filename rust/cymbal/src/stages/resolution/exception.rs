@@ -102,7 +102,7 @@ mod test {
         let mut config = Config::init_with_defaults().unwrap();
         config.object_storage_bucket = "test-bucket".to_string();
 
-        let map_id = "com.posthog.android.sample@3.0+3".to_string();
+        let map_id = "com.hanzo.insights.android.sample@3.0+3".to_string();
 
         let mut record = SymbolSetRecord {
             id: Uuid::now_v7(),
@@ -184,7 +184,7 @@ mod test {
 
         assert_eq!(
             result.module,
-            Some("com.posthog.android.sample".to_string()),
+            Some("com.hanzo.insights.android.sample".to_string()),
         );
 
         assert_eq!(result.exception_type, "MyCustomException3".to_string(),);

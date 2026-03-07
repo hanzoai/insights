@@ -9,61 +9,61 @@ exports[`LegacyPluginExecutorService smoke tests should run the destination plug
 
 exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-hubspot-plugin', plugin: [Object] } 1`] = `
 [
-  "Created Hubspot Contact for test@posthog.com",
+  "Created Hubspot Contact for test@insights.com",
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-pace-posthog-integration', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-pace-insights-integration', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-avo-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-avo-plugin', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-braze-app', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-braze-app', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-engage-so-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-engage-so-plugin', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-gcs-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-gcs-plugin', plugin: [Object] } 1`] = `
 [
-  "Plugin execution failed: Plugin plugin-posthog-gcs-plugin setup failed: Cannot read properties of undefined (reading 'googleCloudKeyJson')",
+  "Plugin execution failed: Plugin plugin-insights-gcs-plugin setup failed: Cannot read properties of undefined (reading 'googleCloudKeyJson')",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-intercom-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-intercom-plugin', plugin: [Object] } 1`] = `
 [
-  "Contact test@posthog.com in Intercom not found",
+  "Contact test@insights.com in Intercom not found",
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-laudspeaker-app', plugin: [Object] } 1`] = `
-[
-  "Function completed in REPLACED-TIME-ms.",
-]
-`;
-
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-patterns-app', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-laudspeaker-app', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-posthog-plugin-replicator', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-patterns-app', plugin: [Object] } 1`] = `
+[
+  "Function completed in REPLACED-TIME-ms.",
+]
+`;
+
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-insights-plugin-replicator', plugin: [Object] } 1`] = `
 [
   "Flushed 1 event to test",
   "Function completed in REPLACED-TIME-ms.",
@@ -76,7 +76,7 @@ exports[`LegacyPluginExecutorService smoke tests should run the destination plug
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-rudderstack-posthog-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the destination plugin: { name: 'plugin-rudderstack-insights-plugin', plugin: [Object] } 1`] = `
 [
   "Function completed in REPLACED-TIME-ms.",
 ]
@@ -121,15 +121,15 @@ exports[`LegacyPluginExecutorService smoke tests should run the transformation p
 
 exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-plugin-stonly-UTM-Extractor', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-anonymization', plugin: [Object] } 1`] = `[]`;
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-anonymization', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-app-unduplicator', plugin: [Object] } 1`] = `[]`;
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-app-unduplicator', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-filter-out-plugin', plugin: [Object] } 1`] = `[]`;
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-filter-out-plugin', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-plugin-geoip', plugin: [Object] } 1`] = `[]`;
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-plugin-geoip', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-route-censor-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-route-censor-plugin', plugin: [Object] } 1`] = `
 [
   "Plugin set up with global config: , {
   "properties": [
@@ -154,9 +154,9 @@ exports[`LegacyPluginExecutorService smoke tests should run the transformation p
 ]
 `;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-posthog-url-normalizer-plugin', plugin: [Object] } 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-insights-url-normalizer-plugin', plugin: [Object] } 1`] = `
 [
-  "event.$current_url: "https://posthog.com" normalized to "https://posthog.com/"",
+  "event.$current_url: "https://insights.com" normalized to "https://insights.com/"",
 ]
 `;
 
@@ -176,11 +176,11 @@ exports[`LegacyPluginExecutorService smoke tests should run the transformation p
 
 exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: { name: 'plugin-user-agent-plugin', plugin: [Object] } 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: {\\n  name: 'plugin-posthog-app-url-parameters-to-event-properties',\\n  plugin: [Object]\\n} 1`] = `[]`;
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: {\\n  name: 'plugin-insights-app-url-parameters-to-event-properties',\\n  plugin: [Object]\\n} 1`] = `[]`;
 
-exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: {\\n  name: 'plugin-posthog-plugin-snowplow-referer-parser',\\n  plugin: [Object]\\n} 1`] = `
+exports[`LegacyPluginExecutorService smoke tests should run the transformation plugin: {\\n  name: 'plugin-insights-plugin-snowplow-referer-parser',\\n  plugin: [Object]\\n} 1`] = `
 [
-  "(Event: $pageview) URL: https://posthog.com, Referrer: undefined, Referring domain: undefined",
+  "(Event: $pageview) URL: https://insights.com, Referrer: undefined, Referring domain: undefined",
   "(SNOWPLOW) Medium: unknown, Source: unknown, Term: undefined",
 ]
 `;

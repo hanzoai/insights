@@ -34,8 +34,8 @@ use tokio::time::interval;
 // todo: fetch from env
 // due to historical reasons we use different suffixes for quota limits and overflow
 // hopefully we can unify these in the future
-pub const QUOTA_LIMITER_CACHE_KEY: &str = "@posthog/quota-limits/";
-pub const OVERFLOW_LIMITER_CACHE_KEY: &str = "@posthog/capture-overflow/";
+pub const QUOTA_LIMITER_CACHE_KEY: &str = "@hanzo/quota-limits/";
+pub const OVERFLOW_LIMITER_CACHE_KEY: &str = "@hanzo/capture-overflow/";
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum QuotaResource {
@@ -183,7 +183,7 @@ mod tests {
     #[tokio::test]
     async fn test_dynamic_limited() {
         let client = MockRedisClient::new().zrangebyscore_ret(
-            "@posthog/capture-overflow/replay",
+            "@hanzo/capture-overflow/replay",
             vec![String::from("banana")],
         );
         let client = Arc::new(client);
@@ -206,7 +206,7 @@ mod tests {
     #[tokio::test]
     async fn test_custom_key_prefix() {
         let client = MockRedisClient::new().zrangebyscore_ret(
-            "prefix//@posthog/quota-limits/events",
+            "prefix//@hanzo/quota-limits/events",
             vec![String::from("banana")],
         );
         let client = Arc::new(client);
@@ -243,7 +243,7 @@ mod tests {
     #[tokio::test]
     async fn test_feature_flag_limiter() {
         let client = MockRedisClient::new().zrangebyscore_ret(
-            "@posthog/quota-limits/feature_flag_requests",
+            "@hanzo/quota-limits/feature_flag_requests",
             vec![String::from("banana")],
         );
         let client = Arc::new(client);

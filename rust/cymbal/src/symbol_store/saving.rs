@@ -15,7 +15,7 @@ use crate::{
         SAVE_SYMBOL_SET, SYMBOL_SET_DB_FETCHES, SYMBOL_SET_DB_HITS, SYMBOL_SET_DB_MISSES,
         SYMBOL_SET_FETCH_RETRY, SYMBOL_SET_SAVED,
     },
-    posthog_utils::{capture_symbol_set_deleted, capture_symbol_set_saved},
+    insights_utils::{capture_symbol_set_deleted, capture_symbol_set_saved},
     symbol_store::BlobClient,
 };
 
@@ -118,7 +118,7 @@ impl<F> Saving<F> {
         // We just saved new data for this symbol set, which invalidates all our previous stack frame resolution results,
         // so delete them
         let deleted: u64 = sqlx::query_scalar!(
-            r#"WITH deleted AS (DELETE FROM posthog_errortrackingstackframe WHERE symbol_set_id = $1 RETURNING *) SELECT count(*) from deleted"#,
+            r#"WITH deleted AS (DELETE FROM insights_errortrackingstackframe WHERE symbol_set_id = $1 RETURNING *) SELECT count(*) from deleted"#,
             record.id // The call to save() above ensures that this id is correct
         )
         .fetch_one(&self.pool)
@@ -297,7 +297,7 @@ impl SymbolSetRecord {
         let mut record = sqlx::query_as!(
             SymbolSetRecord,
             r#"SELECT id, team_id, ref as set_ref, storage_ptr, created_at, failure_reason, content_hash, last_used
-            FROM posthog_errortrackingsymbolset
+            FROM insights_errortrackingsymbolset
             WHERE (content_hash is not null OR storage_ptr is null) AND team_id = $1 AND ref = $2"#,
             team_id,
             truncated_ref
@@ -330,7 +330,7 @@ impl SymbolSetRecord {
         let now = Utc::now();
 
         sqlx::query!(
-            r#"UPDATE posthog_errortrackingsymbolset SET last_used = $2 WHERE id = $1"#,
+            r#"UPDATE insights_errortrackingsymbolset SET last_used = $2 WHERE id = $1"#,
             self.id,
             now
         )
@@ -353,7 +353,7 @@ impl SymbolSetRecord {
         let truncated_ref = truncate_ref(&self.set_ref);
         self.id = sqlx::query_scalar!(
             r#"
-            INSERT INTO posthog_errortrackingsymbolset (id, team_id, ref, storage_ptr, failure_reason, created_at, content_hash)
+            INSERT INTO insights_errortrackingsymbolset (id, team_id, ref, storage_ptr, failure_reason, created_at, content_hash)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (team_id, ref) DO UPDATE SET storage_ptr = $4, content_hash = $7, failure_reason = $5
             RETURNING id
@@ -380,7 +380,7 @@ impl SymbolSetRecord {
     {
         let _ignored = sqlx::query!(
             r#"
-            DELETE FROM posthog_errortrackingsymbolset WHERE id = $1
+            DELETE FROM insights_errortrackingsymbolset WHERE id = $1
             "#,
             self.id
         )

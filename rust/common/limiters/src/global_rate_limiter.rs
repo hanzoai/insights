@@ -102,7 +102,7 @@ impl Default for GlobalRateLimiterConfig {
             window_interval: Duration::from_secs(60),
             bucket_interval: Duration::from_secs(10),
             rate_limit_interval: Duration::from_secs(60),
-            redis_key_prefix: "@posthog/global_rate_limiter".to_string(),
+            redis_key_prefix: "@hanzo/global_rate_limiter".to_string(),
             // 10 minutes - long enough to benefit from hot cache under high cardinality
             local_cache_ttl: Duration::from_secs(600),
             // long enough to avoid stale Redis entries piling up
@@ -1024,7 +1024,7 @@ mod tests {
         assert_eq!(config.global_threshold, 100_000);
         assert_eq!(config.window_interval, Duration::from_secs(60));
         assert_eq!(config.bucket_interval, Duration::from_secs(10));
-        assert_eq!(config.redis_key_prefix, "@posthog/global_rate_limiter");
+        assert_eq!(config.redis_key_prefix, "@hanzo/global_rate_limiter");
         assert_eq!(config.global_cache_ttl, Duration::from_secs(300));
         assert_eq!(config.local_cache_ttl, Duration::from_secs(600));
         assert_eq!(config.global_read_timeout, Duration::from_millis(10));

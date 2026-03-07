@@ -69,7 +69,7 @@ impl PersonLookup for PostgresStorage {
             r#"
             SELECT id, uuid, team_id, properties, properties_last_updated_at,
                    properties_last_operation, created_at, version, is_identified, is_user_id
-            FROM posthog_person
+            FROM insights_person
             WHERE team_id = $1 AND id = $2
             "#,
         )
@@ -89,7 +89,7 @@ impl PersonLookup for PostgresStorage {
             r#"
             SELECT id, uuid, team_id, properties, properties_last_updated_at,
                    properties_last_operation, created_at, version, is_identified, is_user_id
-            FROM posthog_person
+            FROM insights_person
             WHERE team_id = $1 AND uuid = $2
             "#,
         )
@@ -117,7 +117,7 @@ impl PersonLookup for PostgresStorage {
             r#"
             SELECT id, uuid, team_id, properties, properties_last_updated_at,
                    properties_last_operation, created_at, version, is_identified, is_user_id
-            FROM posthog_person
+            FROM insights_person
             WHERE team_id = $1 AND id = ANY($2)
             "#,
         )
@@ -145,7 +145,7 @@ impl PersonLookup for PostgresStorage {
             r#"
             SELECT id, uuid, team_id, properties, properties_last_updated_at,
                    properties_last_operation, created_at, version, is_identified, is_user_id
-            FROM posthog_person
+            FROM insights_person
             WHERE team_id = $1 AND uuid = ANY($2)
             "#,
         )
@@ -172,8 +172,8 @@ impl PersonLookup for PostgresStorage {
             r#"
             SELECT p.id, p.uuid, p.team_id, p.properties, p.properties_last_updated_at,
                    p.properties_last_operation, p.created_at, p.version, p.is_identified, p.is_user_id
-            FROM posthog_person p
-            INNER JOIN posthog_persondistinctid d ON p.id = d.person_id AND p.team_id = d.team_id
+            FROM insights_person p
+            INNER JOIN insights_persondistinctid d ON p.id = d.person_id AND p.team_id = d.team_id
             WHERE p.team_id = $1 AND d.distinct_id = $2
             LIMIT 1
             "#,
@@ -206,8 +206,8 @@ impl PersonLookup for PostgresStorage {
             SELECT p.id, p.uuid, p.team_id, p.properties, p.properties_last_updated_at,
                    p.properties_last_operation, p.created_at, p.version, p.is_identified, p.is_user_id,
                    d.distinct_id
-            FROM posthog_person p
-            INNER JOIN posthog_persondistinctid d ON p.id = d.person_id AND p.team_id = d.team_id
+            FROM insights_person p
+            INNER JOIN insights_persondistinctid d ON p.id = d.person_id AND p.team_id = d.team_id
             WHERE p.team_id = $1 AND d.distinct_id = ANY($2)
             "#,
         )
@@ -265,8 +265,8 @@ impl PersonLookup for PostgresStorage {
             SELECT p.id, p.uuid, p.team_id, p.properties, p.properties_last_updated_at,
                    p.properties_last_operation, p.created_at, p.version, p.is_identified, p.is_user_id,
                    d.distinct_id
-            FROM posthog_person p
-            INNER JOIN posthog_persondistinctid d ON d.person_id = p.id AND d.team_id = p.team_id
+            FROM insights_person p
+            INNER JOIN insights_persondistinctid d ON d.person_id = p.id AND d.team_id = p.team_id
             INNER JOIN UNNEST($1::integer[], $2::text[]) AS batch(team_id, distinct_id)
                 ON d.team_id = batch.team_id AND d.distinct_id = batch.distinct_id
             "#,

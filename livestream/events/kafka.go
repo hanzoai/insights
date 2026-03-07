@@ -19,7 +19,7 @@ import (
 
 // FlexibleString handles JSON values that can be either a string or a number,
 // converting them to a string representation. This is needed because some SDKs
-// (e.g., posthog-ruby) may send distinct_id as an integer instead of a string.
+// (e.g., insights-ruby) may send distinct_id as an integer instead of a string.
 type FlexibleString string
 
 func (f *FlexibleString) UnmarshalEasyJSON(in *jlexer.Lexer) {
@@ -91,7 +91,7 @@ func (f FlexibleString) MarshalJSON() ([]byte, error) {
 }
 
 //easyjson:json
-type PostHogEventWrapper struct {
+type InsightsEventWrapper struct {
 	Uuid       string         `json:"uuid"`
 	DistinctId FlexibleString `json:"distinct_id"`
 	Ip         string         `json:"ip"`
@@ -101,7 +101,7 @@ type PostHogEventWrapper struct {
 }
 
 //easyjson:json
-type PostHogEvent struct {
+type InsightsEvent struct {
 	Token      string                 `json:"api_key,omitempty"`
 	Event      string                 `json:"event"`
 	Properties map[string]interface{} `json:"properties"`
@@ -120,19 +120,19 @@ type KafkaConsumerInterface interface {
 	Close() error
 }
 
-type PostHogKafkaConsumer struct {
+type InsightsKafkaConsumer struct {
 	consumer     KafkaConsumerInterface
 	topic        string
 	geolocator   geo.GeoLocator
 	incoming     chan []byte
-	outgoingChan chan PostHogEvent
+	outgoingChan chan InsightsEvent
 	statsChan    chan CountEvent
 	parallel     int
 }
 
-func NewPostHogKafkaConsumer(
+func NewInsightsKafkaConsumer(
 	kafkaConfig configs.KafkaConfig, geolocator geo.GeoLocator,
-	outgoingChan chan PostHogEvent, statsChan chan CountEvent, parallel int) (*PostHogKafkaConsumer, error) {
+	outgoingChan chan InsightsEvent, statsChan chan CountEvent, parallel int) (*InsightsKafkaConsumer, error) {
 
 	config := &kafka.ConfigMap{
 		"bootstrap.servers":          kafkaConfig.Brokers,
@@ -152,7 +152,7 @@ func NewPostHogKafkaConsumer(
 		return nil, err
 	}
 
-	return &PostHogKafkaConsumer{
+	return &InsightsKafkaConsumer{
 		consumer:     consumer,
 		topic:        kafkaConfig.Topic,
 		geolocator:   geolocator,
@@ -163,7 +163,7 @@ func NewPostHogKafkaConsumer(
 	}, nil
 }
 
-func (c *PostHogKafkaConsumer) Consume() {
+func (c *InsightsKafkaConsumer) Consume() {
 	rebalanceCallback := func(consumer *kafka.Consumer, event kafka.Event) error {
 		if _, ok := event.(kafka.AssignedPartitions); ok {
 			log.Printf("✅ Livestream service ready")
@@ -201,7 +201,7 @@ func (c *PostHogKafkaConsumer) Consume() {
 	}
 }
 
-func (c *PostHogKafkaConsumer) runParsing() {
+func (c *InsightsKafkaConsumer) runParsing() {
 	for {
 		value, ok := <-c.incoming
 		if !ok {
@@ -213,8 +213,8 @@ func (c *PostHogKafkaConsumer) runParsing() {
 	}
 }
 
-func parse(geolocator geo.GeoLocator, kafkaMessage []byte) PostHogEvent {
-	var wrapperMessage PostHogEventWrapper
+func parse(geolocator geo.GeoLocator, kafkaMessage []byte) InsightsEvent {
+	var wrapperMessage InsightsEventWrapper
 	if err := json.Unmarshal(kafkaMessage, &wrapperMessage); err != nil {
 		log.Printf("Error decoding JSON %s: %v", err, string(kafkaMessage))
 	}
@@ -227,7 +227,7 @@ func parse(geolocator geo.GeoLocator, kafkaMessage []byte) PostHogEvent {
 		}
 	}
 
-	phEvent := PostHogEvent{
+	phEvent := InsightsEvent{
 		Timestamp:  wrapperMessage.Timestamp,
 		Token:      "",
 		Event:      "",
@@ -274,7 +274,7 @@ func parse(geolocator geo.GeoLocator, kafkaMessage []byte) PostHogEvent {
 	return phEvent
 }
 
-func (c *PostHogKafkaConsumer) Close() {
+func (c *InsightsKafkaConsumer) Close() {
 	if err := c.consumer.Close(); err != nil {
 		// TODO capture error to Insights
 		log.Printf("Failed to close consumer: %v", err)
@@ -282,7 +282,7 @@ func (c *PostHogKafkaConsumer) Close() {
 	close(c.incoming)
 }
 
-func (c *PostHogKafkaConsumer) IncomingRatio() float64 {
+func (c *InsightsKafkaConsumer) IncomingRatio() float64 {
 	return float64(len(c.incoming)) / float64(cap(c.incoming))
 }
 

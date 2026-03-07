@@ -107,7 +107,7 @@ func RestorePostgres15(backupFile string) error {
 	}
 
 	cmd, args := GetDockerComposeCommand()
-	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "insights", "-c", "ALTER USER insights WITH PASSWORD 'posthog';")
+	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "insights", "-c", "ALTER USER insights WITH PASSWORD 'insights';")
 	_, _ = RunCommand(cmd, fullArgs...) // Best-effort password reset
 
 	return nil

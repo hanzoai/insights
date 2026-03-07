@@ -15,7 +15,7 @@ import (
 var funFacts = []string{
 	"Hanzo AI was founded in 2017 during Techstars",
 	"The hedgehog mascot is named Max",
-	"Insights is 100% open source - check out github.com/PostHog/posthog",
+	"Insights is 100% open source - check out github.com/hanzoai/insights",
 	"Insights supports 40+ data integrations out of the box",
 	"You can run SQL queries directly on your Insights data",
 	"Insights was built by engineers, for engineers",
@@ -141,7 +141,7 @@ func (m WelcomeModel) getActionTitle() string {
 	if m.isUpgrade {
 		return "Upgrade Insights"
 	}
-	return "Install PostHog"
+	return "Install Insights"
 }
 
 func (m WelcomeModel) getActionDescription() string {

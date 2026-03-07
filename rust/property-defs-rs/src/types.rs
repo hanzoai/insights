@@ -86,8 +86,8 @@ const DATETIME_PROPERTY_NAME_KEYWORDS: [&str; 7] = [
 // it does represent a pretty strong indication of the user's intent, for the purposes of
 // *property definition capture only* especially when a bad decision "locks" the property name
 // to the wrong type. Try it here: https://rustexp.lpil.uk/ and review the unit tests.
-// Also notable: post-capture, PostHog displays timestamps in a variety formats:
-// https://github.com/hanzoai/insights/blob/main/posthog/models/property_definition.py#L18-L30
+// Also notable: post-capture, Insights displays timestamps in a variety formats:
+// https://github.com/hanzoai/insights/blob/main/insights/models/property_definition.py#L18-L30
 static DATETIME_PREFIX_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"^(([0-9]{4}[/-][0-2][0-9][/-][0-3][0-9])|([0-2][0-9][/-][0-3][0-9][/-][0-9]{4}))([ T][0-2][0-9]:[0-6][0-9]:[0-6][0-9].*)?$"#
@@ -358,7 +358,7 @@ pub fn detect_property_type(key: &str, value: &Value) -> Option<PropertyValueTyp
         // utm_ prefixed properties should always be detected as strings.
         // Sometimes the first value sent looks like a number, event though
         // subsequent values are not. See
-        // https://github.com/PostHog/posthog/issues/12529 for more context.
+        // https://github.com/hanzoai/insights/issues/12529 for more context.
         // $initial_utm_* properties are the "initial" variants set by the SDK
         // and must follow the same rule.
         return Some(PropertyValueType::String);
@@ -523,7 +523,7 @@ impl EventDefinition {
     {
         let res = sqlx::query!(
             r#"
-            INSERT INTO posthog_eventdefinition (id, name, volume_30_day, query_usage_30_day, team_id, project_id, last_seen_at, created_at)
+            INSERT INTO insights_eventdefinition (id, name, volume_30_day, query_usage_30_day, team_id, project_id, last_seen_at, created_at)
             VALUES ($1, $2, NULL, NULL, $3, $4, $5, NOW())
             ON CONFLICT (coalesce(project_id, team_id::bigint), name)
             DO UPDATE SET last_seen_at = $5

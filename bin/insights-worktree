@@ -326,7 +326,7 @@ setup_worktree_environment() {
 
 # Function to list all worktrees
 list_worktrees() {
-    print_color green "All PostHog Worktrees:"
+    print_color green "All Insights Worktrees:"
     echo ""
     printf "%-30s %-60s %-10s\n" "Branch" "Path" "Location"
     printf "%-30s %-60s %-10s\n" "------" "----" "--------"
@@ -370,7 +370,7 @@ case "$COMMAND" in
         checkout_pr_worktree
         ;;
     help|*)
-        echo "PostHog Worktree Manager"
+        echo "Insights Worktree Manager"
         echo ""
         echo "Usage: $0 <command> [arguments]"
         echo ""
@@ -395,7 +395,7 @@ case "$COMMAND" in
         echo ""
         echo "Working with worktrees:"
         echo "  cd ${WORKTREE_BASE}/<dirname>        # Enter worktree directory"
-        echo "  bin/start                            # Start PostHog (standard command)"
+        echo "  bin/start                            # Start Insights (standard command)"
         echo "  git checkout -b another-branch       # Switch branches within same worktree"
         echo ""
         echo "Notes:"

@@ -75,7 +75,7 @@ async fn it_captures_one_recording_with_user_agent_fallback_for_lib() -> Result<
     let distinct_id = random_string("id", 16);
     let session_id = Uuid::now_v7().to_string();
     let window_id = random_string("id", 16);
-    let lib = "posthog-android/1.0.4";
+    let lib = "insights-android/1.0.4";
 
     let main_topic = EphemeralTopic::new().await;
     let server = ServerHandle::for_recordings(&main_topic).await;
@@ -116,7 +116,7 @@ async fn it_captures_one_recording_with_user_agent_fallback_for_lib() -> Result<
                 "$session_id": session_id,
                 "$window_id": window_id,
                 "$snapshot_items": [],
-                "$lib": "posthog-android",
+                "$lib": "insights-android",
                 "$snapshot_source": "web"
             }
         })

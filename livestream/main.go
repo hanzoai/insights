@@ -58,7 +58,7 @@ func main() {
 	stats := events.NewStatsKeeper()
 	sessionStats := events.NewSessionStatsKeeper(config.SessionRecording.MaxLRUEntries, 0)
 
-	phEventChan := make(chan events.PostHogEvent, 10000)
+	insightsEventChan := make(chan events.InsightsEvent, 10000)
 	statsChan := make(chan events.CountEvent, 10000)
 	sessionStatsChan := make(chan events.SessionRecordingEvent, 10000)
 	subChan := make(chan events.Subscription, 10000)
@@ -67,7 +67,7 @@ func main() {
 	go stats.KeepStats(statsChan)
 	go sessionStats.KeepStats(ctx, sessionStatsChan)
 
-	consumer, err := events.NewPostHogKafkaConsumer(config.Kafka, geolocator, phEventChan, statsChan, config.Parallelism)
+	consumer, err := events.NewInsightsKafkaConsumer(config.Kafka, geolocator, insightsEventChan, statsChan, config.Parallelism)
 	if err != nil {
 		log.Fatalf("Failed to create Kafka consumer: %v", err)
 	}
@@ -98,7 +98,7 @@ func main() {
 				return
 			case <-ticker.C:
 				metrics.IncomingQueue.Set(consumer.IncomingRatio())
-				metrics.EventQueue.Set(float64(len(phEventChan)) / float64(cap(phEventChan)))
+				metrics.EventQueue.Set(float64(len(insightsEventChan)) / float64(cap(insightsEventChan)))
 				metrics.StatsQueue.Set(float64(len(statsChan)) / float64(cap(statsChan)))
 				metrics.SessionRecordingStatsQueue.Set(float64(len(sessionStatsChan)) / float64(cap(sessionStatsChan)))
 				metrics.SubQueue.Set(float64(len(subChan)) / float64(cap(subChan)))
@@ -107,7 +107,7 @@ func main() {
 		}
 	}()
 
-	filter := events.NewFilter(subChan, unSubChan, phEventChan)
+	filter := events.NewFilter(subChan, unSubChan, insightsEventChan)
 	go filter.Run()
 
 	// Echo instance

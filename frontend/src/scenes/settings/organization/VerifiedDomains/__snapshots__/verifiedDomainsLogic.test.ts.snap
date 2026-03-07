@@ -46,8 +46,8 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "anonymize_ips": false,
         "api_token": "default-team-api-token",
         "app_urls": [
-          "https://posthog.com/",
-          "https://app.posthog.com",
+          "https://insights.com/",
+          "https://app.insights.com",
           "https://example.com",
           "http://127.0.0.1:*",
         ],
@@ -155,7 +155,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "project_id": 997,
         "receive_org_level_activity_logs": false,
         "recording_domains": [
-          "https://recordings.posthog.com/",
+          "https://recordings.insights.com/",
         ],
         "require_evaluation_contexts": false,
         "revenue_analytics_config": {
@@ -230,7 +230,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
             "key": "email",
             "operator": "not_icontains",
             "type": "person",
-            "value": "posthog.com",
+            "value": "insights.com",
           },
         ],
         "test_account_filters_default_checked": false,
@@ -268,7 +268,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
   "updatingDomainLoading": false,
   "verifiedDomains": [
     {
-      "domain": "my.posthog.com",
+      "domain": "my.insights.com",
       "id": "8db3b0c2-a0ab-490a-9037-14f3358a81bc",
       "is_verified": true,
       "jit_provisioning_enabled": true,
@@ -276,7 +276,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
       "verified_at": "2022-01-01T23:59:59",
     },
     {
-      "domain": "temp.posthog.com",
+      "domain": "temp.insights.com",
       "id": "id_will_be_deleted",
       "is_verified": false,
       "jit_provisioning_enabled": false,

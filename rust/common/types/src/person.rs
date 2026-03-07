@@ -28,12 +28,12 @@ impl Person {
             Person,
             r#"
                 SELECT pp.id, pp.created_at, pp.team_id, pp.uuid, pp.properties, pp.is_identified, pp.is_user_id, pp.version
-                FROM posthog_person pp
-                INNER JOIN posthog_persondistinctid
-                    ON pp.id = posthog_persondistinctid.person_id
+                FROM insights_person pp
+                INNER JOIN insights_persondistinctid
+                    ON pp.id = insights_persondistinctid.person_id
                 WHERE
-                    posthog_persondistinctid.distinct_id = $1
-                    AND posthog_persondistinctid.team_id = $2
+                    insights_persondistinctid.distinct_id = $1
+                    AND insights_persondistinctid.team_id = $2
                     AND pp.team_id = $2
                 LIMIT 1
             "#,
@@ -53,12 +53,12 @@ impl Person {
             Person,
             r#"
                 SELECT pp.id, pp.created_at, pp.team_id, pp.uuid, '{}'::jsonb as properties, pp.is_identified, pp.is_user_id, pp.version
-                FROM posthog_person pp
-                INNER JOIN posthog_persondistinctid
-                    ON pp.id = posthog_persondistinctid.person_id
+                FROM insights_person pp
+                INNER JOIN insights_persondistinctid
+                    ON pp.id = insights_persondistinctid.person_id
                 WHERE
-                    posthog_persondistinctid.distinct_id = $1
-                    AND posthog_persondistinctid.team_id = $2
+                    insights_persondistinctid.distinct_id = $1
+                    AND insights_persondistinctid.team_id = $2
                     AND pp.team_id = $2
                 LIMIT 1
             "#,

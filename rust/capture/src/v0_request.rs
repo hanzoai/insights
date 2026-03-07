@@ -14,7 +14,7 @@ use crate::{
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub enum RawRequest {
-    /// Array of events (posthog-js)
+    /// Array of events (insights-js)
     Array(Vec<RawEvent>),
     /// Batched events (/batch)
     Batch(BatchedRequest),
@@ -35,7 +35,7 @@ pub struct BatchedRequest {
 
 impl RawRequest {
     /// Takes a request payload and tries to decompress and unmarshall it.
-    /// While posthog-js sends a compression query param, a sizable portion of requests
+    /// While insights-js sends a compression query param, a sizable portion of requests
     /// fail due to it being missing when the body is compressed.
     /// Instead of trusting the parameter, we peek at the payload's first three bytes to
     /// detect gzip, fallback to uncompressed utf8 otherwise.

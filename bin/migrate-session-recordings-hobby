@@ -3,7 +3,7 @@
 set -e
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📦 PostHog Session Recording Migration (MinIO → SeaweedFS)"
+echo "📦 Insights Session Recording Migration (MinIO → SeaweedFS)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "This script will migrate your existing session recordings from"

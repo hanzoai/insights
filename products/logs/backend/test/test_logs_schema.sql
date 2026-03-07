@@ -1,4 +1,4 @@
-use database posthog_test;
+use database insights_test;
 
 CREATE OR REPLACE FUNCTION extractIPv4Substrings AS
 (

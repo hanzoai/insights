@@ -47,8 +47,8 @@ impl Cohort {
                   c.errors_calculating,
                   c.groups,
                   c.created_by_id
-              FROM posthog_cohort AS c
-              JOIN posthog_team AS t ON (c.team_id = t.id)
+              FROM insights_cohort AS c
+              JOIN insights_team AS t ON (c.team_id = t.id)
             WHERE t.id = $1
             AND c.deleted = false
         "#;
@@ -122,7 +122,7 @@ impl Cohort {
     ///           },
     ///           {
     ///             "key": "email",
-    ///             "value": "@posthog.com",
+    ///             "value": "@hanzo.ai",
     ///             "type": "person",
     ///             "operator": "icontains"
     ///           }
@@ -167,7 +167,7 @@ impl InnerCohortProperty {
     ///       "values": [
     ///         {
     ///           "key": "email",
-    ///           "value": "@posthog.com",
+    ///           "value": "@hanzo.ai",
     ///           "type": "person",
     ///           "operator": "icontains"
     ///         },

@@ -107,6 +107,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-compression"
+version = "0.4.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0f9ee0f6e02ffd7ad5816e9464499fba7b3effd01123b515c41d1697c43dad1"
+dependencies = [
+ "compression-codecs",
+ "compression-core",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -350,6 +362,23 @@ dependencies = [
  "ryu",
  "static_assertions",
 ]
+
+[[package]]
+name = "compression-codecs"
+version = "0.4.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb7b51a7d9c967fc26773061ba86150f19c50c0d65c887cb1fbe295fd16619b7"
+dependencies = [
+ "compression-core",
+ "flate2",
+ "memchr",
+]
+
+[[package]]
+name = "compression-core"
+version = "0.4.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75984efb6ed102a0d42db99afb6c1948f0380d1d91808d5529916e6c08b49d8d"
 
 [[package]]
 name = "core-foundation"
@@ -1278,12 +1307,12 @@ dependencies = [
  "dirs",
  "globset",
  "inquire",
+ "insights-symbol-data",
  "magic_string",
  "miette",
  "open",
  "plist",
  "posthog-rs",
- "posthog-symbol-data",
  "proguard",
  "ratatui",
  "rayon",
@@ -1304,6 +1333,14 @@ dependencies = [
  "uuid",
  "walkdir",
  "zip",
+]
+
+[[package]]
+name = "insights-symbol-data"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -1731,27 +1768,19 @@ dependencies = [
 
 [[package]]
 name = "posthog-rs"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "610d236077c94c96194b0d2b40989bda4bf8faf60e15a0da6ef8ffd4c78f6c1c"
+version = "0.4.3"
+source = "git+https://github.com/hanzoai/insights-rs#d883eb4dad9bd22167d365f1e957522ec6053b0f"
 dependencies = [
  "chrono",
  "derive_builder",
+ "regex",
  "reqwest 0.11.27",
  "semver",
  "serde",
  "serde_json",
+ "sha1",
+ "tracing",
  "uuid",
-]
-
-[[package]]
-name = "posthog-symbol-data"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe5471c1aad2514de61c8cbfd0c52fb3eb7efa03229737178442c2277d700330"
-dependencies = [
- "serde",
- "thiserror",
 ]
 
 [[package]]
@@ -2025,6 +2054,7 @@ version = "0.11.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd67538700a17451e7cba03ac727fb961abb7607553461627b97de0b89cf4a62"
 dependencies = [
+ "async-compression",
  "base64 0.21.7",
  "bytes",
  "encoding_rs",
@@ -2051,6 +2081,7 @@ dependencies = [
  "system-configuration",
  "tokio",
  "tokio-rustls 0.24.1",
+ "tokio-util",
  "tower-service",
  "url",
  "wasm-bindgen",
@@ -2328,6 +2359,17 @@ dependencies = [
  "ryu",
  "serde",
  "unsafe-libyaml",
+]
+
+[[package]]
+name = "sha1"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
 ]
 
 [[package]]

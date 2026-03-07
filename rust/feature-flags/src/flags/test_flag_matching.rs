@@ -1976,7 +1976,7 @@ mod tests {
                                 "values": [{
                                     "key": "email",
                                     "type": "person",
-                                    "value": "@posthog\\.com$",
+                                    "value": "@hanzo\.ai$",
                                     "negation": false,
                                     "operator": "regex"
                                 }]
@@ -2004,7 +2004,7 @@ mod tests {
                                 "values": [{
                                     "key": "email",
                                     "type": "person",
-                                    "value": ["neil@posthog.com"],
+                                    "value": ["neil@hanzo.ai"],
                                     "negation": false,
                                     "operator": "exact"
                                 }]
@@ -2047,13 +2047,13 @@ mod tests {
             .await
             .unwrap();
 
-        // Test case 1: Should match - posthog.com email (AND condition)
+        // Test case 1: Should match - hanzo.ai email (AND condition)
         context
             .insert_person(
                 team.id,
                 "test_user_1".to_string(),
                 Some(json!({
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "distinct_id": "test_user_1"
                 })),
             )
@@ -2086,13 +2086,13 @@ mod tests {
             .await
             .unwrap();
 
-        // Test case 4: Should match - neil@posthog.com (OR condition)
+        // Test case 4: Should match - neil@hanzo.ai (OR condition)
         context
             .insert_person(
                 team.id,
                 "test_user_4".to_string(),
                 Some(json!({
-                    "email": "neil@posthog.com",
+                    "email": "neil@hanzo.ai",
                     "distinct_id": "test_user_4"
                 })),
             )
@@ -2157,10 +2157,10 @@ mod tests {
 
         // Test each case
         for (user_id, should_match) in [
-            ("test_user_1", true),                                 // @posthog.com
+            ("test_user_1", true),                                 // @hanzo.ai
             ("test_user_2", true),                                 // fuziontech@gmail.com
             ("D_9eluZIT3gqjO9dJqo1aDeqTbAG4yLwXFhN0bz_Vfc", true), // specific distinct_id
-            ("test_user_4", true),                                 // neil@posthog.com
+            ("test_user_4", true),                                 // neil@hanzo.ai
             ("test_user_5", true),                                 // @leads.io
             ("test_user_6", false),                                // random@example.com
         ] {
@@ -2211,7 +2211,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("fake@posthog.com")),
+                            value: Some(json!("fake@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -2223,7 +2223,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("test@posthog.com")),
+                            value: Some(json!("test@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -2264,7 +2264,7 @@ mod tests {
             .insert_person(
                 team.id,
                 "test_id".to_string(),
-                Some(json!({"email": "test@posthog.com", "is_enabled": true})),
+                Some(json!({"email": "test@hanzo.ai", "is_enabled": true})),
             )
             .await
             .unwrap();
@@ -2355,7 +2355,7 @@ mod tests {
             .insert_person(
                 team.id,
                 "test_id".to_string(),
-                Some(json!({"email": "test@posthog.com", "is_enabled": "true"})),
+                Some(json!({"email": "test@hanzo.ai", "is_enabled": "true"})),
             )
             .await
             .unwrap();
@@ -2370,7 +2370,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("fake@posthog.com")),
+                            value: Some(json!("fake@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -2382,7 +2382,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("test@posthog.com")),
+                            value: Some(json!("test@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -2456,7 +2456,7 @@ mod tests {
             .insert_person(
                 team.id,
                 "test_id".to_string(),
-                Some(json!({"email": "test@posthog.com", "is_enabled": true})),
+                Some(json!({"email": "test@hanzo.ai", "is_enabled": true})),
             )
             .await
             .unwrap();
@@ -2481,7 +2481,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("fake@posthog.com")),
+                            value: Some(json!("fake@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -2493,7 +2493,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("test@posthog.com")),
+                            value: Some(json!("test@hanzo.ai")),
                             operator: Some(OperatorType::Exact),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -4187,7 +4187,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_variants() {
-        // Ported from posthog/test/test_feature_flag.py test_variants
+        // Ported from insights/test/test_feature_flag.py test_variants
         let context = TestContext::new(None).await;
         let cohort_cache = Arc::new(CohortCacheManager::new(
             context.non_persons_reader.clone(),
@@ -4666,7 +4666,7 @@ mod tests {
                     FlagPropertyGroup {
                         properties: Some(vec![PropertyFilter {
                             key: "email".to_string(),
-                            value: Some(json!("@posthog.com")),
+                            value: Some(json!("@hanzo.ai")),
                             operator: Some(OperatorType::Icontains),
                             prop_type: PropertyType::Person,
                             group_type_index: None,
@@ -4715,9 +4715,9 @@ mod tests {
         context
             .insert_person(
                 team.id,
-                "posthog_user".to_string(),
+                "insights_user".to_string(),
                 Some(json!({
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "$feature_enrollment/my-flag": false
                 })),
             )
@@ -4764,7 +4764,7 @@ mod tests {
         // Test Insights user
         let router2 = context.create_postgres_router();
         let mut matcher = FeatureFlagMatcher::new(
-            "posthog_user".to_string(),
+            "insights_user".to_string(),
             None, // device_id
             team.id,
             router2,
