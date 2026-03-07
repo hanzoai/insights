@@ -26,10 +26,10 @@ add_subdirectory(${antlr4_SOURCE_DIR}/runtime/Cpp EXCLUDE_FROM_ALL)
 set(ANTLR_INCLUDE_DIR ${antlr4_SOURCE_DIR}/runtime/Cpp/runtime/src/)
 
 set(PARSER_SOURCES
-    HogQLLexer.cpp
-    HogQLParser.cpp
-    HogQLParserBaseVisitor.cpp
-    HogQLParserVisitor.cpp
+    InsightsQLLexer.cpp
+    InsightsQLParser.cpp
+    InsightsQLParserBaseVisitor.cpp
+    InsightsQLParserVisitor.cpp
     json.cpp
     error.cpp
     string.cpp

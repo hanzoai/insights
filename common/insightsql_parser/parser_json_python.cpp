@@ -1,4 +1,4 @@
-// parser_json_python.cpp - JSON output methods for HogQL Parser Python bindings
+// parser_json_python.cpp - JSON output methods for InsightsQL Parser Python bindings
 // This file is included by parser_python.cpp to add JSON-returning parse methods.
 
 #include "json.h"
@@ -18,16 +18,16 @@
       return NULL;                                                                                           \
     }                                                                                                        \
     auto input_stream = new antlr4::ANTLRInputStream(str, strnlen(str, 65536));                              \
-    auto lexer = new HogQLLexer(input_stream);                                                               \
+    auto lexer = new InsightsQLLexer(input_stream);                                                               \
     auto stream = new antlr4::CommonTokenStream(lexer);                                                      \
-    auto parser = new HogQLParser(stream);                                                                   \
+    auto parser = new InsightsQLParser(stream);                                                                   \
     parser->removeErrorListeners();                                                                          \
-    auto error_listener = new HogQLErrorListener(str);                                                       \
+    auto error_listener = new InsightsQLErrorListener(str);                                                       \
     parser->addErrorListener(error_listener);                                                                \
-    HogQLParser::PASCAL_CASE##Context* parse_tree;                                                           \
+    InsightsQLParser::PASCAL_CASE##Context* parse_tree;                                                           \
     try {                                                                                                    \
       parse_tree = parser->CAMEL_CASE();                                                                     \
-    } catch HANDLE_HOGQL_ERROR(                                                                              \
+    } catch HANDLE_INSIGHTSQL_ERROR(                                                                              \
         SyntaxError, delete error_listener; delete parser; delete stream; delete lexer; delete input_stream; \
     ) catch (const antlr4::EmptyStackException& e) {                                                         \
       delete error_listener;                                                                                 \
@@ -52,7 +52,7 @@
       }                                                                                                      \
       return NULL;                                                                                           \
     };                                                                                                       \
-    HogQLParseTreeJSONConverter json_converter = HogQLParseTreeJSONConverter(internal == 1);                 \
+    InsightsQLParseTreeJSONConverter json_converter = InsightsQLParseTreeJSONConverter(internal == 1);                 \
     string result_json = json_converter.visitAsJSONFinal(parse_tree);                                        \
     delete error_listener;                                                                                   \
     delete parser;                                                                                           \

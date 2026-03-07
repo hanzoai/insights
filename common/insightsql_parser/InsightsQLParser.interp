@@ -341,8 +341,8 @@ FULL_STRING_TEXT
 FULL_STRING_ESCAPE_TRIGGER
 TAG_WS
 TAGC_WS
-HOGQLX_TEXT_TEXT
-HOGQLX_TEXT_WS
+INSIGHTSQLX_TEXT_TEXT
+INSIGHTSQLX_TEXT_WS
 
 rule names:
 program
@@ -408,10 +408,10 @@ columnTypeExpr
 columnExprList
 columnExpr
 columnLambdaExpr
-hogqlxChildElement
-hogqlxText
-hogqlxTagElement
-hogqlxTagAttribute
+insightsqlxChildElement
+insightsqlxText
+insightsqlxTagElement
+insightsqlxTagAttribute
 withExprList
 withExpr
 columnIdentifier
