@@ -66,3 +66,19 @@ minimumReleaseAgeExclude:
     - '@modelcontextprotocol/sdk' # Security update for GHSA-345p-7cg4-v4c7
     - kea@4.0.0-pre.3
     - torph@0.0.5
+    - '@hanzo/insights'
+    - '@hanzo/insights-lite'
+    - '@hanzo/insights-node'
+    - '@hanzo/insights-core'
+    - '@hanzo/insights-types'
+    - '@hanzo/insights-icons'
+    - '@hanzo/insights-mascot-mode'
+    - '@hanzo/insights-rrweb'
+    - '@hanzo/insights-rrweb-types'
+    - '@hanzo/insights-rrweb-plugin-console-record'
+    - '@hanzo/insights-rrweb-utils'
+    - '@hanzo/insights-rrweb-snapshot'
+    - '@hanzo/insights-rrdom'
+    - '@hanzo/icons'
+    - '@hanzo/mascot-mode'
+    - '@hanzo/types'

@@ -1,10 +1,10 @@
 # ScriptVM
 
-A ScriptVM is a 🦔 that runs Hog bytecode. It's purpose is to locally evaluate Hog/QL expressions against any object.
+A ScriptVM runs IQL bytecode.
 
-## Hog bytecode
+## IQL bytecode
 
-Hog Bytecode is a compact representation of a subset of the Hog AST nodes. It follows a certain structure:
+IQL Bytecode is a compact representation of a subset of the IQL AST nodes. It follows a certain structure:
 
 ```python
 1 + 2                  # [_H, op.INTEGER, 2, op.INTEGER, 1, op.PLUS]
@@ -23,7 +23,7 @@ The `python/execute.py` function in this folder acts as the reference implementa
 
 ### Operations
 
-Here's a sample list of Hog bytecode operations, missing about half of them and likely out of date:
+Here's a sample list of IQL bytecode operations, missing about half of them and likely out of date:
 
 ```bash
 FIELD = 1          # [arg3, arg2, arg1, FIELD, 3]       # arg1.arg2.arg3
@@ -62,7 +62,7 @@ FLOAT = 34         # [FLOAT, 123.12]                    # 123.01
 
 ### Functions
 
-A Hog Certified Parser must also implement the following function calls:
+A IQL Certified Parser must also implement the following function calls:
 
 ```bash
 concat(...)              # concat('test: ', 1, null, '!') == 'test: 1!'
@@ -76,7 +76,7 @@ ifNull(val, alternative) # ifNull('string', false) == 'string'
 
 ### Null handling
 
-In Hog/QL equality comparisons, `null` is treated as any other variable. Its presence will not make functions automatically return `null`, as is the ClickHouse default.
+In InsightsQL equality comparisons, `null` is treated as any other variable. Its presence will not make functions automatically return `null`, as is the ClickHouse default.
 
 ```sql
 1 == null # false

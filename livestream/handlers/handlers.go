@@ -13,7 +13,7 @@ import (
 )
 
 func Index(c echo.Context) error {
-	return c.String(http.StatusOK, "RealTime Hog 3000")
+	return c.String(http.StatusOK, "RealTime Insights 3000")
 }
 
 type Counter struct {

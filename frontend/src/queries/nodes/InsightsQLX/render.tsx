@@ -92,7 +92,7 @@ export function renderInsightsQLX(value: any): JSX.Element {
                         type="primary"
                         size="xsmall"
                         sideIcon={<IconAI />}
-                        data-attr="hog-ql-explaincsp-button"
+                        data-attr="fn-ql-explaincsp-button"
                         className="inline-block"
                         disabledReason={
                             properties
@@ -113,7 +113,7 @@ export function renderInsightsQLX(value: any): JSX.Element {
                         recordingStatus={recordingStatus}
                         type="primary"
                         size="xsmall"
-                        data-attr="hog-ql-view-recording-button"
+                        data-attr="fn-ql-view-recording-button"
                         className="inline-block"
                     />
                 </LightErrorBoundary>

@@ -90,7 +90,7 @@ export function InsightsFunctionCode(): JSX.Element {
                             {!type.startsWith('site_') ? (
                                 <span className="text-xs text-secondary">
                                     This is the underlying Custom code that will run whenever this triggers.{' '}
-                                    <Link to="https://hanzo.ai/docs/hog">See the docs</Link> for more info
+                                    <Link to="https://hanzo.ai/docs/iql">See the docs</Link> for more info
                                 </span>
                             ) : null}
                             {mightDropEvents && (
@@ -108,7 +108,7 @@ export function InsightsFunctionCode(): JSX.Element {
                                 </LemonBanner>
                             )}
                             <CodeEditorResizeable
-                                language={type.startsWith('site_') ? 'typescript' : 'hog'}
+                                language={type.startsWith('site_') ? 'typescript' : 'iql'}
                                 value={newScriptCode ?? value ?? ''}
                                 originalValue={oldHogCode && newScriptCode ? oldHogCode : undefined}
                                 onChange={(v) => {

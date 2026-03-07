@@ -4,7 +4,7 @@ import { actionToUrl, urlToAction } from 'kea-router'
 import { VMState, newHogCallable, newHogClosure } from '@hanzo/scriptvm'
 
 import api from 'lib/api'
-import { execHogAsync } from 'lib/hog'
+import { execScriptAsync } from 'lib/iql'
 import { urls } from 'scenes/urls'
 
 import type { iqlReplLogicType } from './iqlReplLogicType'
@@ -99,7 +99,7 @@ export const iqlReplLogic = kea<iqlReplLogicType>([
             const { lastLocals, lastState } = values
 
             try {
-                const res = await api.hog.create(code, lastLocals, true)
+                const res = await api.iql.create(code, lastLocals, true)
                 const [_h, version, ...bytecode] = res.bytecode
                 const locals = res.locals
                 actions.setBytecode(index, bytecode, locals)
@@ -146,7 +146,7 @@ export const iqlReplLogic = kea<iqlReplLogicType>([
                     maxMemUsed: lastState?.maxMemUsed ?? 0,
                     syncDuration: lastState?.syncDuration ?? 0,
                 }
-                const result = await execHogAsync(state, {
+                const result = await execScriptAsync(state, {
                     repl: true,
                     functions: {
                         print: (...args: any[]) => {

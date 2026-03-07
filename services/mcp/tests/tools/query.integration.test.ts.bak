@@ -8,7 +8,7 @@ import type { Context } from '@/tools/types'
 import {
     type CreatedResources,
     SAMPLE_FUNNEL_QUERIES,
-    SAMPLE_HOGQL_QUERIES,
+    SAMPLE_INSIGHTSQL_QUERIES,
     SAMPLE_TREND_QUERIES,
     TEST_ORG_ID,
     TEST_PROJECT_ID,
@@ -48,10 +48,10 @@ describe('Query Integration Tests', () => {
         await cleanupResources(client, testProjectId, createdResources)
     })
 
-    describe('HogQL Query Execution', () => {
-        it('should execute pageviews HogQL query successfully', async () => {
+    describe('InsightsQL Query Execution', () => {
+        it('should execute pageviews InsightsQL query successfully', async () => {
             const tool = queryRunTool()
-            const query = SAMPLE_HOGQL_QUERIES.pageviews
+            const query = SAMPLE_INSIGHTSQL_QUERIES.pageviews
             const result = await tool.handler(context, {
                 query,
             })
@@ -64,10 +64,10 @@ describe('Query Integration Tests', () => {
             expect(Array.isArray(response)).toBe(true)
         })
 
-        it('should execute topEvents HogQL query successfully', async () => {
+        it('should execute topEvents InsightsQL query successfully', async () => {
             const tool = queryRunTool()
             const result = await tool.handler(context, {
-                query: SAMPLE_HOGQL_QUERIES.topEvents,
+                query: SAMPLE_INSIGHTSQL_QUERIES.topEvents,
             })
 
             const response = parseToolResponse(result)
@@ -78,11 +78,11 @@ describe('Query Integration Tests', () => {
             expect(Array.isArray(response)).toBe(true)
         })
 
-        it('should handle invalid HogQL query with invalid node', async () => {
+        it('should handle invalid InsightsQL query with invalid node', async () => {
             const invalidQuery = {
                 kind: 'DataVisualizationNode' as const,
                 source: {
-                    kind: 'HogQLQuery' as const,
+                    kind: 'InsightsQLQuery' as const,
                     query: "SELECT * FROM invalid_table WHERE invalid_column = 'test'",
                     filters: {
                         dateRange: {
