@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail, Result};
-use magic_string::{GenerateDecodedMapOptions, MagicString};
 use insights_symbol_data::{write_symbol_data, HermesMap};
+use magic_string::{GenerateDecodedMapOptions, MagicString};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sourcemap::SourceMap;
