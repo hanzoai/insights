@@ -3,7 +3,7 @@ import json
 from typing import Any
 from uuid import uuid4
 
-import hanzoanalytics
+import hanzo_insights
 import structlog
 
 from llm_gateway.callbacks.base import InstrumentedCallback
@@ -72,8 +72,8 @@ class InsightsCallback(InstrumentedCallback):
         super().__init__()
         self._api_key = api_key
         self._host = host
-        hanzoanalytics.api_key = api_key
-        hanzoanalytics.host = host
+        hanzo_insights.api_key = api_key
+        hanzo_insights.host = host
 
     async def _on_success(
         self, kwargs: dict[str, Any], response_obj: Any, start_time: float, end_time: float, end_user_id: str | None
@@ -149,7 +149,7 @@ class InsightsCallback(InstrumentedCallback):
             properties=properties,
             groups=capture_kwargs.get("groups"),
         )
-        hanzoanalytics.capture(**capture_kwargs)
+        hanzo_insights.capture(**capture_kwargs)
 
     async def _on_failure(
         self, kwargs: dict[str, Any], response_obj: Any, start_time: float, end_time: float, end_user_id: str | None
@@ -203,7 +203,7 @@ class InsightsCallback(InstrumentedCallback):
             properties=properties,
             groups=capture_kwargs.get("groups"),
         )
-        hanzoanalytics.capture(**capture_kwargs)
+        hanzo_insights.capture(**capture_kwargs)
 
     def _extract_metadata(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         llm_params = kwargs.get("llm_params", {}) or {}

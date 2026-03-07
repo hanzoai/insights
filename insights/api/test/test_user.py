@@ -211,7 +211,7 @@ class TestUserAPI(APIBaseTest):
     # UPDATING USER
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_update_current_user(self, mock_capture, mock_identify_task):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
@@ -276,7 +276,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_can_cancel_own_email_change_request(self, _mock_capture, _mock_identify_task):
         self.user.pending_email = "another@email.com"
         self.user.save()
@@ -288,7 +288,7 @@ class TestUserAPI(APIBaseTest):
         assert response_data["pending_email"] is None
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_cannot_cancel_email_change_request_if_it_doesnt_exist(self, _mock_capture, _mock_identify_task):
         # Fire a call to the endpoint without priming the User with a pending_email field
 
@@ -297,7 +297,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_be_in_current_team(
         self, _mock_capture, _mock_identify_task
     ):
@@ -318,7 +318,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture, _mock_identify_task):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
@@ -328,7 +328,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture, _mock_identify_task):
         response = self.client.post(
             "/api/users/@me/scene_personalisation",
@@ -338,7 +338,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_must_send_scene(self, _mock_capture, _mock_identify_task):
         dashboard_one = Dashboard.objects.create(team=self.team, name="Dashboard 1")
 
@@ -354,7 +354,7 @@ class TestUserAPI(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user(self, _mock_capture, _mock_identify_task):
         another_org = Organization.objects.create(name="Another Org")
         another_team = Team.objects.create(name="Another Team", organization=another_org)
@@ -534,7 +534,7 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.is_staff, False)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_can_update_current_organization(self, mock_capture, mock_identify):
         response = self.client.patch("/api/users/@me/", {"set_current_organization": str(self.new_org.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -562,7 +562,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_can_update_current_project(self, mock_capture, mock_identify):
         team = Team.objects.create(name="Local Team", organization=self.new_org)
         response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
@@ -796,7 +796,7 @@ class TestUserAPI(APIBaseTest):
             self.assertEqual(self.user.current_organization, result_organization)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
     def test_user_can_update_password(self, mock_send_password_changed_email, mock_capture, mock_identify):
         user = self._create_user("bob@hanzo.ai", password="A12345678")
@@ -839,7 +839,7 @@ class TestUserAPI(APIBaseTest):
         mock_send_password_changed_email.assert_called_once_with(user.id)
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("insights.tasks.email.send_password_changed_email.delay")
     def test_user_with_no_password_set_can_set_password(
         self, mock_send_password_changed_email, mock_capture, mock_identify
@@ -905,7 +905,7 @@ class TestUserAPI(APIBaseTest):
         self.assertTrue(user.check_password("a_new_password"))
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_cannot_update_to_insecure_password(self, mock_capture, mock_identify):
         response = self.client.patch(
             "/api/users/@me/",
@@ -1052,7 +1052,7 @@ class TestUserAPI(APIBaseTest):
         response = self.client.delete(f"/api/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_can_delete_user_with_no_organization_memberships(self, mock_capture):
         user = self._create_user("noactiveorgmemberships@hanzo.ai", password="test")
 
@@ -1663,7 +1663,7 @@ class TestEmailVerificationAPI(APIBaseTest):
 
     # Email verification request
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_can_request_verification_email(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):

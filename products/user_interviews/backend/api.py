@@ -6,11 +6,11 @@ from uuid import uuid4
 from django.conf import settings
 from django.core.files import File
 
-import hanzoanalytics
-import hanzoanalytics.ai.openai
+import hanzo_insights
+import hanzo_insights.ai.openai
 from drf_spectacular.utils import extend_schema
 from elevenlabs import ElevenLabs
-from hanzoanalytics.ai.openai import OpenAI
+from hanzo_insights.ai.openai import OpenAI
 from rest_framework import serializers, viewsets
 from rest_framework.parsers import JSONParser, MultiPartParser
 
@@ -84,7 +84,7 @@ class UserInterviewSerializer(serializers.ModelSerializer):
     def _attempt_to_map_speaker_names(self, transcript: str, interviewee_emails: list[str]) -> dict[str, str] | None:
         participant_emails_joined = "\n".join(f"- {email}" for email in interviewee_emails)
         assignment_response = OpenAI(
-            analytics_client=hanzoanalytics.default_client, base_url=settings.OPENAI_BASE_URL
+            analytics_client=hanzo_insights.default_client, base_url=settings.OPENAI_BASE_URL
         ).responses.create(  # type: ignore
             model="gpt-4.1-mini",
             insights_trace_id=self._ai_trace_id,
@@ -158,11 +158,11 @@ Map the speakers in the following transcript:
         try:
             return json.loads(assignment_response.output_text)
         except json.JSONDecodeError as e:
-            hanzoanalytics.capture_exception(e)
+            hanzo_insights.capture_exception(e)
             return None
 
     def _summarize_transcript(self, transcript: str):
-        summary_response = OpenAI(analytics_client=hanzoanalytics.default_client).responses.create(  # type: ignore
+        summary_response = OpenAI(analytics_client=hanzo_insights.default_client).responses.create(  # type: ignore
             model="gpt-4.1-mini",
             insights_trace_id=self._ai_trace_id,
             insights_distinct_id=self.context["request"].user.distinct_id,

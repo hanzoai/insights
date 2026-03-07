@@ -626,7 +626,7 @@ class TestTable(APIBaseTest):
         assert credential.access_key == "original_key"
         assert credential.access_secret == "original_secret"
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     @patch("boto3.client")
     def test_file_upload_creates_new_table(self, mock_boto3_client, mock_feature_enabled):
         mock_s3 = MagicMock()
@@ -672,7 +672,7 @@ class TestTable(APIBaseTest):
         # Verify URL pattern was set correctly
         assert table.url_pattern == f"https://test-bucket.s3.amazonaws.com/managed/team_{self.team.id}/test_file.csv"
 
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_file_upload_api_disabled(self, mock_feature_enabled):
         from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -688,7 +688,7 @@ class TestTable(APIBaseTest):
         assert response.status_code == 400
         assert response.json()["message"] == "Warehouse API is not enabled for this organization"
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     @patch("boto3.client")
     def test_file_upload_invalid_table_name(self, mock_boto3_client, mock_feature_enabled):
         mock_s3 = MagicMock()
@@ -708,7 +708,7 @@ class TestTable(APIBaseTest):
         assert response.status_code == 400
         assert "Table names must start with a letter or underscore" in response.json()["message"]
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     @patch("boto3.client")
     def test_file_upload_updates_existing_table(self, mock_boto3_client, mock_feature_enabled):
         mock_s3 = MagicMock()
@@ -772,7 +772,7 @@ class TestTable(APIBaseTest):
                 if "Key" in obj:
                     s3_client.delete_object(Bucket=bucket_name, Key=obj["Key"])
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_file_upload_with_minio(self, mock_feature_enabled):
         """Test file upload using actual MinIO bucket instead of mocking."""
 

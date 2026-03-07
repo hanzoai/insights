@@ -4,7 +4,7 @@ import dataclasses
 
 from django.db import close_old_connections
 
-import hanzoanalytics
+import hanzo_insights
 from structlog.contextvars import bind_contextvars
 from temporalio import activity
 
@@ -98,7 +98,7 @@ def create_external_data_job_model_activity(
         emit_signals_enabled = (
             ai_consent is True
             and is_signal_emission_registered(source.source_type, schema.name)
-            and hanzoanalytics.feature_enabled(EMIT_SIGNALS_FEATURE_FLAG, str(inputs.team_id)) is True
+            and hanzo_insights.feature_enabled(EMIT_SIGNALS_FEATURE_FLAG, str(inputs.team_id)) is True
         )
 
         return CreateExternalDataJobModelActivityOutputs(

@@ -5,7 +5,7 @@ from django.db import connection
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-import hanzoanalytics
+import hanzo_insights
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -188,7 +188,7 @@ class InstanceStatusViewSet(viewsets.ViewSet):
                     }
                 )
         except Exception as e:
-            hanzoanalytics.capture_exception(e)
+            hanzo_insights.capture_exception(e)
             return Response({"error": "unknown error"}, status=500)
 
         return Response({"results": {"overview": metrics}})

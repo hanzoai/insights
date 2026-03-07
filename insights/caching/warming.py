@@ -6,7 +6,7 @@ from typing import Optional
 from django.db.models import Q
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from celery import shared_task
 from celery.canvas import chain
 from prometheus_client import Counter, Gauge
@@ -50,7 +50,7 @@ def teams_enabled_for_cache_warming() -> list[int]:
         "organization_id",
         "uuid",
     ).iterator(chunk_size=1000):
-        enabled = hanzoanalytics.feature_enabled(
+        enabled = hanzo_insights.feature_enabled(
             "cache-warming",
             str(uuid),
             groups={

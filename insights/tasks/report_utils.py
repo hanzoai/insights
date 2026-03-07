@@ -6,7 +6,7 @@ from django.conf import settings
 
 import structlog
 from dateutil import parser
-from hanzoanalytics.client import Client
+from hanzo_insights.client import Client
 
 from insights.cloud_utils import is_cloud
 from insights.exceptions_capture import capture_exception

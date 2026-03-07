@@ -7,7 +7,7 @@ from typing import Any
 from django.db import close_old_connections
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from temporalio import activity
 
 from insights.schema import ReplayInactivityPeriod
@@ -111,7 +111,7 @@ def build_export_context_activity(exported_asset_id: int) -> dict[str, Any]:
 
 def _track_video_export_started(asset: ExportedAsset, build: dict[str, Any]) -> None:
     try:
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=asset.created_by.distinct_id if asset.created_by else str(asset.team.uuid),
             event="video export started",
             properties={
@@ -137,7 +137,7 @@ def _track_video_export_completed(asset: ExportedAsset, build: dict[str, Any], v
         inactivity_skip_ratio = (
             round(1 - (video_duration_s / recording_duration_s), 2) if recording_duration_s > 0 else 0
         )
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=asset.created_by.distinct_id if asset.created_by else str(asset.team.uuid),
             event="video export completed",
             properties={

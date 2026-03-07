@@ -325,7 +325,7 @@ class TestSummarizeDescription:
         original = "x" * 500
         output = _make_output(description=original)
 
-        with patch(f"{MODULE_PATH}.hanzoanalytics"):
+        with patch(f"{MODULE_PATH}.hanzo_insights"):
             result = await _summarize_description(client, output, self.PROMPT, self.THRESHOLD)
 
         assert result.description == original[: self.THRESHOLD]

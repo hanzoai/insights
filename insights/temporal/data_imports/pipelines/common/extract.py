@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, NoReturn
 from django.conf import settings
 
 import pyarrow as pa
-import hanzoanalytics
+import hanzo_insights
 from structlog.typing import FilteringBoundLogger
 from temporalio import activity
 
@@ -127,7 +127,7 @@ def report_heartbeat_timeout(inputs: "ImportDataActivityInputs", logger: Filteri
                 heartbeat_timeout_seconds=heartbeat_timeout.total_seconds(),
             )
 
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 "dwh_pod_heartbeat_timeout",
                 distinct_id=None,
                 properties={

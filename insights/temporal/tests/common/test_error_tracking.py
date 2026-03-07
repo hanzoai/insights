@@ -147,7 +147,7 @@ async def test_exception_capture(fail: bool, capture_additional_properties: bool
             else:
                 assert "fail" not in activity_call[1]["properties"]
 
-            from hanzoanalytics.exception_utils import exceptions_from_error_tuple
+            from hanzo_insights.exception_utils import exceptions_from_error_tuple
 
             exc_info = (type(captured_exc), captured_exc, captured_exc.__traceback__)
             formatted = exceptions_from_error_tuple(exc_info)

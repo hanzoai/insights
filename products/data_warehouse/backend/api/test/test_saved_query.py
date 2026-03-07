@@ -185,7 +185,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.post(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/materialize",
             )
@@ -1067,7 +1067,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.patch(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
                 {
@@ -1097,7 +1097,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.delete(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
             )
@@ -1123,7 +1123,7 @@ class TestSavedQuery(APIBaseTest):
             created_by=self.user,
         )
 
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.post(
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/revert_materialization",
             )
