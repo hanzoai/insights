@@ -220,7 +220,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
             )
 
             # The cluster is a little broken right now, and so this can intermittently fail.
-            # See https://posthog.slack.com/archives/C076R4753Q8/p1756901693184169 for context
+            # See https://insights.slack.com/archives/C076R4753Q8/p1756901693184169 for context
             attempts = 5
             for i in range(attempts):
                 try:

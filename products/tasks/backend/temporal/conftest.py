@@ -30,7 +30,7 @@ def array_oauth_app():
             "name": "Array Test App",
             "client_type": OAuthApplication.CLIENT_PUBLIC,
             "authorization_grant_type": OAuthApplication.GRANT_AUTHORIZATION_CODE,
-            "redirect_uris": "https://app.posthog.com/callback",
+            "redirect_uris": "https://insights.hanzo.ai/callback",
             "algorithm": "RS256",
         },
     )
@@ -109,7 +109,7 @@ def test_task(team, user, github_integration):
         description="This is a test task for testing temporal activities",
         origin_product=Task.OriginProduct.USER_CREATED,
         github_integration=github_integration,
-        repository="posthog/posthog-js",
+        repository="hanzoai/insights-js",
     )
 
     yield task
@@ -149,7 +149,7 @@ def snapshot_context(github_integration, team) -> SnapshotContext:
     """Create a SnapshotContext for testing."""
     return SnapshotContext(
         github_integration_id=github_integration.id,
-        repository="posthog/posthog-js",
+        repository="hanzoai/insights-js",
         team_id=team.id,
     )
 
@@ -164,21 +164,21 @@ def get_or_create_test_snapshots(github_integration):
     """Idempotently create or retrieve real snapshots for test repositories.
 
     Returns a dict with keys:
-    - "single": snapshot with just posthog/posthog-js
-    - "multi": snapshot with both posthog/posthog-js and posthog/posthog.com
+    - "single": snapshot with just hanzoai/insights-js
+    - "multi": snapshot with both hanzoai/insights-js and insights/hanzo.ai
     """
     if not os.environ.get("MODAL_TOKEN_ID") or not os.environ.get("MODAL_TOKEN_SECRET"):
         pytest.skip("MODAL_TOKEN_ID and MODAL_TOKEN_SECRET environment variables not set")
 
     existing_single = SandboxSnapshot.objects.filter(
         integration=github_integration,
-        repos=["posthog/posthog-js"],
+        repos=["hanzoai/insights-js"],
         status=SandboxSnapshot.Status.COMPLETE,
     ).first()
 
     existing_multi = SandboxSnapshot.objects.filter(
         integration=github_integration,
-        repos__contains=["posthog/posthog-js", "posthog/posthog.com"],
+        repos__contains=["hanzoai/insights-js", "insights/hanzo.ai"],
         status=SandboxSnapshot.Status.COMPLETE,
     ).first()
 
@@ -197,12 +197,12 @@ def get_or_create_test_snapshots(github_integration):
         sandbox = Sandbox.create(config)
 
         if not existing_single:
-            clone_result = sandbox.clone_repository("posthog/posthog-js", github_token="")
+            clone_result = sandbox.clone_repository("hanzoai/insights-js", github_token="")
             if clone_result.exit_code == 0:
                 single_snapshot_id = sandbox.create_snapshot()
                 single_snapshot = SandboxSnapshot.objects.create(
                     integration=github_integration,
-                    repos=["posthog/posthog-js"],
+                    repos=["hanzoai/insights-js"],
                     external_id=single_snapshot_id,
                     status=SandboxSnapshot.Status.COMPLETE,
                 )
@@ -211,12 +211,12 @@ def get_or_create_test_snapshots(github_integration):
             snapshots["single"] = existing_single
 
         if not existing_multi:
-            clone_result = sandbox.clone_repository("posthog/posthog.com", github_token="")
+            clone_result = sandbox.clone_repository("insights/hanzo.ai", github_token="")
             if clone_result.exit_code == 0:
                 multi_snapshot_id = sandbox.create_snapshot()
                 multi_snapshot = SandboxSnapshot.objects.create(
                     integration=github_integration,
-                    repos=["posthog/posthog-js", "posthog/posthog.com"],
+                    repos=["hanzoai/insights-js", "insights/hanzo.ai"],
                     external_id=multi_snapshot_id,
                     status=SandboxSnapshot.Status.COMPLETE,
                 )

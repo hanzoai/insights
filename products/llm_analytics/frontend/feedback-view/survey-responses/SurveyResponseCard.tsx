@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { isThumbQuestion } from 'scenes/surveys/utils'
 import { urls } from 'scenes/urls'

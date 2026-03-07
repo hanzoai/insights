@@ -72,7 +72,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_static_input(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.message); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.message); }"
         self.insights_function.inputs = {"message": {"value": "Hello, Inputs!"}}
 
         result = self.compile_and_run()
@@ -80,14 +80,14 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_template_input(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.greeting); }"
         self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.name}!"}}
         result = self.compile_and_run()
         self.snapshot.assert_match(result)
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_filters(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.iql = "export function onEvent(globals) { console.log(globals); }"
         self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
 
         result = self.compile_and_run()
@@ -95,7 +95,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_invalid_template_input(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.greeting); }"
         self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
 
         result = self.compile_and_run()
@@ -103,14 +103,14 @@ class TestSiteFunctions(TestCase):
         assert "console.log(inputs.greeting);" in result
 
     def test_get_transpiled_function_with_syntax_error_in_source(self):
-        self.insights_function.hog = 'export function onLoad() { console.log("Missing closing brace");'
+        self.insights_function.iql = 'export function onLoad() { console.log("Missing closing brace");'
 
         with pytest.raises(TranspilerError):
             get_transpiled_function(self.insights_function)
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_complex_inputs(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.complexInput); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.complexInput); }"
         self.insights_function.inputs = {
             "complexInput": {
                 "value": {
@@ -125,7 +125,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_empty_inputs(self, mock_transpile_fn):
-        self.insights_function.hog = 'export function onLoad() { console.log("No inputs"); }'
+        self.insights_function.iql = 'export function onLoad() { console.log("No inputs"); }'
         self.insights_function.inputs = {}
 
         result = self.compile_and_run()
@@ -135,7 +135,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_non_template_string(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.staticMessage); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.staticMessage); }"
         self.insights_function.inputs = {"staticMessage": {"value": "This is a static message."}}
 
         result = self.compile_and_run()
@@ -146,7 +146,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_list_inputs(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.messages); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.messages); }"
         self.insights_function.inputs = {"messages": {"value": ["Hello", "World", "{person.properties.name}"]}}
 
         result = self.compile_and_run()
@@ -157,7 +157,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_event_filter(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onEvent(event) { console.log(event.properties.url); }"
+        self.insights_function.iql = "export function onEvent(event) { console.log(event.properties.url); }"
         self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "filter_test_accounts": True,
@@ -180,7 +180,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_groups(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.groupInfo); }"
         self.insights_function.inputs = {"groupInfo": {"value": "{groups['company']}"}}
 
         create_group_type_mapping_without_created_at(
@@ -195,7 +195,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_missing_group(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs.groupInfo); }"
         self.insights_function.inputs = {"groupInfo": {"value": "{groups['nonexistent']}"}}
 
         result = self.compile_and_run()
@@ -211,12 +211,12 @@ class TestSiteFunctions(TestCase):
         action.save()
 
         self.team.test_account_filters = [
-            {"key": "email", "value": "@posthog.com", "operator": "not_icontains", "type": "person"},
+            {"key": "email", "value": "@hanzo.ai", "operator": "not_icontains", "type": "person"},
             {"key": "$host", "operator": "not_regex", "value": r"^(localhost|127\.0\.0\.1)($|:)", "type": "event"},
         ]
         self.team.save()
 
-        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.iql = "export function onEvent(globals) { console.log(globals); }"
         self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "actions": [{"id": str(action.pk), "name": "Test Action", "type": "actions"}],
@@ -242,7 +242,7 @@ class TestSiteFunctions(TestCase):
                         {
                             "type": "AND",
                             "values": [
-                                {"key": "email", "type": "person", "value": "@posthog.com", "operator": "icontains"}
+                                {"key": "email", "type": "person", "value": "@hanzo.ai", "operator": "icontains"}
                             ],
                         }
                     ],
@@ -255,7 +255,7 @@ class TestSiteFunctions(TestCase):
         ]
         self.team.save()
 
-        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.iql = "export function onEvent(globals) { console.log(globals); }"
         self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "filter_test_accounts": True,
@@ -267,7 +267,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_mappings(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs); }"
+        self.insights_function.iql = "export function onLoad({ inputs, insights }) { console.log(inputs); }"
         self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
         self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
@@ -284,7 +284,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_onload(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs.message); }"
+        self.insights_function.iql = "export function onLoad({ inputs, insights }) { console.log(inputs.message); }"
         self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
         self.insights_function.inputs = {"message": {"value": "Hello World {person.properties.name}"}}
 
@@ -293,13 +293,13 @@ class TestSiteFunctions(TestCase):
 
         response = self._execute_javascript(
             result
-            + "().init({ posthog: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } })"
+            + "().init({ insights: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } })"
         )
         assert "Hello World Bob\nLoaded" == response.strip()
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_onevent(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
+        self.insights_function.iql = "export function onEvent({ inputs }) { console.log(inputs.message); }"
         # self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
         self.insights_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
         self.insights_function.mappings = [
@@ -319,7 +319,7 @@ class TestSiteFunctions(TestCase):
         }
         response = self._execute_javascript(
             result
-            + "().init({ posthog: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
+            + "().init({ insights: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
             + json.dumps(globals)
             + ")"
         )
@@ -332,7 +332,7 @@ class TestSiteFunctions(TestCase):
         }
         response = self._execute_javascript(
             result
-            + "().init({ posthog: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
+            + "().init({ insights: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
             + json.dumps(globals)
             + ")"
         )
@@ -340,7 +340,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_skip_disabled_mapping(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
+        self.insights_function.iql = "export function onEvent({ inputs }) { console.log(inputs.message); }"
         self.insights_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
         self.insights_function.mappings = [
             {
@@ -360,7 +360,7 @@ class TestSiteFunctions(TestCase):
         }
         response = self._execute_javascript(
             result
-            + "().init({ posthog: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
+            + "().init({ insights: { get_property: () => ({name: 'Bob'}) }, callback: () => { console.log('Loaded') } }).processEvent("
             + json.dumps(globals)
             + ")"
         )
@@ -368,7 +368,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_ordered_inputs(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs); }"
         self.insights_function.inputs = {
             "first": {"value": "I am first", "order": 0},
             "second": {"value": "{person.properties.name}", "order": 1},
@@ -386,7 +386,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_without_order(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs); }"
         self.insights_function.inputs = {
             "noOrder": {"value": "I have no order"},
             "alsoNoOrder": {"value": "{person.properties.name}"},
@@ -403,7 +403,7 @@ class TestSiteFunctions(TestCase):
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_duplicate_orders(self, mock_transpile_fn):
-        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.iql = "export function onLoad() { console.log(inputs); }"
         self.insights_function.inputs = {
             "alpha": {"value": "{person.properties.alpha}", "order": 1},
             "beta": {"value": "{person.properties.beta}", "order": 1},

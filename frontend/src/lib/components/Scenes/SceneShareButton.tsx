@@ -1,4 +1,4 @@
-import { IconShare } from '@posthog/icons'
+import { IconShare } from '@hanzo/icons'
 
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 

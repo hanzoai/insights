@@ -5,9 +5,9 @@ import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import isEqual from 'lodash.isequal'
 import { Uri, editor } from 'monaco-editor'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -389,10 +389,10 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
         fixErrorsSuccess: ({ response }) => {
             actions.setSuggestedQueryInput(response.query, 'insightsql_fixer')
 
-            posthog.capture('ai-error-fixer-success', { trace_id: response.trace_id })
+            insights.capture('ai-error-fixer-success', { trace_id: response.trace_id })
         },
         fixErrorsFailure: () => {
-            posthog.capture('ai-error-fixer-failure')
+            insights.capture('ai-error-fixer-failure')
         },
         insertTextAtCursor: ({ text }) => {
             const editor = props.editor
@@ -531,7 +531,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     }
                 }
             }
-            posthog.capture('sql-editor-accepted-suggestion', { source: values.suggestedSource })
+            insights.capture('sql-editor-accepted-suggestion', { source: values.suggestedSource })
             actions._setSuggestionPayload(null)
         },
         onRejectSuggestedQueryInput: () => {
@@ -578,7 +578,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     }
                 }
             }
-            posthog.capture('sql-editor-rejected-suggestion', { source: values.suggestedSource })
+            insights.capture('sql-editor-rejected-suggestion', { source: values.suggestedSource })
             actions._setSuggestionPayload(null)
         },
         editView: ({ query, view }) => {

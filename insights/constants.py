@@ -3,8 +3,8 @@ from typing import Literal
 
 from semantic_version import Version
 
-FROZEN_POSTHOG_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
-INTERNAL_BOT_EMAIL_SUFFIX = "@posthogbot.user"
+FROZEN_INSIGHTS_VERSION = Version("1.43.0")  # Frozen at the last self-hosted version, just for backwards compat now
+INTERNAL_BOT_EMAIL_SUFFIX = "@insightsbot.user"
 
 
 # N.B. Keep this in sync with frontend enum (types.ts)
@@ -299,7 +299,7 @@ class EventDefinitionType(StrEnum):
     ALL = "all"
     ACTION_EVENT = "action_event"
     EVENT = "event"
-    EVENT_POSTHOG = "event_posthog"
+    EVENT_INSIGHTS = "event_insights"
     EVENT_CUSTOM = "event_custom"
 
 

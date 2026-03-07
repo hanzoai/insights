@@ -51,7 +51,7 @@ You can generate an API key in your Attio workspace settings. Check out [this gu
 - `user_management:read` - To read workspace members
 """,
             iconPath="/static/services/attio.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/attio",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/attio",
             fields=cast(
                 list[FieldType],
                 [

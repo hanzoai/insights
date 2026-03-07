@@ -65,7 +65,7 @@ class TestFindPythonDependencies(unittest.TestCase):
             # Direct dependencies - should trigger rebuild
             ("entrypoint_init", "insights/temporal/subscriptions/__init__.py", True),
             ("entrypoint_workflow", "insights/temporal/subscriptions/subscription_scheduling_workflow.py", True),
-            # Transitive dependencies (the bug that caused issue https://github.com/PostHog/posthog/pull/42307) - should trigger rebuild
+            # Transitive dependencies (the bug that caused issue https://github.com/Hanzo Insights/insights/pull/42307) - should trigger rebuild
             ("transitive_utils", "insights/utils.py", True),
             ("transitive_query_runner", "insights/insightsql_queries/query_runner.py", True),
             # Export-related files - should trigger rebuild
@@ -125,12 +125,12 @@ class TestFindPythonDependencies(unittest.TestCase):
             # Entrypoint - should trigger rebuild
             ("entrypoint_init", "insights/temporal/subscriptions/__init__.py", True),
             ("entrypoint_workflow", "insights/temporal/subscriptions/subscription_scheduling_workflow.py", True),
-            # posthog/temporal/common - should trigger rebuild
+            # insights/temporal/common - should trigger rebuild
             ("temporal_common_base", "insights/temporal/common/base.py", True),
             ("temporal_common_client", "insights/temporal/common/client.py", True),
-            # posthog/tasks/exporter.py - should trigger rebuild
+            # insights/tasks/exporter.py - should trigger rebuild
             ("exporter", "insights/tasks/exporter.py", True),
-            # posthog/tasks/exports/ - should trigger rebuild
+            # insights/tasks/exports/ - should trigger rebuild
             ("image_exporter", "insights/tasks/exports/image_exporter.py", True),
             ("csv_exporter", "insights/tasks/exports/csv_exporter.py", True),
             # ee/tasks/subscriptions/ - should trigger rebuild
@@ -159,7 +159,7 @@ class TestFindPythonDependencies(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("posthog", "posthog"),
+            ("insights", "insights"),
             ("ee", "ee"),
         ]
     )

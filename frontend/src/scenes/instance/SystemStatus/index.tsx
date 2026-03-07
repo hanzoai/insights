@@ -2,8 +2,8 @@ import './index.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, Link } from '@hanzo/lemon-ui'
 
 import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
@@ -88,7 +88,7 @@ export function SystemStatus(): JSX.Element {
                 <Link
                     target="_blank"
                     targetBlankIcon
-                    to="https://posthog.com/docs/self-host/configure/instance-settings?utm_medium=in-product&utm_campaign=instance_status"
+                    to="https://hanzo.ai/docs/self-host/configure/instance-settings?utm_medium=in-product&utm_campaign=instance_status"
                 >
                     Learn more
                 </Link>
@@ -106,7 +106,7 @@ export function SystemStatus(): JSX.Element {
                     type="warning"
                     action={{
                         children: 'Learn more',
-                        to: 'https://posthog.com/docs/configuring-posthog/environment-variables?utm_medium=in-product&utm_campaign=system-status-site-url-misconfig',
+                        to: 'https://hanzo.ai/docs/configuring-insights/environment-variables?utm_medium=in-product&utm_campaign=system-status-site-url-misconfig',
                     }}
                 >
                     Your <code>SITE_URL</code> environment variable seems misconfigured. Your <code>SITE_URL</code> is

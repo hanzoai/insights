@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from '~/lib/api'
 import { InsightQueryNode, InsightVizNode } from '~/queries/schema/schema-general'
@@ -121,7 +121,7 @@ export const insightAIAnalysisLogic = kea<insightAIAnalysisLogicType>([
     listeners(({ actions, values, props }) => ({
         startAnalysis: () => {
             actions.setHasClickedAnalyze(true)
-            posthog.capture('insight ai analysis started', {
+            insights.capture('insight ai analysis started', {
                 insight_id: props.insightId,
                 insight_type: props.query.kind,
                 team_id: values.currentTeamId,
@@ -129,7 +129,7 @@ export const insightAIAnalysisLogic = kea<insightAIAnalysisLogicType>([
             })
         },
         reportAnalysisFeedback: ({ isPositive }) => {
-            posthog.capture('insight ai analysis feedback', {
+            insights.capture('insight ai analysis feedback', {
                 insight_id: props.insightId,
                 insight_type: props.query.kind,
                 team_id: values.currentTeamId,
@@ -139,7 +139,7 @@ export const insightAIAnalysisLogic = kea<insightAIAnalysisLogicType>([
             })
         },
         reportSuggestionFeedback: ({ suggestionIndex, suggestionTitle, isPositive }) => {
-            posthog.capture('insight ai suggestion feedback', {
+            insights.capture('insight ai suggestion feedback', {
                 insight_id: props.insightId,
                 insight_type: props.query.kind,
                 team_id: values.currentTeamId,

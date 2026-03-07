@@ -29,7 +29,7 @@ const config = workflowType === 'storybook' ? {
     label: 'Playwright E2E',
     type: 'E2E screenshots',
     filesFilter: 'playwright/',
-    localCmd: '`pnpm --filter=@posthog/playwright exec playwright test --ui`',
+    localCmd: '`pnpm --filter=@hanzo/playwright exec playwright test --ui`',
 };
 
 // UPDATE mode: snapshots were updated

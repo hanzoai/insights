@@ -30,7 +30,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         user_response.status_code = 200
         user_response.json.return_value = {
             "id": 1,
-            "email": "test@posthog.com",
+            "email": "test@hanzo.ai",
             "theme_mode": "dark",
             "toolbar_mode": "disabled",
             "anonymize_data": True,
@@ -77,7 +77,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test syncing all settings from cloud"""
         self._mock_cloud_api_responses(mock_get)
 
-        call_command("sync_user_settings", api_key="test_key", host="https://app.posthog.com")
+        call_command("sync_user_settings", api_key="test_key", host="https://insights.hanzo.ai")
 
         # Verify user preferences were synced
         self.user.refresh_from_db()
@@ -117,7 +117,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test using API key from environment variable"""
         self._mock_cloud_api_responses(mock_get)
 
-        with patch.dict("os.environ", {"POSTHOG_PERSONAL_API_KEY": "env_key"}):
+        with patch.dict("os.environ", {"INSIGHTS_PERSONAL_API_KEY": "env_key"}):
             call_command("sync_user_settings")
 
         # Verify it worked
@@ -138,9 +138,9 @@ class TestSyncUserSettingsCommand(BaseTest):
         self._mock_cloud_api_responses(mock_get)
 
         # Create another user
-        user2 = User.objects.create(email="user2@posthog.com")
+        user2 = User.objects.create(email="user2@hanzo.ai")
 
-        call_command("sync_user_settings", api_key="test_key", local_email="user2@posthog.com")
+        call_command("sync_user_settings", api_key="test_key", local_email="user2@hanzo.ai")
 
         # user2 should be updated
         user2.refresh_from_db()
@@ -242,11 +242,11 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test syncing from a custom Insights host"""
         self._mock_cloud_api_responses(mock_get)
 
-        call_command("sync_user_settings", api_key="test_key", host="https://eu.posthog.com")
+        call_command("sync_user_settings", api_key="test_key", host="https://insights.hanzo.ai")
 
         # Verify API was called with correct host
         calls = [call[0][0] for call in mock_get.call_args_list]
-        assert any(urlparse(call).netloc == "eu.posthog.com" for call in calls)
+        assert any(urlparse(call).netloc == "insights.hanzo.ai" for call in calls)
 
     @parameterized.expand(
         [
@@ -332,8 +332,8 @@ class TestSyncUserSettingsCommand(BaseTest):
         self._mock_cloud_api_responses(mock_get)
 
         # Create additional users
-        user2 = User.objects.create(email="user2@posthog.com", theme_mode="light")
-        user3 = User.objects.create(email="user3@posthog.com", theme_mode="light")
+        user2 = User.objects.create(email="user2@hanzo.ai", theme_mode="light")
+        user3 = User.objects.create(email="user3@hanzo.ai", theme_mode="light")
 
         call_command("sync_user_settings", api_key="test_key", all_users=True)
 
@@ -352,7 +352,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         self._mock_cloud_api_responses(mock_get)
 
         # Create additional user
-        user2 = User.objects.create(email="user2@posthog.com")
+        user2 = User.objects.create(email="user2@hanzo.ai")
 
         call_command("sync_user_settings", api_key="test_key", all_users=True)
 
@@ -370,7 +370,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test that --all-users ignores --local-email"""
         self._mock_cloud_api_responses(mock_get)
 
-        user2 = User.objects.create(email="user2@posthog.com", theme_mode="light")
+        user2 = User.objects.create(email="user2@hanzo.ai", theme_mode="light")
 
         # local-email should be ignored when all-users is set
         call_command("sync_user_settings", api_key="test_key", all_users=True, local_email="nonexistent@test.com")
@@ -387,7 +387,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test dry-run with all-users"""
         self._mock_cloud_api_responses(mock_get)
 
-        user2 = User.objects.create(email="user2@posthog.com", theme_mode="light")
+        user2 = User.objects.create(email="user2@hanzo.ai", theme_mode="light")
 
         call_command("sync_user_settings", api_key="test_key", all_users=True, dry_run=True)
 

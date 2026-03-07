@@ -18,7 +18,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from posthoganalytics.client import Client as InsightsClient
+from hanzoanalytics.client import Client as InsightsClient
 from psycopg import sql
 from retry import retry
 
@@ -71,8 +71,8 @@ class Period(TypedDict):
 
 
 class TableSizes(TypedDict):
-    posthog_event: int
-    posthog_sessionrecordingevent: int
+    insights_event: int
+    insights_sessionrecordingevent: int
 
 
 CH_BILLING_SETTINGS = {
@@ -349,8 +349,8 @@ def get_instance_metadata(period: tuple[datetime, datetime]) -> InstanceMetadata
         metadata.users_who_signed_up_count = len(metadata.users_who_signed_up)
 
         metadata.table_sizes = {
-            "posthog_event": fetch_table_size("posthog_event"),
-            "posthog_sessionrecordingevent": fetch_table_size("posthog_sessionrecordingevent"),
+            "insights_event": fetch_table_size("insights_event"),
+            "insights_sessionrecordingevent": fetch_table_size("insights_sessionrecordingevent"),
         }
 
         plugin_configs = PluginConfig.objects.select_related("plugin").all()
@@ -473,7 +473,7 @@ def get_teams_with_billable_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/Hanzo Insights/insights/blob/master/insights/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"
@@ -511,7 +511,7 @@ def get_teams_with_billable_enhanced_persons_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/Hanzo Insights/insights/blob/master/insights/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"
@@ -572,21 +572,21 @@ def get_all_event_metrics_in_period(begin: datetime, end: datetime) -> dict[str,
                 event LIKE 'traceloop%%', 'traceloop_events',
                 {lib_expression} = 'web', 'web_events',
                 {lib_expression} = 'js', 'web_lite_events',
-                {lib_expression} = 'posthog-node', 'node_events',
-                {lib_expression} = 'posthog-android', 'android_events',
-                {lib_expression} = 'posthog-flutter', 'flutter_events',
-                {lib_expression} = 'posthog-ios', 'ios_events',
-                {lib_expression} = 'posthog-go', 'go_events',
-                {lib_expression} = 'posthog-java', 'java_events',
-                {lib_expression} = 'posthog-server', 'java_events',
-                {lib_expression} = 'posthog-react-native', 'react_native_events',
-                {lib_expression} = 'posthog-ruby', 'ruby_events',
-                {lib_expression} = 'posthog-python', 'python_events',
-                {lib_expression} = 'posthog-php', 'php_events',
-                {lib_expression} = 'posthog-dotnet', 'dotnet_events',
-                {lib_expression} = 'posthog-elixir', 'elixir_events',
-                {lib_expression} = 'posthog-unity', 'unity_events',
-                {lib_expression} = 'posthog-rs', 'rust_events',
+                {lib_expression} = 'insights-node', 'node_events',
+                {lib_expression} = 'insights-android', 'android_events',
+                {lib_expression} = 'insights-flutter', 'flutter_events',
+                {lib_expression} = 'insights-ios', 'ios_events',
+                {lib_expression} = 'insights-go', 'go_events',
+                {lib_expression} = 'insights-java', 'java_events',
+                {lib_expression} = 'insights-server', 'java_events',
+                {lib_expression} = 'insights-react-native', 'react_native_events',
+                {lib_expression} = 'insights-ruby', 'ruby_events',
+                {lib_expression} = 'hanzo-insights', 'python_events',
+                {lib_expression} = 'insights-php', 'php_events',
+                {lib_expression} = 'insights-dotnet', 'dotnet_events',
+                {lib_expression} = 'insights-elixir', 'elixir_events',
+                {lib_expression} = 'insights-unity', 'unity_events',
+                {lib_expression} = 'insights-rs', 'rust_events',
                 'other'
             ) AS metric,
             count(1) as count
@@ -743,7 +743,7 @@ def get_teams_with_mobile_billable_recording_count_in_period(begin: datetime, en
             WHERE min_first_timestamp >= %(begin)s AND min_first_timestamp < %(end)s
             GROUP BY session_id
             HAVING (ifNull(argMinMerge(snapshot_source), '') == 'mobile'
-            AND ifNull(argMinMerge(snapshot_library), '') IN ('posthog-ios', 'posthog-android', 'posthog-react-native', 'posthog-flutter'))
+            AND ifNull(argMinMerge(snapshot_library), '') IN ('insights-ios', 'insights-android', 'insights-react-native', 'insights-flutter'))
         )
         WHERE session_id NOT IN (
             -- we want to exclude sessions that might have events with timestamps
@@ -1004,8 +1004,8 @@ CLOUD_REGION_TO_TEAM_ID = {
     "US": 2,
 }
 CLOUD_REGION_TO_URL = {
-    "EU": "https://eu.posthog.com",
-    "US": "https://us.posthog.com",
+    "EU": "https://insights.hanzo.ai",
+    "US": "https://insights.hanzo.ai",
 }
 
 
@@ -1035,7 +1035,7 @@ def get_teams_with_ai_credits_used_in_period(
     6. Convert 1:1 to credits
 
     Events are stored in team 1 (EU) or team 2 (US), with the actual team (on which we group by) in properties.
-    We filter by $group_1 which contains the region URL (https://eu.posthog.com or https://us.posthog.com).
+    We filter by $group_1 which contains the region URL (https://insights.hanzo.ai or https://insights.hanzo.ai).
     """
     region = get_instance_region()
 
@@ -1331,17 +1331,17 @@ def get_teams_with_exceptions_captured_in_period(
             multiIf(
                 {lib_expression} = 'web', 'web',
                 {lib_expression} = 'js', 'web_lite',
-                {lib_expression} = 'posthog-node', 'node',
-                {lib_expression} = 'posthog-edge', 'node',
-                {lib_expression} = 'posthog-android', 'android',
-                {lib_expression} = 'posthog-flutter', 'flutter',
-                {lib_expression} = 'posthog-ios', 'ios',
-                {lib_expression} = 'posthog-go', 'go',
-                {lib_expression} = 'posthog-java', 'java',
-                {lib_expression} = 'posthog-server', 'java',
-                {lib_expression} = 'posthog-react-native', 'react_native',
-                {lib_expression} = 'posthog-ruby', 'ruby',
-                {lib_expression} = 'posthog-python', 'python',
+                {lib_expression} = 'insights-node', 'node',
+                {lib_expression} = 'insights-edge', 'node',
+                {lib_expression} = 'insights-android', 'android',
+                {lib_expression} = 'insights-flutter', 'flutter',
+                {lib_expression} = 'insights-ios', 'ios',
+                {lib_expression} = 'insights-go', 'go',
+                {lib_expression} = 'insights-java', 'java',
+                {lib_expression} = 'insights-server', 'java',
+                {lib_expression} = 'insights-react-native', 'react_native',
+                {lib_expression} = 'insights-ruby', 'ruby',
+                {lib_expression} = 'hanzo-insights', 'python',
                 'unknown'
             ) AS library,
             count(1) as total
@@ -1648,11 +1648,11 @@ def capture_report(
     if not organization_id:
         raise ValueError("Organization_id must be provided")
 
-    pha_client = get_ph_client(sync_mode=True)
+    hia_client = get_ph_client(sync_mode=True)
 
     try:
         capture_event(
-            pha_client=pha_client,
+            hia_client=hia_client,
             name="organization usage report",
             organization_id=organization_id,
             properties=full_report_dict,
@@ -1663,7 +1663,7 @@ def capture_report(
             f"UsageReport sent to Insights for organization {organization_id} failed: {str(err)}",
         )
         capture_event(
-            pha_client=pha_client,
+            hia_client=hia_client,
             name="organization usage report failure",
             organization_id=organization_id,
             properties={"error": str(err)},
@@ -1685,7 +1685,7 @@ def capture_report(
 
         try:
             capture_event(
-                pha_client=pha_client,
+                hia_client=hia_client,
                 name="organization usage report per person",
                 organization_id=organization_id,
                 distinct_id=distinct_id,
@@ -2237,11 +2237,11 @@ def send_all_org_usage_reports(
     skip_capture_event: bool = False,
     organization_ids: Optional[list[str]] = None,
 ) -> None:
-    import posthoganalytics
+    import hanzoanalytics
 
-    are_usage_reports_disabled = posthoganalytics.feature_enabled("disable-usage-reports", "internal_billing_events")
+    are_usage_reports_disabled = hanzoanalytics.feature_enabled("disable-usage-reports", "internal_billing_events")
     if are_usage_reports_disabled:
-        posthoganalytics.capture_exception(Exception(f"Usage reports are disabled for {at}"))
+        hanzoanalytics.capture_exception(Exception(f"Usage reports are disabled for {at}"))
         return
 
     at_date = parser.parse(at) if at else None
@@ -2252,7 +2252,7 @@ def send_all_org_usage_reports(
 
     producer = None
 
-    pha_client = get_ph_client(sync_mode=True)
+    hia_client = get_ph_client(sync_mode=True)
 
     if organization_ids:
         logger.info(
@@ -2292,7 +2292,7 @@ def send_all_org_usage_reports(
     logger.info("Sending usage reports to billing")
     queue_time_start = datetime.now()
 
-    pha_client.capture(
+    hia_client.capture(
         distinct_id="internal_billing_events",
         event="usage reports starting",
         properties={
@@ -2344,7 +2344,7 @@ def send_all_org_usage_reports(
             logger.exception(f"Failed to process organization {organization_id}", error=loop_err)
 
     queue_time_duration = (datetime.now() - queue_time_start).total_seconds()
-    pha_client.capture(
+    hia_client.capture(
         distinct_id="internal_billing_events",
         event="usage reports complete",
         properties={

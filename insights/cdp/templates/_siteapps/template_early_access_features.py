@@ -7,7 +7,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     id="template-early-access-features",
     name="Early Access Features App",
     description="This app is used with Early Access Feature Management",
-    icon_url="https://raw.githubusercontent.com/PostHog/early-access-features-app/refs/heads/main/logo.png",
+    icon_url="https://raw.githubusercontent.com/Hanzo Insights/early-access-features-app/refs/heads/main/logo.png",
     category=["Custom"],
     code_language="javascript",
     code="""
@@ -226,7 +226,7 @@ interface PreviewItem {
     documentationUrl: string
 }
 
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     if (inputs.domains) {
         const domains = inputs.domains.split(',').map((domain) => domain.trim())
         if (domains.length > 0 && domains.indexOf(window.location.hostname) === -1) {
@@ -236,15 +236,15 @@ export function onLoad({ inputs, posthog }) {
     const shadow = createShadow(style(inputs))
 
     function optIn(flagKey: string) {
-        posthog.updateEarlyAccessFeatureEnrollment(flagKey, true)
+        insights.updateEarlyAccessFeatureEnrollment(flagKey, true)
     }
 
     function optOut(flagKey: string) {
-        posthog.updateEarlyAccessFeatureEnrollment(flagKey, false)
+        insights.updateEarlyAccessFeatureEnrollment(flagKey, false)
     }
 
     function openbugBox() {
-        posthog.getEarlyAccessFeatures((previewItemData) => {
+        insights.getEarlyAccessFeatures((previewItemData) => {
             const betaListContainer = shadow.getElementById('list-container')
             if (betaListContainer) {
                 const previewItems = listItemComponents(previewItemData)
@@ -359,7 +359,7 @@ export function onLoad({ inputs, posthog }) {
         if (items) {
             return items
                 .map((item, index) => {
-                    const checked = posthog.isFeatureEnabled(item.flagKey)
+                    const checked = insights.isFeatureEnabled(item.flagKey)
 
                     const documentationLink = item.documentationUrl
                         ? `<div class='list-item-documentation-link'>
@@ -404,7 +404,7 @@ function createShadow(style?: string): ShadowRoot {
         {
             "key": "selector",
             "label": "Selector",
-            "description": 'CSS selector to activate on. For example: "#my-beta-button" or "[data-attr=\'posthog-early-access-features-button\']"',
+            "description": 'CSS selector to activate on. For example: "#my-beta-button" or "[data-attr=\'insights-early-access-features-button\']"',
             "type": "string",
             "default": "",
         },

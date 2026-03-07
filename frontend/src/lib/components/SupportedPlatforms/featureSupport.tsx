@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { Feature, PlatformSupportConfig } from './types'
 
@@ -8,7 +8,7 @@ export const FEATURE_SUPPORT: Record<Feature, PlatformSupportConfig> = {
         android: {
             note: (
                 <>
-                    <Link to="https://posthog.com/docs/error-tracking/installation/android#set-up-exception-autocapture">
+                    <Link to="https://hanzo.ai/docs/error-tracking/installation/android#set-up-exception-autocapture">
                         Exception autocapture is supported on Android
                     </Link>{' '}
                     but is not controlled remotely by this toggle
@@ -18,7 +18,7 @@ export const FEATURE_SUPPORT: Record<Feature, PlatformSupportConfig> = {
         flutter: {
             note: (
                 <>
-                    <Link to="https://posthog.com/docs/error-tracking/installation/flutter#set-up-exception-autocapture">
+                    <Link to="https://hanzo.ai/docs/error-tracking/installation/flutter#set-up-exception-autocapture">
                         Exception autocapture is supported on Flutter
                     </Link>{' '}
                     but is not controlled remotely by this toggle
@@ -28,7 +28,7 @@ export const FEATURE_SUPPORT: Record<Feature, PlatformSupportConfig> = {
         reactNative: {
             note: (
                 <>
-                    <Link to="https://posthog.com/docs/error-tracking/installation/react-native#set-up-exception-autocapture">
+                    <Link to="https://hanzo.ai/docs/error-tracking/installation/react-native#set-up-exception-autocapture">
                         Exception autocapture is supported on React Native
                     </Link>{' '}
                     but is not controlled remotely by this toggle

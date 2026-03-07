@@ -443,8 +443,8 @@ export class LogsIngestionConsumer {
                     let team
                     try {
                         team = await this.hub.teamManager.getTeamByToken(token)
-                        if (isDevEnv() && token === 'phc_local') {
-                            // phc_local is a special token used in dev to refer to team 1
+                        if (isDevEnv() && token === 'hi_local') {
+                            // hi_local is a special token used in dev to refer to team 1
                             team = await this.hub.teamManager.getTeam(1)
                         }
                     } catch (e) {

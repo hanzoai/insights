@@ -46,10 +46,10 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
     STRIPE_PRODUCT_COLUMNS,
 )
 
-INVOICE_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.top_customers_query_runner.stripe_invoices"
-PRODUCT_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.top_customers_query_runner.stripe_products"
-CUSTOMER_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.top_customers_query_runner.stripe_customers"
-CHARGES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.top_customers_query_runner.stripe_charges"
+INVOICE_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_customers_query_runner.stripe_invoices"
+PRODUCT_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_customers_query_runner.stripe_products"
+CUSTOMER_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_customers_query_runner.stripe_customers"
+CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_customers_query_runner.stripe_charges"
 
 
 @snapshot_clickhouse_queries
@@ -71,7 +71,7 @@ class TestRevenueAnalyticsTopCustomersQueryRunner(ClickhouseTestMixin, APIBaseTe
                     distinct_ids=[distinct_id],
                     properties={
                         "name": distinct_id,
-                        **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                        **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                     },
                 )
             event_ids: list[str] = []
@@ -260,7 +260,7 @@ class TestRevenueAnalyticsTopCustomersQueryRunner(ClickhouseTestMixin, APIBaseTe
         self.assertEqual(len(results), 16)
 
     def test_with_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             results = self._run_revenue_analytics_top_customers_query().results
@@ -326,7 +326,7 @@ class TestRevenueAnalyticsTopCustomersQueryRunner(ClickhouseTestMixin, APIBaseTe
         )
 
     def test_with_events_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             s1 = str(uuid7("2023-12-02"))
             s2 = str(uuid7("2024-01-03"))
             s3 = str(uuid7("2024-02-04"))

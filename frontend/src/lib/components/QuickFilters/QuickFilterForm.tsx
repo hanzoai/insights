@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 import { OperatorValueSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

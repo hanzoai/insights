@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArchive } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArchive } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { surveyLogic } from '../surveyLogic'
 

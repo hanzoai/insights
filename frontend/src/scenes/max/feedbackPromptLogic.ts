@@ -1,5 +1,5 @@
 import { actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { getFeatureFlagPayload } from 'lib/logic/featureFlagLogic'
@@ -117,7 +117,7 @@ export const feedbackPromptLogic = kea<feedbackPromptLogicType>([
             (): FeedbackConfig | null => {
                 const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG)
                 if (!payload || typeof payload !== 'object') {
-                    posthog.captureException(
+                    insights.captureException(
                         new Error('INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG feature flag is not set'),
                         { tags: { product: 'max_ai' } }
                     )

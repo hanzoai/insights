@@ -193,7 +193,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
 
                     // Second query: get person properties if we have a distinct_id
                     let person_properties: Record<string, any> | null = null
-                    if (distinct_id && distinct_id !== '$posthog_cookieless') {
+                    if (distinct_id && distinct_id !== '$insights_cookieless') {
                         try {
                             const personQuery = insightsql`
                                 SELECT properties

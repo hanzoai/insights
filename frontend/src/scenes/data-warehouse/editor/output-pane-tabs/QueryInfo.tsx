@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRevert, IconTarget, IconX } from '@posthog/icons'
-import { LemonDialog, LemonTable, Link, Spinner } from '@posthog/lemon-ui'
+import { IconRevert, IconTarget, IconX } from '@hanzo/icons'
+import { LemonDialog, LemonTable, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -257,7 +257,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     <br />
                                     <Link
                                         data-attr="materializing-help"
-                                        to="https://posthog.com/docs/data-warehouse/views#materializing-and-scheduling-a-view"
+                                        to="https://hanzo.ai/docs/data-warehouse/views#materializing-and-scheduling-a-view"
                                         target="_blank"
                                     >
                                         Learn more about materialization

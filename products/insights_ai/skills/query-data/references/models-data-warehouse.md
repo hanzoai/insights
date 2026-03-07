@@ -65,17 +65,17 @@ The `columns` field contains column definitions with their types:
 ```json
 {
   "id": {
-    "hogql": "IntegerDatabaseField",
+    "insightsql": "IntegerDatabaseField",
     "clickhouse": "Int64",
     "valid": true
   },
   "email": {
-    "hogql": "StringDatabaseField",
+    "insightsql": "StringDatabaseField",
     "clickhouse": "Nullable(String)",
     "valid": true
   },
   "created_at": {
-    "hogql": "DateTimeDatabaseField",
+    "insightsql": "DateTimeDatabaseField",
     "clickhouse": "DateTime64(3)",
     "valid": true
   }

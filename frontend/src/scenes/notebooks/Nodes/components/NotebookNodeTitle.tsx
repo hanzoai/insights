@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { KeyboardEvent, useEffect, useState } from 'react'
 
-import { LemonInput, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { LemonInput, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 
@@ -104,7 +104,7 @@ export function NotebookNodeTitle(): JSX.Element {
         })
 
         if (title != newValue) {
-            posthog.capture('notebook node title updated')
+            insights.capture('notebook node title updated')
         }
 
         toggleEditingTitle(false)
@@ -153,7 +153,7 @@ export function NotebookNodeTitle(): JSX.Element {
                     className="NotebookNodeTitle NotebookNodeTitle--editable"
                     onDoubleClick={() => {
                         toggleEditingTitle(true)
-                        posthog.capture('notebook editing node title')
+                        insights.capture('notebook editing node title')
                     }}
                 >
                     {suggestedTaskTitle}
@@ -164,7 +164,7 @@ export function NotebookNodeTitle(): JSX.Element {
                     className="NotebookNodeTitle NotebookNodeTitle--editable"
                     onDoubleClick={() => {
                         toggleEditingTitle(true)
-                        posthog.capture('notebook editing node title')
+                        insights.capture('notebook editing node title')
                     }}
                 >
                     {cellLabel ? (

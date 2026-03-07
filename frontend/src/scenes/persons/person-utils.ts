@@ -40,7 +40,7 @@ export interface PersonDisplayProps {
 
 /** Very permissive email format. */
 const EMAIL_REGEX = /.+@.+\..+/i
-/** Very rough UUID format. It's loose around length, because the posthog-js UUID util returns non-normative IDs. */
+/** Very rough UUID format. It's loose around length, because the insights-js UUID util returns non-normative IDs. */
 const BROWSER_ANON_ID_REGEX = /^(?:[a-fA-F0-9]+-){4}[a-fA-F0-9]+$/i
 /** Score distinct IDs for display: UUID-like (i.e. anon ID) gets 0, custom format gets 1, email-like gets 2. */
 function scoreDistinctId(id: string): number {
@@ -48,7 +48,7 @@ function scoreDistinctId(id: string): number {
         return 2
     }
     if (BROWSER_ANON_ID_REGEX.test(id) && id.length > 36) {
-        // posthog-js IDs have the shape of UUIDs but are longer
+        // insights-js IDs have the shape of UUIDs but are longer
         return 0
     }
     return 1

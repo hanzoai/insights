@@ -27,7 +27,7 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <Markdown>
                         If you're using a different server-side SDK or prefer to use the API, you can manually capture
                         the data by calling the `capture` method or using the [capture
-                        API](https://posthog.com/docs/api/capture).
+                        API](https://hanzo.ai/docs/api/capture).
                     </Markdown>
 
                     <Tab.Group tabs={languages.map((l) => l.label)}>
@@ -43,13 +43,13 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         {l.key === 'Node.js' && (
                                             <>
                                                 <Markdown>### 1. Install</Markdown>
-                                                <CodeBlock language="bash" code="npm install posthog-node" />
+                                                <CodeBlock language="bash" code="npm install insights-node" />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>
                                                 <CodeBlock
                                                     language="javascript"
                                                     code={dedent`
-                                                        import { Insights } from 'posthog-node'
+                                                        import { Insights } from 'insights-node'
 
                                                         const client = new Insights('<ph_project_api_key>', {
                                                             host: '<ph_client_api_host>'
@@ -89,15 +89,15 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         {l.key === 'Python' && (
                                             <>
                                                 <Markdown>### 1. Install</Markdown>
-                                                <CodeBlock language="bash" code="pip install posthog" />
+                                                <CodeBlock language="bash" code="pip install insights" />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>
                                                 <CodeBlock
                                                     language="python"
                                                     code={dedent`
-                                                        from posthog import Posthog
+                                                        from insights import Insights
 
-                                                        posthog = Posthog("<ph_project_api_key>", host="<ph_client_api_host>")
+                                                        insights = Insights("<ph_project_api_key>", host="<ph_client_api_host>")
                                                     `}
                                                 />
 
@@ -106,7 +106,7 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                     language="python"
                                                     code={dedent`
                                                         # After your LLM call
-                                                        posthog.capture(
+                                                        insights.capture(
                                                             distinct_id='user_123',
                                                             event='$ai_generation',
                                                             properties={
@@ -133,16 +133,16 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                 <Markdown>### 1. Install</Markdown>
                                                 <CodeBlock
                                                     language="bash"
-                                                    code="go get github.com/posthog/posthog-go"
+                                                    code="go get github.com/hanzoai/insights-go"
                                                 />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>
                                                 <CodeBlock
                                                     language="go"
                                                     code={dedent`
-                                                        import "github.com/posthog/posthog-go"
+                                                        import "github.com/hanzoai/insights-go"
 
-                                                        client, _ := posthog.NewWithConfig("<ph_project_api_key>", posthog.Config{
+                                                        client, _ := insights.NewWithConfig("<ph_project_api_key>", insights.Config{
                                                             Endpoint: "<ph_client_api_host>",
                                                         })
                                                         defer client.Close()
@@ -154,7 +154,7 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                     language="go"
                                                     code={dedent`
                                                         // After your LLM call
-                                                        client.Enqueue(posthog.Capture{
+                                                        client.Enqueue(insights.Capture{
                                                             DistinctId: "user_123",
                                                             Event:      "$ai_generation",
                                                             Properties: map[string]interface{}{
@@ -177,15 +177,15 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         {l.key === 'Ruby' && (
                                             <>
                                                 <Markdown>### 1. Install</Markdown>
-                                                <CodeBlock language="bash" code="gem install posthog-ruby" />
+                                                <CodeBlock language="bash" code="gem install insights-ruby" />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>
                                                 <CodeBlock
                                                     language="ruby"
                                                     code={dedent`
-                                                        require 'posthog-ruby'
+                                                        require 'insights-ruby'
 
-                                                        posthog = Insights::Client.new({
+                                                        insights = Insights::Client.new({
                                                             api_key: '<ph_project_api_key>',
                                                             host: '<ph_client_api_host>'
                                                         })
@@ -197,7 +197,7 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                     language="ruby"
                                                     code={dedent`
                                                         # After your LLM call
-                                                        posthog.capture({
+                                                        insights.capture({
                                                             distinct_id: 'user_123',
                                                             event: '$ai_generation',
                                                             properties: {
@@ -222,7 +222,7 @@ export const getManualSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                                 <Markdown>### 1. Install</Markdown>
                                                 <CodeBlock
                                                     language="bash"
-                                                    code="composer require posthog/posthog-php"
+                                                    code="composer require insights/insights-php"
                                                 />
 
                                                 <Markdown>### 2. Initialize Insights</Markdown>

@@ -1,4 +1,4 @@
-import { IconChevronLeft, IconChevronRight } from '@posthog/icons'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

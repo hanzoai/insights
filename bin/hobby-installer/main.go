@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/posthog/posthog/bin/hobby-installer/ci"
-	"github.com/posthog/posthog/bin/hobby-installer/core"
-	"github.com/posthog/posthog/bin/hobby-installer/tui"
+	"github.com/hanzoai/insights/bin/hobby-installer/ci"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/tui"
 )
 
 type config struct {
@@ -18,8 +18,8 @@ type config struct {
 
 func parseArgs() config {
 	ciFlag := flag.Bool("ci", false, "Run in non-interactive CI mode")
-	version := flag.String("version", "latest", "PostHog version to install")
-	domain := flag.String("domain", "", "Domain where PostHog will be accessible")
+	version := flag.String("version", "latest", "Insights version to install")
+	domain := flag.String("domain", "", "Domain where Insights will be accessible")
 	flag.Parse()
 
 	return config{

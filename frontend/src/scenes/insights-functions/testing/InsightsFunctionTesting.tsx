@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconEllipsis, IconRefresh } from '@posthog/icons'
+import { IconEllipsis, IconRefresh } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,7 +15,7 @@ import {
     LemonTag,
     LemonTagType,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

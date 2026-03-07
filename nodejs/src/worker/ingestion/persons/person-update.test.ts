@@ -1,4 +1,4 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { personProfileIgnoredPropertiesCounter, personProfileUpdateOutcomeCounter } from './metrics'
 import { FILTERED_PERSON_UPDATE_PROPERTIES } from './person-property-utils'

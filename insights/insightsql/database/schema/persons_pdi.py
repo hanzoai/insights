@@ -1,4 +1,4 @@
-import posthoganalytics
+import hanzoanalytics
 
 from insights.insightsql.ast import SelectQuery
 from insights.insightsql.constants import InsightsQLQuerySettings
@@ -51,7 +51,7 @@ def persons_pdi_join(
         raise ResolutionError("Organization not found in context")
     # TODO: @raquelmsmith: Remove flag check and use left join for all once deletes are caught up
     use_inner_join = (
-        posthoganalytics.feature_enabled(
+        hanzoanalytics.feature_enabled(
             "personless-events-not-supported",
             str(context.team.uuid),
             groups={"organization": str(organization.id)},

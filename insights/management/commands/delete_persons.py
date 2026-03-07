@@ -68,17 +68,17 @@ def build_delete_queries(*, for_specific_persons: bool) -> DeleteQueries:
     return DeleteQueries(
         person_distinct_ids=sql.SQL("""
             WITH to_delete AS ({select_query})
-            DELETE FROM posthog_persondistinctid
+            DELETE FROM insights_persondistinctid
             WHERE person_id IN (SELECT id FROM to_delete);
         """).format(select_query=select_query),
         person_override=sql.SQL("""
             WITH to_delete AS ({select_query})
-            DELETE FROM posthog_personoverride
+            DELETE FROM insights_personoverride
             WHERE (old_person_id IN (SELECT id FROM to_delete) OR override_person_id IN (SELECT id FROM to_delete));
         """).format(select_query=select_query),
         cohort_people=sql.SQL("""
             WITH to_delete AS ({select_query})
-            DELETE FROM posthog_cohortpeople
+            DELETE FROM insights_cohortpeople
             WHERE person_id IN (SELECT id FROM to_delete);
         """).format(select_query=select_query),
         person=sql.SQL("""

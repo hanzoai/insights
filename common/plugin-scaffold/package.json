@@ -2,7 +2,7 @@
     "name": "@hanzo/plugin-scaffold",
     "version": "1.5.0",
     "description": "Types and utilities for Hanzo Insights Plugins",
-    "author": "Hanzo AI <engineering@hanzo.ai>",
+    "author": "Hanzo AI <dev@hanzo.ai>",
     "repository": "https://github.com/hanzoai/insights",
     "license": "MIT",
     "types": "dist/index.d.ts",

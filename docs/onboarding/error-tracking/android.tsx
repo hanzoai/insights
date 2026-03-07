@@ -17,7 +17,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <Markdown>
                         {dedent`
                             This configuration is client-side only. Support for remote configuration 
-                            in the [error tracking settings](https://app.posthog.com/settings/project-error-tracking#exception-autocapture) 
+                            in the [error tracking settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture) 
                             will be added in a future release.
                         `}
                     </Markdown>
@@ -34,10 +34,10 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'kotlin',
                             file: 'Kotlin',
                             code: dedent`
-                              import com.posthog.android.InsightsAndroidConfig
+                              import com.insights.android.InsightsAndroidConfig
                               val config = InsightsAndroidConfig(
-                                  apiKey = POSTHOG_API_KEY,
-                                  host = POSTHOG_HOST
+                                  apiKey = INSIGHTS_API_KEY,
+                                  host = INSIGHTS_HOST
                               ).apply {
                                   ...
                                   errorTrackingConfig.autoCapture = true
@@ -107,7 +107,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

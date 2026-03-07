@@ -1,4 +1,4 @@
-import { LemonDropdown, LemonTag, LemonTagProps } from '@posthog/lemon-ui'
+import { LemonDropdown, LemonTag, LemonTagProps } from '@hanzo/lemon-ui'
 
 import { InsightsFunctionType, HogWatcherState } from '~/types'
 

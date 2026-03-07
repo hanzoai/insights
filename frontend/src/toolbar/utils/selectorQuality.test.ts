@@ -31,8 +31,8 @@ describe('checkSelectorFragility', () => {
     })
 
     describe('non-fragile selectors', () => {
-        it('accepts data-posthog attribute', () => {
-            const result = checkSelectorFragility('[data-posthog="export-button"]')
+        it('accepts data-insights attribute', () => {
+            const result = checkSelectorFragility('[data-insights="export-button"]')
             expect(result.isFragile).toBe(false)
             expect(result.fragileSelector).toBeNull()
         })

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -39,7 +39,7 @@ export function BreakdownsSearchBar(): JSX.Element {
                         onChange={(_, value) => {
                             if (value) {
                                 setBreakdownProperty(String(value))
-                                posthog.capture(BreakdownsEvents.PropertySelected, {
+                                insights.capture(BreakdownsEvents.PropertySelected, {
                                     property: String(value),
                                 })
                             }

@@ -8,7 +8,7 @@ from prometheus_client import Counter
 logger = structlog.get_logger(__name__)
 
 COULD_NOT_DECOMPRESS_VALUE_COUNTER = Counter(
-    "posthog_redis_could_not_decompress_value_counter",
+    "insights_redis_could_not_decompress_value_counter",
     """
     Number of times decompression from redis failed while the setting was on.
     This is probably a sign that either there are still uncompressed values in redis

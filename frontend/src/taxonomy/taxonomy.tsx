@@ -68,7 +68,7 @@ const BILLING_USAGE_CATEGORIES = [
     'usage_limit',
 ] as const
 
-export const CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS = [
+export const CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS = [
     'billing_period_end',
     'billing_period_start',
     'current_total_amount_usd',
@@ -82,7 +82,7 @@ export const CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS = [
     ...BILLING_USAGE_CATEGORIES.flatMap((category) => BILLING_PRODUCTS.map((product) => `${category}.${product}`)),
 ]
 
-export const POSTHOG_EVENT_PROMOTED_PROPERTIES = {
+export const INSIGHTS_EVENT_PROMOTED_PROPERTIES = {
     $pageview: ['$current_url', 'title', '$referrer'],
     $pageleave: ['$current_url', 'title', '$referrer'],
     $groupidentify: ['$group_type', '$group_key', '$group_set'],
@@ -124,11 +124,11 @@ export const POSTHOG_EVENT_PROMOTED_PROPERTIES = {
         '$exception_values',
     ],
 }
-export type KNOWN_PROMOTED_PROPERTY_PARENTS = keyof typeof POSTHOG_EVENT_PROMOTED_PROPERTIES
+export type KNOWN_PROMOTED_PROPERTY_PARENTS = keyof typeof INSIGHTS_EVENT_PROMOTED_PROPERTIES
 
 export function isInsightsProperty(propertyKey: string, isCloudOrDev: boolean | undefined = false): boolean {
     const isInsightsProperty = propertyKey.startsWith('$') || PROPERTY_KEYS.includes(propertyKey)
-    const isNonDollarInsightsProperty = isCloudOrDev && CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(propertyKey)
+    const isNonDollarInsightsProperty = isCloudOrDev && CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS.includes(propertyKey)
     return isInsightsProperty || isNonDollarInsightsProperty
 }
 

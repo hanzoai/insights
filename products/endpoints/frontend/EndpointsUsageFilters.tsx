@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInputSelect, LemonSelect } from '@posthog/lemon-ui'
+import { LemonInputSelect, LemonSelect } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'

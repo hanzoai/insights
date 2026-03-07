@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTabs } from '@posthog/lemon-ui'
+import { LemonTabs } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -20,7 +20,7 @@ function NextEnvVarsSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Bash}>
-            {[`NEXT_PUBLIC_POSTHOG_KEY=${currentTeam?.api_token}`, `NEXT_PUBLIC_POSTHOG_HOST=${apiHostOrigin()}`].join(
+            {[`NEXT_PUBLIC_INSIGHTS_KEY=${currentTeam?.api_token}`, `NEXT_PUBLIC_INSIGHTS_HOST=${apiHostOrigin()}`].join(
                 '\n'
             )}
         </CodeSnippet>
@@ -35,15 +35,15 @@ function NextPagesRouterPageViewSnippet(): JSX.Element {
             {`// pages/_app.tsx
 import { useEffect } from 'react'
 import { Router } from 'next/router'
-import posthog from 'posthog-js'
-import { PostHogProvider } from 'posthog-js/react'
+import insights from '@hanzo/insights'
+import { InsightsProvider } from '@hanzo/insights/react'
 import type { AppProps } from 'next/app'
 
 export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || '${apiHostOrigin()}',
+    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY as string, {
+      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST || '${apiHostOrigin()}',
       ${
           isPersonProfilesDisabled
               ? ``
@@ -51,16 +51,16 @@ export default function App({ Component, pageProps }: AppProps) {
       }
       defaults: '${SDK_DEFAULTS_DATE}',
       // Enable debug mode in development
-      loaded: (posthog) => {
-        if (process.env.NODE_ENV === 'development') posthog.debug()
+      loaded: (insights) => {
+        if (process.env.NODE_ENV === 'development') insights.debug()
       }
     })
   }, [])
 
   return (
-    <PostHogProvider client={posthog}>
+    <InsightsProvider client={insights}>
       <Component {...pageProps} />
-    </PostHogProvider>
+    </InsightsProvider>
   )
 }`}
         </CodeSnippet>
@@ -73,15 +73,15 @@ function NextAppRouterLayoutSnippet(): JSX.Element {
             {`// app/layout.tsx
 
 import './globals.css'
-import { PostHogProvider } from './providers'
+import { InsightsProvider } from './providers'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <PostHogProvider>
+        <InsightsProvider>
           {children}
-        </PostHogProvider>
+        </InsightsProvider>
       </body>
     </html>
   )
@@ -100,15 +100,15 @@ function NextAppRouterPageViewProviderSnippet(): JSX.Element {
 
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 
-import posthog from 'posthog-js'
-import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import insights from '@hanzo/insights'
+import { InsightsProvider as PHProvider } from '@hanzo/insights/react'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+export function InsightsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || '${apiHostOrigin()}',
+    insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY as string, {
+      api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST || '${apiHostOrigin()}',
       ${
           isPersonProfilesDisabled
               ? ``
@@ -119,7 +119,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <PHProvider client={posthog}>
+    <PHProvider client={insights}>
       {children}
     </PHProvider>
   )
@@ -133,10 +133,10 @@ function NextInstrumentationClientSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.TypeScript}>
             {`// instrumentation-client.js
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+insights.init(process.env.NEXT_PUBLIC_INSIGHTS_KEY, {
+    api_host: process.env.NEXT_PUBLIC_INSIGHTS_HOST,
     defaults: '${SDK_DEFAULTS_DATE}'
 });
             `}
@@ -151,7 +151,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
     return (
         <>
             <SetupWizardBanner integrationName="Next.js" hide={hideWizard} />
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
             <h3>Add environment variables</h3>
             <p>
@@ -200,7 +200,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                             app router
                         </Link>
                         , you can integrate Insights by creating a <code>providers</code> file in your <code>app</code>{' '}
-                        folder. This is because the <code>posthog-js</code> library needs to be initialized on the
+                        folder. This is because the <code>insights-js</code> library needs to be initialized on the
                         client-side using the Next.js{' '}
                         <Link
                             to="https://nextjs.org/docs/getting-started/react-essentials#client-components"
@@ -212,7 +212,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                     </p>
                     <NextAppRouterPageViewProviderSnippet />
                     <p>
-                        Afterwards, import the <code>PostHogProvider</code> component in your{' '}
+                        Afterwards, import the <code>InsightsProvider</code> component in your{' '}
                         <code>app/layout.tsx</code> file and wrap your app with it.
                     </p>
                     <NextAppRouterLayoutSnippet />

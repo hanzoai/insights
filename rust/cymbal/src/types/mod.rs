@@ -14,7 +14,7 @@ use crate::fingerprinting::{
 use crate::frames::releases::{ReleaseInfo, ReleaseRecord};
 use crate::frames::{Frame, RawFrame};
 use crate::issue_resolution::Issue;
-use crate::metric_consts::POSTHOG_SDK_EXCEPTION_RESOLVED;
+use crate::metric_consts::INSIGHTS_SDK_EXCEPTION_RESOLVED;
 
 mod exception;
 mod stacktrace;
@@ -445,7 +445,7 @@ impl Stacktrace {
             }
         }
 
-        metrics::counter!(POSTHOG_SDK_EXCEPTION_RESOLVED)
+        metrics::counter!(INSIGHTS_SDK_EXCEPTION_RESOLVED)
             .increment(resolved_frames.iter().filter(|f| f.suspicious).count() as u64);
 
         Some(Stacktrace::Resolved {
@@ -508,7 +508,7 @@ mod test {
 
         assert_eq!(
             frame.source_url,
-            Some("https://app-static.eu.posthog.com/static/chunk-PGUQKT6S.js".to_string())
+            Some("https://app-static.eu.insights.hanzo.ai/static/chunk-PGUQKT6S.js".to_string())
         );
         assert_eq!(frame.fn_name, "?".to_string());
         assert!(frame.meta.in_app);
@@ -520,7 +520,7 @@ mod test {
         };
         assert_eq!(
             frame.source_url,
-            Some("https://app-static.eu.posthog.com/static/chunk-PGUQKT6S.js".to_string())
+            Some("https://app-static.eu.insights.hanzo.ai/static/chunk-PGUQKT6S.js".to_string())
         );
         assert_eq!(frame.fn_name, "n.loadForeignModule".to_string());
         assert!(frame.meta.in_app);

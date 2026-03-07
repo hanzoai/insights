@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.utils.timezone import now
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from asgiref.sync import async_to_sync
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
@@ -76,7 +76,7 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
                 if "request" in self.context and self.context["request"].user
                 else str(instance.team.uuid)
             )
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=distinct_id,
                 event="export timeout error returned",
                 properties={
@@ -178,7 +178,7 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
 
         team = instance.team
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=user.distinct_id if user else str(team.uuid),
             event="export requested",
             properties={
@@ -223,7 +223,7 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
                 exporter.export_asset(instance.id)
         else:
             task = exporter.export_asset.delay(instance.id)
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=user.distinct_id if user else str(team.uuid),
                 event="export queued",
                 properties={
@@ -235,7 +235,7 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
                 groups=groups(team.organization, team),
             )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=user.distinct_id if user else str(team.uuid),
             event="export created",
             properties={

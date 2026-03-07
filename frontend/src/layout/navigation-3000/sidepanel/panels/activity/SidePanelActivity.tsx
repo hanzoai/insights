@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useRef } from 'react'
 
-import { IconBell, IconList, IconNotification } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonSkeleton, LemonTabs, Link, Spinner } from '@posthog/lemon-ui'
+import { IconBell, IconList, IconNotification } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonSkeleton, LemonTabs, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ActivityLogRow } from 'lib/components/ActivityLog/ActivityLog'
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'

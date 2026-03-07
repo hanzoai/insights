@@ -160,7 +160,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
         mock_dns_query.return_value = FakeDNSResponse(
             [
                 dns.rrset.from_text(
-                    "_posthog-challenge.verify.example.com.",
+                    "_insights-challenge.verify.example.com.",
                     3600,
                     "IN",
                     "TXT",

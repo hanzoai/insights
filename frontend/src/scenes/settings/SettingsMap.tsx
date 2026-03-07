@@ -1,15 +1,15 @@
-import { LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
-import { ErrorTrackingAlerting } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/alerting/ErrorTrackingAlerting'
-import { Releases } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/releases/Releases'
-import { AutoAssignmentRules } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/rules/AutoAssignmentRules'
-import { CustomGroupingRules } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/rules/CustomGroupingRules'
-import { SpikeDetectionSettings } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/spike_detection/SpikeDetectionSettings'
-import { SymbolSets } from '@posthog/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/symbol_sets/SymbolSets'
-import { LLMProviderKeysSettings } from '@posthog/products-llm-analytics/frontend/settings/LLMProviderKeysSettings'
-import { EventConfiguration } from '@posthog/products-revenue-analytics/frontend/settings/EventConfiguration'
-import { ExternalDataSourceConfiguration } from '@posthog/products-revenue-analytics/frontend/settings/ExternalDataSourceConfiguration'
-import { FilterTestAccountsConfiguration as RevenueAnalyticsFilterTestAccountsConfiguration } from '@posthog/products-revenue-analytics/frontend/settings/FilterTestAccountsConfiguration'
-import { GoalsConfiguration } from '@posthog/products-revenue-analytics/frontend/settings/GoalsConfiguration'
+import { LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { ErrorTrackingAlerting } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/alerting/ErrorTrackingAlerting'
+import { Releases } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/releases/Releases'
+import { AutoAssignmentRules } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/rules/AutoAssignmentRules'
+import { CustomGroupingRules } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/rules/CustomGroupingRules'
+import { SpikeDetectionSettings } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/spike_detection/SpikeDetectionSettings'
+import { SymbolSets } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/symbol_sets/SymbolSets'
+import { LLMProviderKeysSettings } from '@hanzo/products-llm-analytics/frontend/settings/LLMProviderKeysSettings'
+import { EventConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/EventConfiguration'
+import { ExternalDataSourceConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/ExternalDataSourceConfiguration'
+import { FilterTestAccountsConfiguration as RevenueAnalyticsFilterTestAccountsConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/FilterTestAccountsConfiguration'
+import { GoalsConfiguration } from '@hanzo/products-revenue-analytics/frontend/settings/GoalsConfiguration'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
@@ -156,7 +156,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'SDK setup',
                 description:
                     'Install Insights in your app using one of our SDKs. Select your platform to see the setup instructions.',
-                docsUrl: 'https://posthog.com/docs/getting-started/install',
+                docsUrl: 'https://hanzo.ai/docs/getting-started/install',
                 component: <SDKSetupInstructions />,
                 keywords: [
                     'install',
@@ -265,7 +265,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Autocapture',
                 description:
                     'Automatically capture frontend events such as clicks, input changes, and form submissions when using the web JavaScript SDK. Also available for React Native and iOS via code configuration.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/autocapture',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/autocapture',
                 platformSupport: FEATURE_SUPPORT.autocapture,
                 component: <AutocaptureSettings />,
                 keywords: ['click', 'input', 'form', 'dom', 'automatic', 'event'],
@@ -275,7 +275,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Data attributes',
                 description:
                     'Specify data attributes used in your app (e.g. data-attr, data-custom-id). These attributes help the toolbar and action definitions match unique elements on your pages. Use * as a wildcard.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/autocapture#data-attributes',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/autocapture#data-attributes',
                 component: <DataAttributes />,
                 keywords: ['selector', 'css', 'element', 'toolbar', 'action'],
             },
@@ -284,7 +284,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Web vitals autocapture',
                 description:
                     "Capture Google Chrome's web vitals metrics (LCP, CLS, FCP, INP). These events enhance web analytics and session replay with performance data.",
-                docsUrl: 'https://posthog.com/docs/web-analytics/web-vitals',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/web-vitals',
                 platformSupport: FEATURE_SUPPORT.webVitals,
                 component: <WebVitalsAutocaptureSettings />,
                 keywords: ['lcp', 'cls', 'inp', 'fcp', 'performance', 'core web vitals'],
@@ -294,7 +294,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Dead clicks autocapture',
                 description:
                     "Track clicks that don't result in any action (no scroll, text selection, or DOM mutation). Dead clicks help you find elements users expect to be interactive but aren't.",
-                docsUrl: 'https://posthog.com/docs/toolbar/heatmaps#dead-clicks',
+                docsUrl: 'https://hanzo.ai/docs/toolbar/heatmaps#dead-clicks',
                 platformSupport: FEATURE_SUPPORT.deadClicks,
                 component: <DeadClicksAutocaptureSettings />,
                 keywords: ['rage click', 'broken', 'unresponsive', 'frustration'],
@@ -336,7 +336,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Model Context Protocol (MCP) server',
                 description:
                     'Connect Insights to AI tools like Claude, Cursor, and Copilot via the MCP protocol for data-driven AI assistance.',
-                docsUrl: 'https://posthog.com/docs/model-context-protocol',
+                docsUrl: 'https://hanzo.ai/docs/model-context-protocol',
                 component: <MCPServerSettings />,
                 keywords: ['ai', 'llm', 'claude', 'cursor', 'copilot'],
             },
@@ -376,7 +376,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'group-analytics',
                 title: 'Group analytics',
                 description: 'Configure group types for analyzing user behavior at the company or team level.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/group-analytics',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/group-analytics',
                 component: <GroupAnalyticsConfig />,
                 keywords: ['company', 'organization', 'team', 'group type'],
             },
@@ -409,7 +409,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Filter out internal and test users',
                 description:
                     'Define filters to exclude internal users and test accounts from your analytics. Filtered users will not appear in insights by default.',
-                docsUrl: 'https://posthog.com/tutorials/filter-internal-users',
+                docsUrl: 'https://hanzo.ai/tutorials/filter-internal-users',
                 component: <ProjectAccountFiltersSetting />,
                 keywords: ['test account', 'internal', 'exclude', 'filter'],
             },
@@ -441,7 +441,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Correlation analysis exclusions',
                 description:
                     'Correlation analysis automatically surfaces relevant signals for conversion. Exclude events or properties that do not provide useful signals.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/funnels#correlation-analysis',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/funnels#correlation-analysis',
                 component: <CorrelationConfig />,
                 keywords: ['funnel', 'conversion', 'exclude', 'property'],
             },
@@ -450,7 +450,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'User display name',
                 description:
                     'Choose which user properties are used to display names in the UI (e.g. email, name, username).',
-                docsUrl: 'https://posthog.com/docs/data/persons',
+                docsUrl: 'https://hanzo.ai/docs/data/persons',
                 component: <PersonDisplayNameProperties />,
                 keywords: ['name', 'email', 'identity', 'display'],
             },
@@ -459,7 +459,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Path cleaning rules',
                 description:
                     'Define regex rules to normalize URLs in path analysis. Useful for removing IDs or query parameters from paths.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/paths#path-cleaning-rules',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/paths#path-cleaning-rules',
                 component: <PathCleaningFiltersConfig />,
                 keywords: ['url', 'regex', 'normalize', 'path analysis'],
             },
@@ -475,7 +475,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'group-analytics',
                 title: 'Group analytics',
                 description: 'Configure group types for analyzing user behavior at the company or team level.',
-                docsUrl: 'https://posthog.com/docs/product-analytics/group-analytics',
+                docsUrl: 'https://hanzo.ai/docs/product-analytics/group-analytics',
                 component: <GroupAnalyticsConfig />,
                 flag: '!CUSTOMER_ANALYTICS',
                 keywords: ['company', 'organization', 'team', 'group type'],
@@ -510,7 +510,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'IP data capture configuration',
                 description:
                     'When enabled, client IP addresses will not be stored with your events. Transformations like GeoIP enrichment and bot detection can still use the IP before it is discarded.',
-                docsUrl: 'https://posthog.com/docs/privacy',
+                docsUrl: 'https://hanzo.ai/docs/privacy',
                 component: <IPCapture />,
                 keywords: ['ip', 'anonymize', 'gdpr', 'privacy', 'geolocation', 'discard'],
             },
@@ -559,7 +559,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'revenue-analytics-events',
                 title: 'Revenue events',
                 description: 'Configure which events represent revenue-generating actions.',
-                docsUrl: 'https://posthog.com/docs/revenue-analytics',
+                docsUrl: 'https://hanzo.ai/docs/revenue-analytics',
                 component: <EventConfiguration />,
                 keywords: ['purchase', 'payment', 'subscription', 'charge'],
             },
@@ -589,7 +589,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 description:
                     'Add and manage provider API keys for LLM analytics features, including evaluations and playground.',
                 component: <LLMProviderKeysSettings />,
-                docsUrl: 'https://posthog.com/docs/llm-analytics/evaluations',
+                docsUrl: 'https://hanzo.ai/docs/llm-analytics/evaluations',
                 keywords: ['llm', 'provider', 'api key', 'openai', 'anthropic', 'gemini', 'playground'],
             },
         ],
@@ -605,7 +605,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'marketing-settings',
                 title: 'Marketing settings',
                 description: 'Configure tracking and attribution settings for marketing analytics.',
-                docsUrl: 'https://posthog.com/docs/web-analytics/marketing-analytics',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/marketing-analytics',
                 component: <MarketingAnalyticsSettingsWrapper />,
                 keywords: ['utm', 'attribution', 'campaign', 'channel', 'marketing'],
             },
@@ -629,7 +629,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'channel-type',
                 title: 'Custom channel type',
                 description: 'Define custom rules for categorizing traffic sources into channels.',
-                docsUrl: 'https://posthog.com/docs/data/channel-type',
+                docsUrl: 'https://hanzo.ai/docs/data/channel-type',
                 component: <CustomChannelTypes />,
                 keywords: ['utm', 'source', 'medium', 'referrer', 'attribution'],
             },
@@ -637,8 +637,8 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'cookieless-server-hash-mode',
                 title: 'Cookieless server hash mode',
                 description:
-                    'Enable cookieless tracking using a privacy-preserving hash to count unique users without cookies. You must enable this here before enabling cookieless in posthog-js.',
-                docsUrl: 'https://posthog.com/docs/web-analytics/cookieless-tracking',
+                    'Enable cookieless tracking using a privacy-preserving hash to count unique users without cookies. You must enable this here before enabling cookieless in insights-js.',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/cookieless-tracking',
                 component: <CookielessServerHashModeSetting />,
                 keywords: ['cookie', 'privacy', 'gdpr', 'tracking', 'consent'],
             },
@@ -647,7 +647,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Bounce rate duration',
                 description:
                     'Set how long a user can stay on a page (in seconds) before the session is not counted as a bounce. Default is 10 seconds.',
-                docsUrl: 'https://posthog.com/docs/web-analytics/bounce-rate',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/bounce-rate',
                 component: <BounceRateDurationSetting />,
                 keywords: ['bounce', 'session', 'duration', 'seconds'],
             },
@@ -689,7 +689,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'web-vitals-autocapture',
                 title: 'Web vitals autocapture',
                 description: "Capture Google Chrome's web vitals metrics for web analytics performance tracking.",
-                docsUrl: 'https://posthog.com/docs/web-analytics/web-vitals',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/web-vitals',
                 platformSupport: FEATURE_SUPPORT.webVitals,
                 component: <WebVitalsAutocaptureSettings />,
                 keywords: ['lcp', 'cls', 'fcp', 'inp', 'performance', 'core web vitals'],
@@ -707,7 +707,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Session replay',
                 description:
                     'Watch recordings of how users interact with your web app to diagnose issues and understand user behavior.',
-                docsUrl: 'https://posthog.com/docs/session-replay',
+                docsUrl: 'https://hanzo.ai/docs/session-replay',
                 component: <ReplayGeneral />,
                 keywords: ['recording', 'video', 'screen', 'session'],
             },
@@ -715,7 +715,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'replay-log-capture',
                 title: 'Log capture',
                 description: 'Capture browser console logs alongside session recordings to help debug issues.',
-                docsUrl: 'https://posthog.com/docs/session-replay/console-log-recording',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/console-log-recording',
                 platformSupport: FEATURE_SUPPORT.sessionReplayLogCapture,
                 component: <LogCaptureSettings />,
                 keywords: ['console', 'log', 'debug', 'error'],
@@ -725,7 +725,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Canvas capture',
                 description:
                     'Capture HTML canvas elements in session recordings. Useful for apps that render charts, games, or other canvas-based content.',
-                docsUrl: 'https://posthog.com/docs/session-replay/canvas-recording',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/canvas-recording',
                 platformSupport: FEATURE_SUPPORT.sessionReplayCanvasCapture,
                 component: <CanvasCaptureSettings />,
                 keywords: ['canvas', 'webgl', 'drawing', 'chart'],
@@ -735,7 +735,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Recording conditions',
                 description:
                     'Control when recordings start and stop. Use URL triggers, event triggers, or sampling to manage recording volume.',
-                docsUrl: 'https://posthog.com/docs/session-replay/how-to-control-which-sessions-you-record',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/how-to-control-which-sessions-you-record',
                 component: <ReplayTriggers />,
                 keywords: ['trigger', 'url', 'event', 'sample', 'condition', 'filter'],
             },
@@ -744,7 +744,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Privacy and masking',
                 description:
                     'Choose what data gets masked in your session recordings. For more control, configure masking directly in your code.',
-                docsUrl: 'https://posthog.com/docs/session-replay/privacy',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/privacy',
                 platformSupport: FEATURE_SUPPORT.sessionReplayMasking,
                 component: <ReplayMaskingSettings />,
                 keywords: ['redact', 'sensitive', 'pii', 'hide', 'mask', 'privacy', 'gdpr'],
@@ -754,7 +754,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Network capture',
                 description:
                     'Capture network request timings alongside session recordings to identify slow or failing API calls.',
-                docsUrl: 'https://posthog.com/docs/session-replay/network-recording',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/network-recording',
                 platformSupport: FEATURE_SUPPORT.sessionReplayCaptureRequests,
                 component: <ReplayNetworkCapture />,
                 keywords: ['xhr', 'fetch', 'api', 'request', 'response', 'performance'],
@@ -764,7 +764,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Network headers & payloads',
                 description:
                     'Capture request and response headers and body content alongside network timings. Sensitive data is automatically scrubbed.',
-                docsUrl: 'https://posthog.com/docs/session-replay/network-recording',
+                docsUrl: 'https://hanzo.ai/docs/session-replay/network-recording',
                 platformSupport: FEATURE_SUPPORT.sessionReplayCaptureHeadersAndPayloads,
                 component: <ReplayNetworkHeadersPayloads />,
                 keywords: ['headers', 'payload', 'body', 'request', 'response'],
@@ -773,7 +773,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'web-vitals-autocapture',
                 title: 'Web vitals',
                 description: 'Capture web vitals metrics alongside session recordings for performance analysis.',
-                docsUrl: 'https://posthog.com/docs/web-analytics/web-vitals',
+                docsUrl: 'https://hanzo.ai/docs/web-analytics/web-vitals',
                 platformSupport: FEATURE_SUPPORT.webVitals,
                 component: <WebVitalsAutocaptureSettings />,
                 keywords: ['lcp', 'cls', 'fcp', 'inp', 'performance'],
@@ -830,7 +830,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Heatmaps',
                 description:
                     'Capture general clicks, mouse movements, and scrolling to create heatmaps. No additional events are created. Heatmaps are generated based on overall mouse or touch positions, useful for understanding general user behavior.',
-                docsUrl: 'https://posthog.com/docs/toolbar/heatmaps',
+                docsUrl: 'https://hanzo.ai/docs/toolbar/heatmaps',
                 platformSupport: FEATURE_SUPPORT.heatmaps,
                 component: <HeatmapsSettings />,
                 keywords: ['click map', 'scroll', 'rage click', 'mouse', 'touch'],
@@ -848,7 +848,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Surveys',
                 description:
                     'Enable or disable surveys in your web application. When disabled, surveys will not be rendered automatically.',
-                docsUrl: 'https://posthog.com/docs/surveys',
+                docsUrl: 'https://hanzo.ai/docs/surveys',
                 platformSupport: FEATURE_SUPPORT.surveys,
                 component: <SurveyEnableToggle />,
                 keywords: ['popup', 'widget', 'feedback', 'nps', 'csat', 'enable'],
@@ -858,7 +858,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Default survey appearance',
                 description:
                     'Configure the default look and feel for new surveys. Individual surveys can override these settings.',
-                docsUrl: 'https://posthog.com/docs/surveys/creating-surveys#customizing-the-look-and-feel',
+                docsUrl: 'https://hanzo.ai/docs/surveys/creating-surveys#customizing-the-look-and-feel',
                 component: <SurveyDefaultAppearance />,
                 keywords: ['appearance', 'style', 'theme', 'customization', 'popup'],
             },
@@ -876,7 +876,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 description:
                     'When enabled, all new feature flags will have persistence enabled by default. This ensures consistent user experiences across authentication steps.',
                 docsUrl:
-                    'https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps',
+                    'https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps',
                 component: <FlagPersistenceSettings />,
                 keywords: ['flag', 'persistence', 'authentication', 'consistent'],
             },
@@ -893,7 +893,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Require evaluation contexts',
                 description:
                     'Require all new feature flags to have at least one evaluation context before they can be created, preventing flags that are not properly scoped.',
-                docsUrl: 'https://posthog.com/docs/feature-flags/evaluation-contexts',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/evaluation-contexts',
                 flag: 'FLAG_EVALUATION_TAGS',
                 component: <RequireEvaluationContexts />,
                 keywords: ['evaluation', 'context', 'scope', 'require'],
@@ -903,7 +903,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Default evaluation contexts',
                 description:
                     'Automatically apply default evaluation context tags to newly created feature flags. Users can still modify them during flag creation.',
-                docsUrl: 'https://posthog.com/docs/feature-flags/evaluation-contexts',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/evaluation-contexts',
                 flag: 'DEFAULT_EVALUATION_ENVIRONMENTS',
                 component: <DefaultEvaluationContexts />,
                 keywords: ['evaluation', 'default', 'context', 'tag'],
@@ -913,7 +913,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Feature flags secure API key',
                 description:
                     'Use this key for local evaluation of feature flags or remote config settings. Replaces personal API keys for local evaluation.',
-                docsUrl: 'https://posthog.com/docs/feature-flags/local-evaluation',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/local-evaluation',
                 component: <FlagsSecureApiKeys />,
                 keywords: ['api key', 'secret', 'local evaluation', 'remote config'],
             },
@@ -930,7 +930,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Default statistical method',
                 description:
                     'Choose which statistical method to use by default for new experiments in this environment. Individual experiments can override this setting.',
-                docsUrl: 'https://posthog.com/docs/experiments',
+                docsUrl: 'https://hanzo.ai/docs/experiments',
                 component: <DefaultExperimentStatsMethod />,
                 keywords: ['bayesian', 'frequentist', 'statistics', 'ab test'],
             },
@@ -963,7 +963,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Exception autocapture',
                 description:
                     'Automatically capture frontend exceptions using onError and onUnhandledRejection listeners in the web JavaScript SDK.',
-                docsUrl: 'https://posthog.com/docs/error-tracking',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking',
                 platformSupport: FEATURE_SUPPORT.errorTrackingExceptionAutocapture,
                 component: <ExceptionAutocaptureToggle />,
                 keywords: ['crash', 'bug', 'exception', 'stack trace'],
@@ -1024,7 +1024,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'error-tracking-symbol-sets',
                 title: 'Symbol sets',
                 description: 'Upload source maps to get readable stack traces from minified code.',
-                docsUrl: 'https://posthog.com/docs/error-tracking/source-maps',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking/source-maps',
                 component: <SymbolSets />,
                 keywords: ['source map', 'sourcemap', 'debug', 'minified', 'stack trace'],
             },
@@ -1032,7 +1032,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'error-tracking-releases',
                 title: 'Releases',
                 description: 'Track releases to see which version introduced errors and monitor deployment health.',
-                docsUrl: 'https://posthog.com/docs/error-tracking/releases',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking/releases',
                 component: <Releases />,
                 keywords: ['version', 'deploy', 'release', 'regression'],
             },
@@ -1050,7 +1050,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Logs',
                 description:
                     'Automatically capture browser console logs and send them to the Logs product for analysis and debugging. This is separate from session replay console log capture.',
-                docsUrl: 'https://posthog.com/docs/logs',
+                docsUrl: 'https://hanzo.ai/docs/logs',
                 platformSupport: FEATURE_SUPPORT.logsCapture,
                 component: <LogsCaptureSettings />,
                 flag: 'LOGS_SETTINGS',
@@ -1085,7 +1085,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'environment-access-control',
                 title: 'Access control',
                 description: 'Manage who has access to this environment and what they can do.',
-                docsUrl: 'https://posthog.com/docs/settings/access-control',
+                docsUrl: 'https://hanzo.ai/docs/settings/access-control',
                 component: <TeamAccessControl />,
                 keywords: ['permission', 'role', 'access', 'rbac', 'team'],
             },
@@ -1130,7 +1130,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'approval-policies',
                 title: 'Policies',
                 description: 'Configure which actions require approval before being applied.',
-                docsUrl: 'https://posthog.com/docs/settings/approvals#policies',
+                docsUrl: 'https://hanzo.ai/docs/settings/approvals#policies',
                 component: <ApprovalPolicies />,
                 keywords: ['approval', 'policy', 'review', 'gate'],
             },
@@ -1138,7 +1138,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'change-requests',
                 title: 'Change requests',
                 description: 'Review and approve pending change requests.',
-                docsUrl: 'https://posthog.com/docs/settings/approvals#change-requests',
+                docsUrl: 'https://hanzo.ai/docs/settings/approvals#change-requests',
                 component: <ChangeRequestsList />,
                 keywords: ['approval', 'review', 'pending', 'request'],
             },
@@ -1168,7 +1168,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Webhook integration',
                 description:
                     'Send notifications when selected actions are performed by users. Supports Slack, Microsoft Teams, and Discord.',
-                docsUrl: 'https://posthog.com/docs/webhooks',
+                docsUrl: 'https://hanzo.ai/docs/webhooks',
                 component: <WebhookIntegration />,
                 keywords: ['notification', 'alert', 'http', 'callback', 'slack', 'teams', 'discord'],
             },
@@ -1177,7 +1177,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Slack integration',
                 description:
                     'Integrate with Slack to subscribe to insights or dashboards for regular reports to channels of your choice.',
-                docsUrl: 'https://posthog.com/docs/webhooks/slack',
+                docsUrl: 'https://hanzo.ai/docs/webhooks/slack',
                 component: <SlackIntegration />,
                 keywords: ['slack', 'channel', 'notification', 'subscribe', 'report'],
             },
@@ -1185,7 +1185,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'integration-github',
                 title: 'GitHub integration',
                 description: 'Connect GitHub to link issues and pull requests with Insights.',
-                docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking/integrations',
                 component: <GithubIntegration />,
                 keywords: ['github', 'git', 'repository', 'issue', 'pr'],
             },
@@ -1193,7 +1193,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'integration-linear',
                 title: 'Linear integration',
                 description: 'Connect Linear to create and link issues directly from Insights.',
-                docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking/integrations',
                 component: <LinearIntegration />,
                 keywords: ['linear', 'issue', 'project management', 'task'],
             },
@@ -1356,7 +1356,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Roles',
                 description:
                     'Use roles to group your organization members and assign them permissions. Roles are used for access control across your organization.',
-                docsUrl: 'https://posthog.com/docs/settings/access-control',
+                docsUrl: 'https://hanzo.ai/docs/settings/access-control',
                 component: <RolesAccessControls />,
                 keywords: ['role', 'permission', 'rbac', 'access control'],
             },
@@ -1378,7 +1378,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'authentication-domains',
                 title: 'Authentication Domains',
-                docsUrl: 'https://posthog.com/docs/settings/sso',
+                docsUrl: 'https://hanzo.ai/docs/settings/sso',
                 component: <VerifiedDomains />,
                 keywords: ['sso', 'saml', 'single sign-on', 'domain verification', 'enforce'],
             },
@@ -1421,7 +1421,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'organization-proxy',
                 title: 'Managed reverse proxies',
-                docsUrl: 'https://posthog.com/docs/advanced/proxy',
+                docsUrl: 'https://hanzo.ai/docs/advanced/proxy',
                 component: <ManagedReverseProxy />,
                 keywords: ['custom domain', 'dns', 'cname', 'ad blocker', 'first party'],
             },
@@ -1563,7 +1563,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 component: (
                     <div>
                         Grab some{' '}
-                        <Link to="https://posthog.com/merch" target="_blank">
+                        <Link to="https://hanzo.ai/merch" target="_blank">
                             Hanzo merch
                         </Link>{' '}
                         to customize yourself outside of the app
@@ -1604,7 +1604,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Personal API keys',
                 description:
                     'These keys allow full access to your personal account through the API. Only give keys the permissions they need, and delete unused keys promptly.',
-                docsUrl: 'https://posthog.com/docs/api',
+                docsUrl: 'https://hanzo.ai/docs/api',
                 component: <PersonalAPIKeys />,
                 keywords: ['token', 'api key', 'authentication', 'secret'],
             },

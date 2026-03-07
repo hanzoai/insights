@@ -341,7 +341,7 @@ function buildProductManifests() {
     //
     // NOTE: The structure of products.json must match the TypeScript types defined in
     // frontend/src/queries/schema/schema-general.ts (ProductItem and ProductsData).
-    // These types are used to generate Pydantic models in posthog/schema.py.
+    // These types are used to generate Pydantic models in insights/schema.py.
     // If you change the keys here (keysToKeep), make sure to update the TypeScript types.
     const keysToKeep = ['path', 'category', 'iconType', 'type']
     const keysToKeepArray = ['intents']

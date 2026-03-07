@@ -12,7 +12,7 @@ TYPE_FIXES = {
 
 # Raw SQL to find flags with invalid property types (used as a subquery filter)
 INVALID_FLAGS_SQL = """
-    SELECT 1 FROM jsonb_array_elements(posthog_featureflag.filters::jsonb->'groups') as grp,
+    SELECT 1 FROM jsonb_array_elements(insights_featureflag.filters::jsonb->'groups') as grp,
                   jsonb_array_elements(grp->'properties') as prop
     WHERE prop->>'type' NOT IN ('person', 'cohort', 'group', 'flag')
       AND prop->>'type' IS NOT NULL

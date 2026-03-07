@@ -201,7 +201,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -241,7 +241,7 @@ def team_api_test_factory():
             self.assertEqual(self.team.receive_org_level_activity_logs, True)
 
         def test_update_receive_org_level_activity_logs_requires_admin(self):
-            member_user = User.objects.create_user(email="member@posthog.com", password="password", first_name="Member")
+            member_user = User.objects.create_user(email="member@hanzo.ai", password="password", first_name="Member")
             OrganizationMembership.objects.create(
                 user=member_user,
                 organization=self.organization,
@@ -265,7 +265,7 @@ def team_api_test_factory():
             self.assertEqual(self.team.receive_org_level_activity_logs, False)
 
         def test_update_receive_org_level_activity_logs_allows_admin(self):
-            admin_user = User.objects.create_user(email="admin@posthog.com", password="password", first_name="Admin")
+            admin_user = User.objects.create_user(email="admin@hanzo.ai", password="password", first_name="Admin")
             OrganizationMembership.objects.create(
                 user=admin_user,
                 organization=self.organization,
@@ -447,7 +447,7 @@ def team_api_test_factory():
 
         @patch("insights.api.project.delete_project_data_and_notify_task")
         @patch("insights.tasks.tasks.delete_project_data_and_notify_task")
-        @patch("posthoganalytics.capture")
+        @patch("hanzoanalytics.capture")
         def test_delete_team_own_second(
             self,
             mock_capture: MagicMock,
@@ -523,7 +523,7 @@ def team_api_test_factory():
             person = Person.objects.create(
                 team=team,
                 distinct_ids=["example_id"],
-                properties={"email": "tim@posthog.com", "team": "posthog"},
+                properties={"email": "tim@hanzo.ai", "team": "insights"},
             )
             person.add_distinct_id("test")
             flag = FeatureFlag.objects.create(
@@ -550,7 +550,7 @@ def team_api_test_factory():
 
             # if something is missing then teardown fails
             with snapshot_postgres_queries_context(
-                self, custom_query_matcher=lambda query: "DELETE" in query and "posthog_person" in query
+                self, custom_query_matcher=lambda query: "DELETE" in query and "insights_person" in query
             ):
                 response = self.client.delete(f"/api/environments/{team.id}")
             self.assertEqual(response.status_code, 204)
@@ -566,7 +566,7 @@ def team_api_test_factory():
                 "config": {
                     "bucket_name": "my-production-s3-bucket",
                     "region": "us-east-1",
-                    "prefix": "posthog-events/",
+                    "prefix": "insights-events/",
                     "aws_access_key_id": "abc123",
                     "aws_secret_access_key": "secret",
                 },
@@ -612,7 +612,7 @@ def team_api_test_factory():
                 "config": {
                     "bucket_name": "my-production-s3-bucket",
                     "region": "us-east-1",
-                    "prefix": "posthog-events/",
+                    "prefix": "insights-events/",
                     "aws_access_key_id": "abc123",
                     "aws_secret_access_key": "secret",
                 },
@@ -666,7 +666,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertNotEqual(response_data["api_token"], "xyz")
             self.assertEqual(response_data["api_token"], self.team.api_token)
-            self.assertTrue(response_data["api_token"].startswith("phc_"))
+            self.assertTrue(response_data["api_token"].startswith("hi_"))
 
             self._assert_activity_log(
                 [
@@ -691,7 +691,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -725,7 +725,7 @@ def team_api_test_factory():
             self.team.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             new_secret_api_token = self.team.secret_api_token or ""
-            self.assertTrue(new_secret_api_token.startswith("phs_"))
+            self.assertTrue(new_secret_api_token.startswith("his_"))
             self.assertEqual(response_data["secret_api_token"], new_secret_api_token)
             self.assertIsNone(self.team.secret_api_token_backup)
             self._assert_activity_log(
@@ -753,7 +753,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -770,7 +770,7 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token = secret_api_token
             self.team.secret_api_token_backup = None
             self.team.save()
@@ -783,7 +783,7 @@ def team_api_test_factory():
             self.assertNotEqual(response_data["secret_api_token"], secret_api_token)
             self.assertNotEqual(response_data["secret_api_token"], self.team.secret_api_token_backup)
             self.assertEqual(response_data["secret_api_token"], self.team.secret_api_token)
-            self.assertTrue(response_data["secret_api_token"].startswith("phs_"))
+            self.assertTrue(response_data["secret_api_token"].startswith("his_"))
             # Backup token should now be the old secret API token
             self.assertEqual(response_data["secret_api_token_backup"], secret_api_token)
             self._assert_activity_log(
@@ -797,10 +797,10 @@ def team_api_test_factory():
                                     "action": "changed",
                                     "after": {
                                         "secret_api_token": mask_key_value(self.team.secret_api_token),
-                                        "secret_api_token_backup": "phs_...F11C",
+                                        "secret_api_token_backup": "his_...F11C",
                                     },
                                     "before": {
-                                        "secret_api_token": "phs_...F11C",
+                                        "secret_api_token": "his_...F11C",
                                         "secret_api_token_backup": None,
                                     },
                                     "field": "secret_api_token",
@@ -815,7 +815,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -832,9 +832,9 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token = secret_api_token
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
@@ -844,7 +844,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertNotEqual(response_data["secret_api_token"], secret_api_token)
             self.assertEqual(response_data["secret_api_token"], self.team.secret_api_token)
-            self.assertTrue(response_data["secret_api_token"].startswith("phs_"))
+            self.assertTrue(response_data["secret_api_token"].startswith("his_"))
             # Backup token should now be the old secret API token
             self.assertEqual(response_data["secret_api_token_backup"], secret_api_token)
             self._assert_activity_log(
@@ -858,11 +858,11 @@ def team_api_test_factory():
                                     "action": "changed",
                                     "after": {
                                         "secret_api_token": mask_key_value(self.team.secret_api_token),
-                                        "secret_api_token_backup": "phs_...F11C",
+                                        "secret_api_token_backup": "his_...F11C",
                                     },
                                     "before": {
-                                        "secret_api_token": "phs_...F11C",
-                                        "secret_api_token_backup": "phs_...6789",
+                                        "secret_api_token": "his_...F11C",
+                                        "secret_api_token_backup": "his_...6789",
                                     },
                                     "field": "secret_api_token",
                                     "type": "Team",
@@ -876,7 +876,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -891,8 +891,8 @@ def team_api_test_factory():
             self._assert_activity_log_is_empty()
 
             # Set the secret API token
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/api/environments/{self.team.id}/delete_secret_token_backup/")
@@ -900,7 +900,7 @@ def team_api_test_factory():
 
             self.team.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response_data["secret_api_token"], "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(response_data["secret_api_token"], "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
             self.assertIsNone(response_data["secret_api_token_backup"])
             self.assertIsNone(self.team.secret_api_token_backup)
             self._assert_activity_log(
@@ -913,7 +913,7 @@ def team_api_test_factory():
                                 {
                                     "action": "deleted",
                                     "after": None,
-                                    "before": "phs_...6789",
+                                    "before": "his_...6789",
                                     "field": "secret_api_token_backup",
                                     "type": "Team",
                                 },
@@ -926,7 +926,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -934,26 +934,26 @@ def team_api_test_factory():
             )
 
         def test_rotate_secret_token_insufficient_privileges(self):
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
             self.team.secret_api_token_backup = None
             self.team.save()
 
             response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
-            self.assertEqual(self.team.secret_api_token, "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(self.team.secret_api_token, "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
             self.assertIsNone(self.team.secret_api_token_backup)
 
         def test_delete_secret_token_backup_insufficient_privileges(self):
-            self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
-            self.team.secret_api_token_backup = "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            self.team.secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+            self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
             response = self.client.patch(f"/api/environments/{self.team.id}/delete_secret_token_backup/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
-            self.assertEqual(self.team.secret_api_token, "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
-            self.assertEqual(self.team.secret_api_token_backup, "phs_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+            self.assertEqual(self.team.secret_api_token, "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
+            self.assertEqual(self.team.secret_api_token_backup, "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
         def test_update_primary_dashboard(self):
             d = Dashboard.objects.create(name="Test", team=self.team)
@@ -1019,7 +1019,7 @@ def team_api_test_factory():
                         "item_id": str(self.team.pk),
                         "scope": "Team",
                         "user": {
-                            "email": "user1@posthog.com",
+                            "email": "user1@hanzo.ai",
                             "first_name": "",
                         },
                     },
@@ -1081,7 +1081,7 @@ def team_api_test_factory():
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 response.json()["detail"]
-                == "Field autocapture_exceptions_errors_to_ignore must be less than 300 characters. Complex config should be provided in posthog-js initialization."
+                == "Field autocapture_exceptions_errors_to_ignore must be less than 300 characters. Complex config should be provided in insights-js initialization."
             )
 
         @parameterized.expand(
@@ -1515,7 +1515,7 @@ def team_api_test_factory():
             response = self.client.patch(
                 f"/api/environments/{self.team.id}/add_product_intent/",
                 {"product_type": "product_analytics", "intent_context": "onboarding product selected - primary"},
-                headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+                headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
             )
             assert response.status_code == status.HTTP_201_CREATED
             product_intent = ProductIntent.objects.get(team=self.team, product_type="product_analytics")
@@ -1526,7 +1526,7 @@ def team_api_test_factory():
                 "user showed product intent",
                 {
                     "product_key": "product_analytics",
-                    "$current_url": "https://posthogtest.com/my-url",
+                    "$current_url": "https://insightstest.com/my-url",
                     "$session_id": "test_session_id",
                     "$set_once": {},
                     "intent_context": "onboarding product selected - primary",
@@ -1559,7 +1559,7 @@ def team_api_test_factory():
                 response = self.client.patch(
                     f"/api/environments/{self.team.id}/add_product_intent/",
                     {"product_type": "product_analytics"},
-                    headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+                    headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
                 assert response.status_code == status.HTTP_201_CREATED
                 product_intent = ProductIntent.objects.get(team=self.team, product_type="product_analytics")
@@ -1572,7 +1572,7 @@ def team_api_test_factory():
                     "user showed product intent",
                     {
                         "product_key": "product_analytics",
-                        "$current_url": "https://posthogtest.com/my-url",
+                        "$current_url": "https://insightstest.com/my-url",
                         "$session_id": "test_session_id",
                         "$set_once": {},
                         "intent_context": None,
@@ -1599,7 +1599,7 @@ def team_api_test_factory():
                 response = self.client.patch(
                     f"/api/environments/{self.team.id}/complete_product_onboarding/",
                     {"product_type": "product_analytics"},
-                    headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+                    headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
             assert response.status_code == status.HTTP_200_OK
             product_intent = ProductIntent.objects.get(team=self.team, product_type="product_analytics")
@@ -1609,7 +1609,7 @@ def team_api_test_factory():
                 "product onboarding completed",
                 {
                     "product_key": "product_analytics",
-                    "$current_url": "https://posthogtest.com/my-url",
+                    "$current_url": "https://insightstest.com/my-url",
                     "$session_id": "test_session_id",
                     "intent_context": None,
                     "intent_created_at": datetime(2024, 1, 1, 0, 0, 0, tzinfo=UTC),
@@ -1654,7 +1654,7 @@ def team_api_test_factory():
                 response = self.client.patch(
                     f"/api/environments/{self.team.id}/complete_product_onboarding/",
                     {"product_type": "product_analytics"},
-                    headers={"Referer": "https://posthogtest.com/my-url", "X-Posthog-Session-Id": "test_session_id"},
+                    headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
             assert response.status_code == status.HTTP_200_OK
             product_intent = ProductIntent.objects.get(team=self.team, product_type="product_analytics")
@@ -1664,7 +1664,7 @@ def team_api_test_factory():
                 "product onboarding completed",
                 {
                     "product_key": "product_analytics",
-                    "$current_url": "https://posthogtest.com/my-url",
+                    "$current_url": "https://insightstest.com/my-url",
                     "$session_id": "test_session_id",
                     "intent_context": None,
                     "intent_created_at": datetime(2024, 1, 1, 0, 0, 0, tzinfo=UTC),
@@ -1768,7 +1768,7 @@ def team_api_test_factory():
             assert response.status_code == expected_status, response.json()
             return response
 
-        @patch("posthoganalytics.capture_exception")
+        @patch("hanzoanalytics.capture_exception")
         def test_access_control_field_deprecated_on_update(self, mock_capture_exception):
             """Test that access_control field is deprecated and cannot be used when updating a team."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -1781,7 +1781,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             error_data = response.json()
             self.assertIn("deprecated", error_data["detail"])
-            self.assertIn("https://posthog.com/docs/settings/access-control", error_data["detail"])
+            self.assertIn("https://hanzo.ai/docs/settings/access-control", error_data["detail"])
 
             # Verify that the exception was captured
             mock_capture_exception.assert_called_once()
@@ -1791,7 +1791,7 @@ def team_api_test_factory():
             self.assertEqual(call_args[1]["properties"]["value"], "False")
             self.assertEqual(call_args[1]["properties"]["user_id"], self.user.id)
 
-        @patch("posthoganalytics.capture_exception")
+        @patch("hanzoanalytics.capture_exception")
         def test_access_control_field_deprecated_on_partial_update(self, mock_capture_exception):
             """Test that access_control field is deprecated and cannot be used when partially updating a team."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -1804,7 +1804,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             error_data = response.json()
             self.assertIn("deprecated", error_data["detail"])
-            self.assertIn("https://posthog.com/docs/settings/access-control", error_data["detail"])
+            self.assertIn("https://hanzo.ai/docs/settings/access-control", error_data["detail"])
 
             # Verify that the exception was captured
             mock_capture_exception.assert_called_once()
@@ -1814,7 +1814,7 @@ def team_api_test_factory():
             self.assertEqual(call_args[1]["properties"]["value"], "True")
             self.assertEqual(call_args[1]["properties"]["user_id"], self.user.id)
 
-        @patch("posthoganalytics.capture_exception")
+        @patch("hanzoanalytics.capture_exception")
         def test_access_control_field_deprecated_with_other_valid_fields(self, mock_capture_exception):
             """Test that access_control field is deprecated even when other valid fields are provided."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -1827,7 +1827,7 @@ def team_api_test_factory():
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             error_data = response.json()
             self.assertIn("deprecated", error_data["detail"])
-            self.assertIn("https://posthog.com/docs/settings/access-control", error_data["detail"])
+            self.assertIn("https://hanzo.ai/docs/settings/access-control", error_data["detail"])
 
             # Verify that the exception was captured
             mock_capture_exception.assert_called_once()
@@ -2284,7 +2284,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token="pha_test_oauth_token",
+            token="hia_test_oauth_token",
             scope="*",
             expires=timezone.now() + timedelta(hours=1),
             scoped_teams=[other_team_in_project.id],
@@ -2316,7 +2316,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token="pha_test_oauth_token",
+            token="hia_test_oauth_token",
             scope="*",
             expires=timezone.now() + timedelta(hours=1),
             scoped_organizations=[str(other_org.id)],
@@ -2331,7 +2331,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
             "Only the team belonging to the scoped organization should be listed, the other one should be excluded",
         )
 
-    @override_settings(SITE_URL="https://eu.posthog.com", CLOUD_DEPLOYMENT="EU")
+    @override_settings(SITE_URL="https://insights.hanzo.ai", CLOUD_DEPLOYMENT="EU")
     def test_new_eu_organization_defaults_to_anonymize_ips_true(self):
         """New organizations on EU cloud should default to default_anonymize_ips=True"""
         new_org = Organization.objects.create(name="EU Test Org")
@@ -2339,7 +2339,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         # Should automatically be True for EU cloud
         self.assertTrue(new_org.default_anonymize_ips)
 
-    @override_settings(SITE_URL="https://us.posthog.com", CLOUD_DEPLOYMENT="US")
+    @override_settings(SITE_URL="https://insights.hanzo.ai", CLOUD_DEPLOYMENT="US")
     def test_new_us_organization_defaults_to_anonymize_ips_false(self):
         """New organizations on US cloud should default to default_anonymize_ips=False"""
         new_org = Organization.objects.create(name="US Test Org")

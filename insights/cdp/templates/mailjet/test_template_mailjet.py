@@ -3,7 +3,7 @@ from insights.cdp.templates.mailjet.template_mailjet import template_create_cont
 
 
 def create_inputs(**kwargs):
-    inputs = {"api_key": "API_KEY", "secret_key": "SECRET_KEY", "email": "example@posthog.com"}
+    inputs = {"api_key": "API_KEY", "secret_key": "SECRET_KEY", "email": "example@hanzo.ai"}
     inputs.update(kwargs)
     return inputs
 
@@ -19,7 +19,7 @@ class TestTemplateMailjetCreateContact(BaseInsightsFunctionTemplateTest):
             {
                 "method": "POST",
                 "headers": {"Authorization": "Basic QVBJX0tFWTpTRUNSRVRfS0VZ", "Content-Type": "application/json"},
-                "body": {"Email": "example@posthog.com", "Name": "Example", "IsExcludedFromCampaigns": False},
+                "body": {"Email": "example@hanzo.ai", "Name": "Example", "IsExcludedFromCampaigns": False},
             },
         )
 
@@ -36,7 +36,7 @@ class TestTemplateMailjetUpdateContactList(BaseInsightsFunctionTemplateTest):
         self.run_function(inputs=create_inputs(contact_list_id=123, action="addnoforce"))
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://api.mailjet.com/v3/REST/contact/example@posthog.com/managecontactlists",
+            "https://api.mailjet.com/v3/REST/contact/example@hanzo.ai/managecontactlists",
             {
                 "method": "POST",
                 "headers": {"Authorization": "Basic QVBJX0tFWTpTRUNSRVRfS0VZ", "Content-Type": "application/json"},

@@ -1,6 +1,6 @@
 # XXX: The tables defined in this module are not used and are only retained for migration consistency reasons. See
-# `person_distinct_id_overrides` in `posthog.models.person.sql` for its replacement tables, or
-# https://github.com/PostHog/posthog/pull/23616 for additional context.
+# `person_distinct_id_overrides` in `insights.models.person.sql` for its replacement tables, or
+# https://github.com/Hanzo Insights/insights/pull/23616 for additional context.
 
 from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
 from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
@@ -37,7 +37,7 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
         -- the specific version of the `old_person_id` mapping. This is used to
         -- allow us to discard old mappings as new ones are added. This version
         -- will be provided by the corresponding PostgreSQL
-        --`posthog_personoverrides` table
+        --`insights_personoverrides` table
         version INT NOT NULL
     )
 

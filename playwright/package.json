@@ -1,12 +1,12 @@
 {
-    "name": "@posthog/playwright",
+    "name": "@hanzo/playwright",
     "scripts": {
-        "build:products": "pnpm --filter=@posthog/frontend build:products",
+        "build:products": "pnpm --filter=@hanzo/frontend build:products",
         "test": "pnpm build:products && playwright test"
     },
     "dependencies": {
         "@playwright/test": "1.45.0",
-        "@posthog/frontend": "workspace:*"
+        "@hanzo/frontend": "workspace:*"
     },
     "peerDependencies": {}
 }

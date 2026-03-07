@@ -22,9 +22,9 @@ On rare occasions, OOMs can be caused by tables that have too wide data - that i
 
 ## Repartitioning
 
-The `ExternalDataSchema` model stores partitioning settings in the `sync_type_config` json column. We have all the possible settings listed at `posthog/warehouse/models/external_data_schema.py#L57`.
+The `ExternalDataSchema` model stores partitioning settings in the `sync_type_config` json column. We have all the possible settings listed at `insights/warehouse/models/external_data_schema.py#L57`.
 
-More info on what partitioning options and the different modes can be found here: https://github.com/PostHog/posthog/blob/master/posthog/temporal/data_imports/sources/README.md#partitioning
+More info on what partitioning options and the different modes can be found here: https://github.com/Hanzo Insights/insights/blob/master/insights/temporal/data_imports/sources/README.md#partitioning
 
 If a table has the `partition_mode` set to `datetime`, then you'll likely see that `partition_format` is set to either `month` or `None` (which means `month`). To repartition by `day`, you'll want to update this value to `day` and then perform a resync below.
 
@@ -36,7 +36,7 @@ If the table has no partitions, but it could be partitioned, then again just res
 
 When we resync a table, we do so from a k8s pod. We have the ability to disable billing for a sync via this method meaning that a user won't be charged for us repartitioning their data.
 
-To connect to a pod, follow this runbook: https://runbooks.posthog.com/EKS/access
+To connect to a pod, follow this runbook: https://runbooks.hanzo.ai/EKS/access
 
 The following code snippet will both disable billing and reset the table - which means deleting all existing table files (other than query files). Make sure to run this on a `temporal-worker-data-warehouse` pod - they have all the correct env vars set up for this:
 

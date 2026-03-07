@@ -1,4 +1,4 @@
-"""Tests for the posthog_persons without distinct_ids in posthog_persondistinctid cleanup job."""
+"""Tests for the insights_persons without distinct_ids in insights_persondistinctid cleanup job."""
 
 from unittest.mock import MagicMock, patch
 

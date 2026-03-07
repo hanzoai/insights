@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { BindLogic, BuiltLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { LemonWidget } from 'lib/lemon-ui/LemonWidget'

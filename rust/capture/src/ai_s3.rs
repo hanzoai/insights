@@ -75,7 +75,7 @@ fn generate_boundary(event_uuid: &str) -> String {
         .take(8)
         .map(char::from)
         .collect();
-    format!("----posthog-ai-{event_uuid}-{suffix}")
+    format!("----insights-ai-{event_uuid}-{suffix}")
 }
 
 /// Write multipart part headers and body directly into the buffer.
@@ -402,9 +402,9 @@ mod tests {
         let boundary = generate_boundary(uuid);
 
         // Should start with prefix and contain event UUID
-        assert!(boundary.starts_with("----posthog-ai-550e8400-e29b-41d4-a716-446655440000-"));
+        assert!(boundary.starts_with("----insights-ai-550e8400-e29b-41d4-a716-446655440000-"));
         // Should have 8-char random suffix
-        let expected_prefix = "----posthog-ai-550e8400-e29b-41d4-a716-446655440000-";
+        let expected_prefix = "----insights-ai-550e8400-e29b-41d4-a716-446655440000-";
         assert_eq!(boundary.len(), expected_prefix.len() + 8);
 
         // Each call should generate different boundary

@@ -18,7 +18,7 @@ pub mod issue_resolution;
 pub mod langs;
 pub mod metric_consts;
 pub mod pipeline;
-pub mod posthog_utils;
+pub mod insights_utils;
 pub mod router;
 pub mod server;
 pub mod stages;

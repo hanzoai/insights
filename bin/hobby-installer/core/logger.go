@@ -31,7 +31,7 @@ func InitLogFile() error {
 	globalLog.mu.Lock()
 	globalLog.logFile = f
 	globalLog.mu.Unlock()
-	globalLog.Info("=== PostHog Hobby Installer started at %s ===", time.Now().Format(time.RFC3339))
+	globalLog.Info("=== Insights Hobby Installer started at %s ===", time.Now().Format(time.RFC3339))
 	return nil
 }
 

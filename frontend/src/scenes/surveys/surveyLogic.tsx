@@ -2,9 +2,9 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, reducer
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -1078,7 +1078,7 @@ export const surveyLogic = kea<surveyLogicType>([
                     lemonToast.success('Response archived')
                 } catch (error) {
                     lemonToast.error('Failed to archive response')
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         action: 'archive-survey-response',
                         survey: values.survey.id,
                         response: responseUuid,
@@ -1097,7 +1097,7 @@ export const surveyLogic = kea<surveyLogicType>([
                     lemonToast.success('Response unarchived')
                 } catch (error) {
                     lemonToast.error('Failed to unarchive response')
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         action: 'unarchive-survey-response',
                         survey: values.survey.id,
                         response: responseUuid,
@@ -1116,7 +1116,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 } catch (error) {
                     lemonToast.error('Failed to update notification')
                     actions.loadSurveyNotifications()
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         action: 'toggle-survey-notification',
                         survey: values.survey.id,
                         notification: notificationId,
@@ -1395,7 +1395,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 /**
                  * Return only complete responses. For pre-partial responses, we didn't have the survey_completed property.
                  * So we return all responses that don't have it.
-                 * For posthog-js > 1.240, we use the $survey_completed property.
+                 * For insights-js > 1.240, we use the $survey_completed property.
                  */
                 return `AND (
                             NOT JSONHas(properties, '${SurveyEventProperties.SURVEY_COMPLETED}')

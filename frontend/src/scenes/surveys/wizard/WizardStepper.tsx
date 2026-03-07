@@ -1,5 +1,5 @@
-import { IconCheckCircle, IconWarning } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconWarning } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 

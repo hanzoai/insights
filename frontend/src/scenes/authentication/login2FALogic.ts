@@ -142,12 +142,12 @@ export const login2FALogic = kea<login2FALogicType>([
     listeners({
         submitTwofactortokenSuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTHOG_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
         beginPasskey2FASuccess: () => {
             handleLoginRedirect()
-            // Reload the page after login to ensure POSTHOG_APP_CONTEXT is set correctly.
+            // Reload the page after login to ensure INSIGHTS_APP_CONTEXT is set correctly.
             window.location.reload()
         },
     }),

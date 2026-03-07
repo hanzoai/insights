@@ -6,7 +6,7 @@ from typing import Literal, cast
 from django.utils import timezone
 
 import structlog
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from pydantic import BaseModel, Field
 
 from insights.schema import (
@@ -133,7 +133,7 @@ class SearchErrorTrackingIssuesArgs(BaseModel):
         - event.$os: Operating system
         - event.$device_type: Device type (Desktop, Mobile, Tablet)
         - event.$current_url: URL where error occurred
-        - event.$lib: SDK/library used (web, posthog-python, posthog-node, etc.)
+        - event.$lib: SDK/library used (web, hanzo-insights, insights-node, etc.)
 
         ## filterTestAccounts (optional)
         - true: Exclude internal/test accounts

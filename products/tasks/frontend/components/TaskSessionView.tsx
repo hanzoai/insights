@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconCopy } from '@posthog/icons'
-import { LemonButton, Spinner } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { LemonButton, Spinner } from '@hanzo/lemon-ui'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 

@@ -1,9 +1,9 @@
 import { LogicWrapper, actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput } from '@hanzo/lemon-ui'
 
 import { insightAlertsLogic } from 'lib/components/Alerts/insightAlertsLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -389,7 +389,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             null as 'liked' | 'disliked' | null,
             {
                 persist: true,
-                prefix: `${window.POSTHOG_APP_CONTEXT?.current_team?.id}_`,
+                prefix: `${window.INSIGHTS_APP_CONTEXT?.current_team?.id}_`,
             },
             {
                 setInsightFeedback: (_, { feedback }) => feedback,
@@ -698,7 +698,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
         },
         setInsightFeedback: ({ feedback }) => {
             const eventName = `customer-analytics-insight-${feedback}`
-            posthog.capture(eventName, {
+            insights.capture(eventName, {
                 insight_id: values.insight.short_id,
                 insight_name: values.insight.name,
                 dashboard_id: values.insightProps.dashboardId,

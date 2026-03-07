@@ -6,14 +6,14 @@ export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            if (posthog.isFeatureEnabled('flag-key')) {
+            if (insights.isFeatureEnabled('flag-key')) {
                 // Do something differently for this user
                 // Optional: fetch the payload
-                const matchedFlagPayload = posthog.getFeatureFlagPayload('flag-key')
+                const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
             }
         `,
         react: dedent`
-            import { useFeatureFlagEnabled } from '@posthog/react'
+            import { useFeatureFlagEnabled } from '@hanzo/react'
 
             function App() {
                 const showWelcomeMessage = useFeatureFlagEnabled('flag-key')
@@ -44,11 +44,11 @@ export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?
             }
         `,
         python: dedent`
-            is_my_flag_enabled = posthog.feature_enabled('flag-key', 'distinct_id_of_your_user')
+            is_my_flag_enabled = insights.feature_enabled('flag-key', 'distinct_id_of_your_user')
             if is_my_flag_enabled:
                 # Do something differently for this user
                 # Optional: fetch the payload
-                matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+                matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
         `,
         php: dedent`
             $isMyFlagEnabledForUser = Insights::isFeatureEnabled('flag-key', 'distinct_id_of_your_user')
@@ -57,15 +57,15 @@ export const BooleanFlagSnippet = memo(({ language = 'javascript' }: { language?
             }
         `,
         ruby: dedent`
-            is_my_flag_enabled = posthog.is_feature_enabled('flag-key', 'distinct_id_of_your_user')
+            is_my_flag_enabled = insights.is_feature_enabled('flag-key', 'distinct_id_of_your_user')
             if is_my_flag_enabled
                 # Do something differently for this user
                 # Optional: fetch the payload
-                matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+                matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
             end
         `,
         go: dedent`
-            isMyFlagEnabled, err := client.IsFeatureEnabled(posthog.FeatureFlagPayload{
+            isMyFlagEnabled, err := client.IsFeatureEnabled(insights.FeatureFlagPayload{
                 Key:        "flag-key",
                 DistinctId: "distinct_id_of_your_user",
             })

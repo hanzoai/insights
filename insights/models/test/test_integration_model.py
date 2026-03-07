@@ -30,13 +30,13 @@ from insights.models.team.team import Team
 
 def get_db_field_value(field, model_id):
     cursor = connection.cursor()
-    cursor.execute(f"select {field} from posthog_integration where id='{model_id}';")
+    cursor.execute(f"select {field} from insights_integration where id='{model_id}';")
     return cursor.fetchone()[0]
 
 
 def update_db_field_value(field, model_id, value):
     cursor = connection.cursor()
-    cursor.execute(f"update posthog_integration set {field}='{value}' where id='{model_id}';")
+    cursor.execute(f"update insights_integration set {field}='{value}' where id='{model_id}';")
 
 
 class TestIntegrationModel(BaseTest):
@@ -512,15 +512,15 @@ class TestOauthIntegrationModel(BaseTest):
 class TestGoogleCloudIntegrationModel(BaseTest):
     mock_keyfile = {
         "type": "service_account",
-        "project_id": "posthog-616",
+        "project_id": "insights-616",
         "private_key_id": "df3e129a722a865cc3539b4e69507bad",
         "private_key": "-----BEGIN PRIVATE KEY-----\nTHISISTHEKEY==\n-----END PRIVATE KEY-----\n",
-        "client_email": "hog-pubsub-test@posthog-301601.iam.gserviceaccount.com",
+        "client_email": "hog-pubsub-test@insights-301601.iam.gserviceaccount.com",
         "client_id": "11223344556677889900",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/not-a-topic%40posthog-616.iam.gserviceaccount.com",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/not-a-topic%40insights-616.iam.gserviceaccount.com",
         "universe_domain": "googleapis.com",
     }
 
@@ -536,8 +536,8 @@ class TestGoogleCloudIntegrationModel(BaseTest):
 
     @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     def test_integration_from_key(self, mock_credentials):
-        mock_credentials.return_value.project_id = "posthog-616"
-        mock_credentials.return_value.service_account_email = "posthog@"
+        mock_credentials.return_value.project_id = "insights-616"
+        mock_credentials.return_value.service_account_email = "insights@"
         mock_credentials.return_value.token = "ACCESS_TOKEN"
         mock_credentials.return_value.expiry = datetime.fromtimestamp(1704110400 + 3600)
         mock_credentials.return_value.refresh = lambda _: None
@@ -562,8 +562,8 @@ class TestGoogleCloudIntegrationModel(BaseTest):
 
     @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     def test_integration_refresh_token(self, mock_credentials):
-        mock_credentials.return_value.project_id = "posthog-616"
-        mock_credentials.return_value.service_account_email = "posthog@"
+        mock_credentials.return_value.project_id = "insights-616"
+        mock_credentials.return_value.service_account_email = "insights@"
         mock_credentials.return_value.token = "ACCESS_TOKEN"
         mock_credentials.return_value.expiry = datetime.fromtimestamp(1704110400 + 3600)
         mock_credentials.return_value.refresh = lambda _: None

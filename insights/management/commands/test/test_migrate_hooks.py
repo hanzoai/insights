@@ -62,7 +62,7 @@ class TestMigrateHooks(BaseTest):
             "actions": [{"id": f"{self.action.id}", "name": "", "type": "actions", "order": 0}],
             "bytecode": ["_H", INSIGHTSQL_BYTECODE_VERSION, 29],
         }
-        assert insights_function.hog == template_zapier.code
+        assert insights_function.iql == template_zapier.code
         assert insights_function.description == f"{template_zapier.description} Migrated from legacy hook {self.hook.id}."
         assert insights_function.inputs_schema == template_zapier.inputs_schema
         assert insights_function.template_id == template_zapier.id

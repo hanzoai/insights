@@ -1,4 +1,4 @@
-{% extends "email/base.html" %} {% load posthog_assets %} {% block section %}
+{% extends "email/base.html" %} {% load insights_assets %} {% block section %}
 <h1 class="invite-header">
     <strong>{{ invite.created_by.first_name }}</strong> has invited you to join
     <strong>{{ invite.organization.name }}</strong> on Insights
@@ -23,7 +23,7 @@
 </div>
 <p class="invite-bottom">This invitation will expire on {{ expiry_date }}.</p>
 <p class="text-center">
-    <a target="_blank" href="https://posthog.com"><b>https://posthog.com</b></a>
+    <a target="_blank" href="https://hanzo.ai"><b>https://hanzo.ai</b></a>
 </p>
 <div class="text-center">
     <img src="{% absolute_asset_url 'email/invite-email-welcome.png' %}" />
@@ -31,4 +31,4 @@
 
 {% block footer %}
 {% endblock %}
-{% endblock %}{% load posthog_filters %}
+{% endblock %}{% load insights_filters %}

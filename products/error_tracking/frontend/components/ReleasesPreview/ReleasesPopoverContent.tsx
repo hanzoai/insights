@@ -1,9 +1,9 @@
 import { ReactNode, createElement, useMemo } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { IconCommit, IconGitBranch, IconGitRepository, IconShare } from '@posthog/icons'
-import { IconComponent, IconProps } from '@posthog/icons/dist/src/types/icon-types'
-import { LemonTag, LemonTagProps, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCommit, IconGitBranch, IconGitRepository, IconShare } from '@hanzo/icons'
+import { IconComponent, IconProps } from '@hanzo/icons/dist/src/types/icon-types'
+import { LemonTag, LemonTagProps, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { ErrorTrackingRelease, ReleaseGitMetadata } from 'lib/components/Errors/types'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

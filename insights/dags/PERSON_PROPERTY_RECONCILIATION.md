@@ -284,8 +284,8 @@ Use the extraction script to identify which teams failed:
 export DAGSTER_CLOUD_TOKEN="<your-user-token>"
 
 # Extract failed teams from recent runs
-python posthog/dags/scripts/extract_reconciliation_results.py \
-    --org posthog \
+python insights/dags/scripts/extract_reconciliation_results.py \
+    --org insights \
     --deployment prod-us \
     --since "2026-01-27" \
     --until "2026-01-30" \
@@ -393,7 +393,7 @@ The job emits these metrics to ClickHouse:
 
 ## Backup and Recovery
 
-When `backup_enabled: true`, the job stores before/after state in `posthog_person_reconciliation_backup`:
+When `backup_enabled: true`, the job stores before/after state in `insights_person_reconciliation_backup`:
 
 - `job_id`: Dagster run ID
 - `properties` / `properties_after`: Before/after JSON

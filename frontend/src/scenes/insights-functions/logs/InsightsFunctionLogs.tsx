@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonMenu, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonDialog, LemonMenu, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { capitalizeFirstLetter } from 'lib/utils'

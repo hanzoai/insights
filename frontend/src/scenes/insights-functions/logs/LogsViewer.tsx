@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconEye, IconList, IconRefresh, IconSearch, IconTableOfContents } from '@posthog/icons'
+import { IconCalendar, IconEye, IconList, IconRefresh, IconSearch, IconTableOfContents } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -11,7 +11,7 @@ import {
     LemonTag,
     LemonTagProps,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

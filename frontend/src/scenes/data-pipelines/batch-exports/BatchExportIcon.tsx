@@ -1,4 +1,4 @@
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { BatchExportService } from '~/types'
 
@@ -11,7 +11,7 @@ import IconRedshift from 'public/services/redshift.png'
 import IconSnowflake from 'public/services/snowflake.png'
 
 export function getBatchExportUrl(service: BatchExportService['type']): string {
-    return `https://posthog.com/docs/cdp/batch-exports/${service.toLowerCase()}`
+    return `https://hanzo.ai/docs/cdp/batch-exports/${service.toLowerCase()}`
 }
 
 export const BATCH_EXPORT_ICON_MAP: Record<BatchExportService['type'], string> = {

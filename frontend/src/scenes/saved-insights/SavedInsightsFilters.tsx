@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconFlag, IconStar } from '@posthog/icons'
-import { LemonDropdown, ProfilePicture } from '@posthog/lemon-ui'
+import { IconFlag, IconStar } from '@hanzo/icons'
+import { LemonDropdown, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { TagSelect } from 'lib/components/TagSelect'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -52,7 +52,7 @@ export function SavedInsightsFilters({
         const newValue = Array.from(selected)
         const createdByValue = newValue.length > 0 ? newValue : 'All users'
         setFilters({ createdBy: createdByValue })
-        posthog.capture('saved insights filtered', { filter_type: 'created_by', value: createdByValue })
+        insights.capture('saved insights filtered', { filter_type: 'created_by', value: createdByValue })
     }
 
     return (
@@ -75,7 +75,7 @@ export function SavedInsightsFilters({
                             status={borderless && !hasInsightTypeSelection ? 'alt' : 'default'}
                             onChange={(value) => {
                                 setFilters({ insightType: value as string })
-                                posthog.capture('saved insights filtered', { filter_type: 'insight_type', value })
+                                insights.capture('saved insights filtered', { filter_type: 'insight_type', value })
                             }}
                             options={INSIGHT_TYPE_OPTIONS}
                             value={insightType || 'All types'}
@@ -86,7 +86,7 @@ export function SavedInsightsFilters({
                             value={tags || []}
                             onChange={(tags) => {
                                 setFilters({ tags: tags.length > 0 ? tags : [] })
-                                posthog.capture('saved insights filtered', { filter_type: 'tags', value: tags })
+                                insights.capture('saved insights filtered', { filter_type: 'tags', value: tags })
                             }}
                         >
                             {(selectedTags) => (

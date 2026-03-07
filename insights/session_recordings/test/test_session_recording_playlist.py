@@ -440,7 +440,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
     def test_does_not_count_empty_object_as_filters(self) -> None:
         """
         can delete a collection despite there is an empty object for filters
-        a regression test for https://github.com/PostHog/posthog/issues/35820
+        a regression test for https://github.com/Hanzo Insights/insights/issues/35820
         """
         create_response = self._create_playlist({"type": "collection"})
         assert "short_id" in create_response.json(), create_response.json()
@@ -506,7 +506,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
     def test_filters_based_on_params(
         self, _name: str, query_template: str, expected_playlist_indices: list[int]
     ) -> None:
-        other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password")
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password")
         playlists = [
             SessionRecordingPlaylist.objects.create(team=self.team, name="playlist", created_by=self.user),
             SessionRecordingPlaylist.objects.create(team=self.team, pinned=True, created_by=self.user),
@@ -788,7 +788,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         )
 
     @patch(
-        "insights.insightsql.database.database.posthoganalytics.feature_enabled",
+        "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
         new=MagicMock(return_value=False),
     )
     @snapshot_postgres_queries

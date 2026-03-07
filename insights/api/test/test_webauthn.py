@@ -305,7 +305,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
         self.assertEqual(len(credentials), 2)
 
     def test_list_credentials_only_returns_own(self):
-        other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password123")
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
         WebauthnCredential.objects.create(
             user=other_user,
             credential_id=b"other-credential",
@@ -337,7 +337,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_other_users_credential_fails(self):
-        other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password123")
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
         other_credential = WebauthnCredential.objects.create(
             user=other_user,
             credential_id=b"other-credential",

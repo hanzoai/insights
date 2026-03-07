@@ -34,7 +34,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         for i in range(0, count):
             payload.append(
                 {
-                    "target_email": f"test+{random.randint(1000000, 9999999)}@posthog.com",
+                    "target_email": f"test+{random.randint(1000000, 9999999)}@hanzo.ai",
                     "first_name": NAME_SEEDS[i % len(NAME_SEEDS)],
                 }
             )
@@ -45,7 +45,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     def test_cant_list_invites_for_an_alien_organization(self):
         org = Organization.objects.create(name="Alien Org")
-        invite = OrganizationInvite.objects.create(target_email="siloed@posthog.com", organization=org)
+        invite = OrganizationInvite.objects.create(target_email="siloed@hanzo.ai", organization=org)
 
         response = self.client.get(f"/api/organizations/{org.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -58,7 +58,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     # Creating invites
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_add_organization_invite_email_required(self, mock_capture):
         response = self.client.post("/api/organizations/@current/invites/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -75,12 +75,12 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         mock_capture.assert_not_called()
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_add_organization_invite_with_email(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
         email = "x@x.com"
 
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
                 "/api/organizations/@current/invites/",
                 {"target_email": email},
@@ -150,7 +150,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertListEqual(mail.outbox[0].to, [email])
         self.assertEqual(mail.outbox[0].reply_to, [self.user.email])  # Reply-To is set to the inviting user
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_add_organization_invite_with_email_on_instance_but_send_email_prop_false(self, mock_capture):
         """
         Email is available on the instance, but the user creating the invite does not want to send an email to the invitee.
@@ -158,7 +158,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
         email = "x@x.com"
 
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
                 "/api/organizations/@current/invites/", {"target_email": email, "send_email": False}
             )
@@ -170,7 +170,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_create_invites_for_the_same_email_multiple_times_deletes_older_invites(self):
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         count = OrganizationInvite.objects.count()
 
         for _ in range(0, 3):
@@ -183,7 +183,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(OrganizationInvite.objects.count(), count + 1)
 
     def test_can_specify_private_project_access_in_invite(self):
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         count = OrganizationInvite.objects.count()
         private_team = Team.objects.create(organization=self.organization, name="Private Team")
 
@@ -220,7 +220,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         org_membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
         org_membership.level = OrganizationMembership.Level.MEMBER
         org_membership.save()
-        email = "y@posthog.com"
+        email = "y@hanzo.ai"
         count = OrganizationInvite.objects.count()
         response = self.client.post(
             "/api/organizations/@current/invites/",
@@ -245,7 +245,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         org_membership.level = OrganizationMembership.Level.ADMIN
         org_membership.save()
 
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         count = OrganizationInvite.objects.count()
         private_team = Team.objects.create(organization=self.organization, name="Private Team")
 
@@ -275,7 +275,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         org_membership.save()
 
     def test_invite_fails_if_team_in_private_project_access_not_in_org(self):
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         count = OrganizationInvite.objects.count()
         other_org = Organization.objects.create(name="Other Org")
         team_in_other_org = Team.objects.create(organization=other_org, name="Private Team")
@@ -309,7 +309,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(OrganizationInvite.objects.count(), count)
 
     def test_invite_fails_if_inviter_does_not_have_access_to_team(self):
-        email = "xx@posthog.com"
+        email = "xx@hanzo.ai"
         count = OrganizationInvite.objects.count()
         private_team = Team.objects.create(organization=self.organization, name="Private Team")
 
@@ -342,7 +342,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(OrganizationInvite.objects.count(), count)
 
     def test_invite_fails_if_inviter_level_is_lower_than_requested_level(self):
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         count = OrganizationInvite.objects.count()
         private_team = Team.objects.create(organization=self.organization, name="Private Team")
         organization_membership = OrganizationMembership.objects.get(user=self.user, organization=self.organization)
@@ -389,7 +389,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         another_org = Organization.objects.create(name="Another Org")
 
         count = OrganizationInvite.objects.count()
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         response = self.client.post(f"/api/organizations/{another_org.id}/invites/", {"target_email": email})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
@@ -398,19 +398,19 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     # Bulk create invites
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_allow_bulk_creating_invites(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
 
         count = OrganizationInvite.objects.count()
         payload = self.helper_generate_bulk_invite_payload(7)
 
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
                 "/api/organizations/@current/invites/bulk/",
                 payload,
                 format="json",
-                headers={"X-Posthog-Session-Id": "123", "Referer": "http://test.posthog.com/my-url"},
+                headers={"X-Insights-Session-Id": "123", "Referer": "http://test.hanzo.ai/my-url"},
             )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.json()
@@ -441,7 +441,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
                 "current_member_count": 1,
                 "email_available": True,
                 "$session_id": "123",
-                "$current_url": "http://test.posthog.com/my-url",
+                "$current_url": "http://test.hanzo.ai/my-url",
             },
             groups={
                 "instance": ANY,
@@ -471,7 +471,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         with self.settings(
             EMAIL_ENABLED=True,
             EMAIL_HOST="localhost",
-            SITE_URL="http://test.posthog.com",
+            SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post("/api/organizations/@current/invites/bulk/", payload, format="json")
 
@@ -500,7 +500,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         with self.settings(
             EMAIL_ENABLED=True,
             EMAIL_HOST="localhost",
-            SITE_URL="http://test.posthog.com",
+            SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post("/api/organizations/@current/invites/bulk/", payload, format="json")
 
@@ -521,7 +521,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         with self.settings(
             EMAIL_ENABLED=True,
             EMAIL_HOST="localhost",
-            SITE_URL="http://test.posthog.com",
+            SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post(
                 f"/api/organizations/{another_org.id}/invites/bulk/",
@@ -576,10 +576,10 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     # Combine pending invites
 
     def test_combine_pending_invites_combines_levels_and_project_access(self):
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
         self.client.force_login(admin_user)
 
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         private_team_1 = Team.objects.create(organization=self.organization, name="Private Team 1")
         private_team_2 = Team.objects.create(organization=self.organization, name="Private Team 2")
 
@@ -652,7 +652,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             self.assertIn(access, combined_invite["private_project_access"])
 
     def test_combine_pending_invites_with_no_existing_invites(self):
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
         response = self.client.post(
             "/api/organizations/@current/invites/",
             {
@@ -670,7 +670,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     @freeze_time("2024-01-10")
     def test_combine_pending_invites_with_expired_invites(self):
-        email = "xyz@posthog.com"
+        email = "xyz@hanzo.ai"
 
         # Create an expired invite
         with freeze_time("2023-01-05"):
@@ -698,10 +698,10 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(invite["private_project_access"], [])
 
     def test_combine_pending_invites_false_expires_existing_invites(self):
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
         self.client.force_login(admin_user)
 
-        email = "x@posthog.com"
+        email = "x@hanzo.ai"
 
         # Create first invite
         first_invite = self.client.post(
@@ -733,7 +733,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     def test_member_cannot_invite_admin(self):
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
 
         # Login as the member
         self.client.force_login(member_user)
@@ -742,7 +742,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "new_admin@posthog.com",
+                "target_email": "new_admin@hanzo.ai",
                 "level": OrganizationMembership.Level.ADMIN,
             },
         )
@@ -753,11 +753,11 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             "You cannot invite a user with a higher permission level than your own.",
         )
 
-        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_admin@posthog.com").count(), 0)
+        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_admin@hanzo.ai").count(), 0)
 
     def test_admin_cannot_invite_owner(self):
         # Create an admin user
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
 
         # Login as the admin
         self.client.force_login(admin_user)
@@ -766,7 +766,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "new_owner@posthog.com",
+                "target_email": "new_owner@hanzo.ai",
                 "level": OrganizationMembership.Level.OWNER,
             },
         )
@@ -778,11 +778,11 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         )
 
         # Verify no invite was created
-        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_owner@posthog.com").count(), 0)
+        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_owner@hanzo.ai").count(), 0)
 
     def test_member_can_invite_member(self):
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
 
         # Login as the member
         self.client.force_login(member_user)
@@ -791,7 +791,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "new_member@posthog.com",
+                "target_email": "new_member@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         )
@@ -799,13 +799,13 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify invite was created
-        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_member@posthog.com").count(), 1)
-        invite = OrganizationInvite.objects.get(target_email="new_member@posthog.com")
+        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_member@hanzo.ai").count(), 1)
+        invite = OrganizationInvite.objects.get(target_email="new_member@hanzo.ai")
         self.assertEqual(invite.level, OrganizationMembership.Level.MEMBER)
 
     def test_admin_can_invite_admin(self):
         # Create an admin user
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
 
         # Login as the admin
         self.client.force_login(admin_user)
@@ -814,7 +814,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "new_admin@posthog.com",
+                "target_email": "new_admin@hanzo.ai",
                 "level": OrganizationMembership.Level.ADMIN,
             },
         )
@@ -822,13 +822,13 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify invite was created
-        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_admin@posthog.com").count(), 1)
-        invite = OrganizationInvite.objects.get(target_email="new_admin@posthog.com")
+        self.assertEqual(OrganizationInvite.objects.filter(target_email="new_admin@hanzo.ai").count(), 1)
+        invite = OrganizationInvite.objects.get(target_email="new_admin@hanzo.ai")
         self.assertEqual(invite.level, OrganizationMembership.Level.ADMIN)
 
     def test_bulk_invite_with_higher_permission_level(self):
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
 
         # Login as the member
         self.client.force_login(member_user)
@@ -836,15 +836,15 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         # Try to bulk invite users with mixed permission levels
         payload = [
             {
-                "target_email": "new_member@posthog.com",
+                "target_email": "new_member@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
             {
-                "target_email": "new_admin@posthog.com",
+                "target_email": "new_admin@hanzo.ai",
                 "level": OrganizationMembership.Level.ADMIN,
             },
             {
-                "target_email": "another_member@posthog.com",
+                "target_email": "another_member@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         ]
@@ -861,14 +861,14 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         # Verify no invites were created
         self.assertEqual(
             OrganizationInvite.objects.filter(
-                target_email__in=["new_member@posthog.com", "new_admin@posthog.com", "another_member@posthog.com"]
+                target_email__in=["new_member@hanzo.ai", "new_admin@hanzo.ai", "another_member@hanzo.ai"]
             ).count(),
             0,
         )
 
     def test_bulk_invite_with_same_permission_level(self):
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
 
         # Login as the member
         self.client.force_login(member_user)
@@ -876,11 +876,11 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         # Try to bulk invite users with same permission level
         payload = [
             {
-                "target_email": "new_member1@posthog.com",
+                "target_email": "new_member1@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
             {
-                "target_email": "new_member2@posthog.com",
+                "target_email": "new_member2@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         ]
@@ -893,7 +893,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         # Verify invites were created
         self.assertEqual(
             OrganizationInvite.objects.filter(
-                target_email__in=["new_member1@posthog.com", "new_member2@posthog.com"]
+                target_email__in=["new_member1@hanzo.ai", "new_member2@hanzo.ai"]
             ).count(),
             2,
         )
@@ -901,7 +901,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_member_cannot_invite_when_members_can_invite_false_and_feature_available(self):
         """Test that members cannot invite when members_can_invite is False and ORGANIZATION_INVITE_SETTINGS is available."""
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
         self.client.force_login(member_user)
 
         # Enable ORGANIZATION_INVITE_SETTINGS feature and set members_can_invite to False
@@ -916,7 +916,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         )
@@ -927,7 +927,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             f"/api/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
-                    "target_email": "test1@posthog.com",
+                    "target_email": "test1@hanzo.ai",
                     "level": OrganizationMembership.Level.MEMBER,
                 }
             ],
@@ -936,7 +936,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     def test_member_cannot_delete_invite_when_members_can_invite_false(self):
         # Create a member user and log in as them
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
         self.client.force_login(member_user)
 
         self.organization.available_product_features = [
@@ -947,7 +947,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.organization.save()
 
         # Create an invite as an admin (so it exists)
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
         invite = OrganizationInvite.objects.create(organization=self.organization, created_by=admin_user)
 
         # Try to delete as member
@@ -958,7 +958,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_member_can_invite_when_members_can_invite_true_and_feature_available(self):
         """Test that members can invite when members_can_invite is True and ORGANIZATION_INVITE_SETTINGS is available."""
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
         self.client.force_login(member_user)
 
         # Enable ORGANIZATION_INVITE_SETTINGS feature and set members_can_invite to True
@@ -973,7 +973,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         )
@@ -984,7 +984,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             f"/api/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
-                    "target_email": "test1@posthog.com",
+                    "target_email": "test1@hanzo.ai",
                     "level": OrganizationMembership.Level.MEMBER,
                 }
             ],
@@ -994,7 +994,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_admin_can_always_invite_regardless_of_members_can_invite(self):
         """Test that admins can always invite regardless of members_can_invite setting."""
         # Create an admin user
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
         self.client.force_login(admin_user)
 
         # Enable ORGANIZATION_INVITE_SETTINGS feature and set members_can_invite to False
@@ -1006,7 +1006,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         )
@@ -1017,7 +1017,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             f"/api/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
-                    "target_email": "test1@posthog.com",
+                    "target_email": "test1@hanzo.ai",
                     "level": OrganizationMembership.Level.MEMBER,
                 }
             ],
@@ -1027,7 +1027,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_member_can_invite_when_feature_not_available(self):
         """Test that members can invite when ORGANIZATION_INVITE_SETTINGS feature is not available."""
         # Create a member user
-        member_user = self._create_user("member@posthog.com")
+        member_user = self._create_user("member@hanzo.ai")
         self.client.force_login(member_user)
 
         # Ensure ORGANIZATION_INVITE_SETTINGS feature is not available
@@ -1039,7 +1039,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
             },
         )
@@ -1050,7 +1050,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             f"/api/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
-                    "target_email": "test1@posthog.com",
+                    "target_email": "test1@hanzo.ai",
                     "level": OrganizationMembership.Level.MEMBER,
                 }
             ],
@@ -1065,7 +1065,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         team = Team.objects.create(organization=self.organization, name="New Team")
 
         # Create an admin user
-        admin_user = self._create_user("admin@posthog.com", level=OrganizationMembership.Level.ADMIN)
+        admin_user = self._create_user("admin@hanzo.ai", level=OrganizationMembership.Level.ADMIN)
 
         # Login as the admin
         self.client.force_login(admin_user)
@@ -1074,7 +1074,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
             },
         )
@@ -1083,7 +1083,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify the invite was created with the correct private project access
-        invite = OrganizationInvite.objects.get(target_email="test@posthog.com")
+        invite = OrganizationInvite.objects.get(target_email="test@hanzo.ai")
         self.assertEqual(len(invite.private_project_access), 1)
         self.assertEqual(invite.private_project_access[0]["id"], team.id)
         self.assertEqual(invite.private_project_access[0]["level"], "member")
@@ -1096,7 +1096,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         team = Team.objects.create(organization=self.organization, name="New Team")
 
         # Create a member user
-        member_user = self._create_user("member@posthog.com", level=OrganizationMembership.Level.MEMBER)
+        member_user = self._create_user("member@hanzo.ai", level=OrganizationMembership.Level.MEMBER)
 
         # Login as the member
         self.client.force_login(member_user)
@@ -1105,7 +1105,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
             },
         )
@@ -1114,7 +1114,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify the invite was created with the correct private project access
-        invite = OrganizationInvite.objects.get(target_email="test@posthog.com")
+        invite = OrganizationInvite.objects.get(target_email="test@hanzo.ai")
         self.assertEqual(len(invite.private_project_access), 1)
         self.assertEqual(invite.private_project_access[0]["id"], team.id)
         self.assertEqual(invite.private_project_access[0]["level"], "member")
@@ -1127,7 +1127,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         team = Team.objects.create(organization=self.organization, name="New Team")
 
         # Create a member user
-        member_user = self._create_user("member@posthog.com", level=OrganizationMembership.Level.MEMBER)
+        member_user = self._create_user("member@hanzo.ai", level=OrganizationMembership.Level.MEMBER)
 
         # Login as the member
         self.client.force_login(member_user)
@@ -1139,7 +1139,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
             },
         )
@@ -1159,7 +1159,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         team = Team.objects.create(organization=self.organization, name="New Team")
 
         # Create a member user
-        member_user = self._create_user("member@posthog.com", level=OrganizationMembership.Level.MEMBER)
+        member_user = self._create_user("member@hanzo.ai", level=OrganizationMembership.Level.MEMBER)
         member_membership = OrganizationMembership.objects.get(organization=self.organization, user=member_user)
 
         # Login as the member
@@ -1181,7 +1181,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         response = self.client.post(
             f"/api/organizations/{self.organization.id}/invites/",
             {
-                "target_email": "test@posthog.com",
+                "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
             },
         )
@@ -1190,18 +1190,18 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify the invite was created with the correct private project access
-        invite = OrganizationInvite.objects.get(target_email="test@posthog.com")
+        invite = OrganizationInvite.objects.get(target_email="test@hanzo.ai")
         self.assertEqual(len(invite.private_project_access), 1)
         self.assertEqual(invite.private_project_access[0]["id"], team.id)
         self.assertEqual(invite.private_project_access[0]["level"], "member")
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_add_organization_invite_case_insensitive_email_normalization(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
         mixed_case_email = "Test.User@Example.COM"
         expected_normalized_email = "test.user@example.com"
 
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
                 "/api/organizations/@current/invites/",
                 {"target_email": mixed_case_email},
@@ -1220,7 +1220,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         base_email = "user@example.com"
 
         # Create first invite with lowercase email
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response1 = self.client.post(
                 "/api/organizations/@current/invites/",
                 {"target_email": base_email},
@@ -1230,7 +1230,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.assertEqual(OrganizationInvite.objects.count(), 1)
 
         mixed_case_email = "User@Example.COM"
-        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.posthog.com"):
+        with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response2 = self.client.post(
                 "/api/organizations/@current/invites/",
                 {"target_email": mixed_case_email},

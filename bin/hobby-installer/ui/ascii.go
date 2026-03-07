@@ -2,7 +2,7 @@ package ui
 
 import "github.com/charmbracelet/lipgloss"
 
-const posthogBanner = `
+const insightsBanner = `
  ____           _   _   _             
 |  _ \ ___  ___| |_| | | | ___   __ _ 
 | |_) / _ \/ __| __| |_| |/ _ \ / _` + "`" + ` |
@@ -16,7 +16,7 @@ var bannerStyle = lipgloss.NewStyle().
 	Bold(true)
 
 func GetBanner() string {
-	return bannerStyle.Render(posthogBanner)
+	return bannerStyle.Render(insightsBanner)
 }
 
 func GetWelcomeArt() string {

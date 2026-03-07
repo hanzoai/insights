@@ -60,7 +60,7 @@ export const getRudderstackSteps = (ctx: OnboardingComponentsContext): StepDefin
                     </Markdown>
                     <CalloutBox type="fyi" title="Learn more">
                         <Markdown>
-                            See the [RudderStack integration docs](https://posthog.com/docs/libraries/rudderstack) for
+                            See the [RudderStack integration docs](https://hanzo.ai/docs/libraries/rudderstack) for
                             more details.
                         </Markdown>
                     </CalloutBox>

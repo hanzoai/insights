@@ -1,7 +1,7 @@
 {
     "name": "Customer.io",
     "description": "Send event data and emails into Customer.io.",
-    "posthogVersion": ">= 1.25.0",
+    "insightsVersion": ">= 1.25.0",
     "main": "index.ts",
     "config": [
         {

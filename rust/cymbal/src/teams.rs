@@ -174,7 +174,7 @@ pub async fn do_team_lookups(
         let fut = async move {
             m_ctx
                 .team_manager
-                .get_team(&m_ctx.posthog_pool, &m_token)
+                .get_team(&m_ctx.insights_pool, &m_token)
                 .await
         };
         let lookup = WithIndices {

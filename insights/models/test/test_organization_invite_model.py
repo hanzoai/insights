@@ -32,12 +32,12 @@ class TestOrganizationInvite(BaseTest):
         team = Team.objects.create(organization=self.organization, name="New Team")
 
         # Create a user who will use the invite
-        user = User.objects.create_user(email="test@posthog.com", password="password", first_name="first_name")
+        user = User.objects.create_user(email="test@hanzo.ai", password="password", first_name="first_name")
 
         # Create an invite with private project access
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="test@posthog.com",
+            target_email="test@hanzo.ai",
             private_project_access=[{"id": team.id, "level": "admin"}],
         )
 
@@ -58,19 +58,19 @@ class TestOrganizationInvite(BaseTest):
         self.assertEqual(access_control.access_level, "admin")
 
         # Verify the invite has been deleted
-        self.assertFalse(OrganizationInvite.objects.filter(target_email="test@posthog.com").exists())
+        self.assertFalse(OrganizationInvite.objects.filter(target_email="test@hanzo.ai").exists())
 
     def test_invite_use_with_new_access_control_member(self):
         """Test using an invite with the new access control system for member level"""
         team = Team.objects.create(organization=self.organization, name="New Team 2")
 
         # Create a user who will use the invite
-        user = User.objects.create_user(email="test2@posthog.com", password="password", first_name="first_name")
+        user = User.objects.create_user(email="test2@hanzo.ai", password="password", first_name="first_name")
 
         # Create an invite with private project access
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="test2@posthog.com",
+            target_email="test2@hanzo.ai",
             private_project_access=[{"id": team.id, "level": "member"}],
         )
 
@@ -92,17 +92,17 @@ class TestOrganizationInvite(BaseTest):
         self.assertEqual(access_control.access_level, "member")
 
         # Verify the invite has been deleted
-        self.assertFalse(OrganizationInvite.objects.filter(target_email="test2@posthog.com").exists())
+        self.assertFalse(OrganizationInvite.objects.filter(target_email="test2@hanzo.ai").exists())
 
     def test_invite_use_with_nonexistent_team(self):
         """Test using an invite with a team that no longer exists"""
         # Create a user who will use the invite
-        user = User.objects.create_user(email="nonexistent@posthog.com", password="password", first_name="first_name")
+        user = User.objects.create_user(email="nonexistent@hanzo.ai", password="password", first_name="first_name")
 
         # Create an invite with private project access to a non-existent team ID
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="nonexistent@posthog.com",
+            target_email="nonexistent@hanzo.ai",
             private_project_access=[{"id": 99999, "level": "admin"}],
         )
 
@@ -114,7 +114,7 @@ class TestOrganizationInvite(BaseTest):
         self.assertIsNotNone(org_membership)
 
         # Verify the invite has been deleted
-        self.assertFalse(OrganizationInvite.objects.filter(target_email="nonexistent@posthog.com").exists())
+        self.assertFalse(OrganizationInvite.objects.filter(target_email="nonexistent@hanzo.ai").exists())
 
     @patch("insights.models.organization_invite.is_email_available")
     @patch("insights.tasks.email.send_member_join.apply_async")
@@ -127,11 +127,11 @@ class TestOrganizationInvite(BaseTest):
         self.organization.save()
 
         # Create a user who will use the invite
-        user = User.objects.create_user(email="email_test@posthog.com", password="password", first_name="first_name")
+        user = User.objects.create_user(email="email_test@hanzo.ai", password="password", first_name="first_name")
 
         # Create an invite
         invite = OrganizationInvite.objects.create(
-            organization=self.organization, target_email="email_test@posthog.com"
+            organization=self.organization, target_email="email_test@hanzo.ai"
         )
 
         # Use the invite
@@ -148,12 +148,12 @@ class TestOrganizationInvite(BaseTest):
     def test_invite_use_without_private_project_access(self):
         """Test using an invite without private project access returns early"""
         # Create a user who will use the invite
-        user = User.objects.create_user(email="no_access@posthog.com", password="password", first_name="first_name")
+        user = User.objects.create_user(email="no_access@hanzo.ai", password="password", first_name="first_name")
 
         # Create an invite without private project access
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="no_access@posthog.com",
+            target_email="no_access@hanzo.ai",
             private_project_access=None,
         )
 
@@ -171,7 +171,7 @@ class TestOrganizationInvite(BaseTest):
         self.assertEqual(AccessControl.objects.filter(organization_member=org_membership).count(), 0)
 
         # Verify the invite has been deleted
-        self.assertFalse(OrganizationInvite.objects.filter(target_email="no_access@posthog.com").exists())
+        self.assertFalse(OrganizationInvite.objects.filter(target_email="no_access@hanzo.ai").exists())
 
     def test_invite_use_only_deletes_organization_specific_invites(self):
         """Test that using an invite only deletes invites for the specific organization, not all organizations"""
@@ -181,16 +181,16 @@ class TestOrganizationInvite(BaseTest):
         second_org = Organization.objects.create(name="Second Org")
 
         # Create a user who will use the invite
-        user = User.objects.create_user(email="cross_org@posthog.com", password="password", first_name="Test")
+        user = User.objects.create_user(email="cross_org@hanzo.ai", password="password", first_name="Test")
 
         # Create invites with the same email in both organizations
         invite_org1 = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="cross_org@posthog.com",
+            target_email="cross_org@hanzo.ai",
         )
         invite_org2 = OrganizationInvite.objects.create(
             organization=second_org,
-            target_email="cross_org@posthog.com",
+            target_email="cross_org@hanzo.ai",
         )
 
         # Verify both invites exist before using one

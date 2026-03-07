@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-llm-analytics",
+    "name": "@hanzo/products-llm-analytics",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -9,15 +9,15 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "posthog-js": "catalog:",
         "partial-json": "^0.1.7",
-        "torph": "^0.0.5"
+        "torph": "^0.0.5",
+        "@hanzo/insights": "workspace:*"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/react": "*",
         "@testing-library/react": "*",
         "@testing-library/user-event": "*",

@@ -1,7 +1,7 @@
 import { connect, kea, key, listeners, path, props } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { dashboardsModel } from '~/models/dashboardsModel'
 import { DashboardTile, DashboardType, QueryBasedInsightModel } from '~/types'

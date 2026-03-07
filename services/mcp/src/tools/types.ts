@@ -35,16 +35,16 @@ export type Env = {
      * The code automatically handles US/EU region routing via getAuthorizationServerUrl().
      * Only set this for self-hosted Insights deployments.
      */
-    POSTHOG_API_BASE_URL: string | undefined
+    INSIGHTS_API_BASE_URL: string | undefined
     /**
      * Insights base URL for MCP Apps analytics (used for CSP and analytics ingestion).
      * For local development, set to http://localhost:8010.
      */
-    POSTHOG_MCP_APPS_ANALYTICS_BASE_URL: string | undefined
+    INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: string | undefined
     /**
      * Insights API token for MCP Apps analytics (used for CSP and analytics ingestion).
      */
-    POSTHOG_UI_APPS_TOKEN: string | undefined
+    INSIGHTS_UI_APPS_TOKEN: string | undefined
 }
 
 export type Context = {

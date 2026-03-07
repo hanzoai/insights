@@ -1,4 +1,4 @@
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 
@@ -22,7 +22,7 @@ export function InsightsSDKIssueBanner({ event }: InsightsSDKIssueBannerProps): 
     return (
         <LemonBanner
             type="error"
-            action={{ to: 'https://status.posthog.com/incidents/l70cgmt7475m', children: 'Read more' }}
+            action={{ to: 'https://statinsights.hanzo.ai/incidents/l70cgmt7475m', children: 'Read more' }}
             className="mb-4"
         >
             This issue was captured because of a bug in the Insights SDK. We've fixed the issue, and you won't be charged

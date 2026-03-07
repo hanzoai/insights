@@ -1,6 +1,6 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { DurationType } from '~/types'
 
@@ -20,7 +20,7 @@ export function DurationTypeSelect({
         <LemonSelect
             data-attr="duration-type-selector"
             onChange={(v) => {
-                posthog.capture(onChangeEventDescription || 'session recording duration type filter changed', {
+                insights.capture(onChangeEventDescription || 'session recording duration type filter changed', {
                     durationChoice: v,
                 })
                 onChange((v || 'all') as DurationType)

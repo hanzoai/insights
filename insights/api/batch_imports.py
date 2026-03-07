@@ -6,7 +6,7 @@ from enum import Enum
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-import posthoganalytics
+import hanzoanalytics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -530,7 +530,7 @@ class BatchImportViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             else str(uuid.uuid4())
         )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "batch import created",
             distinct_id=distinct_id,
             properties={

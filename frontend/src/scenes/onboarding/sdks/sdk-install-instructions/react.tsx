@@ -14,7 +14,7 @@ function ReactEnvVarsSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Bash}>
-            {[`VITE_PUBLIC_POSTHOG_KEY=${currentTeam?.api_token}`, `VITE_PUBLIC_POSTHOG_HOST=${apiHostOrigin()}`].join(
+            {[`VITE_PUBLIC_INSIGHTS_KEY=${currentTeam?.api_token}`, `VITE_PUBLIC_INSIGHTS_HOST=${apiHostOrigin()}`].join(
                 '\n'
             )}
         </CodeSnippet>
@@ -28,18 +28,18 @@ function ReactSetupSnippet(): JSX.Element {
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { PostHogProvider } from 'posthog-js/react'
+import { InsightsProvider } from '@hanzo/insights/react'
 
 const options = {
-  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  api_host: import.meta.env.VITE_PUBLIC_INSIGHTS_HOST,
   defaults: '${SDK_DEFAULTS_DATE}',
 } as const
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+    <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_INSIGHTS_KEY} options={options}>
       <App />
-    </PostHogProvider>
+    </InsightsProvider>
   </StrictMode>
 )`}
         </CodeSnippet>

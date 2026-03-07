@@ -78,7 +78,7 @@ class BaseTaskAPITest(TestCase):
         if hasattr(self, "feature_flag_patcher"):
             self.feature_flag_patcher.stop()
 
-        self.feature_flag_patcher = patch("posthoganalytics.feature_enabled")  # type: ignore[assignment]
+        self.feature_flag_patcher = patch("hanzoanalytics.feature_enabled")  # type: ignore[assignment]
         self.mock_feature_flag = self.feature_flag_patcher.start()
 
         def check_flag(flag_name, *_args, **_kwargs):
@@ -197,7 +197,7 @@ class TestTaskAPI(BaseTaskAPITest):
                 "title": "New Task",
                 "description": "New Description",
                 "origin_product": "user_created",
-                "repository": "posthog/posthog",
+                "repository": "insights/insights",
             },
             format="json",
         )
@@ -206,7 +206,7 @@ class TestTaskAPI(BaseTaskAPITest):
         data = response.json()
         self.assertEqual(data["title"], "New Task")
         self.assertEqual(data["description"], "New Description")
-        self.assertEqual(data["repository"], "posthog/posthog")
+        self.assertEqual(data["repository"], "insights/insights")
 
     def test_update_task(self):
         task = self.create_task("Original Task")
@@ -259,15 +259,15 @@ class TestTaskAPI(BaseTaskAPITest):
     @parameterized.expand(
         [
             # (filter_param, filter_value, task_repos, expected_task_indices)
-            ("repository", "posthog/posthog", ["posthog/posthog", "posthog/posthog-js", "other/posthog"], [0]),
-            ("repository", "posthog", ["posthog/posthog", "posthog/posthog-js", "other/posthog"], [0, 2]),
-            ("repository", "posthog-js", ["posthog/posthog", "posthog/posthog-js", "other/posthog-js"], [1, 2]),
-            ("organization", "posthog", ["posthog/posthog", "posthog/posthog-js", "other/posthog"], [0, 1]),
-            ("organization", "other", ["posthog/posthog", "other/repo1", "other/repo2"], [1, 2]),
+            ("repository", "insights/insights", ["insights/insights", "hanzoai/insights-js", "other/insights"], [0]),
+            ("repository", "insights", ["insights/insights", "hanzoai/insights-js", "other/insights"], [0, 2]),
+            ("repository", "insights-js", ["insights/insights", "hanzoai/insights-js", "other/insights-js"], [1, 2]),
+            ("organization", "insights", ["insights/insights", "hanzoai/insights-js", "other/insights"], [0, 1]),
+            ("organization", "other", ["insights/insights", "other/repo1", "other/repo2"], [1, 2]),
             # Case insensitive tests
-            ("repository", "Insights/Insights", ["posthog/posthog", "posthog/posthog-js"], [0]),
-            ("repository", "Insights", ["posthog/posthog", "other/posthog"], [0, 1]),
-            ("organization", "Insights", ["posthog/posthog", "posthog/posthog-js", "other/repo"], [0, 1]),
+            ("repository", "Insights/Insights", ["insights/insights", "hanzoai/insights-js"], [0]),
+            ("repository", "Insights", ["insights/insights", "other/insights"], [0, 1]),
+            ("organization", "Insights", ["insights/insights", "hanzoai/insights-js", "other/repo"], [0, 1]),
         ]
     )
     def test_filter_by_repository_and_organization(self, filter_param, filter_value, task_repos, expected_indices):
@@ -715,7 +715,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         decoded = jwt.decode(
             data["token"],
             public_key,
-            audience="posthog:sandbox_connection",
+            audience="insights:sandbox_connection",
             algorithms=["RS256"],
         )
 
@@ -739,7 +739,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         decoded = jwt.decode(
             response.json()["token"],
             public_key,
-            audience="posthog:sandbox_connection",
+            audience="insights:sandbox_connection",
             algorithms=["RS256"],
         )
 
@@ -761,7 +761,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         decoded = jwt.decode(
             response.json()["token"],
             public_key,
-            audience="posthog:sandbox_connection",
+            audience="insights:sandbox_connection",
             algorithms=["RS256"],
         )
 
@@ -805,8 +805,8 @@ class TestTaskRunSessionLogsAPI(BaseTaskAPITest):
             },
         }
 
-    def _make_posthog_entry(self, method: str, timestamp: str, **params) -> dict:
-        """Build a log entry with a _posthog/* notification."""
+    def _make_insights_entry(self, method: str, timestamp: str, **params) -> dict:
+        """Build a log entry with a _insights/* notification."""
         return {
             "type": "notification",
             "timestamp": timestamp,
@@ -984,28 +984,28 @@ class TestTaskRunSessionLogsAPI(BaseTaskAPITest):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["timestamp"], "2026-01-01T10:03:00Z")
 
-    def test_session_logs_posthog_method_filtering(self):
-        """_posthog/* events should be filterable by their method name."""
+    def test_session_logs_insights_method_filtering(self):
+        """_insights/* events should be filterable by their method name."""
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         entries = [
             self._make_session_update_entry("user_message", "2026-01-01T00:00:01Z"),
-            self._make_posthog_entry("_posthog/sdk_session", "2026-01-01T00:00:02Z", sessionId="s1"),
-            self._make_posthog_entry("_posthog/session/resume", "2026-01-01T00:00:03Z", sessionId="s1"),
+            self._make_insights_entry("_insights/sdk_session", "2026-01-01T00:00:02Z", sessionId="s1"),
+            self._make_insights_entry("_insights/session/resume", "2026-01-01T00:00:03Z", sessionId="s1"),
             self._make_session_update_entry("agent_message", "2026-01-01T00:00:04Z"),
         ]
         self._seed_log(task, run, entries)
 
         response = self.client.get(
-            self._events_url(task, run) + "?event_types=_posthog/sdk_session,_posthog/session/resume"
+            self._events_url(task, run) + "?event_types=_insights/sdk_session,_insights/session/resume"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
         self.assertEqual(len(data), 2)
         methods = [e["notification"]["method"] for e in data]
-        self.assertEqual(methods, ["_posthog/sdk_session", "_posthog/session/resume"])
+        self.assertEqual(methods, ["_insights/sdk_session", "_insights/session/resume"])
 
     def test_session_logs_server_timing_header(self):
         task = self.create_task()
@@ -1197,7 +1197,7 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
     @patch("products.tasks.backend.api.compute_repository_readiness")
     def test_repository_readiness_endpoint(self, mock_compute):
         mock_compute.return_value = {
-            "repository": "posthog/posthog",
+            "repository": "insights/insights",
             "classification": "backend_service",
             "excluded": False,
             "coreSuggestions": {
@@ -1228,14 +1228,14 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
         response = self.client.get(
             "/api/projects/@current/tasks/repository_readiness/",
             {
-                "repository": "posthog/posthog",
+                "repository": "insights/insights",
                 "window_days": "7",
                 "refresh": "false",
             },
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()["repository"], "posthog/posthog")
+        self.assertEqual(response.json()["repository"], "insights/insights")
         mock_compute.assert_called_once()
 
     def test_repository_readiness_requires_repository(self):

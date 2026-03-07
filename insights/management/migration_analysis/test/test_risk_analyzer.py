@@ -300,7 +300,7 @@ class TestRunSQLOperations:
         """
         op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_namedquery;",
+            sql="DROP TABLE IF EXISTS insights_namedquery;",
         )
 
         risk = self.analyzer.analyze_operation(op)
@@ -329,7 +329,7 @@ class TestRunSQLOperations:
             migrations.RunSQL,
             sql="""
             -- migration-analyzer: safe reason=Data warehouse table with limited customer usage
-            UPDATE posthog_externaldataschema SET sync_time_of_day = null WHERE sync_time_of_day = '00:00:00';
+            UPDATE insights_externaldataschema SET sync_time_of_day = null WHERE sync_time_of_day = '00:00:00';
             """,
         )
 
@@ -368,7 +368,7 @@ class TestRunSQLOperations:
             migrations.RunSQL,
             sql="""
             -- migration-analyzer: safe reason=Need to update this column later
-            DROP TABLE IF EXISTS posthog_old_table;
+            DROP TABLE IF EXISTS insights_old_table;
             """,
         )
 
@@ -512,7 +512,7 @@ class TestRunSQLOperations:
         """Test ADD CONSTRAINT ... USING INDEX - instant metadata operation (score 0)."""
         op = create_mock_operation(
             migrations.RunSQL,
-            sql="ALTER TABLE posthog_errortrackingstackframe ADD CONSTRAINT unique_team_id_raw_id_part UNIQUE USING INDEX idx_team_id_raw_id_part;",
+            sql="ALTER TABLE insights_errortrackingstackframe ADD CONSTRAINT unique_team_id_raw_id_part UNIQUE USING INDEX idx_team_id_raw_id_part;",
         )
 
         risk = self.analyzer.analyze_operation(op)
@@ -678,7 +678,7 @@ class TestDropTableValidation:
         Valid pattern: Prior migration removes model from state, then drop table.
 
         Migration 0877: SeparateDatabaseAndState removes NamedQuery
-        Migration 0878: DROP TABLE IF EXISTS posthog_namedquery
+        Migration 0878: DROP TABLE IF EXISTS insights_namedquery
         """
         # Create mock migration graph with proper staging
         mock_migration = MagicMock()
@@ -689,7 +689,7 @@ class TestDropTableValidation:
         # Create the DROP operation
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_namedquery;",
+            sql="DROP TABLE IF EXISTS insights_namedquery;",
         )
         mock_migration.operations = [drop_op]
 
@@ -715,7 +715,7 @@ class TestDropTableValidation:
 
         # Analyze with migration context
         migration_risk = self.analyzer.analyze_migration_with_context(
-            mock_migration, "posthog/migrations/0878_drop_named_query.py", mock_loader
+            mock_migration, "insights/migrations/0878_drop_named_query.py", mock_loader
         )
 
         # Should be NEEDS_REVIEW (score 2) since properly staged
@@ -729,7 +729,7 @@ class TestDropTableValidation:
         Migration 0875: SeparateDatabaseAndState removes OldModel
         Migration 0876: Unrelated migration
         Migration 0877: Unrelated migration
-        Migration 0878: DROP TABLE IF EXISTS posthog_oldmodel
+        Migration 0878: DROP TABLE IF EXISTS insights_oldmodel
         """
         # Create mock migrations
         mock_migration = MagicMock()
@@ -739,7 +739,7 @@ class TestDropTableValidation:
 
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_oldmodel;",
+            sql="DROP TABLE IF EXISTS insights_oldmodel;",
         )
         mock_migration.operations = [drop_op]
 
@@ -780,7 +780,7 @@ class TestDropTableValidation:
 
         # Analyze with migration context
         migration_risk = self.analyzer.analyze_migration_with_context(
-            mock_migration, "posthog/migrations/0878_drop_old_model.py", mock_loader
+            mock_migration, "insights/migrations/0878_drop_old_model.py", mock_loader
         )
 
         # Should be NEEDS_REVIEW (score 2) since properly staged (even with gap)
@@ -798,7 +798,7 @@ class TestDropTableValidation:
 
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_sometable;",
+            sql="DROP TABLE IF EXISTS insights_sometable;",
         )
         mock_migration.operations = [drop_op]
 
@@ -815,7 +815,7 @@ class TestDropTableValidation:
         }
 
         migration_risk = self.analyzer.analyze_migration_with_context(
-            mock_migration, "posthog/migrations/0878_drop_something.py", mock_loader
+            mock_migration, "insights/migrations/0878_drop_something.py", mock_loader
         )
 
         # Should be BLOCKED (score 5) - no prior state removal found
@@ -833,7 +833,7 @@ class TestDropTableValidation:
 
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_modelb;",
+            sql="DROP TABLE IF EXISTS insights_modelb;",
         )
         mock_migration.operations = [drop_op]
 
@@ -857,7 +857,7 @@ class TestDropTableValidation:
         }
 
         migration_risk = self.analyzer.analyze_migration_with_context(
-            mock_migration, "posthog/migrations/0878_drop_modelb.py", mock_loader
+            mock_migration, "insights/migrations/0878_drop_modelb.py", mock_loader
         )
 
         # Should be BLOCKED (score 5) - wrong model removed
@@ -876,7 +876,7 @@ class TestDropTableValidation:
         # DROP without IF EXISTS
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE posthog_somemodel;",
+            sql="DROP TABLE insights_somemodel;",
         )
         mock_migration.operations = [drop_op]
 
@@ -900,7 +900,7 @@ class TestDropTableValidation:
         }
 
         migration_risk = self.analyzer.analyze_migration_with_context(
-            mock_migration, "posthog/migrations/0878_drop_model.py", mock_loader
+            mock_migration, "insights/migrations/0878_drop_model.py", mock_loader
         )
 
         # Should be BLOCKED (score 5) - missing IF EXISTS
@@ -917,12 +917,12 @@ class TestDropTableValidation:
 
         drop_op = create_mock_operation(
             migrations.RunSQL,
-            sql="DROP TABLE IF EXISTS posthog_somemodel;",
+            sql="DROP TABLE IF EXISTS insights_somemodel;",
         )
         mock_migration.operations = [drop_op]
 
         # Analyze without loader (old path)
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0878_drop_model.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0878_drop_model.py")
 
         # Should be BLOCKED (score 5) when we can't validate
         assert migration_risk.level == RiskLevel.BLOCKED
@@ -1036,7 +1036,7 @@ class TestCreateModelOperations:
             )
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert migration_risk.level == RiskLevel.BLOCKED  # Policy violations boost to blocked
         assert len(migration_risk.policy_violations) == 1
@@ -1059,7 +1059,7 @@ class TestCreateModelOperations:
             )
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert migration_risk.level == RiskLevel.BLOCKED
         assert len(migration_risk.policy_violations) == 1
@@ -1310,7 +1310,7 @@ class TestCombinationRisks:
 
         db_op = create_mock_operation(
             migrations.RunSQL,
-            sql="CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_test ON posthog_activitylog (team_id, scope);",
+            sql="CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_test ON insights_activitylog (team_id, scope);",
         )
 
         separate_op = create_mock_operation(
@@ -1319,7 +1319,7 @@ class TestCombinationRisks:
 
         mock_migration.operations = [separate_op]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0872_activitylog_idx.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0872_activitylog_idx.py")
 
         # This should NOT be blocked - concurrent index creation is safe
         assert migration_risk.level != RiskLevel.BLOCKED, (
@@ -1380,7 +1380,7 @@ class TestCombinationRisks:
         mock_migration.operations = [separate_op]
 
         migration_risk = self.analyzer.analyze_migration(
-            mock_migration, "posthog/migrations/0948_hogfunction_batch_export.py"
+            mock_migration, "insights/migrations/0948_hogfunction_batch_export.py"
         )
 
         # Should NOT have DDL isolation warning - there's only one top-level operation
@@ -1424,7 +1424,7 @@ class TestCombinationRisks:
 
         mock_migration.operations = [separate_op, add_field_op]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_mixed_ops.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_mixed_ops.py")
 
         # SHOULD have DDL isolation warning - there are two top-level operations
         # Message should be specific about DDL + schema operations
@@ -1582,7 +1582,7 @@ class TestAtomicFalsePolicy:
             )
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert any("WARNING" in v for v in migration_risk.policy_violations)
         assert any("atomic=False" in v for v in migration_risk.policy_violations)
@@ -1599,7 +1599,7 @@ class TestAtomicFalsePolicy:
         op.__class__.__name__ = "AddIndexConcurrently"
         mock_migration.operations = [op]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         # Should not have atomic-related warnings
         assert not any("atomic=False" in v for v in migration_risk.policy_violations)
@@ -1618,7 +1618,7 @@ class TestAtomicFalsePolicy:
         op.__class__.__name__ = "AddIndexConcurrently"
         mock_migration.operations = [op]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert any("BLOCKED" in v for v in migration_risk.policy_violations)
         assert any("atomic=False" in v for v in migration_risk.policy_violations)
@@ -1633,7 +1633,7 @@ class TestAtomicFalsePolicy:
             create_mock_operation(migrations.RunSQL, sql="CREATE INDEX CONCURRENTLY idx_test ON test_table (col);")
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         # Should not have atomic-related warnings
         assert not any("atomic=False" in v for v in migration_risk.policy_violations)
@@ -1648,7 +1648,7 @@ class TestAtomicFalsePolicy:
             create_mock_operation(migrations.RunSQL, sql="CREATE INDEX CONCURRENTLY idx_test ON test_table (col);")
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert any("BLOCKED" in v for v in migration_risk.policy_violations)
         assert any("CONCURRENTLY" in v for v in migration_risk.policy_violations)
@@ -1670,7 +1670,7 @@ class TestAtomicFalsePolicy:
             add_index_op,
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         # Should not have "atomic=False without CONCURRENTLY" warning (CONCURRENTLY is present)
         assert not any("atomic=False without CONCURRENTLY" in v for v in migration_risk.policy_violations)
@@ -1707,7 +1707,7 @@ class TestAtomicFalsePolicy:
             )
         ]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         # Should not have atomic-related warnings
         assert not any("atomic=False" in v for v in migration_risk.policy_violations)
@@ -1723,7 +1723,7 @@ class TestAtomicFalsePolicy:
         op.__class__.__name__ = "RemoveIndexConcurrently"
         mock_migration.operations = [op]
 
-        migration_risk = self.analyzer.analyze_migration(mock_migration, "posthog/migrations/0001_test.py")
+        migration_risk = self.analyzer.analyze_migration(mock_migration, "insights/migrations/0001_test.py")
 
         assert any("BLOCKED" in v for v in migration_risk.policy_violations)
         assert any("CONCURRENTLY" in v for v in migration_risk.policy_violations)

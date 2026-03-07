@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-// keep this in sync with Django posthog.taxonomy pkg values
+// keep this in sync with Django insights.taxonomy pkg values
 pub const GROUP_TYPE_LIMIT: i32 = 5;
 
 pub const DEFAULT_QUERY_LIMIT: i64 = 100;
@@ -10,8 +10,8 @@ pub const SEARCH_TRIGGER_WORD: &str = "latest";
 pub const SEARCH_SCREEN_WORD: &str = "initial";
 
 pub const ENTERPRISE_PROP_DEFS_TABLE: &str = "ee_enterprisepropertydefinition";
-pub const PROPERTY_DEFS_TABLE: &str = "posthog_propertydefinition";
-pub const EVENT_PROPERTY_TABLE: &str = "posthog_eventproperty";
+pub const PROPERTY_DEFS_TABLE: &str = "insights_propertydefinition";
+pub const EVENT_PROPERTY_TABLE: &str = "insights_eventproperty";
 pub const EVENT_PROPERTY_TABLE_ALIAS: &str = "check_for_matching_event_property";
 
 pub const PARENT_PROPERTY_TYPES: [&str; 4] = ["event", "person", "group", "session"];
@@ -38,14 +38,14 @@ pub const ENTERPRISE_PROP_DEFS_TABLE_COLUMNS: [&str; 7] = [
 ];
 
 // property definitions we don't want customers querying
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L343-L361
+// https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L343-L361
 pub const EVENTS_HIDDEN_PROPERTY_DEFINITIONS: [&str; 14] = [
     // distinct_id is set in properties by some libraries, but not consistently, so we shouldn't allow users to filter on it
     "distinct_id",
     // used for updating properties
     "$set",
     "$set_once",
-    // posthog-js used to send it on events and shouldn't have, now it confuses users
+    // insights-js used to send it on events and shouldn't have, now it confuses users
     "$initial_referrer",
     "$initial_referring_domain",
     // Group Analytics
@@ -66,11 +66,11 @@ pub const EVENTS_HIDDEN_PROPERTY_DEFINITIONS: [&str; 14] = [
 // 2. dropped all records with the work "deprecated" in the entry's value object (same as Django does)
 // 3. lowercased all value["label"] entries eligible for capture here (Django does this on the fly)
 // **IMPORTANT** we need to keep this in sync the w/Django original!! see below for more details:
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L326-L339
-// https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/taxonomy.py#L1627-L1631
+// https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L326-L339
+// https://github.com/hanzoai/insights/blob/main/insights/taxonomy/taxonomy.py#L1627-L1631
 pub static PROPERTY_DEFINITION_ALIASES: [(&str, &str); 242] = [
     (
-        "$last_posthog_reset",
+        "$last_insights_reset",
         "timestamp of last call to `reset` in the web sdk",
     ),
     ("$copy_type", "copy type"),

@@ -229,7 +229,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": ["@posthog.com"],
+                                        "value": ["@hanzo.ai"],
                                         "operator": operator,
                                     }
                                 ],
@@ -244,7 +244,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                 {
                     "type": "validation_error",
                     "code": "invalid_value",
-                    "detail": f"Invalid value for operator {operator}: ['@posthog.com']",
+                    "detail": f"Invalid value for operator {operator}: ['@hanzo.ai']",
                     "attr": "filters",
                 },
             )
@@ -265,7 +265,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": '["@posthog.com"]',  # fine as long as a string
+                                    "value": '["@hanzo.ai"]',  # fine as long as a string
                                     "operator": "not_regex",
                                 }
                             ],
@@ -342,7 +342,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "@posthog.com",
+                                    "value": "@hanzo.ai",
                                     "operator": operator,
                                 }
                             ],
@@ -572,7 +572,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             flag_id,
             [
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "created",
                     "created_at": "2021-08-25T22:09:14.252000Z",
                     "scope": "FeatureFlag",
@@ -1120,7 +1120,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                     }
                                 ],
@@ -1186,7 +1186,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                                 {
                                                     "key": "email",
                                                     "type": "person",
-                                                    "value": "@posthog.com",
+                                                    "value": "@hanzo.ai",
                                                     "operator": "icontains",
                                                 }
                                             ],
@@ -1294,7 +1294,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             # Create and login as different user
-            different_user = User.objects.create_and_join(self.organization, "different_user@posthog.com", None)
+            different_user = User.objects.create_and_join(self.organization, "different_user@hanzo.ai", None)
             self.client.force_login(different_user)
             self.assertNotEqual(original_user, different_user)
 
@@ -1332,7 +1332,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             # Create and login as different user
-            different_user = User.objects.create_and_join(self.organization, "different_user@posthog.com", None)
+            different_user = User.objects.create_and_join(self.organization, "different_user@hanzo.ai", None)
             self.client.force_login(different_user)
             self.assertNotEqual(original_user, different_user)
 
@@ -1373,7 +1373,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             self.assertEqual(response.json().get("type"), "server_error")
             self.assertEqual(
                 response.json().get("detail"),
-                "The feature flag was updated by different_user@posthog.com since you started editing it. Please refresh and try again.",
+                "The feature flag was updated by different_user@hanzo.ai since you started editing it. Please refresh and try again.",
             )
 
             # Grab the feature flag and assert created_by is original user and last_modified_by is different user
@@ -1433,7 +1433,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             # Create and login as different user
-            different_user = User.objects.create_and_join(self.organization, "different_user@posthog.com", None)
+            different_user = User.objects.create_and_join(self.organization, "different_user@hanzo.ai", None)
             self.client.force_login(different_user)
 
             # Successfully update the feature flag with the different user. This will increment the version
@@ -1596,7 +1596,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         self.team.rotate_secret_token_and_save(user=self.user, is_impersonated_session=False)
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_other_team_token",
+            api_token="hi_other_team_token",
             name="Other Team",
         )
         other_team.rotate_secret_token_and_save(user=self.user, is_impersonated_session=False)
@@ -1633,7 +1633,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_remote_config_with_numeric_id_scopes_to_project(self):
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_numeric_id_test",
+            api_token="hi_numeric_id_test",
             name="Numeric ID Team",
         )
 
@@ -1658,7 +1658,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_remote_config_with_string_key_scopes_to_project(self):
         other_team = Team.objects.create(
             organization=self.organization,
-            api_token="phc_string_key_test",
+            api_token="hi_string_key_test",
             name="String Key Team",
         )
 
@@ -1858,7 +1858,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                     }
                                 ],
@@ -1924,7 +1924,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                                 {
                                                     "key": "email",
                                                     "type": "person",
-                                                    "value": "@posthog.com",
+                                                    "value": "@hanzo.ai",
                                                     "operator": "icontains",
                                                 }
                                             ],
@@ -2040,7 +2040,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                     }
                                 ],
@@ -2131,7 +2131,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                     }
                                 ],
@@ -2220,7 +2220,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                     {
                                         "key": "email",
                                         "type": "person",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                     }
                                 ],
@@ -2258,7 +2258,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         )
 
     def test_hard_deleting_feature_flag_is_forbidden(self):
-        new_user = User.objects.create_and_join(self.organization, "new_annotations@posthog.com", None)
+        new_user = User.objects.create_and_join(self.organization, "new_annotations@hanzo.ai", None)
 
         instance = FeatureFlag.objects.create(team=self.team, created_by=self.user, key="potato")
         self.client.force_login(new_user)
@@ -2271,7 +2271,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_get_feature_flag_activity(self):
         new_user = User.objects.create_and_join(
             organization=self.organization,
-            email="person_acting_and_then_viewing_activity@posthog.com",
+            email="person_acting_and_then_viewing_activity@hanzo.ai",
             password=None,
             first_name="Potato",
         )
@@ -2357,7 +2357,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_get_feature_flag_activity_for_all_flags(self):
         new_user = User.objects.create_and_join(
             organization=self.organization,
-            email="person_acting_and_then_viewing_activity@posthog.com",
+            email="person_acting_and_then_viewing_activity@hanzo.ai",
             password=None,
             first_name="Potato",
         )
@@ -2469,7 +2469,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_length_of_feature_flag_activity_does_not_change_number_of_db_queries(self):
         new_user = User.objects.create_and_join(
             organization=self.organization,
-            email="person_acting_and_then_viewing_activity@posthog.com",
+            email="person_acting_and_then_viewing_activity@hanzo.ai",
             password=None,
             first_name="Potato",
         )
@@ -2517,11 +2517,11 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
     def test_get_feature_flag_activity_only_from_own_team(self):
         # two users in two teams
         _, org_one_team, org_one_user = User.objects.bootstrap(
-            organization_name="Org 1", email="org1@posthog.com", password=None
+            organization_name="Org 1", email="org1@hanzo.ai", password=None
         )
 
         _, org_two_team, org_two_user = User.objects.bootstrap(
-            organization_name="Org 2", email="org2@posthog.com", password=None
+            organization_name="Org 2", email="org2@hanzo.ai", password=None
         )
 
         # two flags in team 1
@@ -2674,7 +2674,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         )
 
     def test_get_flags_with_specified_token(self):
-        _, _, user = User.objects.bootstrap("Test", "team2@posthog.com", None)
+        _, _, user = User.objects.bootstrap("Test", "team2@hanzo.ai", None)
         self.client.force_login(user)
         assert user.team is not None
         assert self.team is not None
@@ -3628,7 +3628,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "@posthog.com",
+                                    "value": "@hanzo.ai",
                                     "operator": "icontains",
                                 }
                             ],
@@ -3685,7 +3685,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "@posthog.com",
+                                    "value": "@hanzo.ai",
                                     "operator": "icontains",
                                 }
                             ],
@@ -4111,11 +4111,11 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             # missing API key
             response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"), {})
+            self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(f"/api/feature_flag/local_evaluation")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"), {})
+            self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(
                 f"/api/feature_flag/local_evaluation?token={self.team.api_token}",
@@ -4123,7 +4123,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(
-                client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"),
+                client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"),
                 {b"165192618": b"1"},
             )
 
@@ -4135,7 +4135,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             self.assertEqual(
-                client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"),
+                client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"),
                 {b"165192618": b"6"},
             )
 
@@ -4174,7 +4174,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         self.assertEqual(response.json()["count"], 2)
 
         # shouldn't add to local eval requests
-        self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"), {})
+        self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
         self.client.logout()
         # `local_evaluation` is called by logged out clients!
@@ -4183,11 +4183,11 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             # missing API key
             response = self.client.get(f"/api/feature_flag?token={self.team.api_token}")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"), {})
+            self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(f"/api/feature_flag/")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"), {})
+            self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(
                 f"/api/feature_flag/?token={self.team.api_token}",
@@ -4195,7 +4195,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(
-                client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"),
+                client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"),
                 {b"165192618": b"1"},
             )
 
@@ -4214,7 +4214,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             self.assertEqual(
-                client.hgetall(f"posthog:local_evaluation_requests:{self.team.pk}"),
+                client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"),
                 {b"165192618": b"6"},
             )
 
@@ -4272,7 +4272,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                 {
                     "key": "email",
                     "type": "person",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "icontains",
                 }
             ],
@@ -4285,7 +4285,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                 {
                     "key": "email",
                     "type": "person",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "icontains",
                 }
             ],
@@ -4462,7 +4462,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                             "value": "performed_event_first_time",
                             "type": "behavioral",
                         },
-                        {"key": "email", "value": "test@posthog.com", "type": "person"},
+                        {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                     ],
                 }
             },
@@ -4540,7 +4540,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                             "value": "performed_event_first_time",
                             "type": "behavioral",
                         },
-                        {"key": "email", "value": "test@posthog.com", "type": "person"},
+                        {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                     ],
                 }
             },
@@ -4645,7 +4645,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                 {
                     "key": "email",
                     "type": "person",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "icontains",
                 }
             ],
@@ -4863,7 +4863,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -5594,7 +5594,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         )
 
         # Only snapshot flag evaluation queries
-        with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "posthog_person" in query):
+        with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "insights_person" in query):
             response = self.client.post(
                 f"/api/projects/{self.team.id}/feature_flags",
                 {
@@ -5651,7 +5651,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             )
 
         # Only snapshot flag evaluation queries
-        with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "posthog_group" in query):
+        with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "insights_group" in query):
             # Test group flag with invalid regex
             response = self.client.post(
                 f"/api/projects/{self.team.id}/feature_flags",
@@ -5692,7 +5692,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         cohort = Cohort.objects.create(
             team=self.team,
             name="test_cohort",
-            groups=[{"properties": [{"key": "email", "value": "@posthog.com", "type": "person"}]}],
+            groups=[{"properties": [{"key": "email", "value": "@hanzo.ai", "type": "person"}]}],
         )
         response = self.client.post(
             f"/api/projects/{self.team.id}/feature_flags/",
@@ -8152,7 +8152,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
                         {
                             "key": "email",
                             "type": "person",
-                            "value": "@posthog.com",
+                            "value": "@hanzo.ai",
                             "operator": "icontains",
                         }
                     ],
@@ -8163,7 +8163,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             distinct_ids=["p1"],
             team_id=self.team.pk,
-            properties={"email": "user@posthog.com"},
+            properties={"email": "user@hanzo.ai"},
         )
         _create_person(
             distinct_ids=["p2"],
@@ -8776,7 +8776,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         cache.clear()
 
         # Mock FLAG_EVALUATION_TAGS feature flag to be enabled by default
-        self.feature_flag_patcher = patch("posthoganalytics.feature_enabled")
+        self.feature_flag_patcher = patch("hanzoanalytics.feature_enabled")
         self.mock_feature_enabled = self.feature_flag_patcher.start()
         self.mock_feature_enabled.return_value = True
 

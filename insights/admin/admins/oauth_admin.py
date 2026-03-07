@@ -140,7 +140,7 @@ class OAuthApplicationAdmin(admin.ModelAdmin):
             return "–"
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_user_change", args=[obj.user.pk]),
+            reverse("admin:insights_user_change", args=[obj.user.pk]),
             obj.user.email,
         )
 
@@ -150,6 +150,6 @@ class OAuthApplicationAdmin(admin.ModelAdmin):
             return "–"
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_organization_change", args=[obj.organization.pk]),
+            reverse("admin:insights_organization_change", args=[obj.organization.pk]),
             obj.organization.name,
         )

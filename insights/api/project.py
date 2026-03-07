@@ -29,7 +29,7 @@ from insights.constants import AvailableFeature
 from insights.decorators import disallow_if_impersonated
 from insights.event_usage import report_user_action
 from insights.geoip import get_geoip_properties
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models import User
 from insights.models.activity_logging.activity_log import (
     Change,
@@ -272,7 +272,7 @@ class ProjectBackwardCompatSerializer(ProjectBackwardCompatBasicSerializer, User
         return encode_jwt(
             {"team_id": team.id, "api_token": team.api_token},
             timedelta(days=7),
-            PosthogJwtAudience.LIVESTREAM,
+            InsightsJwtAudience.LIVESTREAM,
         )
 
     def get_product_intents(self, obj):
@@ -752,7 +752,7 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         team = project.passthrough_team
         user = request.user
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         serializer = ProductIntentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -779,7 +779,7 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         team = project.passthrough_team
         user = request.user
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         product_type = cast(ProductKey | None, request.data.get("product_type"))
         if not product_type:

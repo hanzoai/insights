@@ -84,7 +84,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT id, team_id, group_type_index, group_key, group_properties,
                    created_at, properties_last_updated_at, properties_last_operation, version
-            FROM posthog_group
+            FROM insights_group
             WHERE team_id = $1 AND group_type_index = $2 AND group_key = $3
             "#,
         )
@@ -119,7 +119,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT g.id, g.team_id, g.group_type_index, g.group_key, g.group_properties,
                    g.created_at, g.properties_last_updated_at, g.properties_last_operation, g.version
-            FROM posthog_group g
+            FROM insights_group g
             INNER JOIN UNNEST($2::integer[], $3::text[]) AS t(group_type_index, group_key)
                 ON g.group_type_index = t.group_type_index AND g.group_key = t.group_key
             WHERE g.team_id = $1
@@ -156,7 +156,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT g.id, g.team_id, g.group_type_index, g.group_key, g.group_properties,
                    g.created_at, g.properties_last_updated_at, g.properties_last_operation, g.version
-            FROM posthog_group g
+            FROM insights_group g
             INNER JOIN UNNEST($1::integer[], $2::integer[], $3::text[]) AS t(team_id, group_type_index, group_key)
                 ON g.team_id = t.team_id AND g.group_type_index = t.group_type_index AND g.group_key = t.group_key
             "#,
@@ -197,7 +197,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT id, team_id, project_id, group_type, group_type_index,
                    name_singular, name_plural, default_columns, detail_dashboard_id, created_at
-            FROM posthog_grouptypemapping
+            FROM insights_grouptypemapping
             WHERE team_id = $1
             "#,
         )
@@ -229,7 +229,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT id, team_id, project_id, group_type, group_type_index,
                    name_singular, name_plural, default_columns, detail_dashboard_id, created_at
-            FROM posthog_grouptypemapping
+            FROM insights_grouptypemapping
             WHERE team_id = ANY($1)
             "#,
         )
@@ -257,7 +257,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT id, team_id, project_id, group_type, group_type_index,
                    name_singular, name_plural, default_columns, detail_dashboard_id, created_at
-            FROM posthog_grouptypemapping
+            FROM insights_grouptypemapping
             WHERE project_id = $1
             "#,
         )
@@ -289,7 +289,7 @@ impl GroupStorage for PostgresStorage {
             r#"
             SELECT id, team_id, project_id, group_type, group_type_index,
                    name_singular, name_plural, default_columns, detail_dashboard_id, created_at
-            FROM posthog_grouptypemapping
+            FROM insights_grouptypemapping
             WHERE project_id = ANY($1)
             "#,
         )

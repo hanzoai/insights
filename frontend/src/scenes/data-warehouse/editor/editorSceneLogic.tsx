@@ -1,5 +1,5 @@
 import { actions, kea, listeners, path, props } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 
@@ -38,16 +38,16 @@ export const editorSceneLogic = kea<editorSceneLogicType>([
     }),
     listeners(() => ({
         reportAIQueryPrompted: () => {
-            posthog.capture('ai_query_prompted')
+            insights.capture('ai_query_prompted')
         },
         reportAIQueryAccepted: () => {
-            posthog.capture('ai_query_accepted')
+            insights.capture('ai_query_accepted')
         },
         reportAIQueryRejected: () => {
-            posthog.capture('ai_query_rejected')
+            insights.capture('ai_query_rejected')
         },
         reportAIQueryPromptOpen: () => {
-            posthog.capture('ai_query_prompt_open')
+            insights.capture('ai_query_prompt_open')
         },
     })),
 ])

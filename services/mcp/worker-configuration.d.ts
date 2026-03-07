@@ -8,9 +8,9 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		INKEEP_API_KEY: string;
-		POSTHOG_API_BASE_URL: string;
-		POSTHOG_MCP_APPS_ANALYTICS_BASE_URL: string;
-		POSTHOG_UI_APPS_TOKEN: string;
+		INSIGHTS_API_BASE_URL: string;
+		INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: string;
+		INSIGHTS_UI_APPS_TOKEN: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MCP>;
 	}
 }

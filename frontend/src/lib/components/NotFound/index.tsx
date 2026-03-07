@@ -2,11 +2,11 @@ import './NotFound.scss'
 
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { IconArrowRight, IconCheckCircle } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, ProfilePicture, SpinnerOverlay, lemonToast } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, ProfilePicture, SpinnerOverlay, lemonToast } from '@hanzo/lemon-ui'
 
 import { getCookie } from 'lib/api'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -45,7 +45,7 @@ export function NotFound({ object, caption, meta, className }: NotFoundProps): J
     const appContext = getAppContext()
 
     useOnMountEffect(() => {
-        posthog.capture('not_found_shown', { object })
+        insights.capture('not_found_shown', { object })
     })
 
     return (
@@ -202,7 +202,7 @@ export function LogInAsSuggestions({ suggestedUsers }: { suggestedUsers: UserBas
                 credentials: 'same-origin',
                 mode: 'cors',
                 headers: {
-                    'X-CSRFToken': getCookie('posthog_csrftoken') as string,
+                    'X-CSRFToken': getCookie('insights_csrftoken') as string,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({

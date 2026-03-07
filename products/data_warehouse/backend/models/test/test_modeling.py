@@ -87,7 +87,7 @@ class TestModelPath(BaseTest):
         self.assertEqual(len(paths), 1)
         self.assertIn([saved_query.id.hex], paths)
 
-    def test_create_from_posthog_root_nodes_query(self):
+    def test_create_from_insights_root_nodes_query(self):
         """Test creation of a model path from a query that reads from Insights root tables."""
         query = """\
           select
@@ -286,8 +286,8 @@ class TestModelPath(BaseTest):
 
         self.assertIn((child_saved_query.id.hex, NodeType.SAVED_QUERY), dag.nodes)
         self.assertIn((parent_saved_query.id.hex, NodeType.SAVED_QUERY), dag.nodes)
-        self.assertIn(("events", NodeType.POSTHOG), dag.nodes)
-        self.assertIn(("persons", NodeType.POSTHOG), dag.nodes)
+        self.assertIn(("events", NodeType.INSIGHTS), dag.nodes)
+        self.assertIn(("persons", NodeType.INSIGHTS), dag.nodes)
         self.assertEqual(len(dag.nodes), 4)
 
     def test_update_child_when_parent_has_multiple_paths_does_not_crash(self):

@@ -9,7 +9,7 @@ from django.db.models import Q, QuerySet
 from django.utils.timezone import now
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from django_filters.rest_framework import DjangoFilterBackend
 from loginas.utils import is_impersonated_session
 from rest_framework import request, response, serializers, viewsets
@@ -48,7 +48,7 @@ from insights.utils import relative_date_parse
 
 logger = structlog.get_logger(__name__)
 
-PLAYLIST_COUNT_REDIS_PREFIX = "@posthog/replay/playlist_filters_match_count/"
+PLAYLIST_COUNT_REDIS_PREFIX = "@insights/replay/playlist_filters_match_count/"
 
 
 def create_synthetic_playlist_instance(
@@ -265,7 +265,7 @@ class SessionRecordingPlaylistSerializer(serializers.ModelSerializer, UserAccess
                     recordings_counts["saved_filters"] = count_saved_filters(playlist, user, team)
 
         except Exception as e:
-            posthoganalytics.capture_exception(e)
+            hanzoanalytics.capture_exception(e)
 
         return recordings_counts
 

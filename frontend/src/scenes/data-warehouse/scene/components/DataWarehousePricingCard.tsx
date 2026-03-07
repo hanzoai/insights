@@ -1,4 +1,4 @@
-import { LemonCard } from '@posthog/lemon-ui'
+import { LemonCard } from '@hanzo/lemon-ui'
 
 import { compactNumber } from 'lib/utils'
 

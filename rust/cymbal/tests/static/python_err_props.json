@@ -540,13 +540,13 @@
                     },
                     {
                         "platform": "python",
-                        "filename": "posthog/management/commands/migrate_clickhouse.py",
+                        "filename": "insights/management/commands/migrate_clickhouse.py",
                         "in_app": true,
                         "function": "handle"
                     },
                     {
                         "platform": "python",
-                        "filename": "posthog/management/commands/migrate_clickhouse.py",
+                        "filename": "insights/management/commands/migrate_clickhouse.py",
                         "in_app": true,
                         "function": "migrate"
                     },
@@ -726,10 +726,10 @@
     "$geoip_disable": true,
     "$lib_version__patch": 6,
     "$lib_version": "3.6.6",
-    "$plugins_succeeded": ["posthog-semver-flattener (12449)"],
-    "$exception_personURL": "https://us.i.posthog.com/project/sTMFPsFhdP1Ssg/person/python-exceptions",
+    "$plugins_succeeded": ["insights-semver-flattener (12449)"],
+    "$exception_personURL": "https://us.i.hanzo.ai/project/sTMFPsFhdP1Ssg/person/python-exceptions",
     "$ip": "185.140.230.43",
     "$lib_version__minor": 6,
-    "$lib": "posthog-python",
+    "$lib": "insights-python",
     "$lib_version__major": 3
 }

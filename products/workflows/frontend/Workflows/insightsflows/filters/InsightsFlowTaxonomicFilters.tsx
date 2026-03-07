@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCode } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCode } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType, TaxonomicFilterValue } from 'lib/components/TaxonomicFilter/types'
 

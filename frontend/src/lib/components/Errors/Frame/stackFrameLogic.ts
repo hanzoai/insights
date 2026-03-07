@@ -1,6 +1,6 @@
 import { actions, kea, listeners, path } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 
@@ -55,7 +55,7 @@ export const stackFrameLogic = kea<stackFrameLogicType>([
     listeners(() => ({
         loadFromRawIdsSuccess: ({ stackFrameRecords }) => {
             const recordsWithContext = Object.values(stackFrameRecords).filter((record) => record.context)
-            posthog.capture('error_tracking_frame_context_loaded', {
+            insights.capture('error_tracking_frame_context_loaded', {
                 frame_count: recordsWithContext.length,
             })
         },

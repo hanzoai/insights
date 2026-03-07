@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconPin, IconPinFilled } from '@posthog/icons'
+import { IconCalendar, IconPin, IconPinFilled } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonButton,
@@ -11,7 +11,7 @@ import {
     LemonTable,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

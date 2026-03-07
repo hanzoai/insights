@@ -2,7 +2,7 @@
 //!
 //! These tests define the expected behavior for consistency level routing:
 //!
-//! 1. Person-related endpoints (touch posthog_person table for data retrieval):
+//! 1. Person-related endpoints (touch insights_person table for data retrieval):
 //!    - MUST reject STRONG consistency with FailedPrecondition
 //!    - The replica service cannot serve strong consistency for person data
 //!      because the person table is cached/managed by the leader service

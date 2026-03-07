@@ -3,7 +3,7 @@ package ci
 import (
 	"fmt"
 
-	"github.com/posthog/posthog/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
 )
 
 type Config struct {
@@ -12,12 +12,12 @@ type Config struct {
 }
 
 func Run(cfg Config) error {
-	isUpgrade := core.DirExists("posthog")
+	isUpgrade := core.DirExists("insights")
 
 	if isUpgrade {
-		fmt.Println("🔄 Upgrading PostHog")
+		fmt.Println("🔄 Upgrading Insights")
 	} else {
-		fmt.Println("🚀 Installing PostHog")
+		fmt.Println("🚀 Installing Insights")
 	}
 	fmt.Printf("   Version: %s\n", cfg.Version)
 	fmt.Printf("   Domain:  %s\n", cfg.Domain)
@@ -39,7 +39,7 @@ func Run(cfg Config) error {
 
 	fmt.Println()
 	fmt.Println("✅ Installation complete!")
-	fmt.Printf("   PostHog is running at: https://%s\n", cfg.Domain)
+	fmt.Printf("   Insights is running at: https://%s\n", cfg.Domain)
 	return nil
 }
 
@@ -78,7 +78,7 @@ func runChecks() error {
 }
 
 func runInstall(cfg core.InstallConfig) error {
-	fmt.Println("📦 Installing PostHog...")
+	fmt.Println("📦 Installing Insights...")
 
 	steps := core.GetInstallSteps()
 

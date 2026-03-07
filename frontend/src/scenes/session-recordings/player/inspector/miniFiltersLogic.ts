@@ -18,7 +18,7 @@ export type SharedListMiniFilter = {
 export const MiniFilters: SharedListMiniFilter[] = [
     {
         type: 'events',
-        key: 'events-posthog',
+        key: 'events-insights',
         name: 'Insights',
         tooltip: 'Standard Insights events except Pageviews, Autocapture, and Exceptions.',
     },
@@ -120,7 +120,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
 export type MiniFilterKey = (typeof MiniFilters)[number]['key']
 
 const defaultMinifilters = [
-    'events-posthog',
+    'events-insights',
     'events-custom',
     'events-pageview',
     'events-autocapture',

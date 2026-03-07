@@ -316,7 +316,7 @@ mod metrics_tests {
         let data = MetricsData {
             team_id: Some(123),
             flags_disabled: Some(false),
-            library: Library::PosthogNode,
+            library: Library::InsightsNode,
         };
 
         // Call the real record_metrics function - it will use our test metrics functions
@@ -343,7 +343,7 @@ mod metrics_tests {
             .contains(&("flags_disabled".to_string(), "false".to_string())));
         assert!(counter
             .labels
-            .contains(&("library".to_string(), "posthog-node".to_string())));
+            .contains(&("library".to_string(), "insights-node".to_string())));
 
         // Check the histogram metric
         let histogram = &metrics[1];
@@ -392,7 +392,7 @@ mod metrics_tests {
         let data = MetricsData {
             team_id: Some(456),
             flags_disabled: Some(true),
-            library: Library::PosthogJs,
+            library: Library::InsightsJs,
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(200));
@@ -425,7 +425,7 @@ mod metrics_tests {
         let data = MetricsData {
             team_id: None,
             flags_disabled: Some(false),
-            library: Library::PosthogPython,
+            library: Library::InsightsPython,
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(150));
@@ -454,7 +454,7 @@ mod metrics_tests {
         let data = MetricsData {
             team_id: Some(789),
             flags_disabled: Some(false),
-            library: Library::PosthogAndroid,
+            library: Library::InsightsAndroid,
         };
 
         record_metrics(&result, data, std::time::Duration::from_millis(75));

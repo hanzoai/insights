@@ -12,7 +12,7 @@ Column | Type | Nullable | Description
 `description` | varchar(1000) | NOT NULL | Cohort description
 `deleted` | boolean | NOT NULL | Soft delete flag
 `filters` | jsonb | NULL | Modern filter structure for cohort criteria
-`query` | jsonb | NULL | HogQL query for analytical cohorts
+`query` | jsonb | NULL | InsightsQL query for analytical cohorts
 `version` | integer | NULL | Current calculation version
 `pending_version` | integer | NULL | Version being calculated
 `count` | integer | NULL | Cached person count
@@ -32,7 +32,7 @@ Type | Description
 `person_property` | Based on person properties (e.g., email contains "example.com")
 `behavioral` | Based on events performed (e.g., "viewed pricing page in last 30 days")
 `realtime` | Can be evaluated in real-time (< 20M persons)
-`analytical` | Complex queries with temporal/sequential logic via HogQL
+`analytical` | Complex queries with temporal/sequential logic via InsightsQL
 
 ### Filters Structure Examples
 

@@ -144,7 +144,7 @@ class TestDatabaseOperations:
         mock_named_cursor.execute.assert_called_once()
         call_args = mock_named_cursor.execute.call_args[0]
         assert "SELECT" in call_args[0]
-        assert "FROM posthog_organization" in call_args[0]
+        assert "FROM insights_organization" in call_args[0]
         assert "WHERE updated_at >" not in call_args[0]
 
     @patch("insights.dags.postgres_to_clickhouse_etl.psycopg2.connect")
@@ -196,8 +196,8 @@ class TestDatabaseOperations:
 
         # Should have called map_all_hosts for:
         # 1. CREATE DATABASE IF NOT EXISTS models
-        # 2. CREATE TABLE posthog_organization
-        # 3. CREATE TABLE posthog_team
+        # 2. CREATE TABLE insights_organization
+        # 3. CREATE TABLE insights_team
         assert mock_cluster.map_all_hosts.call_count == 3
 
         # Extract the Query objects from the calls
@@ -208,11 +208,11 @@ class TestDatabaseOperations:
 
         # Check table creation with ReplicatedReplacingMergeTree
         assert any(
-            "CREATE TABLE IF NOT EXISTS models.posthog_organization" in call and "ReplicatedReplacingMergeTree" in call
+            "CREATE TABLE IF NOT EXISTS models.insights_organization" in call and "ReplicatedReplacingMergeTree" in call
             for call in calls
         )
         assert any(
-            "CREATE TABLE IF NOT EXISTS models.posthog_team" in call and "ReplicatedReplacingMergeTree" in call
+            "CREATE TABLE IF NOT EXISTS models.insights_team" in call and "ReplicatedReplacingMergeTree" in call
             for call in calls
         )
 
@@ -255,7 +255,7 @@ class TestDatabaseOperations:
 
         # Verify INSERT statement
         call_args = mock_sync_execute.call_args[0]
-        assert "INSERT INTO models.posthog_organization" in call_args[0]
+        assert "INSERT INTO models.insights_organization" in call_args[0]
 
     @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
     def test_insert_teams_to_clickhouse(self, mock_sync_execute):
@@ -416,7 +416,7 @@ class TestOps:
             result = sync_organizations(context)
 
             # Verify truncate was called for full refresh
-            mock_sync_execute.assert_any_call("TRUNCATE TABLE models.posthog_organization")
+            mock_sync_execute.assert_any_call("TRUNCATE TABLE models.insights_organization")
 
             assert result.rows_synced == 0
             assert len(result.errors) == 0

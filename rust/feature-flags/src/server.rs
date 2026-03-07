@@ -39,7 +39,7 @@ where
     };
 
     // Create ReadWriteClient for shared Redis (non-critical path: analytics, billing, cookieless)
-    // "shared" means the Redis client shares the cache with the Django PostHog web app.
+    // "shared" means the Redis client shares the cache with the Django Insights web app.
     // Automatically routes reads to replica and writes to primary
     let Some(redis_client) = create_readwrite_client(
         config.get_redis_writer_url(),

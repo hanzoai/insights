@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconChevronDown, IconChevronRight, IconInfo } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronRight, IconInfo } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Link } from 'lib/lemon-ui/Link'
@@ -66,7 +66,7 @@ export function LLMAnalyticsSessionsScene(): JSX.Element {
                     <>
                         Try changing the date range or filters. AI sessions require the <code>$ai_session_id</code>{' '}
                         property to group related traces.{' '}
-                        <Link to="https://posthog.com/docs/llm-analytics/sessions" target="_blank">
+                        <Link to="https://hanzo.ai/docs/llm-analytics/sessions" target="_blank">
                             Learn more →
                         </Link>
                     </>

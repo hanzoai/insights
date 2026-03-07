@@ -31,7 +31,7 @@ export const getNuxtSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             content: (
                 <>
                     <Markdown>
-                        Use `posthog-node` to evaluate feature flags on the server. Initialize Insights in your server
+                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your server
                         route:
                     </Markdown>
                     <CodeBlock
@@ -40,12 +40,12 @@ export const getNuxtSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                 language: 'javascript',
                                 file: 'server/api/example.js',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
+                                    import { Insights } from 'insights-node'
 
                                     const runtimeConfig = useRuntimeConfig()
-                                    const posthog = new Insights(
-                                        runtimeConfig.public.posthogPublicKey,
-                                        { host: runtimeConfig.public.posthogHost }
+                                    const insights = new Insights(
+                                        runtimeConfig.public.insightsPublicKey,
+                                        { host: runtimeConfig.public.insightsHost }
                                     )
                                 `,
                             },

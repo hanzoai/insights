@@ -80,7 +80,7 @@ def summarize_with_gemini(
         system_prompt=SYSTEM_PROMPT,
         user_prompt=_build_user_prompt(question_text, responses),
         response_schema=SurveySummaryResponse,
-        posthog_properties={
+        insights_properties={
             "survey_id": survey_id,
             "question_id": question_id,
             "response_count": len(responses),

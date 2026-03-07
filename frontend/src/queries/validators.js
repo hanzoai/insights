@@ -14,7 +14,7 @@ const schema12 = {
         { $ref: '#/definitions/GroupPropertyFilter' },
         { $ref: '#/definitions/FeaturePropertyFilter' },
         { $ref: '#/definitions/FlagPropertyFilter' },
-        { $ref: '#/definitions/HogQLPropertyFilter' },
+        { $ref: '#/definitions/InsightsQLPropertyFilter' },
         { $ref: '#/definitions/EmptyPropertyFilter' },
         { $ref: '#/definitions/DataWarehousePropertyFilter' },
         { $ref: '#/definitions/DataWarehousePersonPropertyFilter' },
@@ -2904,7 +2904,7 @@ const schema38 = {
     properties: {
         key: { type: 'string' },
         label: { type: 'string' },
-        type: { const: 'hogql', type: 'string' },
+        type: { const: 'insightsql', type: 'string' },
         value: { $ref: '#/definitions/PropertyFilterValue' },
     },
     required: ['key', 'type'],
@@ -2998,13 +2998,13 @@ function validate42(data, { instancePath = '', parentData, parentDataProperty, r
                                     ]
                                     return false
                                 }
-                                if ('hogql' !== data2) {
+                                if ('insightsql' !== data2) {
                                     validate42.errors = [
                                         {
                                             instancePath: instancePath + '/type',
                                             schemaPath: '#/properties/type/const',
                                             keyword: 'const',
-                                            params: { allowedValue: 'hogql' },
+                                            params: { allowedValue: 'insightsql' },
                                             message: 'must be equal to constant',
                                         },
                                     ]
@@ -5371,7 +5371,7 @@ const schema65 = {
         'event_metadata',
         'group',
         'session',
-        'hogql',
+        'insightsql',
         'data_warehouse',
         'data_warehouse_person_property',
         'revenue_analytics',
@@ -5391,7 +5391,7 @@ const schema66 = {
     type: 'object',
 }
 const schema70 = {
-    enum: ['cohort', 'person', 'event', 'event_metadata', 'group', 'session', 'hogql', 'revenue_analytics'],
+    enum: ['cohort', 'person', 'event', 'event_metadata', 'group', 'session', 'insightsql', 'revenue_analytics'],
     type: 'string',
 }
 function validate75(data, { instancePath = '', parentData, parentDataProperty, rootData = data } = {}) {
@@ -5660,7 +5660,7 @@ function validate75(data, { instancePath = '', parentData, parentDataProperty, r
                                                 data4 === 'event_metadata' ||
                                                 data4 === 'group' ||
                                                 data4 === 'session' ||
-                                                data4 === 'hogql' ||
+                                                data4 === 'insightsql' ||
                                                 data4 === 'revenue_analytics'
                                             )
                                         ) {
@@ -6175,7 +6175,7 @@ function validate74(data, { instancePath = '', parentData, parentDataProperty, r
                                                         data8 === 'event_metadata' ||
                                                         data8 === 'group' ||
                                                         data8 === 'session' ||
-                                                        data8 === 'hogql' ||
+                                                        data8 === 'insightsql' ||
                                                         data8 === 'data_warehouse' ||
                                                         data8 === 'data_warehouse_person_property' ||
                                                         data8 === 'revenue_analytics'
@@ -6354,7 +6354,7 @@ const schema75 = {
         limit: { $ref: '#/definitions/integer' },
         math: { $ref: '#/definitions/MathType' },
         math_group_type_index: { enum: [0, 1, 2, 3, 4], type: 'number' },
-        math_hogql: { type: 'string' },
+        math_insightsql: { type: 'string' },
         math_multiplier: { type: 'number' },
         math_property: { type: 'string' },
         math_property_revenue_currency: { $ref: '#/definitions/RevenueCurrencyPropertyConfig' },
@@ -6380,7 +6380,7 @@ const schema77 = {
         { $ref: '#/definitions/PropertyMathType' },
         { $ref: '#/definitions/CountPerActorMathType' },
         { $ref: '#/definitions/GroupMathType' },
-        { $ref: '#/definitions/HogQLMathType' },
+        { $ref: '#/definitions/InsightsQLMathType' },
         { $ref: '#/definitions/ExperimentMetricMathType' },
         { $ref: '#/definitions/CalendarHeatmapMathType' },
     ],
@@ -6413,9 +6413,9 @@ const schema81 = {
     type: 'string',
 }
 const schema82 = { const: 'unique_group', type: 'string' }
-const schema83 = { const: 'hogql', type: 'string' }
+const schema83 = { const: 'insightsql', type: 'string' }
 const schema84 = {
-    enum: ['total', 'sum', 'unique_session', 'min', 'max', 'avg', 'dau', 'unique_group', 'hogql'],
+    enum: ['total', 'sum', 'unique_session', 'min', 'max', 'avg', 'dau', 'unique_group', 'insightsql'],
     type: 'string',
 }
 const schema85 = { enum: ['total', 'dau'], type: 'string' }
@@ -6631,7 +6631,7 @@ function validate81(data, { instancePath = '', parentData, parentDataProperty, r
                         if (typeof data !== 'string') {
                             const err10 = {
                                 instancePath,
-                                schemaPath: '#/definitions/HogQLMathType/type',
+                                schemaPath: '#/definitions/InsightsQLMathType/type',
                                 keyword: 'type',
                                 params: { type: 'string' },
                                 message: 'must be string',
@@ -6643,12 +6643,12 @@ function validate81(data, { instancePath = '', parentData, parentDataProperty, r
                             }
                             errors++
                         }
-                        if ('hogql' !== data) {
+                        if ('insightsql' !== data) {
                             const err11 = {
                                 instancePath,
-                                schemaPath: '#/definitions/HogQLMathType/const',
+                                schemaPath: '#/definitions/InsightsQLMathType/const',
                                 keyword: 'const',
-                                params: { allowedValue: 'hogql' },
+                                params: { allowedValue: 'insightsql' },
                                 message: 'must be equal to constant',
                             }
                             if (vErrors === null) {
@@ -6687,7 +6687,7 @@ function validate81(data, { instancePath = '', parentData, parentDataProperty, r
                                     data === 'avg' ||
                                     data === 'dau' ||
                                     data === 'unique_group' ||
-                                    data === 'hogql'
+                                    data === 'insightsql'
                                 )
                             ) {
                                 const err13 = {
@@ -7426,13 +7426,13 @@ function validate79(data, { instancePath = '', parentData, parentDataProperty, r
                                                 var valid0 = true
                                             }
                                             if (valid0) {
-                                                if (data.math_hogql !== undefined) {
+                                                if (data.math_insightsql !== undefined) {
                                                     const _errs17 = errors
-                                                    if (typeof data.math_hogql !== 'string') {
+                                                    if (typeof data.math_insightsql !== 'string') {
                                                         validate79.errors = [
                                                             {
-                                                                instancePath: instancePath + '/math_hogql',
-                                                                schemaPath: '#/properties/math_hogql/type',
+                                                                instancePath: instancePath + '/math_insightsql',
+                                                                schemaPath: '#/properties/math_insightsql/type',
                                                                 keyword: 'type',
                                                                 params: { type: 'string' },
                                                                 message: 'must be string',
@@ -7825,7 +7825,7 @@ const schema88 = {
         kind: { const: 'ActionsNode', type: 'string' },
         math: { $ref: '#/definitions/MathType' },
         math_group_type_index: { enum: [0, 1, 2, 3, 4], type: 'number' },
-        math_hogql: { type: 'string' },
+        math_insightsql: { type: 'string' },
         math_multiplier: { type: 'number' },
         math_property: { type: 'string' },
         math_property_revenue_currency: { $ref: '#/definitions/RevenueCurrencyPropertyConfig' },
@@ -8055,13 +8055,13 @@ function validate87(data, { instancePath = '', parentData, parentDataProperty, r
                                             var valid0 = true
                                         }
                                         if (valid0) {
-                                            if (data.math_hogql !== undefined) {
+                                            if (data.math_insightsql !== undefined) {
                                                 const _errs15 = errors
-                                                if (typeof data.math_hogql !== 'string') {
+                                                if (typeof data.math_insightsql !== 'string') {
                                                     validate87.errors = [
                                                         {
-                                                            instancePath: instancePath + '/math_hogql',
-                                                            schemaPath: '#/properties/math_hogql/type',
+                                                            instancePath: instancePath + '/math_insightsql',
+                                                            schemaPath: '#/properties/math_insightsql/type',
                                                             keyword: 'type',
                                                             params: { type: 'string' },
                                                             message: 'must be string',
@@ -8362,7 +8362,7 @@ const schema90 = {
         kind: { const: 'ExperimentDataWarehouseNode', type: 'string' },
         math: { $ref: '#/definitions/MathType' },
         math_group_type_index: { enum: [0, 1, 2, 3, 4], type: 'number' },
-        math_hogql: { type: 'string' },
+        math_insightsql: { type: 'string' },
         math_multiplier: { type: 'number' },
         math_property: { type: 'string' },
         math_property_revenue_currency: { $ref: '#/definitions/RevenueCurrencyPropertyConfig' },
@@ -8622,13 +8622,13 @@ function validate93(data, { instancePath = '', parentData, parentDataProperty, r
                                                 var valid0 = true
                                             }
                                             if (valid0) {
-                                                if (data.math_hogql !== undefined) {
+                                                if (data.math_insightsql !== undefined) {
                                                     const _errs16 = errors
-                                                    if (typeof data.math_hogql !== 'string') {
+                                                    if (typeof data.math_insightsql !== 'string') {
                                                         validate93.errors = [
                                                             {
-                                                                instancePath: instancePath + '/math_hogql',
-                                                                schemaPath: '#/properties/math_hogql/type',
+                                                                instancePath: instancePath + '/math_insightsql',
+                                                                schemaPath: '#/properties/math_insightsql/type',
                                                                 keyword: 'type',
                                                                 params: { type: 'string' },
                                                                 message: 'must be string',

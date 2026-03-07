@@ -339,7 +339,7 @@ class TestAlertChecks(APIBaseTest, ClickhouseDestroyTablesMixin):
         assert len(mocked_email_messages) == 1
         email = mocked_email_messages[0]
         assert len(email.to) == 1
-        assert email.to[0]["recipient"] == "user1@posthog.com"
+        assert email.to[0]["recipient"] == "user1@hanzo.ai"
         assert "first anomaly description" in email.html_body
         assert "second anomaly description" in email.html_body
 
@@ -709,7 +709,7 @@ class TestAlertSubscriptionOrgMembership(APIBaseTest):
 
         self.insight = self.dashboard_api.create_insight(data={"name": "insight", "query": query_dict})[1]
 
-        self.other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password")
+        self.other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password")
 
         self.alert = self.client.post(
             f"/api/projects/{self.team.id}/alerts",
@@ -730,12 +730,12 @@ class TestAlertSubscriptionOrgMembership(APIBaseTest):
         alert = AlertConfiguration.objects.get(pk=self.alert["id"])
 
         emails = alert.get_subscribed_users_emails()
-        assert sorted(emails) == sorted(["user1@posthog.com", "other@posthog.com"])
+        assert sorted(emails) == sorted(["user1@hanzo.ai", "other@hanzo.ai"])
 
         OrganizationMembership.objects.filter(user=self.other_user, organization=self.organization).delete()
 
         emails = alert.get_subscribed_users_emails()
-        assert sorted(emails) == ["user1@posthog.com"]
+        assert sorted(emails) == ["user1@hanzo.ai"]
 
     def test_membership_deletion_removes_alert_subscriptions(
         self,
@@ -760,7 +760,7 @@ class TestAlertSubscriptionOrgMembership(APIBaseTest):
         assert len(mocked_email_messages) == 1
         email = mocked_email_messages[0]
         assert len(email.to) == 1
-        assert email.to[0]["recipient"] == "user1@posthog.com"
+        assert email.to[0]["recipient"] == "user1@hanzo.ai"
 
 
 @freeze_time("2024-06-02T08:55:00.000Z")
@@ -803,21 +803,21 @@ class TestGetSubscribedUsersEmails(APIBaseTest):
         AlertSubscription.objects.create(alert_configuration=self.alert, user=outsider)
 
         emails = self.alert.get_subscribed_users_emails()
-        assert sorted(emails) == ["user1@posthog.com"]
+        assert sorted(emails) == ["user1@hanzo.ai"]
 
     def test_includes_user_who_is_in_multiple_orgs_including_alerts_org(self) -> None:
         other_org = Organization.objects.create(name="Other Org")
-        multi_org_user = User.objects.create_and_join(self.organization, "multi@posthog.com", "password")
+        multi_org_user = User.objects.create_and_join(self.organization, "multi@hanzo.ai", "password")
         OrganizationMembership.objects.create(user=multi_org_user, organization=other_org)
 
         AlertSubscription.objects.create(alert_configuration=self.alert, user=multi_org_user)
 
         emails = self.alert.get_subscribed_users_emails()
-        assert sorted(emails) == ["multi@posthog.com", "user1@posthog.com"]
+        assert sorted(emails) == ["multi@hanzo.ai", "user1@hanzo.ai"]
 
     def test_excludes_multi_org_user_removed_from_alerts_org(self) -> None:
         other_org = Organization.objects.create(name="Other Org")
-        multi_org_user = User.objects.create_and_join(self.organization, "multi@posthog.com", "password")
+        multi_org_user = User.objects.create_and_join(self.organization, "multi@hanzo.ai", "password")
         OrganizationMembership.objects.create(user=multi_org_user, organization=other_org)
 
         AlertSubscription.objects.create(alert_configuration=self.alert, user=multi_org_user)
@@ -826,7 +826,7 @@ class TestGetSubscribedUsersEmails(APIBaseTest):
         OrganizationMembership.objects.filter(user=multi_org_user, organization=self.organization).delete()
 
         emails = self.alert.get_subscribed_users_emails()
-        assert sorted(emails) == ["user1@posthog.com"]
+        assert sorted(emails) == ["user1@hanzo.ai"]
 
     def test_returns_empty_list_when_no_subscribers_are_org_members(self) -> None:
         OrganizationMembership.objects.filter(user=self.user, organization=self.organization).delete()

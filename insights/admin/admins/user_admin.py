@@ -43,8 +43,8 @@ class UserChangeForm(DjangoUserChangeForm):
     def clean_is_staff(self):
         is_staff = bool(self.cleaned_data.get("is_staff", False))
         enabled_is_staff = is_staff and (not getattr(self.instance, "is_staff", False))
-        if enabled_is_staff and not self.instance.email.endswith("@posthog.com"):
-            raise ValidationError("Only users with a posthog.com email address may be promoted to staff.")
+        if enabled_is_staff and not self.instance.email.endswith("@hanzo.ai"):
+            raise ValidationError("Only users with a hanzo.ai email address may be promoted to staff.")
 
         return is_staff
 
@@ -54,7 +54,7 @@ class UserAdmin(DjangoUserAdmin):
 
     form = UserChangeForm
     change_password_form = None  # This view is not exposed in our subclass of UserChangeForm
-    change_form_template = "admin/posthog/user/change_form.html"
+    change_form_template = "admin/insights/user/change_form.html"
 
     inlines = [OrganizationMemberInline, PersonalAPIKeyInline, TOTPDeviceInline, UserSocialAuthInline]
     fieldsets = (
@@ -118,7 +118,7 @@ class UserAdmin(DjangoUserAdmin):
 
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[user.team.pk]),
+            reverse("admin:insights_team_change", args=[user.team.pk]),
             user.team.name,
         )
 
@@ -129,7 +129,7 @@ class UserAdmin(DjangoUserAdmin):
 
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_organization_change", args=[user.organization.pk]),
+            reverse("admin:insights_organization_change", args=[user.organization.pk]),
             user.organization.name,
         )
 
@@ -187,7 +187,7 @@ class UserAdmin(DjangoUserAdmin):
                 messages.error(request, f"Failed to send verification email: {str(e)}")
 
             # Redirect back to the change form
-            return HttpResponseRedirect(reverse("admin:posthog_user_change", args=[object_id]))
+            return HttpResponseRedirect(reverse("admin:insights_user_change", args=[object_id]))
 
         if request.POST.get("revoke_sessions") == "1":
             try:
@@ -201,7 +201,7 @@ class UserAdmin(DjangoUserAdmin):
                 messages.error(request, f"Failed to revoke sessions: {str(e)}")
 
             # Redirect back to the change form
-            return HttpResponseRedirect(reverse("admin:posthog_user_change", args=[object_id]))
+            return HttpResponseRedirect(reverse("admin:insights_user_change", args=[object_id]))
 
         if request.POST.get("send_2fa_reset") == "1":
             try:
@@ -232,7 +232,7 @@ class UserAdmin(DjangoUserAdmin):
                 messages.error(request, f"Failed to send 2FA reset email: {str(e)}")
 
             # Redirect back to the change form
-            return HttpResponseRedirect(reverse("admin:posthog_user_change", args=[object_id]))
+            return HttpResponseRedirect(reverse("admin:insights_user_change", args=[object_id]))
 
         return super().change_view(request, object_id, form_url, extra_context)
 

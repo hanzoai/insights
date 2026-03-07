@@ -107,7 +107,7 @@ impl EventSimilarity {
             match (original_val, new_val) {
                 (Some(v1), Some(v2)) if v1 == v2 => matching += 1,
                 (original_opt, new_opt) => {
-                    // For $ properties (PostHog system properties), include values
+                    // For $ properties (Insights system properties), include values
                     // For other properties, just record the key for privacy
                     let values = if key.starts_with('$') {
                         let orig_str = original_opt

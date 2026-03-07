@@ -2,7 +2,7 @@ import { MOCK_DEFAULT_PROJECT, MOCK_DEFAULT_TEAM } from 'lib/api.mock'
 
 import { createMemoryHistory } from 'history'
 import { testUtilsPlugin } from 'kea-test-utils'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { dayjs } from 'lib/dayjs'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -23,14 +23,14 @@ export function initKeaTests(
     projectForWindowContext: ProjectType = MOCK_DEFAULT_PROJECT
 ): void {
     dayjs.tz.setDefault('UTC')
-    window.POSTHOG_APP_CONTEXT = {
-        ...window.POSTHOG_APP_CONTEXT,
+    window.INSIGHTS_APP_CONTEXT = {
+        ...window.INSIGHTS_APP_CONTEXT,
         current_team: teamForWindowContext,
         current_project: projectForWindowContext,
         // Default to $pageview in tests (simulating a team that has pageview events)
         default_event_name: '$pageview',
     } as unknown as AppContext
-    posthog.init('no token', {
+    insights.init('no token', {
         autocapture: false,
         disable_session_recording: true,
         advanced_disable_decide: true,

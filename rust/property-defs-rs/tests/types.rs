@@ -251,7 +251,7 @@ fn test_property_timestamp_rejections() {
     );
 
     assert_eq!(
-        detect_property_type("posthog_is_awesome", &Value::from("FALSE")),
+        detect_property_type("insights_is_awesome", &Value::from("FALSE")),
         Some(PropertyValueType::Boolean)
     );
 
@@ -369,7 +369,7 @@ fn test_property_timestamp_rejections() {
 fn test_initial_utm_properties_always_string() {
     // $initial_utm_* properties are the SDK's "initial" variants of utm_*
     // and must always be classified as String, regardless of value.
-    // See https://github.com/PostHog/posthog/issues/12529
+    // See https://github.com/hanzoai/insights/issues/12529
     let cases: Vec<(&str, Value)> = vec![
         // datetime-looking values that would otherwise be classified as DateTime
         (

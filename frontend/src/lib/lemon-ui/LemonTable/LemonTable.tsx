@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import React, { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'

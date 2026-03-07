@@ -19,7 +19,7 @@ from insights.temporal.common.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
-# Fields from POSTHOG_USAGE_FIELD_MAPPINGS that are handled specially (not simple attribute->field copy)
+# Fields from INSIGHTS_USAGE_FIELD_MAPPINGS that are handled specially (not simple attribute->field copy)
 _SPECIAL_FIELDS = frozenset({"products_activated_7d", "products_activated_30d"})
 
 
@@ -28,7 +28,7 @@ class SalesforceOrgMapping:
     """Mapping between Salesforce account and Insights organization."""
 
     salesforce_account_id: str
-    posthog_org_id: str
+    insights_org_id: str
 
 
 @dataclasses.dataclass
@@ -43,7 +43,7 @@ class SalesforceUsageUpdate:
 class UsageEnrichmentInputs:
     """Inputs for the usage enrichment workflow."""
 
-    batch_size: int = POSTHOG_USAGE_ENRICHMENT_BATCH_SIZE
+    batch_size: int = INSIGHTS_USAGE_ENRICHMENT_BATCH_SIZE
     max_orgs: int | None = None  # Optional limit for testing
     specific_org_id: str | None = None  # Debug mode: enrich single org
 
@@ -63,7 +63,7 @@ def prepare_salesforce_update_record(salesforce_account_id: str, signals: UsageS
     record: dict[str, Any] = {"Id": salesforce_account_id}
 
     # Add all mapped fields, excluding None values and special fields
-    for attr, sf_field in POSTHOG_USAGE_FIELD_MAPPINGS.items():
+    for attr, sf_field in INSIGHTS_USAGE_FIELD_MAPPINGS.items():
         if attr in _SPECIAL_FIELDS:
             continue
         value = getattr(signals, attr, None)
@@ -71,8 +71,8 @@ def prepare_salesforce_update_record(salesforce_account_id: str, signals: UsageS
             record[sf_field] = value
 
     # Products activated (comma-separated, sorted for consistency)
-    record[POSTHOG_USAGE_FIELD_MAPPINGS["products_activated_7d"]] = ",".join(sorted(signals.products_activated_7d))
-    record[POSTHOG_USAGE_FIELD_MAPPINGS["products_activated_30d"]] = ",".join(sorted(signals.products_activated_30d))
+    record[INSIGHTS_USAGE_FIELD_MAPPINGS["products_activated_7d"]] = ",".join(sorted(signals.products_activated_7d))
+    record[INSIGHTS_USAGE_FIELD_MAPPINGS["products_activated_30d"]] = ",".join(sorted(signals.products_activated_30d))
 
     return record
 
@@ -91,14 +91,14 @@ async def cache_org_mappings_activity() -> dict[str, Any]:
     logger.info("cache_miss_querying_salesforce", action="org_mappings")
 
     sf = get_salesforce_client()
-    # POSTHOG_ORG_ID_FIELD is a trusted constant defined in constants.py, not user input
-    query = f"SELECT Id, {POSTHOG_ORG_ID_FIELD} FROM Account WHERE {POSTHOG_ORG_ID_FIELD} != null"
+    # INSIGHTS_ORG_ID_FIELD is a trusted constant defined in constants.py, not user input
+    query = f"SELECT Id, {INSIGHTS_ORG_ID_FIELD} FROM Account WHERE {INSIGHTS_ORG_ID_FIELD} != null"
 
     result = await asyncio.to_thread(sf.query_all, query)
     mappings = [
-        {"salesforce_account_id": r["Id"], "posthog_org_id": r[POSTHOG_ORG_ID_FIELD]}
+        {"salesforce_account_id": r["Id"], "insights_org_id": r[INSIGHTS_ORG_ID_FIELD]}
         for r in result.get("records", [])
-        if r.get(POSTHOG_ORG_ID_FIELD)
+        if r.get(INSIGHTS_ORG_ID_FIELD)
     ]
 
     await store_org_mappings_in_redis(mappings)
@@ -122,7 +122,7 @@ async def fetch_salesforce_org_ids_activity() -> list[SalesforceOrgMapping]:
     mappings = [
         SalesforceOrgMapping(
             salesforce_account_id=m["salesforce_account_id"],
-            posthog_org_id=m["posthog_org_id"],
+            insights_org_id=m["insights_org_id"],
         )
         for m in cached_mappings
     ]
@@ -255,7 +255,7 @@ class SalesforceUsageEnrichmentWorkflow(InsightsWorkflow):
         if inputs.max_orgs and len(mappings) > inputs.max_orgs:
             logger.info("limiting_to_max_orgs", original_count=len(mappings), max_orgs=inputs.max_orgs)
             # Sort by org_id for deterministic behavior in testing
-            mappings = sorted(mappings, key=lambda m: m.posthog_org_id)[: inputs.max_orgs]
+            mappings = sorted(mappings, key=lambda m: m.insights_org_id)[: inputs.max_orgs]
 
         logger.info("salesforce_accounts_to_enrich", count=len(mappings))
 
@@ -263,7 +263,7 @@ class SalesforceUsageEnrichmentWorkflow(InsightsWorkflow):
         total_updated = 0
         all_errors: list[str] = []
 
-        org_to_sf = {m.posthog_org_id: m.salesforce_account_id for m in mappings}
+        org_to_sf = {m.insights_org_id: m.salesforce_account_id for m in mappings}
         all_org_ids = list(org_to_sf.keys())
 
         for batch_tuple in batched(all_org_ids, inputs.batch_size):

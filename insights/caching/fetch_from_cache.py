@@ -13,7 +13,7 @@ from insights.caching.query_cache_routing import get_query_cache
 logger = structlog.get_logger(__name__)
 
 insight_cache_read_counter = Counter(
-    "posthog_cloud_insight_cache_read",
+    "insights_cloud_insight_cache_read",
     "A read from the redis insight cache",
     labelnames=["result"],
 )

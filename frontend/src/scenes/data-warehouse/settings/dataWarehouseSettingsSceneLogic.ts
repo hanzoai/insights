@@ -2,9 +2,9 @@ import { Monaco } from '@monaco-editor/react'
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { router, urlToAction } from 'kea-router'
 import { editor } from 'monaco-editor'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
@@ -33,7 +33,7 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
     connect(() => ({
         values: [
             databaseTableListLogic,
-            ['database', 'posthogTables', 'dataWarehouseTables', 'databaseLoading', 'views', 'viewsMapById'],
+            ['database', 'insightsTables', 'dataWarehouseTables', 'databaseLoading', 'views', 'viewsMapById'],
             dataWarehouseViewsLogic,
             ['dataWarehouseSavedQueryMapById', 'dataWarehouseSavedQueriesLoading'],
         ],
@@ -238,7 +238,7 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
                 actions.loadDatabase()
 
                 if (values.selectedRow) {
-                    posthog.capture('source schema saved', {
+                    insights.capture('source schema saved', {
                         name: values.selectedRow.name,
                         tableType: values.selectedRow.type,
                     })
@@ -268,7 +268,7 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
         },
         toggleSchemaModal: () => {
             if (values.schemaModalIsOpen && values.selectedRow) {
-                posthog.capture('source schema viewed', {
+                insights.capture('source schema viewed', {
                     name: values.selectedRow.name,
                     tableType: values.selectedRow.type,
                 })

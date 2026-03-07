@@ -20,7 +20,7 @@ import psycopg
 import aioboto3
 import deltalake
 import pytest_asyncio
-import posthoganalytics
+import hanzoanalytics
 from asgiref.sync import sync_to_async
 from deltalake import DeltaTable
 from dlt.common.configuration.specs.aws_credentials import AwsCredentials
@@ -671,7 +671,7 @@ async def test_zendesk_brands(team, zendesk_brands):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_brands["brands"],
     )
@@ -688,7 +688,7 @@ async def test_zendesk_organizations(team, zendesk_organizations):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_organizations["organizations"],
     )
@@ -705,7 +705,7 @@ async def test_zendesk_groups(team, zendesk_groups):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_groups["groups"],
     )
@@ -722,7 +722,7 @@ async def test_zendesk_sla_policies(team, zendesk_sla_policies):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_sla_policies["sla_policies"],
     )
@@ -739,7 +739,7 @@ async def test_zendesk_users(team, zendesk_users):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_users["users"],
     )
@@ -756,7 +756,7 @@ async def test_zendesk_ticket_fields(team, zendesk_ticket_fields):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_ticket_fields["ticket_fields"],
     )
@@ -773,7 +773,7 @@ async def test_zendesk_ticket_events(team, zendesk_ticket_events):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_ticket_events["ticket_events"],
     )
@@ -790,7 +790,7 @@ async def test_zendesk_tickets(team, zendesk_tickets):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_tickets["tickets"],
     )
@@ -807,7 +807,7 @@ async def test_zendesk_ticket_metric_events(team, zendesk_ticket_metric_events):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
         mock_data_response=zendesk_ticket_metric_events["ticket_metric_events"],
     )
@@ -1255,7 +1255,7 @@ async def test_non_retryable_error(team, zendesk_brands):
             job_inputs={
                 "subdomain": "test",
                 "api_key": "test_api_key",
-                "email_address": "test@posthog.com",
+                "email_address": "test@hanzo.ai",
             },
         )
 
@@ -1278,7 +1278,7 @@ async def test_non_retryable_error(team, zendesk_brands):
         mock.patch(
             "ee.billing.quota_limiting.list_limited_team_attributes",
         ) as mock_list_limited_team_attributes,
-        mock.patch.object(posthoganalytics, "capture") as capture_mock,
+        mock.patch.object(hanzoanalytics, "capture") as capture_mock,
     ):
         mock_list_limited_team_attributes.side_effect = Exception("404 Client Error: Not Found for url")
 
@@ -1330,7 +1330,7 @@ async def test_non_retryable_error_with_special_characters(team, stripe_customer
         mock.patch(
             "ee.billing.quota_limiting.list_limited_team_attributes",
         ) as mock_list_limited_team_attributes,
-        mock.patch.object(posthoganalytics, "capture") as capture_mock,
+        mock.patch.object(hanzoanalytics, "capture") as capture_mock,
     ):
         mock_list_limited_team_attributes.side_effect = Exception(
             "401 Client Error:\nUnauthorized for url: https://api.stripe.com"
@@ -1364,7 +1364,7 @@ async def test_inconsistent_types_in_data(team):
         job_inputs={
             "subdomain": "test",
             "api_key": "test_api_key",
-            "email_address": "test@posthog.com",
+            "email_address": "test@hanzo.ai",
         },
     )
 
@@ -2633,7 +2633,7 @@ async def test_worker_shutdown_triggers_schedule_buffer_one(team, zendesk_brands
             job_inputs={
                 "subdomain": "test",
                 "api_key": "test_api_key",
-                "email_address": "test@posthog.com",
+                "email_address": "test@hanzo.ai",
             },
             mock_data_response=zendesk_brands["brands"],
             sync_type=ExternalDataSchema.SyncType.INCREMENTAL,
@@ -2824,7 +2824,7 @@ async def test_pipeline_mb_chunk_size(team, zendesk_brands, pipeline_mode):
             job_inputs={
                 "subdomain": "test",
                 "api_key": "test_api_key",
-                "email_address": "test@posthog.com",
+                "email_address": "test@hanzo.ai",
             },
             mock_data_response=[*zendesk_brands["brands"], *zendesk_brands["brands"]],  # Return two items
             ignore_assertions=True,

@@ -85,7 +85,7 @@ function parseACPNotification(parsed: ACPNotification, id: string, toolMap: Map<
     const { notification, timestamp } = parsed
     const method = notification.method
 
-    if (method === '_posthog/console') {
+    if (method === '_insights/console') {
         const params = notification.params as { level?: string; message?: string } | undefined
         return {
             id,
@@ -185,7 +185,7 @@ function parseACPNotification(parsed: ACPNotification, id: string, toolMap: Map<
         return null
     }
 
-    if (method?.startsWith('__posthog/') || method?.startsWith('_posthog/')) {
+    if (method?.startsWith('__insights/') || method?.startsWith('_insights/')) {
         return null
     }
 

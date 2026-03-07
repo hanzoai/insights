@@ -17,7 +17,7 @@ def _create_action_with_property(**kwargs):
         steps_json=[
             {
                 "event": name,
-                "url": "https://posthog.com/feedback/123?vip=1",
+                "url": "https://hanzo.ai/feedback/123?vip=1",
                 "url_matching": "exact",
             }
         ],
@@ -40,7 +40,7 @@ class TestAction(BaseTest):
             distinct_id="bla",
             event=random_uuid,
             team=self.team,
-            properties={"$current_url": "https://posthog.com/feedback/123?vip=1"},
+            properties={"$current_url": "https://hanzo.ai/feedback/123?vip=1"},
         )
         _create_event(distinct_id="bla", event=random_uuid + "::extra", team=self.team)
         flush_persons_and_events()

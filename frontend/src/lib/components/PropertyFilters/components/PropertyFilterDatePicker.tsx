@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonCalendarSelectInput } from '@posthog/lemon-ui'
+import { LemonCalendarSelectInput } from '@hanzo/lemon-ui'
 
 import { PropertyValueProps } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { dayjs } from 'lib/dayjs'

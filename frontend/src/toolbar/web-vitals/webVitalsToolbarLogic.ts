@@ -25,7 +25,7 @@ export type WebVitalsMetricsResponse = {
 export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
     path(['toolbar', 'web-vitals', 'webVitalsToolbarLogic']),
     connect(() => ({
-        values: [toolbarConfigLogic, ['posthog']],
+        values: [toolbarConfigLogic, ['insights']],
     })),
     actions({
         getWebVitals: true,
@@ -62,7 +62,7 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
                     // If web vitals autocapture is disabled, we don't want to fetch the data
                     // because it's likely we won't have any data
                     if (
-                        !values.posthog?.webVitalsAutocapture?.isEnabled &&
+                        !values.insights?.webVitalsAutocapture?.isEnabled &&
                         !inStorybook() &&
                         !inStorybookTestRunner()
                     ) {
@@ -106,7 +106,7 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
     })),
 
     afterMount(({ values, actions, cache }) => {
-        if (!values.posthog?.webVitalsAutocapture?.isEnabled && !inStorybook() && !inStorybookTestRunner()) {
+        if (!values.insights?.webVitalsAutocapture?.isEnabled && !inStorybook() && !inStorybookTestRunner()) {
             actions.nullifyLocalWebVitals()
         } else {
             const METRICS_AND_PROPERTIES: Record<WebVitalsMetric, string> = {
@@ -117,7 +117,7 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
             }
 
             cache.disposables.add(() => {
-                return values.posthog?.on('eventCaptured', (event) => {
+                return values.insights?.on('eventCaptured', (event) => {
                     if (event.event === '$web_vitals') {
                         for (const [metric, property] of Object.entries(METRICS_AND_PROPERTIES)) {
                             const value = event.properties[property]
@@ -127,7 +127,7 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
                         }
                     }
                 })
-            }, 'posthogEventListener')
+            }, 'insightsEventListener')
         }
 
         actions.getWebVitals()

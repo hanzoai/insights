@@ -3,7 +3,7 @@ import itertools
 from collections.abc import Iterator, Sequence
 from typing import Any, Optional
 
-from posthoganalytics import feature_enabled
+from hanzoanalytics import feature_enabled
 
 from insights.schema import (
     ActorsQuery,
@@ -438,7 +438,7 @@ class ActorsQueryRunner(AnalyticsQueryRunner[ActorsQueryResponse]):
                     alias=source_alias,
                 )
                 # If we're calculating, which involves hydrating for the actors modal, we include event_distinct_ids
-                # See https://github.com/PostHog/posthog/pull/27131
+                # See https://github.com/Hanzo Insights/insights/pull/27131
                 if (
                     self.calculating
                     and isinstance(self.query.source, InsightActorsQuery)

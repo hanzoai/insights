@@ -19,7 +19,7 @@ from django.utils.module_loading import import_string
 
 import requests
 import css_inline
-import posthoganalytics
+import hanzoanalytics
 from celery import shared_task
 from lxml import html as lxml_html
 
@@ -174,7 +174,7 @@ def _send_via_http(
 
                 provider_response = response.json()
 
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     distinct_id=dest.get("distinct_id") or dest["raw_email"],
                     event="transactional email triggered",
                     properties={
@@ -376,7 +376,7 @@ class EmailMessage:
             raise exceptions.ImproperlyConfigured("Email is not enabled in this instance.")
 
         if "utm_tags" not in template_context:
-            template_context.update({"utm_tags": f"utm_source=posthog&utm_medium=email&utm_campaign={template_name}"})
+            template_context.update({"utm_tags": f"utm_source=insights&utm_medium=email&utm_campaign={template_name}"})
 
         self.campaign_key = campaign_key
         self.use_http = use_http

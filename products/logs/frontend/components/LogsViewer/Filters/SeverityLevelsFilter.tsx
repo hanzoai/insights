@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@posthog/icons'
-import { LemonButton, LemonMenu } from '@posthog/lemon-ui'
+import { IconFilter } from '@hanzo/icons'
+import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 

@@ -6,8 +6,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { CSSProperties, useEffect, useState } from 'react'
 import { List, useListRef } from 'react-window'
 
-import { IconArchive, IconCheck, IconPlus, IconSearch } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconArchive, IconCheck, IconPlus, IconSearch } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { ControlledDefinitionPopover } from 'lib/components/DefinitionPopover/DefinitionPopoverContents'

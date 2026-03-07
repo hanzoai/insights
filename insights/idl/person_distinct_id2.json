@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "file://posthog/idl/person_distinct_id2.json",
+    "$id": "file://insights/idl/person_distinct_id2.json",
     "title": "person_distinct_id2",
     "description": "Person distinct id2 schema that is destined for ClickHouse",
     "type": "object",

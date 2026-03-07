@@ -1,5 +1,5 @@
-import { IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel, TZLabelProps } from 'lib/components/TZLabel'
 import { cn } from 'lib/utils/css-classes'

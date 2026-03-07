@@ -13,7 +13,7 @@ BREAKDOWN_OTHER_DISPLAY = "Other (i.e. all remaining values)"
 class TestPagingBreakdowns(APIBaseTest):
     """
     A test to explore a report from a customer
-    https://posthog.slack.com/archives/C02LR7352SG/p1643738897887099
+    https://insights.slack.com/archives/C02LR7352SG/p1643738897887099
     """
 
     CLASS_DATA_LEVEL_SETUP = False

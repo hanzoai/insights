@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPlus, IconTrash, IconWarning } from '@posthog/icons'
+import { IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -10,7 +10,7 @@ import {
     LemonSelect,
     LemonTextArea,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'

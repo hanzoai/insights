@@ -141,7 +141,7 @@ export interface InsightsQLParser {
  *
  * @example
  * ```typescript
- * import createInsightsQLParser from '@posthog/insightsql-parser';
+ * import createInsightsQLParser from '@hanzo/insightsql-parser';
  *
  * const parser = await createInsightsQLParser();
  * const result = parser.parseExpr('1 + 2');

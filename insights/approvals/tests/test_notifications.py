@@ -24,8 +24,8 @@ class TestApprovalNotifications(BaseTest):
         self.user.first_name = "Test"
         self.user.save()
 
-        self.approver = self._create_user("approver@posthog.com", first_name="Approver")
-        self.approver2 = self._create_user("approver2@posthog.com", first_name="Approver2")
+        self.approver = self._create_user("approver@hanzo.ai", first_name="Approver")
+        self.approver2 = self._create_user("approver2@hanzo.ai", first_name="Approver2")
 
         self.policy = ApprovalPolicy.objects.create(
             organization=self.organization,
@@ -69,15 +69,15 @@ class TestCustomerIOTemplateIDs(TestApprovalNotifications):
 
 class TestBuildChangeRequestUrl(TestApprovalNotifications):
     def test_builds_correct_url(self):
-        with self.settings(SITE_URL="https://app.posthog.com"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai"):
             url = _build_change_request_url(self.change_request)
-            expected = f"https://app.posthog.com/project/{self.team.project_id}/approvals/{self.change_request.id}"
+            expected = f"https://insights.hanzo.ai/project/{self.team.project_id}/approvals/{self.change_request.id}"
             self.assertEqual(url, expected)
 
     def test_strips_trailing_slash_from_site_url(self):
-        with self.settings(SITE_URL="https://app.posthog.com/"):
+        with self.settings(SITE_URL="https://insights.hanzo.ai/"):
             url = _build_change_request_url(self.change_request)
-            expected = f"https://app.posthog.com/project/{self.team.project_id}/approvals/{self.change_request.id}"
+            expected = f"https://insights.hanzo.ai/project/{self.team.project_id}/approvals/{self.change_request.id}"
             self.assertEqual(url, expected)
 
 
@@ -264,7 +264,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
     def test_approval_requested_template_renders(self, mock_is_email_available):
         mock_is_email_available.return_value = True
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             message = EmailMessage(
@@ -272,7 +272,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                 template_name="approval_requested",
                 subject="Test User needs your sign-off",
                 template_context={
-                    "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                    "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                     "team_name": "Test Team",
                     "requester_name": "Test User",
                 },
@@ -285,7 +285,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
     def test_approval_approved_template_renders(self, mock_is_email_available):
         mock_is_email_available.return_value = True
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             message = EmailMessage(
@@ -293,7 +293,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                 template_name="approval_approved",
                 subject="Admin User approved your change",
                 template_context={
-                    "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                    "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                     "team_name": "Test Team",
                     "approver_name": "Admin User",
                 },
@@ -306,7 +306,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
     def test_approval_rejected_template_renders(self, mock_is_email_available):
         mock_is_email_available.return_value = True
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             message = EmailMessage(
@@ -314,7 +314,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                 template_name="approval_rejected",
                 subject="Your change request was declined",
                 template_context={
-                    "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                    "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                     "team_name": "Test Team",
                     "approver_name": "Admin User",
                 },
@@ -327,7 +327,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
     def test_approval_expired_template_renders(self, mock_is_email_available):
         mock_is_email_available.return_value = True
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             message = EmailMessage(
@@ -335,7 +335,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                 template_name="approval_expired",
                 subject="Your change request timed out",
                 template_context={
-                    "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                    "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                     "team_name": "Test Team",
                 },
             )
@@ -347,7 +347,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
     def test_approval_applied_template_renders(self, mock_is_email_available):
         mock_is_email_available.return_value = True
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             message = EmailMessage(
@@ -355,7 +355,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                 template_name="approval_applied",
                 subject="Your change is live! 🎉",
                 template_context={
-                    "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                    "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                     "team_name": "Test Team",
                 },
             )
@@ -374,7 +374,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
             "approval_applied": "View details",
         }
 
-        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://app.posthog.com"):
+        with override_instance_config("EMAIL_HOST", "localhost"), self.settings(SITE_URL="https://insights.hanzo.ai"):
             from insights.email import EmailMessage
 
             for template_name, expected_cta in templates_with_cta.items():
@@ -383,7 +383,7 @@ class TestEmailTemplateRendering(TestApprovalNotifications):
                     template_name=template_name,
                     subject="Test Subject",
                     template_context={
-                        "change_request_url": "https://app.posthog.com/project/1/approvals/123",
+                        "change_request_url": "https://insights.hanzo.ai/project/1/approvals/123",
                         "team_name": "Test Team",
                         "requester_name": "Test User",
                         "approver_name": "Admin User",

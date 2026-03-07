@@ -480,7 +480,7 @@ class TestLazyLoader(BaseTest):
     @freeze_time("2021-08-25T22:09:14.252Z")
     def test_recently_viewed_insights(self):
         insights = [Insight.objects.create(team=self.team) for _ in range(3)]
-        user2 = User.objects.create(email="testuser@posthog.com")
+        user2 = User.objects.create(email="testuser@hanzo.ai")
 
         InsightViewed.objects.create(
             insight=insights[0],

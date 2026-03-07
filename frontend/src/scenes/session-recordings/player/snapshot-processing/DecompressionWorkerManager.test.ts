@@ -83,21 +83,21 @@ describe('DecompressionWorkerManager', () => {
             expect(instance1).not.toBe(instance2)
         })
 
-        it('recreates instance when posthog config changes', () => {
-            const mockPosthog1 = {} as any
-            const mockPosthog2 = {} as any
+        it('recreates instance when insights config changes', () => {
+            const mockInsights1 = {} as any
+            const mockInsights2 = {} as any
 
-            const instance1 = getDecompressionWorkerManager(mockPosthog1)
-            const instance2 = getDecompressionWorkerManager(mockPosthog2)
+            const instance1 = getDecompressionWorkerManager(mockInsights1)
+            const instance2 = getDecompressionWorkerManager(mockInsights2)
 
             expect(instance1).not.toBe(instance2)
         })
 
         it('returns same instance when config has not changed', () => {
-            const mockPosthog = {} as any
+            const mockInsights = {} as any
 
-            const instance1 = getDecompressionWorkerManager(mockPosthog)
-            const instance2 = getDecompressionWorkerManager(mockPosthog)
+            const instance1 = getDecompressionWorkerManager(mockInsights)
+            const instance2 = getDecompressionWorkerManager(mockInsights)
 
             expect(instance1).toBe(instance2)
         })

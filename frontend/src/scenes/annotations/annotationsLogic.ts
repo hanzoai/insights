@@ -1,7 +1,7 @@
 import { actions, connect, kea, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonSelectOption, LemonSelectOptions } from '@posthog/lemon-ui'
+import { LemonSelectOption, LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'

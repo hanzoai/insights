@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, Tooltip } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -38,7 +38,7 @@ export function PathNodeLabel({ insightProps, node }: PathNodeLabelProps): JSX.E
         viewPathToFunnel(node)
     }
     const copyName = (): void => {
-        void copyToClipboard(nodeName).catch((e) => posthog.captureException(e))
+        void copyToClipboard(nodeName).catch((e) => insights.captureException(e))
     }
     const openModal = (): void => openPersonsModal({ path_end_key: node.name })
 

@@ -15,7 +15,7 @@ import {
     IconPlus,
     IconServer,
     IconTrash,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonButton,
     LemonCollapse,
@@ -30,7 +30,7 @@ import {
     Link,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -292,7 +292,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                                         evaluation context to restrict where this flag
                                                                         can evaluate.{' '}
                                                                         <Link
-                                                                            to="https://posthog.com/docs/feature-flags/evaluation-contexts"
+                                                                            to="https://hanzo.ai/docs/feature-flags/evaluation-contexts"
                                                                             target="_blank"
                                                                         >
                                                                             Learn more
@@ -363,7 +363,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                             Control whether this flag evaluates on client, server, or
                                                             both.{' '}
                                                             <Link
-                                                                to="https://posthog.com/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-environments-optional"
+                                                                to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-environments-optional"
                                                                 target="_blank"
                                                             >
                                                                 Learn more
@@ -433,7 +433,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                             Keep flag values consistent before and after login. Requires
                                                             anonymous user profiles.{' '}
                                                             <Link
-                                                                to="https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                                                                to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
                                                                 target="_blank"
                                                             >
                                                                 Learn more
@@ -735,7 +735,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                                             available via{' '}
                                                             <code className="text-xs">getFeatureFlagPayload</code>.{' '}
                                                             <Link
-                                                                to="https://posthog.com/docs/feature-flags/creating-feature-flags#payloads"
+                                                                to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads"
                                                                 target="_blank"
                                                             >
                                                                 Learn more

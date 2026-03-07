@@ -39,7 +39,7 @@ spec:
               memory: 100Mi
           env:
           - name: CADDY_TARGET
-            value: $(${POSTHOG_WEB_SERVICE_NAME}_SERVICE_HOST):$POSTHOG_WEB_SERVICE_PORT
+            value: $(${INSIGHTS_WEB_SERVICE_NAME}_SERVICE_HOST):$INSIGHTS_WEB_SERVICE_PORT
           - name: TS_USERSPACE
             value: "false"
           - name: TS_HOSTNAME

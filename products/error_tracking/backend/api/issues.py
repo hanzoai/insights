@@ -3,7 +3,7 @@ from django.db.models.query import QuerySet
 from django.http import JsonResponse
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from loginas.utils import is_impersonated_session
 from rest_framework import request, serializers, status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
@@ -188,7 +188,7 @@ class ErrorTrackingIssueViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, view
             # nosemgrep: idor-lookup-without-team (cohort scoped to team before use)
             _ = ErrorTrackingIssueCohort.objects.update_or_create(issue=issue, defaults={"cohort_id": cohort.id})
         except Exception as e:
-            posthoganalytics.capture_exception(
+            hanzoanalytics.capture_exception(
                 e, distinct_id=self.request.user.pk, properties={"issue_id": issue.id, "cohort_id": cohort.id}
             )
             raise ValidationError("An error occurred while assigning this cohort")

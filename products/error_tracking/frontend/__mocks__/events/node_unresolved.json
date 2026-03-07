@@ -65,7 +65,7 @@
         "$exception_issue_id": "8e440548-6e54-477a-a313-c00456632f88",
         "$geoip_disable": true,
         "$lib_version": "4.7.0",
-        "$lib": "posthog-node",
+        "$lib": "insights-node",
         "$process_person_profile": false,
         "$exception_types": ["Error"],
         "$exception_values": ["A random error"],

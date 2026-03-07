@@ -1,4 +1,4 @@
-"""Dagster job for deleting posthog_person_new rows (cascading to N associated posthog_persondistinctid rows)
+"""Dagster job for deleting insights_person_new rows (cascading to N associated insights_persondistinctid rows)
 that are present in the trigger log table used to capture deletes on the unpartitioned DB while we
 transitioned to the new, partitioned DB."""
 
@@ -20,7 +20,7 @@ MAX_RETRY_ATTEMPTS = 5
 class DeletePersonsFromTriggerLogConfig(dagster.Config):
     """Configuration for the delete persons from trigger log job."""
 
-    persons_table: str = "posthog_person_new"
+    persons_table: str = "insights_person_new"
     batch_size: int = 100  # Work in small batches since each person ID will cascade a delete to many distinct ID rows
 
 
@@ -30,17 +30,17 @@ def get_team_ids_for_dpft(
     database: dagster.ResourceParam[psycopg2.extensions.connection],
 ) -> list[int]:
     """
-    Query source database for all distinct team_ids from posthog_person_deletes_log table
-    that have corresponding records in posthog_person_new.
+    Query source database for all distinct team_ids from insights_person_deletes_log table
+    that have corresponding records in insights_person_new.
     Returns list of team IDs to process.
     """
     with database.cursor() as cursor:
         team_ids_query = """
             SELECT DISTINCT pdl.team_id
-            FROM posthog_person_deletes_log AS pdl
+            FROM insights_person_deletes_log AS pdl
             WHERE EXISTS (
                 SELECT 1
-                FROM posthog_person_new AS p
+                FROM insights_person_new AS p
                 WHERE pdl.id = p.id AND pdl.team_id = p.team_id
             )
             ORDER BY pdl.team_id
@@ -99,9 +99,9 @@ def scan_delete_chunk_for_dpft(
     cluster: dagster.ResourceParam[ClickhouseCluster],
 ) -> dict[str, Any]:
     """
-    Scan posthog_person_deletes_log table for all records of a specific team_id
-    that have an associated posthog_person_new row, and deletes the corresponding
-    posthog_person_new rows. Processes in batches of batch_size person IDs.
+    Scan insights_person_deletes_log table for all records of a specific team_id
+    that have an associated insights_person_new row, and deletes the corresponding
+    insights_person_new rows. Processes in batches of batch_size person IDs.
     """
     team_id = chunk
     batch_size = config.batch_size
@@ -139,12 +139,12 @@ def scan_delete_chunk_for_dpft(
                     # Begin transaction (settings already applied at session level)
                     cursor.execute("BEGIN")
 
-                    # Query to find posthog_person_deletes_log rows for this team
+                    # Query to find insights_person_deletes_log rows for this team
                     # Use keyset pagination with WHERE id > last_id for efficiency
                     if last_person_id is None:
                         scan_query = f"""
 SELECT pdl.id, pdl.team_id
-FROM posthog_person_deletes_log AS pdl
+FROM insights_person_deletes_log AS pdl
 WHERE pdl.team_id = %s
   AND EXISTS (
     SELECT 1
@@ -159,7 +159,7 @@ LIMIT %s
                     else:
                         scan_query = f"""
 SELECT pdl.id, pdl.team_id
-FROM posthog_person_deletes_log AS pdl
+FROM insights_person_deletes_log AS pdl
 WHERE pdl.team_id = %s
   AND pdl.id > %s
   AND EXISTS (
@@ -386,8 +386,8 @@ LIMIT %s
 )
 def delete_persons_from_trigger_log_job():
     """
-    Scan posthog_person_deletes_log table by team_id, and deletes the corresponding
-    posthog_person_new rows. Each team is processed in parallel for optimal performance.
+    Scan insights_person_deletes_log table by team_id, and deletes the corresponding
+    insights_person_new rows. Each team is processed in parallel for optimal performance.
     """
     team_ids = get_team_ids_for_dpft()
     chunks = create_team_chunks_for_dpft(team_ids)

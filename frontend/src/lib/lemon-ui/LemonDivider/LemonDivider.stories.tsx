@@ -35,10 +35,10 @@ const VerticalTemplate: StoryFn<typeof LemonDivider> = (props: LemonDividerProps
             <ProfileBubbles
                 people={[
                     {
-                        email: 'tim@posthog.com',
+                        email: 'tim@hanzo.ai',
                     },
                     {
-                        email: 'michael@posthog.com',
+                        email: 'michael@hanzo.ai',
                     },
                 ]}
             />

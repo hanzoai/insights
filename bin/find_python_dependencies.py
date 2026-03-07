@@ -14,11 +14,11 @@ This is useful for determining which files need to trigger a rebuild of a worker
 
 Usage:
     python bin/find_python_dependencies.py insights.temporal.subscriptions
-    # Output: {"dependencies": ["posthog/utils.py", ...]}
+    # Output: {"dependencies": ["insights/utils.py", ...]}
 
     # Check if any changed files affect a worker
     python bin/find_python_dependencies.py insights.temporal.subscriptions --check-changes "insights/utils.py insights/unrelated_file.py"
-    # Output: {"affected": true, "matching_files": ["posthog/utils.py"]}
+    # Output: {"affected": true, "matching_files": ["insights/utils.py"]}
 """
 
 import os
@@ -34,7 +34,7 @@ REPO_ROOT = Path(__file__).parent.parent.resolve()
 sys.path.insert(0, str(REPO_ROOT))
 
 # All local Python packages in the repository
-LOCAL_PACKAGES = ("posthog", "ee", "products", "common")
+LOCAL_PACKAGES = ("insights", "ee", "products", "common")
 
 
 def build_import_graph(packages: tuple[str, ...]) -> grimp.ImportGraph:

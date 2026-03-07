@@ -8,7 +8,7 @@ import Header from '@/components/Header'
 import { useAuth } from '@/lib/auth'
 import { sampleFiles } from '@/lib/data'
 import { useAuthRedirect } from '@/lib/hooks'
-import { posthog } from '@/lib/posthog'
+import { insights } from '@/lib/insights'
 import { formatFileSize, getFileIcon } from '@/lib/utils'
 import { HedgeboxFile } from '@/types'
 
@@ -36,7 +36,7 @@ export default function FilePage({ params }: FilePageProps): React.JSX.Element |
 
         // Track file view
         if (foundFile) {
-            posthog.capture('viewed_file', {
+            insights.capture('viewed_file', {
                 file_id: foundFile.id,
                 file_type: foundFile.type,
                 file_size_b: foundFile.size,
@@ -81,7 +81,7 @@ export default function FilePage({ params }: FilePageProps): React.JSX.Element |
 
     const handleDownload = (): void => {
         setIsProcessing(true)
-        posthog.capture('downloaded_file', {
+        insights.capture('downloaded_file', {
             file_id: file.id,
             file_type: file.type,
             file_size_b: file.size,
@@ -95,7 +95,7 @@ export default function FilePage({ params }: FilePageProps): React.JSX.Element |
     }
 
     const handleShare = (): void => {
-        posthog.capture('shared_file', {
+        insights.capture('shared_file', {
             file_id: file.id,
             file_type: file.type,
             file_size_b: file.size,
@@ -105,7 +105,7 @@ export default function FilePage({ params }: FilePageProps): React.JSX.Element |
 
     const handleDelete = (): void => {
         if (confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
-            posthog.capture('deleted_file', {
+            insights.capture('deleted_file', {
                 file_id: file.id,
                 file_type: file.type,
                 file_size_b: file.size,
@@ -117,7 +117,7 @@ export default function FilePage({ params }: FilePageProps): React.JSX.Element |
     const copyShareLink = (): void => {
         const shareLink = file.sharedLink || `https://hedgebox.net/files/${file.id}/shared`
         navigator.clipboard.writeText(shareLink)
-        posthog.capture('copied_share_link', {
+        insights.capture('copied_share_link', {
             file_id: file.id,
         })
     }

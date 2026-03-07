@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/posthog/posthog/livestream/tui/debug"
+	"github.com/hanzoai/insights/livestream/tui/debug"
 )
 
 const maxBuffer = 4096

@@ -98,7 +98,7 @@ impl GroupTypeMappingCache {
 
         let query = r#"
             SELECT group_type, group_type_index
-            FROM posthog_grouptypemapping
+            FROM insights_grouptypemapping
             WHERE team_id = $1
         "#;
 

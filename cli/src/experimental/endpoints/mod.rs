@@ -94,7 +94,7 @@ pub struct EndpointVariable {
 
 /// Materialization configuration for an endpoint.
 ///
-/// When enabled, PostHog will pre-compute and cache the query results
+/// When enabled, Insights will pre-compute and cache the query results
 /// according to the specified schedule.
 ///
 /// Valid schedule values:
@@ -110,7 +110,7 @@ pub struct MaterializationConfig {
     pub schedule: Option<String>,
 }
 
-/// API response for an endpoint from PostHog
+/// API response for an endpoint from Insights
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EndpointResponse {
     pub id: String,
@@ -162,10 +162,10 @@ pub struct EndpointListResponse {
 
 #[derive(Subcommand)]
 pub enum EndpointCommand {
-    /// List all PostHog endpoints
+    /// List all Insights endpoints
     List(ListArgs),
 
-    /// Get details of a specific PostHog endpoint
+    /// Get details of a specific Insights endpoint
     Get(GetArgs),
 
     /// Open an endpoint in the browser
@@ -174,10 +174,10 @@ pub enum EndpointCommand {
     /// Run an endpoint and see the results
     Run(RunArgs),
 
-    /// Push local endpoint YAML files to PostHog
+    /// Push local endpoint YAML files to Insights
     Push(PushArgs),
 
-    /// Pull PostHog endpoints to local endpoint YAML files
+    /// Pull Insights endpoints to local endpoint YAML files
     Pull(PullArgs),
 
     /// Show differences between local YAML files and remote endpoints
@@ -244,7 +244,7 @@ pub struct RunArgs {
 
 #[derive(Args, Clone)]
 pub struct PushArgs {
-    /// Local PostHog YAML files or directories to push to PostHog
+    /// Local Insights YAML files or directories to push to Insights
     #[arg(required = true)]
     pub paths: Vec<String>,
 
@@ -706,7 +706,7 @@ pub fn compute_changes_for_push(local: &EndpointYaml, remote: &EndpointResponse)
 // InsightVariable API types
 // ============================================================================
 
-/// PostHog InsightVariable from the API
+/// Insights InsightVariable from the API
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InsightVariable {
     pub id: String,
@@ -796,7 +796,7 @@ pub fn create_insight_variable(
     }
 }
 
-/// Fetch a single endpoint by name from PostHog
+/// Fetch a single endpoint by name from Insights
 pub fn fetch_endpoint(name: &str, debug: bool) -> Result<EndpointResponse> {
     let client = &context().client;
     let path = format!("endpoints/{name}/");
@@ -820,7 +820,7 @@ pub fn fetch_endpoint(name: &str, debug: bool) -> Result<EndpointResponse> {
     }
 }
 
-/// Fetch all endpoints from PostHog
+/// Fetch all endpoints from Insights
 pub fn fetch_all_endpoints(debug: bool) -> Result<EndpointListResponse> {
     let client = &context().client;
     debug_request(debug, "GET", "endpoints/");
@@ -868,7 +868,7 @@ pub fn extract_variable_references(query: &str) -> Vec<String> {
 
 /// Valid sync frequency values for materialization schedules.
 ///
-/// These values map directly to what the PostHog API accepts:
+/// These values map directly to what the Insights API accepts:
 /// - Minutes: "5min", "15min", "30min"
 /// - Hours: "1hour", "2hour", "4hour", "6hour", "12hour", "24hour"
 /// - Days: "7day", "30day"

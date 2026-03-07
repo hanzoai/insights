@@ -26,7 +26,7 @@ export const test = coreTest.extend<{ playwrightSetup: PlaywrightSetup; workspac
  * Test with a pre-created Insights workspace
  * Use this when you want a workspace automatically created before your test runs
  *
- * The workspace includes: Organization → Project → Team + test@posthog.com user
+ * The workspace includes: Organization → Project → Team + test@hanzo.ai user
  */
 export const testWithWorkspace = test.extend<{ workspace: PlaywrightWorkspaceSetupResult }>({
     workspace: async ({ playwrightSetup }, use) => {

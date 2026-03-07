@@ -47,7 +47,7 @@ const RDT_ALLOWED_EVENT_NAMES = [
     'Custom',
 ];
 
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     initSnippet();
     let userProperties = {};
     for (const [key, value] of Object.entries(inputs.userProperties)) {
@@ -55,12 +55,12 @@ export function onLoad({ inputs, posthog }) {
             userProperties[key] = value;
         }
     };
-    if (posthog.config.debug) {
+    if (insights.config.debug) {
         console.log('[Insights] rdt init', inputs.pixelId, userProperties);
     }
     rdt('init', inputs.pixelId, userProperties);
 }
-export function onEvent({ inputs, posthog }) {
+export function onEvent({ inputs, insights }) {
 
     let eventProperties = {};
     for (const [key, value] of Object.entries(inputs.eventProperties)) {
@@ -75,7 +75,7 @@ export function onEvent({ inputs, posthog }) {
         eventName = 'Custom';
         eventProperties.customEventName = inputs.eventType;
     }
-    if (posthog.config.debug) {
+    if (insights.config.debug) {
         console.log('[Insights] rdt track', eventName, eventProperties);
     }
     rdt('track', eventName, eventProperties);
@@ -104,7 +104,7 @@ export function onEvent({ inputs, posthog }) {
         },
     ],
     # See our event specification here:
-    # https://posthog.com/docs/data/event-spec/ecommerce-events
+    # https://hanzo.ai/docs/data/event-spec/ecommerce-events
     # And reddit's here:
     # https://business.reddithelp.com/s/article/manual-conversion-events-with-the-reddit-pixel
     mapping_templates=[

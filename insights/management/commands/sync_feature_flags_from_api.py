@@ -25,14 +25,14 @@ def sync_feature_flags_from_api(
     if groups is None:
         groups = {
             "customer": "cus_IK2DWsWVn2ZM16",
-            "instance": "https://us.posthog.com",
+            "instance": "https://insights.hanzo.ai",
             "organization": "4dc8564d-bd82-1065-2f40-97f7c50f67cf",
             "project": "fc445b88-e2c4-488e-bb52-aa80cd7918c9",
         }
 
     output_fn(f"Fetching feature flags for {distinct_id}...")
     response = requests.post(
-        "https://us.i.posthog.com/flags?v=2",
+        "https://us.i.hanzo.ai/flags?v=2",
         headers={"Content-Type": "application/json"},
         data=json.dumps({"api_key": PH_US_API_KEY, "distinct_id": distinct_id, "groups": groups}),
         timeout=30,

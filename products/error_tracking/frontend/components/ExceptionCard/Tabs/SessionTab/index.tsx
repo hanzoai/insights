@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
@@ -140,7 +140,7 @@ export function NoSessionIdFound(): JSX.Element {
                 title="No session found"
                 description="There is no $session_id associated with this exception. If it was captured from a server SDK, you can read our doc on how to forward session IDs"
                 buttonText="Check doc"
-                buttonTo="https://posthog.com/docs/data/sessions#server-sdks-and-sessions"
+                buttonTo="https://hanzo.ai/docs/data/sessions#server-sdks-and-sessions"
                 size="small"
             />
         </div>

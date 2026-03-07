@@ -371,7 +371,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             distinct_ids=["user_internal_1"],
             properties={
-                "email": "test@posthog.com",
+                "email": "test@hanzo.ai",
             },
             team=self.team,
         )
@@ -503,7 +503,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }

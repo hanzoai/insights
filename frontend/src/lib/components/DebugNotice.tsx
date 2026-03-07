@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconCode, IconWarning, IconX } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCode, IconWarning, IconX } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

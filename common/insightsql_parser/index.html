@@ -12,11 +12,11 @@
     </head>
     <body></body>
     <script type="module">
-        import createHogQLParser from './dist/hogql_parser_wasm.js'
+        import createInsightsQLParser from './dist/insightsql_parser_wasm.js'
 
-        createHogQLParser()
+        createInsightsQLParser()
             .then((parser) => {
-                console.log('WASM HogQL Parser loaded')
+                console.log('WASM InsightsQL Parser loaded')
 
                 const input = 'select * from users'
                 const result = parser.parseSelect(input, false)

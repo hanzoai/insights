@@ -686,7 +686,7 @@ class OAuthAuthorizationServerMetadataView(APIView):
             "token_endpoint_auth_methods_supported": ["none", "client_secret_post"],
             "code_challenge_methods_supported": ["S256"],
             # Service documentation
-            "service_documentation": "https://posthog.com/docs/api",
+            "service_documentation": "https://hanzo.ai/docs/api",
         }
 
         return JsonResponse(metadata)

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonTag, Link } from '@posthog/lemon-ui'
+import { LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'

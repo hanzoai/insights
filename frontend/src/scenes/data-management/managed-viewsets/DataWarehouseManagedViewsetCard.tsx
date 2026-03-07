@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPiggyBank } from '@posthog/icons'
-import { LemonSwitch, Link } from '@posthog/lemon-ui'
+import { IconPiggyBank } from '@hanzo/icons'
+import { LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { teamLogic } from 'scenes/teamLogic'
@@ -22,7 +22,7 @@ const VIEWSET_DESCRIPTIONS: Record<
         title: 'Revenue Analytics',
         description:
             'Track and analyze revenue data from your payment providers and custom events. Automatically creates optimized views for revenue metrics, trends, and customer lifetime value.',
-        docsUrl: 'https://posthog.com/docs/revenue-analytics',
+        docsUrl: 'https://hanzo.ai/docs/revenue-analytics',
         configUrl: '/data-management/revenue',
         icon: <IconPiggyBank className="text-xl" />,
     },

@@ -18,7 +18,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                 language: 'ruby',
                                 file: 'Gemfile',
                                 code: dedent`
-                                gem "posthog-ruby"
+                                gem "insights-ruby"
                             `,
                             },
                         ]}
@@ -38,9 +38,9 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                 language: 'ruby',
                                 file: 'Ruby',
                                 code: dedent`
-                                require 'posthog'
+                                require 'insights'
                                 
-                                posthog = Insights::Client.new({
+                                insights = Insights::Client.new({
                                     api_key: "<ph_project_api_key>",
                                     host: "<ph_client_api_host>",
                                     on_error: Proc.new { |status, msg| print msg }
@@ -64,7 +64,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                 language: 'ruby',
                                 file: 'Ruby',
                                 code: dedent`
-                                posthog.capture({
+                                insights.capture({
                                     distinct_id: 'user_123',
                                     event: 'button_clicked',
                                     properties: {

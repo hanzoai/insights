@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import { PropertyMatchType } from 'posthog-js'
+import { PropertyMatchType } from '@hanzo/insights'
 import { useMemo } from 'react'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonCheckbox, LemonCollapse } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonCheckbox, LemonCollapse } from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -256,7 +256,7 @@ export function SurveyEventTrigger(): JSX.Element {
         <SurveyEventSelector
             conditionField="events"
             label="User sends events"
-            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Filtering by event properties requires posthog-js >= v1.268.0 or posthog-react-native >= v4.15.0. Not supported for other SDKs."
+            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Filtering by event properties requires insights-js >= v1.268.0 or insights-react-native >= v4.15.0. Not supported for other SDKs."
             emptyTitle="No events selected"
             emptyDescription="Add events to trigger this survey when those events are captured in the current user session"
             showRepeatedActivation
@@ -272,7 +272,7 @@ export function SurveyCancelEventTrigger(): JSX.Element {
         <SurveyEventSelector
             conditionField="cancelEvents"
             label="Cancel survey on events"
-            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Requires posthog-js SDK at least v1.299.0, and it's supported only for web surveys."
+            info="It only triggers when the event is captured in the current user session and using the Insights SDK. Requires insights-js SDK at least v1.299.0, and it's supported only for web surveys."
             emptyTitle={`During your ${delaySeconds} second delay...`}
             emptyDescription="If any of these events fire, the survey will be cancelled. Useful for not interrupting users who complete an action successfully."
             addButtonText="Add cancel event"

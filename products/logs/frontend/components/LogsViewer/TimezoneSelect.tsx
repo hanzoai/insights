@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGlobe, IconHome, IconLaptop } from '@posthog/icons'
-import { LemonSelect, LemonSelectOptionLeaf, LemonSelectSection } from '@posthog/lemon-ui'
+import { IconGlobe, IconHome, IconLaptop } from '@hanzo/icons'
+import { LemonSelect, LemonSelectOptionLeaf, LemonSelectSection } from '@hanzo/lemon-ui'
 
 import { shortTimeZone } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'

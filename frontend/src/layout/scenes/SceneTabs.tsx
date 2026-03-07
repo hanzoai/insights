@@ -7,7 +7,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
-import { IconPlus, IconX } from '@posthog/icons'
+import { IconPlus, IconX } from '@hanzo/icons'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

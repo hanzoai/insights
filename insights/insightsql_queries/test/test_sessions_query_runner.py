@@ -47,7 +47,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             distinct_ids=[distinct_id],
                             properties={
                                 "name": f"Person {distinct_id}",
-                                "email": f"{distinct_id}@posthog.com",
+                                "email": f"{distinct_id}@hanzo.ai",
                             },
                         )
                     )
@@ -94,10 +94,10 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         """Test sessions query can aggregate by distinct_id and count sessions."""
         self._create_test_sessions(
             data=[
-                ("user1", "session1", "2024-01-01T12:00:00Z", {"$current_url": "https://posthog.com/"}),
-                ("user1", "session1", "2024-01-01T12:05:00Z", {"$current_url": "https://posthog.com/about"}),
-                ("user1", "session2", "2024-01-01T13:00:00Z", {"$current_url": "https://posthog.com/pricing"}),
-                ("user2", "session3", "2024-01-01T14:00:00Z", {"$current_url": "https://posthog.com/"}),
+                ("user1", "session1", "2024-01-01T12:00:00Z", {"$current_url": "https://hanzo.ai/"}),
+                ("user1", "session1", "2024-01-01T12:05:00Z", {"$current_url": "https://hanzo.ai/about"}),
+                ("user1", "session2", "2024-01-01T13:00:00Z", {"$current_url": "https://hanzo.ai/pricing"}),
+                ("user2", "session3", "2024-01-01T14:00:00Z", {"$current_url": "https://hanzo.ai/"}),
             ]
         )
         flush_persons_and_events()

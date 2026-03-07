@@ -5,7 +5,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
-import posthoganalytics
+import hanzoanalytics
 from drf_spectacular.utils import extend_schema
 from rest_framework import response, serializers, status, viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -80,7 +80,7 @@ class PersonalAPIKeySerializer(serializers.ModelSerializer):
                     organization_id = requesting_user.current_organization_id
                     if organization_id is None:
                         raise serializers.ValidationError("Unable to verify feature access.")
-                    if not posthoganalytics.feature_enabled(
+                    if not hanzoanalytics.feature_enabled(
                         "gateway-personal-api-key",
                         str(requesting_user.distinct_id),
                         groups={"organization": str(organization_id)},

@@ -24,7 +24,7 @@ const MOCK_ACTION: ActionType = {
             text_matching: null,
             href: null,
             href_matching: 'contains',
-            url: 'posthog.com/pricing',
+            url: 'hanzo.ai/pricing',
             url_matching: 'contains',
         },
         {

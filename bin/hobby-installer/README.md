@@ -27,10 +27,10 @@ CI mode is automatically enabled when common CI environment variables are detect
 
 ```bash
 # Explicit CI mode
-./hobby-installer --ci --domain posthog.example.com
+./hobby-installer --ci --domain insights.example.com
 
 # With specific version
-./hobby-installer --ci --domain posthog.example.com --version latest
+./hobby-installer --ci --domain insights.example.com --version latest
 
 # Upgrade (domain read from existing .env)
 ./hobby-installer --ci
@@ -139,17 +139,17 @@ On an Ubuntu server:
 
 ```bash
 # Download and run
-curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
-chmod +x posthog-hobby
-./posthog-hobby
+curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
+chmod +x insights-hobby
+./insights-hobby
 ```
 
 For CI/automated deployments:
 
 ```bash
-curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
-chmod +x posthog-hobby
-./posthog-hobby --ci --domain your-domain.com
+curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
+chmod +x insights-hobby
+./insights-hobby --ci --domain your-domain.com
 ```
 
 ## Release process
@@ -164,5 +164,5 @@ The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the fol
 
 This means:
 
-- **Stable URL**: `https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby` always points to the latest build
-- **Version history**: All previous builds are available at `https://github.com/PostHog/posthog/releases?q=hobby-&expanded=true`
+- **Stable URL**: `https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby` always points to the latest build
+- **Version history**: All previous builds are available at `https://github.com/Hanzo Insights/insights/releases?q=hobby-&expanded=true`

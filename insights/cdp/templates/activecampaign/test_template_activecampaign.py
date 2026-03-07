@@ -4,9 +4,9 @@ from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
 def create_inputs(**kwargs):
     inputs = {
-        "accountName": "posthog",
+        "accountName": "insights",
         "apiKey": "API_KEY",
-        "email": "max@posthog.com",
+        "email": "max@hanzo.ai",
         "firstName": "max",
         "attributes": {"1": "Insights", "2": "insights.com"},
     }
@@ -27,7 +27,7 @@ class TestTemplateActiveCampaign(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://posthog.api-us1.com/api/3/contact/sync",
+            "https://insights.api-us1.com/api/3/contact/sync",
             {
                 "method": "POST",
                 "headers": {
@@ -36,7 +36,7 @@ class TestTemplateActiveCampaign(BaseInsightsFunctionTemplateTest):
                 },
                 "body": {
                     "contact": {
-                        "email": "max@posthog.com",
+                        "email": "max@hanzo.ai",
                         "firstName": "max",
                         "fieldValues": [{"field": "1", "value": "Insights"}, {"field": "2", "value": "insights.com"}],
                     }

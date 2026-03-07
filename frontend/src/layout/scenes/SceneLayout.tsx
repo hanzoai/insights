@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import React, { PropsWithChildren, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { AppShortcutMenu } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { Label, LabelProps } from 'lib/ui/Label/Label'

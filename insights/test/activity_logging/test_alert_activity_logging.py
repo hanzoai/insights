@@ -219,7 +219,7 @@ class TestAlertActivityLogging(ActivityLogTestHelper):
         alert = self.create_alert_configuration("Alert for subscription")
         other_user = User.objects.create_and_join(
             organization=self.organization,
-            email="subscriber@posthog.com",
+            email="subscriber@hanzo.ai",
             password="password",
         )
 
@@ -244,7 +244,7 @@ class TestAlertActivityLogging(ActivityLogTestHelper):
         alert = self.create_alert_configuration("Alert for deletion")
         other_user = User.objects.create_and_join(
             organization=self.organization,
-            email="to_delete@posthog.com",
+            email="to_delete@hanzo.ai",
             password="password",
         )
 

@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput, LemonTextArea, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, LemonTextArea, lemonToast } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -45,7 +45,7 @@ export const insightsFunctionRequestModalLogic = kea<insightsFunctionRequestModa
                     </div>
                 ),
                 onSubmit: async (values) => {
-                    posthog.capture(`cdp custom function feedback`, { type, ...values })
+                    insights.capture(`cdp custom function feedback`, { type, ...values })
                     lemonToast.success('Thank you for your feedback!')
                 },
             })

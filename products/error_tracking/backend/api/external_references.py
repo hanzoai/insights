@@ -1,7 +1,7 @@
 from typing import Any
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import ValidationError
 
@@ -95,7 +95,7 @@ class ErrorTrackingExternalReferenceSerializer(serializers.ModelSerializer):
             external_context=external_context,
         )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "error_tracking_external_issue_created",
             groups=groups(team.organization, team),
             properties={

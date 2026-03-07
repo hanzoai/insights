@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import { RE2JS } from 're2js'
 
-import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@insights/scriptvm'
+import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@hanzo/scriptvm'
 
 import { performQuery } from '~/queries/query'
 import { InsightsQLASTQuery, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
@@ -56,8 +56,8 @@ export function execHogAsync(code: any[] | VMState, options?: ExecOptions): Prom
             fetch: () => {
                 throw new Error('fetch is disabled in the browser')
             },
-            posthogCapture: () => {
-                throw new Error('posthogCapture is not yet supported here')
+            insightsCapture: () => {
+                throw new Error('insightsCapture is not yet supported here')
             },
             ...options?.asyncFunctions,
         },

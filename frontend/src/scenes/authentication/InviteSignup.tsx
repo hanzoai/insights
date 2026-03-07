@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconChevronLeft, IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import PasswordStrength from 'lib/components/PasswordStrength'
@@ -390,11 +390,11 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
             </div>
             <div className="mt-4 text-center text-secondary">
                 By clicking continue you agree to our{' '}
-                <Link to="https://posthog.com/terms" target="_blank">
+                <Link to="https://hanzo.ai/terms" target="_blank">
                     Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="https://posthog.com/privacy" target="_blank">
+                <Link to="https://hanzo.ai/privacy" target="_blank">
                     Privacy Policy
                 </Link>
                 .

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { compare as compareFn } from 'natural-orderby'
 
-import { IconFlag } from '@posthog/icons'
-import { LemonColorButton } from '@posthog/lemon-ui'
+import { IconFlag } from '@hanzo/icons'
+import { LemonColorButton } from '@hanzo/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'

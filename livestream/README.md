@@ -1,10 +1,10 @@
-<img src="https://github.com/PostHog/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
+<img src="https://github.com/Hanzo Insights/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
 
 # RealTime Hog 3000
 
 The start of something fresh.
 
-Hog 3000 powers live event stream on Insights: https://us.posthog.com/project/0/activity/live
+Hog 3000 powers live event stream on Insights: https://insights.hanzo.ai/project/0/activity/live
 
 ## Endpoints
 
@@ -25,7 +25,7 @@ Hog 3000 powers live event stream on Insights: https://us.posthog.com/project/0/
 One needs a IP -> (lat,lng) database:
 
 ```bash
-curl https://mmdbcdn.posthog.net/ | brotli -d > mmdb.db
+curl https://mmdbcdn.insights.net/ | brotli -d > mmdb.db
 ```
 
 Config the configs in `configs/config.yml`. You can take a peak at the examples in `configs/configs.example.yml`

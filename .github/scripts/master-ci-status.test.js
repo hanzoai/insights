@@ -24,7 +24,7 @@ function createMocks() {
 
 function createContext(name, conclusion, headSha) {
     return {
-        repo: { owner: 'PostHog', repo: 'posthog' },
+        repo: { owner: 'Insights', repo: 'insights' },
         payload: {
             workflow_run: {
                 name,

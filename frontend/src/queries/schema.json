@@ -11250,7 +11250,7 @@
                     "type": "number"
                 },
                 "type": {
-                    "const": "posthog",
+                    "const": "insights",
                     "type": "string"
                 }
             },
@@ -11429,7 +11429,7 @@
         },
         "DatabaseSchemaTableType": {
             "enum": [
-                "posthog",
+                "insights",
                 "system",
                 "data_warehouse",
                 "view",
@@ -21955,7 +21955,7 @@
             "type": "object"
         },
         "NodeKind": {
-            "description": "Insights Query Schema definition.\n\nThis file acts as the source of truth for:\n\n- frontend/src/queries/schema.json   - generated from typescript via \"pnpm --filter=@posthog/frontend run schema:build:json\"\n\n- posthog/schema.py   - generated from json the above json via \"pnpm -w run schema:build:python\"",
+            "description": "Insights Query Schema definition.\n\nThis file acts as the source of truth for:\n\n- frontend/src/queries/schema.json   - generated from typescript via \"pnpm --filter=@hanzo/frontend run schema:build:json\"\n\n- insights/schema.py   - generated from json the above json via \"pnpm -w run schema:build:python\"",
             "enum": [
                 "EventsNode",
                 "GroupNode",
@@ -23261,8 +23261,8 @@
                     "$ref": "#/definitions/DashboardFilter"
                 },
                 "limit_context": {
-                    "description": "Limit context for the query. Only 'posthog_ai' is allowed as a client-provided value.",
-                    "enum": ["posthog_ai", null],
+                    "description": "Limit context for the query. Only 'insights_ai' is allowed as a client-provided value.",
+                    "enum": ["insights_ai", null],
                     "type": ["string", "null"]
                 },
                 "name": {

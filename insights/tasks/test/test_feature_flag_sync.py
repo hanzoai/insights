@@ -63,7 +63,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         sync_feature_flag_last_called()
 
         # Verify checkpoint was updated in Redis
-        checkpoint_key = "posthog:feature_flag_last_called_sync:last_timestamp"
+        checkpoint_key = "insights:feature_flag_last_called_sync:last_timestamp"
         assert checkpoint_key in redis_mock.storage
 
         # Verify no flags were updated
@@ -77,7 +77,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         """Task should use existing checkpoint if available"""
         redis_mock = mock_redis_client()
         checkpoint_time = tz.make_aware(datetime(2024, 6, 14, 12, 0, 0))
-        checkpoint_key = "posthog:feature_flag_last_called_sync:last_timestamp"
+        checkpoint_key = "insights:feature_flag_last_called_sync:last_timestamp"
         redis_mock.storage[checkpoint_key] = checkpoint_time.isoformat().encode()
 
         mock_get_client.return_value = redis_mock
@@ -233,7 +233,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
     @patch("insights.tasks.tasks.get_client")
     def test_concurrent_execution_prevented(self, mock_get_client: MagicMock) -> None:
         """Only one instance should execute at a time due to lock"""
-        lock_key = "posthog:feature_flag_last_called_sync:lock"
+        lock_key = "insights:feature_flag_last_called_sync:lock"
 
         # Set lock to prevent execution
         cache.set(lock_key, "locked", timeout=600)
@@ -252,7 +252,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         redis_mock = mock_redis_client()
         mock_get_client.return_value = redis_mock
         mock_sync_execute.return_value = []
-        lock_key = "posthog:feature_flag_last_called_sync:lock"
+        lock_key = "insights:feature_flag_last_called_sync:lock"
 
         sync_feature_flag_last_called()
 
@@ -267,7 +267,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         redis_mock = mock_redis_client()
         mock_get_client.return_value = redis_mock
         mock_sync_execute.side_effect = Exception("Database error")
-        lock_key = "posthog:feature_flag_last_called_sync:lock"
+        lock_key = "insights:feature_flag_last_called_sync:lock"
 
         # Task should raise exception but still clean up lock
         try:
@@ -323,7 +323,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         sync_feature_flag_last_called()
 
         # Checkpoint should be set to latest timestamp
-        checkpoint_key = "posthog:feature_flag_last_called_sync:last_timestamp"
+        checkpoint_key = "insights:feature_flag_last_called_sync:last_timestamp"
         stored_timestamp = redis_mock.storage.get(checkpoint_key)
         assert stored_timestamp is not None
         assert latest_timestamp.isoformat() in stored_timestamp

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { QuickFilterOption } from '~/types'
 

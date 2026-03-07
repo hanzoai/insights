@@ -1,5 +1,5 @@
-import { IconAIText } from '@posthog/icons'
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { IconAIText } from '@hanzo/icons'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 export function LoadingState(): JSX.Element {
     return (

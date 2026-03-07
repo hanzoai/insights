@@ -79,8 +79,8 @@ export const CloudWithGoogleLoginEnforcement: StoryFn = () => {
 
     // Trigger pre-check
     useDelayedOnMountEffect(() => {
-        loginLogic.actions.setLoginValue('email', 'test@posthog.com')
-        loginLogic.actions.precheck({ email: 'test@posthog.com' })
+        loginLogic.actions.setLoginValue('email', 'test@hanzo.ai')
+        loginLogic.actions.precheck({ email: 'test@hanzo.ai' })
     })
 
     return <Login />

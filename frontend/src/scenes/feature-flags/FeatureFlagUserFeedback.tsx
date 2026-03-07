@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconMessage } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconMessage } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'

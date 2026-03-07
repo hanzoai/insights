@@ -1,4 +1,4 @@
-//! Multi-tier cache reader for PostHog, matching Django's HyperCache behavior.
+//! Multi-tier cache reader for Insights, matching Django's HyperCache behavior.
 //!
 //! Reads from Redis (primary) then S3 (fallback) for flag definitions and similar data.
 //!
@@ -47,15 +47,15 @@ use tokio::time::timeout;
 use tracing::debug;
 
 /// Metric name for tracking hypercache operations in Prometheus (same one used in Django's HyperCache)
-const HYPERCACHE_COUNTER_NAME: &str = "posthog_hypercache_get_from_cache";
+const HYPERCACHE_COUNTER_NAME: &str = "insights_hypercache_get_from_cache";
 
 /// Metric name for tracking Redis failure reasons (timeout, get_error, pickle_error, json_error)
-const HYPERCACHE_REDIS_MISS_REASON_COUNTER_NAME: &str = "posthog_hypercache_redis_miss_reason";
+const HYPERCACHE_REDIS_MISS_REASON_COUNTER_NAME: &str = "insights_hypercache_redis_miss_reason";
 
 /// Tombstone metric for tracking "impossible" failures that should never happen in production.
 /// This is duplicated from feature_flags::metrics::consts::TOMBSTONE_COUNTER because hypercache
 /// is a standalone crate that shouldn't depend on feature-flags.
-const TOMBSTONE_COUNTER_NAME: &str = "posthog_tombstone_total";
+const TOMBSTONE_COUNTER_NAME: &str = "insights_tombstone_total";
 
 /// Sentinel value used in Redis to indicate that a cache key exists but has no data.
 /// This value is written by Django's HyperCache when a team has no flags.
@@ -209,10 +209,10 @@ impl HyperCacheConfig {
         }
     }
 
-    /// Generate cache key for Redis (includes Django's posthog:version: prefix)
+    /// Generate cache key for Redis (includes Django's insights:version: prefix)
     pub fn get_redis_cache_key(&self, key: &KeyType) -> String {
         let base_key = self.get_base_cache_key(key);
-        format!("posthog:{}:{}", self.django_cache_version, base_key)
+        format!("insights:{}:{}", self.django_cache_version, base_key)
     }
 
     /// Generate cache key for S3 (no prefix, matches Django's object_storage keys)
@@ -687,7 +687,7 @@ mod tests {
         let redis_key = config.get_redis_cache_key(&KeyType::string("123"));
         assert_eq!(
             redis_key,
-            "posthog:3:cache/teams/123/test_namespace/test_value"
+            "insights:3:cache/teams/123/test_namespace/test_value"
         );
     }
 
@@ -705,7 +705,7 @@ mod tests {
         let redis_cache_key = config.get_redis_cache_key(&KeyType::string("123"));
         assert_eq!(
             redis_cache_key,
-            "posthog:1:cache/teams/123/flags/definitions"
+            "insights:1:cache/teams/123/flags/definitions"
         );
 
         let s3_cache_key = config.get_s3_cache_key(&KeyType::string("123"));
@@ -718,7 +718,7 @@ mod tests {
         let redis_cache_key = token_config.get_redis_cache_key(&KeyType::string("phc_abc123"));
         assert_eq!(
             redis_cache_key,
-            "posthog:1:cache/team_tokens/phc_abc123/flags/definitions"
+            "insights:1:cache/team_tokens/phc_abc123/flags/definitions"
         );
 
         let s3_cache_key = token_config.get_s3_cache_key(&KeyType::string("phc_abc123"));
@@ -742,7 +742,7 @@ mod tests {
         let redis_cache_key = config.get_redis_cache_key(&int_key);
         assert_eq!(
             redis_cache_key,
-            "posthog:1:cache/teams/999/flags/definitions"
+            "insights:1:cache/teams/999/flags/definitions"
         );
 
         // Test S3 cache key (no prefix)

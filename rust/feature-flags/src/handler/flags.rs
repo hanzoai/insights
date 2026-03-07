@@ -431,7 +431,7 @@ mod tests {
     #[test]
     fn test_detect_evaluation_runtime_server_user_agent() {
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert("user-agent", "posthog-python/1.2.3".parse().unwrap());
+        headers.insert("user-agent", "insights-python/1.2.3".parse().unwrap());
 
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Server));
@@ -471,7 +471,7 @@ mod tests {
     #[test]
     fn test_detect_evaluation_runtime_dotnet_sdk() {
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert("user-agent", "posthog-dotnet/2.0.0".parse().unwrap());
+        headers.insert("user-agent", "insights-dotnet/2.0.0".parse().unwrap());
 
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Server));
@@ -480,7 +480,7 @@ mod tests {
     #[test]
     fn test_detect_evaluation_runtime_elixir_sdk() {
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert("user-agent", "posthog-elixir/0.1.0".parse().unwrap());
+        headers.insert("user-agent", "insights-elixir/0.1.0".parse().unwrap());
 
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Server));
@@ -490,28 +490,28 @@ mod tests {
     fn test_detect_evaluation_runtime_mobile_sdks() {
         // iOS SDK
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert("user-agent", "posthog-ios/3.0.0".parse().unwrap());
+        headers.insert("user-agent", "insights-ios/3.0.0".parse().unwrap());
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Client));
 
         // React Native SDK
         headers.clear();
-        headers.insert("user-agent", "posthog-react-native/2.5.0".parse().unwrap());
+        headers.insert("user-agent", "insights-react-native/2.5.0".parse().unwrap());
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Client));
 
         // Flutter SDK
         headers.clear();
-        headers.insert("user-agent", "posthog-flutter/4.0.0".parse().unwrap());
+        headers.insert("user-agent", "insights-flutter/4.0.0".parse().unwrap());
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Client));
     }
 
     #[test]
     fn test_detect_evaluation_runtime_android_sdk() {
-        // Android SDK uses "posthog-android/" as its user agent
+        // Android SDK uses "insights-android/" as its user agent
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert("user-agent", "posthog-android/3.1.0".parse().unwrap());
+        headers.insert("user-agent", "insights-android/3.1.0".parse().unwrap());
 
         let result = detect_evaluation_runtime_from_request(&headers, None);
         assert_eq!(result, Some(EvaluationRuntime::Client));
@@ -520,14 +520,14 @@ mod tests {
     #[test]
     fn test_detect_evaluation_runtime_all_server_sdks() {
         let server_sdks = vec![
-            "posthog-python/1.4.0",
-            "posthog-ruby/2.0.0",
-            "posthog-php/3.0.0",
-            "posthog-java/1.0.0",
-            "posthog-go/0.1.0",
-            "posthog-node/2.2.0",
-            "posthog-dotnet/1.0.0",
-            "posthog-elixir/0.2.0",
+            "insights-python/1.4.0",
+            "insights-ruby/2.0.0",
+            "insights-php/3.0.0",
+            "insights-java/1.0.0",
+            "insights-go/0.1.0",
+            "insights-node/2.2.0",
+            "insights-dotnet/1.0.0",
+            "insights-elixir/0.2.0",
         ];
 
         for sdk in server_sdks {
@@ -746,7 +746,7 @@ mod tests {
             "user-agent",
             "Mozilla/5.0 Chrome/120.0.0.0".parse().unwrap(),
         );
-        headers.insert("origin", "https://app.posthog.com".parse().unwrap());
+        headers.insert("origin", "https://insights.hanzo.ai".parse().unwrap());
 
         // Test 1: Explicit "server" should override client detection
         let runtime =
@@ -759,7 +759,7 @@ mod tests {
 
         // Test 2: Explicit "client" with server-like headers
         headers.clear();
-        headers.insert("user-agent", "posthog-python/3.0.0".parse().unwrap());
+        headers.insert("user-agent", "insights-python/3.0.0".parse().unwrap());
         let runtime =
             detect_evaluation_runtime_from_request(&headers, Some(EvaluationRuntime::Client));
         assert_eq!(

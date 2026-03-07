@@ -23,7 +23,7 @@ This is useful for:
 INSIGHTSQL_AGGREGATIONS_KEYS_SET = set(INSIGHTSQL_AGGREGATIONS.keys())
 
 # Mapping of regular aggregation functions to their State/Merge equivalents.
-# These should be present in posthog/insightsql/functions/mapping.py
+# These should be present in insights/insightsql/functions/mapping.py
 SUPPORTED_FUNCTIONS = ["uniq", "uniqIf", "count", "countIf", "sum", "sumIf", "avg", "avgIf"]
 assert set(SUPPORTED_FUNCTIONS).issubset(INSIGHTSQL_AGGREGATIONS_KEYS_SET), (
     "All supported aggregation functions must be in INSIGHTSQL_AGGREGATIONS"

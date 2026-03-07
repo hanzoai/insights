@@ -54,7 +54,7 @@ watchman = { pkg-path = "watchman" } # Fast file watching for Django/Celery auto
 # scripts.
 [vars]
 DEBUG = "1"
-POSTHOG_SKIP_MIGRATION_CHECKS = "1"
+INSIGHTS_SKIP_MIGRATION_CHECKS = "1"
 FLAGS_REDIS_URL = "redis://localhost:6379/1"
 DIRENV_LOG_FORMAT = "" # Disable direnv activation logging (in case direnv is present)
 RUST_LOG = "flox=error,flox_rust_sdk=error,flox_watchdog=error" # Suppress Flox logs only (also set in .envrc for early activation)
@@ -91,8 +91,8 @@ bash = '''
   # Ensure flox binaries (especially Node.js) take precedence over system binaries
   export PATH="$FLOX_ENV/bin:$PATH"
   source $UV_PROJECT_ENVIRONMENT/bin/activate
-  # Source hogli bash completions
-  [ -f "$FLOX_ENV_CACHE/completions/hogli.bash" ] && source "$FLOX_ENV_CACHE/completions/hogli.bash"
+  # Source insightscli bash completions
+  [ -f "$FLOX_ENV_CACHE/completions/insightscli.bash" ] && source "$FLOX_ENV_CACHE/completions/insightscli.bash"
 '''
 zsh = '''
   if [[ -f "$HOME/.zshrc" ]]; then
@@ -103,8 +103,8 @@ zsh = '''
   # Ensure flox binaries (especially Node.js) take precedence over system binaries
   export PATH="$FLOX_ENV/bin:$PATH"
   source $UV_PROJECT_ENVIRONMENT/bin/activate
-  # Add hogli completions to zsh
-  [[ -f "$FLOX_ENV_CACHE/completions/_hogli" ]] && fpath=("$FLOX_ENV_CACHE/completions" $fpath)
+  # Add insightscli completions to zsh
+  [[ -f "$FLOX_ENV_CACHE/completions/_insightscli" ]] && fpath=("$FLOX_ENV_CACHE/completions" $fpath)
   autoload -Uz compinit && compinit -i
 '''
 fish = '''

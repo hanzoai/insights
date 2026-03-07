@@ -1,4 +1,4 @@
-import { LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 const DURATION_REGEX = /^(\d*\.?\d+)([dhm])$/
 

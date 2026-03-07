@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconArrowRight, IconCheck } from '@posthog/icons'
-import { LemonButton, LemonInput, Spinner } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCheck } from '@hanzo/icons'
+import { LemonButton, LemonInput, Spinner } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { NotFound } from 'lib/components/NotFound'

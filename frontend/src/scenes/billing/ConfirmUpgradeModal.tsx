@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { billingLogic } from 'scenes/billing/billingLogic'

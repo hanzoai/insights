@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 

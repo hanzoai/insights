@@ -37,7 +37,7 @@ def test_delete_batch_export(client: HttpClient, temporal, organization, team, u
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -95,7 +95,7 @@ def test_delete_batch_export_cancels_backfills(client: HttpClient, temporal, org
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -149,7 +149,7 @@ def test_cannot_delete_export_of_other_organizations(client: HttpClient, tempora
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -184,7 +184,7 @@ def test_deletes_are_partitioned_by_team_id(client: HttpClient, temporal, organi
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -218,7 +218,7 @@ def test_delete_batch_export_even_without_underlying_schedule(client: HttpClient
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },

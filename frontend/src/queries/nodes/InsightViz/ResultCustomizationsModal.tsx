@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonColorButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonColorButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { DataColorToken } from 'lib/colors'
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'

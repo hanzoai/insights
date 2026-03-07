@@ -86,7 +86,7 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
     })),
     subscriptions(({ actions }) => ({
         template: (template: FormattingTemplate, oldTemplate: FormattingTemplate | undefined) => {
-            actions.compileHog({ fn: template.hog })
+            actions.compileHog({ fn: template.iql })
 
             // If we've changed to a template with a disabled `input` field, then clear the input
             if (!oldTemplate?.hideInput && template.hideInput) {

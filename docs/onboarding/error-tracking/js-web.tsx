@@ -15,7 +15,7 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             <>
                 <Markdown>
                     {dedent`
-                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://app.posthog.com/settings/project-error-tracking#exception-autocapture).
+                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture).
 
                         When enabled, this automatically captures \`$exception\` events when errors are thrown by wrapping the \`window.onerror\` and \`window.onunhandledrejection\` listeners.
                     `}
@@ -40,7 +40,7 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             language: 'javascript',
                             file: 'JavaScript',
                             code: dedent`
-                                posthog.captureException(error, additionalProperties)
+                                insights.captureException(error, additionalProperties)
                             `,
                         },
                     ]}
@@ -63,7 +63,7 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

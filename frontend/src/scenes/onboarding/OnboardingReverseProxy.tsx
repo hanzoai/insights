@@ -1,4 +1,4 @@
-import { LemonDivider, Link } from '@posthog/lemon-ui'
+import { LemonDivider, Link } from '@hanzo/lemon-ui'
 
 import { InviteMembersButton } from 'lib/components/Account/InviteMembersButton'
 
@@ -10,39 +10,39 @@ import { OnboardingStepComponentType } from './onboardingLogic'
 const proxyDocs = [
     {
         title: 'AWS CloudFront',
-        link: 'https://posthog.com/docs/advanced/proxy/cloudfront',
+        link: 'https://hanzo.ai/docs/advanced/proxy/cloudfront',
     },
     {
         title: 'Caddy',
-        link: 'https://posthog.com/docs/advanced/proxy/caddy',
+        link: 'https://hanzo.ai/docs/advanced/proxy/caddy',
     },
     {
         title: 'Cloudflare',
-        link: 'https://posthog.com/docs/advanced/proxy/cloudflare',
+        link: 'https://hanzo.ai/docs/advanced/proxy/cloudflare',
     },
     {
         title: 'Kubernetes Ingress Controller',
-        link: 'https://posthog.com/docs/advanced/proxy/kubernetes-ingress-controller',
+        link: 'https://hanzo.ai/docs/advanced/proxy/kubernetes-ingress-controller',
     },
     {
         title: 'Netlify',
-        link: 'https://posthog.com/docs/advanced/proxy/netlify',
+        link: 'https://hanzo.ai/docs/advanced/proxy/netlify',
     },
     {
         title: 'Next.js rewrites',
-        link: 'https://posthog.com/docs/advanced/proxy/nextjs',
+        link: 'https://hanzo.ai/docs/advanced/proxy/nextjs',
     },
     {
         title: 'Next.js middleware',
-        link: 'https://posthog.com/docs/advanced/proxy/nextjs-middleware',
+        link: 'https://hanzo.ai/docs/advanced/proxy/nextjs-middleware',
     },
     {
         title: 'Vercel',
-        link: 'https://posthog.com/docs/advanced/proxy/vercel',
+        link: 'https://hanzo.ai/docs/advanced/proxy/vercel',
     },
     {
         title: 'Nuxt',
-        link: 'https://posthog.com/docs/advanced/proxy/nuxt',
+        link: 'https://hanzo.ai/docs/advanced/proxy/nuxt',
     },
 ]
 
@@ -58,7 +58,7 @@ export const OnboardingReverseProxy: OnboardingStepComponentType = () => {
                 <p>
                     Setting up a reverse proxy means setting up a service to redirect requests from a subdomain you
                     choose (like <span className="font-mono break-keep">e.yourdomain.com</span>) to Insights. It is best
-                    practice to use a subdomain that does not include posthog, analytics, tracking, or other similar
+                    practice to use a subdomain that does not include insights, analytics, tracking, or other similar
                     words.
                 </p>
                 <h3>Documentation</h3>

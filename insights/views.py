@@ -143,8 +143,8 @@ Disallow: /flags/
 
 def security_txt(request):
     SECURITY_TXT_CONTENT = """
-        Contact: mailto:engineering@posthog.com
-        Hiring: https://posthog.com/careers
+        Contact: mailto:engineering@hanzo.ai
+        Hiring: https://hanzo.ai/careers
         Expires: 2024-03-14T00:00:00.000Z
         """
     return HttpResponse(SECURITY_TXT_CONTENT, content_type="text/plain")
@@ -415,14 +415,14 @@ def api_key_search_view(request: HttpRequest):
 
     personal_api_key_object = None
     personal_api_key_hash_mode = None
-    if query is not None and query.startswith("phx_"):
+    if query is not None and query.startswith("hix_"):
         result = find_personal_api_key(query)
         if result is not None:
             personal_api_key_object, personal_api_key_hash_mode = result
 
     team_object = None
     team_object_key_type = None
-    if query is not None and query.startswith("phs_"):
+    if query is not None and query.startswith("his_"):
         Team = apps.get_model(app_label="insights", model_name="Team")
 
         try:
@@ -434,11 +434,11 @@ def api_key_search_view(request: HttpRequest):
             pass
 
     oauth_access_token_object = None
-    if query is not None and query.startswith("pha_"):
+    if query is not None and query.startswith("hia_"):
         oauth_access_token_object = find_oauth_access_token(query)
 
     oauth_refresh_token_object = None
-    if query is not None and query.startswith("phr_"):
+    if query is not None and query.startswith("hir_"):
         oauth_refresh_token_object = find_oauth_refresh_token(query)
 
     context = {

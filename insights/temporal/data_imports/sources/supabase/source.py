@@ -24,7 +24,7 @@ class SupabaseSource(PostgresSource):
             name=SchemaExternalDataSourceType.SUPABASE,
             iconPath="/static/services/supabase.png",
             caption="Enter your Supabase credentials to automatically pull your data into the Insights Data warehouse",
-            docsUrl="https://posthog.com/tutorials/supabase-query",
+            docsUrl="https://hanzo.ai/tutorials/supabase-query",
             fields=super().get_source_config.fields,
             betaSource=True,
             featureFlag="supabase-dwh",

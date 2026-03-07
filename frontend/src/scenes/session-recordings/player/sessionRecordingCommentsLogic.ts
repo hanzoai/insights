@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
@@ -77,7 +77,7 @@ export const sessionRecordingCommentsLogic = kea<sessionRecordingCommentsLogicTy
         },
 
         deleteCommentFailure: (e) => {
-            posthog.captureException(e, { action: 'session recording comments logic delete comment' })
+            insights.captureException(e, { action: 'session recording comments logic delete comment' })
             lemonToast.error('Could not delete comment, refresh and try again')
         },
 

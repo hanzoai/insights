@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import { LemonBadge, Tooltip, TooltipProps } from '@posthog/lemon-ui'
+import { LemonBadge, Tooltip, TooltipProps } from '@hanzo/lemon-ui'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 

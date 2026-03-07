@@ -90,7 +90,7 @@ async function verifyInactivityPeriodsAvailable(page) {
     try {
         await page.waitForFunction(
             () => {
-                const periods = window.__POSTHOG_INACTIVITY_PERIODS__
+                const periods = window.__INSIGHTS_INACTIVITY_PERIODS__
                 return Array.isArray(periods) && periods.length > 0
             },
             { timeout: 20000 }
@@ -119,14 +119,14 @@ async function waitForRecordingWithSegments(page, maxWaitMs, playbackStarted) {
         try {
             const handle = await page.waitForFunction(
                 (lastCounterVal) => {
-                    if (window.__POSTHOG_RECORDING_ENDED__) {
+                    if (window.__INSIGHTS_RECORDING_ENDED__) {
                         return { ended: true }
                     }
-                    const counter = window.__POSTHOG_SEGMENT_COUNTER__ || 0
+                    const counter = window.__INSIGHTS_SEGMENT_COUNTER__ || 0
                     if (counter > lastCounterVal) {
                         return {
                             counter: counter,
-                            segment_start_ts: window.__POSTHOG_CURRENT_SEGMENT_START_TS__,
+                            segment_start_ts: window.__INSIGHTS_CURRENT_SEGMENT_START_TS__,
                         }
                     }
                     return false
@@ -162,7 +162,7 @@ async function detectInactivityPeriods(page, playbackSpeed, segmentStartTimestam
     try {
         log('Detecting inactivity periods...')
         const inactivityPeriodsRaw = await page.evaluate(() => {
-            const r = window.__POSTHOG_INACTIVITY_PERIODS__
+            const r = window.__INSIGHTS_INACTIVITY_PERIODS__
             if (!r) {
                 return []
             }
@@ -247,7 +247,7 @@ async function main() {
             // devtools: !headless, // Enable for debugging
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
             args: [
-                // The default flag for PostHog usage of headless browsers, as they run within containers
+                // The default flag for Insights usage of headless browsers, as they run within containers
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
                 '--use-gl=swiftshader',

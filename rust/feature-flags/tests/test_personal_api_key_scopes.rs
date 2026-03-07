@@ -7,17 +7,17 @@ use uuid::Uuid;
 /// Helper: Clean up test data (PAK, organization memberships, and user)
 async fn cleanup_test_data(ctx: &TestContext, pak_id: String, user_id: i32) {
     let mut conn = ctx.get_non_persons_connection().await.unwrap();
-    sqlx::query("DELETE FROM posthog_personalapikey WHERE id = $1")
+    sqlx::query("DELETE FROM insights_personalapikey WHERE id = $1")
         .bind(pak_id)
         .execute(&mut *conn)
         .await
         .unwrap();
-    sqlx::query("DELETE FROM posthog_organizationmembership WHERE user_id = $1")
+    sqlx::query("DELETE FROM insights_organizationmembership WHERE user_id = $1")
         .bind(user_id)
         .execute(&mut *conn)
         .await
         .unwrap();
-    sqlx::query("DELETE FROM posthog_user WHERE id = $1")
+    sqlx::query("DELETE FROM insights_user WHERE id = $1")
         .bind(user_id)
         .execute(&mut *conn)
         .await

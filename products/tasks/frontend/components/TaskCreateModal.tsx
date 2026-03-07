@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTextArea } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { taskTrackerSceneLogic } from '../logics/taskTrackerSceneLogic'
 import { RepositorySelector } from './RepositorySelector'

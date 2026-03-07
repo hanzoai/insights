@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton, Spinner } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SupportHeroHog } from 'lib/components/mascots'
@@ -48,7 +48,7 @@ function SetupPrompt({ className }: Pick<ZendeskSourceSetupPromptProps, 'classNa
             className={className}
             description="Use data warehouse sources to import data from Zendesk into Insights."
             isEmpty={true}
-            docsURL="https://posthog.com/docs/data-warehouse"
+            docsURL="https://hanzo.ai/docs/data-warehouse"
             actionElementOverride={
                 <LemonButton
                     icon={<IconPlusSmall />}

@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import * as Icons from '@posthog/icons'
-import { IconArrowRight, IconChevronDown, IconSparkles } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonCard, LemonLabel, LemonSelect, LemonTextArea, Link } from '@posthog/lemon-ui'
+import * as Icons from '@hanzo/icons'
+import { IconArrowRight, IconChevronDown, IconSparkles } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonCard, LemonLabel, LemonSelect, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
 import { Logomark } from 'lib/brand/Logomark'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconWarning } from '@posthog/icons'
-import { LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { PropertyDefinitionType } from '~/types'
@@ -18,7 +18,7 @@ export function PropertyTypeTag({ propertyName, schemaPropertyType }: PropertyTy
     const propertyDefinition = getPropertyDefinition(propertyName, PropertyDefinitionType.Event)
 
     // Special case: 'Object' from schema matches 'String' from property definitions
-    // posthog-js automatically uses JSON.stringify()
+    // insights-js automatically uses JSON.stringify()
     const hasTypeMismatch =
         propertyDefinition &&
         propertyDefinition.property_type &&

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { IconChevronLeft, IconChevronRight, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, Spinner } from '@posthog/lemon-ui'
+import { IconChevronLeft, IconChevronRight, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, Spinner } from '@hanzo/lemon-ui'
 
 interface ImageCarouselProps {
     imageUrls: string[]

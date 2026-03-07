@@ -1,5 +1,5 @@
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu, lemonToast } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonMenu, lemonToast } from '@hanzo/lemon-ui'
 
 import { getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
 import { urls } from 'scenes/urls'

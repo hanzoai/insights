@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { DateTime } from 'luxon'
 
-import { VMState } from '@insights/scriptvm'
+import { VMState } from '@hanzo/scriptvm'
 
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 

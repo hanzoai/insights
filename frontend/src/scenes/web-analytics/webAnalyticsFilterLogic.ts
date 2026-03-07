@@ -10,7 +10,7 @@ import { PropertyFilterBaseValue, PropertyFilterType, PropertyOperator, WebAnaly
 import { DeviceType, INITIAL_WEB_ANALYTICS_FILTER } from './common'
 import type { webAnalyticsFilterLogicType } from './webAnalyticsFilterLogicType'
 
-const teamId = window.POSTHOG_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}__` }
 
 export const webAnalyticsFilterLogic = kea<webAnalyticsFilterLogicType>([

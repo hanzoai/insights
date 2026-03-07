@@ -16,12 +16,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 import nh3
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from axes.decorators import axes_dispatch
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
 from nanoid import generate
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from prometheus_client import Counter
 from rest_framework import exceptions, filters, request, serializers, status, viewsets
 from rest_framework.request import Request
@@ -95,13 +95,13 @@ else:
 
 
 COUNTER_SURVEYS_API_USE_REMOTE_CONFIG = Counter(
-    "posthog_surveys_api_use_remote_config",
+    "insights_surveys_api_use_remote_config",
     "Number of times the surveys API has been used with remote config",
     labelnames=["result"],
 )
 
 COUNTER_SURVEYS_API_REMOTE_CONFIG_COMPARISON = Counter(
-    "posthog_surveys_api_remote_config_comparison",
+    "insights_surveys_api_remote_config_comparison",
     "Comparison of surveys response equality",
     labelnames=["result"],
 )
@@ -1678,7 +1678,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         # Short-term Redis cache
         cache.set(cache_key, response_data, timeout=30)
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             event="survey response summarized",
             distinct_id=str(user.distinct_id),
             properties={"survey_id": survey_id, "question_id": question_id, "response_count": response_count},
@@ -1734,7 +1734,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         survey.headline_response_count = result.get("responses_sampled", 0)
         survey.save(update_fields=["headline_summary", "headline_response_count"])
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             event="survey headline generated",
             distinct_id=str(user.distinct_id),
             properties={
@@ -1899,7 +1899,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
                 }
             )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             event="survey bulk duplicated",
             distinct_id=str(user.distinct_id),
             properties={
@@ -1939,7 +1939,7 @@ class SurveyAPIActionSerializer(serializers.ModelSerializer):
 
 class SurveyAPISerializer(serializers.ModelSerializer):
     """
-    Serializer for the exposed /api/surveys endpoint, to be used in posthog-js and for headless APIs.
+    Serializer for the exposed /api/surveys endpoint, to be used in insights-js and for headless APIs.
     """
 
     linked_flag_key = serializers.CharField(source="linked_flag.key", read_only=True)
@@ -1955,7 +1955,7 @@ class SurveyAPISerializer(serializers.ModelSerializer):
             "name",
             # NB: The "description" field is serialized on Create/Update request, and used to be serialized on the next line,
             # But we had a user write in complaining that we were exposing the description in the API
-            # (https://posthoghelp.zendesk.com/agent/tickets/15210), which was a problem for them
+            # (https://insightshelp.zendesk.com/agent/tickets/15210), which was a problem for them
             # since they were using it as a way to store sensitive information. Given that we don't ever use
             # that field to render the survey, we can safely remove it from the API response.
             "type",

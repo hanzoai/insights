@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { router } from 'kea-router'
 
-import { IconGraph, IconServer } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconGraph, IconServer } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { urls } from 'scenes/urls'

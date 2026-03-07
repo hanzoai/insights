@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCheck, IconCursorClick, IconPlay, IconPlus, IconSidebarClose, IconX } from '@posthog/icons'
-import { LemonButton, LemonInput, Link } from '@posthog/lemon-ui'
+import { IconCheck, IconCursorClick, IconPlay, IconPlus, IconSidebarClose, IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 import { hasIncompleteTargeting } from 'scenes/product-tours/stepUtils'
@@ -21,7 +21,7 @@ import { PRODUCT_TOURS_SIDEBAR_TRANSITION_MS } from './utils'
 const SIDEBAR_WIDTH = 320
 
 export function ProductToursSidebar(): JSX.Element | null {
-    const { posthog } = useValues(toolbarConfigLogic)
+    const { insights } = useValues(toolbarConfigLogic)
     const {
         selectedTourId,
         tourForm,
@@ -91,8 +91,8 @@ export function ProductToursSidebar(): JSX.Element | null {
     }
 
     const getPreviewDisabledReason = (): string | undefined => {
-        if (posthog?.version && !hasMinProductToursVersion(posthog.version)) {
-            return `Requires posthog-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`
+        if (insights?.version && !hasMinProductToursVersion(insights.version)) {
+            return `Requires insights-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`
         }
 
         if (isPreviewing) {
@@ -356,7 +356,7 @@ export function ProductToursSidebar(): JSX.Element | null {
             >
                 <p>
                     With your permission, we'd like to enable{' '}
-                    <Link to="https://posthog.com/session-replay" target="_blank" targetBlankIcon>
+                    <Link to="https://hanzo.ai/session-replay" target="_blank" targetBlankIcon>
                         Session Replay
                     </Link>{' '}
                     while you're working with Product Tours to help us build the best product for you.
