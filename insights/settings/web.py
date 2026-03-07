@@ -332,7 +332,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_RENDERER_CLASSES": ["insights.renderers.SafeJSONRenderer"],
     "PAGE_SIZE": 100,
-    "EXCEPTION_HANDLER": "exceptions_hog.exception_handler",
+    "EXCEPTION_HANDLER": "insights.exceptions_handler.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # These rate limits are defined in `rate_limit.py`, and they're only
@@ -366,7 +366,7 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-EXCEPTIONS_HOG = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
+EXCEPTIONS_HANDLER = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
 
 ####
 # Compression
