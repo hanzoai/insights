@@ -331,7 +331,7 @@ class AssistantTool(StrEnum):
     SEARCH_SESSION_RECORDINGS = "search_session_recordings"
     FIX_INSIGHTSQL_QUERY = "fix_insightsql_query"
     ANALYZE_USER_INTERVIEWS = "analyze_user_interviews"
-    CREATE_HOG_TRANSFORMATION_FUNCTION = "create_hog_transformation_function"
+    CREATE_IQL_TRANSFORMATION_FUNCTION = "create_iql_transformation_function"
     CREATE_INSIGHTS_FUNCTION_FILTERS = "create_insights_function_filters"
     CREATE_INSIGHTS_FUNCTION_INPUTS = "create_insights_function_inputs"
     CREATE_MESSAGE_TEMPLATE = "create_message_template"

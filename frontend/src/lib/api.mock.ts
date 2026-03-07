@@ -53,7 +53,7 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     secret_api_token_backup: 'his_default-team-secret-api-token-backup',
     app_urls: ['https://hanzo.ai/', 'https://insights.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
     recording_domains: ['https://recordings.hanzo.ai/'],
-    name: 'MockHog App + Marketing',
+    name: 'MockInsights App + Marketing',
     slack_incoming_webhook: '',
     created_at: '2020-06-30T09:53:35.932534Z',
     updated_at: '2022-03-17T16:09:21.566253Z',
@@ -217,7 +217,7 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
 
 export const MOCK_DEFAULT_PROJECT: ProjectType = {
     id: MOCK_TEAM_ID,
-    name: 'MockHog App + Marketing',
+    name: 'MockInsights App + Marketing',
     organization_id: MOCK_ORGANIZATION_ID,
     created_at: '2020-06-30T09:53:35.932534Z',
 }
@@ -225,8 +225,8 @@ export const MOCK_DEFAULT_PROJECT: ProjectType = {
 export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     customer_id: null,
     id: MOCK_ORGANIZATION_ID,
-    name: 'MockHog',
-    slug: 'mockhog-fstn',
+    name: 'MockInsights',
+    slug: 'mockinsights-fstn',
     created_at: '2020-09-24T15:05:01.254111Z',
     updated_at: '2022-01-03T13:50:55.369557Z',
     membership_level: OrganizationMembershipLevel.Admin,

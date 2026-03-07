@@ -644,15 +644,15 @@
       team_id Int64,
       timestamp DateTime64(6, 'UTC'),
       -- The name of the service or product that generated the metrics.
-      -- Examples: plugins, hog
+      -- Examples: plugins, iql
       app_source LowCardinality(String),
       -- An id for the app source.
       -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.
-      -- Examples: A plugin id, a hog application id
+      -- Examples: A plugin id, a iql application id
       app_source_id String,
       -- A secondary id e.g. for the instance of app_source that generated this metric.
       -- This may be ommitted if app_source is a singleton.
-      -- Examples: A plugin config id, a hog application config id
+      -- Examples: A plugin config id, a iql application config id
       instance_id String,
       metric_kind LowCardinality(String),
       metric_name LowCardinality(String),
@@ -4137,15 +4137,15 @@
       team_id Int64,
       timestamp DateTime64(6, 'UTC'),
       -- The name of the service or product that generated the metrics.
-      -- Examples: plugins, hog
+      -- Examples: plugins, iql
       app_source LowCardinality(String),
       -- An id for the app source.
       -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.
-      -- Examples: A plugin id, a hog application id
+      -- Examples: A plugin id, a iql application id
       app_source_id String,
       -- A secondary id e.g. for the instance of app_source that generated this metric.
       -- This may be ommitted if app_source is a singleton.
-      -- Examples: A plugin config id, a hog application config id
+      -- Examples: A plugin config id, a iql application config id
       instance_id String,
       metric_kind LowCardinality(String),
       metric_name LowCardinality(String),
@@ -5460,15 +5460,15 @@
       team_id Int64,
       timestamp DateTime64(6, 'UTC'),
       -- The name of the service or product that generated the metrics.
-      -- Examples: plugins, hog
+      -- Examples: plugins, iql
       app_source LowCardinality(String),
       -- An id for the app source.
       -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.
-      -- Examples: A plugin id, a hog application id
+      -- Examples: A plugin id, a iql application id
       app_source_id String,
       -- A secondary id e.g. for the instance of app_source that generated this metric.
       -- This may be ommitted if app_source is a singleton.
-      -- Examples: A plugin config id, a hog application config id
+      -- Examples: A plugin config id, a iql application config id
       instance_id String,
       metric_kind LowCardinality(String),
       metric_name LowCardinality(String),
@@ -7179,15 +7179,15 @@
       team_id Int64,
       timestamp DateTime64(6, 'UTC'),
       -- The name of the service or product that generated the metrics.
-      -- Examples: plugins, hog
+      -- Examples: plugins, iql
       app_source LowCardinality(String),
       -- An id for the app source.
       -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.
-      -- Examples: A plugin id, a hog application id
+      -- Examples: A plugin id, a iql application id
       app_source_id String,
       -- A secondary id e.g. for the instance of app_source that generated this metric.
       -- This may be ommitted if app_source is a singleton.
-      -- Examples: A plugin config id, a hog application config id
+      -- Examples: A plugin config id, a iql application config id
       instance_id String,
       metric_kind LowCardinality(String),
       metric_name LowCardinality(String),

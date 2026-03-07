@@ -1,7 +1,7 @@
 import pytest
 from insights.test.base import BaseTest
 
-from insights.insightsql.compiler.bytecode import create_bytecode, execute_hog, to_bytecode
+from insights.insightsql.compiler.bytecode import create_bytecode, execute_iql, to_bytecode
 from insights.insightsql.errors import QueryError
 from insights.insightsql.parser import parse_program
 
@@ -551,22 +551,22 @@ class TestBytecode(BaseTest):
         assert "Can't use cohorts in real-time filters." in str(e.exception)
 
         with self.assertRaises(QueryError) as e:
-            execute_hog("globalVar := 1;")
+            execute_iql("globalVar := 1;")
         self.assertEqual(
             str(e.exception), 'Variable "globalVar" not declared in this scope. Can not assign to globals.'
         )
 
         with self.assertRaises(QueryError) as e:
-            execute_hog("globalVar.properties.bla := 1;")
+            execute_iql("globalVar.properties.bla := 1;")
         self.assertEqual(
             str(e.exception), 'Variable "globalVar" not declared in this scope. Can not assign to globals.'
         )
 
     def test_bytecode_execute(self):
         # Test a simple operations. The script execution itself is tested under common/scriptvm/python/
-        self.assertEqual(execute_hog("1 + 2", team=self.team).result, 3)
+        self.assertEqual(execute_iql("1 + 2", team=self.team).result, 3)
         self.assertEqual(
-            execute_hog(
+            execute_iql(
                 """
             fun fibonacci(number) {
                 if (number < 2) {
@@ -594,6 +594,6 @@ class TestBytecode(BaseTest):
 
     def test_bytecode_insightsqlx(self):
         self.assertEqual(
-            execute_hog("<Sparkline data={[1,2,3]} />", team=self.team).result,
+            execute_iql("<Sparkline data={[1,2,3]} />", team=self.team).result,
             {"__hx_tag": "Sparkline", "data": [1, 2, 3]},
         )

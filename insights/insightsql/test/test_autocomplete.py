@@ -400,7 +400,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         results = self._json(query=query, start=5, end=6, database=database)
         assert len(results.suggestions) == 0
 
-    def test_autocomplete_hog(self):
+    def test_autocomplete_iql(self):
         database = Database.create_for(team=self.team)
 
         # 1

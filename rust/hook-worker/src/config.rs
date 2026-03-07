@@ -48,7 +48,7 @@ pub struct Config {
     pub allow_internal_ips: bool,
 
     #[envconfig(default = "false")]
-    pub hog_mode: bool,
+    pub iql_mode: bool,
 
     #[envconfig(default = "cdp_function_callbacks")]
     pub cdp_function_callbacks_topic: String,

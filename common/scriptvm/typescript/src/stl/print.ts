@@ -1,4 +1,4 @@
-import { isHogAST, isHogCallable, isHogClosure, isHogDate, isHogDateTime, isHogError } from '../objects'
+import { isHogAST, isIQLCallable, isIQLClosure, isIQLDate, isIQLDateTime, isIQLError } from '../objects'
 import { convertJSToHog } from '../utils'
 
 const escapeCharsMap: Record<string, string> = {
@@ -42,18 +42,18 @@ export function escapeIdentifier(identifier: string | number): string {
         .join('')}\``
 }
 
-export function printHogValue(obj: any, marked: Set<any> | undefined = undefined): string {
+export function printIQLValue(obj: any, marked: Set<any> | undefined = undefined): string {
     if (!marked) {
         marked = new Set()
     }
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
         if (
             marked.has(obj) &&
-            !isHogDateTime(obj) &&
-            !isHogDate(obj) &&
-            !isHogError(obj) &&
-            !isHogClosure(obj) &&
-            !isHogCallable(obj) &&
+            !isIQLDateTime(obj) &&
+            !isIQLDate(obj) &&
+            !isIQLError(obj) &&
+            !isIQLClosure(obj) &&
+            !isIQLCallable(obj) &&
             !isHogAST(obj)
         ) {
             return 'null'
@@ -61,42 +61,42 @@ export function printHogValue(obj: any, marked: Set<any> | undefined = undefined
         marked.add(obj)
         try {
             if (Array.isArray(obj)) {
-                if ((obj as any).__isHogTuple) {
+                if ((obj as any).__isIQLTuple) {
                     if (obj.length < 2) {
-                        return `tuple(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
+                        return `tuple(${obj.map((o) => printIQLValue(o, marked)).join(', ')})`
                     }
-                    return `(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
+                    return `(${obj.map((o) => printIQLValue(o, marked)).join(', ')})`
                 }
-                return `[${obj.map((o) => printHogValue(o, marked)).join(', ')}]`
+                return `[${obj.map((o) => printIQLValue(o, marked)).join(', ')}]`
             }
-            if (isHogDateTime(obj)) {
+            if (isIQLDateTime(obj)) {
                 const millis = String(obj.dt)
                 return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${escapeString(obj.zone)})`
             }
-            if (isHogDate(obj)) {
+            if (isIQLDate(obj)) {
                 return `Date(${obj.year}, ${obj.month}, ${obj.day})`
             }
-            if (isHogError(obj)) {
+            if (isIQLError(obj)) {
                 return `${String(obj.type)}(${escapeString(obj.message)}${
-                    obj.payload ? `, ${printHogValue(obj.payload, marked)}` : ''
+                    obj.payload ? `, ${printIQLValue(obj.payload, marked)}` : ''
                 })`
             }
-            if (isHogClosure(obj)) {
-                return printHogValue(obj.callable, marked)
+            if (isIQLClosure(obj)) {
+                return printIQLValue(obj.callable, marked)
             }
-            if (isHogCallable(obj)) {
-                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printHogValue(obj.argCount)})>`
+            if (isIQLCallable(obj)) {
+                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printIQLValue(obj.argCount)})>`
             }
             if (isHogAST(obj)) {
                 return `sql(${new InsightsQLPrinter(false, marked).print(obj)})`
             }
             if (obj instanceof Map) {
                 return `{${Array.from(obj.entries())
-                    .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
+                    .map(([key, value]) => `${printIQLValue(key, marked)}: ${printIQLValue(value, marked)}`)
                     .join(', ')}}`
             }
             return `{${Object.entries(obj)
-                .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
+                .map(([key, value]) => `${printIQLValue(key, marked)}: ${printIQLValue(value, marked)}`)
                 .join(', ')}}`
         } finally {
             marked.delete(obj)
@@ -111,11 +111,11 @@ export function printHogValue(obj: any, marked: Set<any> | undefined = undefined
     return obj.toString()
 }
 
-export function printHogStringOutput(obj: any): string {
+export function printIQLStringOutput(obj: any): string {
     if (typeof obj === 'string') {
         return obj
     }
-    return printHogValue(obj)
+    return printIQLValue(obj)
 }
 
 type ASTNode = Map<string, any> | null
@@ -751,6 +751,6 @@ export class InsightsQLPrinter {
     }
 
     private escapeValue(value: any): string {
-        return printHogValue(value, this.marked)
+        return printIQLValue(value, this.marked)
     }
 }

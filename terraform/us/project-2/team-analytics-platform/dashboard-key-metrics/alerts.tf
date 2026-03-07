@@ -81,7 +81,7 @@ resource "insights_alert" "export_alert" {
   subscribed_users       = var.analytics_platform_alert_subscribed_user_ids
 }
 
-resource "insights_hog_function" "slack_alert_notification" {
+resource "insights_insights_function" "slack_alert_notification" {
   for_each = insights_alert.export_alert
 
   name        = "Post to Slack on insight alert firing"
