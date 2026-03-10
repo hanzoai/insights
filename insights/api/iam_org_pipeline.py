@@ -192,12 +192,15 @@ def iam_org_assign(
             user.save(update_fields=["current_organization"])
 
     except Exception:
-        logger.exception(
-            "iam_org_pipeline_error",
+        logger.error(
+            "iam_org_pipeline_error: user will need manual org assignment",
             user_id=str(user.uuid),
+            user_email=getattr(user, "email", "unknown"),
             org_slug=org_slug,
+            response_keys=list(response.keys()) if response else [],
+            exc_info=True,
         )
         # Don't fail the login -- just log the error
-        # User will need to be manually assigned
+        # User will need to be manually assigned via admin
 
     return None
