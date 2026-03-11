@@ -511,13 +511,33 @@ jobs:
                   path: playwright/junit-results.xml
                   if-no-files-found: ignore
 
+      - name: Fetch CF credentials from KMS
+        id: kms
+        env:
+          HANZO_API_KEY: ${{ secrets.HANZO_API_KEY }}
+          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+        run: |
+          response=$(curl -sf "${KMS_ENDPOINT}/api/v1/secrets/raw?secretPath=/deploy&environment=production" \
+            -H "Authorization: Bearer ${HANZO_API_KEY}" 2>/dev/null || echo "")
+          if [ -n "$response" ]; then
+            cf_token=$(echo "$response" | jq -r '.secrets[] | select(.secretKey=="CLOUDFLARE_API_TOKEN") | .secretValue // empty')
+            cf_account=$(echo "$response" | jq -r '.secrets[] | select(.secretKey=="CLOUDFLARE_ACCOUNT_ID") | .secretValue // empty')
+          fi
+          if [ -z "${cf_token:-}" ]; then
+            echo "::error::CF credentials not found in KMS."
+            exit 1
+          fi
+          echo "::add-mask::${cf_token}"
+          echo "::add-mask::${cf_account}"
+          echo "cf_token=${cf_token}" >> "$GITHUB_OUTPUT"
+          echo "cf_account=${cf_account}" >> "$GITHUB_OUTPUT"
             - name: Publish report to Cloudflare Pages
               if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
               id: cf-deploy
               continue-on-error: true
               env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ steps.kms.outputs.cf_token }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ steps.kms.outputs.cf_account }}
               run: |
                   BRANCH="${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'main' }}"
                   npx --yes wrangler@3 pages deploy playwright/playwright-report \
