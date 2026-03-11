@@ -176,3 +176,4 @@ services/mcp/ui-apps-dist
 
 # Downloaded GitHub issues for signals
 products/signals/backend/github_issues/
+CLAUDE.md
