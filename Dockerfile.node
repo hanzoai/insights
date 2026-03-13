@@ -138,6 +138,9 @@ COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpile
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/dist /code/common/scriptvm/typescript/dist
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/node_modules /code/common/scriptvm/typescript/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/package.json /code/common/scriptvm/typescript/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/dist /code/common/insights-node/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/node_modules /code/common/insights-node/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/package.json /code/common/insights-node/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
 COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules
