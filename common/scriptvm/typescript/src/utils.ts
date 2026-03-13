@@ -166,6 +166,10 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
     return x
 }
 
+// Aliases for IQL naming convention
+export const convertJSToIQL = convertJSToHog
+export const convertIQLToJS = convertHogToJS
+
 export function calculateCost(object: any, marked: Set<any> | undefined = undefined): any {
     if (!marked) {
         marked = new Set()

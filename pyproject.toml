@@ -131,7 +131,7 @@ dependencies = [
     "sqlalchemy-bigquery[bqstorage]==1.12.1",
     "sqlparse==0.5.0",
     "sshtunnel==0.4.0",
-    "statsiql==1.0.6",
+    "statshog==1.0.6",
     "stripe==12.2.0",
     "structlog==25.4.0",
     "temporalio==1.14.1",
@@ -279,7 +279,7 @@ required-version = "~=0.10.2"
 [tool.uv.sources]
 infi-clickhouse-orm = { git = "https://github.com/hanzoai/infi.clickhouse_orm", rev = "9578c79f29635ee2c1d01b7979e89adab8383de2" }
 insightsql-parser = { path = "common/insightsql_parser" }
-hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "master" }
 
 
 [tool.isort]
