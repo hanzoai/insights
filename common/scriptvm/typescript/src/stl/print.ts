@@ -1,4 +1,4 @@
-import { isHogAST, isIQLCallable, isIQLClosure, isIQLDate, isIQLDateTime, isIQLError } from '../objects'
+import { isIQLAST, isIQLCallable, isIQLClosure, isIQLDate, isIQLDateTime, isIQLError } from '../objects'
 import { convertJSToHog } from '../utils'
 
 const escapeCharsMap: Record<string, string> = {
@@ -54,7 +54,7 @@ export function printIQLValue(obj: any, marked: Set<any> | undefined = undefined
             !isIQLError(obj) &&
             !isIQLClosure(obj) &&
             !isIQLCallable(obj) &&
-            !isHogAST(obj)
+            !isIQLAST(obj)
         ) {
             return 'null'
         }
@@ -87,7 +87,7 @@ export function printIQLValue(obj: any, marked: Set<any> | undefined = undefined
             if (isIQLCallable(obj)) {
                 return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printIQLValue(obj.argCount)})>`
             }
-            if (isHogAST(obj)) {
+            if (isIQLAST(obj)) {
                 return `sql(${new InsightsQLPrinter(false, marked).print(obj)})`
             }
             if (obj instanceof Map) {
@@ -147,7 +147,7 @@ export class InsightsQLPrinter {
             return ''
         }
         if (!(node instanceof Map)) {
-            if (isHogAST(node)) {
+            if (isIQLAST(node)) {
                 node = convertJSToHog(node)
             } else {
                 return this.escapeValue(node)
