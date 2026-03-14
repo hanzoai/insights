@@ -7,7 +7,7 @@
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "@hanzo/insights": "workspace:*"
+        "@hanzo/insights": "catalog:"
     },
     "peerDependencies": {
         "@hanzo/icons": "*",

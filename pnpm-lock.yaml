@@ -6,6 +6,12 @@ settings:
 
 catalogs:
   default:
+    '@hanzo/insights':
+      specifier: ^1.352.0
+      version: 1.352.0
+    '@hanzo/insights-lite':
+      specifier: ^4.2.2
+      version: 4.2.2
     '@parcel/packager-ts':
       specifier: 2.13.3
       version: 2.13.3
@@ -230,18 +236,6 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
-
-  common/insights-js:
-    dependencies:
-      insights-js-upstream:
-        specifier: npm:@hanzo/insights@1.352.0
-        version: '@hanzo/insights@1.352.0'
-
-  common/insights-js-lite:
-    dependencies:
-      insights-lite-upstream:
-        specifier: npm:@hanzo/insights-lite@4.2.2
-        version: '@hanzo/insights-lite@4.2.2'
 
   common/insights-node:
     dependencies:
@@ -541,11 +535,11 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       '@hanzo/insights-lite':
-        specifier: workspace:*
-        version: link:../common/insights-js-lite
+        specifier: 'catalog:'
+        version: 4.2.2
       '@hanzo/insightsql-parser':
         specifier: workspace:*
         version: link:../common/insightsql_parser
@@ -1798,8 +1792,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1822,8 +1816,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1903,8 +1897,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1942,8 +1936,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2028,8 +2022,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2062,8 +2056,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2238,8 +2232,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2271,8 +2265,8 @@ importers:
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
-        specifier: workspace:*
-        version: link:../../common/insights-js
+        specifier: 'catalog:'
+        version: 1.352.0
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2311,8 +2305,8 @@ importers:
   services/mcp:
     dependencies:
       '@hanzo/insights-lite':
-        specifier: workspace:*
-        version: link:../../common/insights-js-lite
+        specifier: 'catalog:'
+        version: 4.2.2
       '@hanzo/insights-node':
         specifier: workspace:*
         version: link:../../common/insights-node
