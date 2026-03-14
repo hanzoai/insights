@@ -234,7 +234,7 @@ class AutoProjectMiddleware:
         return self.get_response(request)
 
     def get_target_queryset(self, request: HttpRequest) -> Optional[QuerySet]:
-        # TODO: Remove this method, as all relevant links now have `project_id_in_url``
+        # Legacy fallback for links without project_id_in_url
 
         path_parts = request.path.strip("/").split("/")
         # Sync the paths with urls.ts!
