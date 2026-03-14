@@ -11,7 +11,7 @@
         "kea-subscriptions": "catalog:",
         "partial-json": "^0.1.7",
         "torph": "^0.0.5",
-        "@hanzo/insights": "workspace:*"
+        "@hanzo/insights": "catalog:"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"

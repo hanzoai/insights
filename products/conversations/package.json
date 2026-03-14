@@ -9,7 +9,7 @@
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
         "ts-pattern": "catalog:",
-        "@hanzo/insights": "workspace:*"
+        "@hanzo/insights": "catalog:"
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
