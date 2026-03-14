@@ -13,6 +13,6 @@
     ],
     "dependencies": {
         "insights-node-upstream": "npm:@hanzo/insights-node@5.10.4",
-        "@posthog/core": "npm:@hanzo/insights-core@1.4.0"
+        "insights-core-upstream": "npm:@hanzo/insights-core@1.4.0"
     }
 }
