@@ -31,6 +31,8 @@ COPY patches/ patches/
 COPY common/scriptvm/typescript/ common/scriptvm/typescript/
 COPY common/esbuilder/ common/esbuilder/
 COPY common/tailwind/ common/tailwind/
+COPY common/insights-js/ common/insights-js/
+COPY common/insights-js-lite/ common/insights-js-lite/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
