@@ -176,16 +176,19 @@ FROM debian:bookworm-slim AS fetch-geoip-db
 WORKDIR /code
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
-# Fetch the GeoLite2-City database that will be used for IP geolocation within Django.
+# Fetch a GeoIP City database for IP geolocation within Django.
+# Uses DB-IP City Lite (free, compatible with MaxMind GeoLite2 format).
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     "ca-certificates" \
     "curl" \
-    "brotli" \
+    "gzip" \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.insights.hanzo.ai/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
+    DBIP_MONTH=$(date +%Y-%m) && \
+    curl -sS -L "https://download.db-ip.com/free/dbip-city-lite-${DBIP_MONTH}.mmdb.gz" | \
+    gunzip > ./share/GeoLite2-City.mmdb && \
     chmod -R 755 ./share/GeoLite2-City.mmdb
 
 
