@@ -28,6 +28,7 @@
 !gunicorn.config.py
 !manage.py
 !turbo.json
+!.npmrc
 !package.json
 !.pnpmfile.cjs
 !patches
