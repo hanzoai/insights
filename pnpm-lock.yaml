@@ -97,26 +97,13 @@ overrides:
   react-dom: 18.3.1
   sha.js: '>=2.4.12'
   typescript: 5.4.5
-  posthog-js: npm:@hanzo/insights@1.352.0
-  posthog-js-lite: npm:@hanzo/insights-lite@4.2.2
-  posthog-node: npm:@hanzo/insights-node@5.10.4
-  '@posthog/core': npm:@hanzo/insights-core@1.23.1
-  '@posthog/types': npm:@hanzo/insights-types@1.352.0
-  '@posthog/icons': npm:@hanzo/insights-icons@0.36.6
-  '@posthog/hedgehog-mode': npm:@hanzo/insights-mascot-mode@0.0.48
-  '@posthog/rrweb': npm:@hanzo/insights-rrweb@0.0.26
-  '@posthog/rrweb-types': npm:@hanzo/insights-rrweb-types@0.0.26
-  '@posthog/rrweb-plugin-console-record': npm:@hanzo/insights-rrweb-plugin-console-record@0.0.26
-  '@posthog/rrweb-utils': npm:@hanzo/insights-rrweb-utils@0.0.4
-  '@posthog/rrweb-snapshot': npm:@hanzo/insights-rrweb-snapshot@0.0.4
-  '@posthog/rrdom': npm:@hanzo/insights-rrdom@0.0.4
   '@hanzo/icons': npm:@hanzo/insights-icons@0.36.6
   '@hanzo/mascot-mode': npm:@hanzo/insights-mascot-mode@0.0.48
   '@hanzo/rrweb': npm:@hanzo/insights-rrweb@0.0.26
   '@hanzo/rrweb-types': npm:@hanzo/insights-rrweb-types@0.0.26
   '@hanzo/rrweb-plugin-console-record': npm:@hanzo/insights-rrweb-plugin-console-record@0.0.26
 
-pnpmfileChecksum: sha256-c6qv+VxAFoq+GhX6LDxbjNm8OcsOlwK1EPfLTN2X4Jw=
+pnpmfileChecksum: sha256-abczPKq3Su5jbaLwsw78wLnHM/RpIEE6R7kSwJW86ZE=
 
 patchedDependencies:
   chartjs-plugin-crosshair@2.0.0:
@@ -258,6 +245,9 @@ importers:
 
   common/insights-node:
     dependencies:
+      '@posthog/core':
+        specifier: npm:@hanzo/insights-core@1.23.1
+        version: '@hanzo/insights-core@1.23.1'
       insights-node-upstream:
         specifier: npm:@hanzo/insights-node@5.10.4
         version: '@hanzo/insights-node@5.10.4'
@@ -19206,8 +19196,8 @@ packages:
     resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
     engines: {node: '>= 10.0.0'}
 
-  unlayer-types@1.384.0:
-    resolution: {integrity: sha512-3/AFoi3iT0MBwaTvj0OXc0CZHf2rGnBeLCtV/OZbDjL5X8Pw+9+d1iprPlyzAUi5fgJ2MmalBbAeRe+xCJMPrA==}
+  unlayer-types@1.385.0:
+    resolution: {integrity: sha512-AtgziDIyqq1nubRNB7lcZNZ6CHUi5zxgbEAtFlrbcU358UbDNggcAcwr7RXGyNlwpJPGg3FUyq/XWwyAQLpdVQ==}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -39705,7 +39695,7 @@ snapshots:
   react-email-editor@1.7.11(react@18.3.1):
     dependencies:
       react: 18.3.1
-      unlayer-types: 1.384.0
+      unlayer-types: 1.385.0
 
   react-error-overlay@6.0.9: {}
 
@@ -41851,7 +41841,7 @@ snapshots:
 
   universalify@2.0.0: {}
 
-  unlayer-types@1.384.0: {}
+  unlayer-types@1.385.0: {}
 
   unpipe@1.0.0: {}
 
