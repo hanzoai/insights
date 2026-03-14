@@ -239,9 +239,9 @@ importers:
 
   common/insights-node:
     dependencies:
-      '@posthog/core':
-        specifier: npm:@hanzo/insights-core@1.23.1
-        version: '@hanzo/insights-core@1.23.1'
+      insights-core-upstream:
+        specifier: npm:@hanzo/insights-core@1.4.0
+        version: '@hanzo/insights-core@1.4.0'
       insights-node-upstream:
         specifier: npm:@hanzo/insights-node@5.10.4
         version: '@hanzo/insights-node@5.10.4'
