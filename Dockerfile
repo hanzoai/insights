@@ -299,7 +299,6 @@ RUN --mount=type=cache,id=playwright-browsers,target=/tmp/playwright-cache \
 USER insights
 
 # Copy the frontend assets from the frontend-build stage.
-# TODO: this copy should not be necessary, we should remove it once we verify everything still works.
 COPY --from=frontend-build --chown=insights:insights /code/frontend/dist /code/frontend/dist
 
 # Ensure sourcemap-upload stage runs (the file itself is not needed in the final image).
