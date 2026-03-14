@@ -10,7 +10,7 @@
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
         "use-debounce": "catalog:",
-        "@hanzo/insights": "workspace:*"
+        "@hanzo/insights": "catalog:"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"
