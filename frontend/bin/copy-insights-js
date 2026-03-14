@@ -2,16 +2,8 @@
 
 set -e
 
-# This script copies built dist files from the @hanzo/insights npm package
-# so they can be served on the CDN.
-#
-# In pnpm workspaces, @hanzo/insights resolves to the workspace wrapper at
-# common/insights-js which depends on insights-js-upstream (npm alias for
-# the real @hanzo/insights package). We resolve the upstream dist location
-# from the wrapper's context.
-
-WRAPPER_DIR=$(node -e "console.log(require('path').dirname(require.resolve('@hanzo/insights')))")
-PKG_DIR=$(cd "$WRAPPER_DIR" && node -e "const p = require.resolve('insights-js-upstream/package.json'); console.log(require('path').dirname(p))")
+# This script copies built dist files from @hanzo/insights so they can be served on the CDN.
+PKG_DIR=$(node -e "console.log(require('path').dirname(require.resolve('@hanzo/insights/package.json')))")
 
 if [ ! -d "$PKG_DIR/dist" ]; then
     echo "ERROR: Cannot find @hanzo/insights dist at $PKG_DIR/dist" >&2
