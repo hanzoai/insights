@@ -142,6 +142,10 @@ COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/in
 COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/node_modules /code/common/insights-node/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/index.d.ts /code/common/insights-node/index.d.ts
 COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/package.json /code/common/insights-node/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/dist /code/common/plugin-scaffold/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/package.json /code/common/plugin-scaffold/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/lib /code/common/siphash/lib
+COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/package.json /code/common/siphash/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
 COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules
