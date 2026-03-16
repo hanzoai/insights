@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@hanzo/insights':
-      specifier: ^1.352.0
-      version: 1.352.0
+      specifier: ^1.358.1
+      version: 1.358.1
     '@hanzo/insights-lite':
       specifier: ^4.2.2
       version: 4.2.2
@@ -109,7 +109,7 @@ overrides:
   '@hanzo/rrweb-types': npm:@hanzo/insights-rrweb-types@0.0.26
   '@hanzo/rrweb-plugin-console-record': npm:@hanzo/insights-rrweb-plugin-console-record@0.0.26
 
-pnpmfileChecksum: sha256-abczPKq3Su5jbaLwsw78wLnHM/RpIEE6R7kSwJW86ZE=
+pnpmfileChecksum: sha256-J54OsRwDqF4vWeTmKRZyDR/UkeD5WJefwg3u20ndy88=
 
 patchedDependencies:
   chartjs-plugin-crosshair@2.0.0:
@@ -243,8 +243,8 @@ importers:
         specifier: npm:@hanzo/insights-core@1.4.0
         version: '@hanzo/insights-core@1.4.0'
       insights-node-upstream:
-        specifier: npm:@hanzo/insights-node@5.10.4
-        version: '@hanzo/insights-node@5.10.4'
+        specifier: npm:@hanzo/insights-node@5.26.2
+        version: '@hanzo/insights-node@5.26.2'
 
   common/insightsql_parser: {}
 
@@ -536,7 +536,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       '@hanzo/insights-lite':
         specifier: 'catalog:'
         version: 4.2.2
@@ -1793,7 +1793,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1817,7 +1817,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1898,7 +1898,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -1937,7 +1937,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2023,7 +2023,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2057,7 +2057,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2233,7 +2233,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -2266,7 +2266,7 @@ importers:
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 'catalog:'
-        version: 1.352.0
+        version: 1.358.1
       kea:
         specifier: 'catalog:'
         version: 4.0.0-pre.3(react@18.3.1)
@@ -5016,8 +5016,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  '@hanzo/insights-core@1.23.1':
-    resolution: {integrity: sha512-fVrF1GueVZQr20FxAv2VzWZREsEvQ98UC17yi99KYFahKod8oYl6NrroEgmt7hg7FLjVTqaheEVfx8qYjV6Jow==}
+  '@hanzo/insights-core@1.23.2':
+    resolution: {integrity: sha512-35txrK8Es7gZB2eV1ZIeD6XzXjkvEiBpkmxYud/E/7o6Q+9RACGQTJtemPhBljtwSi7h55FdMJB2nLKPe9+pBw==}
 
   '@hanzo/insights-core@1.4.0':
     resolution: {integrity: sha512-hqo223pPdrbch/OvmvB2C6b32tgEi/8QYm+uaLcELc3143GJ/18cSUt217l7UE07eSJIDtBPYco1b4XWtCmJEg==}
@@ -5041,9 +5041,9 @@ packages:
       react: 18.3.1
       react-dom: 18.3.1
 
-  '@hanzo/insights-node@5.10.4':
-    resolution: {integrity: sha512-kdsrQnbAzBHL8dGX0dLvUg7ErKH7gz4DvGo2tJKCDwb/WkgVjcTAlelSjuS2sBmn0GrwzUhJ30agMC6WU4mTCA==}
-    engines: {node: '>=20'}
+  '@hanzo/insights-node@5.26.2':
+    resolution: {integrity: sha512-8LiJKOMJ7FdhiYhAl0RSsWMzx6Ux6bUBRXYMJTJMvs0GkNpbVuprYMthWeNQn2a3YXTZjR03y+Uj+q30UcQTtQ==}
+    engines: {node: ^20.20.0 || >=22.22.0}
 
   '@hanzo/insights-rrdom@0.0.4':
     resolution: {integrity: sha512-WwgdPJ3J2O07Rrxh3mTEtQEensQNZf8N84R1MNlhPsy2ZuIizOK5Slhg2W9dedPEcPGyw5+4ZO+zwyWhenjCjw==}
@@ -5066,11 +5066,11 @@ packages:
   '@hanzo/insights-rrweb@0.0.26':
     resolution: {integrity: sha512-rmK2gD6Jk5Pqir2A+ke50ZwP6M5t0zECbOegzZA55V5hh4pSyfj7K5Fnc6LutpgrlA0l7pIjz6fpzVsSh/gUKw==}
 
-  '@hanzo/insights-types@1.352.0':
-    resolution: {integrity: sha512-R2J4jrlhIJgouux/6KaMdoCvlgnuyT7UOw7BMbpyjG3Lkk6z1MMvAmSw7eJ6au1PxNldPE/dCGprEH+WLdBCFA==}
+  '@hanzo/insights-types@1.358.1':
+    resolution: {integrity: sha512-HV/IiQs+GCVwKeqpu5tkuDFKkfVG9Sf0KWOuUqSFwqgSO+NelTvL6aPXBmCemFhRW81cnf2rCp7/7vxOwBbwqg==}
 
-  '@hanzo/insights@1.352.0':
-    resolution: {integrity: sha512-wO9oSwjUnkj9iA6W5ZlTvY2Lf5ehxDvOrXRlaL7ABjKyijN7uL6/WHjan3G8dD2NgeRVEFq8IJzd7OncBDpG5g==}
+  '@hanzo/insights@1.358.1':
+    resolution: {integrity: sha512-eZ5zfEkLGRLpLkxTCp/xOUwyIU9LoJXAMz+ZnDix905mKKqopj3ivy5rG/SjIfs4U9ZBJw+UZ82Ye+p9DqAyLQ==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -19190,8 +19190,8 @@ packages:
     resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
     engines: {node: '>= 10.0.0'}
 
-  unlayer-types@1.385.0:
-    resolution: {integrity: sha512-AtgziDIyqq1nubRNB7lcZNZ6CHUi5zxgbEAtFlrbcU358UbDNggcAcwr7RXGyNlwpJPGg3FUyq/XWwyAQLpdVQ==}
+  unlayer-types@1.386.0:
+    resolution: {integrity: sha512-uO2zj3IfEqIKVJCA3kGm2bmOFZT7hD1Ga4PbFegspae25BP+ClWzhe0oK23/PGhFOIxI0Qbp1cpq/pcraoPeWQ==}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -24122,7 +24122,7 @@ snapshots:
       protobufjs: 7.5.4
       yargs: 17.7.2
 
-  '@hanzo/insights-core@1.23.1':
+  '@hanzo/insights-core@1.23.2':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -24154,9 +24154,9 @@ snapshots:
     transitivePeerDependencies:
       - prop-types
 
-  '@hanzo/insights-node@5.10.4':
+  '@hanzo/insights-node@5.26.2':
     dependencies:
-      '@hanzo/insights-core': 1.4.0
+      '@hanzo/insights-core': 1.23.2
 
   '@hanzo/insights-rrdom@0.0.4':
     dependencies:
@@ -24186,12 +24186,12 @@ snapshots:
       base64-arraybuffer: 1.0.2
       mitt: 3.0.0
 
-  '@hanzo/insights-types@1.352.0': {}
+  '@hanzo/insights-types@1.358.1': {}
 
-  '@hanzo/insights@1.352.0':
+  '@hanzo/insights@1.358.1':
     dependencies:
-      '@hanzo/insights-core': 1.23.1
-      '@hanzo/insights-types': 1.352.0
+      '@hanzo/insights-core': 1.23.2
+      '@hanzo/insights-types': 1.358.1
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/exporter-logs-otlp-http': 0.208.0(@opentelemetry/api@1.9.0)
@@ -39689,7 +39689,7 @@ snapshots:
   react-email-editor@1.7.11(react@18.3.1):
     dependencies:
       react: 18.3.1
-      unlayer-types: 1.385.0
+      unlayer-types: 1.386.0
 
   react-error-overlay@6.0.9: {}
 
@@ -41835,7 +41835,7 @@ snapshots:
 
   universalify@2.0.0: {}
 
-  unlayer-types@1.385.0: {}
+  unlayer-types@1.386.0: {}
 
   unpipe@1.0.0: {}
 
