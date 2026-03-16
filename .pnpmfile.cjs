@@ -6,11 +6,11 @@ function readPackage(pkg) {
 
     // Upstream → Hanzo fork overrides (applied to all packages)
     var overrides = {};
-    overrides[_up + '-js'] = 'npm:@hanzo/insights@1.352.0';
+    overrides[_up + '-js'] = 'npm:@hanzo/insights@1.358.1';
     overrides[_up + '-js-lite'] = 'npm:@hanzo/insights-lite@4.2.2';
-    overrides[_up + '-node'] = 'npm:@hanzo/insights-node@5.10.4';
-    overrides[_at_up + 'core'] = 'npm:@hanzo/insights-core@1.23.1';
-    overrides[_at_up + 'types'] = 'npm:@hanzo/insights-types@1.352.0';
+    overrides[_up + '-node'] = 'npm:@hanzo/insights-node@5.26.2';
+    overrides[_at_up + 'core'] = 'npm:@hanzo/insights-core@1.23.2';
+    overrides[_at_up + 'types'] = 'npm:@hanzo/insights-types@1.358.1';
     overrides[_at_up + 'icons'] = 'npm:@hanzo/insights-icons@0.36.6';
     overrides[_at_up + 'hedge' + 'hog-mode'] = 'npm:@hanzo/insights-mascot-mode@0.0.48';
     overrides[_at_up + 'rrweb'] = 'npm:@hanzo/insights-rrweb@0.0.26';
@@ -22,8 +22,8 @@ function readPackage(pkg) {
 
     // Workspace wrapper internal dep remaps
     var remaps = {
-        'insights-node-upstream': 'npm:@hanzo/insights-node@5.10.4',
-        'insights-js-upstream': 'npm:@hanzo/insights@1.352.0',
+        'insights-node-upstream': 'npm:@hanzo/insights-node@5.26.2',
+        'insights-js-upstream': 'npm:@hanzo/insights@1.358.1',
         'insights-lite-upstream': 'npm:@hanzo/insights-lite@4.2.2'
     };
 
