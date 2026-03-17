@@ -11,7 +11,7 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import APIException, UnsupportedMediaType, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.auth import TemporaryTokenAuthentication

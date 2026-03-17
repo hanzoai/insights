@@ -1,4 +1,4 @@
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 from insights import settings
 from insights.api.services.query import logger
