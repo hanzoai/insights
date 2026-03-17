@@ -1,11 +1,11 @@
 import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import insights from '@hanzo/insights'
 
 import { IconArrowLeft, IconEye, IconPlus, IconShield, IconTarget, IconThumbsUp, IconWarning } from '@hanzo/icons'
+import insights from '@hanzo/insights'
 import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
-import { JudgeHog } from 'lib/components/mascots'
+import { JudgeMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -130,7 +130,7 @@ function TemplateGrid({
                     <div className="text-center space-y-3">
                         {showHog && (
                             <div className="flex justify-center mb-4">
-                                <JudgeHog className="w-32 h-32" />
+                                <JudgeMascot className="w-32 h-32" />
                             </div>
                         )}
                         <h1 className="text-3xl font-bold">{title}</h1>

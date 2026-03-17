@@ -283,7 +283,7 @@ export function Cohorts(): JSX.Element {
                 isEmpty={shouldShowEmptyState}
                 docsURL="https://hanzo.ai/docs/data/cohorts"
                 action={() => router.actions.push(urls.cohort('new'))}
-                customMascot={ListMascot}
+                customInsights={ListMascot}
             />
 
             <div>{filtersSection}</div>

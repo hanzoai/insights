@@ -6,7 +6,7 @@ import { LemonCollapse, LemonDivider, LemonInput, LemonSelect, LemonTag, Link, T
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { MailHog } from 'lib/components/mascots'
+import { MailMascot } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
@@ -286,7 +286,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                     action={() => {
                         showNewWorkflowModal()
                     }}
-                    customHog={MailHog}
+                    customInsights={MailMascot}
                     isEmpty
                 />
             )}
