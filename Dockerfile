@@ -23,7 +23,7 @@ FROM node:24.13.0-bookworm-slim AS frontend-build
 WORKDIR /code
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
-COPY .npmrc .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY frontend/package.json frontend/
 COPY frontend/bin/ frontend/bin/
 COPY bin/ bin/
@@ -90,7 +90,7 @@ COPY nodejs/src/scripts/ nodejs/src/scripts/
 RUN cd nodejs/src/scripts && npm install --omit=dev
 
 # Build plugin transpiler for site destinations/apps
-COPY .npmrc .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY bin/turbo bin/turbo
 COPY patches/ patches/
 COPY common/esbuilder/ common/esbuilder/
