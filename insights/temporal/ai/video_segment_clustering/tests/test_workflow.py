@@ -1,12 +1,8 @@
 """Tests for the VideoSegmentClusteringWorkflow.
 
-The test data is stored in two files in this directory:
-- `mock_video_segments.yaml.gz` - Gzip-compressed YAML containing segment metadata
-  (document_id, session_id, timestamps, content/descriptions, etc.)
-  Compressed to reduce repo size. Decompress with `gunzip -k` to inspect.
-- `mock_video_segments_embeddings.npy` - The 3072-dimensional embeddings as a NumPy binary array.
-  Stored separately because embeddings are large binary blobs (float32 arrays) that would bloat the YAML file and
-  make it unreadable. The array is indexed to match the order of segments in the YAML file.
+The test data is stored in `mock_video_segments.yaml.gz` (gzip-compressed YAML with segment metadata).
+Embeddings are generated at test time by the `mock_embeddings` conftest fixture (deterministic random
+vectors, seeded for reproducibility) to avoid storing a 57 MB binary in the repo.
 """
 
 import gzip
@@ -17,7 +13,6 @@ import pytest
 from unittest.mock import patch
 
 import yaml
-import numpy as np
 from temporalio import activity
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
@@ -72,26 +67,23 @@ async def mock_label_activity(inputs: LabelClustersActivityInputs) -> LabelingRe
     return LabelingResult(labels=labels)
 
 
-def load_test_data() -> tuple[list[dict], np.ndarray]:
-    """Load test segments and embeddings from files."""
+def load_test_segments() -> list[dict]:
+    """Load test segment metadata from the YAML fixture."""
     yaml_path = Path(__file__).parent / "mock_video_segments.yaml.gz"
-    npy_path = Path(__file__).parent / "mock_video_segments_embeddings.npy"
 
     with gzip.open(yaml_path, "rt") as f:
         data = yaml.safe_load(f)
 
-    embeddings = np.load(npy_path)
-    segments = data["segments"]
-
-    return segments, embeddings
+    return data["segments"]
 
 
 @pytest.fixture
-def test_segments_and_embeddings():
+def test_segments_and_embeddings(mock_embeddings):
     """Load test segments with their embeddings and populate global state for mocked activities."""
     global _test_segments, _test_video_segments
 
-    segments, embeddings = load_test_data()
+    segments = load_test_segments()
+    embeddings = mock_embeddings
 
     # Convert to VideoSegmentMetadata objects for the workflow (without embeddings)
     _test_segments = []
