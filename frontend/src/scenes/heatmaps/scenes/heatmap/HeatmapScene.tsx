@@ -6,7 +6,7 @@ import { LemonTag, Spinner } from '@hanzo/lemon-ui'
 
 import { appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'
-import { FilmCameraHog } from 'lib/components/mascots'
+import { FilmCameraMascot } from 'lib/components/mascots'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
@@ -155,7 +155,7 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                                     <div className="flex-1 flex items-center justify-center min-h-96">
                                         <style>{`@keyframes icon-wobble{from{transform:rotate(0deg)}to{transform:rotate(5deg)}}`}</style>
                                         <div className="text-sm text-center font-semibold">
-                                            <FilmCameraHog
+                                            <FilmCameraMascot
                                                 className="w-32 h-32 mx-auto mb-2"
                                                 style={{
                                                     animation: 'icon-wobble 1.2s ease-in-out infinite alternate',

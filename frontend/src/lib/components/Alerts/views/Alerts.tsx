@@ -5,7 +5,7 @@ import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { DetectiveHog } from 'lib/components/mascots'
+import { DetectiveMascot } from 'lib/components/mascots'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
@@ -121,7 +121,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
                     // TODO: update docs link when ready
                     // docsURL="https://hanzo.ai/docs/data/annotations"
                     isEmpty={alertsSortedByState.length === 0 && !alertsLoading}
-                    customHog={DetectiveHog}
+                    customMascot={DetectiveMascot}
                     actionElementOverride={
                         <span className="italic">
                             To get started, visit a trends insight, expand options in the header and click 'Manage

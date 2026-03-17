@@ -4,7 +4,7 @@ import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
-import { LaptopHog3 } from '../mascots'
+import { LaptopMascot3 } from '../mascots'
 import { upgradeModalLogic } from './upgradeModalLogic'
 
 export function UpgradeModal(): JSX.Element {
@@ -27,7 +27,7 @@ export function UpgradeModal(): JSX.Element {
                 <div className="max-w-2xl mt-8">
                     <div className="PayGateMini rounded flex flex-col items-center p-4 text-center bg-primary border border-primary">
                         <div className="mb-3 max-w-72">
-                            <LaptopHog3 />
+                            <LaptopMascot3 />
                         </div>
                         <p className="max-w-140 mb-4">
                             You've reached your usage limit for <b>projects</b>. To create more than{' '}

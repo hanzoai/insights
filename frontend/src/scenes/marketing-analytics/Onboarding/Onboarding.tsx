@@ -5,7 +5,7 @@ import { IconArrowRight } from '@hanzo/icons'
 import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { FilmCameraHog } from 'lib/components/mascots'
+import { FilmCameraMascot } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -99,7 +99,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
             }
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
-            customHog={FilmCameraHog}
+            customMascot={FilmCameraMascot}
         />
     )
 }

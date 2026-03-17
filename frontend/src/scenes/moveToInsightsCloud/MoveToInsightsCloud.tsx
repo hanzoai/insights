@@ -12,7 +12,7 @@ import {
 } from '@hanzo/icons'
 import { LemonButton, Link } from '@hanzo/lemon-ui'
 
-import { ExperimentsHog } from 'lib/components/mascots'
+import { ExperimentsMascot } from 'lib/components/mascots'
 import { SceneExport } from 'scenes/sceneTypes'
 
 export const scene: SceneExport = {
@@ -119,7 +119,7 @@ export function MoveToInsightsCloud(): JSX.Element {
                     </div>
                     <aside className="my-2 hidden md:flex justify-end">
                         <div className="max-w-64">
-                            <ExperimentsHog className="w-full h-auto" />
+                            <ExperimentsMascot className="w-full h-auto" />
                         </div>
                     </aside>
                 </div>

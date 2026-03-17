@@ -1,53 +1,55 @@
-// Mascot mascot illustrations removed — stubs kept for import compatibility
+// Mascot illustrations removed — stubs kept for import compatibility
 // All components return null to prevent rendering
-
 import { ImgHTMLAttributes } from 'react'
 
 type MascotProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'>
 
-const NullHog = (_props: MascotProps): JSX.Element | null => null
+function NullMascot(props: MascotProps): JSX.Element | null {
+    void props
+    return null
+}
 
-export const SurprisedHog = NullHog
-export const XRayHog = NullHog
-export const XRayHog2 = NullHog
-export const HospitalHog = NullHog
-export const BlushingHog = NullHog
-export const LaptopHog1 = NullHog
-export const LaptopHog2 = NullHog
-export const LaptopHog3 = NullHog
-export const LaptopHog4 = NullHog
-export const LaptopHogEU = NullHog
-export const ExplorerHog = NullHog
-export const RunningHog = NullHog
-export const SpaceHog = NullHog
-export const TronHog = NullHog
-export const HeartHog = NullHog
-export const StarHog = NullHog
-export const PoliceHog = NullHog
-export const SleepingHog = NullHog
-export const BuilderHog1 = NullHog
-export const BuilderHog2 = NullHog
-export const BuilderHog3 = NullHog
-export const ProfessorHog = NullHog
-export const SupportHeroHog = NullHog
-export const DetectiveHog = NullHog
-export const MailHog = NullHog
-export const FeatureFlagHog = NullHog
-export const ExperimentsHog = NullHog
-export const ListHog = NullHog
-export const WarningHog = NullHog
-export const WavingHog = NullHog
-export const ReadingHog = NullHog
-export const RobotHog = NullHog
-export const MicrophoneHog = NullHog
-export const PhonePairHogs = NullHog
-export const BurningMoneyHog = NullHog
-export const FilmCameraHog = NullHog
-export const SupermanHog = NullHog
-export const JudgeHog = NullHog
-export const ClimberHog1 = NullHog
-export const ClimberHog2 = NullHog
-export const YCHog = NullHog
-export const BigLeaguesHog = NullHog
-export const StopSignHog = NullHog
-export const ThreeBearsHogs = NullHog
+export const SurprisedMascot = NullMascot
+export const XRayMascot = NullMascot
+export const XRayMascot2 = NullMascot
+export const HospitalMascot = NullMascot
+export const BlushingMascot = NullMascot
+export const LaptopMascot1 = NullMascot
+export const LaptopMascot2 = NullMascot
+export const LaptopMascot3 = NullMascot
+export const LaptopMascot4 = NullMascot
+export const LaptopMascotEU = NullMascot
+export const ExplorerMascot = NullMascot
+export const RunningMascot = NullMascot
+export const SpaceMascot = NullMascot
+export const TronMascot = NullMascot
+export const HeartMascot = NullMascot
+export const StarMascot = NullMascot
+export const PoliceMascot = NullMascot
+export const SleepingMascot = NullMascot
+export const BuilderMascot1 = NullMascot
+export const BuilderMascot2 = NullMascot
+export const BuilderMascot3 = NullMascot
+export const ProfessorMascot = NullMascot
+export const SupportHeroMascot = NullMascot
+export const DetectiveMascot = NullMascot
+export const MailMascot = NullMascot
+export const FeatureFlagMascot = NullMascot
+export const ExperimentsMascot = NullMascot
+export const ListMascot = NullMascot
+export const WarningMascot = NullMascot
+export const WavingMascot = NullMascot
+export const ReadingMascot = NullMascot
+export const RobotMascot = NullMascot
+export const MicrophoneMascot = NullMascot
+export const PhonePairMascots = NullMascot
+export const BurningMoneyMascot = NullMascot
+export const FilmCameraMascot = NullMascot
+export const SupermanMascot = NullMascot
+export const JudgeMascot = NullMascot
+export const ClimberMascot1 = NullMascot
+export const ClimberMascot2 = NullMascot
+export const YCMascot = NullMascot
+export const BigLeaguesMascot = NullMascot
+export const StopSignMascot = NullMascot
+export const ThreeBearsMascots = NullMascot

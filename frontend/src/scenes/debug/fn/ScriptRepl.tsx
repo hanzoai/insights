@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { printHogStringOutput } from '@hanzo/scriptvm'
 import { LemonButton, LemonTable, LemonTabs } from '@hanzo/lemon-ui'
+import { printIQLStringOutput } from '@hanzo/scriptvm'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
@@ -45,7 +45,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
                     {
                         key: 'raw',
                         label: 'Raw',
-                        content: <div>{printHogStringOutput(response)}</div>,
+                        content: <div>{printIQLStringOutput(response)}</div>,
                     },
                 ]}
             />
@@ -53,7 +53,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
     )
 }
 
-function printRichHogOutput(arg: any): JSX.Element | string {
+function printRichOutput(arg: any): JSX.Element | string {
     if (typeof arg === 'object' && arg !== null) {
         if ('__hx_tag' in arg) {
             return renderInsightsQLX(arg)
@@ -62,7 +62,7 @@ function printRichHogOutput(arg: any): JSX.Element | string {
             return <ReplResultsTable response={arg} />
         }
     }
-    return printHogStringOutput(arg)
+    return printIQLStringOutput(arg)
 }
 
 interface ReplChunkProps {
@@ -114,7 +114,7 @@ export function ReplChunk({
                             <div key={index}>
                                 {line.map((arg, argIndex) => (
                                     <React.Fragment key={argIndex}>
-                                        {printRichHogOutput(arg)}
+                                        {printRichOutput(arg)}
                                         {argIndex < line.length - 1 ? ' ' : ''}
                                     </React.Fragment>
                                 ))}
@@ -131,7 +131,7 @@ export function ReplChunk({
                     >
                         {'<'}
                     </span>
-                    <div className="flex-1 whitespace-pre-wrap ml-2">{printRichHogOutput(result)}</div>
+                    <div className="flex-1 whitespace-pre-wrap ml-2">{printRichOutput(result)}</div>
                 </div>
             )}
             {status === 'error' && (

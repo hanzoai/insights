@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
+import insights from '@hanzo/insights'
 import { LemonBanner } from '@hanzo/lemon-ui'
 
-import { JudgeHog } from 'lib/components/mascots'
+import { JudgeMascot } from 'lib/components/mascots'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -63,7 +63,7 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
                         </LemonButton>
                     </div>
                 </div>
-                <JudgeHog className="h-30 w-fit shrink-0" alt="Illustration" />
+                <JudgeMascot className="h-30 w-fit shrink-0" alt="Illustration" />
             </div>
         </LemonBanner>
     )

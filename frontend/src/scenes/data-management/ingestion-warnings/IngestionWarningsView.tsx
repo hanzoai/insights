@@ -6,7 +6,7 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { ReadingHog } from 'lib/components/mascots'
+import { ReadingMascot } from 'lib/components/mascots'
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { Link } from 'lib/lemon-ui/Link'
 import { Scene } from 'scenes/sceneTypes'
@@ -373,7 +373,7 @@ export function IngestionWarningsView(): JSX.Element {
                     isEmpty={true}
                     description="Nice! You've had no ingestion warnings in the past 30 days. If we detect any issues with your data, we'll show them here."
                     docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
-                    customHog={ReadingHog}
+                    customMascot={ReadingMascot}
                 />
             )}
         </SceneContent>

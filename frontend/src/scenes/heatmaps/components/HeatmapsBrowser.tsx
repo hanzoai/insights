@@ -16,7 +16,7 @@ import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUr
 import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
-import { DetectiveHog } from 'lib/components/mascots'
+import { DetectiveMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
@@ -248,7 +248,7 @@ function HeatmapsBrowserIntro(): JSX.Element {
             <div className="max-w-[50rem] py-6 px-3 h-full w-full">
                 <div className="flex items-center flex-wrap gap-6">
                     <div className="w-50">
-                        <DetectiveHog className="w-full h-full" />
+                        <DetectiveMascot className="w-full h-full" />
                     </div>
 
                     <div className="flex-1">

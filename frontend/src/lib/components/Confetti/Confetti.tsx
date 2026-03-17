@@ -1,58 +1,58 @@
 import React, { useCallback, useState } from 'react'
 
 import {
-    BlushingHog,
-    DetectiveHog,
-    ExperimentsHog,
-    ExplorerHog,
-    FeatureFlagHog,
-    HeartHog,
-    HospitalHog,
-    ListHog,
-    MailHog,
-    MicrophoneHog,
-    PoliceHog,
-    ProfessorHog,
-    ReadingHog,
-    RunningHog,
-    SleepingHog,
-    SpaceHog,
-    StarHog,
-    SupportHeroHog,
-    SurprisedHog,
-    TronHog,
-    WavingHog,
-    XRayHog,
-    XRayHog2,
+    BlushingMascot,
+    DetectiveMascot,
+    ExperimentsMascot,
+    ExplorerMascot,
+    FeatureFlagMascot,
+    HeartMascot,
+    HospitalMascot,
+    ListMascot,
+    MailMascot,
+    MicrophoneMascot,
+    PoliceMascot,
+    ProfessorMascot,
+    ReadingMascot,
+    RunningMascot,
+    SleepingMascot,
+    SpaceMascot,
+    StarMascot,
+    SupportHeroMascot,
+    SurprisedMascot,
+    TronMascot,
+    WavingMascot,
+    XRayMascot,
+    XRayMascot2,
 } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
-export type HogComponent = React.ComponentType<{ width: number; height: number }>
+export type MascotComponent = React.ComponentType<{ width: number; height: number }>
 
-const images: HogComponent[] = [
-    SurprisedHog,
-    XRayHog,
-    XRayHog2,
-    HospitalHog,
-    BlushingHog,
-    ExplorerHog,
-    RunningHog,
-    SpaceHog,
-    TronHog,
-    HeartHog,
-    StarHog,
-    PoliceHog,
-    SleepingHog,
-    ProfessorHog,
-    SupportHeroHog,
-    DetectiveHog,
-    MailHog,
-    FeatureFlagHog,
-    ExperimentsHog,
-    ListHog,
-    WavingHog,
-    ReadingHog,
-    MicrophoneHog,
+const images: MascotComponent[] = [
+    SurprisedMascot,
+    XRayMascot,
+    XRayMascot2,
+    HospitalMascot,
+    BlushingMascot,
+    ExplorerMascot,
+    RunningMascot,
+    SpaceMascot,
+    TronMascot,
+    HeartMascot,
+    StarMascot,
+    PoliceMascot,
+    SleepingMascot,
+    ProfessorMascot,
+    SupportHeroMascot,
+    DetectiveMascot,
+    MailMascot,
+    FeatureFlagMascot,
+    ExperimentsMascot,
+    ListMascot,
+    WavingMascot,
+    ReadingMascot,
+    MicrophoneMascot,
 ]
 
 interface Particle {
@@ -143,7 +143,7 @@ export const useConfetti = (options: ConfettiOptions = {}): ConfettiHook => {
             <div className="fixed top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 9999 }}>
                 {particleSets.flatMap((set, setIndex) =>
                     set.map((particle, particleIndex) => {
-                        const HogComponent = images[particle.imageIndex]
+                        const ImageComponent = images[particle.imageIndex]
                         return (
                             <div
                                 key={`${setIndex}-${particleIndex}`}
@@ -156,7 +156,7 @@ export const useConfetti = (options: ConfettiOptions = {}): ConfettiHook => {
                                     transition: 'opacity 0.1s linear',
                                 }}
                             >
-                                <HogComponent width={particle.size} height={particle.size} />
+                                <ImageComponent width={particle.size} height={particle.size} />
                             </div>
                         )
                     })

@@ -1,15 +1,15 @@
 import { LemonDropdown, LemonTag, LemonTagProps } from '@hanzo/lemon-ui'
 
-import { InsightsFunctionType, HogWatcherState } from '~/types'
+import { InsightsFunctionType, InsightsWatcherState } from '~/types'
 
 type DisplayOptions = { tagType: LemonTagProps['type']; display: string; description: JSX.Element }
-const displayMap: Record<HogWatcherState, DisplayOptions> = {
-    [HogWatcherState.healthy]: {
+const displayMap: Record<InsightsWatcherState, DisplayOptions> = {
+    [InsightsWatcherState.healthy]: {
         tagType: 'success',
         display: 'Active',
         description: <>The function is running as expected.</>,
     },
-    [HogWatcherState.overflowed]: {
+    [InsightsWatcherState.overflowed]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
@@ -19,7 +19,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.disabled]: {
+    [InsightsWatcherState.disabled]: {
         tagType: 'danger',
         display: 'Disabled',
         description: (
@@ -29,7 +29,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.forcefully_degraded]: {
+    [InsightsWatcherState.forcefully_degraded]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
@@ -39,7 +39,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.forcefully_disabled]: {
+    [InsightsWatcherState.forcefully_disabled]: {
         tagType: 'danger',
         display: 'Disabled',
         description: <>The function has been forcefully disabled by an Insights admin. Please contact support.</>,
@@ -69,7 +69,9 @@ export type InsightsFunctionStatusIndicatorProps = {
 
 const HIDE_STATUS_FOR_TYPES: InsightsFunctionType['type'][] = ['site_destination', 'site_app']
 
-export function InsightsFunctionStatusIndicator({ insightsFunction }: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
+export function InsightsFunctionStatusIndicator({
+    insightsFunction,
+}: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
     if (!insightsFunction || HIDE_STATUS_FOR_TYPES.includes(insightsFunction.type)) {
         return null
     }
