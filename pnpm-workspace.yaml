@@ -81,3 +81,4 @@ minimumReleaseAgeExclude:
     - '@hanzo/icons'
     - '@hanzo/mascot-mode'
     - '@hanzo/types'
+    - '@hanzo/lemon-ui'
