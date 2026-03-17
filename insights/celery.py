@@ -147,7 +147,7 @@ def on_worker_start(**kwargs) -> None:
 # Set up clickhouse query instrumentation
 @task_prerun.connect
 def prerun_signal_handler(task_id, task, **kwargs):
-    from statsiql.defaults.django import statsd
+    from statshog.defaults.django import statsd
 
     from insights.clickhouse.client.connection import Workload, set_default_clickhouse_workload_type
     from insights.clickhouse.query_tagging import tag_queries

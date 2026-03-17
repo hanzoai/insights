@@ -21,7 +21,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework_csv import renderers as csvrenderers
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 from insights.schema import ProductKey
 
@@ -65,7 +65,6 @@ from insights.queries.trends.trends_actors import TrendsActors
 from insights.queries.util import get_earliest_timestamp
 from insights.rate_limit import ClickHouseBurstRateThrottle, PersonalApiKeyRateThrottle, UserOrEmailRateThrottle
 from insights.renderers import SafeJSONRenderer
-from insights.settings import EE_AVAILABLE
 from insights.tasks.split_person import split_person
 from insights.utils import convert_property_value, format_query_params_absolute_url, is_anonymous_id
 
@@ -209,9 +208,7 @@ def get_funnel_actor_class(filter: Filter) -> Callable:
     funnel_actor_class: type[ActorBaseQuery]
 
     if filter.correlation_person_entity:
-        raise ValueError(
-            "Funnel Correlations is not available"
-        )
+        raise ValueError("Funnel Correlations is not available")
     elif filter.funnel_viz_type == FunnelVizType.TRENDS:
         funnel_actor_class = ClickhouseFunnelTrendsActors
     else:

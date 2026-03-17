@@ -25,7 +25,7 @@ import structlog
 from django_prometheus.middleware import Metrics
 from loginas.utils import is_impersonated_session, restore_original_login
 from social_core.exceptions import AuthCanceled, AuthFailed
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 from insights.api.shared import UserBasicSerializer
 from insights.clickhouse.client.execute import clickhouse_query_counter

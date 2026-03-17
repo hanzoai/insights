@@ -158,7 +158,7 @@ def _team_integrity_statistics(person_data: list[Any]) -> Counter:
 
 
 def _emit_metrics(integrity_results: Counter) -> None:
-    from statsiql.defaults.django import statsd
+    from statshog.defaults.django import statsd
 
     for key, value in integrity_results.items():
         statsd.gauge(f"insights_person_integrity_{key}", value)
