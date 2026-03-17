@@ -2769,7 +2769,7 @@ wheels = [
 [[package]]
 name = "hanzo-insights"
 version = "7.9.7"
-source = { git = "https://github.com/hanzoai/insights-python?branch=master#98a2ca443c541b80b7d6ca221ffb89da41ad25d2" }
+source = { git = "https://github.com/hanzoai/insights-python?branch=main#34b739cd6b0bf9c6e206e1fbe0a9192b6af71983" }
 dependencies = [
     { name = "backoff" },
     { name = "distro" },
@@ -3327,7 +3327,7 @@ requires-dist = [
     { name = "granian", extras = ["uvloop", "reload", "pname"], specifier = "==2.5.5" },
     { name = "grimp", specifier = "==3.13" },
     { name = "gspread", specifier = "==6.2.1" },
-    { name = "hanzo-insights", git = "https://github.com/hanzoai/insights-python?branch=master" },
+    { name = "hanzo-insights", git = "https://github.com/hanzoai/insights-python?branch=main" },
     { name = "infi-clickhouse-orm", git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=9578c79f29635ee2c1d01b7979e89adab8383de2" },
     { name = "insightsql-parser", directory = "common/insightsql_parser" },
     { name = "jsonref", specifier = "==1.1.0" },
