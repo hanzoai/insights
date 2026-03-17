@@ -3,8 +3,9 @@ import equal from 'fast-deep-equal'
 import { BuiltLogic, actions, afterMount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { combineUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
+
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { TeamMembershipLevel } from 'lib/constants'
@@ -273,7 +274,7 @@ const pathPrefixesOnboardingNotRequiredFor = [
     '/instance',
     urls.moveToInsightsCloud(),
     urls.unsubscribe(),
-    urls.debugHog(),
+    urls.debugFn(),
     urls.debugQuery(),
     urls.activity(),
     urls.oauthAuthorize(),
