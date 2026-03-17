@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Spinner } from '@hanzo/lemon-ui'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
-import { SupermanHog } from 'lib/components/mascots'
+import { SupermanMascot } from 'lib/components/mascots'
 import { billingLogic } from 'scenes/billing/billingLogic'
 
 import { type BillingProductV2Type, OnboardingStepKey } from '~/types'
@@ -58,7 +58,7 @@ const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.
 
             {/* Superman floating animation */}
             <div className="w-40 h-40 animate-float">
-                <SupermanHog className="w-full h-full object-contain" />
+                <SupermanMascot className="w-full h-full object-contain" />
             </div>
 
             {/* Text Below */}

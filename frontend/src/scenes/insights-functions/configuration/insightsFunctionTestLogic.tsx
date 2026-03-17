@@ -23,7 +23,7 @@ export type InsightsFunctionTestInvocationForm = {
     mock_async_functions: boolean
 }
 
-export type HogTransformationEvent = {
+export type TransformationEvent = {
     event: any
     uuid: string
     distinct_id: string
@@ -31,7 +31,7 @@ export type HogTransformationEvent = {
     properties: any
 }
 
-const convertToTransformationEvent = (result: any): HogTransformationEvent => {
+const convertToTransformationEvent = (result: any): TransformationEvent => {
     const properties = result.properties ?? {}
     // We don't want to use these values given they will change in the test invocation
     delete properties.$transformations_failed
@@ -46,7 +46,7 @@ const convertToTransformationEvent = (result: any): HogTransformationEvent => {
     }
 }
 
-const convertFromTransformationEvent = (result: HogTransformationEvent): Record<string, any> => {
+const convertFromTransformationEvent = (result: TransformationEvent): Record<string, any> => {
     delete result.properties.$transformations_failed
     delete result.properties.$transformations_succeeded
     delete result.properties.$transformations_skipped

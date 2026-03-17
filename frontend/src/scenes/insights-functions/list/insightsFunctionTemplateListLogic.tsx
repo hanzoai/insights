@@ -2,8 +2,8 @@ import FuseClass from 'fuse.js'
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, combineUrl, router, urlToAction } from 'kea-router'
-import insights from '@hanzo/insights'
 
+import insights from '@hanzo/insights'
 import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
@@ -41,7 +41,9 @@ export type InsightsFunctionTemplateListLogicProps = {
     /** If provided, only those templates will be shown */
     subTemplateIds?: InsightsFunctionSubTemplateIdType[] | null
     /** Overrides to be used when creating a new custom function */
-    getConfigurationOverrides?: (subTemplateId?: InsightsFunctionSubTemplateIdType) => CyclotronJobFiltersType | undefined
+    getConfigurationOverrides?: (
+        subTemplateId?: InsightsFunctionSubTemplateIdType
+    ) => CyclotronJobFiltersType | undefined
     syncFiltersWithUrl?: boolean
     manualTemplates?: InsightsFunctionTemplateType[] | null
     manualTemplatesLoading?: boolean
@@ -154,7 +156,7 @@ export const insightsFunctionTemplateListLogic = kea<insightsFunctionTemplateLis
                 return templates
                     .filter((x) => shouldShowInsightsFunctionTemplate(x, user))
                     .filter((x) => !x.flag || !!featureFlags[x.flag as FeatureFlagKey])
-                    .filter((x) => x.type !== 'source_webhook' || !!featureFlags[FEATURE_FLAGS.CDP_HOG_SOURCES])
+                    .filter((x) => x.type !== 'source_webhook' || !!featureFlags[FEATURE_FLAGS.CDP_SCRIPT_SOURCES])
                     .filter(
                         (x) =>
                             x.id !== 'template-source-vercel-log-drain' ||
