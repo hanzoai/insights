@@ -114,8 +114,8 @@ def generate_exception_response(
     """
 
     # Importing here because this module is loaded before Django settings are configured,
-    # and statsiql relies on those being ready
-    from statsiql.defaults.django import statsd
+    # and statshog relies on those being ready
+    from statshog.defaults.django import statsd
 
     statsd.incr(
         f"insights_cloud_raw_endpoint_exception",

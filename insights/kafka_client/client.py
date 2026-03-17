@@ -17,7 +17,7 @@ from confluent_kafka import (
 )
 from confluent_kafka.aio import AIOProducer
 from kafka import KafkaConsumer as KC
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 from structlog import get_logger
 
 from insights.clickhouse.client import sync_execute
