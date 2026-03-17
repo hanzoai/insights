@@ -296,7 +296,11 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         name: 'Heatmap recording',
         iconType: 'heatmap',
     },
-    [Scene.InsightsFunction]: { projectBased: true, name: 'Custom function', activityScope: ActivityScope.INSIGHTS_FUNCTION },
+    [Scene.InsightsFunction]: {
+        projectBased: true,
+        name: 'Custom function',
+        activityScope: ActivityScope.INSIGHTS_FUNCTION,
+    },
     [Scene.Insight]: {
         projectBased: true,
         name: 'Insights',
@@ -912,7 +916,7 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.unsubscribe()]: [Scene.Unsubscribe, 'unsubscribe'],
     [urls.integrationsRedirect(':kind')]: [Scene.IntegrationsRedirect, 'integrationsRedirect'],
     [urls.debugQuery()]: [Scene.DebugQuery, 'debugQuery'],
-    [urls.debugHog()]: [Scene.DebugFn, 'debugHog'],
+    [urls.debugFn()]: [Scene.DebugFn, 'debugFn'],
     [urls.signalsDebug()]: [Scene.SignalsDebug, 'signalsDebug'],
     [urls.notebook(':shortId')]: [Scene.Notebook, 'notebook'],
     [urls.notebooks()]: [Scene.Notebooks, 'notebooks'],

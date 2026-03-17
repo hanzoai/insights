@@ -185,13 +185,13 @@ export const iqlReplLogic = kea<iqlReplLogicType>([
                     const newCode = values.replChunks.map((chunk) => chunk.code).join('\n')
                     if (newCode.length > 1024 * 1024) {
                         // Still not enough, abort
-                        return [urls.debugHog(), undefined, undefined, { replace: true }]
+                        return [urls.debugFn(), undefined, undefined, { replace: true }]
                     }
-                    return [urls.debugHog(), undefined, { code: newCode }, { replace: true }]
+                    return [urls.debugFn(), undefined, { code: newCode }, { replace: true }]
                 }
 
                 return [
-                    urls.debugHog(),
+                    urls.debugFn(),
                     undefined,
                     { repl: values.replChunks, code: values.currentCode },
                     { replace: true },
@@ -210,7 +210,7 @@ export const iqlReplLogic = kea<iqlReplLogicType>([
         }
     }),
     urlToAction(({ actions, values }) => ({
-        [urls.debugHog()]: (_, __, { repl, code }, { method }) => {
+        [urls.debugFn()]: (_, __, { repl, code }, { method }) => {
             if (method === 'PUSH' || ((repl || code) && !values.currentCode && values.replChunks.length === 0)) {
                 actions.setReplChunks(repl)
                 actions.setCurrentCode(code)
