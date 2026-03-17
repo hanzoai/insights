@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
 import { IconGear } from '@hanzo/icons'
+import insights from '@hanzo/insights'
 import { LemonButton, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ListHog } from 'lib/components/mascots'
+import { ListMascot } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useInterval } from 'lib/hooks/useInterval'
 import goImage from 'scenes/onboarding/sdks/logos/go.svg'
@@ -96,7 +96,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
             isEmpty={true}
             productKey={ProductKey.LOGS}
             className={className}
-            customHog={ListHog}
+            customInsights={ListMascot}
             actionElementOverride={
                 <div className="flex flex-col items-start gap-4">
                     <p className="text-sm text-secondary m-0">

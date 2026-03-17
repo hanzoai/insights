@@ -34,7 +34,7 @@ export type ProductIntroductionProps = {
     /** If you want to provide a custom action button instead of using the default one */
     actionElementOverride?: JSX.Element
     docsURL?: string
-    customMascot?: React.ComponentType<{ className?: string }>
+    customInsights?: React.ComponentType<{ className?: string }>
     className?: string
 }
 
@@ -49,7 +49,7 @@ export const ProductIntroduction = ({
     disabledReason,
     actionElementOverride,
     docsURL,
-    customMascot: CustomMascot,
+    customInsights: CustomInsights,
     className,
 }: ProductIntroductionProps): JSX.Element | null => {
     const { updateHasSeenProductIntroFor } = useActions(userLogic)
@@ -89,8 +89,8 @@ export const ProductIntroduction = ({
             <div className="flex items-center gap-8 w-full justify-center">
                 <div>
                     <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        {CustomMascot ? (
-                            <CustomMascot className="w-full h-full" />
+                        {CustomInsights ? (
+                            <CustomInsights className="w-full h-full" />
                         ) : actionable ? (
                             <BuilderMascot3 className="w-full h-full" />
                         ) : (
