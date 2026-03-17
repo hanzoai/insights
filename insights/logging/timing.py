@@ -3,7 +3,7 @@ from time import time
 from typing import Any, Optional
 
 import structlog
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 logger = structlog.get_logger(__name__)
 
