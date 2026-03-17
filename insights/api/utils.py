@@ -15,15 +15,15 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 import structlog
-from loginas.utils import is_impersonated_session
 from hanzo_insights import capture_exception
+from loginas.utils import is_impersonated_session
 from prometheus_client import Counter
 from requests.adapters import HTTPAdapter
 from rest_framework import request, serializers, status
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 from urllib3 import HTTPConnectionPool, HTTPSConnectionPool, PoolManager
 
 from insights.schema import QueryTiming
