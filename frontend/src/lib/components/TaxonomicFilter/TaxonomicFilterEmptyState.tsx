@@ -11,7 +11,7 @@ import { urls } from 'scenes/urls'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderHog3 } from '../mascots'
+import { BuilderMascot3 } from '../mascots'
 
 type EmptyStateProps = {
     title: string
@@ -84,7 +84,7 @@ const DataWarehouseEmptyState = (): JSX.Element => {
                 text: 'New source',
             }}
             docsUrl="https://hanzo.ai/docs/data-warehouse"
-            icon={BuilderHog3}
+            icon={BuilderMascot3}
         />
     )
 }

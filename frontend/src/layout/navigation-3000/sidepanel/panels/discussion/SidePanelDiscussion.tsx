@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { IconChat } from '@hanzo/icons'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
-import { WarningHog } from 'lib/components/mascots'
+import { WarningMascot } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconWithCount } from 'lib/lemon-ui/icons'
 import { cn } from 'lib/utils/css-classes'
@@ -90,7 +90,7 @@ export const SidePanelDiscussion = (): JSX.Element => {
                 ) : (
                     <div className="mx-auto p-8 max-w-160 mt-8 ">
                         <div className={cn('max-w-80 mx-auto', isRemovingSidePanelFlag && 'max-w-24')}>
-                            <WarningHog className="w-full h-full" />
+                            <WarningMascot className="w-full h-full" />
                         </div>
                         <h2>Discussions aren't supported here yet...</h2>
                         <p>

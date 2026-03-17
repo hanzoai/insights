@@ -10,7 +10,7 @@ import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { JudgeHog, StarHog } from 'lib/components/mascots'
+import { JudgeMascot, StarMascot } from 'lib/components/mascots'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
@@ -151,7 +151,7 @@ export function Billing(): JSX.Element {
             {billing?.trial ? (
                 <LemonBanner type="info" hideIcon className="max-w-300 mb-2">
                     <div className="flex items-center gap-4">
-                        <JudgeHog className="w-20 h-20 flex-shrink-0" />
+                        <JudgeMascot className="w-20 h-20 flex-shrink-0" />
                         <div>
                             <p className="text-lg">You're on (a) trial</p>
                             <p>
@@ -195,7 +195,7 @@ export function Billing(): JSX.Element {
                 <div className="mt-6 max-w-300">
                     <LemonBanner type="info" hideIcon>
                         <div className="flex items-center gap-4">
-                            <StarHog className="w-16 h-16 flex-shrink-0" />
+                            <StarMascot className="w-16 h-16 flex-shrink-0" />
                             <div>
                                 <p className="font-semibold mb-2">You have active coupons!</p>
                                 <ul className="list-disc list-inside space-y-1">

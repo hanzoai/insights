@@ -130,7 +130,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
     },
 })
 
-export function initHogTemplateLanguage(monaco: Monaco): void {
+export function initScriptTemplateLanguage(monaco: Monaco): void {
     if (!monaco.languages.getLanguages().some(({ id }) => id === 'scriptTemplate')) {
         monaco.languages.register({
             id: 'scriptTemplate',

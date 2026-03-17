@@ -5,7 +5,7 @@ import { LemonButton, LemonCheckbox, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartHog, MailHog, SurprisedHog } from 'lib/components/mascots'
+import { HeartMascot, MailMascot, SurprisedMascot } from 'lib/components/mascots'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -133,7 +133,7 @@ export function VerifyEmail(): JSX.Element {
                                 <h2 className="text-lg">Welcome to Insights!</h2>
                                 <h1 className="text-3xl font-bold">Let's verify your email address.</h1>
                                 <div className="max-w-60 my-10">
-                                    <MailHog className="w-full h-full" />
+                                    <MailMascot className="w-full h-full" />
                                 </div>
                                 <p className="mb-6">An email has been sent with a link to verify your email address.</p>
                                 <GetHelp />
@@ -147,7 +147,7 @@ export function VerifyEmail(): JSX.Element {
                             <>
                                 <h1 className="text-3xl font-bold">Success!</h1>
                                 <div className="max-w-60 mb-12">
-                                    <HeartHog className="w-full h-full" />
+                                    <HeartMascot className="w-full h-full" />
                                 </div>
                                 <p>Thanks for verifying your email address. Now taking you to Insights...</p>
                             </>
@@ -155,7 +155,7 @@ export function VerifyEmail(): JSX.Element {
                             <>
                                 <h1 className="text-3xl font-bold">Whoops!</h1>
                                 <div className="max-w-60 mb-12">
-                                    <SurprisedHog className="w-full h-full" />
+                                    <SurprisedMascot className="w-full h-full" />
                                 </div>
                                 <p className="mb-6">Seems like that link isn't quite right. Try again?</p>
 
