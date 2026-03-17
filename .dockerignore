@@ -12,8 +12,6 @@
 !common/plugin-scaffold
 !common/siphash
 !common/insights-node
-!common/insights-js
-!common/insights-js-lite
 !dags
 !docs/onboarding
 !frontend/@hanzo
@@ -28,7 +26,6 @@
 !gunicorn.config.py
 !manage.py
 !turbo.json
-!.npmrc
 !package.json
 !.pnpmfile.cjs
 !patches
