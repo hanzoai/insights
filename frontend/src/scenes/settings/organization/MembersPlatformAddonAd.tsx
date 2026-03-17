@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
+import insights from '@hanzo/insights'
 import { LemonBanner } from '@hanzo/lemon-ui'
 
-import { DetectiveHog, JudgeHog, SpaceHog, ThreeBearsHogs } from 'lib/components/mascots'
+import { DetectiveMascot, JudgeMascot, SpaceMascot, ThreeBearsMascots } from 'lib/components/mascots'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { membersPlatformAddonAdLogic } from 'scenes/settings/organization/membersPlatformAddonAdLogic'
@@ -15,11 +15,11 @@ import { ProductKey } from '~/queries/schema/schema-general'
 
 import { MembersPagePlatformAddonAdKey } from './membersPlatformAddonAdLogic'
 
-const platformAddonAdIllustrations: Record<MembersPagePlatformAddonAdKey, typeof DetectiveHog> = {
-    'test-audit-trail': DetectiveHog,
-    'test-paper-trail': JudgeHog,
-    'test-space-scale': SpaceHog,
-    'test-big-village': ThreeBearsHogs,
+const platformAddonAdIllustrations: Record<MembersPagePlatformAddonAdKey, typeof DetectiveMascot> = {
+    'test-audit-trail': DetectiveMascot,
+    'test-paper-trail': JudgeMascot,
+    'test-space-scale': SpaceMascot,
+    'test-big-village': ThreeBearsMascots,
 }
 
 const dismissKey = 'organization-members-platform-addon-ad-3'

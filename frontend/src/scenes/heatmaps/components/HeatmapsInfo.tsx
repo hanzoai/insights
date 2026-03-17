@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { LemonBanner, LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
 
-import { DetectiveHog } from 'lib/components/mascots'
+import { DetectiveMascot } from 'lib/components/mascots'
 import { heatmapLogic } from 'scenes/heatmaps/scenes/heatmap/heatmapLogic'
 
 import { heatmapsBrowserLogic } from './heatmapsBrowserLogic'
@@ -11,7 +11,7 @@ export function HeatmapsInfoBanner(): JSX.Element {
     return (
         <div className="flex items-center flex-wrap gap-6">
             <div className="w-50">
-                <DetectiveHog className="w-full h-full" />
+                <DetectiveMascot className="w-full h-full" />
             </div>
 
             <div className="flex-1">

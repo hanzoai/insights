@@ -12,7 +12,7 @@ import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
-import { FeatureFlagHog } from 'lib/components/mascots'
+import { FeatureFlagMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
@@ -553,7 +553,7 @@ export function OverViewTab({
                 docsURL="https://hanzo.ai/docs/feature-flags/manual"
                 action={() => router.actions.push(newFeatureFlagUrl)}
                 isEmpty={shouldShowEmptyState}
-                customHog={FeatureFlagHog}
+                customMascot={FeatureFlagMascot}
                 className={cn('my-0')}
             />
             <ApprovalsPromoBanner />

@@ -2,12 +2,12 @@ import './SessionRecordingPlayer.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import { useEffect, useMemo, useRef } from 'react'
 
+import insights from '@hanzo/insights'
 import { LemonButton } from '@hanzo/lemon-ui'
 
-import { BuilderHog2 } from 'lib/components/mascots'
+import { BuilderMascot2 } from 'lib/components/mascots'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { HotkeysInterface, useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
@@ -260,7 +260,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
                     <div className="SessionRecordingPlayer__main flex flex-col h-full w-full">
                         {isRecentAndInvalid ? (
                             <div className="flex flex-1 flex-col items-center justify-center">
-                                <BuilderHog2 height={200} />
+                                <BuilderMascot2 height={200} />
                                 <h1>We're still working on it</h1>
                                 <p>
                                     This recording hasn't been fully ingested yet. It should be ready to watch in a few

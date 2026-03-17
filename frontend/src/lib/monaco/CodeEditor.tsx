@@ -13,11 +13,11 @@ import { Spinner } from 'lib/lemon-ui/Spinner'
 import { codeEditorLogic } from 'lib/monaco/codeEditorLogic'
 import { codeEditorLogicType } from 'lib/monaco/codeEditorLogicType'
 import { findNextFocusableElement, findPreviousFocusableElement } from 'lib/monaco/domUtils'
-import { initScriptLanguage } from 'lib/monaco/languages/script'
-import { initHogJsonLanguage } from 'lib/monaco/languages/scriptJson'
 import { initInsightsQLLanguage } from 'lib/monaco/languages/insightsQL'
-import { initHogTemplateLanguage } from 'lib/monaco/languages/scriptTemplate'
 import { initLiquidLanguage } from 'lib/monaco/languages/liquid'
+import { initScriptLanguage } from 'lib/monaco/languages/script'
+import { initIQLJsonLanguage } from 'lib/monaco/languages/scriptJson'
+import { initScriptTemplateLanguage } from 'lib/monaco/languages/scriptTemplate'
 import { inStorybookTestRunner } from 'lib/utils'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
@@ -71,10 +71,10 @@ function initEditor(
         initInsightsQLLanguage(monaco, editorProps.language as InsightsLanguage)
     }
     if (editorProps?.language === 'insightsTemplate') {
-        initHogTemplateLanguage(monaco)
+        initScriptTemplateLanguage(monaco)
     }
     if (editorProps?.language === 'insightsJson') {
-        initHogJsonLanguage(monaco)
+        initIQLJsonLanguage(monaco)
     }
     if (editorProps?.language === 'liquid') {
         initLiquidLanguage(monaco)

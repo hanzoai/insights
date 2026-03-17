@@ -22,15 +22,15 @@ export function InsightsFunctionCode(): JSX.Element {
         templateHasChanged,
         type,
         mightDropEvents,
-        oldHogCode,
+        oldIQLCode,
         newScriptCode,
     } = useValues(insightsFunctionConfigurationLogic)
 
     const {
         setShowSource,
-        setOldHogCode,
-        setNewHogCode,
-        clearHogCodeDiff,
+        setOldIQLCode,
+        setNewIQLCode,
+        clearIQLCodeDiff,
         reportAIInsightsFunctionPrompted,
         reportAIInsightsFunctionAccepted,
         reportAIInsightsFunctionRejected,
@@ -101,38 +101,39 @@ export function InsightsFunctionCode(): JSX.Element {
                             )}
                             {type === 'source_webhook' && (
                                 <LemonBanner type="info" className="mt-2">
-                                    <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to ingest
-                                    events to Insights. You can also do HTTP calls with <code>fetch</code>. In this case
-                                    however, the request will be queued to a background task, a <code>201 Created</code>{' '}
-                                    response will be returned and the event will be ingested asynchronously.
+                                    <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to
+                                    ingest events to Insights. You can also do HTTP calls with <code>fetch</code>. In
+                                    this case however, the request will be queued to a background task, a{' '}
+                                    <code>201 Created</code> response will be returned and the event will be ingested
+                                    asynchronously.
                                 </LemonBanner>
                             )}
                             <CodeEditorResizeable
                                 language={type.startsWith('site_') ? 'typescript' : 'iql'}
                                 value={newScriptCode ?? value ?? ''}
-                                originalValue={oldHogCode && newScriptCode ? oldHogCode : undefined}
+                                originalValue={oldIQLCode && newScriptCode ? oldIQLCode : undefined}
                                 onChange={(v) => {
                                     // If user manually edits while diff is showing, clear the diff
-                                    if (oldHogCode && newScriptCode) {
-                                        clearHogCodeDiff()
+                                    if (oldIQLCode && newScriptCode) {
+                                        clearIQLCodeDiff()
                                     }
                                     onChange(v ?? '')
                                 }}
                                 globals={sampleGlobalsWithInputs}
-                                showDiffActions={!!(oldHogCode && newScriptCode)}
+                                showDiffActions={!!(oldIQLCode && newScriptCode)}
                                 onAcceptChanges={() => {
                                     if (newScriptCode) {
                                         onChange(newScriptCode)
                                     }
                                     reportAIInsightsFunctionAccepted()
-                                    clearHogCodeDiff()
+                                    clearIQLCodeDiff()
                                 }}
                                 onRejectChanges={() => {
-                                    if (oldHogCode) {
-                                        onChange(oldHogCode)
+                                    if (oldIQLCode) {
+                                        onChange(oldIQLCode)
                                     }
                                     reportAIInsightsFunctionRejected()
-                                    clearHogCodeDiff()
+                                    clearIQLCodeDiff()
                                 }}
                                 options={{
                                     minimap: {
@@ -146,7 +147,7 @@ export function InsightsFunctionCode(): JSX.Element {
                                         showInlineDetails: true,
                                     },
                                     quickSuggestionsDelay: 300,
-                                    readOnly: !!(oldHogCode && newScriptCode),
+                                    readOnly: !!(oldIQLCode && newScriptCode),
                                 }}
                             />
                         </>
@@ -168,9 +169,9 @@ export function InsightsFunctionCode(): JSX.Element {
             }}
             callback={(toolOutput: string) => {
                 // Store the old value before changing
-                setOldHogCode(configuration.fn ?? '')
+                setOldIQLCode(configuration.fn ?? '')
                 // Store the new value from Max Tool
-                setNewHogCode(toolOutput)
+                setNewIQLCode(toolOutput)
                 // Report that AI was prompted
                 reportAIInsightsFunctionPrompted()
                 // Don't immediately update the form - let user accept/reject
