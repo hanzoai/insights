@@ -1,13 +1,13 @@
 import '../../DataTable/DataTable.scss'
 
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
 import React from 'react'
 
 import { IconPin, IconPinFilled } from '@hanzo/icons'
+import insights from '@hanzo/insights'
 import { LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
 
-import { execFn } from 'lib/script'
+import { execScript } from 'lib/iql'
 import { lightenDarkenColor } from 'lib/utils'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
 
@@ -122,7 +122,7 @@ export const Table = (props: TableProps): JSX.Element => {
                             return isValidBytecode
                         })
                         .map((n) => {
-                            const res = execHog(n.bytecode, {
+                            const res = execScript(n.bytecode, {
                                 globals: {
                                     value: data[index].value,
                                     input: convertTableValue(n.input, column.type.name),

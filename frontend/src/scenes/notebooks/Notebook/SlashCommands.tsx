@@ -9,7 +9,7 @@ import {
     IconCursor,
     IconFunnels,
     IconGraph,
-    IconInsightsQL,
+    IconHogQL as IconInsightsQL,
     IconLifecycle,
     IconPeople,
     IconPython,

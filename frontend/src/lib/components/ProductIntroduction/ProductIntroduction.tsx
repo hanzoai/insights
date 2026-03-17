@@ -8,7 +8,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderHog3, DetectiveHog } from '../mascots'
+import { BuilderMascot3, DetectiveMascot } from '../mascots'
 
 /**
  * A component to introduce new users to a product, and to show something
@@ -34,7 +34,7 @@ export type ProductIntroductionProps = {
     /** If you want to provide a custom action button instead of using the default one */
     actionElementOverride?: JSX.Element
     docsURL?: string
-    customHog?: React.ComponentType<{ className?: string }>
+    customMascot?: React.ComponentType<{ className?: string }>
     className?: string
 }
 
@@ -49,7 +49,7 @@ export const ProductIntroduction = ({
     disabledReason,
     actionElementOverride,
     docsURL,
-    customHog: CustomHog,
+    customMascot: CustomMascot,
     className,
 }: ProductIntroductionProps): JSX.Element | null => {
     const { updateHasSeenProductIntroFor } = useActions(userLogic)
@@ -89,12 +89,12 @@ export const ProductIntroduction = ({
             <div className="flex items-center gap-8 w-full justify-center">
                 <div>
                     <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        {CustomHog ? (
-                            <CustomHog className="w-full h-full" />
+                        {CustomMascot ? (
+                            <CustomMascot className="w-full h-full" />
                         ) : actionable ? (
-                            <BuilderHog3 className="w-full h-full" />
+                            <BuilderMascot3 className="w-full h-full" />
                         ) : (
-                            <DetectiveHog className="w-full h-full" />
+                            <DetectiveMascot className="w-full h-full" />
                         )}
                     </div>
                 </div>

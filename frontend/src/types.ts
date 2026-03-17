@@ -1,9 +1,8 @@
 import { LogicWrapper } from 'kea'
-import type { Insights } from '~/lib/insights-browser'
-import type { PropertyMatchType, SupportedWebVitalsMetrics } from '@hanzo/insights'
 import { ReactNode } from 'react'
 import { Layout } from 'react-grid-layout'
 
+import type { PropertyMatchType, SupportedWebVitalsMetrics } from '@hanzo/insights'
 import { LemonTableColumns } from '@hanzo/lemon-ui'
 import { PluginConfigSchema } from '@hanzo/plugin-scaffold'
 import { LogLevel } from '@hanzo/rrweb-plugin-console-record'
@@ -40,6 +39,7 @@ import { Params, Scene, SceneConfig } from 'scenes/sceneTypes'
 import { SessionRecordingPlayerMode } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { SurveyRatingScaleValue, WEB_SAFE_FONTS } from 'scenes/surveys/constants'
 
+import type { Insights } from '~/lib/insights-browser'
 import { RootAssistantMessage } from '~/queries/schema/schema-assistant-messages'
 import type {
     CoreEvent,
@@ -56,11 +56,11 @@ import type {
     ExternalDataSourceType,
     FileSystemIconType,
     FileSystemImport,
+    InsightQueryNode,
+    InsightVizNode,
     InsightsQLQuery,
     InsightsQLQueryModifiers,
     InsightsQLVariable,
-    InsightQueryNode,
-    InsightVizNode,
     MarketingAnalyticsConfig,
     Node,
     NodeKind,
@@ -6086,7 +6086,10 @@ export type InsightsFunctionConfigurationType = Omit<
     iql?: InsightsFunctionType['iql'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
-export type InsightsFlowConfigurationType = Omit<InsightsFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
+export type InsightsFlowConfigurationType = Omit<
+    InsightsFlow,
+    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'
+>
 export type CyclotronJobConfigurationType = InsightsFunctionConfigurationType | InsightsFlowConfigurationType
 
 export type InsightsFunctionSubTemplateType = Pick<
@@ -6127,7 +6130,7 @@ export type InsightsFunctionIconResponse = {
     url: string
 }
 
-export enum HogWatcherState {
+export enum InsightsWatcherState {
     healthy = 1,
     overflowed = 2,
     disabled = 3,
@@ -6136,7 +6139,7 @@ export enum HogWatcherState {
 }
 
 export type InsightsFunctionStatus = {
-    state: HogWatcherState
+    state: InsightsWatcherState
     tokens: number
 }
 

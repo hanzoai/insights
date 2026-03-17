@@ -4,7 +4,7 @@ import { IconPlusSmall } from '@hanzo/icons'
 import { LemonButton, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { SupportHeroHog } from 'lib/components/mascots'
+import { SupportHeroMascot } from 'lib/components/mascots'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
 import { urls } from 'scenes/urls'
@@ -40,7 +40,7 @@ export function ZendeskSourceSetupPrompt({
 function SetupPrompt({ className }: Pick<ZendeskSourceSetupPromptProps, 'className'>): JSX.Element {
     return (
         <ProductIntroduction
-            customHog={SupportHeroHog}
+            customMascot={SupportHeroMascot}
             productName="Data Warehouse Source"
             titleOverride="Bring your data from Zendesk"
             productKey={ProductKey.DATA_WAREHOUSE}
