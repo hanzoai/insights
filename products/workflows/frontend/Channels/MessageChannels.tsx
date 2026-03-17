@@ -4,7 +4,7 @@ import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SetupTaskId } from 'lib/components/ProductSetup'
-import { MicrophoneHog } from 'lib/components/mascots'
+import { MicrophoneMascot } from 'lib/components/mascots'
 import { EmailIntegrationsList } from 'lib/integrations/EmailIntegrationsList'
 import { IntegrationsList } from 'lib/integrations/IntegrationsList'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
@@ -52,7 +52,7 @@ export function MessageChannels(): JSX.Element {
                         description="Set up messaging channels to automatically send emails, SMS, or Slack notifications triggered by user actions and events."
                         docsURL="https://hanzo.ai/docs/workflows/configure-channels"
                         action={() => openSetupModal(undefined, 'email')}
-                        customHog={MicrophoneHog}
+                        customInsights={MicrophoneMascot}
                         isEmpty
                     />
                 )}

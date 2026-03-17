@@ -177,7 +177,7 @@ export function Comments(): JSX.Element {
                         thingName="comment"
                         description="Comments allow you to provide context and discussions on various elements in Insights."
                         isEmpty={shouldShowEmptyState}
-                        customMascot={MicrophoneMascot}
+                        customInsights={MicrophoneMascot}
                     />
                 </div>
                 {!shouldShowEmptyState && (

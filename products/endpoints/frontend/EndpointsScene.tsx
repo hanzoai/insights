@@ -7,7 +7,7 @@ import { LemonButton } from '@hanzo/lemon-ui'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { BigLeaguesHog } from 'lib/components/mascots'
+import { BigLeaguesMascot } from 'lib/components/mascots'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
@@ -128,7 +128,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                                     : ENDPOINTS_PRODUCT_DESCRIPTION
                             }
                             docsURL="https://hanzo.ai/docs/endpoints"
-                            customHog={BigLeaguesHog}
+                            customInsights={BigLeaguesMascot}
                             isEmpty={false}
                             action={() => router.actions.push(urls.sqlEditor({ outputTab: OutputTab.Endpoint }))}
                         />
