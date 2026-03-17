@@ -121,7 +121,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
                     // TODO: update docs link when ready
                     // docsURL="https://hanzo.ai/docs/data/annotations"
                     isEmpty={alertsSortedByState.length === 0 && !alertsLoading}
-                    customMascot={DetectiveMascot}
+                    customInsights={DetectiveMascot}
                     actionElementOverride={
                         <span className="italic">
                             To get started, visit a trends insight, expand options in the header and click 'Manage

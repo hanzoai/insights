@@ -553,7 +553,7 @@ export function OverViewTab({
                 docsURL="https://hanzo.ai/docs/feature-flags/manual"
                 action={() => router.actions.push(newFeatureFlagUrl)}
                 isEmpty={shouldShowEmptyState}
-                customMascot={FeatureFlagMascot}
+                customInsights={FeatureFlagMascot}
                 className={cn('my-0')}
             />
             <ApprovalsPromoBanner />
