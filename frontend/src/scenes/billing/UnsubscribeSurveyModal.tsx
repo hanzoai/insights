@@ -1,9 +1,9 @@
 import './UnsubscribeSurveyModal.scss'
 
 import { useActions, useValues } from 'kea'
-import { SurveyEventProperties } from '@hanzo/insights'
 import { useState } from 'react'
 
+import { SurveyEventProperties } from '@hanzo/insights'
 import {
     LemonBanner,
     LemonButton,
@@ -18,7 +18,7 @@ import {
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartHog } from 'lib/components/mascots'
+import { HeartMascot } from 'lib/components/mascots'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
@@ -81,7 +81,7 @@ export const UnsubscribeSurveyModal = ({
                 <h3 className="text-lg mb-2">Are you sure you want to leave?</h3>
                 <p className="text-secondary mb-4">We would love to keep you around!</p>
                 <div className="flex justify-center items-center">
-                    <HeartHog width="100" height="100" />
+                    <HeartMascot width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">

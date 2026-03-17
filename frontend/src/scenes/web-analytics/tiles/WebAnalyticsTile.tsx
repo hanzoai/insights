@@ -10,7 +10,7 @@ import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
-import { StarHog } from 'lib/components/mascots'
+import { StarMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
@@ -1155,7 +1155,7 @@ const FrustrationMetricsEmptyState = (
             <div className="flex items-center gap-8 w-full justify-center">
                 <div>
                     <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        <StarHog />
+                        <StarMascot />
                     </div>
                     <p>No frustrating pages found! Keep up the great work!</p>
                 </div>

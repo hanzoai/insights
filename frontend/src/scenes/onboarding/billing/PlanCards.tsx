@@ -85,7 +85,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
         ...planData.features,
     ]
 
-    const mascotPositionClass = mascotPosition === 'top-right' ? 'CheekyHogTopRight' : 'CheekyHogTopLeft'
+    const mascotPositionClass = mascotPosition === 'top-right' ? 'CheekyMascotTopRight' : 'CheekyMascotTopLeft'
 
     return (
         <div className="relative" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>

@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { actionToUrl, urlToAction } from 'kea-router'
 
-import { VMState, newHogCallable, newHogClosure } from '@hanzo/scriptvm'
+import { VMState, newIQLCallable, newIQLClosure } from '@hanzo/scriptvm'
 
 import api from 'lib/api'
 import { execScriptAsync } from 'lib/iql'
@@ -127,8 +127,8 @@ export const iqlReplLogic = kea<iqlReplLogicType>([
                             chunk: 'root',
                             stackStart: 0,
                             argCount: 0,
-                            closure: newHogClosure(
-                                newHogCallable('local', {
+                            closure: newIQLClosure(
+                                newIQLCallable('local', {
                                     name: '',
                                     argCount: 0,
                                     upvalueCount: 0,

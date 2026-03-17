@@ -5,7 +5,7 @@ import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
 import { LemonButton, LemonFileInput, LemonInput, LemonSelect, Link, Spinner, lemonToast } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { ClimberHog1, ClimberHog2, YCHog } from 'lib/components/mascots'
+import { ClimberMascot1, ClimberMascot2, YCMascot } from 'lib/components/mascots'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonCalendarSelectInput } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
@@ -167,7 +167,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex flex-col items-center mt-8">
                         <div className="px-4 w-full max-w-100 mb-4">
                             <div className="relative">
-                                <YCHog className="h-auto w-full" />
+                                <YCMascot className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -184,7 +184,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex items-center justify-center -mt-6 md:gap-8 mb-3">
                         <div className="flex items-end self-end">
                             <div className="relative w-35 min-w-18">
-                                <ClimberHog1 className="h-auto w-full" />
+                                <ClimberMascot1 className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -200,7 +200,7 @@ export function StartupProgram(): JSX.Element {
                         </div>
                         <div className="flex items-center">
                             <div className="relative w-35 min-w-18">
-                                <ClimberHog2 className="h-auto w-full" />
+                                <ClimberMascot2 className="h-auto w-full" />
                             </div>
                         </div>
                     </div>
@@ -307,8 +307,8 @@ export function StartupProgram(): JSX.Element {
                                 </div>
                                 <div className="flex gap-1">
                                     <span className="text-xxs align-super">2</span>
-                                    Boring international customs reasons mean users outside US/Canada get a $150 Insights
-                                    merch voucher instead.
+                                    Boring international customs reasons mean users outside US/Canada get a $150
+                                    Insights merch voucher instead.
                                 </div>
                             </div>
                         </div>

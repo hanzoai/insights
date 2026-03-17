@@ -21,14 +21,14 @@ const external = {
     },
 }
 
-export function execHog(code: any[] | VMState, options?: ExecOptions): ExecResult {
+export function execScript(code: any[] | VMState, options?: ExecOptions): ExecResult {
     return iqlExec(code, {
         external,
         ...options,
     })
 }
 
-export function execHogAsync(code: any[] | VMState, options?: ExecOptions): Promise<ExecResult> {
+export function execScriptAsync(code: any[] | VMState, options?: ExecOptions): Promise<ExecResult> {
     return iqlExecAsync(code, {
         external,
         ...options,

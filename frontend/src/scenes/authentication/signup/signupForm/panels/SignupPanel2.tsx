@@ -32,7 +32,7 @@ export function SignupPanel2(): JSX.Element | null {
                     <LemonInput
                         className="ph-ignore-input"
                         data-attr="signup-organization-name"
-                        placeholder="Hogflix Movies"
+                        placeholder="Acme Inc"
                         disabled={isSignupPanel2Submitting}
                     />
                 </LemonField>

@@ -8,7 +8,7 @@ import { getSeriesColorPalette } from 'lib/colors'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { downloadFile } from 'lib/utils'
 
-import { FilmCameraHog } from '../mascots'
+import { FilmCameraMascot } from '../mascots'
 import {
     type DrawingItem,
     type HistoryItem,
@@ -369,7 +369,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
             <>
                 <LemonModal isOpen={isOpen} onClose={handleClose} width="auto" maxWidth="100%">
                     <div className="flex flex-col items-center justify-center py-10">
-                        <FilmCameraHog className="h-32 w-32" />
+                        <FilmCameraMascot className="h-32 w-32" />
                         <div className="mt-2">
                             <Spinner className="mr-4" />
                             Taking a screenshot...

@@ -8,7 +8,7 @@ import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneHog } from 'lib/components/mascots'
+import { MicrophoneMascot } from 'lib/components/mascots'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
@@ -195,7 +195,7 @@ export function Annotations(): JSX.Element {
                         docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customHog={MicrophoneHog}
+                        customMascot={MicrophoneMascot}
                     />
                 </div>
                 {!shouldShowEmptyState && (
