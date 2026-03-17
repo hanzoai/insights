@@ -4,7 +4,7 @@ import { IconDownload } from '@hanzo/icons'
 import { LemonButton, LemonTable, LemonTableColumn } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { PhonePairHogs } from 'lib/components/mascots'
+import { PhonePairMascots } from 'lib/components/mascots'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
 import { MaxTool } from 'scenes/max/MaxTool'
@@ -44,7 +44,7 @@ export function UserInterviews(): JSX.Element {
                 productKey={ProductKey.USER_INTERVIEWS}
                 thingName="user interview"
                 description="Make full use of user interviews by recording them with Insights."
-                customHog={PhonePairHogs}
+                customInsights={PhonePairMascots}
                 isEmpty={!userInterviewsLoading && userInterviews.length === 0}
                 actionElementOverride={
                     <LemonButton

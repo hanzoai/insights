@@ -40,7 +40,7 @@ export function ZendeskSourceSetupPrompt({
 function SetupPrompt({ className }: Pick<ZendeskSourceSetupPromptProps, 'className'>): JSX.Element {
     return (
         <ProductIntroduction
-            customMascot={SupportHeroMascot}
+            customInsights={SupportHeroMascot}
             productName="Data Warehouse Source"
             titleOverride="Bring your data from Zendesk"
             productKey={ProductKey.DATA_WAREHOUSE}
