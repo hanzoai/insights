@@ -9,7 +9,7 @@ from django.urls import resolve
 
 from prometheus_client import Counter
 from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
-from statsiql.defaults.django import statsd
+from statshog.defaults.django import statsd
 
 from insights.auth import PersonalAPIKeyAuthentication
 from insights.event_usage import report_user_action
