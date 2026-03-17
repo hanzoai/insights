@@ -146,7 +146,7 @@ RUN curl -L https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip 
 # Cache ID includes libxmlsec1 version to bust cache when system library changes
 COPY pyproject.toml uv.lock ./
 COPY common/insightsql_parser common/insightsql_parser/
-RUN --mount=type=cache,id=uv-libxmlsec1.2.37-2,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-libxmlsec1.2.37-3,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project --no-binary-package lxml --no-binary-package xmlsec
 
 ENV PATH=/python-runtime/bin:$PATH \
