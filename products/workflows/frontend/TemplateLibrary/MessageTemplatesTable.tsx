@@ -7,7 +7,7 @@ import { IconTrash } from '@hanzo/icons'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ReadingHog } from 'lib/components/mascots'
+import { ReadingMascot } from 'lib/components/mascots'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
 import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
@@ -37,7 +37,7 @@ export function MessageTemplatesTable(): JSX.Element {
                     action={() => {
                         router.actions.push(urls.workflowsLibraryTemplateNew())
                     }}
-                    customHog={ReadingHog}
+                    customInsights={ReadingMascot}
                     isEmpty
                 />
             )}

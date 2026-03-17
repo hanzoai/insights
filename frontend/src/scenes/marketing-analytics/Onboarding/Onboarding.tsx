@@ -99,7 +99,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
             }
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
-            customMascot={FilmCameraMascot}
+            customInsights={FilmCameraMascot}
         />
     )
 }

@@ -195,7 +195,7 @@ export function Annotations(): JSX.Element {
                         docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customMascot={MicrophoneMascot}
+                        customInsights={MicrophoneMascot}
                     />
                 </div>
                 {!shouldShowEmptyState && (

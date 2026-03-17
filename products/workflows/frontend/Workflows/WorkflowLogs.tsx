@@ -5,7 +5,7 @@ import { LemonCollapse, LemonDivider, ProfilePicture, Spinner, Tooltip } from '@
 
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
 import { TZLabel } from 'lib/components/TZLabel'
-import { ListHog, SleepingHog } from 'lib/components/mascots'
+import { ListMascot, SleepingMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 
@@ -73,7 +73,7 @@ function BatchRunInfo({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
 
     const logsSection = isFutureJob ? (
         <div className="flex flex-col w-full bg-surface-primary rounded py-8 items-center text-center">
-            <SleepingHog width="100" height="100" className="mb-4" />
+            <SleepingMascot width="100" height="100" className="mb-4" />
             <h2 className="text-xl leading-tight">This job hasn't started yet</h2>
             <p className="text-sm text-balance text-tertiary">Once the job starts executing, logs will appear here.</p>
         </div>
@@ -115,7 +115,7 @@ function WorkflowBatchRunLogs({ id }: WorkflowLogsProps): JSX.Element {
     if (!futureJobs.length && !pastJobs.length) {
         return (
             <div className="flex flex-col bg-surface-primary rounded px-4 py-8 items-center text-center mx-auto">
-                <ListHog width="100" height="100" className="mb-4" />
+                <ListMascot width="100" height="100" className="mb-4" />
                 <h2 className="text-xl leading-tight">No batch workflow jobs have been run yet</h2>
                 <p className="text-sm text-balance text-tertiary">
                     Once a batch workflow job is triggered, execution logs will appear here.

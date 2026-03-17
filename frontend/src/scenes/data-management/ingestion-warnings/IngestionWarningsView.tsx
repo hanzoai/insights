@@ -373,7 +373,7 @@ export function IngestionWarningsView(): JSX.Element {
                     isEmpty={true}
                     description="Nice! You've had no ingestion warnings in the past 30 days. If we detect any issues with your data, we'll show them here."
                     docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
-                    customMascot={ReadingMascot}
+                    customInsights={ReadingMascot}
                 />
             )}
         </SceneContent>

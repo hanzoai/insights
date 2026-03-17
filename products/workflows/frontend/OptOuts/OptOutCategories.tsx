@@ -5,7 +5,7 @@ import { IconDownload, IconPlus } from '@hanzo/icons'
 import { LemonButton, LemonCollapse, LemonDialog, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { BuilderHog3 } from 'lib/components/mascots'
+import { BuilderMascot3 } from 'lib/components/mascots'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 
@@ -153,7 +153,7 @@ export function OptOutCategories(): JSX.Element {
                                     </LemonButton>
                                 </>
                             }
-                            customHog={BuilderHog3}
+                            customInsights={BuilderMascot3}
                             isEmpty
                         />
                     )}
