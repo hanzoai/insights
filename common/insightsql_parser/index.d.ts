@@ -90,9 +90,9 @@ export interface InsightsQLParser {
     parseOrderExpr(input: string, isInternal?: boolean): string
 
     /**
-     * Parse a complete Hog program
+     * Parse a complete IQL program
      *
-     * @param input - The Hog program string to parse
+     * @param input - The IQL program string to parse
      * @param isInternal - If true, omits position information from the AST (default: false)
      * @returns JSON string representing the AST or error
      *

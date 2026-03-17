@@ -455,7 +455,7 @@ const ExperimentsTable = ({
                         docsURL="https://hanzo.ai/docs/experiments"
                         action={() => router.actions.push(urls.experiment('new'))}
                         isEmpty={shouldShowEmptyState}
-                        customMascot={ExperimentsMascot}
+                        customInsights={ExperimentsMascot}
                         className="my-0"
                     />
                 </AccessControlAction>
