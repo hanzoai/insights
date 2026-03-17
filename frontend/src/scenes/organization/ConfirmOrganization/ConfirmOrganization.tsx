@@ -77,7 +77,7 @@ export function ConfirmOrganization(): JSX.Element {
                     label="Organization name"
                     help="You can always rename your organization later"
                 >
-                    <LemonInput className="ph-ignore-input" placeholder="Hogflix Movies" />
+                    <LemonInput className="ph-ignore-input" placeholder="Acme Inc" />
                 </LemonField>
 
                 <SignupRoleSelect />

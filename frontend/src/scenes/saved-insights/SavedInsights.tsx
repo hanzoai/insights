@@ -11,7 +11,7 @@ import {
     IconFlask,
     IconFunnels,
     IconGraph,
-    IconInsightsQL,
+    IconHogQL as IconInsightsQL,
     IconLifecycle,
     IconLineGraph,
     IconLive,

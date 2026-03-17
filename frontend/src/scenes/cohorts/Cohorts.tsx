@@ -10,7 +10,7 @@ import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
-import { ListHog } from 'lib/components/mascots'
+import { ListMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
@@ -283,7 +283,7 @@ export function Cohorts(): JSX.Element {
                 isEmpty={shouldShowEmptyState}
                 docsURL="https://hanzo.ai/docs/data/cohorts"
                 action={() => router.actions.push(urls.cohort('new'))}
-                customHog={ListHog}
+                customMascot={ListMascot}
             />
 
             <div>{filtersSection}</div>

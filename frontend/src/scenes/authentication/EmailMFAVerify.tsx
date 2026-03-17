@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { LemonButton } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { HeartHog, SurprisedHog } from 'lib/components/mascots'
+import { HeartMascot, SurprisedMascot } from 'lib/components/mascots'
 
 import { emailMFAVerifyLogic } from './emailMFAVerifyLogic'
 
@@ -18,7 +18,7 @@ export function EmailMFAVerify(): JSX.Element {
                     <>
                         <h1 className="text-3xl font-bold">Almost in - just click below!</h1>
                         <div className="max-w-60 mb-12">
-                            <HeartHog className="w-full h-full" />
+                            <HeartMascot className="w-full h-full" />
                         </div>
                         <p className="mb-6">Click below to verify your email address.</p>
                         <LemonButton
@@ -37,7 +37,7 @@ export function EmailMFAVerify(): JSX.Element {
                     <>
                         <h1 className="text-3xl font-bold">Whoops!</h1>
                         <div className="max-w-60 mb-12">
-                            <SurprisedHog className="w-full h-full" />
+                            <SurprisedMascot className="w-full h-full" />
                         </div>
                         <LemonButton type="primary" to="/login" fullWidth center>
                             Back to login
