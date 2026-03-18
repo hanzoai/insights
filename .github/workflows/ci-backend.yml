@@ -305,6 +305,9 @@ jobs:
               if: steps.setup-uv.outputs.cache-hit != 'true'
               run: sudo apt-get update && sudo apt-get install -y libxml2-dev libxmlsec1-dev libxmlsec1-openssl
 
+            - name: Install antlr4 C++ runtime (for insightsql-parser)
+              run: sudo apt-get update && sudo apt-get install -y libantlr4-runtime-dev
+
             - name: Install Rust
               uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e
               with:
@@ -386,6 +389,8 @@ jobs:
               uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
+            - name: Install antlr4 C++ runtime (for insightsql-parser)
+              run: sudo apt-get update && sudo apt-get install -y libantlr4-runtime-dev
             - name: Install Python dependencies
               run: UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
             - name: Check IDOR model coverage
@@ -431,7 +436,12 @@ jobs:
               if: steps.setup-uv.outputs.cache-hit != 'true'
               run: |
                   sudo apt-get update
-                  sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+                  sudo apt-get install -y libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+
+            - name: Install antlr4 C++ runtime (for insightsql-parser)
+              run: |
+                  sudo apt-get update && sudo apt-get install -y libantlr4-runtime-dev
+
             - name: Install Rust
               uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e
               with:
@@ -1011,7 +1021,12 @@ jobs:
               if: ${{ needs.changes.outputs.backend == 'true' && steps.setup-uv-tests.outputs.cache-hit != 'true' }}
               shell: bash
               run: |
-                  sudo apt-get update && sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+                  sudo apt-get update && sudo apt-get install -y libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+
+            - name: Install antlr4 C++ runtime (for insightsql-parser)
+              shell: bash
+              run: |
+                  sudo apt-get update && sudo apt-get install -y libantlr4-runtime-dev
 
             - name: Install Rust
               if: needs.changes.outputs.backend == 'true'
@@ -1573,7 +1588,11 @@ jobs:
               if: steps.setup-uv-async.outputs.cache-hit != 'true'
               run: |
                   sudo apt-get update
-                  sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+                  sudo apt-get install -y libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+
+            - name: Install antlr4 C++ runtime (for insightsql-parser)
+              run: |
+                  sudo apt-get update && sudo apt-get install -y libantlr4-runtime-dev
 
             - name: Install Rust
               uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e
