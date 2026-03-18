@@ -81,10 +81,15 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y libxml2-dev libxmlsec1 libxmlsec1-dev libxmlsec1-openssl
 
-            - name: Install antlr4 C++ runtime (for insightsql-parser)
+            - name: Install antlr4 C++ runtime 4.13.1 from source (for insightsql-parser)
               run: |
-                  sudo apt-get update
-                  sudo apt-get install -y libantlr4-runtime-dev
+                  sudo apt-get update && sudo apt-get install -y unzip cmake build-essential g++
+                  curl -sL https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip -o /tmp/antlr4-source.zip
+                  cd /tmp && unzip -q antlr4-source.zip -d antlr4-source && cd antlr4-source
+                  cmake . -DBUILD_TESTING=OFF -DANTLR4_BUILD_TESTS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 > /dev/null 2>&1
+                  make -j$(nproc) > /dev/null 2>&1
+                  sudo make install > /dev/null 2>&1
+                  sudo ldconfig
 
             - name: Install Python dependencies
               run: |
@@ -200,10 +205,15 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt-get install -y libxml2-dev libxmlsec1 libxmlsec1-dev libxmlsec1-openssl
-            - name: Install antlr4 C++ runtime (for insightsql-parser)
+            - name: Install antlr4 C++ runtime 4.13.1 from source (for insightsql-parser)
               run: |
-                  sudo apt-get update
-                  sudo apt-get install -y libantlr4-runtime-dev
+                  sudo apt-get update && sudo apt-get install -y unzip cmake build-essential g++
+                  curl -sL https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip -o /tmp/antlr4-source.zip
+                  cd /tmp && unzip -q antlr4-source.zip -d antlr4-source && cd antlr4-source
+                  cmake . -DBUILD_TESTING=OFF -DANTLR4_BUILD_TESTS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 > /dev/null 2>&1
+                  make -j$(nproc) > /dev/null 2>&1
+                  sudo make install > /dev/null 2>&1
+                  sudo ldconfig
             - name: Install Python dependencies
               run: |
                   UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
