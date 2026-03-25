@@ -14,6 +14,8 @@ jobs:
         steps:
             - name: Get app token
               id: app-token
+              if: ${{ secrets.GH_APP_INSIGHTS_SCHEDULED_ACTIONS_APP_ID != '' }}
+              continue-on-error: true
               uses: getsentry/action-github-app-token@d4b5da6c5e37703f8c3b3e43abb5705b46e159cc # v3.0.0
               with:
                   app_id: ${{ secrets.GH_APP_INSIGHTS_SCHEDULED_ACTIONS_APP_ID }}
@@ -22,7 +24,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v6
               with:
-                  token: ${{ steps.app-token.outputs.token }}
+                  token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
             - name: Configure git
               run: |
@@ -43,7 +45,7 @@ jobs:
 
             - name: Reset stale browserslist branch
               env:
-                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                  GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
               run: |
                   if git ls-remote --heads origin browserslist-update | grep browserslist-update; then
                     echo "Resetting stale browserslist-update branch to main to avoid rebase conflicts"
@@ -58,14 +60,14 @@ jobs:
               id: update-browserlist
               uses: c2corg/browserslist-update-action@a76abb476199caea5399f9e28ff3f16e491ec566 # v2.5.0
               with:
-                  github_token: ${{ steps.app-token.outputs.token }}
+                  github_token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
                   commit_message: 'build: update Browserslist db'
                   title: 'build: update Browserslist db'
                   labels: 'dependencies'
 
             - name: Enable automerge
               env:
-                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                  GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
                   PR_NUMBER: ${{ steps.update-browserlist.outputs.pr_number }}
               run: |
                   gh pr merge "$PR_NUMBER" --auto --squash

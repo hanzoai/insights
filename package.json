@@ -54,24 +54,24 @@
         "fuse.js": "catalog:",
         "husky": "catalog:",
         "lint-staged": "catalog:",
-        "uuid": "^10.0.0"
+        "uuid": "^13.0.0"
     },
     "devDependencies": {
         "@parcel/packager-ts": "catalog:",
         "@parcel/transformer-typescript-types": "catalog:",
-        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-        "@types/uuid": "^10.0.0",
-        "markdownlint-cli2": "^0.18.1",
-        "orval": "8.0.3",
-        "oxlint": "^1.8.0",
-        "playwright": "1.45.0",
+        "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+        "@types/uuid": "^11.0.0",
+        "markdownlint-cli2": "^0.21.0",
+        "orval": "8.5.3",
+        "oxlint": "^1.56.0",
+        "playwright": "1.58.2",
         "prettier": "catalog:",
-        "stylelint": "^15.11.0",
-        "stylelint-config-recess-order": "^4.6.0",
-        "stylelint-config-standard-scss": "^11.1.0",
-        "stylelint-order": "^6.0.4",
-        "syncpack": "^13.0.4",
-        "turbo": "^2.4.2"
+        "stylelint": "^17.4.0",
+        "stylelint-config-recess-order": "^7.7.0",
+        "stylelint-config-standard-scss": "^17.0.0",
+        "stylelint-order": "^8.1.1",
+        "syncpack": "^14.2.0",
+        "turbo": "^2.8.18"
     },
     "optionalDependencies": {
         "fsevents": "^2.3.3"
