@@ -159,9 +159,17 @@ CODE_REVIEW.md
 data/seaweedfs
 data/seaweedfs/
 
-# No env files except for the example
+# No env files except for examples and direnv config
+# All secrets MUST come from KMS (kms.hanzo.ai) -- never commit credentials.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
 .env*
 !.env.example
+!.envrc
 
 # Ignore Agent OS (Claude Code) files
 .claude/agents/agent-os
