@@ -38,6 +38,18 @@ jobs:
                   key: main-ci-incident-${{ github.run_id }}
                   restore-keys: main-ci-incident-
 
+            - name: Check Slack token availability
+              id: slack_check
+              run: |
+                  if [ -n "$SLACK_BOT_TOKEN" ]; then
+                    echo "available=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "available=false" >> $GITHUB_OUTPUT
+                    echo "::warning::SLACK_BOT_TOKEN secret not configured — Slack notifications disabled"
+                  fi
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
             - name: Read incident state
               id: incident
               run: |
@@ -79,7 +91,7 @@ jobs:
             # ============ SLACK: CREATE ============
 
             - name: Post new incident to Slack
-              if: steps.process.outputs.action == 'create'
+              if: steps.process.outputs.action == 'create' && steps.slack_check.outputs.available == 'true'
               id: slack_new
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
@@ -113,7 +125,7 @@ jobs:
                               url: "${{ github.event.workflow_run.html_url }}"
 
             - name: Save Slack info to state
-              if: steps.process.outputs.action == 'create'
+              if: steps.process.outputs.action == 'create' && steps.slack_check.outputs.available == 'true'
               run: |
                   jq \
                     --arg channel "${{ steps.slack_new.outputs.channel_id }}" \
@@ -125,7 +137,7 @@ jobs:
             # ============ SLACK: UPDATE ============
 
             - name: Update Slack message
-              if: steps.process.outputs.action == 'update'
+              if: steps.process.outputs.action == 'update' && steps.slack_check.outputs.available == 'true'
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
                   method: chat.update
@@ -159,7 +171,7 @@ jobs:
                               url: "${{ github.event.workflow_run.html_url }}"
 
             - name: Thread reply with failure
-              if: steps.process.outputs.action == 'update'
+              if: steps.process.outputs.action == 'update' && steps.slack_check.outputs.available == 'true'
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
                   method: chat.postMessage
@@ -172,7 +184,7 @@ jobs:
             # ============ SLACK: RESOLVE ============
 
             - name: Thread reply with recovery
-              if: steps.process.outputs.action == 'resolve' && steps.process.outputs.resolved == 'false'
+              if: steps.process.outputs.action == 'resolve' && steps.process.outputs.resolved == 'false' && steps.slack_check.outputs.available == 'true'
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
                   method: chat.postMessage
@@ -193,7 +205,7 @@ jobs:
                   echo "mins=$mins" >> $GITHUB_OUTPUT
 
             - name: Update Slack to resolved
-              if: steps.process.outputs.resolved == 'true'
+              if: steps.process.outputs.resolved == 'true' && steps.slack_check.outputs.available == 'true'
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
                   method: chat.update
@@ -220,7 +232,7 @@ jobs:
                             text: "*Commit*\n<${{ steps.commit.outputs.url }}|${{ steps.commit.outputs.short_sha }}> ${{ steps.commit.outputs.message }}"
 
             - name: Thread reply with resolution
-              if: steps.process.outputs.resolved == 'true'
+              if: steps.process.outputs.resolved == 'true' && steps.slack_check.outputs.available == 'true'
               uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
               with:
                   method: chat.postMessage
