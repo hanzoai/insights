@@ -16,6 +16,7 @@ from insights.tasks.alerts.checks import (
     checks_cleanup_task,
     reset_stuck_alerts_task,
 )
+from insights.tasks.commerce_billing import report_insights_usage_to_commerce
 from insights.tasks.email import send_error_tracking_weekly_digest, send_insights_functions_daily_digest
 from insights.tasks.feature_flags import (
     cleanup_stale_flags_expiry_tracking_task,
@@ -34,20 +35,14 @@ from insights.tasks.tasks import (
     calculate_cohort,
     calculate_decide_usage,
     check_async_migration_health,
-    check_flags_to_rollback,
     clean_stale_partials,
     clear_clickhouse_deleted_person,
     clear_expired_sessions,
     clickhouse_clear_removed_data,
     clickhouse_errors_count,
-    clickhouse_materialize_columns,
     clickhouse_mutation_count,
     clickhouse_part_count,
     clickhouse_row_count,
-    clickhouse_send_license_usage,
-    count_items_in_playlists,
-    delete_expired_exported_assets,
-    find_flags_with_enriched_analytics,
     ingestion_lag,
     pg_plugin_server_query_timing,
     pg_row_count,
@@ -68,7 +63,10 @@ from insights.tasks.tasks import (
     verify_persons_data_in_sync,
 )
 from insights.tasks.team_access_cache_tasks import warm_all_team_access_caches_task
-from insights.tasks.team_metadata import cleanup_stale_expiry_tracking_task, refresh_expiring_team_metadata_cache_entries
+from insights.tasks.team_metadata import (
+    cleanup_stale_expiry_tracking_task,
+    refresh_expiring_team_metadata_cache_entries,
+)
 from insights.utils import get_crontab, get_instance_region
 
 from products.endpoints.backend.tasks import deactivate_stale_materializations
@@ -262,6 +260,14 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         crontab(hour="4", minute="15"),
         send_llm_analytics_usage_reports.s(),
         name="send llm analytics usage reports",
+    )
+
+    # Report per-org event usage to Commerce API for billing -- hourly at minute 50
+    add_periodic_task_with_expiry(
+        sender,
+        crontab(hour="*", minute="50"),
+        report_insights_usage_to_commerce.s(),
+        name="report insights usage to commerce",
     )
 
     # Send InsightsFunctions daily digest at 9:30 AM UTC (good for US and EU)
