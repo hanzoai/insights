@@ -8,7 +8,8 @@ services:
             - '127.0.0.1:5432:5432'
         environment:
             POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
+            # Get from KMS: kms.hanzo.ai/hanzo/insights/livestream/postgres-password
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in environment}
             POSTGRES_DB: liveevents
         healthcheck:
             test: ['CMD-SHELL', 'pg_isready -U postgres']
