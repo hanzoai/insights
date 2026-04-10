@@ -70,7 +70,6 @@ WHITELISTED_PATHS = [
     "/api/login/token/",
     "/api/login/email-mfa/",
     "/api/users/@me/",
-    "/_health/",
     "/healthz",
 ]
 
