@@ -157,6 +157,7 @@ urlpatterns = [
     # is only included for compatability with old installations. For new
     # operations livez and readyz should be used.
     opt_slash_path("_health", health),
+    path("healthz", health),
     opt_slash_path("_stats", stats),
     opt_slash_path("_preflight", preflight_check),
     # ee
