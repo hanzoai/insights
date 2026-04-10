@@ -15,7 +15,7 @@ import { logger } from '~/utils/logger'
 const HEADER_NAME = 'X-Internal-Api-Secret'
 
 // Paths that don't require authentication (public endpoints and health checks)
-const PUBLIC_PATH_PREFIXES = ['/public/', '/_health', '/_ready', '/_metrics', '/metrics']
+const PUBLIC_PATH_PREFIXES = ['/public/', '/healthz', '/_ready', '/_metrics', '/metrics']
 
 export interface InternalApiAuthOptions {
     secret: string

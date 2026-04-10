@@ -24,8 +24,8 @@ describe('router', () => {
 
     // these should simply pass under normal conditions
     describe('health and readiness checks', () => {
-        it('responds to _health', async () => {
-            const res = await supertest(server.expressApp).get(`/_health`).send()
+        it('responds to healthz', async () => {
+            const res = await supertest(server.expressApp).get(`/healthz`).send()
 
             expect(res.status).toEqual(200)
             expect(res.body).toMatchInlineSnapshot(`
