@@ -110,7 +110,7 @@ describe('createInternalApiAuthMiddleware', () => {
     describe('path exclusions', () => {
         it.each([
             ['/public/webhooks/123', 'public path'],
-            ['/_health', 'health check'],
+            ['/healthz', 'health check'],
             ['/_ready', 'ready check'],
             ['/_metrics', 'metrics'],
             ['/metrics', 'prometheus metrics'],

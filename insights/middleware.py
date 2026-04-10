@@ -1003,3 +1003,22 @@ def impersonated_session_logout(request: HttpRequest) -> HttpResponse:
     impersonated_user_pk = request.user.pk
     restore_original_login(request)
     return redirect(f"/admin/insights/user/{impersonated_user_pk}/change/")
+
+
+class V1InsightsRewriteMiddleware:
+    """
+    Rewrites /v1/insights/* requests to /api/* so the existing Django URL
+    patterns handle them without duplication.  Allows the service to be
+    addressed via the standard /<version>/<service>/<path> convention.
+    """
+
+    PREFIX = "/v1/insights/"
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        if request.path.startswith(self.PREFIX):
+            request.path = "/api/" + request.path[len(self.PREFIX) :]
+            request.path_info = request.path
+        return self.get_response(request)

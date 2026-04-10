@@ -102,6 +102,7 @@ MIDDLEWARE = [
     # ok below the above middlewares however.
     "insights.health.healthcheck_middleware",
     "insights.middleware.ShortCircuitMiddleware",
+    "insights.middleware.V1InsightsRewriteMiddleware",
     "insights.middleware.AllowIPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

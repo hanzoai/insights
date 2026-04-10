@@ -228,7 +228,7 @@ class TestSessionAuthenticationTwoFactor(TestCase):
             "/api/users/@me/two_factor_validate/",
             "/logout/",
             "/api/logout/",
-            "/_health/",
+            "/healthz",
             "/static/css/app.css",
             "/uploaded_media/file.png",
         ]

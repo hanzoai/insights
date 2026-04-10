@@ -16,7 +16,7 @@ export function setupCommonRoutes(
     app: express.Application,
     services: Pick<PluginServerService, 'id' | 'healthcheck'>[]
 ): express.Application {
-    app.get('/_health', buildGetHealth(services))
+    app.get('/healthz', buildGetHealth(services))
     app.get('/_ready', buildGetHealth(services))
     app.get('/_metrics', getMetrics)
     app.get('/metrics', getMetrics)
