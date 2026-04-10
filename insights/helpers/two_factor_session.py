@@ -12,8 +12,8 @@ from django.utils.http import base36_to_int
 
 import structlog
 import hanzo_insights
-from loginas.utils import is_impersonated_session
 from hanzo_insights import capture_exception
+from loginas.utils import is_impersonated_session
 from rest_framework.exceptions import PermissionDenied
 from two_factor.utils import default_device
 
@@ -71,6 +71,7 @@ WHITELISTED_PATHS = [
     "/api/login/email-mfa/",
     "/api/users/@me/",
     "/_health/",
+    "/healthz",
 ]
 
 WHITELISTED_PREFIXES = [
