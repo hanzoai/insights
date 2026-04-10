@@ -297,6 +297,9 @@ def healthcheck_middleware(get_response: Callable[[HttpRequest], HttpResponse]):
         elif request.path == "/_livez":
             return livez(request)
 
+        elif request.path == "/healthz":
+            return livez(request)
+
         return get_response(request)
 
     return middleware
