@@ -48,6 +48,7 @@ from .auth import PersonalAPIKeyAuthentication
 ALWAYS_ALLOWED_ENDPOINTS = [
     "static",
     "_health",
+    "healthz",
     "flags",
     "messaging-preferences",
     "i",
