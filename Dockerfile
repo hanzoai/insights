@@ -33,12 +33,12 @@ COPY common/esbuilder/ common/esbuilder/
 COPY common/tailwind/ common/tailwind/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
-# Full workspace install — scriptvm devDeps include @parcel/transformer-typescript-types
-# referenced via catalog: but filtered installs don't propagate catalog refs through
-# transitive devDeps reliably. Slower but reliable.
+# Full workspace install. Drop --frozen-lockfile because we're updating
+# the catalog version of @parcel/transformer-typescript-types to match
+# scriptvm's pinned 2.13.3 (lockfile may have stale 2.16.4 ref).
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && pnpm --version && \
-    CI=1 pnpm install --frozen-lockfile --store-dir /tmp/pnpm-store-v24
+    CI=1 pnpm install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24
 
 COPY frontend/ frontend/
 RUN bin/turbo --filter=@hanzo/frontend build
