@@ -75,3 +75,7 @@ rust/target
 !docker-compose.base.yml
 !docker-compose.dev.yml
 !docker
+!playwright/package.json
+!services/mcp/package.json
+!nodejs/src/scripts/package.json
+!rust/cyclotron-node/package.json
