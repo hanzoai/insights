@@ -102,9 +102,11 @@ COPY patches/ patches/
 COPY common/esbuilder/ common/esbuilder/
 COPY common/plugin_transpiler/ common/plugin_transpiler/
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
-    corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=4096" CI=1 pnpm --filter=@hanzo/plugin-transpiler... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=4096" bin/turbo --filter=@hanzo/plugin-transpiler build
+    apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack enable \
+    && NODE_OPTIONS="--max-old-space-size=4096" CI=1 pnpm --filter=@hanzo/plugin-transpiler... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 \
+    && NODE_OPTIONS="--max-old-space-size=4096" bin/turbo --filter=@hanzo/plugin-transpiler build
 
 
 #
