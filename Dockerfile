@@ -23,6 +23,11 @@ FROM node:24.13.0-bookworm-slim AS frontend-build
 WORKDIR /code
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
+# git is needed for pnpm to fetch git+https deps (e.g. chartjs-plugin-stacked100
+# pinned to github:hanzoai/chartjs-plugin-stacked100#built-1.7.1).
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY frontend/package.json frontend/
 COPY frontend/bin/ frontend/bin/
