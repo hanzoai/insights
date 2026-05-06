@@ -31,9 +31,9 @@ jobs:
                     - platform: linux/amd64
                       runner: ubuntu-latest
                       goarch: amd64
-                    - platform: linux/arm64
-                      runner: hanzo-build-arm64
-                      goarch: arm64
+                    # arm64 paused — DOKS hanzo-build-arm64 ARC scale set
+                    # offline (DO has no arm64 droplets in catalog).
+                    # Re-add when DO ships arm64 instances.
         runs-on: ${{ matrix.runner }}
         permissions:
             contents: read
