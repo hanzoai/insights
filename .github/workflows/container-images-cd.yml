@@ -58,12 +58,11 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.GHCR_IMAGE }}
+                  # Semver-only policy: never push :latest, :{major}, or :{major}.{minor}
+                  # floating tags. Branch builds get an immutable sha-<sha7> tag.
                   tags: |
-                      type=raw,value=latest,enable={{is_default_branch}}
-                      type=sha,prefix=
+                      type=sha,prefix=sha-
                       type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=semver,pattern={{major}}
 
             - name: Prepare platform slug
               id: slug
@@ -123,12 +122,11 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.GHCR_IMAGE }}
+                  # Semver-only policy: never push :latest, :{major}, or :{major}.{minor}
+                  # floating tags. Branch builds get an immutable sha-<sha7> tag.
                   tags: |
-                      type=raw,value=latest,enable={{is_default_branch}}
-                      type=sha,prefix=
+                      type=sha,prefix=sha-
                       type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=semver,pattern={{major}}
 
             - name: Create manifest list and push
               working-directory: ${{ runner.temp }}/digests
