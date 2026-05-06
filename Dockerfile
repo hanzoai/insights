@@ -28,23 +28,15 @@ COPY frontend/package.json frontend/
 COPY frontend/bin/ frontend/bin/
 COPY bin/ bin/
 COPY patches/ patches/
-# Copy ALL workspace packages — pnpm-workspace.yaml lists 17 of them and
-# transitive workspace deps (@hanzo/insightsql-parser, @hanzo/siphash etc.)
-# must all be resolvable for the install to succeed.
 COPY common/ common/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
-COPY playwright/package.json playwright/
-COPY nodejs/package.json nodejs/
-COPY nodejs/src/scripts/package.json nodejs/src/scripts/
-COPY services/mcp/package.json services/mcp/
-COPY rust/cyclotron-node/package.json rust/cyclotron-node/
-# Full workspace install. Drop --frozen-lockfile because we're updating
-# the catalog version of @parcel/transformer-typescript-types to match
-# scriptvm's pinned 2.13.3 (lockfile may have stale 2.16.4 ref).
+# Filter install — only @hanzo/frontend and its workspace deps. Drop
+# --frozen-lockfile because catalog `@parcel/transformer-typescript-types`
+# was bumped 2.16.4→2.13.3 to match scriptvm's pinned config-default.
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && pnpm --version && \
-    CI=1 pnpm install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24
+    CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24
 
 COPY frontend/ frontend/
 RUN bin/turbo --filter=@hanzo/frontend build
