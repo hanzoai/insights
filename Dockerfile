@@ -125,8 +125,8 @@ RUN apt-get update && \
     "curl" \
     "git" \
     "libpq-dev" \
-    "libxmlsec1=1.2.37-2" \
-    "libxmlsec1-dev=1.2.37-2" \
+    "libxmlsec1" \
+    "libxmlsec1-dev" \
     "libffi-dev" \
     "unzip" \
     "uuid-dev" \
@@ -209,12 +209,12 @@ RUN apt-get update && \
     "chromium-driver" \
     "gettext-base" \
     "libpq-dev" \
-    "libxmlsec1=1.2.37-2" \
-    "libxmlsec1-dev=1.2.37-2" \
+    "libxmlsec1" \
+    "libxmlsec1-dev" \
     "libxml2" \
-    "ffmpeg=7:5.1.8-0+deb12u1" \
-    "libssl-dev=3.0.18-1~deb12u2" \
-    "libssl3=3.0.18-1~deb12u2" \
+    "ffmpeg" \
+    "libssl-dev" \
+    "libssl3" \
     "libjemalloc2" \
     && \
     rm -rf /var/lib/apt/lists/*
