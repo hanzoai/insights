@@ -33,13 +33,12 @@ COPY common/esbuilder/ common/esbuilder/
 COPY common/tailwind/ common/tailwind/
 COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
-# Use --filter with multiple targets so scriptvm + tailwind + frontend
-# all get their full devDep trees (parcel transformer-typescript-types,
-# tailwindcss/cli, etc). The `...` suffix pulls transitive dependencies
-# of each filtered package.
+# Full workspace install — scriptvm devDeps include @parcel/transformer-typescript-types
+# referenced via catalog: but filtered installs don't propagate catalog refs through
+# transitive devDeps reliably. Slower but reliable.
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && pnpm --version && \
-    CI=1 pnpm --filter=@hanzo/frontend... --filter=@hanzo/scriptvm... --filter=@hanzo/tailwind... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24
+    CI=1 pnpm install --frozen-lockfile --store-dir /tmp/pnpm-store-v24
 
 COPY frontend/ frontend/
 RUN bin/turbo --filter=@hanzo/frontend build
