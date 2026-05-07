@@ -189,7 +189,7 @@ services:
             DYNAMIC_CONFIG_ENABLED: 'true'
 
     objectstorage:
-        image: ghcr.io/hanzoai/storage:latest
+        image: ghcr.io/hanzoai/storage:v2026.2.0
         restart: on-failure
         environment:
             MINIO_ROOT_USER: object_storage_root_user
