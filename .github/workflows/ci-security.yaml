@@ -27,6 +27,7 @@ jobs:
                       aws-actions/
                       docker/
                       github/
+                      hanzoai/
                       hashicorp/
                       Insights/
                       tailscale/
