@@ -3,7 +3,6 @@ import { AppContext, OrganizationType, PathType, TeamType, UserType } from '~/ty
 declare global {
     export interface Window {
         INSIGHTS_APP_CONTEXT?: AppContext
-        STRIPE_PUBLIC_KEY?: string
     }
 }
 
