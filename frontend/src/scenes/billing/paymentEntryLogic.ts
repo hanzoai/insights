@@ -1,5 +1,6 @@
 import { kea } from 'kea'
 import { router } from 'kea-router'
+
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
@@ -22,7 +23,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
     actions: {
         setClientSecret: (clientSecret) => ({ clientSecret }),
         setLoading: (loading) => ({ loading }),
-        setStripeError: (error) => ({ error }),
+        setPaymentError: (error) => ({ error }),
         setApiError: (error) => ({ error }),
         clearErrors: true,
         initiateAuthorization: true,
@@ -50,10 +51,10 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                 setLoading: (_, { loading }) => loading,
             },
         ],
-        stripeError: [
+        paymentError: [
             null,
             {
-                setStripeError: (_, { error }) => error,
+                setPaymentError: (_, { error }) => error,
                 clearErrors: () => null,
             },
         ],
@@ -211,7 +212,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                         )
                     }
                 } catch (error) {
-                    actions.setStripeError('Failed to complete. Please refresh the page and try again.')
+                    actions.setPaymentError('Failed to complete. Please refresh the page and try again.')
                     insights.captureException(new Error('payment entry api error', { cause: error }))
                 } finally {
                     actions.setLoading(false)
