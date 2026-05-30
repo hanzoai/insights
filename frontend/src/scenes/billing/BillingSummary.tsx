@@ -4,7 +4,7 @@ import { dayjs } from 'lib/dayjs'
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
 import { humanFriendlyCurrency } from 'lib/utils'
 
-import { StripePortalButton } from './StripePortalButton'
+import { BillingPortalButton } from './BillingPortalButton'
 import { billingLogic } from './billingLogic'
 
 export const BillingSummary = (): JSX.Element => {
@@ -117,7 +117,7 @@ export const BillingSummary = (): JSX.Element => {
                         </div>
                     )}
                 </div>
-                <StripePortalButton />
+                <BillingPortalButton />
             </div>
         </div>
     )

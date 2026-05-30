@@ -28,10 +28,10 @@ import { BillingProductV2Type } from '~/types'
 
 import { BillingHero } from './BillingHero'
 import { BillingNoAccess } from './BillingNoAccess'
+import { BillingPortalButton } from './BillingPortalButton'
 import { BillingProduct } from './BillingProduct'
 import { BillingSummary } from './BillingSummary'
 import { CreditCTAHero } from './CreditCTAHero'
-import { StripePortalButton } from './StripePortalButton'
 import { UnsubscribeCard } from './UnsubscribeCard'
 import { billingLogic } from './billingLogic'
 
@@ -189,7 +189,7 @@ export function Billing(): JSX.Element {
                 </div>
             )}
 
-            {!showBillingSummary && <StripePortalButton />}
+            {!showBillingSummary && <BillingPortalButton />}
 
             {!couponsOverviewLoading && activeCoupons.length > 0 && (
                 <div className="mt-6 max-w-300">
