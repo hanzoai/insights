@@ -4,13 +4,16 @@ import { LemonButton } from '@hanzo/lemon-ui'
 
 import { billingLogic } from './billingLogic'
 
-export const StripePortalButton = (): JSX.Element | null => {
+export const BillingPortalButton = (): JSX.Element | null => {
     const { billing } = useValues(billingLogic)
 
     if (!billing?.customer_id) {
         return null
     }
 
+    // TODO(stripe-rip): backend should drop `stripe_portal_url` once
+    // every environment is migrated to Hanzo Commerce; the field is read
+    // here only as a transition fallback.
     const billingUrl = billing.external_billing_provider_invoices_url || billing.stripe_portal_url
 
     if (!billingUrl) {
