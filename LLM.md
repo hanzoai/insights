@@ -2,7 +2,9 @@
 
 ## Overview
 
-Product analytics and feature flags. PostHog fork with multi-tenant IAM integration.
+Product analytics and feature flags. Multi-tenant IAM integration.
+
+**Upstream**: [PostHog](https://github.com/PostHog/posthog) (MIT). Branded as **Hanzo Insights**.
 
 ## Tech Stack
 

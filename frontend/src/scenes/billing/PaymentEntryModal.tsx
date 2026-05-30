@@ -1,88 +1,39 @@
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { paymentEntryLogic } from './paymentEntryLogic'
 
-const stripeJs = async (): Promise<typeof import('@stripe/stripe-js')> => await import('@stripe/stripe-js')
+const PAY_URL = process.env.HANZO_PAY_URL ?? 'https://pay.hanzo.ai'
 
-export const PaymentForm = (): JSX.Element => {
-    const { stripeError, isLoading } = useValues(paymentEntryLogic)
-    const { setStripeError, clearErrors, hidePaymentEntryModal, pollAuthorizationStatus, setLoading } =
-        useActions(paymentEntryLogic)
-
-    const stripe = useStripe()
-    const elements = useElements()
-
-    const handleSubmit = async (event: React.MouseEvent<HTMLElement>): Promise<void> => {
-        clearErrors()
-        event.preventDefault()
-        if (!stripe || !elements) {
-            return
-        }
-        setLoading(true)
-        const result = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: `${window.location.origin}/billing/authorization_status`,
-            },
-            redirect: 'if_required',
-        })
-
-        if (result.error) {
-            setLoading(false)
-            setStripeError(result.error.message)
-            insights.captureException(new Error('payment entry stripe error', { cause: result.error }))
-        } else {
-            pollAuthorizationStatus(result.paymentIntent.id)
-        }
-    }
-
-    return (
-        <div>
-            <PaymentElement />
-            <p className="text-xs text-secondary mt-0.5">
-                A temporary $0.50 authorization hold will be placed on your card to verify it. This hold will be
-                automatically released within 7 days and you will not be charged.
-            </p>
-            {stripeError && <LemonBanner type="error">{stripeError}</LemonBanner>}
-            <div className="flex justify-end deprecated-space-x-2 mt-2">
-                <LemonButton disabled={isLoading} type="secondary" onClick={hidePaymentEntryModal}>
-                    Cancel
-                </LemonButton>
-                <LemonButton loading={isLoading} type="primary" onClick={(event) => void handleSubmit(event)}>
-                    Submit
-                </LemonButton>
-            </div>
-        </div>
-    )
-}
-
+/**
+ * Card-entry modal. The user's browser is bounced to @hanzoai/pay
+ * (pay.hanzo.ai) which terminates the actual payment with the
+ * Hanzo Commerce backend. We do not host Stripe Elements anymore.
+ *
+ * The insights backend still returns a `clientSecret` from
+ * /api/billing/activate/authorize — that token is now a Hanzo Commerce
+ * checkout-session token. Pay forwards it back through commerce.
+ */
 export const PaymentEntryModal = (): JSX.Element => {
-    const { clientSecret, paymentEntryModalOpen, apiError } = useValues(paymentEntryLogic)
+    const { clientSecret, paymentEntryModalOpen, apiError, isLoading } = useValues(paymentEntryLogic)
     const { hidePaymentEntryModal, initiateAuthorization } = useActions(paymentEntryLogic)
-    const [stripePromise, setStripePromise] = useState<any>(null)
-
-    useEffect(() => {
-        // Only load Stripe.js when the modal is opened
-        if (paymentEntryModalOpen && !stripePromise) {
-            const loadStripeJs = async (): Promise<void> => {
-                const { loadStripe } = await stripeJs()
-                const publicKey = window.STRIPE_PUBLIC_KEY!
-                setStripePromise(await loadStripe(publicKey))
-            }
-            void loadStripeJs()
-        }
-    }, [paymentEntryModalOpen, stripePromise])
 
     useEffect(() => {
         if (paymentEntryModalOpen) {
             initiateAuthorization()
         }
     }, [paymentEntryModalOpen, initiateAuthorization])
+
+    const goToPay = (): void => {
+        if (!clientSecret) {
+            return
+        }
+        const returnUrl = `${window.location.origin}/billing/authorization_status`
+        const target = `${PAY_URL}/checkout?session=${encodeURIComponent(clientSecret)}&return_url=${encodeURIComponent(returnUrl)}`
+        window.location.assign(target)
+    }
 
     return (
         <LemonModal
@@ -93,17 +44,29 @@ export const PaymentEntryModal = (): JSX.Element => {
             description=""
         >
             <div>
-                {clientSecret ? (
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                        <PaymentForm />
-                    </Elements>
-                ) : apiError ? (
+                {apiError ? (
                     <div className="flex flex-col gap-2 my-2">
                         <p className="text-md">
                             We could not complete your upgrade at this time. Please review the error below and contact
                             support if you need help.
                         </p>
                         <LemonBanner type="error">{apiError}</LemonBanner>
+                    </div>
+                ) : clientSecret ? (
+                    <div className="flex flex-col gap-3 my-2">
+                        <p className="text-md">
+                            You will be redirected to {new URL(PAY_URL).host} to add your payment details securely. A
+                            temporary $0.50 authorization hold will be placed on your card to verify it. The hold is
+                            automatically released within 7 days.
+                        </p>
+                        <div className="flex justify-end deprecated-space-x-2 mt-2">
+                            <LemonButton disabled={isLoading} type="secondary" onClick={hidePaymentEntryModal}>
+                                Cancel
+                            </LemonButton>
+                            <LemonButton loading={isLoading} type="primary" onClick={goToPay}>
+                                Continue to checkout
+                            </LemonButton>
+                        </div>
                     </div>
                 ) : (
                     <div className="min-h-80 flex flex-col justify-center items-center">
