@@ -1,6 +1,6 @@
 module github.com/hanzoai/insights/bin/hobby-installer
 
-go 1.26
+go 1.26.3
 
 require (
 	github.com/charmbracelet/bubbles v0.20.0
