@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   build-and-push:
-    runs-on: hanzo-build-linux-amd64
+    runs-on: evo
     steps:
       - uses: actions/checkout@v4
 
