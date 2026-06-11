@@ -1,110 +1,109 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	metric "github.com/luxfi/metric"
 )
 
 var (
-	MsgConsumed = promauto.NewCounterVec(
-		prometheus.CounterOpts{
+	MsgConsumed = metric.NewCounterVec(
+		metric.CounterOpts{
 			Name: "livestream_kafka_consumed_total",
 			Help: "The total number of processed events",
 		},
 		[]string{"partition"},
 	)
-	TimeoutConsume = promauto.NewCounter(prometheus.CounterOpts{
+	TimeoutConsume = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_kafka_timeout_total",
 		Help: "The total number of consume timeouts",
 	})
-	ConnectFailure = promauto.NewCounter(prometheus.CounterOpts{
+	ConnectFailure = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_kafka_connect_failure_total",
 		Help: "The total number of failed connect attempts",
 	})
-	HandledEvents = promauto.NewCounter(prometheus.CounterOpts{
+	HandledEvents = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_ph_events_total",
 		Help: "The total number of handled Insights events, less than or equal to consumed",
 	})
 
-	IncomingQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	IncomingQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_incoming_queue_use_ratio",
 		Help: "How much of incoming queue is used",
 	})
-	EventQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	EventQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_event_queue_use_ratio",
 		Help: "How much of parsed event queue is used",
 	})
-	StatsQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	StatsQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_stats_queue_use_ratio",
 		Help: "How much of stats queue is used",
 	})
-	SubQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	SubQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_sub_queue_use_ratio",
 		Help: "How much of sub queue is used (a connection create subscription)",
 	})
-	UnSubQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	UnSubQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_unsub_queue_use_ratio",
 		Help: "How much of unsub queue is used (disconnecting removes subscription)",
 	})
-	SubTotal = promauto.NewGauge(prometheus.GaugeOpts{
+	SubTotal = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_active_event_subscriptions_total",
 		Help: "How many active event subscriptions we have",
 	})
-	DroppedEvents = promauto.NewCounterVec(
-		prometheus.CounterOpts{
+	DroppedEvents = metric.NewCounterVec(
+		metric.CounterOpts{
 			Name: "livestream_dropped_events_total",
 			Help: "Events dropped due to full subscriber channel",
 		},
 		[]string{"channel"},
 	)
-	GeoIPLookupFailures = promauto.NewCounter(prometheus.CounterOpts{
+	GeoIPLookupFailures = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_geoip_lookup_failures_total",
 		Help: "The total number of failed GeoIP lookups",
 	})
 
-	SessionRecordingMsgConsumed = promauto.NewCounterVec(
-		prometheus.CounterOpts{
+	SessionRecordingMsgConsumed = metric.NewCounterVec(
+		metric.CounterOpts{
 			Name: "livestream_session_recording_kafka_consumed_total",
 			Help: "The total number of consumed session recording messages",
 		},
 		[]string{"partition"},
 	)
-	SessionRecordingTimeoutConsume = promauto.NewCounter(prometheus.CounterOpts{
+	SessionRecordingTimeoutConsume = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_session_recording_kafka_timeout_total",
 		Help: "The total number of session recording consume timeouts",
 	})
-	SessionRecordingConnectFailure = promauto.NewCounter(prometheus.CounterOpts{
+	SessionRecordingConnectFailure = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_session_recording_kafka_connect_failure_total",
 		Help: "The total number of failed session recording connect attempts",
 	})
-	SessionRecordingHandledEvents = promauto.NewCounter(prometheus.CounterOpts{
+	SessionRecordingHandledEvents = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_session_recording_events_total",
 		Help: "The total number of handled session recording events",
 	})
-	SessionRecordingStatsQueue = promauto.NewGauge(prometheus.GaugeOpts{
+	SessionRecordingStatsQueue = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_session_recording_stats_queue_use_ratio",
 		Help: "How much of session recording stats queue is used",
 	})
-	SessionRecordingDroppedMessages = promauto.NewCounter(prometheus.CounterOpts{
+	SessionRecordingDroppedMessages = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_session_recording_dropped_messages_total",
 		Help: "The total number of session recording messages dropped due to missing headers",
 	})
 
 	// Session stats LRU metrics
-	SessionRecordingLRUSize = promauto.NewGauge(prometheus.GaugeOpts{
+	SessionRecordingLRUSize = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_session_recording_lru_size",
 		Help: "Current number of unique sessions in the LRU cache",
 	})
-	SessionRecordingLRUEvictions = promauto.NewCounter(prometheus.CounterOpts{
+	SessionRecordingLRUEvictions = metric.NewCounter(metric.CounterOpts{
 		Name: "livestream_session_recording_lru_evictions_total",
 		Help: "Total number of sessions evicted from LRU (by TTL or capacity)",
 	})
-	SessionRecordingTokenCount = promauto.NewGauge(prometheus.GaugeOpts{
+	SessionRecordingTokenCount = metric.NewGauge(metric.GaugeOpts{
 		Name: "livestream_session_recording_token_count",
 		Help: "Number of unique tokens being tracked",
 	})
 
-	EventLagHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+	EventLagHistogram = metric.NewHistogram(metric.HistogramOpts{
 		Name:    "livestream_event_lag_seconds",
 		Help:    "Distribution of event lag in seconds",
 		Buckets: []float64{1, 2, 5, 10, 30, 60, 120, 300, 600, 900, 1800, 3600},

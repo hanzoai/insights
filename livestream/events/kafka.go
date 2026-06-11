@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	jlexer "github.com/mailru/easyjson/jlexer"
-	jwriter "github.com/mailru/easyjson/jwriter"
 	"github.com/hanzoai/insights/livestream/configs"
 	"github.com/hanzoai/insights/livestream/geo"
 	"github.com/hanzoai/insights/livestream/metrics"
-	"github.com/prometheus/client_golang/prometheus"
+	metric "github.com/luxfi/metric"
+	jlexer "github.com/mailru/easyjson/jlexer"
+	jwriter "github.com/mailru/easyjson/jwriter"
 )
 
 // FlexibleString handles JSON values that can be either a string or a number,
@@ -196,7 +196,7 @@ func (c *InsightsKafkaConsumer) Consume() {
 			continue
 		}
 
-		metrics.MsgConsumed.With(prometheus.Labels{"partition": strconv.Itoa(int(msg.TopicPartition.Partition))}).Inc()
+		metrics.MsgConsumed.With(metric.Labels{"partition": strconv.Itoa(int(msg.TopicPartition.Partition))}).Inc()
 		c.incoming <- msg.Value
 	}
 }
