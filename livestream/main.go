@@ -10,17 +10,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/hanzoai/insights/livestream/auth"
 	"github.com/hanzoai/insights/livestream/configs"
 	"github.com/hanzoai/insights/livestream/events"
 	"github.com/hanzoai/insights/livestream/geo"
 	"github.com/hanzoai/insights/livestream/handlers"
 	"github.com/hanzoai/insights/livestream/metrics"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/labstack/echo-contrib/echoprometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	metric "github.com/luxfi/metric"
 )
 
 func main() {
@@ -172,10 +171,10 @@ func main() {
 	// Routes
 	e.GET("/", handlers.Index)
 
-	// For details why promhttp.Handler won't work: https://github.com/prometheus/client_golang/issues/622
-	e.GET("/metrics", echo.WrapHandler(promhttp.InstrumentMetricHandler(
-		prometheus.DefaultRegisterer,
-		promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{DisableCompression: true}),
+	// For details why metric.Handler won't work: https://github.com/prometheus/client_golang/issues/622
+	e.GET("/metrics", echo.WrapHandler(metric.InstrumentMetricHandler(
+		metric.DefaultRegisterer,
+		metric.NewHTTPHandler(metric.DefaultGatherer, metric.HandlerOpts{DisableCompression: true}),
 	)))
 
 	e.GET("/stats", handlers.StatsHandler(stats, sessionStats))

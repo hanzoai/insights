@@ -8,7 +8,7 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/hanzoai/insights/livestream/metrics"
-	"github.com/prometheus/client_golang/prometheus"
+	metric "github.com/luxfi/metric"
 )
 
 type Subscription struct {
@@ -156,7 +156,7 @@ func (c *Filter) Run() {
 						case sub.EventChan <- *responseGeoEvent:
 						default:
 							sub.DroppedEvents.Add(1)
-							metrics.DroppedEvents.With(prometheus.Labels{"channel": "geo"}).Inc()
+							metrics.DroppedEvents.With(metric.Labels{"channel": "geo"}).Inc()
 						}
 					}
 				} else {
@@ -166,7 +166,7 @@ func (c *Filter) Run() {
 					case sub.EventChan <- *responseEvent:
 					default:
 						sub.DroppedEvents.Add(1)
-						metrics.DroppedEvents.With(prometheus.Labels{"channel": "events"}).Inc()
+						metrics.DroppedEvents.With(metric.Labels{"channel": "events"}).Inc()
 					}
 				}
 			}

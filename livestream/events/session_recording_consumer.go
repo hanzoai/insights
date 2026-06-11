@@ -9,7 +9,7 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/hanzoai/insights/livestream/metrics"
-	"github.com/prometheus/client_golang/prometheus"
+	metric "github.com/luxfi/metric"
 )
 
 type SessionRecordingEvent struct {
@@ -33,9 +33,9 @@ func NewSessionRecordingKafkaConsumer(
 		"auto.offset.reset":          "latest",
 		"enable.auto.commit":         false,
 		"security.protocol":          securityProtocol,
-		"fetch.message.max.bytes":    10_000_000,  // 10MB - we only read headers
-		"fetch.max.bytes":            50_000_000,  // 50MB - reduced from 1GB
-		"queued.max.messages.kbytes": 100_000,     // 100MB - reduced from 2GB
+		"fetch.message.max.bytes":    10_000_000, // 10MB - we only read headers
+		"fetch.max.bytes":            50_000_000, // 50MB - reduced from 1GB
+		"queued.max.messages.kbytes": 100_000,    // 100MB - reduced from 2GB
 	}
 
 	consumer, err := kafka.NewConsumer(config)
@@ -85,7 +85,7 @@ func (c *SessionRecordingKafkaConsumer) Consume(ctx context.Context) {
 			}
 
 			msgCount++
-			metrics.SessionRecordingMsgConsumed.With(prometheus.Labels{"partition": strconv.Itoa(int(msg.TopicPartition.Partition))}).Inc()
+			metrics.SessionRecordingMsgConsumed.With(metric.Labels{"partition": strconv.Itoa(int(msg.TopicPartition.Partition))}).Inc()
 
 			// Log first few messages and periodically to help debug header issues
 			if msgCount <= 5 || msgCount%10000 == 0 {
