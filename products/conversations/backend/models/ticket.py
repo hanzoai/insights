@@ -70,7 +70,7 @@ class Ticket(UUIDTModel):
             models.Index(fields=["team", "widget_session_id"]),  # Access control queries
             models.Index(fields=["team", "distinct_id"]),  # Person linking queries
             models.Index(fields=["team", "status"]),
-            models.Index(fields=["team", "-ticket_number"], name="insights_con_team_id_ticket_idx"),  # MAX() lookups
+            models.Index(fields=["team", "-ticket_number"], name="con_team_id_ticket_idx"),  # MAX() lookups
             models.Index(fields=["team", "session_id"]),  # Session context queries
             # Dashboard ordering optimization
             models.Index(fields=["team", "-updated_at"], name="insights_con_team_updated_idx"),

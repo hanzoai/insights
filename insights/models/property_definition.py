@@ -99,7 +99,7 @@ class PropertyDefinition(UUIDTModel):
                 Coalesce(F("project_id"), F("team_id")),
                 F("type"),
                 F("is_numerical"),
-                name="insights_pro_project_3583d2_idx",
+                name="pro_project_3583d2_idx",
             ),
             GinIndex(
                 name="index_property_definition_name",

@@ -25,9 +25,9 @@ class EventProperty(models.Model):
             # Index on project_id foreign key
             models.Index(fields=["project"], name="insights_eve_proj_id_dd2337d2"),
             models.Index(fields=["team", "event"]),
-            models.Index(Coalesce(F("project_id"), F("team_id")), F("event"), name="insights_eve_proj_id_22de03_idx"),
+            models.Index(Coalesce(F("project_id"), F("team_id")), F("event"), name="eve_proj_id_22de03_idx"),
             models.Index(fields=["team", "property"]),
-            models.Index(Coalesce(F("project_id"), F("team_id")), F("property"), name="insights_eve_proj_id_26dbfb_idx"),
+            models.Index(Coalesce(F("project_id"), F("team_id")), F("property"), name="eve_proj_id_26dbfb_idx"),
         ]
 
     __repr__ = sane_repr("event", "property", "team_id")

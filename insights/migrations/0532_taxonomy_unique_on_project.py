@@ -43,11 +43,11 @@ class Migration(migrations.Migration):
         # Remove misguided `project_id`-only indexes from the previous migration
         RemoveIndexConcurrently(
             model_name="eventproperty",
-            name="insights_eve_proj_id_22de03_idx",
+            name="eve_proj_id_22de03_idx",
         ),
         RemoveIndexConcurrently(
             model_name="eventproperty",
-            name="insights_eve_proj_id_26dbfb_idx",
+            name="eve_proj_id_26dbfb_idx",
         ),
         RemoveIndexConcurrently(
             model_name="propertydefinition",
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         ),
         RemoveIndexConcurrently(
             model_name="propertydefinition",
-            name="insights_pro_project_3583d2_idx",
+            name="pro_project_3583d2_idx",
         ),
         # Add new useful indexes using `coalesce(project_id, team_id)`
         AddIndexConcurrently(
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
             index=models.Index(
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("event"),
-                name="insights_eve_proj_id_22de03_idx",
+                name="eve_proj_id_22de03_idx",
             ),
         ),
         AddIndexConcurrently(
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
             index=models.Index(
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("property"),
-                name="insights_eve_proj_id_26dbfb_idx",
+                name="eve_proj_id_26dbfb_idx",
             ),
         ),
         AddIndexConcurrently(
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
                 django.db.models.functions.comparison.Coalesce(models.F("project_id"), models.F("team_id")),
                 models.F("type"),
                 models.F("is_numerical"),
-                name="insights_pro_project_3583d2_idx",
+                name="pro_project_3583d2_idx",
             ),
         ),
         migrations.AddConstraint(
