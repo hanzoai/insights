@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="propertydefinition",
-            index=models.Index(fields=["project_id", "type", "is_numerical"], name="insights_pro_project_3583d2_idx"),
+            index=models.Index(fields=["project_id", "type", "is_numerical"], name="pro_project_3583d2_idx"),
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
@@ -80,10 +80,10 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
-            index=models.Index(fields=["project", "event"], name="insights_eve_proj_id_22de03_idx"),
+            index=models.Index(fields=["project", "event"], name="eve_proj_id_22de03_idx"),
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
-            index=models.Index(fields=["project", "property"], name="insights_eve_proj_id_26dbfb_idx"),
+            index=models.Index(fields=["project", "property"], name="eve_proj_id_26dbfb_idx"),
         ),
     ]

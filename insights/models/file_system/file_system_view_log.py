@@ -25,8 +25,8 @@ class FileSystemViewLog(UUIDModel):
 
     class Meta:
         indexes = [
-            models.Index(fields=["team", "user", "-viewed_at"], name="insights_fsvl_recent_user_views"),
-            models.Index(fields=["team", "type", "ref", "-viewed_at"], name="insights_fsvl_recent_item_views"),
+            models.Index(fields=["team", "user", "-viewed_at"], name="fsvl_recent_user_views"),
+            models.Index(fields=["team", "type", "ref", "-viewed_at"], name="fsvl_recent_item_views"),
         ]
         constraints = [
             models.UniqueConstraint(fields=("team", "user", "type", "ref"), name="insights_fsvl_unique_user_item")
