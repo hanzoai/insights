@@ -168,6 +168,7 @@ const surveyActionsMapping: Record<
 
         const fieldNameMapping: Record<keyof SurveyAppearance, string> = {
             backgroundColor: 'background color',
+            textColor: 'text color',
             submitButtonColor: 'submit button color',
             submitButtonText: 'submit button text',
             submitButtonTextColor: 'submit button text color',
@@ -183,6 +184,7 @@ const surveyActionsMapping: Record<
             thankYouMessageCloseButtonText: 'thank you message close button text',
             autoDisappear: 'auto-disappear option',
             position: 'survey position',
+            tabPosition: 'survey button position',
             shuffleQuestions: 'question shuffling',
             surveyPopupDelaySeconds: 'survey popup delay',
             widgetType: 'widget type',
@@ -198,6 +200,8 @@ const surveyActionsMapping: Record<
             maxWidth: 'max width',
             textSubtleColor: 'text subtle color',
             inputBackground: 'input background',
+            inputTextColor: 'input text color',
+            hideCancelButton: 'hide cancel button',
         }
 
         Object.entries(fieldNameMapping).forEach(([field, readableFieldName]) => {
@@ -276,12 +280,7 @@ const surveyActionsMapping: Record<
                 </>
             )
             if (afterFlag.filters?.groups?.length > 0) {
-                changes.push(
-                    <>
-                        set targeting conditions to:
-                        <pre>{JSON.stringify(afterFlag.filters, null, 2)}</pre>
-                    </>
-                )
+                changes.push(<>set new targeting conditions</>)
             }
         } else if (beforeFlag && !afterFlag) {
             changes.push(
@@ -312,24 +311,12 @@ const surveyActionsMapping: Record<
         const changes: Description[] = []
 
         if (!beforeFlag && afterFlag) {
-            changes.push(
-                <>
-                    added targeting flag filter with the following conditions:
-                    <pre>{JSON.stringify(afterFlag, null, 2)}</pre>
-                </>
-            )
+            changes.push(<>added a targeting flag filter</>)
         } else if (beforeFlag && !afterFlag) {
             changes.push(<>removed targeting flag filter</>)
         } else if (beforeFlag && afterFlag) {
             if (JSON.stringify(beforeFlag) !== JSON.stringify(afterFlag)) {
-                changes.push(
-                    <>
-                        changed targeting conditions from:
-                        <pre>{JSON.stringify(beforeFlag, null, 2)}</pre>
-                        to:
-                        <pre>{JSON.stringify(afterFlag, null, 2)}</pre>
-                    </>
-                )
+                changes.push(<>changed targeting conditions</>)
             }
         }
 
@@ -347,7 +334,7 @@ export function surveyActivityDescriber(logItem: ActivityLogItem, asNotification
         return { description: null }
     }
 
-    const user = <strong>{userNameForLogItem(logItem)}</strong>
+    const user = <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong>
     const surveyLink = nameOrLinkToSurvey(logItem?.item_id, logItem?.detail.name, logItem.activity)
 
     if (logItem.activity === 'created') {

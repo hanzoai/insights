@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconInfo, IconLineGraph } from '@posthog/icons'
-import { LemonSegmentedButton, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconLineGraph } from '@hanzo/icons'
+import { LemonSegmentedButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconTableChart } from 'lib/lemon-ui/icons'
 import { humanFriendlyNumber } from 'lib/utils'

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	"github.com/posthog/posthog/livestream/events"
-	"github.com/posthog/posthog/livestream/handlers"
+	"github.com/hanzoai/insights/livestream/events"
+	"github.com/hanzoai/insights/livestream/handlers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestIndex(t *testing.T) {
 
 	if assert.NoError(t, handlers.Index(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "RealTime Hog 3000", rec.Body.String())
+		assert.Equal(t, "RealTime Insights 3000", rec.Body.String())
 	}
 }
 
@@ -48,6 +48,6 @@ func TestStatsHandler(t *testing.T) {
 
 	if assert.NoError(t, handler(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.JSONEq(t, `{"users_on_product":1}`, string(rec.Body.Bytes()))
+		assert.JSONEq(t, `{"users_on_product":1}`, rec.Body.String())
 	}
 }

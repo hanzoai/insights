@@ -4,7 +4,7 @@
     "calculation_trigger": null,
     "columns": null,
     "error": null,
-    "hogql": null,
+    "insightsql": null,
     "is_cached": true,
     "last_refresh": "2025-05-29T20:24:26.606038Z",
     "modifiers": {

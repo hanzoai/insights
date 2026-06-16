@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconWarning } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -107,7 +107,7 @@ export function InstanceConfigTab(): JSX.Element {
                     <div>
                         Changing these settings will take effect on your entire instance.{' '}
                         <Link
-                            to="https://posthog.com/docs/self-host/configure/instance-settings"
+                            to="https://hanzo.ai/docs/self-host/configure/instance-settings"
                             target="_blank"
                             targetBlankIcon
                         >
@@ -164,7 +164,7 @@ export function InstanceConfigTab(): JSX.Element {
                 <h3>Environment configuration</h3>
                 <div>
                     These settings can only be modified by environment variables.{' '}
-                    <Link to="https://posthog.com/docs/self-host/configure/environment-variables" target="_blank">
+                    <Link to="https://hanzo.ai/docs/self-host/configure/environment-variables" target="_blank">
                         Learn more <IconOpenInNew style={{ verticalAlign: 'middle' }} />
                     </Link>
                     .

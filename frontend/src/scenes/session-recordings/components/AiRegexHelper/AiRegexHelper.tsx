@@ -1,11 +1,11 @@
 /**
- * @fileoverview A component that helps you to generate regex for your settings using Max AI
+ * @fileoverview A component that helps you to generate regex for your settings using AI
  */
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconAI, IconCopy, IconPlus } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonModal, LemonTextArea } from '@posthog/lemon-ui'
+import { IconAI, IconCopy, IconPlus } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonModal, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
@@ -26,7 +26,7 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
     const aiAvailable = preflight?.openai_available
 
     const disabledReason = !aiAvailable
-        ? 'To use AI features, set environment variable OPENAI_API_KEY for this instance of PostHog'
+        ? 'To use AI features, set environment variable OPENAI_API_KEY for this instance of Insights'
         : !dataProcessingAccepted
           ? dataProcessingApprovalDisabledReason || 'You must accept the data processing agreement to use AI features'
           : isLoading
@@ -37,10 +37,10 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
 
     return (
         <>
-            <LemonModal isOpen={isOpen} onClose={onClose} title="Max AI Regex Helper">
+            <LemonModal isOpen={isOpen} onClose={onClose} title="AI Regex Helper">
                 Explain your regex in natural language:
                 <LemonTextArea
-                    placeholder="I want a regex that covers all urls that include 'app.posthog.com/auth/*'"
+                    placeholder="I want a regex that covers all urls that include 'insights.hanzo.ai/auth/*'"
                     className="w-full my-2"
                     maxRows={4}
                     minRows={2}
@@ -87,7 +87,7 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
                             <LemonButton
                                 type="primary"
                                 onClick={() => {
-                                    posthog.capture('path_cleaning_regex_ai_applied', {
+                                    insights.capture('path_cleaning_regex_ai_applied', {
                                         prompt: input,
                                         regex: generatedRegex,
                                     })
@@ -119,7 +119,7 @@ export function AiRegexHelperButton(): JSX.Element {
             icon={<IconAI />}
             onClick={() => {
                 setIsOpen(true)
-                posthog.capture('ai_regex_helper_open')
+                insights.capture('ai_regex_helper_open')
             }}
         >
             Help me with Regex

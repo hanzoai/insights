@@ -3,9 +3,10 @@ import './EditSurvey.scss'
 import { DndContext } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
+import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
+import { IconGitBranch, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCalendarSelect,
@@ -15,14 +16,15 @@ import {
     LemonInput,
     LemonSegmentedButton,
     LemonSelect,
+    LemonSwitch,
     LemonTag,
     Link,
     Popover,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
-import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { FlagSelector } from 'lib/components/FlagSelector'
+import { ANY_VARIANT, variantOptions } from 'lib/components/IngestionControls/triggers/FlagTrigger/VariantSelector'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -35,20 +37,20 @@ import { featureFlagLogic as enabledFeaturesLogic } from 'lib/logic/featureFlagL
 import { formatDate } from 'lib/utils'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
-import { ANY_VARIANT, variantOptions } from 'scenes/settings/environment/ReplayTriggers'
+import { SurveyActionTrigger } from 'scenes/surveys/SurveyActionTrigger'
+import { SurveyCancelEventTrigger, SurveyEventTrigger } from 'scenes/surveys/SurveyEventTrigger'
 import { SurveyRepeatSchedule } from 'scenes/surveys/SurveyRepeatSchedule'
 import { SurveyResponsesCollection } from 'scenes/surveys/SurveyResponsesCollection'
 import { SurveyWidgetCustomization } from 'scenes/surveys/SurveyWidgetCustomization'
 import { Customization } from 'scenes/surveys/survey-appearance/SurveyCustomization'
 import { sanitizeSurveyAppearance, validateSurveyAppearance } from 'scenes/surveys/utils'
+import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { actionsModel } from '~/models/actionsModel'
 import { getPropertyKey } from '~/taxonomy/helpers'
 import {
-    ActionType,
     LinkSurveyQuestion,
     PropertyFilterType,
     PropertyOperator,
@@ -65,8 +67,10 @@ import { SurveyAppearancePreview } from './SurveyAppearancePreview'
 import { HTMLEditor, PresentationTypeCard } from './SurveyAppearanceUtils'
 import { SurveyEditQuestionGroup, SurveyEditQuestionHeader } from './SurveyEditQuestionRow'
 import { SurveyFormAppearance } from './SurveyFormAppearance'
+import { SurveyBranchingFlowModal } from './branching-flow/SurveyBranchingFlowModal'
 import { SURVEY_TYPE_LABEL_MAP, SurveyMatchTypeLabels, defaultSurveyFieldValues } from './constants'
 import { DataCollectionType, SurveyEditSection, surveyLogic } from './surveyLogic'
+import { surveysLogic } from './surveysLogic'
 
 function SurveyCompletionConditions(): JSX.Element {
     const { survey, dataCollectionType, isAdaptiveLimitFFEnabled } = useValues(surveyLogic)
@@ -226,7 +230,7 @@ function SurveyCompletionConditions(): JSX.Element {
     )
 }
 
-export default function SurveyEdit(): JSX.Element {
+export default function SurveyEdit({ id }: { id: string }): JSX.Element {
     const {
         survey,
         urlMatchTypeValidationError,
@@ -236,11 +240,10 @@ export default function SurveyEdit(): JSX.Element {
         isEditingSurvey,
         targetingFlagFilters,
         hasBranchingLogic,
-        surveyRepeatedActivationAvailable,
         deviceTypesMatchTypeValidationError,
         surveyErrors,
-        isExternalSurveyFFEnabled,
         user,
+        surveyLoading,
     } = useValues(surveyLogic)
     const {
         setSurveyValue,
@@ -250,11 +253,25 @@ export default function SurveyEdit(): JSX.Element {
         setFlagPropertyErrors,
         deleteBranchingLogic,
         setSurveyManualErrors,
+        editingSurvey,
+        loadSurvey,
     } = useActions(surveyLogic)
     const { featureFlags } = useValues(enabledFeaturesLogic)
+    const { guidedEditorEnabled } = useValues(surveysLogic)
     const sortedItemIds = survey.questions.map((_, idx) => idx.toString())
     const { thankYouMessageDescriptionContentType = null } = survey.appearance ?? {}
     useMountedLogic(actionsModel)
+
+    const [showFlowModal, setShowFlowModal] = useState(false)
+
+    const handleCancelClick = (): void => {
+        editingSurvey(false)
+        if (id === 'new') {
+            router.actions.push(urls.surveys())
+        } else {
+            loadSurvey()
+        }
+    }
 
     function onSortEnd({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }): void {
         function move(arr: SurveyQuestion[], from: number, to: number): SurveyQuestion[] {
@@ -291,8 +308,40 @@ export default function SurveyEdit(): JSX.Element {
                     onDescriptionChange={(description) => setSurveyValue('description', description)}
                     renameDebounceMs={0}
                     forceEdit
+                    actions={
+                        <>
+                            {guidedEditorEnabled && survey.type === SurveyType.Popover && (
+                                <LemonButton
+                                    data-attr="switch-to-wizard"
+                                    type="tertiary"
+                                    size="small"
+                                    to={urls.surveyWizard(id)}
+                                >
+                                    Guided editor
+                                </LemonButton>
+                            )}
+                            <LemonButton
+                                data-attr="cancel-survey"
+                                type="secondary"
+                                loading={surveyLoading}
+                                onClick={handleCancelClick}
+                                size="small"
+                            >
+                                Cancel
+                            </LemonButton>
+                            <LemonButton
+                                type="primary"
+                                data-attr="save-survey"
+                                htmlType="submit"
+                                loading={surveyLoading}
+                                form="survey"
+                                size="small"
+                            >
+                                {id === 'new' ? 'Save as draft' : 'Save'}
+                            </LemonButton>
+                        </>
+                    }
                 />
-                <SceneDivider />
             </div>
             <div className="flex flex-col xl:grid xl:grid-cols-[1fr_400px] gap-x-4 h-full">
                 <div className="flex flex-col gap-2 flex-1 SurveyForm">
@@ -321,7 +370,7 @@ export default function SurveyEdit(): JSX.Element {
                                                                 }
                                                             }}
                                                             title={SURVEY_TYPE_LABEL_MAP[SurveyType.Popover]}
-                                                            description="Automatically appears when PostHog JS is installed"
+                                                            description="Automatically appears when Insights JS is installed"
                                                             value={SurveyType.Popover}
                                                         >
                                                             <div className="scale-[0.8] absolute -top-4 -left-4">
@@ -340,7 +389,7 @@ export default function SurveyEdit(): JSX.Element {
                                                                 }
                                                             }}
                                                             title={SURVEY_TYPE_LABEL_MAP[SurveyType.API]}
-                                                            description="Use the PostHog API to show/hide your survey programmatically"
+                                                            description="Use the Insights API to show/hide your survey programmatically"
                                                             value={SurveyType.API}
                                                         >
                                                             <div className="absolute left-4 w-[350px]">
@@ -362,24 +411,34 @@ export default function SurveyEdit(): JSX.Element {
                                                             active={value === SurveyType.ExternalSurvey}
                                                             onClick={() => onChange(SurveyType.ExternalSurvey)}
                                                             title={SURVEY_TYPE_LABEL_MAP[SurveyType.ExternalSurvey]}
-                                                            description="Collect responses via an external link, hosted on PostHog. If you are already using surveys, make sure to upgrade posthog-js to at least v1.258.1."
+                                                            description="Collect responses via an external link, hosted on Insights. If you are already using surveys, make sure to upgrade insights-js to at least v1.258.1."
                                                             value={SurveyType.ExternalSurvey}
-                                                            disabled={!isExternalSurveyFFEnabled}
                                                         >
-                                                            <LemonTag type="warning">
-                                                                {isExternalSurveyFFEnabled ? 'BETA' : 'COMING SOON'}
-                                                            </LemonTag>
+                                                            <LemonTag type="warning">BETA</LemonTag>
                                                         </PresentationTypeCard>
                                                     </div>
                                                     {survey.type === SurveyType.Widget && <SurveyWidgetCustomization />}
                                                     {survey.type === SurveyType.ExternalSurvey && (
                                                         <>
+                                                            <Tooltip title="Enable this to embed the survey in tools like Framer, Webflow, or other website builders that use iframes.">
+                                                                <LemonSwitch
+                                                                    checked={!!survey.enable_iframe_embedding}
+                                                                    onChange={(checked) =>
+                                                                        setSurveyValue(
+                                                                            'enable_iframe_embedding',
+                                                                            checked
+                                                                        )
+                                                                    }
+                                                                    label="Allow embedding in iframes"
+                                                                    bordered
+                                                                />
+                                                            </Tooltip>
                                                             <div className="font-semibold">
                                                                 How hosted surveys work:
                                                             </div>
                                                             <ul className="space-y-2 text-sm">
                                                                 <li>
-                                                                    • The survey will be hosted by PostHog and you can
+                                                                    • The survey will be hosted by Insights and you can
                                                                     share the URL with your customers
                                                                 </li>
                                                                 <li>
@@ -389,15 +448,15 @@ export default function SurveyEdit(): JSX.Element {
                                                                     </code>{' '}
                                                                     query parameter to the URL. Here's an example:{'\n'}
                                                                     <Link
-                                                                        to={`https://us.posthog.com/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}
+                                                                        to={`https://insights.hanzo.ai/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}
                                                                         target="_blank"
-                                                                    >{`https://us.posthog.com/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}</Link>
+                                                                    >{`https://insights.hanzo.ai/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}</Link>
                                                                 </li>
                                                                 <li>
                                                                     • Check more details about identifying respondents
                                                                     in the{' '}
                                                                     <Link
-                                                                        to="https://posthog.com/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
+                                                                        to="https://hanzo.ai/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
                                                                         target="_blank"
                                                                     >
                                                                         documentation
@@ -671,6 +730,17 @@ export default function SurveyEdit(): JSX.Element {
                                                 >
                                                     Add question
                                                 </LemonButton>
+                                                {hasBranchingLogic && (
+                                                    <LemonButton
+                                                        data-attr="preview-survey-branching"
+                                                        type="secondary"
+                                                        className="w-max"
+                                                        icon={<IconGitBranch />}
+                                                        onClick={() => setShowFlowModal(true)}
+                                                    >
+                                                        Preview branching flow
+                                                    </LemonButton>
+                                                )}
                                             </div>
                                             {!survey.appearance?.displayThankYouMessage && (
                                                 <LemonButton
@@ -724,6 +794,16 @@ export default function SurveyEdit(): JSX.Element {
                                                                           survey.type
                                                                       )
                                                                   )
+                                                              }
+                                                              if (
+                                                                  'surveyPopupDelaySeconds' in appearance &&
+                                                                  !appearance.surveyPopupDelaySeconds &&
+                                                                  survey.conditions?.cancelEvents?.values?.length
+                                                              ) {
+                                                                  setSurveyValue('conditions', {
+                                                                      ...survey.conditions,
+                                                                      cancelEvents: undefined,
+                                                                  })
                                                               }
                                                           }}
                                                           validationErrors={surveyErrors?.appearance}
@@ -856,7 +936,7 @@ export default function SurveyEdit(): JSX.Element {
                                                               <LemonField.Pure
                                                                   label="Link to a specific flag variant"
                                                                   info="Choose which variant of the feature flag to link to this survey.
-                                                              Requires posthog-js v1.259.0 or greater or posthog-react-native v4.4.0 or greater"
+                                                              Requires insights-js v1.259.0 or greater or insights-react-native v4.4.0 or greater"
                                                               >
                                                                   <div className="flex flex-col gap-2">
                                                                       <LemonSegmentedButton
@@ -897,7 +977,7 @@ export default function SurveyEdit(): JSX.Element {
                                                                       <LemonField.Pure
                                                                           label="URL targeting"
                                                                           error={urlMatchTypeValidationError}
-                                                                          info="Targeting by regex or exact match requires at least version 1.82 of posthog-js"
+                                                                          info="Targeting by regex or exact match requires at least version 1.82 of insights-js"
                                                                       >
                                                                           <div className="flex flex-row gap-2 items-center">
                                                                               URL
@@ -928,7 +1008,7 @@ export default function SurveyEdit(): JSX.Element {
                                                                                           url: urlVal,
                                                                                       })
                                                                                   }
-                                                                                  placeholder="ex: https://app.posthog.com"
+                                                                                  placeholder="ex: https://insights.hanzo.ai"
                                                                                   fullWidth
                                                                               />
                                                                           </div>
@@ -942,11 +1022,11 @@ export default function SurveyEdit(): JSX.Element {
                                                                                   survey on. Possible values: 'Desktop',
                                                                                   'Mobile', 'Tablet'. For the full list
                                                                                   and caveats,{' '}
-                                                                                  <Link to="https://posthog.com/docs/surveys/creating-surveys#display-conditions">
+                                                                                  <Link to="https://hanzo.ai/docs/surveys/creating-surveys#display-conditions">
                                                                                       check the documentation here
                                                                                   </Link>
                                                                                   . Requires at least version 1.214 of
-                                                                                  posthog-js
+                                                                                  insights-js
                                                                               </>
                                                                           }
                                                                       >
@@ -1168,121 +1248,28 @@ export default function SurveyEdit(): JSX.Element {
                                                                   )}
                                                               </BindLogic>
                                                           </LemonField.Pure>
-                                                          <LemonField.Pure
-                                                              label="User sends events"
-                                                              info="It only triggers when the event is captured in the current user session and using the PostHog SDK."
-                                                          >
-                                                              <>
-                                                                  <EventSelect
-                                                                      filterGroupTypes={[
-                                                                          TaxonomicFilterGroupType.CustomEvents,
-                                                                          TaxonomicFilterGroupType.Events,
-                                                                      ]}
-                                                                      allowNonCapturedEvents
-                                                                      onChange={(includedEvents) => {
-                                                                          setSurveyValue('conditions', {
-                                                                              ...survey.conditions,
-                                                                              events: {
-                                                                                  values: includedEvents.map((e) => {
-                                                                                      return { name: e }
-                                                                                  }),
-                                                                              },
-                                                                          })
-                                                                      }}
-                                                                      selectedEvents={
-                                                                          survey.conditions?.events?.values?.length !=
-                                                                              undefined &&
-                                                                          survey.conditions?.events?.values?.length > 0
-                                                                              ? survey.conditions?.events?.values.map(
-                                                                                    (v) => v.name
-                                                                                )
-                                                                              : []
-                                                                      }
-                                                                      addElement={
-                                                                          <LemonButton
-                                                                              size="small"
-                                                                              type="secondary"
-                                                                              icon={<IconPlus />}
-                                                                              sideIcon={null}
-                                                                          >
-                                                                              Add event
-                                                                          </LemonButton>
-                                                                      }
-                                                                  />
-                                                                  {surveyRepeatedActivationAvailable && (
-                                                                      <div className="flex flex-row gap-2 items-center">
-                                                                          Survey display frequency
-                                                                          <LemonSelect
-                                                                              onChange={(value) => {
-                                                                                  setSurveyValue('conditions', {
-                                                                                      ...survey.conditions,
-                                                                                      events: {
-                                                                                          ...survey.conditions?.events,
-                                                                                          repeatedActivation: value,
-                                                                                      },
-                                                                                  })
-                                                                              }}
-                                                                              value={
-                                                                                  survey.conditions?.events
-                                                                                      ?.repeatedActivation || false
-                                                                              }
-                                                                              options={[
-                                                                                  {
-                                                                                      label: 'Just once',
-                                                                                      value: false,
-                                                                                  },
-                                                                                  {
-                                                                                      label: 'Every time any of the above events are captured',
-                                                                                      value: true,
-                                                                                  },
-                                                                              ]}
-                                                                          />
-                                                                      </div>
-                                                                  )}
-                                                              </>
-                                                          </LemonField.Pure>
-                                                          {featureFlags[FEATURE_FLAGS.SURVEYS_ACTIONS] && (
+                                                          {featureFlags[FEATURE_FLAGS.SURVEYS_ACTIONS] ? (
                                                               <LemonField.Pure
-                                                                  label="User performs actions"
-                                                                  info="Note that these actions are only observed, and activate this survey, in the current user session."
+                                                                  label="Activation triggers"
+                                                                  info="Survey will activate when any of these conditions are met"
                                                               >
-                                                                  <EventSelect
-                                                                      filterGroupTypes={[
-                                                                          TaxonomicFilterGroupType.Actions,
-                                                                      ]}
-                                                                      onItemChange={(items: ActionType[]) => {
-                                                                          setSurveyValue('conditions', {
-                                                                              ...survey.conditions,
-                                                                              actions: {
-                                                                                  values: items.map((e) => {
-                                                                                      return { id: e.id, name: e.name }
-                                                                                  }),
-                                                                              },
-                                                                          })
-                                                                      }}
-                                                                      selectedItems={
-                                                                          survey.conditions?.actions?.values &&
-                                                                          survey.conditions?.actions?.values.length > 0
-                                                                              ? survey.conditions?.actions?.values
-                                                                              : []
-                                                                      }
-                                                                      selectedEvents={
-                                                                          survey.conditions?.actions?.values?.map(
-                                                                              (v) => v.name
-                                                                          ) ?? []
-                                                                      }
-                                                                      addElement={
-                                                                          <LemonButton
-                                                                              size="small"
-                                                                              type="secondary"
-                                                                              icon={<IconPlus />}
-                                                                              sideIcon={null}
-                                                                          >
-                                                                              Add action
-                                                                          </LemonButton>
-                                                                      }
-                                                                  />
+                                                                  <div className="border rounded p-3 space-y-3">
+                                                                      <SurveyEventTrigger />
+                                                                      <div className="flex items-center gap-2">
+                                                                          <div className="flex-1 border-t border-dashed" />
+                                                                          <span className="text-xs font-semibold text-muted uppercase">
+                                                                              or
+                                                                          </span>
+                                                                          <div className="flex-1 border-t border-dashed" />
+                                                                      </div>
+                                                                      <SurveyActionTrigger />
+                                                                  </div>
                                                               </LemonField.Pure>
+                                                          ) : (
+                                                              <SurveyEventTrigger />
+                                                          )}
+                                                          {!!survey.appearance?.surveyPopupDelaySeconds && (
+                                                              <SurveyCancelEventTrigger />
                                                           )}
                                                       </>
                                                   )}
@@ -1310,6 +1297,7 @@ export default function SurveyEdit(): JSX.Element {
                     </div>
                 </div>
             </div>
+            <SurveyBranchingFlowModal survey={survey} isOpen={showFlowModal} onClose={() => setShowFlowModal(false)} />
         </SceneContent>
     )
 }

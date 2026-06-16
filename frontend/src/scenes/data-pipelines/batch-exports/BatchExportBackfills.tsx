@@ -1,12 +1,13 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonTable } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonTable } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
 import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { IconCancel, IconRefresh } from 'lib/lemon-ui/icons'
+import { IconCancel } from 'lib/lemon-ui/icons'
 
 import { BatchExportBackfill } from '~/types'
 
@@ -82,7 +83,7 @@ function BatchExportLatestBackfills({ id }: BatchExportBackfillsLogicProps): JSX
                             const color = colorForStatus(status)
                             const statusStyles = {
                                 success: 'border-success text-success-dark',
-                                accent: 'border-accent text-primary-dark',
+                                'color-accent': 'border-accent text-accent',
                                 warning: 'border-warning text-warning-dark',
                                 danger: 'border-danger text-danger-dark',
                                 default: 'border-default text-default-dark',
@@ -238,14 +239,14 @@ function BackfillCancelButton({
 
 const colorForStatus = (
     status: BatchExportBackfill['status']
-): 'success' | 'accent' | 'warning' | 'danger' | 'default' => {
+): 'success' | 'color-accent' | 'warning' | 'danger' | 'default' => {
     switch (status) {
         case 'Completed':
             return 'success'
         case 'ContinuedAsNew':
         case 'Running':
         case 'Starting':
-            return 'accent'
+            return 'color-accent'
         case 'Cancelled':
         case 'Terminated':
         case 'TimedOut':

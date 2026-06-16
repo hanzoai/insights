@@ -28,6 +28,31 @@ export function copyPublicFolder(srcDir, destDir) {
     })
 }
 
+export function copySnappyWASMFile(absWorkingDir) {
+    try {
+        fse.copyFileSync(
+            path.resolve(absWorkingDir, 'node_modules/snappy-wasm/es/snappy_bg.wasm'),
+            path.resolve(absWorkingDir, 'dist/snappy_bg.wasm')
+        )
+    } catch (error) {
+        console.warn('Could not copy snappy wasm file:', error.message)
+    }
+}
+
+export function copyRRWebWorkerFiles(absWorkingDir) {
+    try {
+        const rrwebSourceDir = path.resolve(absWorkingDir, 'node_modules/@hanzo/rrweb/dist')
+        const distDir = path.resolve(absWorkingDir, 'dist')
+        const files = fse.readdirSync(rrwebSourceDir)
+        const mapFiles = files.filter((f) => f.startsWith('image-bitmap-data-url-worker-') && f.endsWith('.js.map'))
+        mapFiles.forEach((file) => {
+            fse.copyFileSync(path.join(rrwebSourceDir, file), path.join(distDir, file))
+        })
+    } catch (error) {
+        console.warn('Could not copy rrweb map files:', error.message)
+    }
+}
+
 /** Update the file's modified and accessed times to now. */
 async function touchFile(file) {
     const now = new Date()
@@ -48,7 +73,7 @@ export function copyIndexHtml(
     //
     // `JS_URL` is expected to be injected into the html as part of Django html
     // template rendering. We do not know what JS_URL should be at runtime, as,
-    // for instance, on PostHog Cloud, we want to use the official PostHog
+    // for instance, on Insights Cloud, we want to use the official Insights
     // Docker image, but serve the js and it's dependencies from e.g. CloudFront
     const buildId = new Date().valueOf()
 
@@ -77,15 +102,15 @@ export function copyIndexHtml(
     // Django caches the generated index.html, and we'll end up loading the wrong chunks after one change.
     const chunksToServe = isDev ? {} : chunks
     const chunkCode = `
-        window.ESBUILD_LOADED_CHUNKS = new Set(); 
-        window.ESBUILD_LOAD_CHUNKS = function(name) { 
+        window.ESBUILD_LOADED_CHUNKS = new Set();
+        window.ESBUILD_LOAD_CHUNKS = function(name) {
             const chunks = ${JSON.stringify(chunksToServe)}[name] || [];
-            for (const chunk of chunks) { 
-                if (!window.ESBUILD_LOADED_CHUNKS.has(chunk)) { 
-                    window.ESBUILD_LOAD_SCRIPT('chunk-'+chunk+'.js'); 
+            for (const chunk of chunks) {
+                if (!window.ESBUILD_LOADED_CHUNKS.has(chunk)) {
+                    window.ESBUILD_LOAD_SCRIPT('chunk-'+chunk+'.js');
                     window.ESBUILD_LOADED_CHUNKS.add(chunk);
-                } 
-            } 
+                }
+            }
         }
         window.ESBUILD_LOAD_CHUNKS('index');
     `
@@ -103,7 +128,7 @@ export function copyIndexHtml(
         path.resolve(absWorkingDir, to),
         fse.readFileSync(path.resolve(absWorkingDir, from), { encoding: 'utf-8' }).replace(
             '</head>',
-            `   <script type="application/javascript">
+            `   <script nonce="{{ request.csp_nonce }}" type="application/javascript">
                     // NOTE: the link for the stylesheet will be added just
                     // after this script block. The react code will need the
                     // body to have been parsed before it is able to interact
@@ -151,6 +176,22 @@ export const commonConfig = {
     // no hashes in dev mode for faster reloads --> we save the old hash in index.html otherwise
     entryNames: isDev ? '[dir]/[name]' : '[dir]/[name]-[hash]',
     plugins: [
+        // monaco-vim imports monaco-editor internals without .js extensions (e.g. monaco-editor/esm/vs/editor/editor.api)
+        // which esbuild can't resolve through monaco-editor's package.json exports map
+        {
+            name: 'resolve-monaco-esm',
+            setup(build) {
+                build.onResolve({ filter: /^monaco-editor\/esm\// }, (args) => {
+                    if (args.path.endsWith('.js')) {
+                        return
+                    }
+                    return build.resolve(args.path + '.js', {
+                        kind: args.kind,
+                        resolveDir: args.resolveDir,
+                    })
+                })
+            },
+        },
         sassPlugin({
             async transform(source, resolveDir, filePath) {
                 const plugins = [autoprefixer, postcssPresetEnv({ stage: 0 })]
@@ -176,11 +217,13 @@ export const commonConfig = {
     loader: {
         '.ttf': 'file',
         '.png': 'file',
+        '.gif': 'file',
         '.svg': 'file',
         '.woff': 'file',
         '.woff2': 'file',
         '.mp3': 'file',
         '.lottie': 'file',
+        '.sql': 'text',
     },
     metafile: true,
 }
@@ -240,7 +283,7 @@ export async function buildInParallel(configs, { onBuildStart, onBuildComplete }
 function getBuiltEntryPoints(config, result) {
     let outfiles = []
     if (config.outdir) {
-        // convert "src/index.tsx" --> /a/posthog/frontend/dist/index.js
+        // convert "src/index.tsx" --> /a/insights/frontend/dist/index.js
         outfiles = config.entryPoints.map((file) =>
             path
                 .resolve(config.absWorkingDir, file)
@@ -378,7 +421,6 @@ export async function buildOrWatch(config) {
             .watch(
                 [
                     path.resolve(absWorkingDir, 'src'),
-                    path.resolve(absWorkingDir, '../ee/frontend'),
                     path.resolve(absWorkingDir, '../common'),
                     path.resolve(absWorkingDir, '../products/*/manifest.tsx'),
                     path.resolve(absWorkingDir, '../products/*/frontend/**/*'),

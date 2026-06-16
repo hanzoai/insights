@@ -1,7 +1,9 @@
 import './LoadingBar.scss'
 
 import { useEffect, useState } from 'react'
-import { twMerge } from 'tailwind-merge'
+
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
+import { cn } from 'lib/utils/css-classes'
 
 export interface SpinnerProps {
     textColored?: boolean
@@ -17,6 +19,7 @@ export interface SpinnerProps {
 /** Smoothly animated spinner for loading states. It does not indicate progress, only that something's happening. */
 export function LoadingBar({ className, loadId, setProgress, progress, wrapperClassName }: SpinnerProps): JSX.Element {
     const [_progress, _setProgress] = useState(0)
+    const { isVisible: isPageVisible } = usePageVisibility()
 
     useEffect(() => {
         if (loadId && progress) {
@@ -33,6 +36,10 @@ export function LoadingBar({ className, loadId, setProgress, progress, wrapperCl
     }, [_progress, loadId, setProgress])
 
     useEffect(() => {
+        if (!isPageVisible) {
+            return
+        }
+
         const interval = setInterval(() => {
             _setProgress((prevProgress) => {
                 let newProgress = prevProgress + 0.005
@@ -51,11 +58,11 @@ export function LoadingBar({ className, loadId, setProgress, progress, wrapperCl
         }, 50)
 
         return () => clearInterval(interval)
-    }, [loadId])
+    }, [loadId, isPageVisible])
 
     return (
-        <div className={twMerge(`progress-outer max-w-120 w-full my-3`, wrapperClassName)}>
-            <div className={twMerge(`progress`, className)}>
+        <div className={cn(`progress-outer max-w-120 w-full my-3`, wrapperClassName)} data-attr="loading-bar">
+            <div className={cn(`progress`, className)}>
                 <div
                     className="progress-bar"
                     // eslint-disable-next-line react/forbid-dom-props

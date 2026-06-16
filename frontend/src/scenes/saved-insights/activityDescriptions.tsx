@@ -1,6 +1,7 @@
 import '../../lib/components/Cards/InsightCard/InsightCard.scss'
 
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
+import { Fragment } from 'react'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
@@ -93,7 +94,7 @@ const insightActionsMapping: Record<
     },
     deleted: function onSoftDelete(change, logItem, asNotification) {
         const isDeleted = detectBoolean(change?.after)
-        const describeChange = isDeleted ? 'deleted' : 'un-deleted'
+        const describeChange = isDeleted ? 'deleted' : 'restored'
         return {
             description: [
                 <>
@@ -194,7 +195,7 @@ const insightActionsMapping: Record<
                     </>
                 }
                 listParts={addedDashboards.map((d) => (
-                    <>{linkToDashboard(d)}</>
+                    <Fragment key={d.id}>{linkToDashboard(d)}</Fragment>
                 ))}
             />
         ) : null
@@ -208,7 +209,7 @@ const insightActionsMapping: Record<
                     </>
                 }
                 listParts={removedDashboards.map((d) => (
-                    <>{linkToDashboard(d)}</>
+                    <Fragment key={d.id}>{linkToDashboard(d)}</Fragment>
                 ))}
             />
         ) : null
@@ -232,13 +233,12 @@ const insightActionsMapping: Record<
     saved: () => null,
     is_sample: () => null,
     timezone: () => null,
-    effective_restriction_level: () => null,
-    effective_privilege_level: () => null,
     disable_baseline: () => null,
     dashboard_tiles: () => null,
     query_status: () => null,
     user_access_level: () => null,
     _create_in_folder: () => null,
+    last_viewed_at: () => null,
 }
 
 function summarizeChanges(filtersAfter: Partial<FilterType>): ChangeMapping | null {
@@ -267,7 +267,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> created the insight:{' '}
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> created the insight:{' '}
                     {nameOrLinkToInsight(logItem?.detail.short_id, logItem?.detail.name)}
                 </>
             ),
@@ -278,8 +278,8 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> deleted {asNotification ? 'your' : 'the'} insight:{' '}
-                    {logItem.detail.name}
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> deleted{' '}
+                    {asNotification ? 'your' : 'the'} insight: {logItem.detail.name}
                 </>
             ),
         }
@@ -289,7 +289,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>PostHog</strong> exported {asNotification ? 'your' : 'the'} insight: {logItem.detail.name}{' '}
+                    <strong>Insights</strong> exported {asNotification ? 'your' : 'the'} insight: {logItem.detail.name}{' '}
                     as an image for the shared insight link.
                 </>
             ),
@@ -300,8 +300,8 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> shared {asNotification ? 'your' : 'the'} insight:{' '}
-                    {logItem.detail.name}.
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> shared{' '}
+                    {asNotification ? 'your' : 'the'} insight: {logItem.detail.name}.
                 </>
             ),
         }
@@ -311,7 +311,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> deleted shared link for{' '}
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> deleted shared link for{' '}
                     {asNotification ? 'your' : 'the'} insight: {logItem.detail.name}.
                 </>
             ),
@@ -353,7 +353,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
             }
         } catch (e) {
             console.error('Error while summarizing insight update', e)
-            posthog.captureException(e)
+            insights.captureException(e)
         }
 
         if (changes.length) {
@@ -361,7 +361,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
                 description: (
                     <SentenceList
                         listParts={changes}
-                        prefix={<strong>{userNameForLogItem(logItem)}</strong>}
+                        prefix={<strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong>}
                         suffix={changeSuffix}
                     />
                 ),
@@ -379,7 +379,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> exported{' '}
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> exported{' '}
                     {nameOrLinkToInsight(logItem?.detail.short_id, logItem?.detail.name)} as a {exportType}
                 </>
             ),
@@ -416,5 +416,9 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
         }
     }
 
-    return defaultDescriber(logItem, asNotification, nameOrLinkToInsight(logItem?.detail.short_id))
+    return defaultDescriber(
+        logItem,
+        asNotification,
+        nameOrLinkToInsight(logItem?.detail.short_id, logItem?.detail.name)
+    )
 }

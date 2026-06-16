@@ -103,12 +103,14 @@ function copyPublicAssets(): void {
     } else {
         console.warn('⚠️ Public directory does not exist')
     }
+
 }
 
 export function publicAssetsPlugin(): Plugin {
     return {
         name: 'public-assets-copy',
-        buildStart() {
+        configureServer() {
+            // Copy assets when dev server starts
             deleteAssetsFiles()
             copyPublicAssets()
         },

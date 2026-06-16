@@ -1,0 +1,163 @@
+#
+# Dockerfile.node - nodejs Only
+#
+# This Dockerfile builds only the nodejs (Node.js app) without Django, frontend, or other components.
+# Use this for running standalone nodejs instances.
+#
+
+#
+# Build stage: Rust 1.91 + Node.js 24.13.0 on Debian Bookworm
+#
+FROM rust:1.91-bookworm AS nodejs-build
+
+# Install Node.js 24.13.0
+ENV NODE_VERSION=24.13.0
+RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
+    && case "${dpkgArch##*-}" in \
+        amd64) ARCH='x64';; \
+        arm64) ARCH='arm64';; \
+        *) echo "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
+    esac \
+    && curl -fsSLO "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz" \
+    && tar -xJf "node-v${NODE_VERSION}-linux-${ARCH}.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+    && rm "node-v${NODE_VERSION}-linux-${ARCH}.tar.xz" \
+    && node --version && npm --version
+
+# Compile and install system dependencies
+# Add Confluent's client repository for librdkafka 2.10.1
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    "wget" \
+    "gnupg" \
+    && \
+    mkdir -p /etc/apt/keyrings && \
+    wget -qO - https://packages.confluent.io/clients/deb/archive.key | gpg --dearmor -o /etc/apt/keyrings/confluent-clients.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/confluent-clients.gpg] https://packages.confluent.io/clients/deb/ bookworm main" > /etc/apt/sources.list.d/confluent-clients.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends --allow-downgrades \
+    "make" \
+    "g++" \
+    "gcc" \
+    "python3" \
+    "librdkafka1=2.10.1-1.cflt~deb12" \
+    "librdkafka++1=2.10.1-1.cflt~deb12" \
+    "librdkafka-dev=2.10.1-1.cflt~deb12" \
+    "libssl-dev=3.0.18-1~deb12u2" \
+    "libssl3=3.0.18-1~deb12u2" \
+    "zlib1g-dev" \
+    && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /code
+COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json .pnpmfile.cjs ./
+COPY ./bin/turbo ./bin/turbo
+COPY ./patches ./patches
+COPY ./rust ./rust
+COPY ./common/esbuilder/ ./common/esbuilder/
+COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
+COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
+COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
+COPY ./common/siphash/ ./common/siphash/
+COPY ./common/insights-node/ ./common/insights-node/
+COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
+SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
+
+# Use system librdkafka from Confluent (2.10.1) instead of bundled version
+ENV BUILD_LIBRDKAFKA=0
+
+# Compile and install Node.js dependencies
+RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
+    corepack enable && \
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@hanzo/nodejs... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@hanzo/plugin-transpiler... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/plugin-transpiler build
+
+# Build the nodejs services
+COPY ./nodejs/src/ ./nodejs/src/
+COPY ./nodejs/tests/ ./nodejs/tests/
+COPY ./nodejs/assets/ ./nodejs/assets/
+COPY ./nodejs/bin/ ./nodejs/bin/
+
+# Build cyclotron first
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/cyclotron build
+
+# Then build the nodejs services
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/nodejs build
+
+
+#
+# Runtime stage: Minimal image with only nodejs runtime dependencies
+#
+FROM node:24.13.0-bookworm-slim
+WORKDIR /code
+SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
+
+# Install runtime dependencies
+# Add Confluent's client repository for librdkafka runtime
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    "ca-certificates" \
+    "wget" \
+    "gnupg" \
+    && \
+    mkdir -p /etc/apt/keyrings && \
+    wget -qO - https://packages.confluent.io/clients/deb/archive.key | gpg --dearmor -o /etc/apt/keyrings/confluent-clients.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/confluent-clients.gpg] https://packages.confluent.io/clients/deb/ bookworm main" > /etc/apt/sources.list.d/confluent-clients.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends --allow-downgrades \
+    "librdkafka1=2.10.1-1.cflt~deb12" \
+    "librdkafka++1=2.10.1-1.cflt~deb12" \
+    "libssl3=3.0.18-1~deb12u2" \
+    "curl" \
+    "gettext-base" \
+    && \
+    rm -rf /var/lib/apt/lists/*
+# curl: Required by bin/nodejs startup script to fetch EC2 metadata when INJECT_EC2_CLIENT_RACK is set
+# gettext-base: Provides envsubst command used by bin/nodejs to substitute environment variables in Kafka client IDs
+
+# Install and use a non-root user
+RUN groupadd -g 1000 insights || groupmod -n insights $(getent group 1000 | cut -d: -f1) && \
+    useradd -u 1000 -g insights insights || usermod -l insights -d /code -g insights $(getent passwd 1000 | cut -d: -f1) && \
+    chown -R insights:insights /code
+USER insights
+
+# Add the commit hash
+ARG COMMIT_HASH
+RUN echo ${COMMIT_HASH:-unknown} > /code/commit.txt
+
+
+# Add in the compiled nodejs & its runtime dependencies from the build stage
+COPY --from=nodejs-build --chown=insights:insights /code/rust/cyclotron-node/dist /code/rust/cyclotron-node/dist
+COPY --from=nodejs-build --chown=insights:insights /code/rust/cyclotron-node/package.json /code/rust/cyclotron-node/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/rust/cyclotron-node/index.node /code/rust/cyclotron-node/index.node
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/dist /code/common/plugin_transpiler/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/node_modules /code/common/plugin_transpiler/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/package.json /code/common/plugin_transpiler/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/dist /code/common/scriptvm/typescript/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/node_modules /code/common/scriptvm/typescript/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/package.json /code/common/scriptvm/typescript/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/index.js /code/common/insights-node/index.js
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/node_modules /code/common/insights-node/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/index.d.ts /code/common/insights-node/index.d.ts
+COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/package.json /code/common/insights-node/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/dist /code/common/plugin-scaffold/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/package.json /code/common/plugin-scaffold/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/lib /code/common/siphash/lib
+COPY --from=nodejs-build --chown=insights:insights /code/common/siphash/package.json /code/common/siphash/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
+COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/nodejs/package.json /code/nodejs/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/nodejs/assets /code/nodejs/assets
+COPY --from=nodejs-build --chown=insights:insights /code/nodejs/bin /code/nodejs/bin
+
+# Setup ENV
+ENV NODE_ENV=production \
+    BUILD_LIBRDKAFKA=0
+
+# Expose the port from which we serve OpenMetrics data
+EXPOSE 8001
+
+# Default command: run the nodejs services
+CMD ["node", "nodejs/dist/index.js"]
+

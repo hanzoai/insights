@@ -3,7 +3,7 @@ import { lazyLoaders } from 'kea-loaders'
 
 import api from 'lib/api'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { PersonType } from '~/types'
 
 import type { replayActiveUsersTableLogicType } from './replayActiveUsersTableLogicType'
@@ -22,7 +22,7 @@ export const replayActiveUsersTableLogic = kea<replayActiveUsersTableLogicType>(
     lazyLoaders(() => ({
         countedUsers: {
             loadCountedUsers: async (_, breakpoint): Promise<{ person: PersonType; count: number }[]> => {
-                const q = hogql`
+                const q = insightsql`
                     WITH
             -- get the session ids for any recorded sessions in the last 7 days
             recorded_sessions AS (
@@ -60,14 +60,14 @@ export const replayActiveUsersTableLogic = kea<replayActiveUsersTableLogicType>(
                 sp.person_id,
                 sp.pp,
                 count(distinct sp.session_id) as total_count
-            FROM session_persons sp 
+            FROM session_persons sp
             WHERE sp.person_id IS NOT NULL
             GROUP BY sp.person_id, sp.pp
             ORDER BY total_count DESC
             LIMIT 10
                 `
 
-                const qResponse = await api.queryHogQL(q)
+                const qResponse = await api.queryInsightsQL(q, { scene: 'Replay', productKey: 'session_replay' })
 
                 breakpoint()
 

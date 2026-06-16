@@ -2,7 +2,7 @@ import { actions, defaults, kea, listeners, path, reducers, selectors } from 'ke
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'
@@ -22,6 +22,7 @@ export type SourceMapUpload = {
 }
 
 export type ErrorTrackingSymbolSetResponse = CountedPaginatedResponse<ErrorTrackingSymbolSet>
+export type SymbolSetOrder = 'created_at' | '-created_at' | 'last_used' | '-last_used'
 
 export const symbolSetLogic = kea<symbolSetLogicType>([
     path(['products', 'error_tracking', 'scenes', 'ErrorTrackingConfigurationScene', 'symbol_sets', 'symbolSetLogic']),
@@ -31,6 +32,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
         deleteSymbolSet: (id: string) => ({ id }),
         setUploadSymbolSetId: (id: string | null) => ({ id }),
         setSymbolSetStatusFilter: (status: SymbolSetStatusFilter) => ({ status }),
+        setSymbolSetOrder: (order: SymbolSetOrder) => ({ order }),
         setPage: (page: number) => ({ page }),
     }),
 
@@ -39,6 +41,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
         symbolSetResponse: null as ErrorTrackingSymbolSetResponse | null,
         symbolSetStatusFilter: 'all' as SymbolSetStatusFilter,
         uploadSymbolSetId: null as string | null,
+        symbolSetOrder: '-created_at' as SymbolSetOrder,
     }),
 
     reducers({
@@ -51,6 +54,10 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
         page: {
             setPage: (_, { page }) => page,
             setSymbolSetStatusFilter: () => 1,
+            setSymbolSetOrder: () => 1,
+        },
+        symbolSetOrder: {
+            setSymbolSetOrder: (_, { order }) => order,
         },
     }),
 
@@ -62,6 +69,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
                     status: values.symbolSetStatusFilter,
                     limit: RESULTS_PER_PAGE,
                     offset: (values.page - 1) * RESULTS_PER_PAGE,
+                    orderBy: values.symbolSetOrder,
                 })
                 return res
             },
@@ -105,6 +113,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
         },
         setSymbolSetStatusFilter: () => actions.loadSymbolSets(),
         setPage: () => actions.loadSymbolSets(),
+        setSymbolSetOrder: () => actions.loadSymbolSets(),
     })),
 
     selectors(({ actions }) => ({
@@ -113,12 +122,14 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
             (): Breadcrumb[] => [
                 {
                     key: Scene.ErrorTracking,
-                    name: 'Error tracking',
+                    name: 'Error Tracking',
                     path: urls.errorTracking(),
+                    iconType: 'error_tracking',
                 },
                 {
                     key: Scene.ErrorTrackingConfiguration,
                     name: 'Configuration',
+                    iconType: 'error_tracking',
                 },
             ],
         ],

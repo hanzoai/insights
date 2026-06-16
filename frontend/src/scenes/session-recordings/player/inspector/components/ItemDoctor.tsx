@@ -18,7 +18,7 @@ export function ItemDoctor({ item }: ItemDoctorProps): JSX.Element {
 export function ItemDoctorDetail({ item }: ItemDoctorProps): JSX.Element {
     return (
         <div data-attr="item-doctor-item" className="font-light w-full flex flex-col">
-            {['posthog config', 'session options'].includes(item.tag) ? (
+            {['insights config', 'session options'].includes(item.tag) ? (
                 <div className="px-2 py-1 text-xs border-t flex justify-end">
                     <CopyToClipboardInline
                         explicitValue={JSON.stringify(item.data, null, 2)}

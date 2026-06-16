@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconCollapse, IconExpand, IconPlus } from '@posthog/icons'
-import { LemonMenu, LemonSwitch } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand, IconPlus } from '@hanzo/icons'
+import { LemonMenu, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -16,7 +16,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 import { SceneBreadcrumbBackButton } from '~/layout/scenes/components/SceneBreadcrumbs'
 import { Query } from '~/queries/Query/Query'
 import { isSessionPropertyFilters } from '~/queries/schema-guards'
-import { DataTableNode, HogQLQuery, SessionAttributionGroupBy } from '~/queries/schema/schema-general'
+import { DataTableNode, InsightsQLQuery, SessionAttributionGroupBy } from '~/queries/schema/schema-general'
 import { QueryContext, QueryContextColumnComponent } from '~/queries/types'
 
 import { sessionAttributionExplorerLogic } from './sessionAttributionExplorerLogic'
@@ -28,7 +28,6 @@ export function SessionAttributionExplorerScene(): JSX.Element {
 export const scene: SceneExport = {
     component: SessionAttributionExplorerScene,
     logic: sessionAttributionExplorerLogic,
-    settingSectionId: 'environment-web-analytics',
 }
 
 const ExpandableDataCell: QueryContextColumnComponent = ({ value }: { value: unknown }): JSX.Element => {
@@ -45,7 +44,7 @@ const ExpandableDataCell: QueryContextColumnComponent = ({ value }: { value: unk
     }
 
     if (!Array.isArray(value)) {
-        return <div>{value}</div>
+        return <div>{String(value)}</div>
     }
 
     return (
@@ -205,12 +204,12 @@ export function SessionAttributionExplorer(): JSX.Element {
                             attributed. We use the referring domain, <code>utm_source</code>, <code>utm_medium</code>,{' '}
                             <code>utm_campaign</code>, and the presence of advertising ids like <code>gclid</code> and{' '}
                             <code>gad_source</code>, to assign a session a{' '}
-                            <Link to="https://posthog.com/docs/data/channel-type">Channel type</Link>.
+                            <Link to="https://hanzo.ai/docs/data/channel-type">Channel type</Link>.
                         </p>
                         <p>
                             If you believe that a session is attributed incorrectly, please let us know! If you'd like
                             to customize your Channel attribution, please leave feedback on the{' '}
-                            <Link to="https://github.com/PostHog/posthog/issues/21195">feature request</Link>.
+                            <Link to="https://github.com/hanzoai/insights/issues/21195">feature request</Link>.
                         </p>
                     </div>
                     {showSupportOptions ? (
@@ -237,7 +236,7 @@ export function SessionAttributionExplorer(): JSX.Element {
                 context={queryContext}
                 query={query}
                 setQuery={(query) => {
-                    const source = query.source as HogQLQuery
+                    const source = query.source as InsightsQLQuery
                     if (source.filters && isSessionPropertyFilters(source.filters.properties)) {
                         setProperties(source.filters.properties)
                     } else {

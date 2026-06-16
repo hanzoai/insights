@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonDivider, LemonModal, Link } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonDivider, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -37,7 +37,7 @@ export function StaffUsersTab(): JSX.Element {
             render: function ProfilePictureRender(_, user) {
                 return (
                     <>
-                        {user.first_name}
+                        <span className="ph-no-capture">{user.first_name}</span>
                         {user.uuid === myself?.uuid && <LemonTag className="uppercase ml-1">Me</LemonTag>}
                     </>
                 )
@@ -47,6 +47,7 @@ export function StaffUsersTab(): JSX.Element {
             key: 'email',
             title: 'Email',
             dataIndex: 'email',
+            render: (_, user) => <span className="ph-no-capture">{user.email}</span>,
         },
         {
             key: 'actions',
@@ -77,7 +78,7 @@ export function StaffUsersTab(): JSX.Element {
                 Users who have permissions to manage instance-wide settings. Staff user permissions are set at the{' '}
                 <b>instance-level and are independent of any organization or project permissions.</b>{' '}
                 <Link
-                    to="https://posthog.com/docs/self-host/configure/instance-settings#staff-users"
+                    to="https://hanzo.ai/docs/self-host/configure/instance-settings#staff-users"
                     target="_blank"
                     targetBlankIcon
                 >

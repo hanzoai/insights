@@ -1,6 +1,6 @@
 import json
 
-from posthog.test.base import APIBaseTest, BaseTest, QueryMatchingTest, snapshot_postgres_queries
+from insights.test.base import APIBaseTest, BaseTest, QueryMatchingTest, snapshot_postgres_queries
 from unittest.mock import ANY, patch
 
 from django.core.cache import cache
@@ -8,8 +8,8 @@ from django.test.client import Client
 
 from rest_framework import status
 
-from posthog.models import FeatureFlag, Person
-from posthog.models.team.team_caching import set_team_in_cache
+from insights.models import FeatureFlag, Person
+from insights.models.team.team_caching import set_team_in_cache
 
 from products.early_access_features.backend.models import EarlyAccessFeature
 
@@ -515,12 +515,117 @@ class TestEarlyAccessFeature(APIBaseTest):
                     "feature_flag": None,
                     "id": ANY,
                     "name": "Click counter",
+                    "payload": {},
                     "stage": "beta",
                 },
             ],
         }
 
-    @patch("posthog.api.feature_flag.report_user_action")
+    def test_can_create_early_access_feature_with_payload(self):
+        payload = {"key": "value", "nested": {"inner": "data", "number": 42}}
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/early_access_feature/",
+            data={
+                "name": "Feature with payload",
+                "description": "A feature with a custom payload",
+                "stage": "beta",
+                "payload": payload,
+            },
+            format="json",
+        )
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_201_CREATED, response_data
+        assert response_data["payload"] == payload
+        feature = EarlyAccessFeature.objects.get(id=response_data["id"])
+        assert feature.payload == payload
+
+    def test_can_create_early_access_feature_without_payload_defaults_to_empty_dict(self):
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/early_access_feature/",
+            data={
+                "name": "Feature without payload",
+                "description": "A feature without a payload",
+                "stage": "beta",
+            },
+            format="json",
+        )
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_201_CREATED, response_data
+        assert response_data["payload"] == {}
+
+        feature = EarlyAccessFeature.objects.get(id=response_data["id"])
+        assert feature.payload == {}
+
+    def test_can_update_payload(self):
+        feature = EarlyAccessFeature.objects.create(
+            team=self.team,
+            name="Feature",
+            description="A feature",
+            stage="beta",
+            payload={"old": "data"},
+        )
+
+        new_payload = {"new": "payload", "updated": True, "count": 123}
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/early_access_feature/{feature.id}",
+            data={"payload": new_payload},
+            format="json",
+        )
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_200_OK, response_data
+        assert response_data["payload"] == new_payload
+        feature.refresh_from_db()
+        assert feature.payload == new_payload
+
+    def test_can_update_payload_to_empty_dict(self):
+        feature = EarlyAccessFeature.objects.create(
+            team=self.team,
+            name="Feature",
+            description="A feature",
+            stage="beta",
+            payload={"existing": "data"},
+        )
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/early_access_feature/{feature.id}",
+            data={"payload": {}},
+            format="json",
+        )
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_200_OK, response_data
+        assert response_data["payload"] == {}
+        feature.refresh_from_db()
+        assert feature.payload == {}
+
+    def test_payload_in_list_response(self):
+        EarlyAccessFeature.objects.create(
+            team=self.team,
+            name="Feature with payload",
+            description="A feature",
+            stage="beta",
+            payload={"custom": "data", "number": 42},
+        )
+        EarlyAccessFeature.objects.create(
+            team=self.team,
+            name="Feature without payload",
+            description="Another feature",
+            stage="beta",
+        )
+
+        response = self.client.get(f"/api/projects/{self.team.id}/early_access_feature/")
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_200_OK, response_data
+        assert response_data["count"] == 2
+        payloads = [result["payload"] for result in response_data["results"]]
+        assert {"custom": "data", "number": 42} in payloads
+        assert {} in payloads
+
+    @patch("insights.api.feature_flag.report_user_action")
     def test_creation_context_is_set_to_early_access_features(self, mock_capture):
         response = self.client.post(
             f"/api/projects/{self.team.id}/early_access_feature/",
@@ -547,10 +652,11 @@ class TestEarlyAccessFeature(APIBaseTest):
                 "aggregating_by_groups": False,
                 "payload_count": 0,
                 "creation_context": "early_access_features",
+                "source": "web",
             },
         )
 
-    @patch("posthog.tasks.early_access_feature.send_events_for_early_access_feature_stage_change.delay")
+    @patch("insights.tasks.early_access_feature.send_events_for_early_access_feature_stage_change.delay")
     def test_send_events_for_early_access_feature_stage_change_fires_on_stage_change(self, mock_celery_task):
         response = self.client.post(
             f"/api/projects/{self.team.id}/early_access_feature/",
@@ -593,7 +699,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         assert EarlyAccessFeature.objects.filter(id=feature_id).exists()
         assert FeatureFlag.objects.filter(id=response_data["feature_flag"]["id"]).exists()
 
-        from posthog.models.file_system.file_system import FileSystem
+        from insights.models.file_system.file_system import FileSystem
 
         fs_entry = FileSystem.objects.filter(
             team=self.team,
@@ -602,9 +708,9 @@ class TestEarlyAccessFeature(APIBaseTest):
         ).first()
 
         assert fs_entry is not None, "FileSystem entry not found for the newly created Early Access Feature."
-        assert (
-            "Special Folder/Early Access" in fs_entry.path
-        ), f"Expected 'Special Folder/Early Access' in {fs_entry.path}"
+        assert "Special Folder/Early Access" in fs_entry.path, (
+            f"Expected 'Special Folder/Early Access' in {fs_entry.path}"
+        )
 
 
 class TestPreviewList(BaseTest, QueryMatchingTest):
@@ -624,7 +730,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         return self.client.get(
             f"/api/early_access_features/",
             data={"token": token or self.team.api_token},
-            HTTP_ORIGIN=origin,
+            headers={"origin": origin},
             REMOTE_ADDR=ip,
         )
 
@@ -633,7 +739,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         feature_flag = FeatureFlag.objects.create(
@@ -681,6 +787,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
                         "description": "A fancy new sprocket.",
                         "stage": "beta",
                         "documentationUrl": "",
+                        "payload": {},
                         "flagKey": "sprocket",
                     }
                 ],
@@ -691,7 +798,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         # This is precisely what the `set_team_in_cache()` would have set on Dec 9, 2024
@@ -738,6 +845,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
                         "description": "A fancy new sprocket.",
                         "stage": "beta",
                         "documentationUrl": "",
+                        "payload": {},
                         "flagKey": "sprocket",
                     }
                 ],
@@ -748,7 +856,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         # Slightly dirty to use the actual implementation of `set_team_in_cache()` here, but this tests how things are
@@ -784,6 +892,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
                         "description": "A fancy new sprocket.",
                         "stage": "beta",
                         "documentationUrl": "",
+                        "payload": {},
                         "flagKey": "sprocket",
                     }
                 ],
@@ -793,7 +902,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         Person.objects.create(
             team=self.team,
             distinct_ids=["example_id"],
-            properties={"email": "example@posthog.com"},
+            properties={"email": "example@hanzo.ai"},
         )
 
         feature_flag = FeatureFlag.objects.create(
@@ -855,6 +964,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
                         "description": "A fancy new sprocket.",
                         "stage": "beta",
                         "documentationUrl": "",
+                        "payload": {},
                         "flagKey": "sprocket",
                     }
                 ],
@@ -868,7 +978,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
             self.assertEqual(response.status_code, 401)
             self.assertEqual(
                 response.json()["detail"],
-                "Project API key invalid. You can find your project API key in PostHog project settings.",
+                "Project API key invalid. You can find your project API key in Insights project settings.",
             )
 
     def test_early_access_features_errors_out_on_no_token(self):
@@ -879,5 +989,52 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
             self.assertEqual(response.status_code, 401)
             self.assertEqual(
                 response.json()["detail"],
-                "API key not provided. You can find your project API key in PostHog project settings.",
+                "API key not provided. You can find your project API key in Insights project settings.",
+            )
+
+    @snapshot_postgres_queries
+    def test_early_access_features_includes_payload_in_preview(self):
+        Person.objects.create(
+            team=self.team,
+            distinct_ids=["example_id"],
+            properties={"email": "example@hanzo.ai"},
+        )
+
+        feature_flag = FeatureFlag.objects.create(
+            team=self.team,
+            name=f"Feature Flag for Feature Sprocket",
+            key="sprocket",
+            rollout_percentage=0,
+            created_by=self.user,
+        )
+        payload = {"customKey": "customValue", "nested": {"data": 123}}
+        feature = EarlyAccessFeature.objects.create(
+            team=self.team,
+            name="Sprocket",
+            description="A fancy new sprocket.",
+            stage="beta",
+            feature_flag=feature_flag,
+            payload=payload,
+        )
+
+        self.client.logout()
+
+        with self.assertNumQueries(2):
+            response = self._get_features()
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get("access-control-allow-origin"), "http://127.0.0.1:8000")
+
+            self.assertListEqual(
+                response.json()["earlyAccessFeatures"],
+                [
+                    {
+                        "id": str(feature.id),
+                        "name": "Sprocket",
+                        "description": "A fancy new sprocket.",
+                        "stage": "beta",
+                        "documentationUrl": "",
+                        "payload": payload,
+                        "flagKey": "sprocket",
+                    }
+                ],
             )

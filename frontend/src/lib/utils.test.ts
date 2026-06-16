@@ -2,7 +2,7 @@ import tk from 'timekeeper'
 
 import { dayjs } from 'lib/dayjs'
 
-import { ElementType, EventType, PropertyType, TimeUnitType } from '~/types'
+import { ElementType, EventType, PropertyOperator, PropertyType, TimeUnitType } from '~/types'
 
 import {
     areDatesValidForInterval,
@@ -25,6 +25,8 @@ import {
     ensureStringIsNotBlank,
     eventToDescription,
     floorMsToClosestSecond,
+    formatDateTimeRange,
+    formatPercentageDiff,
     genericOperatorMap,
     getDefaultInterval,
     getFormattedLastWeekDate,
@@ -36,6 +38,7 @@ import {
     is12HoursOrLess,
     isExternalLink,
     isLessThan2Days,
+    isOperatorMulti,
     isURL,
     median,
     midEllipsis,
@@ -43,8 +46,10 @@ import {
     objectClean,
     objectCleanWithEmpty,
     objectDiffShallow,
+    parseTagsFilter,
     pluralize,
     range,
+    retryWithBackoff,
     reverseColonDelimitedDuration,
     roundToDecimal,
     selectorOperatorMap,
@@ -99,6 +104,7 @@ describe('lib/utils', () => {
             expect(identifierToHuman('500')).toEqual('500')
             expect(identifierToHuman(404)).toEqual('404')
             expect(identifierToHuman('CreateProject')).toEqual('Create project')
+            expect(identifierToHuman('insights_function/transformation')).toEqual('Custom function transformation')
         })
     })
 
@@ -121,9 +127,9 @@ describe('lib/utils', () => {
 
     describe('isURL()', () => {
         it('recognizes URLs properly', () => {
-            expect(isURL('https://www.posthog.com')).toEqual(true)
-            expect(isURL('http://www.posthog.com')).toEqual(true)
-            expect(isURL('http://www.posthog.com:8000/images')).toEqual(true)
+            expect(isURL('https://www.hanzo.ai')).toEqual(true)
+            expect(isURL('http://www.hanzo.ai')).toEqual(true)
+            expect(isURL('http://www.hanzo.ai:8000/images')).toEqual(true)
             expect(isURL('http://localhost:8000/login?next=/insights')).toEqual(true)
             expect(isURL('http://localhost:8000/activity/explore?properties=%5B%5D')).toEqual(true)
             expect(isURL('https://apple.com/')).toEqual(true)
@@ -138,9 +144,9 @@ describe('lib/utils', () => {
 
         it('recognizes non-URLs properly', () => {
             expect(isURL('1234567890')).toEqual(false)
-            expect(isURL('www.posthog')).toEqual(false)
-            expect(isURL('-.posthog')).toEqual(false)
-            expect(isURL('posthog.3')).toEqual(false)
+            expect(isURL('www.insights')).toEqual(false)
+            expect(isURL('-.insights')).toEqual(false)
+            expect(isURL('insights.3')).toEqual(false)
             expect(isURL(1)).toEqual(false)
             expect(isURL(true)).toEqual(false)
             expect(isURL(null)).toEqual(false)
@@ -152,13 +158,22 @@ describe('lib/utils', () => {
                 )
             ).toEqual(false)
         })
+
+        it('rejects dangerous protocols (XSS prevention)', () => {
+            expect(isURL('javascript:alert(1)')).toEqual(false)
+            expect(isURL('javascript:alert(document.cookie)')).toEqual(false)
+            expect(isURL('JAVASCRIPT:alert(1)')).toEqual(false)
+            expect(isURL('data:text/html,<script>alert(1)</script>')).toEqual(false)
+            expect(isURL('vbscript:msgbox(1)')).toEqual(false)
+            expect(isURL('file:///etc/passwd')).toEqual(false)
+        })
     })
 
     describe('isExternalLink()', () => {
         it('recognizes external links properly', () => {
-            expect(isExternalLink('http://www.posthog.com')).toEqual(true)
-            expect(isExternalLink('https://www.posthog.com')).toEqual(true)
-            expect(isExternalLink('mailto:ben@posthog.com')).toEqual(true)
+            expect(isExternalLink('http://www.hanzo.ai')).toEqual(true)
+            expect(isExternalLink('https://www.hanzo.ai')).toEqual(true)
+            expect(isExternalLink('mailto:ben@hanzo.ai')).toEqual(true)
         })
 
         it('recognizes non-external links properly', () => {
@@ -254,7 +269,70 @@ describe('lib/utils', () => {
                 expect(dateFilterToText('-48h', undefined, 'default')).toEqual('Last 48 hours')
                 expect(dateFilterToText('-1d', null, 'default')).toEqual('Last 1 day')
                 expect(dateFilterToText('-1dStart', '-1dEnd', 'default')).toEqual('Yesterday')
-                expect(dateFilterToText('-1mStart', '-1mEnd', 'default')).toEqual('Previous month')
+                expect(dateFilterToText('-1mStart', '-1mEnd', 'default')).toEqual('Last month')
+            })
+
+            // The frontend DateFilter emits YYYY-MM-DD (without allowTimePrecision) or
+            // YYYY-MM-DDTHH:mm:ss (with allowTimePrecision, used by recordings).
+            // The AI agent (filter_session_recordings) emits YYYY-MM-DDTHH:mm:ss.SSS.
+            // All cross-combinations must display correctly.
+
+            it('handles ISO datetime without milliseconds (frontend DateFilter format)', () => {
+                // Both dates as YYYY-MM-DDTHH:mm:ss
+                expect(dateFilterToText('2026-02-01T00:00:00', '2026-02-04T23:59:59', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+                // Non-midnight times
+                expect(dateFilterToText('2026-02-01T14:30:00', '2026-02-04T18:45:00', 'default')).toEqual(
+                    'February 1, 14:30 - February 4, 18:45'
+                )
+            })
+
+            it('handles ISO datetime with milliseconds (AI agent format)', () => {
+                // Both dates as YYYY-MM-DDTHH:mm:ss.SSS
+                expect(dateFilterToText('2026-02-01T00:00:00.000', '2026-02-04T23:59:59.999', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+            })
+
+            it('handles mixed datetime formats (frontend × AI agent)', () => {
+                // YYYY-MM-DDTHH:mm:ss from + YYYY-MM-DDTHH:mm:ss.SSS to
+                expect(dateFilterToText('2026-02-01T00:00:00', '2026-02-04T23:59:59.999', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+                // YYYY-MM-DDTHH:mm:ss.SSS from + YYYY-MM-DDTHH:mm:ss to
+                expect(dateFilterToText('2026-02-01T00:00:00.000', '2026-02-04T23:59:59', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+            })
+
+            it('handles plain date + datetime (either direction)', () => {
+                // YYYY-MM-DD from + YYYY-MM-DDTHH:mm:ss to
+                expect(dateFilterToText('2026-02-01', '2026-02-04T23:59:59', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+                // YYYY-MM-DD from + YYYY-MM-DDTHH:mm:ss.SSS to
+                expect(dateFilterToText('2026-02-01', '2026-02-04T23:59:59.999', 'default')).toEqual(
+                    'February 1, 00:00:00 - February 4, 23:59:59'
+                )
+                // YYYY-MM-DDTHH:mm:ss from + YYYY-MM-DD to (both resolve to midnight → times omitted)
+                expect(dateFilterToText('2026-02-01T00:00:00', '2026-02-04', 'default')).toEqual(
+                    'February 1 - February 4'
+                )
+                // YYYY-MM-DDTHH:mm:ss.SSS from + YYYY-MM-DD to (both resolve to midnight → times omitted)
+                expect(dateFilterToText('2026-02-01T00:00:00.000', '2026-02-04', 'default')).toEqual(
+                    'February 1 - February 4'
+                )
+                // Non-midnight datetime from + YYYY-MM-DD to
+                expect(dateFilterToText('2026-02-01T14:30:00', '2026-02-04', 'default')).toEqual(
+                    'February 1, 14:30 - February 4, 00:00'
+                )
+            })
+
+            it('handles same-day datetime range', () => {
+                expect(dateFilterToText('2026-02-01T09:00:00', '2026-02-01T17:00:00', 'default')).toEqual(
+                    'February 1, 09:00 - 17:00'
+                )
             })
 
             it('can have overridden date options', () => {
@@ -316,6 +394,40 @@ describe('lib/utils', () => {
                 expect(dateFilterToText(from, to, 'custom', dateMapping, true, 'YYYY-MM-DD hh:mm:ss')).toEqual(
                     '2018-04-04 12:00:00 - 2018-04-09 11:05:00'
                 )
+            })
+        })
+
+        describe('week formatting respects weekStartDay', () => {
+            // 2012-03-02 is a Friday
+            beforeEach(() => {
+                tk.freeze(new Date(1330688329321))
+            })
+            afterEach(() => {
+                tk.reset()
+            })
+
+            it('This week with Sunday start (default)', () => {
+                expect(
+                    dateFilterToText('wStart', undefined, 'default', dateMapping, true, undefined, undefined, 0)
+                ).toEqual('February 26 - March 2, 2012')
+            })
+
+            it('This week with Monday start', () => {
+                expect(
+                    dateFilterToText('wStart', undefined, 'default', dateMapping, true, undefined, undefined, 1)
+                ).toEqual('February 27 - March 2, 2012')
+            })
+
+            it('Last week with Sunday start (default)', () => {
+                expect(
+                    dateFilterToText('-1wStart', '-1wEnd', 'default', dateMapping, true, undefined, undefined, 0)
+                ).toEqual('February 19 - February 25, 2012')
+            })
+
+            it('Last week with Monday start', () => {
+                expect(
+                    dateFilterToText('-1wStart', '-1wEnd', 'default', dateMapping, true, undefined, undefined, 1)
+                ).toEqual('February 20 - February 26, 2012')
             })
         })
     })
@@ -410,6 +522,10 @@ describe('lib/utils', () => {
 
         it('should return days for month to date', () => {
             expect(getDefaultInterval('mStart', null)).toEqual('day')
+        })
+
+        it('should return days for week to date', () => {
+            expect(getDefaultInterval('wStart', null)).toEqual('day')
         })
 
         it('should return month for year to date', () => {
@@ -991,23 +1107,23 @@ describe('lib/utils', () => {
 
     describe('getRelativeNextPath', () => {
         const location = {
-            origin: 'https://us.posthog.com',
+            origin: 'https://insights.hanzo.ai',
             protocol: 'https:',
-            host: 'us.posthog.com',
-            hostname: 'us.posthog.com',
-            href: 'https://us.posthog.com/',
+            host: 'insights.hanzo.ai',
+            hostname: 'insights.hanzo.ai',
+            href: 'https://insights.hanzo.ai/',
         } as Location
 
         it('returns relative path for same-origin absolute URL', () => {
-            expect(getRelativeNextPath('https://us.posthog.com/test', location)).toBe('/test')
+            expect(getRelativeNextPath('https://insights.hanzo.ai/test', location)).toBe('/test')
         })
 
         it('returns relative path for same-origin absolute URL with query and hash', () => {
-            expect(getRelativeNextPath('https://us.posthog.com/test?foo=bar#baz', location)).toBe('/test?foo=bar#baz')
+            expect(getRelativeNextPath('https://insights.hanzo.ai/test?foo=bar#baz', location)).toBe('/test?foo=bar#baz')
         })
 
         it('returns relative path for encoded same-origin absolute URL', () => {
-            expect(getRelativeNextPath('https%3A%2F%2Fus.posthog.com%2Ftest', location)).toBe('/test')
+            expect(getRelativeNextPath('https%3A%2F%2Finsights.hanzo.ai%2Ftest', location)).toBe('/test')
         })
 
         it('returns relative path for root-relative path', () => {
@@ -1050,6 +1166,426 @@ describe('lib/utils', () => {
 
         it('returns null for encoded protocol-relative URL', () => {
             expect(getRelativeNextPath('%2F%2Fevil.com%2Ftest', location)).toBeNull()
+        })
+    })
+
+    describe('parseTagsFilter()', () => {
+        describe('array input', () => {
+            it('handles string arrays', () => {
+                expect(parseTagsFilter(['tag1', 'tag2', 'tag3'])).toEqual(['tag1', 'tag2', 'tag3'])
+            })
+
+            it('handles mixed type arrays', () => {
+                expect(parseTagsFilter(['tag1', 123, true, null, undefined])).toEqual([
+                    'tag1',
+                    '123',
+                    'true',
+                    'null',
+                    'undefined',
+                ])
+            })
+
+            it('filters out empty values', () => {
+                expect(parseTagsFilter(['tag1', '', 'tag2', null, 'tag3'])).toEqual(['tag1', 'tag2', 'null', 'tag3'])
+            })
+
+            it('handles empty array', () => {
+                expect(parseTagsFilter([])).toEqual([])
+            })
+        })
+
+        describe('JSON string input', () => {
+            it('parses valid JSON arrays', () => {
+                expect(parseTagsFilter('["tag1", "tag2", "tag3"]')).toEqual(['tag1', 'tag2', 'tag3'])
+            })
+
+            it('parses JSON arrays with mixed types', () => {
+                expect(parseTagsFilter('["tag1", 123, true]')).toEqual(['tag1', '123', 'true'])
+            })
+
+            it('filters out empty values from JSON', () => {
+                expect(parseTagsFilter('["tag1", "", "tag2", null, "tag3"]')).toEqual(['tag1', 'tag2', 'null', 'tag3'])
+            })
+
+            it('handles empty JSON array', () => {
+                expect(parseTagsFilter('[]')).toEqual([])
+            })
+
+            it('handles malformed JSON gracefully', () => {
+                expect(parseTagsFilter('["tag1", "tag2"')).toEqual(['["tag1"', '"tag2"'])
+            })
+
+            it('handles invalid JSON syntax', () => {
+                expect(parseTagsFilter('{invalid json}')).toEqual(['{invalid json}'])
+            })
+
+            it('handles JSON that is not an array', () => {
+                expect(parseTagsFilter('{"not": "an array"}')).toEqual(['{"not": "an array"}'])
+            })
+
+            it('handles JSON with trailing comma', () => {
+                expect(parseTagsFilter('["tag1", "tag2",]')).toEqual(['["tag1"', '"tag2"', ']'])
+            })
+        })
+
+        describe('comma-separated string input', () => {
+            it('parses simple comma-separated values', () => {
+                expect(parseTagsFilter('tag1,tag2,tag3')).toEqual(['tag1', 'tag2', 'tag3'])
+            })
+
+            it('trims whitespace from values', () => {
+                expect(parseTagsFilter(' tag1 , tag2 , tag3 ')).toEqual(['tag1', 'tag2', 'tag3'])
+            })
+
+            it('filters out empty values', () => {
+                expect(parseTagsFilter('tag1,,tag2, ,tag3')).toEqual(['tag1', 'tag2', 'tag3'])
+            })
+
+            it('handles single value', () => {
+                expect(parseTagsFilter('tag1')).toEqual(['tag1'])
+            })
+
+            it('handles empty string', () => {
+                expect(parseTagsFilter('')).toEqual([])
+            })
+
+            it('handles string with only whitespace', () => {
+                expect(parseTagsFilter('   ')).toEqual([])
+            })
+
+            it('handles string with only commas', () => {
+                expect(parseTagsFilter(',,')).toEqual([])
+            })
+
+            it('handles string with commas and whitespace', () => {
+                expect(parseTagsFilter(' , , ')).toEqual([])
+            })
+        })
+
+        describe('edge cases and invalid input', () => {
+            it('returns undefined for null input', () => {
+                expect(parseTagsFilter(null)).toBeUndefined()
+            })
+
+            it('returns undefined for undefined input', () => {
+                expect(parseTagsFilter(undefined)).toBeUndefined()
+            })
+
+            it('returns undefined for number input', () => {
+                expect(parseTagsFilter(123)).toBeUndefined()
+            })
+
+            it('returns undefined for boolean input', () => {
+                expect(parseTagsFilter(true)).toBeUndefined()
+                expect(parseTagsFilter(false)).toBeUndefined()
+            })
+
+            it('returns undefined for object input', () => {
+                expect(parseTagsFilter({})).toBeUndefined()
+                expect(parseTagsFilter({ tags: ['tag1'] })).toBeUndefined()
+            })
+
+            it('handles special characters in tags', () => {
+                expect(parseTagsFilter('tag-with-dash,tag_with_underscore,tag.with.dots')).toEqual([
+                    'tag-with-dash',
+                    'tag_with_underscore',
+                    'tag.with.dots',
+                ])
+            })
+
+            it('handles unicode characters', () => {
+                expect(parseTagsFilter('标签1,🏷️,тег')).toEqual(['标签1', '🏷️', 'тег'])
+            })
+
+            it('handles very long strings', () => {
+                const longTag = 'a'.repeat(1000)
+                expect(parseTagsFilter(longTag)).toEqual([longTag])
+            })
+
+            it('handles strings with newlines and tabs', () => {
+                expect(parseTagsFilter('tag1\ntag2\ttag3')).toEqual(['tag1\ntag2\ttag3'])
+            })
+        })
+    })
+
+    describe('formatDateTimeRange()', () => {
+        beforeEach(() => {
+            tk.freeze(new Date('2025-03-15T12:00:00.000Z'))
+        })
+        afterEach(() => {
+            tk.reset()
+        })
+
+        it('formats range in different years with full details', () => {
+            const from = dayjs('2024-12-31T14:30:45')
+            const to = dayjs('2025-01-01T16:45:30')
+            expect(formatDateTimeRange(from, to)).toEqual('December 31, 2024 14:30:45 - January 1, 2025 16:45:30')
+        })
+
+        it('formats range in same year but different days', () => {
+            const from = dayjs('2024-06-15T09:00:00')
+            const to = dayjs('2024-06-20T17:30:00')
+            expect(formatDateTimeRange(from, to)).toEqual('June 15, 2024 09:00 - June 20, 17:30')
+        })
+
+        it('hides time if both times are midnight', () => {
+            const from = dayjs('2024-06-15T00:00:00')
+            const to = dayjs('2024-06-20T00:00:00')
+            expect(formatDateTimeRange(from, to)).toEqual('June 15, 2024  - June 20')
+        })
+
+        it('formats range in same year as current year', () => {
+            const from = dayjs('2025-01-10T10:15:00')
+            const to = dayjs('2025-02-05T14:20:00')
+            expect(formatDateTimeRange(from, to)).toEqual('January 10, 10:15 - February 5, 14:20')
+        })
+
+        it('formats range on same day in different year', () => {
+            const from = dayjs('2024-08-10T09:30:00')
+            const to = dayjs('2024-08-10T18:45:00')
+            expect(formatDateTimeRange(from, to)).toEqual('August 10, 2024 09:30 - 18:45')
+        })
+
+        it('formats range on same day in current year', () => {
+            const from = dayjs('2025-03-15T08:00:00')
+            const to = dayjs('2025-03-15T20:00:00')
+            expect(formatDateTimeRange(from, to)).toEqual('08:00 - 20:00')
+        })
+
+        it('removes seconds when both times have zero seconds on same day', () => {
+            const from = dayjs('2025-03-15T10:30:00')
+            const to = dayjs('2025-03-15T14:45:00')
+            expect(formatDateTimeRange(from, to)).toEqual('10:30 - 14:45')
+        })
+
+        it('includes seconds when start time has non-zero seconds', () => {
+            const from = dayjs('2025-03-15T10:30:15')
+            const to = dayjs('2025-03-15T14:45:00')
+            expect(formatDateTimeRange(from, to)).toEqual('10:30:15 - 14:45:00')
+        })
+
+        it('includes seconds when end time has non-zero seconds', () => {
+            const from = dayjs('2025-03-15T10:30:00')
+            const to = dayjs('2025-03-15T14:45:30')
+            expect(formatDateTimeRange(from, to)).toEqual('10:30:00 - 14:45:30')
+        })
+
+        it('includes seconds when both times have non-zero seconds', () => {
+            const from = dayjs('2025-03-15T10:30:15')
+            const to = dayjs('2025-03-15T14:45:30')
+            expect(formatDateTimeRange(from, to)).toEqual('10:30:15 - 14:45:30')
+        })
+
+        it('handles range spanning different days in current year', () => {
+            const from = dayjs('2025-03-14T22:00:00')
+            const to = dayjs('2025-03-16T02:00:00')
+            expect(formatDateTimeRange(from, to)).toEqual('March 14, 22:00 - March 16, 02:00')
+        })
+
+        it('handles very short time ranges on same day', () => {
+            const from = dayjs('2025-03-15T12:00:00')
+            const to = dayjs('2025-03-15T12:01:00')
+            expect(formatDateTimeRange(from, to)).toEqual('12:00 - 12:01')
+        })
+    })
+
+    describe('formatPercentageDiff()', () => {
+        it.each([
+            { current: 150, previous: 100, expected: '(+50.0%)' },
+            { current: 200, previous: 100, expected: '(+100.0%)' },
+            { current: 100, previous: 100, expected: '(+0.0%)' },
+            { current: 50, previous: 100, expected: '(-50.0%)' },
+            { current: 0, previous: 100, expected: '(-100.0%)' },
+            { current: 125, previous: 100, expected: '(+25.0%)' },
+            { current: 75, previous: 100, expected: '(-25.0%)' },
+        ])('formats $current vs $previous as $expected', ({ current, previous, expected }) => {
+            expect(formatPercentageDiff(current, previous)).toEqual(expected)
+        })
+
+        it.each([
+            { current: 100, previous: 0, description: 'division by zero' },
+            { current: 0, previous: 0, description: 'zero divided by zero' },
+        ])('returns null for $description', ({ current, previous }) => {
+            expect(formatPercentageDiff(current, previous)).toBeNull()
+        })
+    })
+
+    describe('retryWithBackoff()', () => {
+        it('returns result on first successful attempt', async () => {
+            const fn = jest.fn().mockResolvedValue('success')
+            const result = await retryWithBackoff(fn, { initialDelayMs: 0 })
+            expect(result).toBe('success')
+            expect(fn).toHaveBeenCalledTimes(1)
+        })
+
+        it('retries on failure and succeeds', async () => {
+            const fn = jest
+                .fn()
+                .mockRejectedValueOnce(new Error('fail 1'))
+                .mockRejectedValueOnce(new Error('fail 2'))
+                .mockResolvedValue('success')
+
+            const result = await retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 0 })
+            expect(result).toBe('success')
+            expect(fn).toHaveBeenCalledTimes(3)
+        })
+
+        it('throws last error after all attempts exhausted', async () => {
+            const errors = [new Error('fail 1'), new Error('fail 2'), new Error('fail 3')]
+            let callCount = 0
+            const fn = jest.fn().mockImplementation(() => Promise.reject(errors[callCount++]))
+
+            await expect(retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 0 })).rejects.toThrow('fail 3')
+            expect(fn).toHaveBeenCalledTimes(3)
+        })
+
+        it('re-throws AbortError immediately without retrying', async () => {
+            const fn = jest.fn().mockImplementation(() => {
+                const error = new DOMException('Aborted', 'AbortError')
+                return Promise.reject(error)
+            })
+
+            await expect(retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 0 })).rejects.toThrow('Aborted')
+            expect(fn).toHaveBeenCalledTimes(1)
+        })
+
+        it('throws immediately if signal is already aborted', async () => {
+            const controller = new AbortController()
+            controller.abort()
+
+            const fn = jest.fn().mockResolvedValue('success')
+            await expect(retryWithBackoff(fn, { signal: controller.signal })).rejects.toThrow('Aborted')
+            expect(fn).not.toHaveBeenCalled()
+        })
+
+        it('applies exponential backoff between retries', async () => {
+            jest.useFakeTimers()
+            try {
+                let callCount = 0
+                const fn = jest.fn().mockImplementation(() => {
+                    callCount++
+                    if (callCount < 3) {
+                        return Promise.reject(new Error('fail'))
+                    }
+                    return Promise.resolve('success')
+                })
+
+                const promise = retryWithBackoff(fn, {
+                    maxAttempts: 3,
+                    initialDelayMs: 1000,
+                    backoffMultiplier: 2,
+                })
+
+                // First call happens immediately
+                await Promise.resolve()
+                expect(fn).toHaveBeenCalledTimes(1)
+
+                // After 1000ms (initialDelayMs * 2^0), second attempt
+                await jest.advanceTimersByTimeAsync(1000)
+                expect(fn).toHaveBeenCalledTimes(2)
+
+                // After 2000ms (initialDelayMs * 2^1), third attempt
+                await jest.advanceTimersByTimeAsync(2000)
+                expect(fn).toHaveBeenCalledTimes(3)
+
+                await expect(promise).resolves.toBe('success')
+            } finally {
+                jest.useRealTimers()
+            }
+        })
+
+        it('uses default options when none provided', async () => {
+            const errors = [new Error('fail'), new Error('fail'), new Error('fail')]
+            let callCount = 0
+            const fn = jest.fn().mockImplementation(() => Promise.reject(errors[callCount++]))
+
+            await expect(retryWithBackoff(fn, { initialDelayMs: 0 })).rejects.toThrow('fail')
+            expect(fn).toHaveBeenCalledTimes(3) // default maxAttempts is 3
+        })
+
+        it('handles maxAttempts of 1 (no retries)', async () => {
+            const fn = jest.fn().mockImplementation(() => Promise.reject(new Error('fail')))
+
+            await expect(retryWithBackoff(fn, { maxAttempts: 1, initialDelayMs: 0 })).rejects.toThrow('fail')
+            expect(fn).toHaveBeenCalledTimes(1)
+        })
+
+        it('does not retry when shouldRetry returns false', async () => {
+            const error = new Error('non-retryable')
+            const fn = jest.fn().mockImplementation(() => Promise.reject(error))
+
+            await expect(
+                retryWithBackoff(fn, {
+                    maxAttempts: 3,
+                    initialDelayMs: 0,
+                    shouldRetry: () => false,
+                })
+            ).rejects.toThrow('non-retryable')
+            expect(fn).toHaveBeenCalledTimes(1)
+        })
+
+        it('retries when shouldRetry returns true', async () => {
+            let callCount = 0
+            const fn = jest.fn().mockImplementation(() => {
+                callCount++
+                if (callCount < 3) {
+                    return Promise.reject(new Error('retryable'))
+                }
+                return Promise.resolve('success')
+            })
+
+            const result = await retryWithBackoff(fn, {
+                maxAttempts: 3,
+                initialDelayMs: 0,
+                shouldRetry: () => true,
+            })
+            expect(result).toBe('success')
+            expect(fn).toHaveBeenCalledTimes(3)
+        })
+
+        it('stops retrying when shouldRetry returns false for specific error', async () => {
+            const errors = [new Error('retry-me'), new Error('stop-here'), new Error('never-reached')]
+            let callCount = 0
+            const fn = jest.fn().mockImplementation(() => Promise.reject(errors[callCount++]))
+
+            await expect(
+                retryWithBackoff(fn, {
+                    maxAttempts: 3,
+                    initialDelayMs: 0,
+                    shouldRetry: (e) => e instanceof Error && e.message !== 'stop-here',
+                })
+            ).rejects.toThrow('stop-here')
+            expect(fn).toHaveBeenCalledTimes(2)
+        })
+
+        it('receives the error in shouldRetry callback', async () => {
+            const testError = new Error('test-error')
+            const fn = jest.fn().mockImplementation(() => Promise.reject(testError))
+            const shouldRetry = jest.fn().mockReturnValue(false)
+
+            await expect(retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 0, shouldRetry })).rejects.toThrow(
+                'test-error'
+            )
+            expect(shouldRetry).toHaveBeenCalledWith(testError)
+        })
+    })
+
+    describe('isOperatorMulti', () => {
+        it('returns true for operators that support multiple values', () => {
+            expect(isOperatorMulti(PropertyOperator.Exact)).toBe(true)
+            expect(isOperatorMulti(PropertyOperator.IsNot)).toBe(true)
+            expect(isOperatorMulti(PropertyOperator.IContainsMulti)).toBe(true)
+            expect(isOperatorMulti(PropertyOperator.NotIContainsMulti)).toBe(true)
+        })
+
+        it('returns false for operators that do not support multiple values', () => {
+            expect(isOperatorMulti(PropertyOperator.IContains)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.NotIContains)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.GreaterThan)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.LessThan)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.IsSet)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.IsNotSet)).toBe(false)
+            expect(isOperatorMulti(PropertyOperator.Regex)).toBe(false)
         })
     })
 })

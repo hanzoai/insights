@@ -23,7 +23,7 @@ const stepsNeutral = [25, 50, 100, 250, 350, 400, 450, 500]
 const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
 
 const primtiveColorMap: Map<string, number[]> = new Map([
-    ['color-posthog-3000', stepsNeutral],
+    ['color-insights-3000', stepsNeutral],
     ['color-neutral', steps],
     ['color-neutral-cool', steps],
 

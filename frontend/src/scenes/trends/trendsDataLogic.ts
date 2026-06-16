@@ -31,7 +31,7 @@ import { isValidBreakdown } from '~/queries/utils'
 import {
     ChartDisplayType,
     CountPerActorMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightLogicProps,
     IntervalType,
     LifecycleToggle,
@@ -48,11 +48,12 @@ export const RESULT_CUSTOMIZATION_DEFAULT = ResultCustomizationBy.Value
 /** All math types that can result in non-whole numbers. */
 const POSSIBLY_FRACTIONAL_MATH_TYPES: Set<MathType> = new Set(
     [CountPerActorMathType.Average as MathType]
-        .concat(Object.values(HogQLMathType))
+        .concat(Object.values(InsightsQLMathType))
         .concat(Object.values(PropertyMathType))
 )
 
 export const INTERVAL_TO_DEFAULT_MOVING_AVERAGE_PERIOD: Record<IntervalType, number> = {
+    second: 300,
     minute: 10,
     hour: 6,
     day: 7,
@@ -96,7 +97,8 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
                 'isLifecycle',
                 'isStickiness',
                 'isNonTimeSeriesDisplay',
-                'isSingleSeries',
+                'isSingleSeriesOutput',
+                'isSingleSeriesDefinition',
                 'hasLegend',
                 'showLegend',
                 'vizSpecificOptions',
@@ -115,6 +117,7 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
         setBreakdownValuesLoading: (loading: boolean) => ({ loading }),
         toggleResultHidden: (dataset: IndexedTrendResult) => ({ dataset }),
         toggleAllResultsHidden: (datasets: IndexedTrendResult[], hidden: boolean) => ({ datasets, hidden }),
+        setHoveredDatasetIndex: (index: number | null) => ({ index }),
     }),
 
     reducers({
@@ -122,6 +125,12 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
             false,
             {
                 setBreakdownValuesLoading: (_, { loading }) => loading,
+            },
+        ],
+        hoveredDatasetIndex: [
+            null as number | null,
+            {
+                setHoveredDatasetIndex: (_, { index }) => index,
             },
         ],
     }),
@@ -169,7 +178,22 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
             (results, display, lifecycleFilter): IndexedTrendResult[] => {
                 const defaultLifecyclesOrder = ['new', 'resurrecting', 'returning', 'dormant']
                 let indexedResults = results.map((result, index) => ({ ...result, seriesIndex: index }))
-                if (
+
+                // want the previous bars to show before current bars
+                if (display === ChartDisplayType.ActionsUnstackedBar && indexedResults.some((x) => x.compare)) {
+                    indexedResults.sort((a, b) => {
+                        if (a.compare_label === b.compare_label) {
+                            return 0
+                        }
+                        if (a.compare_label === 'previous') {
+                            return -1
+                        }
+                        if (b.compare_label === 'previous') {
+                            return 1
+                        }
+                        return 0
+                    })
+                } else if (
                     display &&
                     (display === ChartDisplayType.ActionsBarValue || display === ChartDisplayType.ActionsPie)
                 ) {
@@ -202,22 +226,21 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
                     )
                 }
 
-                /** Unique series in the results, determined by `item.label` and `item.action.order`. */
-                const uniqSeries = Array.from(
-                    new Set(
-                        indexedResults
-                            .slice()
-                            .sort((a, b) => (a.action?.order ?? 0) - (b.action?.order ?? 0))
-                            .map((item) => `${item.label}_${item.action?.order}_${item?.breakdown_value}`)
-                    )
-                )
+                const colorIndexMap = new Map<string, number>()
+                indexedResults
+                    .slice()
+                    .sort((a, b) => (a.action?.order ?? 0) - (b.action?.order ?? 0))
+                    .forEach((item) => {
+                        const key = `${item.label}_${item.action?.order}_${item?.breakdown_value}`
+                        if (!colorIndexMap.has(key)) {
+                            colorIndexMap.set(key, colorIndexMap.size)
+                        }
+                    })
 
-                // Give current and previous versions of the same dataset the same colorIndex
                 return indexedResults.map((item, index) => {
-                    const colorIndex = uniqSeries.findIndex(
-                        (identifier) => identifier === `${item.label}_${item.action?.order}_${item?.breakdown_value}`
-                    )
-                    return { ...item, colorIndex: colorIndex, id: index }
+                    const key = `${item.label}_${item.action?.order}_${item?.breakdown_value}`
+                    const colorIndex = colorIndexMap.get(key) ?? 0
+                    return { ...item, colorIndex, id: index }
                 })
             },
         ],
@@ -316,7 +339,11 @@ export const trendsDataLogic = kea<trendsDataLogicType>([
                 const isLineGraph =
                     isTrends &&
                     !hasDataWarehouseSeries &&
-                    [ChartDisplayType.ActionsLineGraph, ChartDisplayType.ActionsLineGraphCumulative].includes(display)
+                    [
+                        ChartDisplayType.ActionsLineGraph,
+                        ChartDisplayType.ActionsLineGraphCumulative,
+                        ChartDisplayType.ActionsAreaGraph,
+                    ].includes(display)
 
                 return (trendsFilter?.showMovingAverage && isLineGraph && isLinearScale) || false
             },

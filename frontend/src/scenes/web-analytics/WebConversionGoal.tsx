@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCursor } from '@posthog/icons'
+import { IconCursor } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
@@ -12,17 +12,29 @@ import { actionsModel } from '~/models/actionsModel'
 
 import { ProductTab } from './common'
 
-export const WebConversionGoal = (): JSX.Element | null => {
+export interface WebConversionGoalProps {
+    value?: { actionId: number } | { customEventName: string } | null
+    onChange?: (value: { actionId: number } | { customEventName: string } | null) => void
+}
+
+export const WebConversionGoal = ({
+    value: propsValue,
+    onChange: propsOnChange,
+}: WebConversionGoalProps = {}): JSX.Element | null => {
     const { isWindowLessThan } = useWindowSize()
 
-    const { conversionGoal, productTab } = useValues(webAnalyticsLogic)
-    const { setConversionGoal } = useActions(webAnalyticsLogic)
+    const { conversionGoal: logicConversionGoal, productTab } = useValues(webAnalyticsLogic)
+    const { setConversionGoal: logicSetConversionGoal } = useActions(webAnalyticsLogic)
     const { actions } = useValues(actionsModel)
+
+    const conversionGoal = propsValue !== undefined ? propsValue : logicConversionGoal
+    const setConversionGoal = propsOnChange ?? logicSetConversionGoal
+
     const [group, setGroup] = useState(TaxonomicFilterGroupType.CustomEvents)
     const value =
         conversionGoal && 'actionId' in conversionGoal ? conversionGoal.actionId : conversionGoal?.customEventName
 
-    if (productTab !== ProductTab.ANALYTICS) {
+    if (propsValue === undefined && productTab !== ProductTab.ANALYTICS) {
         return null
     }
 

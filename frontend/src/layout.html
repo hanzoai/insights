@@ -3,17 +3,20 @@
 
 <head>
     <meta name="robots" content="noindex" />
-    <title>PostHog</title>
+    <title>Insights</title>
     {% include "head.html" %}
 
-    <script>
-        const posthogJSApiKey = "{{ js_posthog_api_key|escapejs }}";
-        let posthogHost = "{{ js_posthog_host|escapejs }}";
-        if (posthogHost.trim().length === 0) {
-            posthogHost = window.location.origin;
+    <script nonce="{{ request.csp_nonce }}">
+        // these values are properly sanitized
+        // nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag
+        const insightsJSApiKey = "{{ js_insights_api_key|escapejs }}";
+        // nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag
+        let insightsHost = "{{ js_insights_host|escapejs }}";
+        if (insightsHost.trim().length === 0) {
+            insightsHost = window.location.origin;
         }
-        !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
-        posthog.init(posthogJSApiKey, { api_host: posthogHost, persistence: 'localStorage+cookie' })
+        !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.hanzo.ai", "-assets.i.hanzo.ai") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
+        insights.init(insightsJSApiKey, { api_host: insightsHost, persistence: 'localStorage+cookie' })
     </script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous" />
@@ -30,13 +33,14 @@
         }
 
         body {
-            background: #E5E7E0 !important;
+            background: #111111 !important;
             display: -ms-flexbox;
             display: flex;
             -ms-flex-align: center;
             align-items: center;
             padding-top: 40px;
             padding-bottom: 40px;
+            color: #e0e0e0;
         }
 
         .auth-frame {
@@ -63,9 +67,9 @@
         }
 
         .form-signin {
-            background: #EEEFE9;
+            background: #1a1a1a;
             border-radius: .5rem;
-            border: solid 1px #D0D1C9;
+            border: solid 1px #333;
             border-bottom-width: 3px;
             margin: auto;
             max-width: 450px;
@@ -112,23 +116,25 @@
         .field input {
             transition: all 0.2s;
             touch-action: manipulation;
-            color: #495057;
+            color: #ccc;
         }
 
         .field input {
             font-size: 1.5em;
             border: 0;
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid #444;
             font-family: inherit;
             -webkit-appearance: none;
             border-radius: 0;
             padding: 0;
             cursor: text;
+            background: transparent;
+            color: #e0e0e0;
         }
 
         .field input:focus {
             outline: 0;
-            border-bottom: 1px solid #666;
+            border-bottom: 1px solid #999;
         }
 
         input:placeholder-shown+label {
@@ -173,8 +179,8 @@
             animation-range-start: normal;
             animation-timeline: auto;
             animation-timing-function: ease;
-            background-color: rgb(205, 132, 7);
-            border-bottom-color: rgb(177, 120, 22);
+            background-color: #333;
+            border-bottom-color: #222;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
             border-bottom-style: solid;
@@ -184,19 +190,19 @@
             border-image-slice: 100%;
             border-image-source: none;
             border-image-width: 1;
-            border-left-color: rgb(177, 120, 22);
+            border-left-color: #222;
             border-left-style: solid;
             border-left-width: 1.5px;
-            border-right-color: rgb(177, 120, 22);
+            border-right-color: #222;
             border-right-style: solid;
             border-right-width: 1.5px;
-            border-top-color: rgb(177, 120, 22);
+            border-top-color: #222;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             border-top-style: solid;
             border-top-width: 1.5px;
             box-sizing: border-box;
-            color: rgb(21, 21, 21);
+            color: #fff;
             cursor: pointer;
             display: block;
             font-family: 'Emoji Flags Polyfill', MatterVF, -apple-system, "system-ui", "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Ubuntu, roboto, noto, arial, "sans-serif";
@@ -211,7 +217,7 @@
             position: relative;
             tab-size: 4;
             text-align: center;
-            text-decoration-color: rgb(21, 21, 21);
+            text-decoration-color: #fff;
             text-decoration-line: none;
             text-decoration-style: solid;
             text-decoration-thickness: auto;
@@ -221,8 +227,8 @@
         }
 
         .button span {
-            background-color: rgb(235, 157, 42);
-            border-bottom-color: rgb(177, 120, 22);
+            background-color: #fff;
+            border-bottom-color: #ccc;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
             border-bottom-style: solid;
@@ -232,19 +238,19 @@
             border-image-slice: 100%;
             border-image-source: none;
             border-image-width: 1;
-            border-left-color: rgb(177, 120, 22);
+            border-left-color: #ccc;
             border-left-style: solid;
             border-left-width: 1.5px;
-            border-right-color: rgb(177, 120, 22);
+            border-right-color: #ccc;
             border-right-style: solid;
             border-right-width: 1.5px;
-            border-top-color: rgb(177, 120, 22);
+            border-top-color: #ccc;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             border-top-style: solid;
             border-top-width: 1.5px;
             box-sizing: border-box;
-            color: rgb(21, 21, 21);
+            color: #111;
             cursor: pointer;
             display: block;
             font-family: 'Emoji Flags Polyfill', MatterVF, -apple-system, "system-ui", "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Ubuntu, roboto, noto, arial, "sans-serif";

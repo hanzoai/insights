@@ -14,12 +14,18 @@ test.describe('Toolbar', () => {
             await page.goto(href)
         }
 
-        await expect(page.locator('#__POSTHOG_TOOLBAR__ .Toolbar')).toBeVisible({ timeout: 5000 })
+        await expect(page.locator('#__INSIGHTS_TOOLBAR__ .Toolbar')).toBeVisible({ timeout: 5000 })
     })
 
     test('Toolbar item in sidebar has launch options', async ({ page }) => {
         await page.goToMenuItem('toolbar')
         await page.getByText('Add authorized URL').click()
         await expect(page).toHaveURL(/.*\/toolbar/)
+    })
+
+    test('Can open add authorized URL form', async ({ page }) => {
+        await page.goToMenuItem('toolbar')
+        await page.locator('[data-attr="toolbar-add-url"]').click()
+        await expect(page.locator('[data-attr="url-input"]')).toBeVisible()
     })
 })

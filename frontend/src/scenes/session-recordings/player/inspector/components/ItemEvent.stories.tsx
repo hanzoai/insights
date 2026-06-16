@@ -1,7 +1,8 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 
-import { now } from 'lib/dayjs'
+import { dayjs } from 'lib/dayjs'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { uuid } from 'lib/utils'
 import {
     ItemEvent,
     ItemEventDetail,
@@ -21,6 +22,9 @@ const meta: Meta<typeof ItemEvent> = {
             get: {},
         }),
     ],
+    parameters: {
+        mockDate: '2025-09-23',
+    },
 }
 export default meta
 
@@ -29,6 +33,7 @@ function makeItem(
     dataOverrides: Partial<RecordingEventType> = {},
     propertiesOverrides: Record<string, any> = {}
 ): InspectorListItemEvent {
+    const mockDate = dayjs('2025-11-04')
     const data: RecordingEventType = {
         elements: [],
         event: '',
@@ -36,7 +41,7 @@ function makeItem(
         id: '',
         playerTime: 0,
 
-        timestamp: now().toISOString(),
+        timestamp: mockDate.toISOString(),
         ...dataOverrides,
         // this is last so that it overrides data overrides sensibly 🙃
         properties: {
@@ -47,8 +52,9 @@ function makeItem(
         data: data,
         search: '',
         timeInRecording: 0,
-        timestamp: now(),
+        timestamp: mockDate,
         type: 'events',
+        key: `some-key-${uuid()}`,
         ...itemOverrides,
     }
 }
@@ -79,7 +85,11 @@ Default.args = {}
 
 export const PageViewWithPath: Story = BasicTemplate.bind({})
 PageViewWithPath.args = {
-    item: makeItem({}, { event: '$pageview' }, { $pathname: '/some/path' }),
+    item: makeItem(
+        {},
+        { event: '$pageview' },
+        { $pathname: '/some/path', aBool: true, aNumber: 123, aString: 'hello', aNull: null, anUndefined: undefined }
+    ),
 }
 
 export const PageViewWithCurrentURL: Story = BasicTemplate.bind({})
@@ -184,30 +194,30 @@ GroupIdentifyEvent.args = {
             $os_version: '10.15.7',
             $browser: 'Chrome',
             $device_type: 'Desktop',
-            $current_url: 'https://us.posthog.com/project/2/insights/new',
-            $host: 'us.posthog.com',
+            $current_url: 'https://insights.hanzo.ai/project/2/insights/new',
+            $host: 'insights.hanzo.ai',
             $pathname: '/project/2/insights/new',
             $initial_person_info: {
                 r: '$direct',
-                u: 'https://us.posthog.com/project/2',
+                u: 'https://insights.hanzo.ai/project/2',
             },
             $groups: {
                 project: '00000000-0000-0000-0000-proj00000001',
                 organization: '00000000-0000-0000-0000-org000000001',
                 customer: 'cus_ExampleCustomer123',
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
             },
             $group_type: 'instance',
-            $group_key: 'https://us.posthog.com',
+            $group_key: 'https://insights.hanzo.ai',
             $group_set: {
-                site_url: 'https://us.posthog.com',
+                site_url: 'https://insights.hanzo.ai',
             },
             $session_id: '01900000-0000-0000-0000-000000000003',
             $window_id: '01900000-0000-0000-0000-000000000004',
             $group_2: '00000000-0000-0000-0000-proj00000001',
             $group_0: '00000000-0000-0000-0000-org000000001',
             $group_3: 'cus_ExampleCustomer123',
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
         }
     ),
 }
@@ -223,7 +233,7 @@ AISpanEvent.args = {
             conversation_id: '00000000-0000-0000-0000-000000000005',
             $session_id: '01900000-0000-0000-0000-000000000006',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000002',
                 project: '00000000-0000-0000-0000-proj00000002',
             },
@@ -251,7 +261,7 @@ AISpanEvent.args = {
                                         'Modify the query to return results for both cohort 1001 and cohort 1002. Group by cohort, as well as day, and show the cohort ID in the results. All other logic should remain the same.',
                                 },
                                 id: 'call_a8sMElJzxA53Acb9AguyjOg1',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                                 type: 'tool_call',
                             },
                         ],
@@ -264,7 +274,7 @@ AISpanEvent.args = {
                         tool_call_id: 'call_a8sMElJzxA53Acb9AguyjOg1',
                         type: 'tool',
                         ui_payload: {
-                            generate_hogql_query:
+                            generate_insightsql_query:
                                 "SELECT\n    cohort_id,\n    day,\n    sum(session_duration) AS total_session_time_seconds,\n    count() AS total_sessions,\n    count(distinct person_id) AS total_unique_users\nFROM (\n    SELECT\n        toDate(timestamp) AS day,\n        $session_id,\n        person_id,\n        multiIf(person_id IN COHORT 1001, 1001, person_id IN COHORT 1002, 1002, NULL) AS cohort_id,\n        dateDiff('second', min(timestamp), max(timestamp)) AS session_duration\n    FROM events\n    WHERE event = 'page_viewed'\n        AND timestamp >= now() - interval 3 day\n        AND (person_id IN COHORT 1001 OR person_id IN COHORT 1002)\n    GROUP BY day, $session_id, person_id, cohort_id\n)\nGROUP BY cohort_id, day\nORDER BY cohort_id, day DESC",
                         },
                         visible: false,
@@ -298,7 +308,7 @@ AISpanEvent.args = {
                 start_id: '37130538-7a64-452c-b742-0febacea07e2',
                 summary_title: null,
             },
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             $ai_output_state: {
                 dashboard_name: null,
                 graph_status: null,
@@ -342,7 +352,7 @@ AISpanEvent.args = {
             $lib_version__minor: 7,
             $lib_version__patch: 4,
             num_keys_in_properties: 469,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000002',
             $group_2: '00000000-0000-0000-0000-proj00000002',
         }
@@ -360,7 +370,7 @@ AIGenerationEvent.args = {
             $ai_input: [
                 {
                     content:
-                        "You are Max, PostHog's AI assistant. Be friendly, direct, and helpful. Use tools to analyze data and answer questions.",
+                        "You are Max, Insights's AI assistant. Be friendly, direct, and helpful. Use tools to analyze data and answer questions.",
                     role: 'system',
                 },
                 {
@@ -368,7 +378,7 @@ AIGenerationEvent.args = {
                     role: 'system',
                 },
                 {
-                    content: 'User is editing SQL. Use generate_hogql_query tool for SQL queries.',
+                    content: 'User is editing SQL. Use generate_insightsql_query tool for SQL queries.',
                     role: 'system',
                 },
                 {
@@ -377,7 +387,7 @@ AIGenerationEvent.args = {
                 },
                 {
                     content:
-                        'You are currently in project Example Project, which is part of the Example Organization.\nThe user\'s name appears to be Jane Doe (jane@example.com). Feel free to use their first name when greeting. DO NOT use this name if it appears possibly fake.\nThe user is accessing the PostHog App from the "us" region, therefore all PostHog App URLs should be prefixed with the region, e.g. https://us.posthog.com\nCurrent time in the project\'s timezone, UTC: 2025-09-21 14:02:43.',
+                        'You are currently in project Example Project, which is part of the Example Organization.\nThe user\'s name appears to be Jane Doe (jane@example.com). Feel free to use their first name when greeting. DO NOT use this name if it appears possibly fake.\nThe user is accessing the Insights App from the "us" region, therefore all Insights App URLs should be prefixed with the region, e.g. https://insights.hanzo.ai\nCurrent time in the project\'s timezone, UTC: 2025-09-21 14:02:43.',
                     role: 'system',
                 },
                 {
@@ -392,7 +402,7 @@ AIGenerationEvent.args = {
                             function: {
                                 arguments:
                                     '{"instructions": "Count the number of distinct users (person_id) who triggered an autocapture event where element_text contains \'submit\' and $current_url contains \'/upload\' (case-insensitive)."}',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                             },
                             id: 'call_kS45Oc4e5FV19MjLy61Y2xyC',
                             type: 'function',
@@ -407,7 +417,7 @@ AIGenerationEvent.args = {
             ],
             $ai_span_id: 'span-0002-0002-0002-000000000002',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000003',
                 project: '00000000-0000-0000-0000-proj00000003',
             },
@@ -437,7 +447,7 @@ AIGenerationEvent.args = {
             $ai_cache_creation_input_tokens: 0,
             $ai_cache_read_input_tokens: 3200,
             $ai_model: 'gpt-4.1',
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             is_first_conversation: true,
             $ai_base_url: null,
             region: 'US',
@@ -457,7 +467,7 @@ AIGenerationEvent.args = {
             $ai_total_cost_usd: 0.003548,
             $ai_temperature: 0.3,
             $ai_stream: true,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000003',
             $group_2: '00000000-0000-0000-0000-proj00000003',
         }
@@ -501,7 +511,7 @@ AITraceEvent.args = {
                                         "Count the number of distinct users (person_id) who triggered an autocapture event where element_text contains 'submit' and $current_url contains '/upload' (case-insensitive).",
                                 },
                                 id: 'call_ExampleCallId001',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                                 type: 'tool_call',
                             },
                         ],
@@ -514,7 +524,7 @@ AITraceEvent.args = {
                         tool_call_id: 'call_ExampleCallId001',
                         type: 'tool',
                         ui_payload: {
-                            generate_hogql_query:
+                            generate_insightsql_query:
                                 "SELECT count(DISTINCT person_id)\nFROM events\nWHERE event = '$autocapture'\n  AND lower(properties.element_text) LIKE '%submit%'\n  AND lower(properties.$current_url) LIKE '%/upload%'\n  AND timestamp >= now() - INTERVAL 30 DAY",
                         },
                         visible: false,
@@ -536,7 +546,7 @@ AITraceEvent.args = {
             },
             $lib_version: '6.7.4',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000004',
                 project: '00000000-0000-0000-0000-proj00000004',
             },
@@ -544,7 +554,7 @@ AITraceEvent.args = {
             $python_runtime: 'CPython',
             is_first_conversation: true,
             $geoip_disable: true,
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             $ai_span_id: 'span-0003-0003-0003-000000000003',
             $ai_input_state: {
                 dashboard_name: null,
@@ -586,7 +596,7 @@ AITraceEvent.args = {
             $lib_version__minor: 7,
             $lib_version__patch: 4,
             num_keys_in_properties: 468,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000004',
             $group_2: '00000000-0000-0000-0000-proj00000004',
         }

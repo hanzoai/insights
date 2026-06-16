@@ -1,0 +1,199 @@
+# serializer version: 1
+# name: TestActorsBaseQuery.test_get_groups
+  '''
+  SELECT "insights_group"."id",
+         "insights_group"."team_id",
+         "insights_group"."group_key",
+         "insights_group"."group_type_index",
+         "insights_group"."group_properties",
+         "insights_group"."created_at",
+         "insights_group"."properties_last_updated_at",
+         "insights_group"."properties_last_operation",
+         "insights_group"."version"
+  FROM "insights_group"
+  WHERE ("insights_group"."group_key" IN ('org_1',
+                                         'org_2')
+         AND "insights_group"."group_type_index" = 99999
+         AND "insights_group"."team_id" = 99999)
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_distinct_id_limit
+  '''
+  SELECT "insights_person"."id",
+         "insights_person"."created_at",
+         "insights_person"."team_id",
+         "insights_person"."properties",
+         "insights_person"."is_identified",
+         "insights_person"."uuid"
+  FROM "insights_person"
+  WHERE ("insights_person"."team_id" = 99999
+         AND "insights_person"."uuid" IN ('00000000000000000000000000000000'::uuid))
+  ORDER BY "insights_person"."created_at" DESC,
+           "insights_person"."uuid" ASC
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_distinct_id_limit.1
+  '''
+  SELECT "insights_persondistinctid"."id",
+         "insights_persondistinctid"."team_id",
+         "insights_persondistinctid"."person_id",
+         "insights_persondistinctid"."distinct_id",
+         "insights_persondistinctid"."version"
+  FROM "insights_persondistinctid"
+  WHERE ("insights_persondistinctid"."id" IN
+           (SELECT U0."id"
+            FROM "insights_persondistinctid" U0
+            WHERE U0."person_id" = ("insights_persondistinctid"."person_id")
+            LIMIT 3)
+         AND "insights_persondistinctid"."person_id" IN (1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5 /* ... */))
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_prefetch
+  '''
+  SELECT "insights_person"."id",
+         "insights_person"."created_at",
+         "insights_person"."team_id",
+         "insights_person"."properties",
+         "insights_person"."is_identified",
+         "insights_person"."uuid"
+  FROM "insights_person"
+  WHERE ("insights_person"."team_id" = 99999
+         AND "insights_person"."uuid" IN ('00000000000000000000000000000000'::uuid,
+                                         '00000000000000000000000000000000'::uuid))
+  ORDER BY "insights_person"."created_at" DESC,
+           "insights_person"."uuid" ASC
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_prefetch.1
+  '''
+  SELECT "insights_persondistinctid"."id",
+         "insights_persondistinctid"."team_id",
+         "insights_persondistinctid"."person_id",
+         "insights_persondistinctid"."distinct_id",
+         "insights_persondistinctid"."version"
+  FROM "insights_persondistinctid"
+  WHERE ("insights_persondistinctid"."id" IN
+           (SELECT U0."id"
+            FROM "insights_persondistinctid" U0
+            WHERE U0."person_id" = ("insights_persondistinctid"."person_id")
+            LIMIT 1000)
+         AND "insights_persondistinctid"."person_id" IN (1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5 /* ... */))
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_value_per_actor
+  '''
+  SELECT "insights_person"."id",
+         "insights_person"."created_at",
+         "insights_person"."team_id",
+         "insights_person"."properties",
+         "insights_person"."is_identified",
+         "insights_person"."uuid"
+  FROM "insights_person"
+  WHERE ("insights_person"."team_id" = 99999
+         AND "insights_person"."uuid" IN ('00000000000000000000000000000000'::uuid,
+                                         '00000000000000000000000000000000'::uuid))
+  ORDER BY "insights_person"."created_at" DESC,
+           "insights_person"."uuid" ASC
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_people_with_value_per_actor.1
+  '''
+  SELECT "insights_persondistinctid"."id",
+         "insights_persondistinctid"."team_id",
+         "insights_persondistinctid"."person_id",
+         "insights_persondistinctid"."distinct_id",
+         "insights_persondistinctid"."version"
+  FROM "insights_persondistinctid"
+  WHERE ("insights_persondistinctid"."id" IN
+           (SELECT U0."id"
+            FROM "insights_persondistinctid" U0
+            WHERE U0."person_id" = ("insights_persondistinctid"."person_id")
+            LIMIT 1000)
+         AND "insights_persondistinctid"."person_id" IN (1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5 /* ... */))
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_serialized_people_empty
+  '''
+  SELECT insights_person.id,
+         insights_person.uuid,
+         insights_person.properties,
+         insights_person.is_identified,
+         insights_person.created_at
+  FROM insights_person
+  WHERE insights_person.uuid = ANY('{}')
+    AND insights_person.team_id = 99999
+  ORDER BY created_at DESC,
+           uuid
+  '''
+# ---
+# name: TestActorsBaseQuery.test_get_serialized_people_empty.1
+  '''
+  SELECT insights_persondistinctid.person_id,
+         insights_persondistinctid.distinct_id
+  FROM insights_persondistinctid
+  WHERE insights_persondistinctid.person_id = ANY('{}')
+    AND insights_persondistinctid.team_id = 99999
+  '''
+# ---
+# name: TestActorsBaseQuery.test_serialize_groups_with_values
+  '''
+  SELECT "insights_group"."id",
+         "insights_group"."team_id",
+         "insights_group"."group_key",
+         "insights_group"."group_type_index",
+         "insights_group"."group_properties",
+         "insights_group"."created_at",
+         "insights_group"."properties_last_updated_at",
+         "insights_group"."properties_last_operation",
+         "insights_group"."version"
+  FROM "insights_group"
+  WHERE "insights_group"."group_key" IN ('company_a',
+                                        'company_b')
+  '''
+# ---
+# name: TestActorsBaseQuery.test_serialize_people_basic
+  '''
+  SELECT "insights_person"."id",
+         "insights_person"."created_at",
+         "insights_person"."properties_last_updated_at",
+         "insights_person"."properties_last_operation",
+         "insights_person"."team_id",
+         "insights_person"."properties",
+         "insights_person"."is_user_id",
+         "insights_person"."is_identified",
+         "insights_person"."uuid",
+         "insights_person"."version"
+  FROM "insights_person"
+  WHERE "insights_person"."uuid" = '00000000000000000000000000000000'::uuid
+  '''
+# ---
+# name: TestActorsBaseQuery.test_serialize_people_basic.1
+  '''
+  SELECT "insights_persondistinctid"."distinct_id"
+  FROM "insights_persondistinctid"
+  WHERE ("insights_persondistinctid"."person_id" = 99999
+         AND "insights_persondistinctid"."team_id" = 99999)
+  ORDER BY "insights_persondistinctid"."id" ASC
+  '''
+# ---
+# name: TestActorsBaseQuery.test_serialize_people_basic.2
+  '''
+  SELECT "insights_persondistinctid"."distinct_id"
+  FROM "insights_persondistinctid"
+  WHERE ("insights_persondistinctid"."person_id" = 99999
+         AND "insights_persondistinctid"."team_id" = 99999)
+  ORDER BY "insights_persondistinctid"."id" ASC
+  '''
+# ---

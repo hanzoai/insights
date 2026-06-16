@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect'
 import { NotebooksListFilters } from 'scenes/notebooks/NotebooksTable/notebooksTableLogic'
@@ -9,7 +9,8 @@ export const fromNodeTypeToLabel: Omit<
     Record<NotebookNodeType, string>,
     | NotebookNodeType.Backlink
     | NotebookNodeType.PersonFeed
-    | NotebookNodeType.Properties
+    | NotebookNodeType.PersonProperties
+    | NotebookNodeType.GroupProperties
     | NotebookNodeType.Map
     | NotebookNodeType.Mention
     | NotebookNodeType.Embed
@@ -21,14 +22,22 @@ export const fromNodeTypeToLabel: Omit<
     [NotebookNodeType.EarlyAccessFeature]: 'Early Access Features',
     [NotebookNodeType.Survey]: 'Surveys',
     [NotebookNodeType.Image]: 'Images',
-    [NotebookNodeType.Person]: 'Persons',
+    [NotebookNodeType.Person]: 'Users',
     [NotebookNodeType.Query]: 'Queries',
+    [NotebookNodeType.Python]: 'Python',
+    [NotebookNodeType.DuckSQL]: 'SQL (DuckDB)',
+    [NotebookNodeType.InsightsQLSQL]: 'SQL (InsightsQL)',
     [NotebookNodeType.Recording]: 'Session recordings',
     [NotebookNodeType.RecordingPlaylist]: 'Session replay playlists',
     [NotebookNodeType.ReplayTimestamp]: 'Session recording comments',
     [NotebookNodeType.Cohort]: 'Cohorts',
     [NotebookNodeType.Group]: 'Groups',
     [NotebookNodeType.TaskCreate]: 'Task suggestions',
+    [NotebookNodeType.LLMTrace]: 'LLM traces',
+    [NotebookNodeType.Issues]: 'Issues',
+    [NotebookNodeType.UsageMetrics]: 'Usage metrics',
+    [NotebookNodeType.ZendeskTickets]: 'Zendesk tickets',
+    [NotebookNodeType.RelatedGroups]: 'Related groups',
 }
 
 export function ContainsTypeFilters({
@@ -49,7 +58,7 @@ export function ContainsTypeFilters({
                     .map(([type, label]) => ({ key: type, label }))}
                 value={filters.contains}
                 onChange={(newValue: string[]) => {
-                    posthog.capture('notebook containing filter applied')
+                    insights.capture('notebook containing filter applied')
                     setFilters({ contains: newValue.map((x) => x as NotebookNodeType) })
                 }}
                 data-attr="notebooks-list-contains-filters"

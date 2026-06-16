@@ -47,10 +47,10 @@ export const formatAggregationAxisValue = (
                 formattedValue = humanFriendlyDuration(value / 1000, { secondsFixed: 1 })
                 break
             case 'percentage':
-                formattedValue = percentage(value / 100)
+                formattedValue = percentage(value / 100, maxDecimalPlaces)
                 break
             case 'percentage_scaled':
-                formattedValue = percentage(value)
+                formattedValue = percentage(value, maxDecimalPlaces)
                 break
             case 'currency':
                 formattedValue = humanFriendlyCurrency(value)
@@ -80,6 +80,7 @@ export const axisLabel = (chartDisplayType: ChartDisplayType | null | undefined)
         case ChartDisplayType.ActionsLineGraph:
         case ChartDisplayType.ActionsLineGraphCumulative:
         case ChartDisplayType.ActionsBar:
+        case ChartDisplayType.ActionsUnstackedBar:
         case ChartDisplayType.ActionsAreaGraph:
             return 'Y-axis unit'
         case ChartDisplayType.ActionsBarValue:

@@ -1,28 +1,24 @@
+import { FEATURE_FLAGS, type FeatureFlagKey } from 'lib/constants'
+
 import {
+    AttributionMode,
     ConversionGoalFilter,
     DataWarehouseNode,
     ExternalDataSourceType,
-    MarketingAnalyticsHelperForColumnNames,
+    MARKETING_INTEGRATION_CONFIGS,
+    MarketingAnalyticsColumnsSchemaNames,
+    MarketingAnalyticsConstants,
     MarketingAnalyticsOrderBy,
     MarketingAnalyticsTableQuery,
+    NativeMarketingSource,
+    NodeKind,
+    VALID_NATIVE_MARKETING_SOURCES,
 } from '~/queries/schema/schema-general'
-import { ManualLinkSourceType } from '~/types'
+import { InsightsQLMathType, ManualLinkSourceType } from '~/types'
 
 import { NativeSource } from './marketingAnalyticsLogic'
-import { googleAdsCostTile, linkedinAdsCostTile, metaAdsCostTile, redditAdsCostTile } from './marketingCostTile'
 
-export type NativeMarketingSource = Extract<
-    ExternalDataSourceType,
-    'GoogleAds' | 'RedditAds' | 'LinkedinAds' | 'MetaAds'
->
 export type NonNativeMarketingSource = Extract<ExternalDataSourceType, 'BigQuery'>
-
-export const VALID_NATIVE_MARKETING_SOURCES: NativeMarketingSource[] = [
-    'GoogleAds',
-    'RedditAds',
-    'LinkedinAds',
-    'MetaAds',
-]
 
 export const VALID_NON_NATIVE_MARKETING_SOURCES: NonNativeMarketingSource[] = ['BigQuery']
 export const VALID_SELF_MANAGED_MARKETING_SOURCES: ManualLinkSourceType[] = [
@@ -32,40 +28,59 @@ export const VALID_SELF_MANAGED_MARKETING_SOURCES: ManualLinkSourceType[] = [
     'azure',
 ]
 
-export const MAX_ITEMS_TO_SHOW = 3
-
-export const GOOGLE_ADS_CAMPAIGN_TABLE_NAME = 'campaign'
-export const GOOGLE_ADS_CAMPAIGN_STATS_TABLE_NAME = 'campaign_stats'
-
-export const LINKEDIN_ADS_CAMPAIGN_TABLE_NAME = 'campaigns'
-export const LINKEDIN_ADS_CAMPAIGN_STATS_TABLE_NAME = 'campaign_stats'
-
-export const REDDIT_ADS_CAMPAIGN_TABLE_NAME = 'campaigns'
-export const REDDIT_ADS_CAMPAIGN_STATS_TABLE_NAME = 'campaign_report'
-
-export const META_ADS_CAMPAIGN_TABLE_NAME = 'campaigns'
-export const META_ADS_CAMPAIGN_STATS_TABLE_NAME = 'campaign_stats'
-
-export const NEEDED_FIELDS_FOR_NATIVE_MARKETING_ANALYTICS: Record<NativeMarketingSource, string[]> = {
-    GoogleAds: [GOOGLE_ADS_CAMPAIGN_TABLE_NAME, GOOGLE_ADS_CAMPAIGN_STATS_TABLE_NAME],
-    LinkedinAds: [LINKEDIN_ADS_CAMPAIGN_TABLE_NAME, LINKEDIN_ADS_CAMPAIGN_STATS_TABLE_NAME],
-    RedditAds: [REDDIT_ADS_CAMPAIGN_TABLE_NAME, REDDIT_ADS_CAMPAIGN_STATS_TABLE_NAME],
-    MetaAds: [META_ADS_CAMPAIGN_TABLE_NAME, META_ADS_CAMPAIGN_STATS_TABLE_NAME],
+// Map of native sources that require feature flags to be enabled
+export const NATIVE_SOURCE_FEATURE_FLAGS: Partial<Record<NativeMarketingSource, FeatureFlagKey>> = {
+    BingAds: FEATURE_FLAGS.BING_ADS_SOURCE,
+    SnapchatAds: FEATURE_FLAGS.SNAPCHAT_ADS_SOURCE,
 }
 
-export function MarketingDashboardMapper(source: NativeSource): DataWarehouseNode | null {
-    switch (source.source.source_type) {
-        case 'GoogleAds':
-            return googleAdsCostTile(source)
-        case 'LinkedinAds':
-            return linkedinAdsCostTile(source)
-        case 'RedditAds':
-            return redditAdsCostTile(source)
-        case 'MetaAds':
-            return metaAdsCostTile(source)
-        default:
-            return null
-    }
+/**
+ * Filter native marketing sources based on feature flags
+ * @param featureFlags - The feature flags object from featureFlagLogic
+ * @returns Filtered list of native marketing sources that are enabled
+ */
+export function getEnabledNativeMarketingSources(
+    featureFlags: Partial<Record<FeatureFlagKey, boolean | string>>
+): readonly NativeMarketingSource[] {
+    return VALID_NATIVE_MARKETING_SOURCES.filter((source) => {
+        const featureFlagKey = NATIVE_SOURCE_FEATURE_FLAGS[source]
+        if (featureFlagKey) {
+            return !!featureFlags[featureFlagKey]
+        }
+        return true
+    })
+}
+
+export const MAX_ITEMS_TO_SHOW = 3
+
+// Derive table names from centralized config
+export const NEEDED_FIELDS_FOR_NATIVE_MARKETING_ANALYTICS: Record<NativeMarketingSource, string[]> = Object.fromEntries(
+    VALID_NATIVE_MARKETING_SOURCES.map((source) => [
+        source,
+        [MARKETING_INTEGRATION_CONFIGS[source].campaignTableName, MARKETING_INTEGRATION_CONFIGS[source].statsTableName],
+    ])
+) as Record<NativeMarketingSource, string[]>
+
+export const MAX_ATTRIBUTION_WINDOW_DAYS = 90
+export const MIN_ATTRIBUTION_WINDOW_DAYS = 1
+export const DEFAULT_ATTRIBUTION_WINDOW_DAYS = 90
+export const DEFAULT_ATTRIBUTION_MODE = AttributionMode.LastTouch
+
+export const ATTRIBUTION_WINDOW_OPTIONS = [
+    { value: 1, label: '1 day' },
+    { value: 7, label: '1 week (7 days)' },
+    { value: 14, label: '2 weeks (14 days)' },
+    { value: 30, label: '1 month (30 days)' },
+    { value: 90, label: '3 months (90 days)' },
+    { value: 'custom', label: 'Custom' },
+]
+
+export function MarketingDashboardMapper(
+    source: NativeSource,
+    tileColumnSelection: validColumnsForTiles,
+    baseCurrency: string
+): DataWarehouseNode | null {
+    return createMarketingTile(source, tileColumnSelection, baseCurrency)
 }
 
 export const COST_MICROS_MULTIPLIER = 1 / 1000000
@@ -99,7 +114,7 @@ export function isDraftConversionGoalColumn(column: string, draftConversionGoal:
     }
     return (
         column === draftConversionGoal.conversion_goal_name ||
-        column === `${MarketingAnalyticsHelperForColumnNames.CostPer} ${draftConversionGoal.conversion_goal_name}`
+        column === `${MarketingAnalyticsConstants.CostPer} ${draftConversionGoal.conversion_goal_name}`
     )
 }
 
@@ -177,4 +192,494 @@ export function createMarketingAnalyticsOrderBy(
     direction: 'ASC' | 'DESC'
 ): MarketingAnalyticsOrderBy[] {
     return [[column, direction]]
+}
+export type validColumnsForTiles =
+    | Extract<
+          MarketingAnalyticsColumnsSchemaNames,
+          'cost' | 'impressions' | 'clicks' | 'reported_conversion' | 'reported_conversion_value'
+      >
+    | 'roas'
+
+// Raw column types that have actual column mappings (excludes calculated fields like ROAS)
+export type rawColumnsForTiles = Exclude<validColumnsForTiles, 'roas'>
+
+interface ColumnConfig {
+    name: string
+    type: string
+    needsDivision: boolean
+}
+
+interface SourceColumnMappings {
+    cost: string
+    impressions: string
+    clicks: string
+    reportedConversion: string
+    reportedConversionValue: string
+    costNeedsDivision?: boolean
+    currencyColumn?: string
+    fallbackCurrency?: string
+}
+
+interface SourceTileConfig {
+    idField: string
+    timestampField: string
+    columnMappings: SourceColumnMappings
+    specialConversionLogic?: (
+        _table: any,
+        tileColumnSelection: validColumnsForTiles
+    ) => Partial<DataWarehouseNode> | null
+}
+
+export function safeFloat(field: string): string {
+    return `ifNull(toFloat(${field}), 0)`
+}
+
+export function sumSafeFloat(field: string): string {
+    return `SUM(${safeFloat(field)})`
+}
+
+function buildConversionExpr(
+    fields: string | readonly string[],
+    table: any,
+    buildExpr?: (availableFields: string[]) => string
+): Partial<DataWarehouseNode> {
+    const fieldList = typeof fields === 'string' ? [fields] : [...fields]
+    const availableFields = fieldList.filter((field) => table.fields && field in table.fields)
+    if (availableFields.length === 0) {
+        return { math: InsightsQLMathType.InsightsQL, math_insightsql: '0' }
+    }
+    const mathInsightsql = buildExpr
+        ? buildExpr(availableFields)
+        : `SUM(${availableFields.map((field) => safeFloat(field)).join(' + ')})`
+    return { math: InsightsQLMathType.InsightsQL, math_insightsql: mathInsightsql }
+}
+
+const sourceTileConfigs: Record<NativeMarketingSource, SourceTileConfig> = {
+    GoogleAds: {
+        idField: 'id',
+        timestampField: 'segments_date',
+        columnMappings: {
+            cost: 'metrics_cost_micros',
+            impressions: 'metrics_impressions',
+            clicks: 'metrics_clicks',
+            reportedConversion: 'metrics_conversions',
+            reportedConversionValue: 'metrics_conversions_value',
+            costNeedsDivision: true,
+            currencyColumn: 'customer_currency_code',
+            fallbackCurrency: 'USD',
+        },
+    },
+    RedditAds: {
+        idField: 'campaign_id',
+        timestampField: 'date',
+        columnMappings: {
+            cost: 'spend',
+            impressions: 'impressions',
+            clicks: 'clicks',
+            reportedConversion: 'conversion_purchase_total_items',
+            reportedConversionValue: 'conversion_purchase_total_value',
+            costNeedsDivision: true,
+            currencyColumn: 'currency',
+        },
+        specialConversionLogic: (_table, tileColumnSelection) => {
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversion) {
+                return buildConversionExpr(['conversion_signup_total_value', 'conversion_purchase_total_items'], _table)
+            }
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr(['conversion_purchase_total_value', 'conversion_signup_total_value'], _table)
+            }
+            return null
+        },
+    },
+    LinkedinAds: {
+        idField: 'id',
+        timestampField: 'date_start',
+        columnMappings: {
+            cost: 'cost_in_usd',
+            impressions: 'impressions',
+            clicks: 'clicks',
+            reportedConversion: 'external_website_conversions',
+            reportedConversionValue: 'conversion_value_in_local_currency',
+            fallbackCurrency: 'USD',
+        },
+        specialConversionLogic: (table, tileColumnSelection) => {
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr(['conversion_value_in_local_currency'], table)
+            }
+            return null
+        },
+    },
+    MetaAds: {
+        idField: 'campaign_id',
+        timestampField: 'date_stop',
+        columnMappings: {
+            cost: 'spend',
+            impressions: 'impressions',
+            clicks: 'clicks',
+            reportedConversion: 'actions',
+            reportedConversionValue: 'action_values',
+            currencyColumn: 'account_currency',
+        },
+        specialConversionLogic: (table, tileColumnSelection) => {
+            const { omni: omniActionTypes, fallback: fallbackActionTypes } =
+                MARKETING_INTEGRATION_CONFIGS.MetaAds.conversionActionTypes
+
+            const buildArraySumExpr = (field: string, actionTypes: readonly string[]): string => {
+                const actionTypesStr = actionTypes
+                    .map((t) => {
+                        const escaped = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+                        return `'${escaped}'`
+                    })
+                    .join(', ')
+                return `arraySum(x -> JSONExtractFloat(x, 'value'), arrayFilter(x -> JSONExtractString(x, 'action_type') IN (${actionTypesStr}), JSONExtractArrayRaw(coalesce(${field}, '[]'))))`
+            }
+
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversion) {
+                return buildConversionExpr('actions', table, ([field]) => {
+                    const omniSum = buildArraySumExpr(field, omniActionTypes)
+                    const fallbackSum = buildArraySumExpr(field, fallbackActionTypes)
+                    return `SUM(if(${omniSum} > 0, ${omniSum}, ${fallbackSum}))`
+                })
+            }
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr('action_values', table, ([field]) => {
+                    const omniSum = buildArraySumExpr(field, omniActionTypes)
+                    const fallbackSum = buildArraySumExpr(field, fallbackActionTypes)
+                    return `SUM(if(${omniSum} > 0, ${omniSum}, ${fallbackSum}))`
+                })
+            }
+            return null
+        },
+    },
+    TikTokAds: {
+        idField: 'campaign_id',
+        timestampField: 'stat_time_day',
+        columnMappings: {
+            cost: 'spend',
+            impressions: 'impressions',
+            clicks: 'clicks',
+            reportedConversion: 'conversion',
+            reportedConversionValue: 'total_complete_payment_value',
+            currencyColumn: 'currency',
+        },
+        specialConversionLogic: (table, tileColumnSelection) => {
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversion) {
+                return buildConversionExpr('conversion', table)
+            }
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr(['total_complete_payment_value'], table)
+            }
+            return null
+        },
+    },
+    BingAds: {
+        idField: 'campaign_id',
+        timestampField: 'time_period',
+        columnMappings: {
+            cost: 'spend',
+            impressions: 'impressions',
+            clicks: 'clicks',
+            reportedConversion: 'conversions',
+            reportedConversionValue: 'revenue',
+            currencyColumn: 'currency_code',
+        },
+        specialConversionLogic: (table, tileColumnSelection) => {
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversion) {
+                return buildConversionExpr('conversions', table)
+            }
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr(['revenue'], table)
+            }
+            return null
+        },
+    },
+    SnapchatAds: {
+        idField: 'id',
+        timestampField: 'start_time',
+        columnMappings: {
+            cost: 'spend',
+            impressions: 'impressions',
+            clicks: 'swipes',
+            reportedConversion: 'conversion_purchases',
+            reportedConversionValue: 'conversion_purchases_value',
+            costNeedsDivision: true,
+            currencyColumn: 'currency',
+        },
+        specialConversionLogic: (table, tileColumnSelection) => {
+            const { conversionFields, conversionValueFields } = MARKETING_INTEGRATION_CONFIGS.SnapchatAds
+
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversion) {
+                return buildConversionExpr(conversionFields, table)
+            }
+            if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+                return buildConversionExpr(conversionValueFields, table)
+            }
+            return null
+        },
+    },
+}
+
+function createColumnConfig(columnName: string, type: 'float' | 'integer', needsDivision = false): ColumnConfig {
+    return { name: columnName, type, needsDivision }
+}
+
+function buildSourceConfig(mappings: SourceColumnMappings): {
+    columns: { [key in rawColumnsForTiles]: ColumnConfig }
+} {
+    return {
+        columns: {
+            [MarketingAnalyticsColumnsSchemaNames.Cost]: createColumnConfig(
+                mappings.cost,
+                'float',
+                mappings.costNeedsDivision ?? false
+            ),
+            [MarketingAnalyticsColumnsSchemaNames.Impressions]: createColumnConfig(mappings.impressions, 'integer'),
+            [MarketingAnalyticsColumnsSchemaNames.Clicks]: createColumnConfig(mappings.clicks, 'integer'),
+            [MarketingAnalyticsColumnsSchemaNames.ReportedConversion]: createColumnConfig(
+                mappings.reportedConversion,
+                'integer'
+            ),
+            [MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue]: createColumnConfig(
+                mappings.reportedConversionValue,
+                'float'
+            ),
+        },
+    }
+}
+
+export const columnTileConfig: {
+    [key in NativeMarketingSource]: {
+        columns: {
+            [key in rawColumnsForTiles]: ColumnConfig
+        }
+    }
+} = Object.fromEntries(
+    VALID_NATIVE_MARKETING_SOURCES.map((source) => [
+        source,
+        buildSourceConfig(sourceTileConfigs[source].columnMappings),
+    ])
+) as any
+
+export function createMarketingTile(
+    source: NativeSource,
+    tileColumnSelection: validColumnsForTiles,
+    baseCurrency: string
+): DataWarehouseNode | null {
+    const sourceType = source.source.source_type as NativeMarketingSource
+    const tileConfig = sourceTileConfigs[sourceType]
+    const integrationConfig = MARKETING_INTEGRATION_CONFIGS[sourceType]
+
+    if (!tileConfig || !integrationConfig) {
+        return null
+    }
+
+    const table = source.tables.find((t) => t.name.split('.').pop() === integrationConfig.statsTableName)
+    if (!table) {
+        return null
+    }
+
+    // Handle ROAS (Return on Ad Spend) - calculated as conversion_value / cost
+    if (tileColumnSelection === 'roas') {
+        const mappings = tileConfig.columnMappings
+        const costColumn = mappings.cost
+        const needsDivision = mappings.costNeedsDivision
+
+        // Build cost expression
+        const costExpr = needsDivision ? `toFloat(${costColumn} / 1000000)` : `toFloat(${costColumn})`
+
+        // Build conversion value numerator: use specialConversionLogic if available
+        let conversionValueExpr: string
+        const specialResult = tileConfig.specialConversionLogic?.(
+            table,
+            MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue
+        )
+        if (specialResult?.math_insightsql) {
+            conversionValueExpr = specialResult.math_insightsql
+        } else {
+            const conversionValueColumn = mappings.reportedConversionValue
+            const hasConversionValueColumn = table.fields && conversionValueColumn in table.fields
+            if (!hasConversionValueColumn) {
+                conversionValueExpr = '0'
+            } else {
+                conversionValueExpr = sumSafeFloat(conversionValueColumn)
+            }
+        }
+
+        const mathInsightsql = conversionValueExpr === '0' ? '0' : `${conversionValueExpr} / nullIf(SUM(${costExpr}), 0)`
+
+        return {
+            kind: NodeKind.DataWarehouseNode,
+            id: table.id,
+            name: integrationConfig.primarySource,
+            custom_name: `${table.name} roas`,
+            id_field: tileConfig.idField,
+            distinct_id_field: tileConfig.idField,
+            timestamp_field: tileConfig.timestampField,
+            table_name: table.name,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
+        }
+    }
+
+    const column = columnTileConfig[sourceType].columns[tileColumnSelection as rawColumnsForTiles]
+    if (!column) {
+        return null
+    }
+
+    const displayName = integrationConfig.primarySource
+
+    // Check for special conversion logic first
+    if (tileConfig.specialConversionLogic) {
+        const specialLogic = tileConfig.specialConversionLogic(table, tileColumnSelection)
+        if (specialLogic) {
+            let finalMathInsightsql = specialLogic.math_insightsql
+
+            // Apply currency conversion for monetary conversion values
+            if (
+                tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue &&
+                finalMathInsightsql &&
+                finalMathInsightsql !== '0'
+            ) {
+                const mappings = tileConfig.columnMappings
+                const currencyColumn = mappings.currencyColumn
+                const fallbackCurrency = mappings.fallbackCurrency
+                const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
+
+                if (hasCurrencyColumn) {
+                    finalMathInsightsql = `toFloat(convertCurrency(any(coalesce(${currencyColumn}, '${baseCurrency}')), '${baseCurrency}', ${finalMathInsightsql}))`
+                } else if (fallbackCurrency) {
+                    finalMathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', ${finalMathInsightsql}))`
+                }
+            }
+
+            return {
+                kind: NodeKind.DataWarehouseNode,
+                id: table.id,
+                name: displayName,
+                custom_name: `${table.name} ${tileColumnSelection}`,
+                id_field: tileConfig.idField,
+                distinct_id_field: tileConfig.idField,
+                timestamp_field: tileConfig.timestampField,
+                table_name: table.name,
+                ...specialLogic,
+                math_insightsql: finalMathInsightsql,
+            }
+        }
+    }
+
+    if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.Cost) {
+        const mappings = tileConfig.columnMappings
+        const costColumn = mappings.cost
+        const currencyColumn = mappings.currencyColumn
+        const fallbackCurrency = mappings.fallbackCurrency
+        const needsDivision = mappings.costNeedsDivision
+
+        let costExpr = needsDivision ? `toFloat(${costColumn} / 1000000)` : `toFloat(${costColumn})`
+
+        let mathInsightsql: string
+
+        const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
+
+        if (hasCurrencyColumn) {
+            mathInsightsql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${costExpr})))`
+        } else if (fallbackCurrency) {
+            mathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${costExpr})))`
+        } else {
+            mathInsightsql = `SUM(${costExpr})`
+        }
+
+        return {
+            kind: NodeKind.DataWarehouseNode,
+            id: table.id,
+            name: displayName,
+            custom_name: `${table.name} ${tileColumnSelection}`,
+            id_field: tileConfig.idField,
+            distinct_id_field: tileConfig.idField,
+            timestamp_field: tileConfig.timestampField,
+            table_name: table.name,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
+        }
+    }
+
+    // Apply currency conversion for reported_conversion_value (monetary column)
+    if (tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue) {
+        const mappings = tileConfig.columnMappings
+        const currencyColumn = mappings.currencyColumn
+        const fallbackCurrency = mappings.fallbackCurrency
+        const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
+
+        const valueExpr = safeFloat(column.name)
+        let mathInsightsql: string
+
+        if (hasCurrencyColumn) {
+            mathInsightsql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${valueExpr})))`
+        } else if (fallbackCurrency) {
+            mathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${valueExpr})))`
+        } else {
+            mathInsightsql = `SUM(${valueExpr})`
+        }
+
+        return {
+            kind: NodeKind.DataWarehouseNode,
+            id: table.id,
+            name: displayName,
+            custom_name: `${table.name} ${tileColumnSelection}`,
+            id_field: tileConfig.idField,
+            distinct_id_field: tileConfig.idField,
+            timestamp_field: tileConfig.timestampField,
+            table_name: table.name,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
+        }
+    }
+
+    // Default tile configuration for non-monetary columns
+    return {
+        kind: NodeKind.DataWarehouseNode,
+        id: table.id,
+        name: displayName,
+        custom_name: `${table.name} ${tileColumnSelection}`,
+        id_field: tileConfig.idField,
+        distinct_id_field: tileConfig.idField,
+        timestamp_field: tileConfig.timestampField,
+        table_name: table.name,
+        math: InsightsQLMathType.InsightsQL,
+        math_insightsql: sumSafeFloat(column.name),
+    }
+}
+
+export function rowMatchesSearch(record: unknown, searchTerm: string): boolean {
+    if (!searchTerm.trim()) {
+        return true
+    }
+
+    const normalizedSearch = searchTerm.toLowerCase().trim()
+
+    if (!record || typeof record !== 'object') {
+        return false
+    }
+
+    const row = record as { result?: unknown[]; label?: string }
+
+    if (row.label) {
+        return true
+    }
+
+    if (!row.result || !Array.isArray(row.result)) {
+        return false
+    }
+
+    return row.result.some((item) => {
+        if (typeof item === 'string') {
+            return item.toLowerCase().includes(normalizedSearch)
+        }
+        if (typeof item === 'object' && item !== null) {
+            const itemValue = (item as Record<string, unknown>).value
+            if (typeof itemValue === 'string') {
+                return itemValue.toLowerCase().includes(normalizedSearch)
+            }
+        }
+        return false
+    })
 }

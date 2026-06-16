@@ -6,10 +6,10 @@ import { Placeholder } from '@tiptap/extensions'
 import { EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useRef, useState } from 'react'
 
-import { IconEye, IconImage, IconPencil } from '@posthog/icons'
+import { IconEye, IconImage, IconPencil } from '@hanzo/icons'
 
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
@@ -25,6 +25,7 @@ import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput'
 import { emojiUsageLogic } from 'lib/lemon-ui/LemonTextArea/emojiUsageLogic'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { Spinner } from 'lib/lemon-ui/Spinner'
+import { cn } from 'lib/utils/css-classes'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 export type LemonRichContentEditorProps = {
@@ -35,6 +36,7 @@ export type LemonRichContentEditorProps = {
     onUpdate?: (isEmpty: boolean) => void
     onPressCmdEnter?: () => void
     disabled?: boolean
+    minRows?: number
 }
 
 const DEFAULT_INITIAL_CONTENT: JSONContent = {
@@ -42,12 +44,7 @@ const DEFAULT_INITIAL_CONTENT: JSONContent = {
     content: [
         {
             type: 'paragraph',
-            content: [
-                {
-                    type: 'text',
-                    text: '',
-                },
-            ],
+            content: [],
         },
     ],
 }
@@ -82,6 +79,22 @@ export const serializationOptions: { textSerializers?: Record<string, TextSerial
     textSerializers: { [RichContentNodeType.Mention]: ({ node }) => `@member:${node.attrs.id}` },
 }
 
+export function RichContentPreview({
+    content,
+    className,
+}: {
+    content: JSONContent | null
+    className?: string
+}): JSX.Element {
+    const editor = useRichContentEditor({
+        extensions: [...DEFAULT_EXTENSIONS],
+        // preview isn't editable
+        disabled: true,
+        initialContent: content ?? DEFAULT_INITIAL_CONTENT,
+    })
+    return <RichContent editor={editor} className={className} />
+}
+
 export function LemonRichContentEditor({
     initialContent,
     placeholder,
@@ -89,6 +102,7 @@ export function LemonRichContentEditor({
     onUpdate,
     onPressCmdEnter,
     disabled = false,
+    minRows,
 }: LemonRichContentEditorProps): JSX.Element {
     const [isPreviewShown, setIsPreviewShown] = useState<boolean>(false)
     const [ttEditor, setTTEditor] = useState<TTEditor | null>(null)
@@ -122,20 +136,25 @@ export function LemonRichContentEditor({
             if (ttEditor) {
                 ttEditor.commands.insertContent(`\n\n![${fileName}](${url})`)
             }
-            posthog.capture('rich text image uploaded', { name: fileName })
+            insights.capture('rich text image uploaded', { name: fileName })
         },
         onError: (detail) => {
-            posthog.capture('rich text image upload failed', { error: detail })
+            insights.capture('rich text image upload failed', { error: detail })
             lemonToast.error(`Error uploading image: ${detail}`)
         },
     })
 
     return (
-        <div ref={dropRef} className="LemonRichContentEditor flex flex-col border rounded divide-y mt-4">
+        <div ref={dropRef} className="LemonRichContentEditor flex flex-col border rounded divide-y mt-4 input-like">
             {isPreviewShown && ttEditor ? (
-                <RichContent editor={ttEditor} />
+                <RichContent editor={ttEditor} className="bg-fill-input" />
             ) : (
-                <EditorContent editor={editor} className="RichContentEditor p-2" autoFocus />
+                <EditorContent
+                    editor={editor}
+                    className="RichContentEditor p-2"
+                    autoFocus
+                    style={minRows ? { minHeight: `${minRows * 1.5}em` } : undefined}
+                />
             )}
             <div className="flex justify-between p-0.5">
                 <div className="flex">
@@ -197,13 +216,13 @@ export function LemonRichContentEditor({
     )
 }
 
-const RichContent = ({ editor }: { editor: TTEditor }): JSX.Element => {
+const RichContent = ({ editor, className }: { editor: TTEditor; className?: string }): JSX.Element => {
     const text = editor?.getText(serializationOptions)
 
     return (
         <TextContent
             text={text && text.length != 0 ? text : '_Nothing to preview_'}
-            className="p-2 rounded-t bg-fill-input"
+            className={cn('p-2 rounded-t', className)}
         />
     )
 }

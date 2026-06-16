@@ -5,6 +5,7 @@ import {
     cohortOperatorMap,
     isOperatorCohort,
     isOperatorFlag,
+    isOperatorMulti,
 } from 'lib/utils'
 
 import { propertyDefinitionsModelType } from '~/models/propertyDefinitionsModelType'
@@ -27,7 +28,7 @@ import {
     FilterLogicalOperator,
     FlagPropertyFilter,
     GroupPropertyFilter,
-    HogQLPropertyFilter,
+    InsightsQLPropertyFilter,
     LogEntryPropertyFilter,
     LogPropertyFilter,
     PersonPropertyFilter,
@@ -87,7 +88,6 @@ export function convertPropertiesToPropertyGroup(
     }
     return { type: FilterLogicalOperator.And, values: [] }
 }
-
 /** Flatten a filter group into an array of filters. NB: Logical operators (AND/OR) are lost in the process. */
 export function convertPropertyGroupToProperties(
     properties?: PropertyGroupFilter | AnyPropertyFilter[]
@@ -106,12 +106,13 @@ export const PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE: Record<Propert
         [PropertyFilterType.Meta]: TaxonomicFilterGroupType.Metadata,
         [PropertyFilterType.Person]: TaxonomicFilterGroupType.PersonProperties,
         [PropertyFilterType.Event]: TaxonomicFilterGroupType.EventProperties,
+        [PropertyFilterType.InternalEvent]: TaxonomicFilterGroupType.EventProperties,
         [PropertyFilterType.EventMetadata]: TaxonomicFilterGroupType.EventMetadata,
         [PropertyFilterType.Feature]: TaxonomicFilterGroupType.EventFeatureFlags,
         [PropertyFilterType.Cohort]: TaxonomicFilterGroupType.Cohorts,
         [PropertyFilterType.Element]: TaxonomicFilterGroupType.Elements,
         [PropertyFilterType.Session]: TaxonomicFilterGroupType.SessionProperties,
-        [PropertyFilterType.HogQL]: TaxonomicFilterGroupType.HogQLExpression,
+        [PropertyFilterType.InsightsQL]: TaxonomicFilterGroupType.InsightsQLExpression,
         [PropertyFilterType.Group]: TaxonomicFilterGroupType.GroupsPrefix,
         [PropertyFilterType.DataWarehouse]: TaxonomicFilterGroupType.DataWarehouse,
         [PropertyFilterType.DataWarehousePersonProperty]: TaxonomicFilterGroupType.DataWarehousePersonProperties,
@@ -119,8 +120,12 @@ export const PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE: Record<Propert
         [PropertyFilterType.LogEntry]: TaxonomicFilterGroupType.LogEntries,
         [PropertyFilterType.ErrorTrackingIssue]: TaxonomicFilterGroupType.ErrorTrackingIssues,
         [PropertyFilterType.Log]: TaxonomicFilterGroupType.LogAttributes,
+        [PropertyFilterType.LogAttribute]: TaxonomicFilterGroupType.LogAttributes,
+        [PropertyFilterType.LogResourceAttribute]: TaxonomicFilterGroupType.LogResourceAttributes,
         [PropertyFilterType.RevenueAnalytics]: TaxonomicFilterGroupType.RevenueAnalyticsProperties,
         [PropertyFilterType.Flag]: TaxonomicFilterGroupType.FeatureFlags,
+        [PropertyFilterType.WorkflowVariable]: TaxonomicFilterGroupType.WorkflowVariables,
+        [PropertyFilterType.Empty]: TaxonomicFilterGroupType.Empty,
     }
 
 export function formatPropertyLabel(
@@ -128,7 +133,7 @@ export function formatPropertyLabel(
     cohortsById: Partial<Record<CohortType['id'], CohortType>>,
     valueFormatter: (value: PropertyFilterValue | undefined) => string | string[] | null = (s) => [String(s)]
 ): string {
-    if (isHogQLPropertyFilter(item as AnyFilterLike)) {
+    if (isInsightsQLPropertyFilter(item as AnyFilterLike)) {
         return extractExpressionComment(item.key)
     }
     const { value, key, operator, type, cohort_name, label } = item
@@ -185,7 +190,7 @@ export function isValidPropertyFilter(
     return (
         !!filter && // is not falsy
         'key' in filter && // has a "key" property
-        ((filter.type === 'hogql' && !!filter.key) || Object.values(filter).some((v) => !!v)) // contains some properties with values
+        ((filter.type === 'insightsql' && !!filter.key) || Object.values(filter).some((v) => !!v)) // contains some properties with values
     )
 }
 
@@ -220,6 +225,11 @@ export function isEventPersonOrSessionPropertyFilter(
         filter?.type === PropertyFilterType.Session
     )
 }
+export function isWebAnalyticsPropertyFilter(
+    filter?: AnyFilterLike | null
+): filter is EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter {
+    return isEventPersonOrSessionPropertyFilter(filter) || isCohortPropertyFilter(filter)
+}
 export function isElementPropertyFilter(filter?: AnyFilterLike | null): filter is ElementPropertyFilter {
     return filter?.type === PropertyFilterType.Element
 }
@@ -236,7 +246,11 @@ export function isGroupPropertyFilter(filter?: AnyFilterLike | null): filter is 
     return filter?.type === PropertyFilterType.Group
 }
 export function isLogPropertyFilter(filter?: AnyFilterLike | null): filter is LogPropertyFilter {
-    return filter?.type === PropertyFilterType.Log
+    return (
+        filter?.type === PropertyFilterType.Log ||
+        filter?.type === PropertyFilterType.LogAttribute ||
+        filter?.type === PropertyFilterType.LogResourceAttribute
+    )
 }
 export function isErrorTrackingIssuePropertyFilter(filter?: AnyFilterLike | null): filter is GroupPropertyFilter {
     return filter?.type === PropertyFilterType.ErrorTrackingIssue
@@ -255,8 +269,8 @@ export function isFeaturePropertyFilter(filter?: AnyFilterLike | null): filter i
 export function isFlagPropertyFilter(filter?: AnyFilterLike | null): filter is FlagPropertyFilter {
     return filter?.type === PropertyFilterType.Flag
 }
-export function isHogQLPropertyFilter(filter?: AnyFilterLike | null): filter is HogQLPropertyFilter {
-    return filter?.type === PropertyFilterType.HogQL
+export function isInsightsQLPropertyFilter(filter?: AnyFilterLike | null): filter is InsightsQLPropertyFilter {
+    return filter?.type === PropertyFilterType.InsightsQL
 }
 
 export function isAnyPropertyfilter(filter?: AnyFilterLike | null): filter is AnyPropertyFilter {
@@ -288,10 +302,12 @@ export function isPropertyFilterWithOperator(
     | SessionPropertyFilter
     | RecordingPropertyFilter
     | LogEntryPropertyFilter
+    | LogPropertyFilter
     | FeaturePropertyFilter
     | GroupPropertyFilter
     | DataWarehousePropertyFilter
-    | DataWarehousePersonPropertyFilter {
+    | DataWarehousePersonPropertyFilter
+    | LogPropertyFilter {
     return (
         !isPropertyGroupFilterLike(filter) &&
         (isEventPropertyFilter(filter) ||
@@ -308,7 +324,8 @@ export function isPropertyFilterWithOperator(
             isCohortPropertyFilter(filter) ||
             isDataWarehousePropertyFilter(filter) ||
             isDataWarehousePersonPropertyFilter(filter) ||
-            isErrorTrackingIssuePropertyFilter(filter))
+            isErrorTrackingIssuePropertyFilter(filter) ||
+            isLogPropertyFilter(filter))
     )
 }
 
@@ -326,17 +343,21 @@ export function filterMatchesItem(
 const propertyFilterMapping: Partial<Record<PropertyFilterType, TaxonomicFilterGroupType>> = {
     [PropertyFilterType.Person]: TaxonomicFilterGroupType.PersonProperties,
     [PropertyFilterType.Event]: TaxonomicFilterGroupType.EventProperties,
+    [PropertyFilterType.InternalEvent]: TaxonomicFilterGroupType.EventProperties,
     [PropertyFilterType.Feature]: TaxonomicFilterGroupType.EventFeatureFlags,
     [PropertyFilterType.EventMetadata]: TaxonomicFilterGroupType.EventMetadata,
     [PropertyFilterType.Cohort]: TaxonomicFilterGroupType.Cohorts,
     [PropertyFilterType.Element]: TaxonomicFilterGroupType.Elements,
     [PropertyFilterType.Session]: TaxonomicFilterGroupType.SessionProperties,
-    [PropertyFilterType.HogQL]: TaxonomicFilterGroupType.HogQLExpression,
+    [PropertyFilterType.InsightsQL]: TaxonomicFilterGroupType.InsightsQLExpression,
     [PropertyFilterType.Recording]: TaxonomicFilterGroupType.Replay,
     [PropertyFilterType.ErrorTrackingIssue]: TaxonomicFilterGroupType.ErrorTrackingIssues,
-    [PropertyFilterType.Log]: TaxonomicFilterGroupType.LogAttributes,
+    [PropertyFilterType.Log]: TaxonomicFilterGroupType.Logs,
+    [PropertyFilterType.LogAttribute]: TaxonomicFilterGroupType.LogAttributes,
+    [PropertyFilterType.LogResourceAttribute]: TaxonomicFilterGroupType.LogResourceAttributes,
     [PropertyFilterType.RevenueAnalytics]: TaxonomicFilterGroupType.RevenueAnalyticsProperties,
     [PropertyFilterType.Flag]: TaxonomicFilterGroupType.FeatureFlags,
+    [PropertyFilterType.WorkflowVariable]: TaxonomicFilterGroupType.WorkflowVariables,
 }
 
 export const filterToTaxonomicFilterType = (
@@ -383,8 +404,11 @@ export function propertyFilterTypeToPropertyDefinitionType(
         [PropertyFilterType.LogEntry]: PropertyDefinitionType.LogEntry,
         [PropertyFilterType.ErrorTrackingIssue]: PropertyDefinitionType.Resource,
         [PropertyFilterType.Log]: PropertyDefinitionType.Log,
+        [PropertyFilterType.LogAttribute]: PropertyDefinitionType.LogAttribute,
+        [PropertyFilterType.LogResourceAttribute]: PropertyDefinitionType.LogResourceAttribute,
         [PropertyFilterType.RevenueAnalytics]: PropertyDefinitionType.RevenueAnalytics,
         [PropertyFilterType.Flag]: PropertyDefinitionType.FlagValue,
+        [PropertyFilterType.WorkflowVariable]: PropertyDefinitionType.WorkflowVariable,
     }
 
     return mapping[filterType as PropertyFilterType] ?? PropertyDefinitionType.Event
@@ -428,12 +452,24 @@ export function taxonomicFilterTypeToPropertyFilterType(
         return PropertyFilterType.Flag
     }
 
-    if (filterType == TaxonomicFilterGroupType.LogAttributes) {
+    if (filterType == TaxonomicFilterGroupType.Logs) {
         return PropertyFilterType.Log
+    }
+
+    if (filterType == TaxonomicFilterGroupType.LogAttributes) {
+        return PropertyFilterType.LogAttribute
+    }
+
+    if (filterType == TaxonomicFilterGroupType.LogResourceAttributes) {
+        return PropertyFilterType.LogResourceAttribute
     }
 
     if (filterType == TaxonomicFilterGroupType.RevenueAnalyticsProperties) {
         return PropertyFilterType.RevenueAnalytics
+    }
+
+    if (filterType == TaxonomicFilterGroupType.WorkflowVariables) {
+        return PropertyFilterType.WorkflowVariable
     }
 
     return Object.entries(propertyFilterMapping).find(([, v]) => v === filterType)?.[0] as
@@ -470,13 +506,13 @@ export function createDefaultPropertyFilter(
         return cohortProperty
     }
 
-    if (propertyType === PropertyFilterType.HogQL) {
-        const hogQLProperty: HogQLPropertyFilter = {
+    if (propertyType === PropertyFilterType.InsightsQL) {
+        const insightsQLProperty: InsightsQLPropertyFilter = {
             type: propertyType,
             key: String(propertyKey),
             value: null, // must specify something to be compatible with existing types
         }
-        return hogQLProperty
+        return insightsQLProperty
     }
 
     if (propertyType === PropertyFilterType.Flag) {
@@ -517,4 +553,25 @@ export function createDefaultPropertyFilter(
         group_type_index: taxonomicGroup.groupTypeIndex,
     }
     return property
+}
+
+/**
+ * Normalizes property filter values to ensure multi-select operators (Exact, IsNot)
+ * always have array values.
+ */
+export function normalizePropertyFilterValue(
+    value: PropertyFilterValue | undefined,
+    operator: PropertyOperator | null | undefined
+): PropertyFilterValue | undefined {
+    if (value === null || value === undefined) {
+        return value
+    }
+
+    // Multi-select operators (Exact, IsNot) should have array values
+    // Only normalize string/number/boolean values
+    if (operator && isOperatorMulti(operator) && !Array.isArray(value)) {
+        return [value]
+    }
+
+    return value
 }

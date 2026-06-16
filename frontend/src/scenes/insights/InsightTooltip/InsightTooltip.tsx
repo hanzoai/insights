@@ -5,6 +5,7 @@ import { useValues } from 'kea'
 import { ReactNode } from 'react'
 
 import { InsightLabel } from 'lib/components/InsightLabel'
+import { dayjs } from 'lib/dayjs'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { IconHandClick } from 'lib/lemon-ui/icons'
 import { shortTimeZone } from 'lib/utils'
@@ -27,9 +28,11 @@ import {
 export function ClickToInspectActors({
     isTruncated,
     groupTypeLabel,
+    showShiftKeyHint,
 }: {
     isTruncated?: boolean
     groupTypeLabel: string
+    showShiftKeyHint?: boolean
 }): JSX.Element {
     return (
         <div className="table-subtext">
@@ -37,6 +40,12 @@ export function ClickToInspectActors({
                 <div className="table-subtext-truncated">
                     For readability, <b>not all series are displayed</b>.<br />
                 </div>
+            )}
+            {showShiftKeyHint && (
+                <>
+                    <div>Hold Shift (⇧) to highlight individual bars</div>
+                    <br />
+                </>
             )}
             <div className="table-subtext-click-to-inspect">
                 <IconHandClick className="mr-1 mb-0.5" />
@@ -91,6 +100,7 @@ export function InsightTooltip({
     breakdownFilter,
     interval,
     dateRange,
+    showShiftKeyHint,
 }: InsightTooltipProps): JSX.Element {
     // Display entities as columns if multiple exist (e.g., pageview + autocapture, or multiple formulas)
     // and the insight has a breakdown or compare option enabled. This gives us space for labels
@@ -111,7 +121,10 @@ export function InsightTooltip({
     const concreteTooltipTitle = altTitle ? getTooltipTitle(seriesData, altTitle, formattedDate) : null
 
     const title: ReactNode | null =
-        concreteTooltipTitle || (date ? `${formattedDate} (${timezone ? shortTimeZone(timezone) : 'UTC'})` : null)
+        concreteTooltipTitle ||
+        (date
+            ? `${interval === 'day' ? `${dayjs.tz(date, timezone).format('dddd')}, ` : ''}${formattedDate} (${timezone ? shortTimeZone(timezone) : 'UTC'})`
+            : null)
     const rightTitle: ReactNode | null = altRightTitle
         ? getTooltipTitle(seriesData, altRightTitle, formattedDate)
         : null
@@ -197,7 +210,11 @@ export function InsightTooltip({
                     showHeader={showHeader}
                 />
                 {!hideInspectActorsSection && (
-                    <ClickToInspectActors isTruncated={isTruncated} groupTypeLabel={groupTypeLabel} />
+                    <ClickToInspectActors
+                        isTruncated={isTruncated}
+                        groupTypeLabel={groupTypeLabel}
+                        showShiftKeyHint={showShiftKeyHint}
+                    />
                 )}
             </div>
         )
@@ -257,7 +274,11 @@ export function InsightTooltip({
                 showHeader={showHeader}
             />
             {!hideInspectActorsSection && (
-                <ClickToInspectActors isTruncated={isTruncated} groupTypeLabel={groupTypeLabel} />
+                <ClickToInspectActors
+                    isTruncated={isTruncated}
+                    groupTypeLabel={groupTypeLabel}
+                    showShiftKeyHint={showShiftKeyHint}
+                />
             )}
         </div>
     )

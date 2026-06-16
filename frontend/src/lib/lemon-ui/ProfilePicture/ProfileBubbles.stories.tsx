@@ -5,10 +5,10 @@ import { alphabet, range } from 'lib/utils'
 import { ProfileBubbles as ProfileBubblesComponent, ProfileBubblesProps } from './ProfileBubbles'
 
 const DUMMIES: ProfileBubblesProps['people'] = [
-    { email: 'michael@posthog.com', name: 'Michael' },
-    { email: 'lottie@posthog.com', name: 'Lottie' },
-    { email: 'paul@posthog.com', name: 'Paul' },
-    { email: 'joe@posthog.com', name: 'Joe' },
+    { email: 'michael@hanzo.ai', name: 'Michael' },
+    { email: 'lottie@hanzo.ai', name: 'Lottie' },
+    { email: 'paul@hanzo.ai', name: 'Paul' },
+    { email: 'joe@hanzo.ai', name: 'Joe' },
 ]
 
 const meta: Meta<typeof ProfileBubblesComponent> = {
@@ -44,7 +44,7 @@ export function MultipleBubblesWithNoImages(props: any): JSX.Element {
             {...props}
             people={range(20).map((x) => ({
                 name: alphabet[x],
-                email: 'not-real-at-all@posthog.com',
+                email: 'not-real-at-all@hanzo.ai',
             }))}
         />
     )

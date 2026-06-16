@@ -11,7 +11,7 @@ import { AppContext, PropertyDefinition } from '~/types'
 
 import { infiniteListLogic } from './infiniteListLogic'
 
-window.POSTHOG_APP_CONTEXT = {
+window.INSIGHTS_APP_CONTEXT = {
     current_team: { id: MOCK_TEAM_ID },
     current_project: { id: MOCK_TEAM_ID },
 } as unknown as AppContext
@@ -207,7 +207,6 @@ describe('infiniteListLogic', () => {
                     logic.actions.onRowsRendered({
                         startIndex: 30,
                         stopIndex: 40,
-                        overscanStartIndex: 20,
                         overscanStopIndex: 60,
                     })
                 )
@@ -218,7 +217,6 @@ describe('infiniteListLogic', () => {
                     logic.actions.onRowsRendered({
                         startIndex: 80,
                         stopIndex: 100,
-                        overscanStartIndex: 70,
                         overscanStopIndex: 120,
                     })
                 )
@@ -390,7 +388,7 @@ describe('infiniteListLogic', () => {
         })
     })
 
-    it('searches autocapture elements using posthog property', async () => {
+    it('searches autocapture elements using insights property', async () => {
         const logicWithProps = infiniteListLogic({
             taxonomicFilterLogicKey: 'test-element-list',
             listGroupType: TaxonomicFilterGroupType.Elements,

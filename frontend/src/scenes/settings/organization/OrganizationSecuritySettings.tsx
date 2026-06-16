@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -29,10 +29,6 @@ export function OrganizationSecuritySettings(): JSX.Element | null {
     return (
         <>
             <PayGateMini feature={AvailableFeature.ORGANIZATION_SECURITY_SETTINGS}>
-                <h3 className="mt-4">Public sharing</h3>
-
-                <p>Control external access to shared dashboards, insights, and recordings.</p>
-
                 <LemonSwitch
                     label={
                         <span>

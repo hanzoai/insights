@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
-import { getNextSurveyStep } from 'posthog-js/dist/surveys-preview'
+import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
@@ -48,9 +48,9 @@ export function SurveyFormAppearance({
             <LemonField.Pure label="Current question" className="max-w-xs gap-1" htmlFor="current-question-select">
                 <LemonSelect
                     onChange={(pageIndex) => handleSetSelectedPageIndex(pageIndex)}
-                    className="whitespace-nowrap"
                     id="current-question-select"
                     fullWidth
+                    truncateText={{ maxWidthClass: 'max-w-60' }}
                     value={previewPageIndex}
                     options={[
                         ...survey.questions.map((question, index) => ({

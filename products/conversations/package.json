@@ -1,0 +1,31 @@
+{
+    "name": "@hanzo/products-conversations",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "ts-pattern": "catalog:",
+        "@hanzo/insights": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/icons": "*",
+        "@hanzo/lemon-ui": "*",
+        "@tiptap/core": "*",
+        "@tiptap/extension-document": "*",
+        "@tiptap/extension-image": "*",
+        "@tiptap/extension-link": "*",
+        "@tiptap/extension-underline": "*",
+        "@tiptap/extensions": "*",
+        "@tiptap/react": "*",
+        "@tiptap/starter-kit": "*",
+        "@types/react": "*",
+        "@types/react-dom": "*",
+        "clsx": "*",
+        "react": "*",
+        "react-dom": "*"
+    }
+}

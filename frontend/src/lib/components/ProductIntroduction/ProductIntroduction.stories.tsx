@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
 
 import { ProductIntroduction } from './ProductIntroduction'
 
@@ -17,7 +17,7 @@ export function ProductIntroduction_(): JSX.Element {
             productKey={ProductKey.COHORTS}
             thingName="cohort"
             description="Use cohorts to group people together, such as users who used your app in the last week, or people who viewed the signup page but didn’t convert."
-            docsURL="https://posthog.com/docs/data/cohorts"
+            docsURL="https://hanzo.ai/docs/data/cohorts"
             action={() => alert('You clicked the button!')}
             isEmpty={true}
         />
@@ -31,7 +31,7 @@ export function emptyWithAction(): JSX.Element {
             productKey={ProductKey.COHORTS}
             thingName="cohort"
             description="Use cohorts to group people together, such as users who used your app in the last week, or people who viewed the signup page but didn’t convert."
-            docsURL="https://posthog.com/docs/data/cohorts"
+            docsURL="https://hanzo.ai/docs/data/cohorts"
             action={() => alert('You clicked the button!')}
             isEmpty={true}
         />
@@ -56,7 +56,7 @@ export function notEmptyWithAction(): JSX.Element {
             productKey={ProductKey.COHORTS}
             thingName="cohort"
             description="Use cohorts to group people together, such as users who used your app in the last week, or people who viewed the signup page but didn’t convert."
-            docsURL="https://posthog.com/docs/data/cohorts"
+            docsURL="https://hanzo.ai/docs/data/cohorts"
             action={() => alert('You clicked the button!')}
             isEmpty={false}
         />

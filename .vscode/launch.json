@@ -40,7 +40,7 @@
             },
             "env": {
                 "LOCAL_HTTPS": "1",
-                "JS_URL": "https://secure.posthog.dev"
+                "JS_URL": "https://secure.insights.dev"
             }
         },
         {
@@ -53,15 +53,15 @@
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
-                "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+                "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
                 "PRINT_SQL": "1",
-                "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
-                "CLOUD_DEPLOYMENT": "dev"
+                "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
+                "CLOUD_DEPLOYMENT": "local"
             },
             "envFile": "${workspaceFolder}/.env",
             "console": "integratedTerminal",
@@ -80,15 +80,15 @@
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
-                "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+                "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
                 "PRINT_SQL": "1",
                 "BILLING_SERVICE_URL": "http://localhost:8100/",
-                "CLOUD_DEPLOYMENT": "dev"
+                "CLOUD_DEPLOYMENT": "local"
             },
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -103,7 +103,7 @@
             "justMyCode": true,
             "autoReload": {
                 "enable": true,
-                "include": ["posthog/**/*.py"]
+                "include": ["insights/**/*.py"]
             },
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -113,7 +113,7 @@
             "env": {
                 "SKIP_ASYNC_MIGRATIONS_SETUP": "1",
                 "DEBUG": "1",
-                "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
+                "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1"
             },
             "presentation": {
@@ -127,7 +127,7 @@
             "justMyCode": true,
             "autoReload": {
                 "enable": true,
-                "include": ["posthog/**/*.py"]
+                "include": ["insights/**/*.py"]
             },
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -137,7 +137,7 @@
             "env": {
                 "SKIP_ASYNC_MIGRATIONS_SETUP": "1",
                 "DEBUG": "1",
-                "BILLING_SERVICE_URL": "https://billing.dev.posthog.dev",
+                "BILLING_SERVICE_URL": "https://billing.dev.insights.dev",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1"
             },
             "presentation": {
@@ -145,18 +145,17 @@
             }
         },
         {
-            "name": "Plugin Server",
-            "command": "bin/turbo --env-mode=loose --filter=@posthog/plugin-server start",
+            "name": "Nodejs Services",
+            "command": "bin/turbo --env-mode=loose --filter=@hanzo/nodejs start",
             "request": "launch",
             "type": "node-terminal",
             "cwd": "${workspaceFolder}",
             "env": {
                 "CLICKHOUSE_SECURE": "False",
-                "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+                "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
                 "KAFKA_HOSTS": "localhost:9092",
                 "WORKER_CONCURRENCY": "2",
-                "OBJECT_STORAGE_ENABLED": "True",
-                "HOG_HOOK_URL": "http://localhost:3300/hoghook"
+                "OBJECT_STORAGE_ENABLED": "True"
             },
             "presentation": {
                 "group": "main"
@@ -169,15 +168,16 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
-            "args": ["start_temporal_worker"],
+            "args": ["start_temporal_worker", "--task-queue", "${input:temporalTaskQueue}"],
             "django": true,
+            "justMyCode": false,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
-                "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+                "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
                 "PRINT_SQL": "1"
             },
@@ -224,7 +224,7 @@
             "name": "(lldb) Attach",
             "type": "cppdbg",
             "request": "attach",
-            "program": "/Users/twixes/.pyenv/versions/3.10.10/envs/posthog-3.10/bin/python",
+            "program": "/Users/twixes/.pyenv/versions/3.10.10/envs/insights-3.10/bin/python",
             "MIMode": "lldb"
         },
         {
@@ -259,19 +259,19 @@
             "name": "Python Debugger: Django Migrations",
             "type": "debugpy",
             "request": "launch",
-            "args": ["migrate", "posthog"],
+            "args": ["migrate", "insights"],
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
-                "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+                "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
                 "SKIP_SERVICE_VERSION_REQUIREMENTS": "1",
                 "PRINT_SQL": "1",
                 "BILLING_SERVICE_URL": "http://localhost:8100/",
-                "CLOUD_DEPLOYMENT": "dev"
+                "CLOUD_DEPLOYMENT": "local"
             },
             "autoStartBrowser": false,
             "program": "${workspaceFolder}/manage.py"
@@ -297,17 +297,24 @@
             "id": "pickVersion",
             "type": "command",
             "command": "extension.node-version"
+        },
+        {
+            "id": "temporalTaskQueue",
+            "type": "pickString",
+            "description": "Task queue name",
+            "options": ["development-task-queue"],
+            "default": "development-task-queue"
         }
     ],
     "compounds": [
         {
-            "name": "PostHog",
+            "name": "Insights",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
                 "Celery Beat",
                 "Frontend",
-                "Plugin Server",
+                "Nodejs Services",
                 "Temporal Worker"
             ],
             "stopAll": true,
@@ -316,13 +323,13 @@
             }
         },
         {
-            "name": "PostHog (no typegen)",
+            "name": "Insights (no typegen)",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
                 "Celery Beat",
                 "Frontend (no typegen)",
-                "Plugin Server",
+                "Nodejs Services",
                 "Temporal Worker"
             ],
             "stopAll": true,
@@ -331,13 +338,13 @@
             }
         },
         {
-            "name": "PostHog (https)",
+            "name": "Insights (https)",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
                 "Celery Beat",
                 "Frontend (https)",
-                "Plugin Server",
+                "Nodejs Services",
                 "Temporal Worker"
             ],
             "stopAll": true,
@@ -346,12 +353,12 @@
             }
         },
         {
-            "name": "PostHog (local billing)",
+            "name": "Insights (local billing)",
             "configurations": [
                 "Backend (with local billing)",
                 "Celery Threaded Pool",
                 "Frontend",
-                "Plugin Server",
+                "Nodejs Services",
                 "Temporal Worker"
             ],
             "stopAll": true,

@@ -1,7 +1,7 @@
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { LemonTableColumns, Link } from '@posthog/lemon-ui'
+import { LemonTableColumns, Link } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
@@ -97,9 +97,10 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
                         results = await api.pluginConfigs.logs(Number(values.node.id), logParams)
                     }
 
-                    if (!cache.pollingInterval) {
-                        cache.pollingInterval = setInterval(actions.pollBackgroundLogs, 5000)
-                    }
+                    cache.disposables.add(() => {
+                        const intervalId = setInterval(actions.pollBackgroundLogs, 5000)
+                        return () => clearInterval(intervalId)
+                    }, 'pollingInterval')
                     actions.clearBackgroundLogs()
                     return results
                 },

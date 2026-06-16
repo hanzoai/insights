@@ -1,0 +1,44 @@
+{
+    "name": "@hanzo/insightsql-parser",
+    "version": "1.3.14",
+    "description": "WebAssembly InsightsQL Parser - Parse InsightsQL queries in JavaScript/TypeScript",
+    "type": "module",
+    "main": "dist/index.cjs",
+    "module": "dist/insightsql_parser_wasm.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/insightsql_parser_wasm.js",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "files": [
+        "dist/insightsql_parser_wasm.js",
+        "dist/index.cjs",
+        "dist/index.d.ts"
+    ],
+    "scripts": {
+        "build:compile": "emmake cmake --build build_wasm --config Release && cmake --install build_wasm",
+        "build:make": "emcmake cmake -S . -B build_wasm -DCMAKE_BUILD_TYPE=Release && npm run build:compile || echo 'Warning: insightsql-parser build failed, skipping'",
+        "build": "emcmake cmake -S . -B build_wasm -G Ninja -DCMAKE_BUILD_TYPE=Release && npm run build:compile || echo 'Warning: insightsql-parser build failed, skipping'"
+    },
+    "keywords": [
+        "insightsql",
+        "parser",
+        "wasm",
+        "webassembly",
+        "antlr4"
+    ],
+    "author": "Hanzo AI Inc.",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hanzoai/insights.git",
+        "directory": "common/insightsql_parser"
+    },
+    "bugs": {
+        "url": "https://github.com/hanzoai/insights/issues"
+    },
+    "homepage": "https://github.com/hanzoai/insights/tree/main/common/insightsql_parser"
+}

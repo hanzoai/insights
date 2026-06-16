@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconPencil, IconUndo } from '@posthog/icons'
-import { LemonButton, LemonColorPicker, LemonInput, LemonModal, LemonSelect } from '@posthog/lemon-ui'
+import { IconPencil, IconUndo } from '@hanzo/icons'
+import { LemonButton, LemonColorPicker, LemonInput, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
 
 import { getSeriesColorPalette } from 'lib/colors'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { downloadFile } from 'lib/utils'
 
-import { FilmCameraHog } from '../hedgehogs'
+import { FilmCameraMascot } from '../mascots'
 import {
     type DrawingItem,
     type HistoryItem,
@@ -369,7 +369,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
             <>
                 <LemonModal isOpen={isOpen} onClose={handleClose} width="auto" maxWidth="100%">
                     <div className="flex flex-col items-center justify-center py-10">
-                        <FilmCameraHog className="h-32 w-32" />
+                        <FilmCameraMascot className="h-32 w-32" />
                         <div className="mt-2">
                             <Spinner className="mr-4" />
                             Taking a screenshot...

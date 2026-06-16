@@ -2,26 +2,39 @@ import { BuiltLogic, actions, beforeUnmount, connect, kea, key, listeners, path,
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
-import { accessLevelSatisfied } from 'lib/components/AccessControlAction'
 import { EditorRange, JSONContent } from 'lib/components/RichContentEditor/types'
 import { base64Decode, base64Encode, downloadFile, slugify } from 'lib/utils'
+import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
 import { commentsLogic } from 'scenes/comments/commentsLogic'
-import {
-    NotebookNodeReplayTimestampAttrs,
-    buildTimestampCommentContent,
-} from 'scenes/notebooks/Nodes/NotebookNodeReplayTimestamp'
 import { urls } from 'scenes/urls'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 import { SCRATCHPAD_NOTEBOOK, notebooksModel, openNotebook } from '~/models/notebooksModel'
-import { AccessControlLevel, AccessControlResourceType, ActivityScope, CommentType, SidePanelTab } from '~/types'
+import { NodeKind } from '~/queries/schema/schema-general'
+import { isInsightsQLQuery, isSavedInsightNode } from '~/queries/utils'
+import {
+    AccessControlLevel,
+    AccessControlResourceType,
+    ActivityScope,
+    AnyPropertyFilter,
+    CommentType,
+    InsightShortId,
+    SidePanelTab,
+} from '~/types'
 
+import {
+    buildNotebookDependencyGraph,
+    collectDuckSqlNodes,
+    collectInsightsqlSqlNodes,
+    collectNodeIndices,
+    collectPythonNodes,
+} from '../Nodes/notebookNodeContent'
 import { notebookNodeLogicType } from '../Nodes/notebookNodeLogicType'
 // NOTE: Annoyingly, if we import this then kea logic type-gen generates
 // two imports and fails so, we reimport it from the types file
@@ -33,7 +46,9 @@ import {
     NotebookType,
     TableOfContentData,
 } from '../types'
+import { updateContentHeading } from '../utils'
 import { NOTEBOOKS_VERSION, migrate } from './migrations/migrate'
+import { notebookKernelInfoLogic } from './notebookKernelInfoLogic'
 import type { notebookLogicType } from './notebookLogicType'
 import { notebookSettingsLogic } from './notebookSettingsLogic'
 
@@ -46,6 +61,7 @@ export type NotebookLogicProps = {
     shortId: string
     mode?: NotebookLogicMode
     target?: NotebookTarget
+    canvasFiltersOverride?: AnyPropertyFilter[]
 }
 
 async function runWhenEditorIsReady(waitForEditor: () => boolean, fn: () => any): Promise<any> {
@@ -72,6 +88,7 @@ export const notebookLogic = kea<notebookLogicType>([
     props({} as NotebookLogicProps),
     path((key) => ['scenes', 'notebooks', 'Notebook', 'notebookLogic', key]),
     key(({ shortId, mode }) => `${shortId}-${mode}`),
+
     connect((props: NotebookLogicProps) => ({
         values: [
             notebooksModel,
@@ -81,8 +98,10 @@ export const notebookLogic = kea<notebookLogicType>([
                 item_id: props.shortId,
             }),
             ['comments', 'itemContext'],
+            notebookKernelInfoLogic({ shortId: props.shortId }),
+            ['kernelInfo'],
             notebookSettingsLogic,
-            ['showTableOfContents'],
+            ['showKernelInfo', 'showTableOfContents'],
         ],
         actions: [
             notebooksModel,
@@ -113,7 +132,7 @@ export const notebookLogic = kea<notebookLogicType>([
         scheduleNotebookRefresh: true,
         saveNotebook: (notebook: Pick<NotebookType, 'content' | 'title'>) => ({ notebook }),
         renameNotebook: (title: string) => ({ title }),
-        setEditingNodeId: (editingNodeId: string | null) => ({ editingNodeId }),
+        setEditingNodeEditing: (nodeId: string, editing: boolean) => ({ nodeId, editing }),
         exportJSON: true,
         showConflictWarning: true,
         onUpdateEditor: true,
@@ -133,12 +152,10 @@ export const notebookLogic = kea<notebookLogicType>([
             nodeType,
             knownStartingPosition,
         }),
-        insertReplayCommentByTimestamp: (options: {
-            timestamp: number
-            sessionRecordingId: string
-            knownStartingPosition?: number
-            nodeId?: string
-        }) => options,
+        addSavedInsightToNotebook: (insightShortId: InsightShortId, insertionPosition: number | null = null) => ({
+            insightShortId,
+            insertionPosition,
+        }),
         setShowHistory: (showHistory: boolean) => ({ showHistory }),
         setTableOfContents: (tableOfContents: TableOfContentData) => ({ tableOfContents }),
         setTextSelection: (selection: number | EditorRange) => ({ selection }),
@@ -192,10 +209,29 @@ export const notebookLogic = kea<notebookLogicType>([
                 loadNotebookSuccess: () => false,
             },
         ],
-        editingNodeId: [
-            null as string | null,
+        editingNodeIds: [
+            {} as Record<string, true>,
             {
-                setEditingNodeId: (_, { editingNodeId }) => editingNodeId,
+                setEditingNodeEditing: (state, { nodeId, editing }) => {
+                    if (editing) {
+                        return {
+                            ...state,
+                            [nodeId]: true,
+                        }
+                    }
+                    if (!state[nodeId]) {
+                        return state
+                    }
+                    const { [nodeId]: _, ...rest } = state
+                    return rest
+                },
+                unregisterNodeLogic: (state, { nodeId }) => {
+                    if (!state[nodeId]) {
+                        return state
+                    }
+                    const { [nodeId]: _, ...rest } = state
+                    return rest
+                },
             },
         ],
         nodeLogics: [
@@ -310,6 +346,20 @@ export const notebookLogic = kea<notebookLogicType>([
                             title: notebook.title,
                         })
 
+                        if (
+                            response.content &&
+                            values.editor &&
+                            values.localContent &&
+                            notebook.content === values.localContent
+                        ) {
+                            const currentEditorContent = values.editor.getJSON()
+                            if (JSON.stringify(response.content) !== JSON.stringify(currentEditorContent)) {
+                                const currentPosition = values.editor.getCurrentPosition()
+                                values.editor.setContent(response.content)
+                                values.editor.setTextSelection(currentPosition)
+                            }
+                        }
+
                         // If the object is identical then no edits were made, so we can safely clear the local changes
                         if (notebook.content === values.localContent) {
                             actions.clearLocalContent()
@@ -318,6 +368,7 @@ export const notebookLogic = kea<notebookLogicType>([
                         return response
                     } catch (error: any) {
                         if (error.code === 'conflict') {
+                            actions.clearLocalContent()
                             actions.showConflictWarning()
                             return null
                         }
@@ -343,24 +394,40 @@ export const notebookLogic = kea<notebookLogicType>([
                         return null
                     }
 
-                    // We use the local content if set otherwise the notebook content. That way it supports templates, scratchpad etc.
-                    const response = await api.notebooks.create({
-                        content: values.content,
-                        text_content: values.editor?.getText() || '',
-                        title: values.title,
-                    })
-
-                    posthog.capture(`notebook duplicated`, {
-                        short_id: response.short_id,
-                    })
-
-                    const source =
+                    const duplicationSource =
                         values.mode === 'canvas'
                             ? 'Canvas'
                             : values.notebook?.short_id === 'scratchpad'
                               ? 'Scratchpad'
-                              : 'Template'
-                    lemonToast.success(`Notebook created from ${source}!`)
+                              : values.isTemplate
+                                ? 'Template'
+                                : null
+                    const isRegularNotebookDuplication = duplicationSource === null
+
+                    const title = isRegularNotebookDuplication ? `${values.title} (duplicate)` : values.title
+
+                    const content = isRegularNotebookDuplication
+                        ? updateContentHeading(values.content, title)
+                        : values.content
+
+                    let textContent = values.editor?.getText() || ''
+                    if (isRegularNotebookDuplication && textContent.startsWith(values.title)) {
+                        textContent = title + textContent.slice(values.title.length)
+                    }
+
+                    const response = await api.notebooks.create({
+                        content,
+                        text_content: textContent,
+                        title,
+                    })
+
+                    insights.capture(`notebook duplicated`, {
+                        short_id: response.short_id,
+                    })
+
+                    lemonToast.success(
+                        duplicationSource ? `Notebook created from ${duplicationSource}!` : 'Notebook duplicated!'
+                    )
 
                     if (values.notebook?.short_id === 'scratchpad') {
                         // If duplicating the scratchpad, we assume they don't want the scratchpad content anymore
@@ -375,6 +442,7 @@ export const notebookLogic = kea<notebookLogicType>([
         ],
     })),
     selectors({
+        canvasFiltersOverride: [() => [(_, props) => props], (props) => props.canvasFiltersOverride || []],
         shortId: [(_, p) => [p.shortId], (shortId) => shortId],
         mode: [() => [(_, props) => props], (props): NotebookLogicMode => props.mode ?? 'notebook'],
         isTemplate: [(s) => [s.shortId], (shortId): boolean => shortId.startsWith('template-')],
@@ -425,10 +493,17 @@ export const notebookLogic = kea<notebookLogicType>([
                 return 'unsaved'
             },
         ],
-        editingNodeLogic: [
-            (s) => [s.editingNodeId, s.nodeLogics],
-            (editingNodeId, nodeLogics) =>
-                Object.values(nodeLogics).find((nodeLogic) => nodeLogic.values.nodeId === editingNodeId),
+        editingNodeLogics: [
+            (s) => [s.editingNodeIds, s.nodeLogics],
+            (editingNodeIds, nodeLogics) =>
+                Object.values(nodeLogics).filter((nodeLogic) => editingNodeIds[nodeLogic.values.nodeId]),
+        ],
+        editingNodeLogicsForLeft: [
+            (s) => [s.editingNodeLogics, s.containerSize],
+            (editingNodeLogics, containerSize) =>
+                containerSize === 'small'
+                    ? []
+                    : editingNodeLogics.filter((nodeLogic) => nodeLogic.values.settingsPlacement !== 'inline'),
         ],
         findNodeLogic: [
             (s) => [s.nodeLogics],
@@ -466,21 +541,87 @@ export const notebookLogic = kea<notebookLogicType>([
             },
         ],
 
+        pythonNodeSummaries: [(s) => [s.content], (content) => collectPythonNodes(content)],
+        duckSqlNodeSummaries: [(s) => [s.content], (content) => collectDuckSqlNodes(content)],
+        insightsqlSqlNodeSummaries: [(s) => [s.content], (content) => collectInsightsqlSqlNodes(content)],
+        dependencyGraph: [(s) => [s.content], (content) => buildNotebookDependencyGraph(content)],
+
+        pythonNodeIndices: [
+            (s) => [s.content],
+            (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.Python),
+        ],
+
+        sqlNodeIndices: [
+            (s) => [s.content],
+            (content) =>
+                collectNodeIndices(
+                    content,
+                    (node) =>
+                        node.type === NotebookNodeType.Query &&
+                        (isInsightsQLQuery(node.attrs?.query) ||
+                            (node.attrs?.query?.source && isInsightsQLQuery(node.attrs.query.source)))
+                ),
+        ],
+        duckSqlNodeIndices: [
+            (s) => [s.content],
+            (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.DuckSQL),
+        ],
+        insightsqlSqlNodeIndices: [
+            (s) => [s.content],
+            (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.InsightsQLSQL),
+        ],
+
         isShowingLeftColumn: [
-            (s) => [s.editingNodeId, s.showHistory, s.showTableOfContents, s.containerSize],
-            (editingNodeId, showHistory, showTableOfContents, containerSize) => {
-                return showHistory || showTableOfContents || (!!editingNodeId && containerSize !== 'small')
+            (s) => [
+                s.editingNodeLogicsForLeft,
+                s.showHistory,
+                s.showTableOfContents,
+                s.showKernelInfo,
+                s.containerSize,
+            ],
+            (editingNodeLogicsForLeft, showHistory, showTableOfContents, showKernelInfo, containerSize) => {
+                const shouldShowSettings = editingNodeLogicsForLeft.length > 0 && containerSize !== 'small'
+
+                return showHistory || showTableOfContents || showKernelInfo || shouldShowSettings
             },
         ],
 
         isEditable: [
             (s) => [s.shouldBeEditable, s.previewContent, s.notebook, s.mode],
             (shouldBeEditable, previewContent, notebook, mode) =>
-                mode === 'canvas' ||
-                (shouldBeEditable &&
-                    !previewContent &&
-                    !!notebook?.user_access_level &&
-                    accessLevelSatisfied(AccessControlResourceType.Notebook, notebook.user_access_level, 'editor')),
+                shouldBeEditable &&
+                (mode === 'canvas' ||
+                    (!previewContent &&
+                        !!notebook?.user_access_level &&
+                        accessLevelSatisfied(
+                            AccessControlResourceType.Notebook,
+                            notebook.user_access_level,
+                            AccessControlLevel.Editor
+                        ))),
+        ],
+
+        insightShortIdsInNotebook: [
+            (s) => [s.content],
+            (content) => {
+                if (!content) {
+                    return []
+                }
+                const insightNodes = content?.content?.filter(
+                    (node) => node.type === NotebookNodeType.Query && isSavedInsightNode(node?.attrs?.query)
+                )
+                return insightNodes?.map((node) => node?.attrs?.query?.shortId)
+            },
+        ],
+
+        personUUIDFromCanvasOverride: [
+            () => [(_, props) => props],
+            (props: NotebookLogicProps): string | null => {
+                if (!props.canvasFiltersOverride || props.canvasFiltersOverride.length === 0) {
+                    return null
+                }
+                return props.canvasFiltersOverride.find((filter: AnyPropertyFilter) => filter.key === 'person_id')
+                    ?.value as string
+            },
         ],
     }),
     listeners(({ values, actions, cache }) => ({
@@ -523,41 +664,33 @@ export const notebookLogic = kea<notebookLogicType>([
                 }
             )
         },
-        insertReplayCommentByTimestamp: async ({ timestamp, sessionRecordingId, knownStartingPosition, nodeId }) => {
-            await runWhenEditorIsReady(
-                () => !!values.editor,
-                () => {
-                    let insertionPosition =
-                        knownStartingPosition || values.editor?.findNodePositionByAttrs({ id: sessionRecordingId })
-                    let nextNode = values.editor?.nextNode(insertionPosition)
-                    while (nextNode && values.editor?.hasChildOfType(nextNode.node, NotebookNodeType.ReplayTimestamp)) {
-                        const candidateTimestampAttributes = nextNode.node.content.firstChild
-                            ?.attrs as NotebookNodeReplayTimestampAttrs
-                        const nextNodePlaybackTime = candidateTimestampAttributes.playbackTime || -1
-                        if (nextNodePlaybackTime <= timestamp) {
-                            insertionPosition = nextNode.position
-                            nextNode = values.editor?.nextNode(insertionPosition)
-                        } else {
-                            nextNode = null
-                        }
-                    }
+        addSavedInsightToNotebook: async ({ insightShortId, insertionPosition }) => {
+            const content = {
+                type: NotebookNodeType.Query,
+                attrs: {
+                    query: {
+                        kind: NodeKind.SavedInsightNode,
+                        shortId: insightShortId,
+                    },
+                },
+            }
 
-                    values.editor?.insertContentAfterNode(
-                        insertionPosition,
-                        buildTimestampCommentContent({
-                            playbackTime: timestamp,
-                            sessionRecordingId,
-                            sourceNodeId: nodeId,
-                        })
-                    )
-                }
-            )
+            if (insertionPosition !== null) {
+                values.editor?.insertContentAt(insertionPosition, content)
+            } else {
+                actions.insertAfterLastNode(content)
+            }
+            lemonToast.success('Insight added to notebook')
         },
         setLocalContent: async ({ updateEditor, jsonContent, skipCapture }, breakpoint) => {
             if (
                 values.mode !== 'canvas' &&
                 !!values.notebook?.user_access_level &&
-                !accessLevelSatisfied(AccessControlResourceType.Notebook, values.notebook.user_access_level, 'editor')
+                !accessLevelSatisfied(
+                    AccessControlResourceType.Notebook,
+                    values.notebook.user_access_level,
+                    AccessControlLevel.Editor
+                )
             ) {
                 actions.clearLocalContent()
                 return
@@ -587,7 +720,7 @@ export const notebookLogic = kea<notebookLogicType>([
             }
 
             if (!skipCapture) {
-                posthog.capture('notebook content changed', {
+                insights.capture('notebook content changed', {
                     short_id: values.notebook?.short_id,
                 })
             }
@@ -619,7 +752,14 @@ export const notebookLogic = kea<notebookLogicType>([
             const jsonContent = values.editor.getJSON()
 
             actions.setLocalContent(jsonContent)
-            actions.onUpdateEditor()
+            // Throttle onUpdateEditor to avoid performance issues with many notebook nodes
+            if (cache.throttledOnUpdateEditorTimeout) {
+                clearTimeout(cache.throttledOnUpdateEditorTimeout)
+            }
+            cache.throttledOnUpdateEditorTimeout = setTimeout(() => {
+                actions.onUpdateEditor()
+                cache.throttledOnUpdateEditorTimeout = null
+            }, 16) // ~60fps throttling
         },
         setEditor: () => {
             values.editor?.setContent(values.content)
@@ -643,7 +783,14 @@ export const notebookLogic = kea<notebookLogicType>([
 
         onEditorSelectionUpdate: () => {
             if (values.editor) {
-                actions.onUpdateEditor()
+                // Throttle this too to avoid excessive calls
+                if (cache.throttledOnUpdateEditorTimeout) {
+                    clearTimeout(cache.throttledOnUpdateEditorTimeout)
+                }
+                cache.throttledOnUpdateEditorTimeout = setTimeout(() => {
+                    actions.onUpdateEditor()
+                    cache.throttledOnUpdateEditorTimeout = null
+                }, 16) // ~60fps throttling
             }
         },
         scrollToSelection: () => {
@@ -651,8 +798,11 @@ export const notebookLogic = kea<notebookLogicType>([
                 values.editor.scrollToSelection()
             }
         },
-        setEditingNodeId: () => {
-            values.editingNodeLogic?.actions.selectNode()
+        setEditingNodeEditing: ({ nodeId, editing }) => {
+            if (!editing) {
+                return
+            }
+            values.findNodeLogicById(nodeId)?.actions.selectNode(false)
         },
 
         setTextSelection: ({ selection }) => {
@@ -665,10 +815,16 @@ export const notebookLogic = kea<notebookLogicType>([
             if (values.mode !== 'notebook') {
                 return
             }
-            clearTimeout(cache.refreshTimeout)
-            cache.refreshTimeout = setTimeout(() => {
-                actions.loadNotebook()
-            }, NOTEBOOK_REFRESH_MS)
+            // Remove any existing refresh timeout
+            cache.disposables.dispose('refreshTimeout')
+
+            // Add new refresh timeout
+            cache.disposables.add(() => {
+                const refreshTimeout = setTimeout(() => {
+                    actions.loadNotebook()
+                }, NOTEBOOK_REFRESH_MS)
+                return () => clearTimeout(refreshTimeout)
+            }, 'refreshTimeout')
         },
 
         // Comments
@@ -735,8 +891,7 @@ export const notebookLogic = kea<notebookLogicType>([
         },
     })),
 
-    beforeUnmount(({ cache }) => {
-        clearTimeout(cache.refreshTimeout)
+    beforeUnmount(() => {
         const hashParams = router.values.currentLocation.hashParams
         delete hashParams['🦔']
         router.actions.replace(

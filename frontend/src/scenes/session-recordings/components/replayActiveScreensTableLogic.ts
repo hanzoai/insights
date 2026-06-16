@@ -3,7 +3,7 @@ import { lazyLoaders } from 'kea-loaders'
 
 import api from 'lib/api'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import type { replayActiveScreensTableLogicType } from './replayActiveScreensTableLogicType'
 
@@ -21,7 +21,7 @@ export const replayActiveScreensTableLogic = kea<replayActiveScreensTableLogicTy
     lazyLoaders(() => ({
         countedScreens: {
             loadCountedScreens: async (_, breakpoint): Promise<{ screen: string; count: number }[]> => {
-                const q = hogql`
+                const q = insightsql`
                     SELECT
                 cutQueryString(cutFragment(url)) as screen,
                 count(distinct session_id) as count
@@ -40,7 +40,7 @@ export const replayActiveScreensTableLogic = kea<replayActiveScreensTableLogicTy
             LIMIT 10
                 `
 
-                const qResponse = await api.queryHogQL(q)
+                const qResponse = await api.queryInsightsQL(q, { scene: 'Replay', productKey: 'session_replay' })
 
                 breakpoint()
 

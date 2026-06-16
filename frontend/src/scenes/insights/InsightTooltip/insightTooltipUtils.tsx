@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { dayjs } from 'lib/dayjs'
 import { capitalizeFirstLetter, midEllipsis, pluralize } from 'lib/utils'
 import { getConstrainedWeekRange } from 'lib/utils/dateTimeUtils'
@@ -67,6 +68,8 @@ export interface InsightTooltipProps extends Omit<TooltipConfig, 'renderSeries' 
     timezone?: string | undefined
     interval?: IntervalType | null
     dateRange?: DateRange | null
+    /** Show hint about holding shift to highlight individual bars in stacked charts */
+    showShiftKeyHint?: boolean
 }
 
 export interface FormattedDateOptions {
@@ -95,6 +98,7 @@ export function getTooltipTitle(
 }
 
 export const INTERVAL_UNIT_TO_DAYJS_FORMAT: Record<IntervalType, string> = {
+    second: 'D MMM YYYY HH:mm:ss',
     minute: 'D MMM YYYY HH:mm:00',
     hour: 'D MMM YYYY HH:00',
     day: 'D MMM YYYY',
@@ -131,6 +135,12 @@ export function getFormattedDate(input?: string | number, options?: FormattedDat
     // Number of intervals (i.e. days, weeks)
     if (Number.isInteger(input)) {
         return pluralize(input as number, interval ?? 'day')
+    }
+
+    // Handle retention graph labels like "Day 0", "Week 12", etc.
+    // retention tooltips don't show the date/header, so we don't need to format it
+    if (typeof input === 'string' && /^(Day|Week|Month|Hour) \d+$/.test(input)) {
+        return input
     }
 
     const day = dayjs.tz(input, timezone)
@@ -177,15 +187,26 @@ function getDatumTitle(s: SeriesDatum, breakdownFilter: BreakdownFilter | null |
     const cohorts = cohortsModel.findMounted()?.values?.allCohorts
     const formatPropertyValueForDisplay = propertyDefinitionsModel.findMounted()?.values?.formatPropertyValueForDisplay
     const pillValues = getPillValues(s, breakdownFilter, cohorts, formatPropertyValueForDisplay)
+    const showPathCleaningHighlight = breakdownFilter?.breakdown_path_cleaning
+
     if (pillValues.length > 0) {
         return (
             <>
-                {pillValues.map((pill, index) => (
-                    <React.Fragment key={pill}>
-                        <span>{midEllipsis(pill, 60)}</span>
-                        {index < pillValues.length - 1 && ' · '}
-                    </React.Fragment>
-                ))}
+                {pillValues.map((pill, index) => {
+                    const isBreakdownValue = index === 0 && s.breakdown_value !== undefined
+                    const shouldHighlight = showPathCleaningHighlight && isBreakdownValue && typeof pill === 'string'
+
+                    return (
+                        <React.Fragment key={pill}>
+                            {shouldHighlight ? (
+                                <span>{parseAliasToReadable(pill)}</span>
+                            ) : (
+                                <span>{midEllipsis(pill, 60)}</span>
+                            )}
+                            {index < pillValues.length - 1 && ' · '}
+                        </React.Fragment>
+                    )
+                })}
             </>
         )
     }

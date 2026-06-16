@@ -86,7 +86,7 @@ export const groupsModel = kea<groupsModelType>([
             (s) => [s.groupTypesRaw],
             (groupTypesRaw) =>
                 new Map<GroupTypeIndex, GroupType>(
-                    groupTypesRaw.map((groupType) => [groupType.group_type_index, groupType])
+                    (groupTypesRaw ?? []).map((groupType) => [groupType.group_type_index, groupType])
                 ),
         ],
         groupTypesLoading: [(s) => [s.groupTypesRawLoading], (groupTypesRawLoading) => groupTypesRawLoading],
@@ -154,8 +154,8 @@ export const groupsModel = kea<groupsModelType>([
         },
     })),
     afterMount(({ actions }) => {
-        if (window.POSTHOG_APP_CONTEXT?.current_team?.group_types) {
-            actions.loadAllGroupTypesSuccess(window.POSTHOG_APP_CONTEXT.current_team.group_types)
+        if (window.INSIGHTS_APP_CONTEXT?.current_team?.group_types) {
+            actions.loadAllGroupTypesSuccess(window.INSIGHTS_APP_CONTEXT.current_team.group_types)
         } else {
             actions.loadAllGroupTypes()
         }

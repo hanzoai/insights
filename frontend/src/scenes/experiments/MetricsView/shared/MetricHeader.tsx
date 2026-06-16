@@ -1,37 +1,109 @@
 import { useActions } from 'kea'
+import { useState } from 'react'
 
-import { IconCopy, IconPencil } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonTag } from '@posthog/lemon-ui'
+import { IconCopy, IconPencil, IconStack } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonDropdown, LemonTag } from '@hanzo/lemon-ui'
 
+import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { METRIC_CONTEXTS, experimentMetricModalLogic } from 'scenes/experiments/Metrics/experimentMetricModalLogic'
+import { sharedMetricModalLogic } from 'scenes/experiments/Metrics/sharedMetricModalLogic'
 import { modalsLogic } from 'scenes/experiments/modalsLogic'
+import { isEventExposureConfig } from 'scenes/experiments/utils'
 import { urls } from 'scenes/urls'
 
-import type { ExperimentMetric } from '~/queries/schema/schema-general'
+import type { Breakdown, EventsNode, ExperimentMetric } from '~/queries/schema/schema-general'
+import { NodeKind } from '~/queries/schema/schema-general'
+import type { Experiment } from '~/types'
 
 import { MetricTitle } from './MetricTitle'
 import { getMetricTag } from './utils'
+
+// Helper function to get the exposure event from experiment
+const getExposureEvent = (experiment: Experiment): string => {
+    const exposureConfig = experiment.exposure_criteria?.exposure_config
+    if (!exposureConfig) {
+        return '$feature_flag_called'
+    }
+    if (isEventExposureConfig(exposureConfig)) {
+        return exposureConfig.event
+    }
+    // Fall back
+    return '$feature_flag_called'
+}
+
+// AddBreakdownButton component for event property breakdowns
+const AddBreakdownButton = ({
+    experiment,
+    onChange,
+}: {
+    experiment: Experiment
+    onChange: (breakdown: Breakdown) => void
+}): JSX.Element | null => {
+    const [dropdownOpen, setDropdownOpen] = useState(false)
+
+    /**
+     * bail if we don't have an experiment
+     * this could happen if the experiment has not been loaded yet
+     * or if we are in the legacy experiment view
+     */
+    if (!experiment) {
+        return null
+    }
+
+    // Create metadata source for the exposure event to filter properties
+    const exposureEvent = getExposureEvent(experiment)
+    const metadataSource: EventsNode = {
+        kind: NodeKind.EventsNode,
+        event: exposureEvent,
+    }
+
+    return (
+        <LemonDropdown
+            overlay={
+                <TaxonomicFilter
+                    onChange={(_, value) => {
+                        onChange({ type: 'event', property: value?.toString() || '' })
+                        setDropdownOpen(false)
+                    }}
+                    taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}
+                    metadataSource={metadataSource}
+                />
+            }
+            visible={dropdownOpen}
+            onClickOutside={() => setDropdownOpen(false)}
+        >
+            <LemonButton
+                tooltip="Add breakdown"
+                type="secondary"
+                size="xsmall"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+                <IconStack />
+            </LemonButton>
+        </LemonDropdown>
+    )
+}
 
 export const MetricHeader = ({
     displayOrder,
     metric,
     metricType,
     isPrimaryMetric,
+    experiment,
     onDuplicateMetricClick,
+    onBreakdownChange,
 }: {
     displayOrder?: number
     metric: any
     metricType: any
     isPrimaryMetric: boolean
+    experiment: Experiment
     onDuplicateMetricClick: (metric: ExperimentMetric) => void
+    onBreakdownChange: (breakdown: Breakdown) => void
 }): JSX.Element => {
     /**
-     * This is a bit overkill, since primary and secondary metric dialogs are
-     * identical.
-     * Also, it's not the responsibility of this component to understand
-     * the difference between primary and secondary metrics.
-     * For this component, primary and secondary are identical,
-     * except for which modal to open.
-     * The openModal function has to be provided as a dependency.
+     * This is necessary for legacy experiments support
      */
     const {
         openPrimaryMetricModal,
@@ -40,8 +112,11 @@ export const MetricHeader = ({
         openSecondarySharedMetricModal,
     } = useActions(modalsLogic)
 
+    const { openExperimentMetricModal } = useActions(experimentMetricModalLogic)
+    const { openSharedMetricModal } = useActions(sharedMetricModalLogic)
+
     return (
-        <div className="text-xs font-semibold">
+        <div className="text-xs font-semibold flex flex-col justify-between h-full">
             <div className="deprecated-space-y-1">
                 <div className="flex items-start justify-between gap-2 min-w-0">
                     <div className="text-xs font-semibold flex items-start min-w-0 flex-1">
@@ -60,17 +135,33 @@ export const MetricHeader = ({
                                 tooltip="Edit"
                                 onClick={() => {
                                     if (metric.isSharedMetric) {
+                                        /**
+                                         * this is for legacy experiments support
+                                         */
                                         const openSharedModal = isPrimaryMetric
                                             ? openPrimarySharedMetricModal
                                             : openSecondarySharedMetricModal
                                         openSharedModal(metric.sharedMetricId)
+
+                                        openSharedMetricModal(
+                                            METRIC_CONTEXTS[isPrimaryMetric ? 'primary' : 'secondary'],
+                                            metric.sharedMetricId
+                                        )
                                     } else {
+                                        /**
+                                         * this is for legacy experiments support
+                                         */
                                         const openMetricModal = isPrimaryMetric
                                             ? openPrimaryMetricModal
                                             : openSecondaryMetricModal
                                         if (metric.uuid) {
                                             openMetricModal(metric.uuid)
                                         }
+
+                                        openExperimentMetricModal(
+                                            METRIC_CONTEXTS[isPrimaryMetric ? 'primary' : 'secondary'],
+                                            metric
+                                        )
                                     }
                                 }}
                             />
@@ -92,8 +183,8 @@ export const MetricHeader = ({
                                                 <div className="text-sm text-secondary max-w-lg">
                                                     <p>
                                                         We'll take you to the form to customize and save this metric.
-                                                        Your new version will appear in your shared metrics, ready to
-                                                        add to your experiment.
+                                                        Your new version will appear in your shared metrics, ready to be
+                                                        added to your experiment.
                                                     </p>
                                                 </div>
                                             ),
@@ -124,6 +215,11 @@ export const MetricHeader = ({
                     <LemonTag type="muted" size="small">
                         {getMetricTag(metric)}
                     </LemonTag>
+                    {metric.goal === 'decrease' && (
+                        <LemonTag type="highlight" size="small">
+                            Goal: Decrease
+                        </LemonTag>
+                    )}
                     {metric.isSharedMetric && (
                         <LemonTag type="option" size="small">
                             Shared
@@ -131,6 +227,11 @@ export const MetricHeader = ({
                     )}
                 </div>
             </div>
+            {(metric.breakdownFilter?.breakdowns || []).length < 3 && (
+                <div className="flex justify-end items-end">
+                    <AddBreakdownButton experiment={experiment} onChange={onBreakdownChange} />
+                </div>
+            )}
         </div>
     )
 }

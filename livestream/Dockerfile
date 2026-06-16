@@ -1,4 +1,4 @@
-FROM golang:1.24.6 AS builder
+FROM golang:1.26 AS builder
 WORKDIR /code
 COPY go.sum go.mod ./
 RUN go mod download -x
@@ -16,12 +16,16 @@ RUN apt-get update && \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.posthog.net/" --http1.1 | brotli --decompress --output=/GeoLite2-City.mmdb ) && \
+    ( curl -s -L "https://mmdbcdn.insights.hanzo.ai/" --http1.1 | brotli --decompress --output=/GeoLite2-City.mmdb ) && \
     chmod -R 755 /GeoLite2-City.mmdb
 
 FROM ubuntu:24.04
 COPY --from=builder /livestream /GeoLite2-City.mmdb /
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder /usr/share/ca-certificates /usr/share/ca-certificates
+
+# TODO run as non-root user
+# nosemgrep: dockerfile.security.last-user-is-root.last-user-is-root
+USER root
 
 CMD ["/livestream"]

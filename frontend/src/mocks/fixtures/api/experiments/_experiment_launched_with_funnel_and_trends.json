@@ -147,9 +147,9 @@
         "distinct_id": "6PMxBkEONKiJoizOIKGkcTICvtOk1smj277H6lqowDG",
         "first_name": "Employee 427",
         "last_name": "",
-        "email": "test@posthog.com",
+        "email": "test@hanzo.ai",
         "is_email_verified": null,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": null
     },
     "created_at": "2025-01-16T21:51:09.062768Z",
@@ -214,5 +214,6 @@
             },
             "uuid": "cbdd02f8-4a27-4017-a8d8-5f989b304ada"
         }
-    ]
+    ],
+    "user_access_level": "editor"
 }

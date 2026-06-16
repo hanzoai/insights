@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { BaseIcon, IconCheck, IconChevronDown, IconEye, IconHide, IconLogomark, IconVideoCamera } from '@posthog/icons'
+import { BaseIcon, IconCheck, IconChevronDown, IconEye, IconHide, IconLogomark, IconVideoCamera } from '@hanzo/icons'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
@@ -72,20 +72,20 @@ export const EventDebugMenu = (): JSX.Element => {
         activeFilteredEvents,
         searchFilteredEventsCount,
         selectedEventTypes,
-        hidePostHogProperties,
-        hidePostHogFlags,
+        hideInsightsProperties,
+        hideInsightsFlags,
         expandedProperties,
     } = useValues(eventDebugMenuLogic)
-    const { markExpanded, setSelectedEventType, setSearchText, setHidePostHogProperties, setHidePostHogFlags } =
+    const { markExpanded, setSelectedEventType, setSearchText, setHideInsightsProperties, setHideInsightsFlags } =
         useActions(eventDebugMenuLogic)
 
     const showEventsMenuItems = [
         checkableMenuItem(
-            'PostHog Events',
-            searchFilteredEventsCount['posthog'],
+            'Insights Events',
+            searchFilteredEventsCount['insights'],
             <IconLogomark />,
-            selectedEventTypes.includes('posthog'),
-            () => setSelectedEventType('posthog', !selectedEventTypes.includes('posthog'))
+            selectedEventTypes.includes('insights'),
+            () => setSelectedEventType('insights', !selectedEventTypes.includes('insights'))
         ),
         checkableMenuItem(
             'Custom Events',
@@ -104,11 +104,11 @@ export const EventDebugMenu = (): JSX.Element => {
     ]
 
     const hideThingsMenuItems = [
-        checkableMenuItem('Hide PostHog properties', null, null, hidePostHogProperties, () =>
-            setHidePostHogProperties(!hidePostHogProperties)
+        checkableMenuItem('Hide Insights properties', null, null, hideInsightsProperties, () =>
+            setHideInsightsProperties(!hideInsightsProperties)
         ),
-        checkableMenuItem('Hide PostHog flags', null, null, hidePostHogFlags, () =>
-            setHidePostHogFlags(!hidePostHogFlags)
+        checkableMenuItem('Hide Insights flags', null, null, hideInsightsFlags, () =>
+            setHideInsightsFlags(!hideInsightsFlags)
         ),
     ]
 
@@ -131,7 +131,7 @@ export const EventDebugMenu = (): JSX.Element => {
             <ToolbarMenu.Body>
                 <div className="flex flex-col deprecated-space-y-1">
                     <div className="flex-1 text-sm pl-1">
-                        View all events sent from this page as they are sent to PostHog.
+                        View all events sent from this page as they are sent to Insights.
                     </div>
                     {activeFilteredEvents.length ? (
                         activeFilteredEvents.map((e) => {

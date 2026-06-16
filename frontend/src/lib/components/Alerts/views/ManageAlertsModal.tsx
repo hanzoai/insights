@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
@@ -67,6 +67,7 @@ export function AlertListItem({ alert, onClick }: AlertListItemProps): JSX.Eleme
 interface ManageAlertsModalProps extends InsightAlertsLogicProps {
     isOpen: boolean
     insightShortId: InsightShortId
+    canCreateAlertForInsight: boolean
     onClose?: () => void
 }
 
@@ -83,7 +84,7 @@ export function ManageAlertsModal(props: ManageAlertsModalProps): JSX.Element {
             </LemonModal.Header>
             <LemonModal.Content>
                 <div className="mb-4">
-                    With alerts, PostHog will monitor your insight and notify you when certain conditions are met. We do
+                    With alerts, Insights will monitor your insight and notify you when certain conditions are met. We do
                     not evaluate alerts in real-time, but rather on a schedule (hourly, daily...).
                     <br />
                     <Link to={urls.alerts()} target="_blank">
@@ -115,7 +116,15 @@ export function ManageAlertsModal(props: ManageAlertsModalProps): JSX.Element {
             </LemonModal.Content>
 
             <LemonModal.Footer>
-                <LemonButton type="primary" onClick={() => push(urls.insightAlert(props.insightShortId, 'new'))}>
+                <LemonButton
+                    type="primary"
+                    onClick={() => push(urls.insightAlert(props.insightShortId, 'new'))}
+                    disabledReason={
+                        !props.canCreateAlertForInsight
+                            ? 'Alerts are only available for trends. Change the insight representation to add alerts.'
+                            : undefined
+                    }
+                >
                     New alert
                 </LemonButton>
                 <LemonButton type="secondary" onClick={props.onClose}>

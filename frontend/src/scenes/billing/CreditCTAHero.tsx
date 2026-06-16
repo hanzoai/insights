@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSkeleton } from '@hanzo/lemon-ui'
 
-import { BurningMoneyHog } from 'lib/components/hedgehogs'
+import { BurningMoneyMascot } from 'lib/components/mascots'
 
 import { PurchaseCreditsModal } from './PurchaseCreditsModal'
 import { billingLogic } from './billingLogic'
@@ -33,7 +33,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                     onClick={() => toggleCreditCTAHeroDismissed(false)}
                 >
                     <span className="flex items-center gap-1.5">
-                        <BurningMoneyHog
+                        <BurningMoneyMascot
                             className="w-8 h-8 group-hover:animate-bounce"
                             style={{ animationDuration: '0.75s' }}
                         />
@@ -123,12 +123,12 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                     )}{' '}
                                     over the next year.
                                 </p>
-                                <p className="mt-2 mb-0">Ready to save money on your PostHog usage?</p>
+                                <p className="mt-2 mb-0">Ready to save money on your Insights usage?</p>
                             </>
                         )}
                     </div>
                     <div className="flex flex-col justify-center items-end w-30">
-                        <BurningMoneyHog className="w-full h-auto" />
+                        <BurningMoneyMascot className="w-full h-auto" />
                         {creditOverview.status === 'pending' && creditOverview.invoice_url && (
                             <LemonButton
                                 type="primary"
@@ -163,7 +163,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                             </p>
                             <LemonButton
                                 type="primary"
-                                to="mailto:sales@posthog.com?subject=Let's talk enterprise!"
+                                to="mailto:sales@hanzo.ai?subject=Let's talk enterprise!"
                                 className="w-30"
                             >
                                 Talk to sales

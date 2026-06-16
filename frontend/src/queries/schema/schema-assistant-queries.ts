@@ -185,7 +185,7 @@ export interface AssistantTrendsEventsNode
         EventsNode,
         | 'fixedProperties'
         | 'properties'
-        | 'math_hogql'
+        | 'math_insightsql'
         | 'limit'
         | 'groupBy'
         | 'orderBy'
@@ -203,7 +203,7 @@ export interface AssistantTrendsActionsNode
         ActionsNode,
         | 'fixedProperties'
         | 'properties'
-        | 'math_hogql'
+        | 'math_insightsql'
         | 'limit'
         | 'groupBy'
         | 'orderBy'
@@ -483,7 +483,7 @@ export interface AssistantFunnelsFilter {
      * Use this field only if the user explicitly asks to aggregate the funnel by unique sessions.
      * @default null
      */
-    funnelAggregateByHogQL?: 'properties.$session_id' | null
+    funnelAggregateByInsightsQL?: 'properties.$session_id' | null
 }
 
 export type AssistantFunnelsBreakdownType = Extract<BreakdownType, 'person' | 'event' | 'group' | 'session'>
@@ -606,8 +606,8 @@ export interface AssistantRetentionQuery extends AssistantInsightsQueryBase {
     retentionFilter: AssistantRetentionFilter
 }
 
-export interface AssistantHogQLQuery {
-    kind: NodeKind.HogQLQuery
-    /** SQL SELECT statement to execute. Mostly standard ClickHouse SQL with PostHog-specific additions. */
+export interface AssistantInsightsQLQuery {
+    kind: NodeKind.InsightsQLQuery
+    /** SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions. */
     query: string
 }

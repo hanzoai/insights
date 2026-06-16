@@ -1,12 +1,16 @@
-import { DashboardFilter, HogQLVariable, QuerySchema } from '~/queries/schema/schema-general'
+import { AgentMode } from '~/queries/schema/schema-assistant-messages'
+import { DashboardFilter, InsightsQLVariable, QuerySchema } from '~/queries/schema/schema-general'
 import { integer } from '~/queries/schema/type-utils'
 import { ActionType, DashboardType, EventDefinition, InsightShortId, QueryBasedInsightModel } from '~/types'
+
+import { RevenueAnalyticsQuery } from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
 
 export enum MaxContextType {
     DASHBOARD = 'dashboard',
     INSIGHT = 'insight',
     EVENT = 'event',
     ACTION = 'action',
+    ERROR_TRACKING_ISSUE = 'error_tracking_issue',
 }
 
 export type InsightWithQuery = Pick<Partial<QueryBasedInsightModel>, 'query'> & Partial<QueryBasedInsightModel>
@@ -16,14 +20,14 @@ export interface MaxInsightContext {
     id: InsightShortId
     name?: string | null
     description?: string | null
-    query: QuerySchema // The actual query node, e.g., TrendsQuery, HogQLQuery
+    query: QuerySchema // The actual query node, e.g., TrendsQuery, InsightsQLQuery
     filtersOverride?: DashboardFilter
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
 }
 
 export interface MaxDashboardContext {
     type: MaxContextType.DASHBOARD
-    id: number
+    id: integer
     name?: string | null
     description?: string | null
     insights: MaxInsightContext[]
@@ -39,9 +43,15 @@ export interface MaxEventContext {
 
 export interface MaxActionContext {
     type: MaxContextType.ACTION
-    id: number
+    id: integer
     name: string
     description?: string | null
+}
+
+export interface MaxErrorTrackingIssueContext {
+    type: MaxContextType.ERROR_TRACKING_ISSUE
+    id: string // UUID of the error tracking issue
+    name?: string | null
 }
 
 // The main shape for the UI context sent to the backend
@@ -50,6 +60,8 @@ export interface MaxUIContext {
     insights?: MaxInsightContext[]
     events?: MaxEventContext[]
     actions?: MaxActionContext[]
+    error_tracking_issues?: MaxErrorTrackingIssueContext[]
+    form_answers?: Record<string, string> // question_id -> answer for create_form tool responses
 }
 
 // Taxonomic filter options
@@ -57,18 +69,24 @@ export interface MaxContextTaxonomicFilterOption {
     id: string
     value: string | integer
     name: string
-    icon: React.ReactNode
+    icon: React.ComponentType
     type?: MaxContextType
 }
 
 // Union type for all possible context payloads that can be exposed by scene logics
-export type MaxContextItem = MaxInsightContext | MaxDashboardContext | MaxEventContext | MaxActionContext
+export type MaxContextItem =
+    | MaxInsightContext
+    | MaxDashboardContext
+    | MaxEventContext
+    | MaxActionContext
+    | MaxErrorTrackingIssueContext
 
 type MaxInsightContextInput = {
     type: MaxContextType.INSIGHT
     data: InsightWithQuery
     filtersOverride?: DashboardFilter
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
+    revenueAnalyticsQuery?: RevenueAnalyticsQuery
 }
 type MaxDashboardContextInput = {
     type: MaxContextType.DASHBOARD
@@ -82,11 +100,16 @@ type MaxActionContextInput = {
     type: MaxContextType.ACTION
     data: ActionType
 }
+type MaxErrorTrackingIssueContextInput = {
+    type: MaxContextType.ERROR_TRACKING_ISSUE
+    data: { id: string; name?: string | null }
+}
 export type MaxContextInput =
     | MaxInsightContextInput
     | MaxDashboardContextInput
     | MaxEventContextInput
     | MaxActionContextInput
+    | MaxErrorTrackingIssueContextInput
 
 /**
  * Helper functions to create maxContext items safely
@@ -100,13 +123,21 @@ export const createMaxContextHelpers = {
 
     insight: (
         insight: InsightWithQuery,
-        filtersOverride?: DashboardFilter,
-        variablesOverride?: Record<string, HogQLVariable>
+        {
+            filtersOverride,
+            variablesOverride,
+            revenueAnalyticsQuery,
+        }: {
+            filtersOverride?: DashboardFilter
+            variablesOverride?: Record<string, InsightsQLVariable>
+            revenueAnalyticsQuery?: RevenueAnalyticsQuery
+        } = {}
     ): MaxInsightContextInput => ({
         type: MaxContextType.INSIGHT,
         data: insight,
         filtersOverride,
         variablesOverride,
+        revenueAnalyticsQuery,
     }),
 
     event: (event: EventDefinition): MaxEventContextInput => ({
@@ -118,4 +149,13 @@ export const createMaxContextHelpers = {
         type: MaxContextType.ACTION,
         data: action,
     }),
+
+    errorTrackingIssue: (issue: { id: string; name?: string | null }): MaxErrorTrackingIssueContextInput => ({
+        type: MaxContextType.ERROR_TRACKING_ISSUE,
+        data: issue,
+    }),
+}
+
+export function isAgentMode(mode: unknown): mode is AgentMode {
+    return typeof mode === 'string' && Object.values(AgentMode).includes(mode as AgentMode)
 }

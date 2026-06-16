@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSelect, LemonTag, lemonToast } from '@posthog/lemon-ui'
+import { LemonButton, LemonSelect, LemonTag, lemonToast } from '@hanzo/lemon-ui'
 
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
 
@@ -79,12 +79,29 @@ const getSaveDisabledReason = (
     }
 }
 
+const getInitialRadioState = (
+    schema: ExternalDataSourceSyncSchema,
+    incrementalSyncSupported: boolean,
+    appendSyncSupported: boolean
+): 'full_refresh' | 'incremental' | 'append' => {
+    if (schema.sync_type) {
+        return schema.sync_type
+    }
+    if (incrementalSyncSupported) {
+        return 'incremental'
+    }
+    if (appendSyncSupported) {
+        return 'append'
+    }
+    return 'full_refresh'
+}
+
 export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }: SyncMethodFormProps): JSX.Element => {
     const incrementalSyncSupported = getIncrementalSyncSupported(schema)
     const appendSyncSupported = getAppendOnlySyncSupported(schema)
 
-    const [radioValue, setRadioValue] = useState(
-        schema.sync_type ?? (incrementalSyncSupported.disabled ? 'append' : 'incremental')
+    const [radioValue, setRadioValue] = useState(() =>
+        getInitialRadioState(schema, !incrementalSyncSupported.disabled, !appendSyncSupported.disabled)
     )
     const [incrementalFieldValue, setIncrementalFieldValue] = useState(schema.incremental_field ?? null)
     const [appendFieldValue, setAppendFieldValue] = useState(schema.incremental_field ?? null)

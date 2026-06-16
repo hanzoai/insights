@@ -6,11 +6,11 @@ import { Field, Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonDivider, LemonInput, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { JudgeHog } from 'lib/components/hedgehogs'
+import { JudgeMascot, StarMascot } from 'lib/components/mascots'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
@@ -19,17 +19,19 @@ import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toSentenceCase } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { couponLogic } from 'scenes/coupons/couponLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
-import { BillingProductV2Type, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { BillingProductV2Type } from '~/types'
 
 import { BillingHero } from './BillingHero'
 import { BillingNoAccess } from './BillingNoAccess'
+import { BillingPortalButton } from './BillingPortalButton'
 import { BillingProduct } from './BillingProduct'
 import { BillingSummary } from './BillingSummary'
 import { CreditCTAHero } from './CreditCTAHero'
-import { StripePortalButton } from './StripePortalButton'
 import { UnsubscribeCard } from './UnsubscribeCard'
 import { billingLogic } from './billingLogic'
 
@@ -54,6 +56,7 @@ export function Billing(): JSX.Element {
     const { openSupportForm } = useActions(supportLogic)
     const { featureFlags } = useValues(featureFlagLogic)
     const { location, searchParams } = useValues(router)
+    const { activeCoupons, couponsOverviewLoading } = useValues(couponLogic({}))
 
     const restrictionReason = useRestrictedArea({
         minimumAccessLevel: OrganizationMembershipLevel.Admin,
@@ -77,7 +80,7 @@ export function Billing(): JSX.Element {
         router.actions.push(urls.default())
     }
 
-    if (!billing && billingLoading) {
+    if ((!billing && billingLoading) || couponsOverviewLoading) {
         return (
             <>
                 <SpinnerOverlay sceneLevel />
@@ -101,7 +104,7 @@ export function Billing(): JSX.Element {
                             submit a bug report
                         </Link>
                     ) : (
-                        <Link to="mailto:sales@posthog.com">contact sales@posthog.com</Link>
+                        <Link to="mailto:sales@hanzo.ai">contact sales@hanzo.ai</Link>
                     )}
                     .
                 </LemonBanner>
@@ -148,7 +151,7 @@ export function Billing(): JSX.Element {
             {billing?.trial ? (
                 <LemonBanner type="info" hideIcon className="max-w-300 mb-2">
                     <div className="flex items-center gap-4">
-                        <JudgeHog className="w-20 h-20 flex-shrink-0" />
+                        <JudgeMascot className="w-20 h-20 flex-shrink-0" />
                         <div>
                             <p className="text-lg">You're on (a) trial</p>
                             <p>
@@ -186,7 +189,32 @@ export function Billing(): JSX.Element {
                 </div>
             )}
 
-            {!showBillingSummary && <StripePortalButton />}
+            {!showBillingSummary && <BillingPortalButton />}
+
+            {!couponsOverviewLoading && activeCoupons.length > 0 && (
+                <div className="mt-6 max-w-300">
+                    <LemonBanner type="info" hideIcon>
+                        <div className="flex items-center gap-4">
+                            <StarMascot className="w-16 h-16 flex-shrink-0" />
+                            <div>
+                                <p className="font-semibold mb-2">You have active coupons!</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                    {activeCoupons.map((coupon) => (
+                                        <li key={coupon.code} className="text-sm">
+                                            <span>{coupon.campaign_name}</span>
+                                            {coupon.expires_at && (
+                                                <span className="text-muted ml-1">
+                                                    · until {dayjs(coupon.expires_at).format('LL')}
+                                                </span>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </LemonBanner>
+                </div>
+            )}
 
             <LemonDivider className="mt-6 mb-8" />
 
@@ -203,7 +231,13 @@ export function Billing(): JSX.Element {
                 <h2>Products</h2>
             </div>
 
-            {products
+            {(featureFlags[FEATURE_FLAGS.REORDER_PLATFORM_ADDON_BILLING_SECTION] === 'test-top-of-page'
+                ? [
+                      platformAndSupportProduct,
+                      ...(products?.filter((product) => product.type !== ProductKey.PLATFORM_AND_SUPPORT) ?? []),
+                  ].filter((product): product is BillingProductV2Type => !!product)
+                : products
+            )
                 ?.filter(
                     (product: BillingProductV2Type) =>
                         !product.inclusion_only || product.addons.find((a) => !a.inclusion_only)

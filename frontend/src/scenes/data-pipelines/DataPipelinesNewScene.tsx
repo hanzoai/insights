@@ -3,19 +3,17 @@ import { kea, path, props, selectors, useValues } from 'kea'
 import { NotFound } from 'lib/components/NotFound'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
-import { humanizeHogFunctionType } from 'scenes/hog-functions/hog-function-utils'
-import { HogFunctionTemplateList } from 'scenes/hog-functions/list/HogFunctionTemplateList'
+import { humanizeInsightsFunctionType } from 'scenes/insights-functions/insights-function-utils'
+import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Breadcrumb } from '~/types'
 
 import type { dataPipelinesNewSceneLogicType } from './DataPipelinesNewSceneType'
-import { DataPipelinesSceneTab } from './DataPipelinesScene'
-import { nonHogFunctionTemplatesLogic } from './utils/nonHogFunctionTemplatesLogic'
+import { nonInsightsFunctionTemplatesLogic } from './utils/nonInsightsFunctionTemplatesLogic'
 
 export type DataPipelinesNewSceneKind = 'transformation' | 'destination' | 'source' | 'site_app'
 
@@ -30,21 +28,27 @@ export const dataPipelinesNewSceneLogic = kea<dataPipelinesNewSceneLogicType>([
         logicProps: [() => [(_, props) => props], (props) => props],
         breadcrumbs: [
             () => [(_, props) => props],
-            ({ kind }): Breadcrumb[] => {
+            ({ kind }: DataPipelinesNewSceneProps): Breadcrumb[] => {
+                const sceneMapping: Record<DataPipelinesNewSceneKind, { scene: Scene; url: () => string }> = {
+                    source: { scene: Scene.Sources, url: urls.sources },
+                    transformation: { scene: Scene.Transformations, url: urls.transformations },
+                    destination: { scene: Scene.Destinations, url: urls.destinations },
+                    site_app: { scene: Scene.Apps, url: urls.apps },
+                }
+
+                const mapping = sceneMapping[kind]
+
                 return [
                     {
-                        key: Scene.DataPipelines,
-                        name: 'Data pipelines',
-                        path: urls.dataPipelines('overview'),
-                    },
-                    {
-                        key: [Scene.DataPipelines, kind],
-                        name: capitalizeFirstLetter(kind) + 's',
-                        path: urls.dataPipelines((kind + 's') as DataPipelinesSceneTab),
+                        key: mapping.scene,
+                        name: capitalizeFirstLetter(humanizeInsightsFunctionType(kind, true)),
+                        path: mapping.url(),
+                        iconType: 'data_pipeline',
                     },
                     {
                         key: Scene.DataPipelinesNew,
-                        name: 'New',
+                        name: 'New ' + humanizeInsightsFunctionType(kind),
+                        iconType: 'data_pipeline',
                     },
                 ]
             },
@@ -56,7 +60,7 @@ export const scene: SceneExport = {
     component: DataPipelinesNewScene,
     logic: dataPipelinesNewSceneLogic,
     paramsToProps: ({ params: { kind } }): (typeof dataPipelinesNewSceneLogic)['props'] => ({
-        kind,
+        kind: kind || 'site_app', // Default to 'site_app' for /apps/new route
     }),
 }
 
@@ -65,13 +69,13 @@ export function DataPipelinesNewScene(): JSX.Element {
     const { kind } = logicProps
 
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
-    const { hogFunctionTemplatesDataWarehouseSources, hogFunctionTemplatesBatchExports } = useValues(
-        nonHogFunctionTemplatesLogic({
+    const { insightsFunctionTemplatesDataWarehouseSources, insightsFunctionTemplatesBatchExports } = useValues(
+        nonInsightsFunctionTemplatesLogic({
             availableSources: availableSources ?? {},
         })
     )
 
-    const humanizedKind = humanizeHogFunctionType(kind)
+    const humanizedKind = humanizeInsightsFunctionType(kind)
 
     return (
         <SceneContent>
@@ -81,18 +85,17 @@ export function DataPipelinesNewScene(): JSX.Element {
                     type: 'data_pipeline',
                 }}
             />
-            <SceneDivider />
 
             {kind === 'transformation' ? (
-                <HogFunctionTemplateList type="transformation" />
+                <InsightsFunctionTemplateList type="transformation" />
             ) : kind === 'destination' ? (
-                <HogFunctionTemplateList type="destination" manualTemplates={hogFunctionTemplatesBatchExports} />
+                <InsightsFunctionTemplateList type="destination" manualTemplates={insightsFunctionTemplatesBatchExports} />
             ) : kind === 'site_app' ? (
-                <HogFunctionTemplateList type="site_app" />
+                <InsightsFunctionTemplateList type="site_app" />
             ) : kind === 'source' ? (
-                <HogFunctionTemplateList
+                <InsightsFunctionTemplateList
                     type="source_webhook"
-                    manualTemplates={hogFunctionTemplatesDataWarehouseSources}
+                    manualTemplates={insightsFunctionTemplatesDataWarehouseSources}
                     manualTemplatesLoading={availableSourcesLoading}
                 />
             ) : (

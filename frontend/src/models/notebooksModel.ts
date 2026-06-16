@@ -1,11 +1,12 @@
 import { BuiltLogic, actions, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { EditorFocusPosition, JSONContent } from 'lib/components/RichContentEditor/types'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
+import { addProductIntent } from 'lib/utils/product-intents'
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 import type { notebookLogicType } from 'scenes/notebooks/Notebook/notebookLogicType'
 import { notebookPanelLogic } from 'scenes/notebooks/NotebookPanel/notebookPanelLogic'
@@ -16,7 +17,7 @@ import { projectLogic } from 'scenes/projectLogic'
 import { urls } from 'scenes/urls'
 
 import { deleteFromTree, getLastNewFolder, refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
-import { InsightVizNode, Node } from '~/queries/schema/schema-general'
+import { InsightVizNode, Node, ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 import { DashboardType, QueryBasedInsightModel } from '~/types'
 
 import type { notebooksModelType } from './notebooksModelType'
@@ -101,8 +102,13 @@ export const notebooksModel = kea<notebooksModelType>([
                         onCreate?.(logic)
                     })
 
-                    posthog.capture(`notebook created`, {
+                    insights.capture(`notebook created`, {
                         short_id: notebook.short_id,
+                    })
+
+                    void addProductIntent({
+                        product_type: ProductKey.NOTEBOOKS,
+                        intent_context: ProductIntentContext.NOTEBOOK_CREATED,
                     })
 
                     return [notebook, ...values.notebooks]

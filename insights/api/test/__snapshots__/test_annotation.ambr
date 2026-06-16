@@ -1,0 +1,1161 @@
+# serializer version: 1
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."temporary_token",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE "insights_user"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.1
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.10
+  '''
+  SELECT "insights_team"."id",
+         "insights_team"."uuid",
+         "insights_team"."organization_id",
+         "insights_team"."parent_team_id",
+         "insights_team"."project_id",
+         "insights_team"."api_token",
+         "insights_team"."app_urls",
+         "insights_team"."name",
+         "insights_team"."slack_incoming_webhook",
+         "insights_team"."created_at",
+         "insights_team"."updated_at",
+         "insights_team"."anonymize_ips",
+         "insights_team"."completed_snippet_onboarding",
+         "insights_team"."has_completed_onboarding_for",
+         "insights_team"."onboarding_tasks",
+         "insights_team"."ingested_event",
+         "insights_team"."person_processing_opt_out",
+         "insights_team"."secret_api_token",
+         "insights_team"."secret_api_token_backup",
+         "insights_team"."session_recording_opt_in",
+         "insights_team"."session_recording_sample_rate",
+         "insights_team"."session_recording_minimum_duration_milliseconds",
+         "insights_team"."session_recording_linked_flag",
+         "insights_team"."session_recording_network_payload_capture_config",
+         "insights_team"."session_recording_masking_config",
+         "insights_team"."session_recording_url_trigger_config",
+         "insights_team"."session_recording_url_blocklist_config",
+         "insights_team"."session_recording_event_trigger_config",
+         "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_replay_config",
+         "insights_team"."session_recording_retention_period",
+         "insights_team"."session_recording_encryption",
+         "insights_team"."conversations_enabled",
+         "insights_team"."conversations_settings",
+         "insights_team"."proactive_tasks_enabled",
+         "insights_team"."survey_config",
+         "insights_team"."surveys_opt_in",
+         "insights_team"."product_tours_opt_in",
+         "insights_team"."capture_console_log_opt_in",
+         "insights_team"."capture_performance_opt_in",
+         "insights_team"."capture_dead_clicks",
+         "insights_team"."autocapture_opt_out",
+         "insights_team"."autocapture_web_vitals_opt_in",
+         "insights_team"."autocapture_web_vitals_allowed_metrics",
+         "insights_team"."autocapture_exceptions_opt_in",
+         "insights_team"."autocapture_exceptions_errors_to_ignore",
+         "insights_team"."logs_settings",
+         "insights_team"."heatmaps_opt_in",
+         "insights_team"."receive_org_level_activity_logs",
+         "insights_team"."web_analytics_pre_aggregated_tables_enabled",
+         "insights_team"."web_analytics_pre_aggregated_tables_version",
+         "insights_team"."flags_persistence_default",
+         "insights_team"."feature_flag_confirmation_enabled",
+         "insights_team"."feature_flag_confirmation_message",
+         "insights_team"."default_evaluation_environments_enabled",
+         "insights_team"."require_evaluation_environment_tags",
+         "insights_team"."default_evaluation_contexts_enabled",
+         "insights_team"."require_evaluation_contexts",
+         "insights_team"."session_recording_version",
+         "insights_team"."signup_token",
+         "insights_team"."is_demo",
+         "insights_team"."access_control",
+         "insights_team"."week_start_day",
+         "insights_team"."inject_web_apps",
+         "insights_team"."test_account_filters",
+         "insights_team"."test_account_filters_default_checked",
+         "insights_team"."path_cleaning_filters",
+         "insights_team"."timezone",
+         "insights_team"."data_attributes",
+         "insights_team"."person_display_name_properties",
+         "insights_team"."live_events_columns",
+         "insights_team"."recording_domains",
+         "insights_team"."human_friendly_comparison_periods",
+         "insights_team"."cookieless_server_hash_mode",
+         "insights_team"."primary_dashboard_id",
+         "insights_team"."default_data_theme",
+         "insights_team"."extra_settings",
+         "insights_team"."modifiers",
+         "insights_team"."correlation_config",
+         "insights_team"."session_recording_retention_period_days",
+         "insights_team"."external_data_workspace_id",
+         "insights_team"."external_data_workspace_last_synced_at",
+         "insights_team"."api_query_rate_limit",
+         "insights_team"."revenue_tracking_config",
+         "insights_team"."drop_events_older_than",
+         "insights_team"."base_currency",
+         "insights_team"."experiment_recalculation_time",
+         "insights_team"."default_experiment_confidence_level",
+         "insights_team"."default_experiment_stats_method",
+         "insights_team"."business_model"
+  FROM "insights_team"
+  WHERE "insights_team"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.11
+  '''
+  SELECT "insights_project"."id",
+         "insights_project"."organization_id",
+         "insights_project"."name",
+         "insights_project"."created_at",
+         "insights_project"."product_description"
+  FROM "insights_project"
+  WHERE "insights_project"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.12
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.13
+  '''
+  SELECT "ee_accesscontrol"."id",
+         "ee_accesscontrol"."team_id",
+         "ee_accesscontrol"."access_level",
+         "ee_accesscontrol"."resource",
+         "ee_accesscontrol"."resource_id",
+         "ee_accesscontrol"."organization_member_id",
+         "ee_accesscontrol"."role_id",
+         "ee_accesscontrol"."created_by_id",
+         "ee_accesscontrol"."created_at",
+         "ee_accesscontrol"."updated_at"
+  FROM "ee_accesscontrol"
+  LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
+  WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
+          AND "ee_accesscontrol"."resource" = 'project'
+          AND "ee_accesscontrol"."resource_id" = '99999'
+          AND "ee_accesscontrol"."role_id" IS NULL
+          AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'project'
+             AND "ee_accesscontrol"."resource_id" = '99999'
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.14
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE "insights_organizationmembership"."user_id" = 99999
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.15
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_annotation"
+  WHERE (NOT "insights_annotation"."deleted"
+         AND (("insights_annotation"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+               AND "insights_annotation"."scope" = 'organization')
+              OR "insights_annotation"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.16
+  '''
+  SELECT "insights_annotation"."id",
+         "insights_annotation"."content",
+         "insights_annotation"."created_at",
+         "insights_annotation"."updated_at",
+         "insights_annotation"."dashboard_item_id",
+         "insights_annotation"."dashboard_id",
+         "insights_annotation"."team_id",
+         "insights_annotation"."organization_id",
+         "insights_annotation"."created_by_id",
+         "insights_annotation"."scope",
+         "insights_annotation"."creation_type",
+         "insights_annotation"."date_marker",
+         "insights_annotation"."deleted",
+         "insights_annotation"."apply_all",
+         "insights_dashboarditem"."id",
+         "insights_dashboarditem"."name",
+         "insights_dashboarditem"."derived_name",
+         "insights_dashboarditem"."description",
+         "insights_dashboarditem"."team_id",
+         "insights_dashboarditem"."filters",
+         "insights_dashboarditem"."filters_hash",
+         "insights_dashboarditem"."query",
+         "insights_dashboarditem"."query_metadata",
+         "insights_dashboarditem"."order",
+         "insights_dashboarditem"."deleted",
+         "insights_dashboarditem"."saved",
+         "insights_dashboarditem"."created_at",
+         "insights_dashboarditem"."refreshing",
+         "insights_dashboarditem"."created_by_id",
+         "insights_dashboarditem"."is_sample",
+         "insights_dashboarditem"."short_id",
+         "insights_dashboarditem"."favorited",
+         "insights_dashboarditem"."refresh_attempt",
+         "insights_dashboarditem"."last_modified_at",
+         "insights_dashboarditem"."last_modified_by_id",
+         "insights_dashboarditem"."dashboard_id",
+         "insights_dashboarditem"."last_refresh",
+         "insights_dashboarditem"."layouts",
+         "insights_dashboarditem"."color",
+         "insights_dashboarditem"."dive_dashboard_id",
+         "insights_dashboarditem"."updated_at",
+         "insights_dashboarditem"."deprecated_tags",
+         "insights_dashboarditem"."tags",
+         "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."temporary_token",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."requested_password_reset_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_annotation"
+  LEFT OUTER JOIN "insights_dashboarditem" ON ("insights_annotation"."dashboard_item_id" = "insights_dashboarditem"."id")
+  LEFT OUTER JOIN "insights_user" ON ("insights_annotation"."created_by_id" = "insights_user"."id")
+  WHERE (NOT "insights_annotation"."deleted"
+         AND (("insights_annotation"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+               AND "insights_annotation"."scope" = 'organization')
+              OR "insights_annotation"."team_id" = 99999))
+  ORDER BY "insights_annotation"."date_marker" DESC
+  LIMIT 1000
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.17
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."temporary_token",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE "insights_user"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.18
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.19
+  '''
+  SELECT "insights_team"."id",
+         "insights_team"."uuid",
+         "insights_team"."organization_id",
+         "insights_team"."parent_team_id",
+         "insights_team"."project_id",
+         "insights_team"."api_token",
+         "insights_team"."app_urls",
+         "insights_team"."name",
+         "insights_team"."slack_incoming_webhook",
+         "insights_team"."created_at",
+         "insights_team"."updated_at",
+         "insights_team"."anonymize_ips",
+         "insights_team"."completed_snippet_onboarding",
+         "insights_team"."has_completed_onboarding_for",
+         "insights_team"."onboarding_tasks",
+         "insights_team"."ingested_event",
+         "insights_team"."person_processing_opt_out",
+         "insights_team"."secret_api_token",
+         "insights_team"."secret_api_token_backup",
+         "insights_team"."session_recording_opt_in",
+         "insights_team"."session_recording_sample_rate",
+         "insights_team"."session_recording_minimum_duration_milliseconds",
+         "insights_team"."session_recording_linked_flag",
+         "insights_team"."session_recording_network_payload_capture_config",
+         "insights_team"."session_recording_masking_config",
+         "insights_team"."session_recording_url_trigger_config",
+         "insights_team"."session_recording_url_blocklist_config",
+         "insights_team"."session_recording_event_trigger_config",
+         "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_replay_config",
+         "insights_team"."session_recording_retention_period",
+         "insights_team"."session_recording_encryption",
+         "insights_team"."conversations_enabled",
+         "insights_team"."conversations_settings",
+         "insights_team"."proactive_tasks_enabled",
+         "insights_team"."survey_config",
+         "insights_team"."surveys_opt_in",
+         "insights_team"."product_tours_opt_in",
+         "insights_team"."capture_console_log_opt_in",
+         "insights_team"."capture_performance_opt_in",
+         "insights_team"."capture_dead_clicks",
+         "insights_team"."autocapture_opt_out",
+         "insights_team"."autocapture_web_vitals_opt_in",
+         "insights_team"."autocapture_web_vitals_allowed_metrics",
+         "insights_team"."autocapture_exceptions_opt_in",
+         "insights_team"."autocapture_exceptions_errors_to_ignore",
+         "insights_team"."logs_settings",
+         "insights_team"."heatmaps_opt_in",
+         "insights_team"."receive_org_level_activity_logs",
+         "insights_team"."web_analytics_pre_aggregated_tables_enabled",
+         "insights_team"."web_analytics_pre_aggregated_tables_version",
+         "insights_team"."flags_persistence_default",
+         "insights_team"."feature_flag_confirmation_enabled",
+         "insights_team"."feature_flag_confirmation_message",
+         "insights_team"."default_evaluation_environments_enabled",
+         "insights_team"."require_evaluation_environment_tags",
+         "insights_team"."default_evaluation_contexts_enabled",
+         "insights_team"."require_evaluation_contexts",
+         "insights_team"."session_recording_version",
+         "insights_team"."signup_token",
+         "insights_team"."is_demo",
+         "insights_team"."access_control",
+         "insights_team"."week_start_day",
+         "insights_team"."inject_web_apps",
+         "insights_team"."test_account_filters",
+         "insights_team"."test_account_filters_default_checked",
+         "insights_team"."path_cleaning_filters",
+         "insights_team"."timezone",
+         "insights_team"."data_attributes",
+         "insights_team"."person_display_name_properties",
+         "insights_team"."live_events_columns",
+         "insights_team"."recording_domains",
+         "insights_team"."human_friendly_comparison_periods",
+         "insights_team"."cookieless_server_hash_mode",
+         "insights_team"."primary_dashboard_id",
+         "insights_team"."default_data_theme",
+         "insights_team"."extra_settings",
+         "insights_team"."modifiers",
+         "insights_team"."correlation_config",
+         "insights_team"."session_recording_retention_period_days",
+         "insights_team"."external_data_workspace_id",
+         "insights_team"."external_data_workspace_last_synced_at",
+         "insights_team"."api_query_rate_limit",
+         "insights_team"."revenue_tracking_config",
+         "insights_team"."drop_events_older_than",
+         "insights_team"."base_currency",
+         "insights_team"."experiment_recalculation_time",
+         "insights_team"."default_experiment_confidence_level",
+         "insights_team"."default_experiment_stats_method",
+         "insights_team"."business_model"
+  FROM "insights_team"
+  WHERE "insights_team"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.2
+  '''
+  SELECT "insights_team"."id",
+         "insights_team"."uuid",
+         "insights_team"."organization_id",
+         "insights_team"."parent_team_id",
+         "insights_team"."project_id",
+         "insights_team"."api_token",
+         "insights_team"."app_urls",
+         "insights_team"."name",
+         "insights_team"."slack_incoming_webhook",
+         "insights_team"."created_at",
+         "insights_team"."updated_at",
+         "insights_team"."anonymize_ips",
+         "insights_team"."completed_snippet_onboarding",
+         "insights_team"."has_completed_onboarding_for",
+         "insights_team"."onboarding_tasks",
+         "insights_team"."ingested_event",
+         "insights_team"."person_processing_opt_out",
+         "insights_team"."secret_api_token",
+         "insights_team"."secret_api_token_backup",
+         "insights_team"."session_recording_opt_in",
+         "insights_team"."session_recording_sample_rate",
+         "insights_team"."session_recording_minimum_duration_milliseconds",
+         "insights_team"."session_recording_linked_flag",
+         "insights_team"."session_recording_network_payload_capture_config",
+         "insights_team"."session_recording_masking_config",
+         "insights_team"."session_recording_url_trigger_config",
+         "insights_team"."session_recording_url_blocklist_config",
+         "insights_team"."session_recording_event_trigger_config",
+         "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_replay_config",
+         "insights_team"."session_recording_retention_period",
+         "insights_team"."session_recording_encryption",
+         "insights_team"."conversations_enabled",
+         "insights_team"."conversations_settings",
+         "insights_team"."proactive_tasks_enabled",
+         "insights_team"."survey_config",
+         "insights_team"."surveys_opt_in",
+         "insights_team"."product_tours_opt_in",
+         "insights_team"."capture_console_log_opt_in",
+         "insights_team"."capture_performance_opt_in",
+         "insights_team"."capture_dead_clicks",
+         "insights_team"."autocapture_opt_out",
+         "insights_team"."autocapture_web_vitals_opt_in",
+         "insights_team"."autocapture_web_vitals_allowed_metrics",
+         "insights_team"."autocapture_exceptions_opt_in",
+         "insights_team"."autocapture_exceptions_errors_to_ignore",
+         "insights_team"."logs_settings",
+         "insights_team"."heatmaps_opt_in",
+         "insights_team"."receive_org_level_activity_logs",
+         "insights_team"."web_analytics_pre_aggregated_tables_enabled",
+         "insights_team"."web_analytics_pre_aggregated_tables_version",
+         "insights_team"."flags_persistence_default",
+         "insights_team"."feature_flag_confirmation_enabled",
+         "insights_team"."feature_flag_confirmation_message",
+         "insights_team"."default_evaluation_environments_enabled",
+         "insights_team"."require_evaluation_environment_tags",
+         "insights_team"."default_evaluation_contexts_enabled",
+         "insights_team"."require_evaluation_contexts",
+         "insights_team"."session_recording_version",
+         "insights_team"."signup_token",
+         "insights_team"."is_demo",
+         "insights_team"."access_control",
+         "insights_team"."week_start_day",
+         "insights_team"."inject_web_apps",
+         "insights_team"."test_account_filters",
+         "insights_team"."test_account_filters_default_checked",
+         "insights_team"."path_cleaning_filters",
+         "insights_team"."timezone",
+         "insights_team"."data_attributes",
+         "insights_team"."person_display_name_properties",
+         "insights_team"."live_events_columns",
+         "insights_team"."recording_domains",
+         "insights_team"."human_friendly_comparison_periods",
+         "insights_team"."cookieless_server_hash_mode",
+         "insights_team"."primary_dashboard_id",
+         "insights_team"."default_data_theme",
+         "insights_team"."extra_settings",
+         "insights_team"."modifiers",
+         "insights_team"."correlation_config",
+         "insights_team"."session_recording_retention_period_days",
+         "insights_team"."external_data_workspace_id",
+         "insights_team"."external_data_workspace_last_synced_at",
+         "insights_team"."api_query_rate_limit",
+         "insights_team"."revenue_tracking_config",
+         "insights_team"."drop_events_older_than",
+         "insights_team"."base_currency",
+         "insights_team"."experiment_recalculation_time",
+         "insights_team"."default_experiment_confidence_level",
+         "insights_team"."default_experiment_stats_method",
+         "insights_team"."business_model"
+  FROM "insights_team"
+  WHERE "insights_team"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.20
+  '''
+  SELECT "insights_project"."id",
+         "insights_project"."organization_id",
+         "insights_project"."name",
+         "insights_project"."created_at",
+         "insights_project"."product_description"
+  FROM "insights_project"
+  WHERE "insights_project"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.21
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.22
+  '''
+  SELECT "ee_accesscontrol"."id",
+         "ee_accesscontrol"."team_id",
+         "ee_accesscontrol"."access_level",
+         "ee_accesscontrol"."resource",
+         "ee_accesscontrol"."resource_id",
+         "ee_accesscontrol"."organization_member_id",
+         "ee_accesscontrol"."role_id",
+         "ee_accesscontrol"."created_by_id",
+         "ee_accesscontrol"."created_at",
+         "ee_accesscontrol"."updated_at"
+  FROM "ee_accesscontrol"
+  LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
+  WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
+          AND "ee_accesscontrol"."resource" = 'project'
+          AND "ee_accesscontrol"."resource_id" = '99999'
+          AND "ee_accesscontrol"."role_id" IS NULL
+          AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'project'
+             AND "ee_accesscontrol"."resource_id" = '99999'
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.23
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE "insights_organizationmembership"."user_id" = 99999
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.24
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_annotation"
+  WHERE (NOT "insights_annotation"."deleted"
+         AND (("insights_annotation"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+               AND "insights_annotation"."scope" = 'organization')
+              OR "insights_annotation"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.25
+  '''
+  SELECT "insights_annotation"."id",
+         "insights_annotation"."content",
+         "insights_annotation"."created_at",
+         "insights_annotation"."updated_at",
+         "insights_annotation"."dashboard_item_id",
+         "insights_annotation"."dashboard_id",
+         "insights_annotation"."team_id",
+         "insights_annotation"."organization_id",
+         "insights_annotation"."created_by_id",
+         "insights_annotation"."scope",
+         "insights_annotation"."creation_type",
+         "insights_annotation"."date_marker",
+         "insights_annotation"."deleted",
+         "insights_annotation"."apply_all",
+         "insights_dashboarditem"."id",
+         "insights_dashboarditem"."name",
+         "insights_dashboarditem"."derived_name",
+         "insights_dashboarditem"."description",
+         "insights_dashboarditem"."team_id",
+         "insights_dashboarditem"."filters",
+         "insights_dashboarditem"."filters_hash",
+         "insights_dashboarditem"."query",
+         "insights_dashboarditem"."query_metadata",
+         "insights_dashboarditem"."order",
+         "insights_dashboarditem"."deleted",
+         "insights_dashboarditem"."saved",
+         "insights_dashboarditem"."created_at",
+         "insights_dashboarditem"."refreshing",
+         "insights_dashboarditem"."created_by_id",
+         "insights_dashboarditem"."is_sample",
+         "insights_dashboarditem"."short_id",
+         "insights_dashboarditem"."favorited",
+         "insights_dashboarditem"."refresh_attempt",
+         "insights_dashboarditem"."last_modified_at",
+         "insights_dashboarditem"."last_modified_by_id",
+         "insights_dashboarditem"."dashboard_id",
+         "insights_dashboarditem"."last_refresh",
+         "insights_dashboarditem"."layouts",
+         "insights_dashboarditem"."color",
+         "insights_dashboarditem"."dive_dashboard_id",
+         "insights_dashboarditem"."updated_at",
+         "insights_dashboarditem"."deprecated_tags",
+         "insights_dashboarditem"."tags",
+         "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."temporary_token",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."requested_password_reset_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_annotation"
+  LEFT OUTER JOIN "insights_dashboarditem" ON ("insights_annotation"."dashboard_item_id" = "insights_dashboarditem"."id")
+  LEFT OUTER JOIN "insights_user" ON ("insights_annotation"."created_by_id" = "insights_user"."id")
+  WHERE (NOT "insights_annotation"."deleted"
+         AND (("insights_annotation"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+               AND "insights_annotation"."scope" = 'organization')
+              OR "insights_annotation"."team_id" = 99999))
+  ORDER BY "insights_annotation"."date_marker" DESC
+  LIMIT 1000
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.3
+  '''
+  SELECT "insights_project"."id",
+         "insights_project"."organization_id",
+         "insights_project"."name",
+         "insights_project"."created_at",
+         "insights_project"."product_description"
+  FROM "insights_project"
+  WHERE "insights_project"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.4
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.5
+  '''
+  SELECT "ee_accesscontrol"."id",
+         "ee_accesscontrol"."team_id",
+         "ee_accesscontrol"."access_level",
+         "ee_accesscontrol"."resource",
+         "ee_accesscontrol"."resource_id",
+         "ee_accesscontrol"."organization_member_id",
+         "ee_accesscontrol"."role_id",
+         "ee_accesscontrol"."created_by_id",
+         "ee_accesscontrol"."created_at",
+         "ee_accesscontrol"."updated_at"
+  FROM "ee_accesscontrol"
+  LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
+  WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
+          AND "ee_accesscontrol"."resource" = 'project'
+          AND "ee_accesscontrol"."resource_id" = '99999'
+          AND "ee_accesscontrol"."role_id" IS NULL
+          AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'project'
+             AND "ee_accesscontrol"."resource_id" = '99999'
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("ee_accesscontrol"."organization_member_id" IS NULL
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."resource" = 'annotation'
+             AND "ee_accesscontrol"."resource_id" IS NOT NULL
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.6
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE "insights_organizationmembership"."user_id" = 99999
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.7
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_annotation"
+  WHERE (NOT "insights_annotation"."deleted"
+         AND (("insights_annotation"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+               AND "insights_annotation"."scope" = 'organization')
+              OR "insights_annotation"."team_id" = 99999))
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.8
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."temporary_token",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE "insights_user"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestAnnotation.test_retrieving_annotation_is_not_n_plus_1.9
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---

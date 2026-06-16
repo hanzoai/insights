@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useCallback, useState } from 'react'
 
-import { IconChevronDown, IconClock, IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonMenuItem, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronDown, IconClock, IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonMenuItem, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

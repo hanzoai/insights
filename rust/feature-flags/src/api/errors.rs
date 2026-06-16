@@ -1,11 +1,36 @@
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::{IntoResponse, Json, Response};
 use common_cookieless::CookielessManagerError;
-use common_database::CustomDatabaseError;
+use common_database::{extract_timeout_type, is_timeout_error, CustomDatabaseError};
+use common_hypercache::HyperCacheError;
 use common_redis::CustomRedisError;
+use serde::Serialize;
 use thiserror::Error;
 
 use crate::utils::graph_utils::DependencyType;
+
+/// Simplifies serde error messages for end-user consumption.
+///
+/// Serde errors can be verbose, listing all valid enum variants, e.g.:
+/// "unknown variant `contains`, expected one of `exact`, `is_not`, `icontains`, ..."
+///
+/// This truncates at ", expected" to produce a simpler message:
+/// "unknown variant `contains`"
+///
+/// Full details are logged server-side; this is just for the client response.
+pub fn simplify_serde_error(error: &str) -> &str {
+    error.split(", expected").next().unwrap_or(error)
+}
+
+/// Structured error response matching Django REST Framework's format
+#[derive(Debug, Serialize)]
+pub struct AuthenticationErrorResponse {
+    #[serde(rename = "type")]
+    pub error_type: String,
+    pub code: String,
+    pub detail: String,
+    pub attr: Option<String>,
+}
 
 #[derive(Error, Debug)]
 pub enum ClientFacingError {
@@ -15,6 +40,10 @@ pub enum ClientFacingError {
     Unauthorized(String),
     #[error("Rate limited")]
     RateLimited,
+    #[error("IP rate limited")]
+    IpRateLimited,
+    #[error("Token rate limited")]
+    TokenRateLimited,
     #[error("billing limit reached")]
     BillingLimit,
     #[error("Service unavailable")]
@@ -37,22 +66,45 @@ pub enum FlagError {
     NoTokenError,
     #[error("API key is not valid")]
     TokenValidationError,
+    #[error("Personal API key found in request {0} is invalid")]
+    PersonalApiKeyInvalid(String),
+    #[error("Secret API token is invalid")]
+    SecretApiTokenInvalid,
+    #[error("No authentication credentials provided")]
+    NoAuthenticationProvided,
     #[error("Row not found in postgres")]
     RowNotFound,
-    #[error("failed to parse redis cache data")]
-    RedisDataParsingError,
+    /// Data parsing error with context about what failed.
+    /// This is an internal error (500) indicating data corruption or schema mismatch,
+    /// not a service availability issue.
+    #[error("Failed to parse flag data: {0}")]
+    DataParsingErrorWithContext(String),
     #[error("failed to deserialize filters")]
     DeserializeFiltersError,
-    #[error("failed to update redis cache")]
-    CacheUpdateError,
     #[error("redis unavailable")]
     RedisUnavailable,
     #[error("database unavailable")]
     DatabaseUnavailable,
+    #[error("Failed to fetch hash key override for experience continuity")]
+    HashKeyOverrideError,
     #[error("Database error: {0}")]
-    DatabaseError(String),
+    DatabaseError(sqlx::Error, Option<String>),
+    /// Timeout error with optional type classification.
+    ///
+    /// Valid timeout types include:
+    /// - `"query_canceled"` - Statement timeout (PostgreSQL SQLSTATE 57014)
+    /// - `"lock_not_available"` - Lock timeout (PostgreSQL SQLSTATE 55P03)
+    /// - `"idle_in_transaction_timeout"` - Idle transaction timeout (PostgreSQL SQLSTATE 25P03)
+    /// - `"pool_timeout"` - Connection pool acquisition timeout
+    /// - `"io_timeout"` - Network/socket timeout
+    /// - `"protocol_timeout"` - PostgreSQL protocol timeout
+    /// - `"client_timeout"` - Client-side tokio::timeout wrapper
+    /// - `"redis_timeout"` - Redis operation timeout
+    /// - `"cache_timeout"` - Cache operation timeout
+    /// - `"database_timeout"` - Generic database timeout (fallback when SQLSTATE unavailable)
+    /// - `None` - Timeout occurred but specific type unknown
     #[error("Timed out while fetching data")]
-    TimeoutError,
+    TimeoutError(Option<String>),
     #[error("No group type mappings")]
     NoGroupTypeMappings,
     #[error("Dependency of type {0} with id {1} not found")]
@@ -67,8 +119,210 @@ pub enum FlagError {
     PropertiesNotInCache,
     #[error("Static cohort matches not cached")]
     StaticCohortMatchesNotCached,
+    #[error("Cache miss - data not found in cache")]
+    CacheMiss,
+    #[error("Failed to parse data")]
+    DataParsingError,
     #[error(transparent)]
     CookielessError(#[from] CookielessManagerError),
+}
+
+impl FlagError {
+    /// Returns (error_code, status_code) for this error.
+    ///
+    /// This consolidates error classification in one place to ensure consistency
+    /// between error codes and HTTP status codes, and makes adding new error
+    /// variants easier (only one match statement to update).
+    fn error_metadata(&self) -> (&'static str, u16) {
+        match self {
+            // Client-facing errors
+            FlagError::ClientFacing(ClientFacingError::BadRequest(_)) => ("bad_request", 400),
+            FlagError::ClientFacing(ClientFacingError::Unauthorized(_)) => ("unauthorized", 401),
+            FlagError::ClientFacing(ClientFacingError::RateLimited) => ("rate_limited", 429),
+            FlagError::ClientFacing(ClientFacingError::IpRateLimited) => ("ip_rate_limited", 429),
+            FlagError::ClientFacing(ClientFacingError::TokenRateLimited) => {
+                ("token_rate_limited", 429)
+            }
+            FlagError::ClientFacing(ClientFacingError::BillingLimit) => ("billing_limit", 402),
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable) => {
+                ("service_unavailable", 503)
+            }
+
+            // Request parsing errors (400)
+            FlagError::RequestDecodingError(_) => ("request_decoding_error", 400),
+            FlagError::RequestParsingError(_) => ("request_parsing_error", 400),
+            FlagError::MissingDistinctId => ("missing_distinct_id", 400),
+
+            // Authentication errors (401)
+            FlagError::NoTokenError => ("missing_token", 401),
+            FlagError::TokenValidationError => ("invalid_token", 401),
+            FlagError::PersonalApiKeyInvalid(_) => ("personal_api_key_invalid", 401),
+            FlagError::SecretApiTokenInvalid => ("secret_api_token_invalid", 401),
+            FlagError::NoAuthenticationProvided => ("no_authentication", 401),
+
+            // Internal server errors (500)
+            FlagError::Internal(_) => ("internal_error", 500),
+            FlagError::DeserializeFiltersError => ("deserialize_filters_error", 500),
+            FlagError::DatabaseError(_, _) => ("database_error", 500),
+            FlagError::NoGroupTypeMappings => ("no_group_type_mappings", 500),
+            FlagError::RowNotFound => ("row_not_found", 500),
+            FlagError::DependencyNotFound(_, _) => ("dependency_not_found", 500),
+            FlagError::CohortFiltersParsingError => ("cohort_filters_parsing_error", 500),
+            FlagError::DependencyCycle(_, _) => ("dependency_cycle", 500),
+            FlagError::DataParsingError => ("data_parsing_error", 500),
+            FlagError::HashKeyOverrideError => ("hash_key_override_error", 500),
+
+            // Data parsing errors (500) - internal errors, not service unavailability
+            FlagError::DataParsingErrorWithContext(_) => ("flag_data_parsing_error", 500),
+
+            // Service unavailable errors (503) - transient issues, retry may help
+            FlagError::RedisUnavailable => ("redis_unavailable", 503),
+            FlagError::DatabaseUnavailable => ("database_unavailable", 503),
+            FlagError::TimeoutError(_) => ("timeout", 503),
+            FlagError::CacheMiss => ("cache_miss", 503),
+            // Cache misses for person/cohort data - transient, data may be populated soon
+            FlagError::PersonNotFound => ("person_not_found", 503),
+            FlagError::PropertiesNotInCache => ("properties_not_in_cache", 503),
+            FlagError::StaticCohortMatchesNotCached => ("static_cohort_not_cached", 503),
+
+            // Cookieless errors (mixed)
+            FlagError::CookielessError(err) => match err {
+                CookielessManagerError::MissingProperty(_)
+                | CookielessManagerError::UrlParseError(_)
+                | CookielessManagerError::InvalidTimestamp(_) => ("cookieless_error", 400),
+                _ => ("cookieless_error", 500),
+            },
+        }
+    }
+
+    /// Returns a short error code for canonical logging.
+    pub fn error_code(&self) -> &'static str {
+        self.error_metadata().0
+    }
+
+    /// Returns the HTTP status code for this error.
+    pub fn status_code(&self) -> u16 {
+        self.error_metadata().1
+    }
+
+    /// Returns a granular error code for flag evaluation failures.
+    /// This provides more specific error classification than `error_code()`,
+    /// particularly for database errors where we can distinguish between
+    /// timeouts, connection pool exhaustion, etc.
+    /// Falls back to `error_code()` for variants that don't need extra granularity.
+    pub fn evaluation_error_code(&self) -> String {
+        match self {
+            FlagError::DatabaseError(sqlx_error, context) => {
+                let error_msg = sqlx_error.to_string();
+                let context_msg = context.as_deref().unwrap_or("");
+
+                if error_msg.contains("statement timeout") {
+                    "timeout".to_string()
+                } else if error_msg.contains("no more connections") {
+                    "no_more_connections".to_string()
+                } else if context_msg.contains("Failed to fetch conditions") {
+                    "flag_condition_retry".to_string()
+                } else if context_msg.contains("Failed to fetch group") {
+                    "group_mapping_retry".to_string()
+                } else if context_msg.contains("Database healthcheck failed") {
+                    "healthcheck_failed".to_string()
+                } else if error_msg.contains("query_wait_timeout") {
+                    "query_wait_timeout".to_string()
+                } else {
+                    self.error_code().to_string()
+                }
+            }
+            FlagError::TimeoutError(Some(t)) => format!("timeout:{t}"),
+            FlagError::TimeoutError(None) => "timeout_error".to_string(),
+            FlagError::DependencyNotFound(dependency_type, _) => match dependency_type {
+                DependencyType::Cohort => "dependency_not_found_cohort".to_string(),
+                DependencyType::Flag => "dependency_not_found_flag".to_string(),
+            },
+            FlagError::DependencyCycle(dependency_type, _) => match dependency_type {
+                DependencyType::Cohort => "dependency_cycle_cohort".to_string(),
+                DependencyType::Flag => "dependency_cycle_flag".to_string(),
+            },
+            _ => self.error_code().to_string(),
+        }
+    }
+
+    /// Returns a human-readable description for flag evaluation failures.
+    /// Provides detailed descriptions for variants where the `Display` impl
+    /// is too technical, and falls back to `to_string()` (the `#[error]` message)
+    /// for everything else.
+    pub fn evaluation_error_description(&self) -> String {
+        match self {
+            FlagError::DatabaseError(sqlx_error, context) => {
+                let error_msg = sqlx_error.to_string();
+                let context_msg = context.as_deref().unwrap_or("");
+
+                if error_msg.contains("statement timeout") {
+                    "Database statement timed out".to_string()
+                } else if error_msg.contains("no more connections") {
+                    "Database connection pool exhausted".to_string()
+                } else if context_msg.contains("Failed to fetch conditions") {
+                    "Failed to fetch flag conditions".to_string()
+                } else if context_msg.contains("Failed to fetch group") {
+                    "Failed to fetch group mappings".to_string()
+                } else if context_msg.contains("Database healthcheck failed") {
+                    "Database healthcheck failed".to_string()
+                } else if error_msg.contains("query_wait_timeout") {
+                    "Query wait timeout exceeded".to_string()
+                } else {
+                    "Database connection error during evaluation".to_string()
+                }
+            }
+            FlagError::TimeoutError(Some(t)) => format!("Timeout: {t}"),
+            FlagError::DependencyNotFound(dependency_type, _) => match dependency_type {
+                DependencyType::Cohort => "Cohort dependency not found".to_string(),
+                DependencyType::Flag => "Flag dependency not found".to_string(),
+            },
+            FlagError::DependencyCycle(dependency_type, _) => match dependency_type {
+                DependencyType::Cohort => "Cohort dependency cycle detected".to_string(),
+                DependencyType::Flag => "Flag dependency cycle detected".to_string(),
+            },
+            _ => self.to_string(),
+        }
+    }
+
+    pub fn is_5xx(&self) -> bool {
+        let status = match self {
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable) => {
+                StatusCode::SERVICE_UNAVAILABLE
+            }
+            FlagError::ClientFacing(_) => return false, // All other ClientFacing are 4XX
+            FlagError::Internal(_)
+            | FlagError::DeserializeFiltersError
+            | FlagError::DatabaseError(_, _)
+            | FlagError::NoGroupTypeMappings
+            | FlagError::RowNotFound
+            | FlagError::DependencyNotFound(_, _)
+            | FlagError::CohortFiltersParsingError
+            | FlagError::DependencyCycle(_, _)
+            | FlagError::DataParsingError
+            | FlagError::DataParsingErrorWithContext(_)
+            | FlagError::HashKeyOverrideError => StatusCode::INTERNAL_SERVER_ERROR,
+
+            FlagError::RedisUnavailable
+            | FlagError::DatabaseUnavailable
+            | FlagError::TimeoutError(_)
+            | FlagError::CacheMiss
+            | FlagError::PersonNotFound
+            | FlagError::PropertiesNotInCache
+            | FlagError::StaticCohortMatchesNotCached => StatusCode::SERVICE_UNAVAILABLE,
+
+            FlagError::CookielessError(
+                CookielessManagerError::HashError(_)
+                | CookielessManagerError::ChronoError(_)
+                | CookielessManagerError::RedisError(_, _)
+                | CookielessManagerError::SaltCacheError(_)
+                | CookielessManagerError::InvalidIdentifyCount(_),
+            ) => StatusCode::INTERNAL_SERVER_ERROR,
+            FlagError::CookielessError(_) => return false, // Other CookielessErrors are 4XX
+            _ => return false,                             // Everything else is 4XX
+        };
+        status.is_server_error()
+    }
 }
 
 impl IntoResponse for FlagError {
@@ -78,7 +332,17 @@ impl IntoResponse for FlagError {
                 ClientFacingError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
                 ClientFacingError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),
                 ClientFacingError::BillingLimit => (StatusCode::PAYMENT_REQUIRED, "Billing limit reached. Please upgrade your plan.".to_string()),
-                ClientFacingError::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "Rate limit exceeded. Please reduce your request frequency and try again later.".to_string()),
+                ClientFacingError::RateLimited
+                | ClientFacingError::IpRateLimited
+                | ClientFacingError::TokenRateLimited => {
+                    let response = AuthenticationErrorResponse {
+                        error_type: "validation_error".to_string(),
+                        code: "rate_limit_exceeded".to_string(),
+                        detail: "Rate limit exceeded".to_string(),
+                        attr: None,
+                    };
+                    return (StatusCode::TOO_MANY_REQUESTS, Json(response)).into_response();
+                }
                 ClientFacingError::ServiceUnavailable => (StatusCode::SERVICE_UNAVAILABLE, "Service is currently unavailable. Please try again later.".to_string()),
             },
             FlagError::Internal(msg) => {
@@ -103,18 +367,38 @@ impl IntoResponse for FlagError {
             FlagError::TokenValidationError => {
                 (StatusCode::UNAUTHORIZED, "The provided API key is invalid or has expired. Please check your API key and try again.".to_string())
             }
-            FlagError::RedisDataParsingError => {
-                tracing::error!("Data parsing error: {:?}", self);
-                (
-                    StatusCode::SERVICE_UNAVAILABLE,
-                    "Failed to parse internal data. This is likely a temporary issue. Please try again later.".to_string(),
-                )
+            FlagError::PersonalApiKeyInvalid(source) => {
+                let response = AuthenticationErrorResponse {
+                    error_type: "authentication_error".to_string(),
+                    code: "authentication_failed".to_string(),
+                    detail: format!("Personal API key found in request {source} is invalid."),
+                    attr: None,
+                };
+                return (StatusCode::UNAUTHORIZED, Json(response)).into_response();
             }
-            FlagError::CacheUpdateError => {
-                tracing::error!("Cache update error: {:?}", self);
+            FlagError::SecretApiTokenInvalid => {
+                let response = AuthenticationErrorResponse {
+                    error_type: "authentication_error".to_string(),
+                    code: "authentication_failed".to_string(),
+                    detail: "Secret API token is invalid.".to_string(),
+                    attr: None,
+                };
+                return (StatusCode::UNAUTHORIZED, Json(response)).into_response();
+            }
+            FlagError::NoAuthenticationProvided => {
+                let response = AuthenticationErrorResponse {
+                    error_type: "authentication_error".to_string(),
+                    code: "not_authenticated".to_string(),
+                    detail: "Authentication credentials were not provided.".to_string(),
+                    attr: None,
+                };
+                return (StatusCode::UNAUTHORIZED, Json(response)).into_response();
+            }
+            FlagError::DataParsingErrorWithContext(ref details) => {
+                tracing::error!("Data parsing error: {}", details);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    "Failed to update internal cache. This is likely a temporary issue. Please try again later.".to_string(),
+                    "Failed to parse flag configuration data. This may indicate a misconfigured feature flag. Please check your flag definitions or contact support.".to_string(),
                 )
             }
             FlagError::DeserializeFiltersError => {
@@ -138,15 +422,20 @@ impl IntoResponse for FlagError {
                     "Our database service is currently unavailable. This is likely a temporary issue. Please try again later.".to_string(),
                 )
             }
-            FlagError::DatabaseError(msg) => {
-                tracing::error!("Database error: {}", msg);
+            FlagError::DatabaseError(sqlx_error, context) => {
+                if let Some(ctx) = context {
+                    tracing::error!("Database error with context '{}': {}", ctx, sqlx_error);
+                } else {
+                    tracing::error!("Database error: {}", sqlx_error);
+                }
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "A database error occurred. Please try again later or contact support if the problem persists.".to_string(),
                 )
             }
-            FlagError::TimeoutError => {
-                tracing::error!("Timeout error: {:?}", self);
+            FlagError::TimeoutError(ref timeout_type) => {
+                let timeout_desc = timeout_type.as_deref().unwrap_or("unknown type");
+                tracing::error!("Timeout error ({}): {:?}", timeout_desc, self);
                 (
                     StatusCode::SERVICE_UNAVAILABLE,
                     "The request timed out. This could be due to high load or network issues. Please try again later.".to_string(),
@@ -178,14 +467,29 @@ impl IntoResponse for FlagError {
                 tracing::error!("{} dependency cycle: {:?}", dependency_type, cycle_start_id);
                 (StatusCode::INTERNAL_SERVER_ERROR, format!("Dependency cycle detected: {dependency_type} id {cycle_start_id} starts the cycle"))
             }
+            FlagError::HashKeyOverrideError => {
+                tracing::error!("Failed to fetch hash key override for experience continuity");
+                (StatusCode::INTERNAL_SERVER_ERROR, "Failed to fetch hash key override for experience continuity. Please try again later.".to_string())
+            }
             FlagError::PersonNotFound => {
-                (StatusCode::BAD_REQUEST, "Person not found. Please check your distinct_id and try again.".to_string())
+                tracing::warn!("Person not found in cache");
+                (StatusCode::SERVICE_UNAVAILABLE, "Person data not yet available. This is a temporary issue while data is being populated. Please try again.".to_string())
             }
             FlagError::PropertiesNotInCache => {
-                (StatusCode::BAD_REQUEST, "Person properties not found. Please check your distinct_id and try again.".to_string())
+                tracing::warn!("Person properties not found in cache");
+                (StatusCode::SERVICE_UNAVAILABLE, "Person properties not yet available. This is a temporary issue while data is being populated. Please try again.".to_string())
             }
             FlagError::StaticCohortMatchesNotCached => {
-                (StatusCode::BAD_REQUEST, "Static cohort matches not cached. Please check your distinct_id and try again.".to_string())
+                tracing::warn!("Static cohort matches not found in cache");
+                (StatusCode::SERVICE_UNAVAILABLE, "Cohort membership data not yet available. This is a temporary issue while data is being populated. Please try again.".to_string())
+            }
+            FlagError::CacheMiss => {
+                tracing::error!("Cache miss - required data not found in cache");
+                (StatusCode::SERVICE_UNAVAILABLE, "Required data not found in cache. This is likely a temporary issue. Please try again later.".to_string())
+            }
+            FlagError::DataParsingError => {
+                tracing::error!("Failed to parse data");
+                (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse internal data. This is likely a temporary issue. Please try again later.".to_string())
             }
             FlagError::CookielessError(err) => {
                 match err {
@@ -223,9 +527,16 @@ impl From<CustomRedisError> for FlagError {
     fn from(e: CustomRedisError) -> Self {
         match e {
             CustomRedisError::NotFound => FlagError::TokenValidationError,
-            CustomRedisError::ParseError(_) => FlagError::RedisDataParsingError,
-            CustomRedisError::Timeout => FlagError::TimeoutError,
-            CustomRedisError::Other(_) => FlagError::RedisUnavailable,
+            CustomRedisError::ParseError(details) => {
+                FlagError::DataParsingErrorWithContext(format!(
+                    "Redis data parsing failed: {}",
+                    simplify_serde_error(&details)
+                ))
+            }
+            CustomRedisError::Timeout => FlagError::TimeoutError(Some("Redis timeout".to_string())),
+            CustomRedisError::InvalidConfiguration(_) | CustomRedisError::Redis(_) => {
+                FlagError::RedisUnavailable
+            }
         }
     }
 }
@@ -233,8 +544,19 @@ impl From<CustomRedisError> for FlagError {
 impl From<CustomDatabaseError> for FlagError {
     fn from(e: CustomDatabaseError) -> Self {
         match e {
-            CustomDatabaseError::Other(_) => FlagError::DatabaseUnavailable,
-            CustomDatabaseError::Timeout(_) => FlagError::TimeoutError,
+            CustomDatabaseError::Timeout(_) => {
+                FlagError::TimeoutError(Some("client_timeout".to_string()))
+            }
+            CustomDatabaseError::Other(sqlx_error) => {
+                // Check if it's a timeout-related SQL error
+                if is_timeout_error(&sqlx_error) {
+                    FlagError::TimeoutError(
+                        extract_timeout_type(&sqlx_error).map(|s| s.to_string()),
+                    )
+                } else {
+                    FlagError::DatabaseUnavailable
+                }
+            }
         }
     }
 }
@@ -243,7 +565,366 @@ impl From<sqlx::Error> for FlagError {
     fn from(e: sqlx::Error) -> Self {
         match e {
             sqlx::Error::RowNotFound => FlagError::RowNotFound,
-            _ => FlagError::DatabaseError(e.to_string()),
+            _ => {
+                // Check if it's a timeout-related SQL error
+                if is_timeout_error(&e) {
+                    FlagError::TimeoutError(extract_timeout_type(&e).map(|s| s.to_string()))
+                } else {
+                    FlagError::DatabaseError(e, None)
+                }
+            }
+        }
+    }
+}
+
+impl From<HyperCacheError> for FlagError {
+    fn from(e: HyperCacheError) -> Self {
+        match e {
+            HyperCacheError::CacheMiss => FlagError::CacheMiss,
+            HyperCacheError::Redis(redis_error) => FlagError::from(redis_error),
+            HyperCacheError::S3(_) => FlagError::CacheMiss,
+            HyperCacheError::Json(_) => FlagError::DataParsingError,
+            HyperCacheError::Timeout(_) => {
+                FlagError::TimeoutError(Some("cache_timeout".to_string()))
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio::time::{timeout, Duration};
+
+    #[test]
+    fn test_is_5xx() {
+        // Test 5XX errors
+        assert!(FlagError::Internal("test".to_string()).is_5xx());
+        assert!(FlagError::DatabaseUnavailable.is_5xx());
+        assert!(FlagError::RedisUnavailable.is_5xx());
+        assert!(FlagError::TimeoutError(None).is_5xx());
+        assert!(FlagError::ClientFacing(ClientFacingError::ServiceUnavailable).is_5xx());
+
+        // Test 4XX errors
+        assert!(
+            !FlagError::ClientFacing(ClientFacingError::BadRequest("test".to_string())).is_5xx()
+        );
+        assert!(
+            !FlagError::ClientFacing(ClientFacingError::Unauthorized("test".to_string())).is_5xx()
+        );
+        assert!(!FlagError::ClientFacing(ClientFacingError::RateLimited).is_5xx());
+        assert!(!FlagError::ClientFacing(ClientFacingError::BillingLimit).is_5xx());
+        assert!(!FlagError::MissingDistinctId.is_5xx());
+        assert!(!FlagError::NoTokenError.is_5xx());
+        assert!(!FlagError::TokenValidationError.is_5xx());
+    }
+
+    #[test]
+    fn test_custom_database_error_conversion_timeout() {
+        // Test that CustomDatabaseError::Timeout converts to FlagError::TimeoutError with client_timeout
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let elapsed_error = rt.block_on(async {
+            timeout(
+                Duration::from_nanos(1),
+                tokio::time::sleep(Duration::from_secs(1)),
+            )
+            .await
+            .unwrap_err()
+        });
+
+        let timeout_error = CustomDatabaseError::Timeout(elapsed_error);
+        let flag_error: FlagError = timeout_error.into();
+        assert!(
+            matches!(flag_error, FlagError::TimeoutError(Some(ref timeout_type)) if timeout_type == "client_timeout")
+        );
+    }
+
+    #[test]
+    fn test_custom_database_error_conversion_sqlx_timeout() {
+        // Test that sqlx timeout errors convert to FlagError::TimeoutError with pool_timeout
+        let sqlx_timeout = CustomDatabaseError::Other(sqlx::Error::PoolTimedOut);
+        let flag_error: FlagError = sqlx_timeout.into();
+        assert!(
+            matches!(flag_error, FlagError::TimeoutError(Some(ref timeout_type)) if timeout_type == "pool_timeout")
+        );
+    }
+
+    #[test]
+    fn test_custom_database_error_conversion_sqlx_non_timeout() {
+        // Test that non-timeout sqlx errors convert to FlagError::DatabaseUnavailable
+        let sqlx_error = CustomDatabaseError::Other(sqlx::Error::RowNotFound);
+        let flag_error: FlagError = sqlx_error.into();
+        assert!(matches!(flag_error, FlagError::DatabaseUnavailable));
+    }
+
+    #[test]
+    fn test_direct_sqlx_timeout_conversion() {
+        // Test that direct sqlx timeout errors convert to FlagError::TimeoutError with type
+        let sqlx_timeout: FlagError = sqlx::Error::PoolTimedOut.into();
+        assert!(
+            matches!(sqlx_timeout, FlagError::TimeoutError(Some(ref timeout_type)) if timeout_type == "pool_timeout")
+        );
+    }
+
+    #[test]
+    fn test_direct_sqlx_non_timeout_conversion() {
+        // Test that direct non-timeout sqlx errors are handled correctly
+        let sqlx_error: FlagError = sqlx::Error::RowNotFound.into();
+        assert!(matches!(sqlx_error, FlagError::RowNotFound));
+    }
+
+    #[test]
+    fn test_redis_timeout_conversion() {
+        // Test that Redis timeout errors are converted to FlagError::TimeoutError
+        let redis_timeout: FlagError = CustomRedisError::Timeout.into();
+        assert!(
+            matches!(redis_timeout, FlagError::TimeoutError(Some(ref timeout_type)) if timeout_type == "Redis timeout")
+        );
+    }
+
+    #[test]
+    fn test_error_codes_are_non_empty() {
+        // Verify all error codes are non-empty strings
+        let errors: Vec<FlagError> = vec![
+            FlagError::ClientFacing(ClientFacingError::BadRequest("test".to_string())),
+            FlagError::ClientFacing(ClientFacingError::Unauthorized("test".to_string())),
+            FlagError::ClientFacing(ClientFacingError::RateLimited),
+            FlagError::ClientFacing(ClientFacingError::IpRateLimited),
+            FlagError::ClientFacing(ClientFacingError::TokenRateLimited),
+            FlagError::ClientFacing(ClientFacingError::BillingLimit),
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable),
+            FlagError::Internal("test".to_string()),
+            FlagError::RequestDecodingError("test".to_string()),
+            serde_json::from_str::<String>("invalid json")
+                .unwrap_err()
+                .into(), // RequestParsingError
+            FlagError::MissingDistinctId,
+            FlagError::NoTokenError,
+            FlagError::TokenValidationError,
+            FlagError::PersonalApiKeyInvalid("test".to_string()),
+            FlagError::SecretApiTokenInvalid,
+            FlagError::NoAuthenticationProvided,
+            FlagError::RowNotFound,
+            FlagError::DataParsingErrorWithContext("test parse error".to_string()),
+            FlagError::DeserializeFiltersError,
+            FlagError::RedisUnavailable,
+            FlagError::DatabaseUnavailable,
+            FlagError::DatabaseError(sqlx::Error::RowNotFound, Some("test context".to_string())),
+            FlagError::TimeoutError(None),
+            FlagError::NoGroupTypeMappings,
+            FlagError::DependencyNotFound(DependencyType::Flag, 1),
+            FlagError::DependencyCycle(DependencyType::Cohort, 2),
+            FlagError::CohortFiltersParsingError,
+            FlagError::PersonNotFound,
+            FlagError::PropertiesNotInCache,
+            FlagError::StaticCohortMatchesNotCached,
+            FlagError::CacheMiss,
+            FlagError::DataParsingError,
+            CookielessManagerError::MissingProperty("test".to_string()).into(), // CookielessError
+        ];
+
+        for error in errors {
+            let code = error.error_code();
+            assert!(
+                !code.is_empty(),
+                "Error code should not be empty for {error:?}"
+            );
+            assert!(
+                !code.contains(' '),
+                "Error code should not contain spaces: {code}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_status_codes_match_http_semantics() {
+        // 4xx errors (client errors)
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::BadRequest("".into())).status_code(),
+            400
+        );
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::Unauthorized("".into())).status_code(),
+            401
+        );
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::BillingLimit).status_code(),
+            402
+        );
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::RateLimited).status_code(),
+            429
+        );
+        assert_eq!(FlagError::MissingDistinctId.status_code(), 400);
+        assert_eq!(FlagError::NoTokenError.status_code(), 401);
+        assert_eq!(FlagError::TokenValidationError.status_code(), 401);
+
+        // 5xx errors (server errors)
+        assert_eq!(FlagError::Internal("".into()).status_code(), 500);
+        assert_eq!(FlagError::DatabaseUnavailable.status_code(), 503);
+        assert_eq!(FlagError::RedisUnavailable.status_code(), 503);
+        assert_eq!(FlagError::TimeoutError(None).status_code(), 503);
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable).status_code(),
+            503
+        );
+        assert_eq!(FlagError::RowNotFound.status_code(), 500);
+        // Cache miss errors are now 503 (transient)
+        assert_eq!(FlagError::PersonNotFound.status_code(), 503);
+        assert_eq!(FlagError::PropertiesNotInCache.status_code(), 503);
+        assert_eq!(FlagError::StaticCohortMatchesNotCached.status_code(), 503);
+    }
+
+    #[test]
+    fn test_status_code_ranges() {
+        // All client-facing errors except ServiceUnavailable should be 4xx
+        let client_4xx_errors = vec![
+            FlagError::ClientFacing(ClientFacingError::BadRequest("".into())),
+            FlagError::ClientFacing(ClientFacingError::Unauthorized("".into())),
+            FlagError::ClientFacing(ClientFacingError::RateLimited),
+            FlagError::ClientFacing(ClientFacingError::BillingLimit),
+        ];
+        for error in client_4xx_errors {
+            let status = error.status_code();
+            assert!(
+                (400..500).contains(&status),
+                "Expected 4xx for {error:?}, got {status}"
+            );
+        }
+
+        // Server errors should be 5xx
+        let server_errors = vec![
+            FlagError::Internal("".into()),
+            FlagError::DeserializeFiltersError,
+            FlagError::NoGroupTypeMappings,
+            FlagError::RowNotFound,
+            FlagError::CohortFiltersParsingError,
+            FlagError::DataParsingError,
+        ];
+        for error in server_errors {
+            let status = error.status_code();
+            assert!(status >= 500, "Expected 5xx for {error:?}, got {status}");
+        }
+    }
+
+    #[test]
+    fn test_error_code_consistency_with_is_5xx() {
+        // Verify that status_code() >= 500 matches is_5xx() for ALL 5xx errors
+        let errors_5xx = vec![
+            FlagError::Internal("test".to_string()),
+            FlagError::DeserializeFiltersError,
+            FlagError::DatabaseError(sqlx::Error::RowNotFound, None),
+            FlagError::NoGroupTypeMappings,
+            FlagError::RowNotFound,
+            FlagError::DependencyNotFound(DependencyType::Flag, 1),
+            FlagError::CohortFiltersParsingError,
+            FlagError::DependencyCycle(DependencyType::Cohort, 2),
+            FlagError::DataParsingError,
+            FlagError::DataParsingErrorWithContext("test".to_string()),
+            FlagError::RedisUnavailable,
+            FlagError::DatabaseUnavailable,
+            FlagError::TimeoutError(None),
+            FlagError::CacheMiss,
+            FlagError::PersonNotFound,
+            FlagError::PropertiesNotInCache,
+            FlagError::StaticCohortMatchesNotCached,
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable),
+        ];
+
+        for error in errors_5xx {
+            let is_5xx = error.is_5xx();
+            let status = error.status_code();
+            assert!(
+                is_5xx,
+                "is_5xx() should be true for {error:?} (status={status})"
+            );
+            assert!(
+                status >= 500,
+                "status_code() should be >= 500 for {error:?}, got {status}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_specific_error_codes() {
+        // Verify specific error codes match expected values
+        assert_eq!(
+            FlagError::ClientFacing(ClientFacingError::RateLimited).error_code(),
+            "rate_limited"
+        );
+        assert_eq!(FlagError::NoTokenError.error_code(), "missing_token");
+        assert_eq!(
+            FlagError::TokenValidationError.error_code(),
+            "invalid_token"
+        );
+        assert_eq!(
+            FlagError::MissingDistinctId.error_code(),
+            "missing_distinct_id"
+        );
+        assert_eq!(
+            FlagError::TimeoutError(Some("pool".to_string())).error_code(),
+            "timeout"
+        );
+        assert_eq!(
+            FlagError::DatabaseUnavailable.error_code(),
+            "database_unavailable"
+        );
+        assert_eq!(
+            FlagError::RedisUnavailable.error_code(),
+            "redis_unavailable"
+        );
+    }
+
+    #[test]
+    fn test_error_codes_are_unique() {
+        use std::collections::HashSet;
+
+        // All error variants that should have unique error codes
+        let errors: Vec<FlagError> = vec![
+            FlagError::ClientFacing(ClientFacingError::BadRequest("test".to_string())),
+            FlagError::ClientFacing(ClientFacingError::Unauthorized("test".to_string())),
+            FlagError::ClientFacing(ClientFacingError::RateLimited),
+            FlagError::ClientFacing(ClientFacingError::IpRateLimited),
+            FlagError::ClientFacing(ClientFacingError::TokenRateLimited),
+            FlagError::ClientFacing(ClientFacingError::BillingLimit),
+            FlagError::ClientFacing(ClientFacingError::ServiceUnavailable),
+            FlagError::Internal("test".to_string()),
+            FlagError::RequestDecodingError("test".to_string()),
+            serde_json::from_str::<String>("invalid json")
+                .unwrap_err()
+                .into(), // RequestParsingError
+            FlagError::MissingDistinctId,
+            FlagError::NoTokenError,
+            FlagError::TokenValidationError,
+            FlagError::PersonalApiKeyInvalid("test".to_string()),
+            FlagError::SecretApiTokenInvalid,
+            FlagError::NoAuthenticationProvided,
+            FlagError::RowNotFound,
+            FlagError::DataParsingErrorWithContext("test parse error".to_string()),
+            FlagError::DeserializeFiltersError,
+            FlagError::RedisUnavailable,
+            FlagError::DatabaseUnavailable,
+            FlagError::DatabaseError(sqlx::Error::RowNotFound, Some("test context".to_string())),
+            FlagError::TimeoutError(None),
+            FlagError::NoGroupTypeMappings,
+            FlagError::DependencyNotFound(DependencyType::Flag, 1),
+            FlagError::DependencyCycle(DependencyType::Cohort, 2),
+            FlagError::CohortFiltersParsingError,
+            FlagError::PersonNotFound,
+            FlagError::PropertiesNotInCache,
+            FlagError::StaticCohortMatchesNotCached,
+            FlagError::CacheMiss,
+            FlagError::DataParsingError,
+            CookielessManagerError::MissingProperty("test".to_string()).into(),
+        ];
+
+        let mut seen_codes: HashSet<&'static str> = HashSet::new();
+        for error in &errors {
+            let code = error.error_code();
+            assert!(
+                seen_codes.insert(code),
+                "Duplicate error code '{code}' found for {error:?}"
+            );
         }
     }
 }

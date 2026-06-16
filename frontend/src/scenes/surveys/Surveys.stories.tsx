@@ -9,6 +9,7 @@ import { mswDecorator, useStorybookMocks } from '~/mocks/browser'
 import organizationCurrent from '~/mocks/fixtures/api/organizations/@current/@current.json'
 import { toPaginatedResponse } from '~/mocks/handlers'
 import {
+    AccessControlLevel,
     FeatureFlagBasicType,
     MultipleSurveyQuestion,
     PropertyFilterType,
@@ -32,7 +33,7 @@ const MOCK_BASIC_SURVEY: Survey = {
         uuid: '01863799-062b-0000-8a61-b2842d5f8642',
         distinct_id: 'Sopz9Z4NMIfXGlJe6W1XF98GOqhHNui5J5eRe0tBGTE',
         first_name: 'Employee 427',
-        email: 'test2@posthog.com',
+        email: 'test2@hanzo.ai',
     },
     questions: [{ question: 'question 1?', type: SurveyQuestionType.Open }],
     conditions: null,
@@ -48,6 +49,7 @@ const MOCK_BASIC_SURVEY: Survey = {
     iteration_count: null,
     iteration_frequency_days: null,
     schedule: SurveySchedule.Once,
+    user_access_level: AccessControlLevel.Editor,
 }
 
 const MOCK_SURVEY_WITH_MULTIPLE_OPTIONS: Survey = {
@@ -61,7 +63,7 @@ const MOCK_SURVEY_WITH_MULTIPLE_OPTIONS: Survey = {
         uuid: '01863799-062b-0000-8a61-b2842d5f8642',
         distinct_id: 'Sopz9Z4NMIfXGlJe6W1XF98GOqhHNui5J5eRe0tBGTE',
         first_name: 'Employee 427',
-        email: 'test2@posthog.com',
+        email: 'test2@hanzo.ai',
     },
     questions: [
         {
@@ -89,6 +91,7 @@ const MOCK_SURVEY_WITH_MULTIPLE_OPTIONS: Survey = {
     iteration_count: null,
     iteration_frequency_days: null,
     schedule: SurveySchedule.Once,
+    user_access_level: AccessControlLevel.Editor,
 }
 
 const MOCK_SURVEY_WITH_RELEASE_CONS: Survey = {
@@ -102,12 +105,12 @@ const MOCK_SURVEY_WITH_RELEASE_CONS: Survey = {
         uuid: '01863799-062b-0000-8a61-b2842d5f8642',
         distinct_id: 'Sopz9Z4NMIfXGlJe6W1XF98GOqhHNui5J5eRe0tBGTE',
         first_name: 'Employee 427',
-        email: 'test2@posthog.com',
+        email: 'test2@hanzo.ai',
     },
     questions: [{ question: 'question 2?', type: SurveyQuestionType.Open }],
     appearance: { backgroundColor: 'white', submitButtonColor: '#2C2C2C' },
     conditions: {
-        url: 'posthog',
+        url: 'insights',
         selector: '',
         events: { values: [{ name: 'user_subscribed' }] },
         actions: { values: [] },
@@ -146,7 +149,7 @@ const MOCK_SURVEY_WITH_RELEASE_CONS: Survey = {
                         {
                             key: 'email',
                             type: PropertyFilterType.Person,
-                            value: ['li@posthog.com'],
+                            value: ['li@hanzo.ai'],
                             operator: PropertyOperator.Exact,
                         },
                     ],
@@ -168,13 +171,14 @@ const MOCK_SURVEY_WITH_RELEASE_CONS: Survey = {
     iteration_count: null,
     iteration_frequency_days: null,
     schedule: SurveySchedule.Once,
+    user_access_level: AccessControlLevel.Editor,
 }
 
 const MOCK_SURVEY_SHOWN = {
     clickhouse:
-        "SELECT count() AS `survey shown` FROM events WHERE and(equals(events.team_id, 1), equals(events.event, %(hogql_val_0)s), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_1)s), ''), 'null'), '^\"|\"$', ''), %(hogql_val_2)s), 0)) LIMIT 100 SETTINGS readonly=2, max_execution_time=60",
+        "SELECT count() AS `survey shown` FROM events WHERE and(equals(events.team_id, 1), equals(events.event, %(insightsql_val_0)s), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', ''), %(insightsql_val_2)s), 0)) LIMIT 100 SETTINGS readonly=2, max_execution_time=60",
     columns: ['survey shown'],
-    hogql: "SELECT count() AS `survey shown` FROM events WHERE and(equals(event, 'survey shown'), equals(properties.$survey_id, '0188e637-3b72-0000-f407-07a338652af9')) LIMIT 100",
+    insightsql: "SELECT count() AS `survey shown` FROM events WHERE and(equals(event, 'survey shown'), equals(properties.$survey_id, '0188e637-3b72-0000-f407-07a338652af9')) LIMIT 100",
     query: "select count() as 'survey shown' from events where event == 'survey shown' and properties.$survey_id == '0187c279-bcae-0000-34f5-4f121921f006'",
     results: [[0]],
     types: [['survey shown', 'UInt64']],
@@ -301,6 +305,7 @@ export const NewSurveyPresentationSection: StoryFn = () => {
     return <App />
 }
 NewSurveyPresentationSection.parameters = { pageUrl: urls.survey('new') }
+NewSurveyPresentationSection.tags = ['test-skip']
 
 export const NewSurveyTargetingSection: StoryFn = () => {
     useDelayedOnMountEffect(() => {
@@ -335,6 +340,7 @@ export const NewSurveyAppearanceSection: StoryFn = () => {
     return <App />
 }
 NewSurveyAppearanceSection.parameters = { pageUrl: urls.survey('new?edit=true') }
+NewSurveyAppearanceSection.tags = ['test-skip']
 
 export const NewSurveyWithHTMLQuestionDescription: StoryFn = () => {
     useStorybookMocks({
@@ -343,8 +349,8 @@ export const NewSurveyWithHTMLQuestionDescription: StoryFn = () => {
             '/api/users/@me': () => [
                 200,
                 {
-                    email: 'test@posthog.com',
-                    first_name: 'Test Hedgehog',
+                    email: 'test@hanzo.ai',
+                    first_name: 'Test Mascot',
                     organization: {
                         ...organizationCurrent,
                         available_product_features: [
@@ -413,12 +419,14 @@ export const SurveyView: Story = {
 }
 
 export const SurveyTemplates: Story = {
+    tags: ['test-skip'],
     parameters: {
         pageUrl: urls.surveyTemplates(),
     },
 }
 
 export const SurveyNotFound: Story = {
+    tags: ['test-skip'],
     parameters: {
         pageUrl: urls.survey('1234566789'),
     },

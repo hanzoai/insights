@@ -4,27 +4,32 @@ use std::collections::HashSet;
 
 use super::cohort_models::CohortPropertyType;
 use super::cohort_models::CohortValues;
+use crate::cohorts::cohort_cache_manager::CohortFetchError;
 use crate::cohorts::cohort_models::{Cohort, CohortId, CohortProperty, InnerCohortProperty};
+use crate::database::get_connection_with_metrics;
 use crate::properties::property_matching::match_property;
 use crate::properties::property_models::OperatorType;
 use crate::utils::graph_utils::{DependencyGraph, DependencyProvider, DependencyType};
 use crate::{api::errors::FlagError, properties::property_models::PropertyFilter};
 use common_database::PostgresReader;
+use common_types::TeamId;
 
 impl Cohort {
     /// Returns all cohorts for a given team
     pub async fn list_from_pg(
         client: PostgresReader,
-        project_id: i64,
-    ) -> Result<Vec<Cohort>, FlagError> {
-        let mut conn = client.get_connection().await.map_err(|e| {
-            tracing::error!(
-                "Failed to get database connection for project {}: {}",
-                project_id,
-                e
-            );
-            FlagError::DatabaseUnavailable
-        })?;
+        team_id: TeamId,
+    ) -> Result<Vec<Cohort>, CohortFetchError> {
+        let mut conn = get_connection_with_metrics(&client, "non_persons_reader", "fetch_cohorts")
+            .await
+            .map_err(|e| {
+                tracing::error!(
+                    "Failed to get database connection for team {}: {}",
+                    team_id,
+                    e
+                );
+                CohortFetchError::DatabaseUnavailable
+            })?;
 
         let query = r#"
             SELECT c.id,
@@ -42,22 +47,22 @@ impl Cohort {
                   c.errors_calculating,
                   c.groups,
                   c.created_by_id
-              FROM posthog_cohort AS c
-              JOIN posthog_team AS t ON (c.team_id = t.id)
-            WHERE t.project_id = $1
+              FROM insights_cohort AS c
+              JOIN insights_team AS t ON (c.team_id = t.id)
+            WHERE t.id = $1
             AND c.deleted = false
         "#;
         let cohorts = sqlx::query_as::<_, Cohort>(query)
-            .bind(project_id)
+            .bind(team_id)
             .fetch_all(&mut *conn)
             .await
             .map_err(|e| {
                 tracing::error!(
-                    "Failed to fetch cohorts from database for project {}: {}",
-                    project_id,
+                    "Failed to fetch cohorts from database for team {}: {}",
+                    team_id,
                     e
                 );
-                FlagError::Internal(format!("Database query error: {e}"))
+                CohortFetchError::QueryFailed(format!("Database query error: {e}"))
             })?;
 
         Ok(cohorts)
@@ -117,7 +122,7 @@ impl Cohort {
     ///           },
     ///           {
     ///             "key": "email",
-    ///             "value": "@posthog.com",
+    ///             "value": "@hanzo.ai",
     ///             "type": "person",
     ///             "operator": "icontains"
     ///           }
@@ -162,7 +167,7 @@ impl InnerCohortProperty {
     ///       "values": [
     ///         {
     ///           "key": "email",
-    ///           "value": "@posthog.com",
+    ///           "value": "@hanzo.ai",
     ///           "type": "person",
     ///           "operator": "icontains"
     ///         },
@@ -228,7 +233,8 @@ fn evaluate_cohort_values(
             for filter in &values.values {
                 if filter.is_cohort() {
                     // Handle cohort membership check
-                    if apply_cohort_membership_logic(&[filter.clone()], cohort_matches)? {
+                    if apply_cohort_membership_logic(std::slice::from_ref(filter), cohort_matches)?
+                    {
                         return Ok(true);
                     }
                 } else {
@@ -244,8 +250,10 @@ fn evaluate_cohort_values(
             for filter in &values.values {
                 if filter.is_cohort() {
                     // Handle cohort membership check with negation
-                    let cohort_result =
-                        apply_cohort_membership_logic(&[filter.clone()], cohort_matches)?;
+                    let cohort_result = apply_cohort_membership_logic(
+                        std::slice::from_ref(filter),
+                        cohort_matches,
+                    )?;
                     // Apply negation if specified
                     if cohort_result == filter.negation.unwrap_or(false) {
                         return Ok(false);
@@ -310,6 +318,7 @@ pub fn evaluate_dynamic_cohorts(
     initial_cohort_id: CohortId,
     target_properties: &HashMap<String, Value>,
     cohorts: &[Cohort],
+    static_cohort_matches: &HashMap<CohortId, bool>,
 ) -> Result<bool, FlagError> {
     // First check if this is a static cohort
     let initial_cohort = cohorts
@@ -330,6 +339,16 @@ pub fn evaluate_dynamic_cohorts(
 
     // Use for_each_dependencies_first to evaluate each cohort in the correct order
     let results = graph.for_each_dependencies_first(|cohort, results, result| {
+        // If this is a static cohort dependency, use the cached result
+        if cohort.is_static {
+            let cached_result = static_cohort_matches
+                .get(&cohort.id)
+                .copied()
+                .unwrap_or(false);
+            *result = cached_result;
+            return Ok(());
+        }
+
         *result = evaluate_single_cohort(cohort, target_properties, results)?;
         Ok(())
     })?;
@@ -399,44 +418,40 @@ mod tests {
     use crate::{
         cohorts::cohort_models::{CohortPropertyType, CohortValues},
         properties::property_models::PropertyType,
-        utils::test_utils::{
-            insert_cohort_for_team_in_pg, insert_new_team_in_pg, setup_pg_reader_client,
-            setup_pg_writer_client,
-        },
+        utils::test_utils::TestContext,
     };
     use serde_json::json;
 
     #[tokio::test]
     async fn test_list_from_pg() {
-        let reader = setup_pg_reader_client(None).await;
-        let writer = setup_pg_writer_client(None).await;
-
-        let team = insert_new_team_in_pg(reader.clone(), None)
+        let context = TestContext::new(None).await;
+        let team = context
+            .insert_new_team(None)
             .await
             .expect("Failed to insert team");
 
         // Insert multiple cohorts for the team
-        insert_cohort_for_team_in_pg(
-            writer.clone(),
-            team.id,
-            Some("Cohort 1".to_string()),
-            json!({"properties": {"type": "AND", "values": [{"type": "property", "values": [{"key": "age", "type": "person", "value": [30], "negation": false, "operator": "gt"}]}]}}),
-            false,
-        )
-        .await
-        .expect("Failed to insert cohort1");
+        context
+            .insert_cohort(
+                team.id,
+                Some("Cohort 1".to_string()),
+                json!({"properties": {"type": "AND", "values": [{"type": "property", "values": [{"key": "age", "type": "person", "value": [30], "negation": false, "operator": "gt"}]}]}}),
+                false,
+            )
+            .await
+            .expect("Failed to insert cohort1");
 
-        insert_cohort_for_team_in_pg(
-            writer.clone(),
-            team.id,
-            Some("Cohort 2".to_string()),
-            json!({"properties": {"type": "OR", "values": [{"type": "property", "values": [{"key": "country", "type": "person", "value": ["USA"], "negation": false, "operator": "exact"}]}]}}),
-            false,
-        )
-        .await
-        .expect("Failed to insert cohort2");
+        context
+            .insert_cohort(
+                team.id,
+                Some("Cohort 2".to_string()),
+                json!({"properties": {"type": "OR", "values": [{"type": "property", "values": [{"key": "country", "type": "person", "value": ["USA"], "negation": false, "operator": "exact"}]}]}}),
+                false,
+            )
+            .await
+            .expect("Failed to insert cohort2");
 
-        let cohorts = Cohort::list_from_pg(reader, team.project_id)
+        let cohorts = Cohort::list_from_pg(context.non_persons_reader, team.id)
             .await
             .expect("Failed to list cohorts");
 
@@ -483,27 +498,26 @@ mod tests {
 
     #[tokio::test]
     async fn test_extract_dependencies() {
-        let reader = setup_pg_reader_client(None).await;
-        let writer = setup_pg_writer_client(None).await;
-
-        let team = insert_new_team_in_pg(reader.clone(), None)
+        let context = TestContext::new(None).await;
+        let team = context
+            .insert_new_team(None)
             .await
             .expect("Failed to insert team");
 
         // Insert a single cohort that is dependent on another cohort
-        let dependent_cohort = insert_cohort_for_team_in_pg(
-            writer.clone(),
-            team.id,
-            Some("Dependent Cohort".to_string()),
-            json!({"properties": {"type": "OR", "values": [{"type": "OR", "values": [{"key": "$browser", "type": "person", "value": ["Safari"], "negation": false, "operator": "exact"}]}]}}),
-            false,
-        )
-        .await
-        .expect("Failed to insert dependent_cohort");
+        let dependent_cohort = context
+            .insert_cohort(
+                team.id,
+                Some("Dependent Cohort".to_string()),
+                json!({"properties": {"type": "OR", "values": [{"type": "OR", "values": [{"key": "$browser", "type": "person", "value": ["Safari"], "negation": false, "operator": "exact"}]}]}}),
+                false,
+            )
+            .await
+            .expect("Failed to insert dependent_cohort");
 
         // Insert main cohort with a single dependency
-        let main_cohort = insert_cohort_for_team_in_pg(
-                writer.clone(),
+        let main_cohort = context
+            .insert_cohort(
                 team.id,
                 Some("Main Cohort".to_string()),
                 json!({"properties": {"type": "OR", "values": [{"type": "OR", "values": [{"key": "id", "type": "cohort", "value": dependent_cohort.id, "negation": false}]}]}}),
@@ -512,7 +526,7 @@ mod tests {
             .await
             .expect("Failed to insert main_cohort");
 
-        let cohorts = Cohort::list_from_pg(reader.clone(), team.project_id)
+        let cohorts = Cohort::list_from_pg(context.non_persons_reader.clone(), team.id)
             .await
             .expect("Failed to fetch cohorts");
 
@@ -666,10 +680,10 @@ mod tests {
     }
 
     #[test]
-    fn test_evaluate_dynamic_cohorts_static_cohort_early_exit() {
-        // Create a static cohort
+    fn test_evaluate_dynamic_cohorts_with_static_cohort_dependency() {
+        // Create a static cohort (cohort 10)
         let static_cohort = Cohort {
-            id: 1,
+            id: 10,
             name: Some("Static Cohort".to_string()),
             description: None,
             team_id: 1,
@@ -686,14 +700,74 @@ mod tests {
             created_by_id: None,
         };
 
-        let cohorts = vec![static_cohort];
+        // Create a dynamic cohort (cohort 20) that depends on the static cohort
+        let dynamic_cohort = Cohort {
+            id: 20,
+            name: Some("Dynamic Cohort with Static Dependency".to_string()),
+            description: None,
+            team_id: 1,
+            deleted: false,
+            filters: Some(json!({
+                "properties": {
+                    "type": "OR",
+                    "values": [{
+                        "type": "OR",
+                        "values": [{
+                            "key": "id",
+                            "type": "cohort",
+                            "value": 10,
+                            "negation": false
+                        }]
+                    }]
+                }
+            })),
+            query: None,
+            version: None,
+            pending_version: None,
+            count: None,
+            is_calculating: false,
+            is_static: false,
+            errors_calculating: 0,
+            groups: json!({}),
+            created_by_id: None,
+        };
+
+        let cohorts = vec![static_cohort, dynamic_cohort];
         let target_properties = HashMap::new();
 
-        // evaluate_dynamic_cohorts should return false early for static cohorts
-        let result = evaluate_dynamic_cohorts(1, &target_properties, &cohorts).unwrap();
+        // Test case 1: Static cohort is in cache and matches
+        let mut static_cohort_matches = HashMap::new();
+        static_cohort_matches.insert(10, true);
+
+        let result =
+            evaluate_dynamic_cohorts(20, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
+        assert!(
+            result,
+            "Dynamic cohort should match when its static cohort dependency matches"
+        );
+
+        // Test case 2: Static cohort is in cache but doesn't match
+        let mut static_cohort_matches = HashMap::new();
+        static_cohort_matches.insert(10, false);
+
+        let result =
+            evaluate_dynamic_cohorts(20, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
         assert!(
             !result,
-            "Static cohorts should return false from evaluate_dynamic_cohorts"
+            "Dynamic cohort should not match when its static cohort dependency doesn't match"
+        );
+
+        // Test case 3: Static cohort is not in cache (defaults to false)
+        let static_cohort_matches = HashMap::new();
+
+        let result =
+            evaluate_dynamic_cohorts(20, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
+        assert!(
+            !result,
+            "Dynamic cohort should not match when static cohort is not in cache"
         );
     }
 
@@ -744,13 +818,16 @@ mod tests {
         };
 
         let cohorts = vec![cohort_with_negation];
+        let static_cohort_matches = HashMap::new();
 
         // Test case 1: User with @example.com email but NOT excluded
         // Should match because: regex matches AND (icontains doesn't match -> negated to true)
         let mut target_properties = HashMap::new();
         target_properties.insert("email".to_string(), json!("test.user@example.com"));
 
-        let result = evaluate_dynamic_cohorts(1, &target_properties, &cohorts).unwrap();
+        let result =
+            evaluate_dynamic_cohorts(1, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
         assert!(
             result,
             "User with @example.com email should match when not excluded"
@@ -760,7 +837,9 @@ mod tests {
         // Should NOT match because: regex matches BUT (icontains matches -> negated to false)
         target_properties.insert("email".to_string(), json!("excluded.user@example.com"));
 
-        let result = evaluate_dynamic_cohorts(1, &target_properties, &cohorts).unwrap();
+        let result =
+            evaluate_dynamic_cohorts(1, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
         assert!(
             !result,
             "User with @example.com email should NOT match when excluded"
@@ -770,14 +849,18 @@ mod tests {
         // Should NOT match because: regex doesn't match (regardless of negation)
         target_properties.insert("email".to_string(), json!("test.user@other.com"));
 
-        let result = evaluate_dynamic_cohorts(1, &target_properties, &cohorts).unwrap();
+        let result =
+            evaluate_dynamic_cohorts(1, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
         assert!(!result, "User without @example.com email should NOT match");
 
         // Test case 4: User with excluded term but wrong domain
         // Should NOT match because: regex doesn't match (regardless of negation)
         target_properties.insert("email".to_string(), json!("excluded.user@other.com"));
 
-        let result = evaluate_dynamic_cohorts(1, &target_properties, &cohorts).unwrap();
+        let result =
+            evaluate_dynamic_cohorts(1, &target_properties, &cohorts, &static_cohort_matches)
+                .unwrap();
         assert!(
             !result,
             "User with wrong domain should NOT match regardless of exclusion"

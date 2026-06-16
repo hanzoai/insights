@@ -27,6 +27,8 @@ import {
 } from '~/types'
 
 import { ThemeName } from '../dataThemeLogic'
+import { coreEventsConfigurationDescriber } from './core_events_config/coreEventsConfigurationDescriber'
+import { customerAnalyticsConfigurationDescriber } from './customer_analytics_config/customerAnalyticsConfigurationDescriber'
 import { marketingAnalyticsConfigurationDescriber } from './marketing_analytics_config/marketingAnalyticsConfigurationDescriber'
 import { revenueAnalyticsConfigurationDescriber } from './revenue_analytics_config/revenueAnalyticsConfigurationDescriber'
 
@@ -96,7 +98,7 @@ function createArrayChangeHandler(
             return null
         }
 
-        const array = change.after as any[]
+        const array = (change.after || []) as any[]
         const displayArray = map ? array.map(map).filter(Boolean) : array
         const fieldNameElement = useEmphasis ? <em>{fieldName}</em> : fieldName
 
@@ -119,7 +121,7 @@ function createSimpleValueHandler(fieldName: string, options: { useEmphasis?: bo
             return null
         }
 
-        const valueElement = useEmphasis ? <em>{change.after}</em> : change.after
+        const valueElement = useEmphasis ? <em>{String(change.after)}</em> : change.after
         return {
             description: [
                 <>
@@ -142,7 +144,7 @@ function createFixedVerbValueHandler(
             return null
         }
 
-        const valueElement = useEmphasis ? <em>{change.after}</em> : change.after
+        const valueElement = useEmphasis ? <em>{String(change.after)}</em> : change.after
         return {
             description: [
                 <>
@@ -402,9 +404,15 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         return { description: descriptions }
     },
 
+    // Logs
+    logs_settings: () => {
+        return { description: [<>updated logs settings</>] }
+    },
+
     // Feature flag confirmation config
     feature_flag_confirmation_enabled: createBooleanToggleHandler('feature flag confirmation'),
     feature_flag_confirmation_message: createSimpleValueHandler('feature flag confirmation message'),
+    default_evaluation_contexts_enabled: createBooleanToggleHandler('default evaluation contexts'),
 
     // Autocapture
     autocapture_exceptions_errors_to_ignore: createArrayChangeHandler('autocapture exceptions errors to ignore'),
@@ -426,6 +434,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     anonymize_ips: createBooleanToggleHandler('anonymizing IP addresses'),
     slack_incoming_webhook: createSimpleValueHandler('Slack incoming webhook'),
     timezone: createSimpleValueHandler('timezone', { useEmphasis: true }),
+    business_model: createSimpleValueHandler('business model'),
     data_attributes: createArrayChangeHandler('data attributes'),
     live_events_columns: createArrayChangeHandler('live events columns'),
     app_urls: createArrayChangeHandler('app URLs'),
@@ -433,6 +442,8 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     person_display_name_properties: createArrayChangeHandler('person display name properties'),
     person_on_events_querying_enabled: createBooleanToggleHandler('querying person on events'),
     human_friendly_comparison_periods: createBooleanToggleHandler('human friendly comparison periods'),
+    receive_org_level_activity_logs: createBooleanToggleHandler('organization-level activity logs'),
+    require_evaluation_contexts: createBooleanToggleHandler('require evaluation context tags'),
     test_account_filters: (change) => {
         // change.after is an array of property filters
         // change.before is an array o property filters
@@ -572,7 +583,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
                 <>
                     {change.action === 'created' ? 'set' : 'changed'} the <em>primary dashboard</em> to{' '}
                     <Link to={urls.dashboard(change.after as number)}>
-                        <em>{change.after}</em>
+                        <em>{String(change.after)}</em>
                     </Link>
                 </>,
             ],
@@ -584,7 +595,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
                 <>
                     {change.after ? 'enabled' : 'disabled'}{' '}
                     <Link
-                        to="https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                        to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
                         target="_blank"
                     >
                         flag persistence
@@ -679,7 +690,7 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
         ) {
             descriptions.push(
                 <>
-                    set <em>excluded person properties</em> to{' '}
+                    set <em>excluded user properties</em> to{' '}
                     <code>{after.excluded_person_property_names.join(', ')}</code>
                 </>
             )
@@ -709,8 +720,16 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     },
 
     // Complex configs that require a custom describer
+    customer_analytics_config: customerAnalyticsConfigurationDescriber,
     marketing_analytics_config: marketingAnalyticsConfigurationDescriber,
     revenue_analytics_config: revenueAnalyticsConfigurationDescriber,
+    core_events_config: coreEventsConfigurationDescriber,
+
+    // Conversations
+    conversations_enabled: createBooleanToggleHandler('conversations'),
+    conversations_settings: () => {
+        return { description: [<>updated conversations settings</>] }
+    },
 
     // should never come from the backend
     created_at: () => null,
@@ -729,10 +748,13 @@ const TEAM_PROPERTIES_MAPPING: Record<keyof TeamType, (change: ActivityChange) =
     effective_membership_level: () => null,
     default_modifiers: () => null,
     is_demo: () => null,
-    access_control: () => null,
     has_group_types: () => null,
     web_analytics_pre_aggregated_tables_enabled: () => null,
     web_analytics_pre_aggregated_tables_version: () => null,
+    experiment_recalculation_time: () => null,
+    default_experiment_confidence_level: () => null,
+    default_experiment_stats_method: () => null,
+    managed_viewsets: () => null,
 }
 
 function nameAndLink(logItem?: ActivityLogItem): JSX.Element {
@@ -781,7 +803,7 @@ export function teamActivityDescriber(logItem: ActivityLogItem, asNotification?:
                 description: (
                     <SentenceList
                         listParts={changes}
-                        prefix={<strong>{userNameForLogItem(logItem)}</strong>}
+                        prefix={<strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong>}
                         suffix={changeSuffix}
                     />
                 ),

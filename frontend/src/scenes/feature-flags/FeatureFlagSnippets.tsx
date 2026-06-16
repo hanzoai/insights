@@ -122,7 +122,7 @@ export function PHPSnippet({
     localEvaluation,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHog::'
+    const clientSuffix = 'Insights::'
 
     const flagFunction = multivariant ? 'getFeatureFlag' : 'isFeatureEnabled'
 
@@ -206,21 +206,21 @@ remoteConfigPayload, err := ${clientSuffix}GetRemoteConfigPayload("${flagKey}")`
             ? `
     // add group properties used in the flag to ensure the flag
     // is evaluated locally, vs. going to our servers
-    groupProperties: map[string]Properties{"${groupType.group_type}": posthog.NewProperties().Set("${propertyName}", "value").Set("name", "xyz")}`
+    groupProperties: map[string]Properties{"${groupType.group_type}": insights.NewProperties().Set("${propertyName}", "value").Set("name", "xyz")}`
             : `
     // add person properties used in the flag to ensure the flag
     // is evaluated locally, vs. going to our servers
-    PersonProperties: posthog.NewProperties().Set("${propertyName}", "value")`
+    PersonProperties: insights.NewProperties().Set("${propertyName}", "value")`
         : ''
 
     const flagSnippet = groupType
-        ? `${clientSuffix}${flagFunction}(posthog.FeatureFlagPayload{
+        ? `${clientSuffix}${flagFunction}(insights.FeatureFlagPayload{
         Key:        "${flagKey}",
         DistinctId: "distinct-id",
         Groups:     Groups{'${groupType.group_type}': '<${groupType.name_singular || 'group'} ID>'},${localEvalAddition}
     }
 )`
-        : `${clientSuffix}${flagFunction}(posthog.FeatureFlagPayload{
+        : `${clientSuffix}${flagFunction}(insights.FeatureFlagPayload{
     Key:        '${flagKey}',
     DistinctId: "distinct-id",${localEvalAddition}
 })`
@@ -253,7 +253,7 @@ export function RubySnippet({
     encryptedPayload,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'posthog.'
+    const clientSuffix = 'insights.'
     const flagFunction = payload ? 'get_feature_flag_payload' : multivariant ? 'get_feature_flag' : 'is_feature_enabled'
 
     const propertyName = samplePropertyName || 'is_authorized'
@@ -265,7 +265,7 @@ export function RubySnippet({
             <>
                 <CodeSnippet language={Language.Ruby} wrap>
                     {`${reminder}
-remote_config_payload = posthog.get_remote_config_payload('${flagKey}')`}
+remote_config_payload = insights.get_remote_config_payload('${flagKey}')`}
                 </CodeSnippet>
             </>
         )
@@ -326,7 +326,7 @@ export function PythonSnippet({
     encryptedPayload,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'posthog.'
+    const clientSuffix = 'insights.'
     const flagFunction = payload ? 'get_feature_flag_payload' : multivariant ? 'get_feature_flag' : 'feature_enabled'
 
     const propertyName = samplePropertyName || 'is_authorized'
@@ -338,7 +338,7 @@ export function PythonSnippet({
             <>
                 <CodeSnippet language={Language.Python} wrap>
                     {`${reminder}
-remote_config_payload = posthog.get_remote_config_payload('${flagKey}')`}
+remote_config_payload = insights.get_remote_config_payload('${flagKey}')`}
                 </CodeSnippet>
             </>
         )
@@ -399,7 +399,7 @@ export function CSharpSnippet({
     encryptedPayload,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'posthog.'
+    const clientSuffix = 'insights.'
     const flagFunction = payload
         ? 'GetFeatureFlagAsync'
         : multivariant
@@ -415,7 +415,7 @@ export function CSharpSnippet({
             <>
                 <CodeSnippet language={Language.CSharp} wrap>
                     {`${reminder}
-var remoteConfigPayload = await posthog.GetRemoteConfigPayloadAsync("${flagKey}");`}
+var remoteConfigPayload = await insights.GetRemoteConfigPayloadAsync("${flagKey}");`}
                 </CodeSnippet>
             </>
         )
@@ -484,8 +484,33 @@ if (${conditional}) {
     )
 }
 
+export function JavaSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
+    const distinctId = 'user distinct id'
+    let snippet = ''
+    if (payload) {
+        snippet = `insights.getFeatureFlagPayload("${distinctId}", "${flagKey}")`
+    } else if (multivariant) {
+        snippet = `Object flagValue = insights.getFeatureFlag("${distinctId}", "${flagKey}");
+if ("example-variant".equals(flagValue)) {
+    // Do something differently for this user
+}`
+    } else {
+        snippet = `if (insights.isFeatureEnabled("${distinctId}", "${flagKey}")) {
+    // Do something differently for this user
+}`
+    }
+
+    return (
+        <>
+            <CodeSnippet language={Language.Java} wrap>
+                {snippet}
+            </CodeSnippet>
+        </>
+    )
+}
+
 export function AndroidSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHog.'
+    const clientSuffix = 'Insights.'
 
     if (payload) {
         return (
@@ -509,7 +534,7 @@ export function AndroidSnippet({ flagKey, multivariant, payload }: FeatureFlagSn
 }
 
 export function FlutterSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'await Posthog().'
+    const clientSuffix = 'await Insights().'
 
     if (payload) {
         return (
@@ -534,7 +559,7 @@ export function FlutterSnippet({ flagKey, multivariant, payload }: FeatureFlagSn
 }
 
 export function iOSSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHogSDK.shared.'
+    const clientSuffix = 'InsightsSDK.shared.'
 
     if (payload) {
         return (
@@ -557,7 +582,7 @@ export function iOSSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippe
 }
 
 export function ReactNativeSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'posthog.'
+    const clientSuffix = 'insights.'
 
     if (payload) {
         return (
@@ -573,7 +598,7 @@ export function ReactNativeSnippet({ flagKey, multivariant, payload }: FeatureFl
     return (
         <CodeSnippet language={Language.JSX} wrap>
             {`// With a hook
-import { useFeatureFlag } from 'posthog-react-native'
+import { useFeatureFlag } from 'insights-react-native'
 
 const MyComponent = () => {
     const showFlaggedFeature = useFeatureFlag('${flagKey}')
@@ -606,7 +631,7 @@ export function ReactSnippet({ flagKey, multivariant, payload }: FeatureFlagSnip
     return (
         <CodeSnippet language={Language.JSX} wrap>
             {`
-import { ${flagFunction} } from 'posthog-js/react'
+import { ${flagFunction} } from '@hanzo/insights/react'
 
 function App() {
     const ${variable} = ${flagFunction}('${flagKey}')
@@ -668,7 +693,7 @@ export function JSSnippet({
         return (
             <>
                 <CodeSnippet language={Language.JavaScript} wrap>
-                    {`posthog.getFeatureFlagPayload('${flagKey ?? ''}')`}
+                    {`insights.getFeatureFlagPayload('${flagKey ?? ''}')`}
                 </CodeSnippet>
             </>
         )
@@ -678,8 +703,8 @@ export function JSSnippet({
 
     const propertyOverrideSnippet = `// Your flag depends on properties that are not instantly available. If you want
 // to make them available without waiting for server delays, send these properties for flag evaluation, like so:
-// Make sure to call this before evaluating flags. More info: https://posthog.com/docs/libraries/js#overriding-server-properties 
-posthog.${
+// Make sure to call this before evaluating flags. More info: https://hanzo.ai/docs/libraries/js/usage#overriding-server-properties 
+insights.${
         groupType
             ? `setGroupPropertiesForFlags({ '${groupType.group_type}': {'${propertyName}': 'value'}})`
             : `setPersonPropertiesForFlags({'${propertyName}': 'value'})`
@@ -687,7 +712,7 @@ posthog.${
 
 `
 
-    const clientSuffix = 'posthog.'
+    const clientSuffix = 'insights.'
     const flagFunction = multivariant ? 'getFeatureFlag' : 'isFeatureEnabled'
 
     const variantSuffix = multivariant ? ` == 'example-variant'` : ''
@@ -715,16 +740,16 @@ if (${clientSuffix}${flagFunction}('${flagKey ?? ''}') ${variantSuffix}) {
 export function JSBootstrappingSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript} wrap>
-            {`// Initialise the posthog library with a distinct ID and feature flags for immediate loading
+            {`// Initialise the insights library with a distinct ID and feature flags for immediate loading
 // This avoids the delay between the library loading and feature flags becoming available to use.
 
-posthog.init('{project_api_key}', {
+insights.init('{project_api_key}', {
     api_host: '${apiHostOrigin()}'
     bootstrap:
     {
         distinctID: 'your-anonymous-id',
         featureFlags: {
-    // input the flag values here from 'posthog.getAllFlags(distinct_id)' which you can find in the server-side libraries.
+    // input the flag values here from 'insights.getAllFlags(distinct_id)' which you can find in the server-side libraries.
         // example:
             // 'flag-1': true,
             // 'variant-flag': 'control',

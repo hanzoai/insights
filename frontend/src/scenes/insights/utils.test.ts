@@ -259,7 +259,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown_type: 'event',
             breakdown_histogram_bin_count: 10,
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
             'Other (i.e. all remaining values)'
         )
     })
@@ -270,7 +270,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown_type: 'event',
             breakdown_histogram_bin_count: 10,
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
             'None (i.e. no value)'
         )
     })
@@ -314,7 +314,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown: 'demographic',
             breakdown_type: 'event',
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
             'Other (i.e. all remaining values)'
         )
     })
@@ -324,9 +324,25 @@ describe('formatBreakdownLabel()', () => {
             breakdown: 'demographic',
             breakdown_type: 'event',
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
             'None (i.e. no value)'
         )
+    })
+
+    it.each([
+        ['exactly 200 chars is not truncated', 'a'.repeat(200), 'a'.repeat(200)],
+        ['201 chars is truncated with ellipsis', 'b'.repeat(201), 'b'.repeat(200) + '…'],
+        [
+            'very long HTML error page is truncated',
+            '<html>' + 'x'.repeat(22000) + '</html>',
+            '<html>' + 'x'.repeat(194) + '…',
+        ],
+    ])('truncates long breakdown labels: %s', (_desc, input, expected) => {
+        const breakdownFilter: BreakdownFilter = {
+            breakdown: 'error_message',
+            breakdown_type: 'event',
+        }
+        expect(formatBreakdownLabel(input, breakdownFilter, [], identity)).toEqual(expected)
     })
 
     it('handles multi-breakdowns', () => {
@@ -473,6 +489,25 @@ describe('formatBreakdownLabel()', () => {
         expect(formatBreakdownLabel(['661', '662'], breakdownFilter3, undefined, formatter, 0)).toEqual('661::662')
         expect(formatter).toHaveBeenNthCalledWith(1, 'name', 661, 'group', 0)
         expect(formatter).toHaveBeenNthCalledWith(2, 'test', 662, 'group', 1)
+    })
+
+    it('handles breakdown cohort that has no breakdown_type', () => {
+        const breakdownFilter: BreakdownFilter = {
+            breakdowns: [
+                {
+                    property: 1,
+                    type: 'cohort',
+                },
+                {
+                    property: 5,
+                    type: 'cohort',
+                },
+            ],
+        }
+        const multipleBreakdownIndex = 1
+        expect(
+            formatBreakdownLabel(cohort.id, breakdownFilter, [cohort as any], identity, multipleBreakdownIndex)
+        ).toEqual(cohort.name)
     })
 })
 

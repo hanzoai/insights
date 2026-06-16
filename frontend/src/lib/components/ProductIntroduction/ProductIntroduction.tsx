@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import { IconOpenSidebar, IconPlus, IconX } from '@posthog/icons'
+import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { cn } from 'lib/utils/css-classes'
 import { userLogic } from 'scenes/userLogic'
 
-import { ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderHog3, DetectiveHog } from '../hedgehogs'
+import { BuilderMascot3, DetectiveMascot } from '../mascots'
 
 /**
  * A component to introduce new users to a product, and to show something
@@ -30,10 +30,11 @@ export type ProductIntroductionProps = {
     isEmpty?: boolean
     /** The action to take when the user clicks the CTA */
     action?: () => void
+    disabledReason?: string
     /** If you want to provide a custom action button instead of using the default one */
     actionElementOverride?: JSX.Element
     docsURL?: string
-    customHog?: React.ComponentType<{ className?: string }>
+    customInsights?: React.ComponentType<{ className?: string }>
     className?: string
 }
 
@@ -45,9 +46,10 @@ export const ProductIntroduction = ({
     titleOverride,
     isEmpty,
     action,
+    disabledReason,
     actionElementOverride,
     docsURL,
-    customHog: CustomHog,
+    customInsights: CustomInsights,
     className,
 }: ProductIntroductionProps): JSX.Element | null => {
     const { updateHasSeenProductIntroFor } = useActions(userLogic)
@@ -87,12 +89,12 @@ export const ProductIntroduction = ({
             <div className="flex items-center gap-8 w-full justify-center">
                 <div>
                     <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        {CustomHog ? (
-                            <CustomHog className="w-full h-full" />
+                        {CustomInsights ? (
+                            <CustomInsights className="w-full h-full" />
                         ) : actionable ? (
-                            <BuilderHog3 className="w-full h-full" />
+                            <BuilderMascot3 className="w-full h-full" />
                         ) : (
-                            <DetectiveHog className="w-full h-full" />
+                            <DetectiveMascot className="w-full h-full" />
                         )}
                     </div>
                 </div>
@@ -123,6 +125,7 @@ export const ProductIntroduction = ({
                                     action?.()
                                 }}
                                 data-attr={'create-' + thingName.replace(' ', '-').toLowerCase()}
+                                disabledReason={disabledReason}
                             >
                                 Create {thingName}
                             </LemonButton>

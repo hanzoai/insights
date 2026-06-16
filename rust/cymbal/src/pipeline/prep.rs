@@ -1,17 +1,19 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use chrono::{DateTime, Duration, Utc};
-use common_types::{CapturedEvent, ClickHouseEvent, PersonMode, RawEvent, Team};
+use common_types::{
+    format::{format_ch_datetime, parse_datetime_assuming_utc},
+    CapturedEvent, ClickHouseEvent, PersonMode, RawEvent, Team,
+};
 use serde_json::Value;
 
 use crate::{
     error::{EventError, PipelineFailure, PipelineResult},
     recursively_sanitize_properties, sanitize_string,
+    types::event::PropertiesContainer,
 };
 
-use super::{
-    exception::add_error_to_event, format_ch_timestamp, parse_ts_assuming_utc, IncomingEvent,
-};
+use super::IncomingEvent;
 
 // Adds team info, and folds set, set_once and ip address data into the event properties
 pub fn prepare_events(
@@ -63,14 +65,14 @@ pub fn prepare_events(
                 // the raw json object to a RawEvent indicates some pipeline error, and we should fail and
                 // take lag until it's fixed (so we return an UnhandledError here)
                 let raw_event: RawEvent =
-                    serde_json::from_value(raw_event).map_err(|e| (i, e.into()))?;
+                    serde_json::from_value(raw_event).map_err(|e| (i, Arc::new(e.into())))?;
 
                 // Bit of a mouthful, but basically, if the event has a timestamp, try to parse it,
                 // and store an event error if we can't. If the event has no timestamp, use the instant
                 // the event was captured.
                 let timestamp = match &raw_event.timestamp {
-                    Some(ts) => parse_ts_assuming_utc(ts),
-                    None => Ok(parse_ts_assuming_utc(&outer.now)
+                    Some(ts) => parse_datetime_assuming_utc(ts),
+                    None => Ok(parse_datetime_assuming_utc(&outer.now)
                         .expect("CapturedEvent::now is always valid")), // Set by capture, should always be valid
                 };
 
@@ -132,7 +134,7 @@ fn transform_event(
 
     let mut sent_at = outer
         .get_sent_at_as_rfc3339()
-        .map(|sa| parse_ts_assuming_utc(&sa).expect("sent_at is a valid datetime"));
+        .map(|sa| parse_datetime_assuming_utc(&sa).expect("sent_at is a valid datetime"));
 
     if raw_event
         .properties
@@ -143,7 +145,7 @@ fn transform_event(
         sent_at = None;
     }
 
-    let now = parse_ts_assuming_utc(&outer.now).expect("CapturedEvent::now is always valid");
+    let now = parse_datetime_assuming_utc(&outer.now).expect("CapturedEvent::now is always valid");
 
     let timestamp = resolve_timestamp(timestamp, sent_at, now, raw_event.offset);
 
@@ -162,8 +164,8 @@ fn transform_event(
                 .expect("Json data just deserialized can be serialized"),
         ),
         person_id: None,
-        timestamp: format_ch_timestamp(timestamp),
-        created_at: format_ch_timestamp(Utc::now()),
+        timestamp: format_ch_datetime(timestamp),
+        created_at: format_ch_datetime(Utc::now()),
         elements_chain: None, // TODO - we skip elements chain extraction for now, but should implement it eventually
         person_created_at: None,
         person_properties: None,
@@ -178,10 +180,13 @@ fn transform_event(
         group3_created_at: None,
         group4_created_at: None,
         person_mode,
+        captured_at: None,
+        historical_migration: None,
     };
 
     if timestamp_was_invalid {
-        add_error_to_event(&mut event, "Timestamp was future dated")
+        event
+            .attach_error("Timestamp was future dated".into())
             .expect("We can parse the raw event we just serialised")
     }
 
@@ -204,7 +209,7 @@ fn get_person_mode(raw_event: &RawEvent, team: &Team) -> PersonMode {
     }
 }
 
-// This function exists because of https://github.com/PostHog/posthog/blob/6c2f119571edb10a23ec711c6f6e2b6155d76ef9/plugin-server/src/worker/ingestion/timestamps.ts#L81.
+// This function exists because of https://github.com/hanzoai/insights/blob/6c2f119571edb10a23ec711c6f6e2b6155d76ef9/plugin-server/src/worker/ingestion/timestamps.ts#L81.
 // We specifically diverge by only filtering out timestamps dated in the future.
 pub fn resolve_timestamp(
     found_timestamp: DateTime<Utc>, // The instant the exception occurred, or was caught.

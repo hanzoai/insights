@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonSwitch, LemonSwitchProps } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonSwitch, LemonSwitchProps } from '@hanzo/lemon-ui'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -20,8 +20,12 @@ export function TestAccountFilterSwitch({ checked, onChange, ...props }: TestAcc
         <LemonSwitch
             id="test-account-filter"
             bordered
-            disabledReason={!hasFilters ? "You haven't set any internal test filters" : null}
             {...props}
+            disabledReason={
+                !hasFilters
+                    ? "You haven't set any internal test filters. Click the gear icon to configure."
+                    : props.disabledReason
+            }
             checked={checked}
             onChange={onChange}
             label={

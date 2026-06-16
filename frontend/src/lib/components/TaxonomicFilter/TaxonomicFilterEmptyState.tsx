@@ -2,17 +2,16 @@ import { useActions } from 'kea'
 import { router } from 'kea-router'
 import type React from 'react'
 
-import { IconOpenSidebar, IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconOpenSidebar, IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { ProductIntentContext } from 'lib/utils/product-intents'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { ProductKey } from '~/types'
+import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderHog3 } from '../hedgehogs'
+import { BuilderMascot3 } from '../mascots'
 
 type EmptyStateProps = {
     title: string
@@ -22,18 +21,18 @@ type EmptyStateProps = {
         text: string
     }
     docsUrl?: string
-    hog: React.ComponentType<{ className?: string }>
+    icon: React.ComponentType<{ className?: string }>
     groupType: TaxonomicFilterGroupType
 }
 
-const EmptyState = ({ title, description, action, docsUrl, hog: Hog, groupType }: EmptyStateProps): JSX.Element => {
+const EmptyState = ({ title, description, action, docsUrl, icon: Icon, groupType }: EmptyStateProps): JSX.Element => {
     const { push } = useActions(router)
     const { addProductIntentForCrossSell } = useActions(teamLogic)
 
     return (
         <div className="flex gap-4 items-center p-8 mt-4 w-full rounded">
             <div className="w-32 h-32">
-                <Hog className="w-full h-full" />
+                <Icon className="w-full h-full" />
             </div>
             <div className="flex-1 text-center">
                 <h2 className="text-lg font-semibold">{title}</h2>
@@ -79,13 +78,13 @@ const DataWarehouseEmptyState = (): JSX.Element => {
         <EmptyState
             title="Connect external data"
             groupType={TaxonomicFilterGroupType.DataWarehouse}
-            description="Use data warehouse sources to import data from your external data into PostHog."
+            description="Use data warehouse sources to import data from your external data into Insights."
             action={{
                 to: urls.dataWarehouseSourceNew(),
                 text: 'New source',
             }}
-            docsUrl="https://posthog.com/docs/data-warehouse"
-            hog={BuilderHog3}
+            docsUrl="https://hanzo.ai/docs/data-warehouse"
+            icon={BuilderMascot3}
         />
     )
 }

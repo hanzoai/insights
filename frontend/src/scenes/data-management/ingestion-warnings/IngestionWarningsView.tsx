@@ -1,21 +1,22 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { ReadingHog } from 'lib/components/hedgehogs'
+import { ReadingMascot } from 'lib/components/mascots'
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { Link } from 'lib/lemon-ui/Link'
+import { Scene } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
 
 import { IngestionWarning, IngestionWarningSummary, ingestionWarningsLogic } from './ingestionWarningsLogic'
 
@@ -31,6 +32,7 @@ const WARNING_TYPE_TO_DESCRIPTION = {
     replay_timestamp_too_far: 'Replay event timestamp was too far in the future',
     replay_message_too_large: 'Replay data was dropped because it was too large to ingest',
     set_on_exception: '$set or $set_once is ignored on exception events and should not be sent',
+    schema_validation_failed: 'Event rejected due to schema validation failure',
 }
 
 const WARNING_TYPE_RENDERER = {
@@ -116,7 +118,7 @@ const WARNING_TYPE_RENDERER = {
                     {details.timestamp ? <li>Client provided timestamp: {details.timestamp}</li> : ''}
                     {details.sentAt ? <li>Client provided sent_at: {details.sentAt}</li> : ''}
                     {details.offset ? <li>Client provided time offset: {details.offset}</li> : ''}
-                    <li>PostHog server capture time: {details.now}</li>
+                    <li>Insights server capture time: {details.now}</li>
                 </ul>
             </>
         )
@@ -245,6 +247,43 @@ const WARNING_TYPE_RENDERER = {
             </>
         )
     },
+    schema_validation_failed: function Render(warning: IngestionWarning): JSX.Element {
+        const details = warning.details as {
+            eventUuid: string
+            eventName: string
+            distinctId: string
+            errors: Array<{
+                property: string
+                reason: 'missing_required' | 'type_mismatch'
+                expectedTypes?: string[]
+                actualValue?: string
+            }>
+        }
+        return (
+            <>
+                Event <strong>{details.eventName}</strong> was rejected because it failed schema validation for
+                distinct_id <Link to={urls.personByDistinctId(details.distinctId)}>{details.distinctId}</Link> (event
+                uuid: <code>{details.eventUuid}</code>):
+                <ul>
+                    {details.errors.map((error, index) => (
+                        <li key={index}>
+                            {error.reason === 'missing_required' ? (
+                                <>
+                                    Required property <code>{error.property}</code> is missing
+                                </>
+                            ) : (
+                                <>
+                                    Property <code>{error.property}</code> has invalid type (expected{' '}
+                                    {error.expectedTypes?.join(' or ')}, got{' '}
+                                    <code>{error.actualValue ?? 'unknown'}</code>)
+                                </>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </>
+        )
+    },
 }
 
 export function IngestionWarningsView(): JSX.Element {
@@ -255,13 +294,12 @@ export function IngestionWarningsView(): JSX.Element {
     return (
         <SceneContent data-attr="manage-events-table">
             <SceneTitleSection
-                name="Ingestion warnings"
-                description="Data ingestion related warnings from past 30 days."
+                name={sceneConfigurations[Scene.IngestionWarnings].name}
+                description={sceneConfigurations[Scene.IngestionWarnings].description}
                 resourceType={{
-                    type: 'ingestion_warning',
+                    type: sceneConfigurations[Scene.IngestionWarnings].iconType || 'default_icon_type',
                 }}
             />
-            <SceneDivider />
             <SceneSection>
                 <LemonInput
                     fullWidth
@@ -283,7 +321,7 @@ export function IngestionWarningsView(): JSX.Element {
                                     <>
                                         {type} (
                                         <Link
-                                            to={`https://posthog.com/docs/data#${type
+                                            to={`https://hanzo.ai/docs/data#${type
                                                 .toLowerCase()
                                                 .replace(',', '')
                                                 .split(' ')
@@ -334,8 +372,8 @@ export function IngestionWarningsView(): JSX.Element {
                     productKey={ProductKey.INGESTION_WARNINGS}
                     isEmpty={true}
                     description="Nice! You've had no ingestion warnings in the past 30 days. If we detect any issues with your data, we'll show them here."
-                    docsURL="https://posthog.com/docs/data/data-management#ingestion-warnings"
-                    customHog={ReadingHog}
+                    docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
+                    customInsights={ReadingMascot}
                 />
             )}
         </SceneContent>

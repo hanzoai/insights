@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconChevronRight } from '@posthog/icons'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { Popover } from 'lib/lemon-ui/Popover'
 

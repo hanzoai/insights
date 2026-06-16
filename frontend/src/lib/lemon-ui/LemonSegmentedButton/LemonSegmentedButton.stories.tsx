@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
-import { IconBook, IconCalculator, IconCalendar, IconGear } from '@posthog/icons'
+import { IconBook, IconCalculator, IconCalendar, IconGear } from '@hanzo/icons'
 
 import { LemonSegmentedButton, LemonSegmentedButtonOption, LemonSegmentedButtonProps } from './LemonSegmentedButton'
 
@@ -55,4 +55,9 @@ FullWidth.args = {
 export const Small: Story = Template.bind({})
 Small.args = {
     size: 'small',
+}
+
+export const Disabled: Story = Template.bind({})
+Disabled.args = {
+    disabledReason: 'Choose a chart type first.',
 }

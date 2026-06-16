@@ -25,7 +25,7 @@ export type WebVitalsMetricsResponse = {
 export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
     path(['toolbar', 'web-vitals', 'webVitalsToolbarLogic']),
     connect(() => ({
-        values: [toolbarConfigLogic, ['posthog']],
+        values: [toolbarConfigLogic, ['insights']],
     })),
     actions({
         getWebVitals: true,
@@ -62,7 +62,7 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
                     // If web vitals autocapture is disabled, we don't want to fetch the data
                     // because it's likely we won't have any data
                     if (
-                        !values.posthog?.webVitalsAutocapture?.isEnabled &&
+                        !values.insights?.webVitalsAutocapture?.isEnabled &&
                         !inStorybook() &&
                         !inStorybookTestRunner()
                     ) {
@@ -105,10 +105,8 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
         },
     })),
 
-    afterMount(({ values, actions }) => {
-        // Listen to posthog events and capture them
-        // Guarantee that we won't even attempt to show web vitals data if the feature is disabled
-        if (!values.posthog?.webVitalsAutocapture?.isEnabled && !inStorybook() && !inStorybookTestRunner()) {
+    afterMount(({ values, actions, cache }) => {
+        if (!values.insights?.webVitalsAutocapture?.isEnabled && !inStorybook() && !inStorybookTestRunner()) {
             actions.nullifyLocalWebVitals()
         } else {
             const METRICS_AND_PROPERTIES: Record<WebVitalsMetric, string> = {
@@ -118,19 +116,20 @@ export const webVitalsToolbarLogic = kea<webVitalsToolbarLogicType>([
                 INP: '$web_vitals_INP_value',
             }
 
-            values.posthog?.on('eventCaptured', (event) => {
-                if (event.event === '$web_vitals') {
-                    for (const [metric, property] of Object.entries(METRICS_AND_PROPERTIES)) {
-                        const value = event.properties[property]
-                        if (value !== undefined) {
-                            actions.setLocalWebVital(metric as WebVitalsMetric, value)
+            cache.disposables.add(() => {
+                return values.insights?.on('eventCaptured', (event) => {
+                    if (event.event === '$web_vitals') {
+                        for (const [metric, property] of Object.entries(METRICS_AND_PROPERTIES)) {
+                            const value = event.properties[property]
+                            if (value !== undefined) {
+                                actions.setLocalWebVital(metric as WebVitalsMetric, value)
+                            }
                         }
                     }
-                }
-            })
+                })
+            }, 'insightsEventListener')
         }
 
-        // Collect the web vitals metrics from the server when the page is loaded
         actions.getWebVitals()
     }),
     permanentlyMount(),

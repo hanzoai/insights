@@ -1,13 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton, LemonTag, LemonTextArea } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonTag, LemonTextArea } from '@hanzo/lemon-ui'
 
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { NotebookNodeProps, NotebookNodeType } from 'scenes/notebooks/types'
 
-import { tasksLogic } from 'products/tasks/frontend/tasksLogic'
+import { tasksLogic } from 'products/tasks/frontend/logics/tasksLogic'
+import { tasksLogicType } from 'products/tasks/frontend/logics/tasksLogicType'
 import { OriginProduct, TaskUpsertProps } from 'products/tasks/frontend/types'
 
 import { notebookNodeLogic } from './notebookNodeLogic'
@@ -19,7 +20,7 @@ type NotebookNodeTaskCreateAttributes = {
 }
 
 function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttributes>): JSX.Element | null {
-    const { createTask } = useActions(tasksLogic)
+    const { createTask } = useActions<tasksLogicType>(tasksLogic)
     const { expanded } = useValues(notebookNodeLogic)
     const [title, setTitle] = useState<string>(attributes.title || '')
     const [description, setDescription] = useState<string>(attributes.description || '')
@@ -30,7 +31,7 @@ function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttri
             description: description,
             origin_product: OriginProduct.SESSION_SUMMARIES,
         }
-        createTask(payload)
+        createTask({ data: payload })
     }
 
     const parsedSeverity =
@@ -71,7 +72,7 @@ function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttri
     )
 }
 
-export const NotebookNodeTaskCreate = createPostHogWidgetNode<NotebookNodeTaskCreateAttributes>({
+export const NotebookNodeTaskCreate = createInsightsWidgetNode<NotebookNodeTaskCreateAttributes>({
     nodeType: NotebookNodeType.TaskCreate,
     titlePlaceholder: 'Suggested task',
     startExpanded: false,

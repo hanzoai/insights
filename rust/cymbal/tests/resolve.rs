@@ -10,13 +10,14 @@ use cymbal::{
         caching::{Caching, SymbolSetCache},
         chunk_id::OrChunkId,
         hermesmap::HermesMapProvider,
+        proguard::ProguardProvider,
         sourcemap::{OwnedSourceMapCache, SourcemapProvider},
         Catalog, Fetcher, Parser,
     },
     types::{RawErrProps, Stacktrace},
 };
 use httpmock::MockServer;
-use posthog_symbol_data::{read_symbol_data, SourceAndMap};
+use insights_symbol_data::{read_symbol_data, SourceAndMap};
 use symbolic::sourcemapcache::SourcePosition;
 use tokio::sync::Mutex;
 
@@ -121,7 +122,11 @@ async fn end_to_end_resolver_test() {
         inner: HermesMapProvider {},
     };
 
-    let catalog = Catalog::new(Caching::new(wrapped, cache), hmp);
+    let pgp = NoOpChunkIdFetcher {
+        inner: ProguardProvider {},
+    };
+
+    let catalog = Catalog::new(Caching::new(wrapped, cache), hmp, pgp);
 
     let mut resolved_frames = Vec::new();
     for frame in test_stack {

@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { ApiMethodOptions, PaginatedResponse } from 'lib/api'
 
@@ -26,12 +26,21 @@ export const externalDataSourcesLogic = kea<externalDataSourcesLogicType>([
                     const methodOptions: ApiMethodOptions = {
                         signal: cache.abortController.signal,
                     }
-                    const res = await api.externalDataSources.list(methodOptions)
-                    breakpoint()
+                    try {
+                        const res = await api.externalDataSources.list(methodOptions)
+                        breakpoint()
 
-                    cache.abortController = null
+                        cache.abortController = null
 
-                    return res
+                        return res
+                    } catch (error: any) {
+                        // On 403, return empty result instead of failing - user doesn't have access
+                        if (error.status === 403) {
+                            cache.abortController = null
+                            return { results: [], count: 0, next: null, previous: null }
+                        }
+                        throw error
+                    }
                 },
                 updateSource: async (source: ExternalDataSource) => {
                     const updatedSource = await api.externalDataSources.update(source.id, source)

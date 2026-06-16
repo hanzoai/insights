@@ -3,9 +3,9 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconCode } from '@posthog/icons'
-import { LemonModal } from '@posthog/lemon-ui'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCode } from '@hanzo/icons'
+import { LemonModal } from '@hanzo/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
@@ -14,8 +14,8 @@ import { TZLabel } from 'lib/components/TZLabel'
 import { PaginationControl, usePagination } from 'lib/lemon-ui/PaginationControl'
 import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 
-import { multitabEditorLogic } from './multitabEditorLogic'
 import { queryHistoryLogic } from './queryHistoryLogic'
+import { sqlEditorLogic } from './sqlEditorLogic'
 
 function QueryHistoryLogRow({ logItem }: { logItem: HumanizedActivityLogItem }): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
@@ -88,7 +88,7 @@ function QueryDiffViewer({ before, after }: QueryDiffViewerProps): JSX.Element {
                 key="diff-viewer"
                 original={before?.query ?? ''}
                 modified={after?.query ?? ''}
-                language="hogQL"
+                language="insightsQL"
                 width={width}
                 options={{
                     renderOverviewRuler: false,
@@ -138,9 +138,9 @@ function QueryHistoryLog({ id }: { id?: number | string }): JSX.Element {
 }
 
 export function QueryHistoryModal(): JSX.Element {
-    const { isHistoryModalOpen } = useValues(multitabEditorLogic)
-    const { closeHistoryModal } = useActions(multitabEditorLogic)
-    const { editingView } = useValues(multitabEditorLogic)
+    const { isHistoryModalOpen } = useValues(sqlEditorLogic)
+    const { closeHistoryModal } = useActions(sqlEditorLogic)
+    const { editingView } = useValues(sqlEditorLogic)
 
     return (
         <LemonModal title="View history" isOpen={isHistoryModalOpen} onClose={closeHistoryModal} width={800}>

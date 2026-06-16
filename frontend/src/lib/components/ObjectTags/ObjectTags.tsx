@@ -2,15 +2,11 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { CSSProperties, useMemo } from 'react'
 
-import { IconPencil, IconPlus } from '@posthog/icons'
-import { LemonInputSelect, LemonTag, LemonTagType } from '@posthog/lemon-ui'
+import { IconPencil, IconPlus } from '@hanzo/icons'
+import { LemonInputSelect, LemonTag, LemonTagType } from '@hanzo/lemon-ui'
 
 import { objectTagsLogic } from 'lib/components/ObjectTags/objectTagsLogic'
 import { colorForString } from 'lib/utils'
-
-import { AvailableFeature } from '~/types'
-
-import { upgradeModalLogic } from '../UpgradeModal/upgradeModalLogic'
 
 interface ObjectTagsPropsBase {
     tags: string[]
@@ -60,7 +56,6 @@ export function ObjectTags({
 }: ObjectTagsProps): JSX.Element {
     const objectTagId = useMemo(() => uniqueMemoizedIndex++, [])
     const logic = objectTagsLogic({ id: objectTagId, onChange })
-    const { guardAvailableFeature } = useValues(upgradeModalLogic)
     const { editingTags } = useValues(logic)
     const { setEditingTags, setTags } = useActions(logic)
 
@@ -70,19 +65,13 @@ export function ObjectTags({
         style.color = 'var(--color-text-secondary)'
     }
 
-    const onGuardClick = (callback: () => void): void => {
-        guardAvailableFeature(AvailableFeature.TAGGING, () => {
-            callback()
-        })
-    }
-
-    const hasTags = tagsAvailable && tagsAvailable.length > 0
+    const hasTags = tags && tags.length > 0
 
     return (
         <div
             // eslint-disable-next-line react/forbid-dom-props
             style={style}
-            className={clsx(className, 'inline-flex flex-wrap deprecated-space-x-1 items-center')}
+            className={clsx(className, 'inline-flex flex-wrap gap-0.5 items-center')}
             data-attr={dataAttr}
         >
             {editingTags ? (
@@ -100,6 +89,7 @@ export function ObjectTags({
                     data-attr="new-tag-input"
                     placeholder='try "official"'
                     autoFocus
+                    popoverClassName="click-outside-block"
                 />
             ) : (
                 <>
@@ -118,11 +108,7 @@ export function ObjectTags({
                         <span className="inline-flex font-normal">
                             <LemonTag
                                 type="none"
-                                onClick={() =>
-                                    onGuardClick(() => {
-                                        setEditingTags(true)
-                                    })
-                                }
+                                onClick={() => setEditingTags(true)}
                                 data-attr="button-add-tag"
                                 icon={hasTags ? <IconPencil /> : <IconPlus />}
                                 className="border border-dashed"

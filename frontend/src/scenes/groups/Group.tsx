@@ -1,12 +1,9 @@
-import { useActions, useValues } from 'kea'
+import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
-import { PageHeader } from 'lib/components/PageHeader'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
-import { TZLabel } from 'lib/components/TZLabel'
 import { isEventFilter } from 'lib/components/UniversalFilters/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -15,9 +12,11 @@ import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { Link } from 'lib/lemon-ui/Link'
 import { Spinner, SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { capitalizeFirstLetter } from 'lib/utils'
 import { GroupLogicProps, groupLogic } from 'scenes/groups/groupLogic'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from 'scenes/notebooks/types'
+import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
 import { RelatedFeatureFlags } from 'scenes/persons/RelatedFeatureFlags'
 import { SceneExport } from 'scenes/sceneTypes'
 import { SessionRecordingsPlaylist } from 'scenes/session-recordings/playlist/SessionRecordingsPlaylist'
@@ -25,22 +24,28 @@ import { filtersFromUniversalFilterGroups } from 'scenes/session-recordings/util
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { groupsModel } from '~/models/groupsModel'
 import { Query } from '~/queries/Query/Query'
-import type { ActionFilter, Group } from '~/types'
+import type { ActionFilter } from '~/types'
 import {
     ActivityScope,
     FilterLogicalOperator,
     GroupsTabType,
-    Group as IGroup,
     PersonsTabType,
     PropertyDefinitionType,
     PropertyFilterType,
     PropertyOperator,
 } from '~/types'
 
+import { GroupProfileCanvas } from 'products/customer_analytics/frontend/components/GroupProfileCanvas'
+
 import { GroupOverview } from './GroupOverview'
 import { RelatedGroups } from './RelatedGroups'
 import { GroupNotebookCard } from './cards/GroupNotebookCard'
+import { GroupCaption } from './components/GroupCaption'
 
 export const scene: SceneExport<GroupLogicProps> = {
     component: Group,
@@ -51,50 +56,38 @@ export const scene: SceneExport<GroupLogicProps> = {
     }),
 }
 
-export function GroupCaption({ groupData, groupTypeName }: { groupData: IGroup; groupTypeName: string }): JSX.Element {
-    return (
-        <div className="flex items-center flex-wrap">
-            <div className="mr-4">
-                <span className="text-secondary">Type:</span> {groupTypeName}
-            </div>
-            <div className="mr-4">
-                <span className="text-secondary">Key:</span>{' '}
-                <CopyToClipboardInline
-                    tooltipMessage={null}
-                    description="group key"
-                    style={{ display: 'inline-flex', justifyContent: 'flex-end' }}
-                >
-                    {groupData.group_key}
-                </CopyToClipboardInline>
-            </div>
-            <div>
-                <span className="text-secondary">First seen:</span>{' '}
-                {groupData.created_at ? <TZLabel time={groupData.created_at} /> : 'unknown'}
-            </div>
-        </div>
-    )
-}
-
-export function Group(): JSX.Element {
+export function Group({ tabId }: { tabId?: string }): JSX.Element {
+    if (!tabId) {
+        throw new Error('GroupScene rendered with no tabId')
+    }
+    const mountedGroupLogic = useMountedLogic(groupLogic)
     const { logicProps, groupData, groupDataLoading, groupTypeName, groupType, groupTab, groupEventsQuery } =
-        useValues(groupLogic)
+        useValues(mountedGroupLogic)
     const { groupKey, groupTypeIndex } = logicProps
-    const { setGroupEventsQuery, editProperty, deleteProperty } = useActions(groupLogic)
+    const { setGroupEventsQuery, editProperty, deleteProperty } = useActions(mountedGroupLogic)
     const { currentTeam } = useValues(teamLogic)
     const { featureFlags } = useValues(featureFlagLogic)
+    const { aggregationLabel } = useValues(groupsModel)
 
     if (!groupData || !groupType) {
         return groupDataLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="group" />
     }
 
-    const settingLevel = featureFlags[FEATURE_FLAGS.ENVIRONMENTS] ? 'environment' : 'project'
+    const activeTab = groupTab ?? (featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] ? 'profile' : 'overview')
 
     return (
-        <>
-            <PageHeader
-                caption={<GroupCaption groupData={groupData} groupTypeName={groupTypeName} />}
-                buttons={
+        <SceneContent>
+            <SceneTitleSection
+                name={groupDisplayId(groupData.group_key, groupData.group_properties)}
+                resourceType={{ type: 'group' }}
+                forceBackTo={{
+                    name: capitalizeFirstLetter(aggregationLabel(groupTypeIndex).plural),
+                    key: 'groups',
+                    path: urls.groups(groupTypeIndex),
+                }}
+                actions={
                     <NotebookSelectButton
+                        size="small"
                         type="secondary"
                         resource={{
                             type: NotebookNodeType.Group,
@@ -106,16 +99,34 @@ export function Group(): JSX.Element {
                     />
                 }
             />
+            <GroupCaption groupData={groupData} groupTypeName={groupTypeName} />
+            <SceneDivider />
             <LemonTabs
-                activeKey={groupTab ?? 'overview'}
+                sceneInset
+                activeKey={activeTab}
                 onChange={(tab) => router.actions.push(urls.group(String(groupTypeIndex), groupKey, true, tab))}
                 tabs={[
+                    ...(featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS]
+                        ? [
+                              {
+                                  key: GroupsTabType.PROFILE,
+                                  label: <span data-attr="groups-profile-tab">Profile</span>,
+                                  content: (
+                                      <GroupProfileCanvas
+                                          group={groupData}
+                                          tabId={tabId}
+                                          attachTo={mountedGroupLogic}
+                                      />
+                                  ),
+                              },
+                          ]
+                        : []),
                     {
                         key: GroupsTabType.OVERVIEW,
                         label: <span data-attr="groups-overview-tab">Overview</span>,
                         content: <GroupOverview groupData={groupData} />,
                     },
-                    ...(featureFlags[FEATURE_FLAGS.CRM_ITERATION_ONE] && groupData.notebook
+                    ...(featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] && groupData.notebook
                         ? [
                               {
                                   key: GroupsTabType.NOTES,
@@ -159,8 +170,8 @@ export function Group(): JSX.Element {
                                 {!currentTeam?.session_recording_opt_in ? (
                                     <div className="mb-4">
                                         <LemonBanner type="info">
-                                            Session recordings are currently disabled for this {settingLevel}. To use
-                                            this feature, please go to your{' '}
+                                            Session recordings are currently disabled for this project. To use this
+                                            feature, please go to your{' '}
                                             <Link to={`${urls.settings('project')}#recordings`}>project settings</Link>{' '}
                                             and enable it.
                                         </LemonBanner>
@@ -191,7 +202,7 @@ export function Group(): JSX.Element {
                                                                     properties: [
                                                                         {
                                                                             key: `$group_${groupTypeIndex} = '${groupKey}'`,
-                                                                            type: 'hogql',
+                                                                            type: 'insightsql',
                                                                         },
                                                                     ],
                                                                 } as ActionFilter,
@@ -253,7 +264,7 @@ export function Group(): JSX.Element {
                                 id={`${groupTypeIndex}-${groupKey}`}
                                 caption={
                                     <LemonBanner type="info">
-                                        This page only shows changes made by users in the PostHog site. Automatic
+                                        This page only shows changes made by users in the Insights site. Automatic
                                         changes from the API aren't shown here.
                                     </LemonBanner>
                                 }
@@ -262,6 +273,6 @@ export function Group(): JSX.Element {
                     },
                 ]}
             />
-        </>
+        </SceneContent>
     )
 }

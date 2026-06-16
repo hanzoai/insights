@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 from django.apps import apps
 
-from posthog.models.integration import GitHubIntegration, Integration
+from insights.models.integration import GitHubIntegration, Integration
 
 
 class RepositoryContext:
@@ -230,7 +230,7 @@ async def _meets_smart_select_constraints(org: str, repo: str, constraints: dict
 
     if allowed_repos:
         repo_full_name = f"{org}/{repo}"
-        # Support wildcard patterns like "PostHog/*" or "*-api"
+        # Support wildcard patterns like "Insights/*" or "*-api"
         if not any(fnmatch.fnmatch(repo_full_name, pattern) for pattern in allowed_repos):
             return False
 

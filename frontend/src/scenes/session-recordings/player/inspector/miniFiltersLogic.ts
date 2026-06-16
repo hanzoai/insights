@@ -1,3 +1,4 @@
+import equal from 'fast-deep-equal'
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 
 import { sessionRecordingEventUsageLogic } from 'scenes/session-recordings/sessionRecordingEventUsageLogic'
@@ -17,9 +18,9 @@ export type SharedListMiniFilter = {
 export const MiniFilters: SharedListMiniFilter[] = [
     {
         type: 'events',
-        key: 'events-posthog',
-        name: 'PostHog',
-        tooltip: 'Standard PostHog events except Pageviews, Autocapture, and Exceptions.',
+        key: 'events-insights',
+        name: 'Insights',
+        tooltip: 'Standard Insights events except Pageviews, Autocapture, and Exceptions.',
     },
     {
         type: 'events',
@@ -43,7 +44,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
         type: 'events',
         key: 'events-exceptions',
         name: 'Exceptions',
-        tooltip: 'Exception events from PostHog or its Sentry integration',
+        tooltip: 'Exception events from Insights or its Sentry integration',
     },
     {
         type: 'console',
@@ -106,7 +107,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
         key: 'doctor',
         name: 'Doctor',
         tooltip:
-            'Doctor events are special events that are automatically detected by PostHog to help diagnose issues in replay.',
+            'Doctor events are special events that are automatically detected by Insights to help diagnose issues in replay.',
     },
     {
         type: 'comment',
@@ -119,7 +120,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
 export type MiniFilterKey = (typeof MiniFilters)[number]['key']
 
 const defaultMinifilters = [
-    'events-posthog',
+    'events-insights',
     'events-custom',
     'events-pageview',
     'events-autocapture',
@@ -211,6 +212,7 @@ export const miniFiltersLogic = kea<miniFiltersLogicType>([
                     enabled: selectedMiniFilters.includes(x.key),
                 }))
             },
+            { resultEqualityCheck: equal },
         ],
 
         miniFiltersByKey: [
@@ -221,6 +223,7 @@ export const miniFiltersLogic = kea<miniFiltersLogicType>([
                     return acc
                 }, {})
             },
+            { resultEqualityCheck: equal },
         ],
 
         miniFiltersForTypeByKey: [

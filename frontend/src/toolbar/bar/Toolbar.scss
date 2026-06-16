@@ -30,7 +30,7 @@
         }
     }
 
-    & + .HedgehogBuddy {
+    & + .MascotBuddy {
         z-index: 2147483020;
     }
 
@@ -141,15 +141,29 @@
         transform: var(--toolbar-translate) scale(1.1);
     }
 
-    &--with-experiments {
+    &--extra-buttons-1 {
         --toolbar-width-expanded: 376px;
+    }
+
+    &--extra-buttons-2 {
+        --toolbar-width-expanded: 418px;
     }
 
     &--minimized {
         width: var(--toolbar-width-minimized); // Account for border
 
-        &.Toolbar--hedgehog-mode {
+        &.Toolbar--mascot-mode {
             transform: var(--toolbar-translate) scale(0);
+        }
+    }
+
+    &__logomark {
+        width: 1.5rem;
+        height: 1.5rem;
+
+        svg {
+            width: 100%;
+            height: 100%;
         }
     }
 }

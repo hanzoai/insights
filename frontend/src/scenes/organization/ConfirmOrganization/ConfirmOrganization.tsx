@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
@@ -26,7 +26,7 @@ export function ConfirmOrganization(): JSX.Element {
     const { setShowNewOrgWarning } = useActions(confirmOrganizationLogic)
 
     return (
-        <BridgePage view="org-creation-confirmation" hedgehog>
+        <BridgePage view="org-creation-confirmation" mascot>
             <h2>Create a new organization</h2>
             <div className="flex-1">
                 <p className="text-center">
@@ -51,7 +51,7 @@ export function ConfirmOrganization(): JSX.Element {
                         </p>
                         <ul className="list-disc pl-4">
                             <li>You're logging in with the wrong email address</li>
-                            <li>Your PostHog account is at a different URL</li>
+                            <li>Your Insights account is at a different URL</li>
                             <li>You need an invitation from a colleague</li>
                         </ul>
                     </div>
@@ -77,7 +77,7 @@ export function ConfirmOrganization(): JSX.Element {
                     label="Organization name"
                     help="You can always rename your organization later"
                 >
-                    <LemonInput className="ph-ignore-input" placeholder="Hogflix Movies" />
+                    <LemonInput className="ph-ignore-input" placeholder="Acme Inc" />
                 </LemonField>
 
                 <SignupRoleSelect />
@@ -96,11 +96,11 @@ export function ConfirmOrganization(): JSX.Element {
 
             <div className="text-center terms-and-conditions-text mt-4 text-secondary">
                 By creating an account, you agree to our{' '}
-                <Link to="https://posthog.com/terms" target="_blank">
+                <Link to="https://hanzo.ai/terms" target="_blank">
                     Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="https://posthog.com/privacy" target="_blank">
+                <Link to="https://hanzo.ai/privacy" target="_blank">
                     Privacy Policy
                 </Link>
                 .
@@ -108,11 +108,11 @@ export function ConfirmOrganization(): JSX.Element {
             <LemonDivider thick dashed className="my-6" />
             <div className="text-center terms-and-conditions-text mt-4 text-secondary">
                 Have questions?{' '}
-                <Link to="https://posthog.com/support" target="_blank">
+                <Link to="https://hanzo.ai/support" target="_blank" disableDocsPanel>
                     Visit support
                 </Link>{' '}
                 or{' '}
-                <Link to="https://posthog.com/docs" target="_blank">
+                <Link to="https://hanzo.ai/docs" target="_blank" disableDocsPanel>
                     read our documentation
                 </Link>
                 .

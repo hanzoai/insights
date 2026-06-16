@@ -1,9 +1,9 @@
-import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
+import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
@@ -27,10 +27,10 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
     path(['scenes', 'data-warehouse', 'settings', 'source', 'dataWarehouseSourceSettingsLogic']),
     props({} as DataWarehouseSourceSettingsLogicProps),
     key(({ id }) => id),
-    connect({
+    connect(() => ({
         values: [availableSourcesDataLogic, ['availableSources']],
         actions: [externalDataSourcesLogic, ['updateSource']],
-    }),
+    })),
     actions({
         setSourceId: (id: string) => ({ id }),
         reloadSchema: (schema: ExternalDataSourceSchema) => ({ schema }),
@@ -38,6 +38,8 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
         deleteTable: (schema: ExternalDataSourceSchema) => ({ schema }),
         setCanLoadMoreJobs: (canLoadMoreJobs: boolean) => ({ canLoadMoreJobs }),
         setIsProjectTime: (isProjectTime: boolean) => ({ isProjectTime }),
+        setSelectedSchemas: (schemaNames: string[]) => ({ schemaNames }),
+        setShowEnabledSchemasOnly: (showEnabledSchemasOnly: boolean) => ({ showEnabledSchemasOnly }),
     }),
     loaders(({ actions, values }) => ({
         source: [
@@ -74,8 +76,21 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                         return await api.externalDataSources.jobs(values.sourceId, null, null)
                     }
 
-                    const newJobs = await api.externalDataSources.jobs(values.sourceId, null, values.jobs[0].created_at)
-                    return [...newJobs, ...values.jobs]
+                    // Re-fetch recent jobs without an `after` filter to get updated statuses.
+                    // The API returns up to 50 jobs sorted by created_at desc, so this
+                    // will refresh the status of recent jobs (e.g. Running -> Completed).
+                    const freshJobs = await api.externalDataSources.jobs(values.sourceId, null, null)
+
+                    // Merge fresh jobs with existing jobs, preferring the fresh data
+                    const jobsById = new Map(values.jobs.map((job) => [job.id, job]))
+                    for (const job of freshJobs) {
+                        jobsById.set(job.id, job)
+                    }
+
+                    // Sort by created_at descending (newest first)
+                    return Array.from(jobsById.values()).sort(
+                        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )
                 },
                 loadMoreJobs: async () => {
                     const hasJobs = values.jobs.length >= 0
@@ -116,6 +131,18 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 setIsProjectTime: (_, { isProjectTime }) => isProjectTime,
             },
         ],
+        selectedSchemas: [
+            [] as string[],
+            {
+                setSelectedSchemas: (_, { schemaNames }) => schemaNames,
+            },
+        ],
+        showEnabledSchemasOnly: [
+            false as boolean,
+            {
+                setShowEnabledSchemasOnly: (_, { showEnabledSchemasOnly }) => showEnabledSchemasOnly,
+            },
+        ],
         sourceConfigLoading: [
             false as boolean,
             {
@@ -136,6 +163,18 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 return availableSources[source.source_type]
             },
         ],
+        filteredSchemas: [
+            (s) => [s.source, s.showEnabledSchemasOnly],
+            (source, showEnabledSchemasOnly): ExternalDataSourceSchema[] => {
+                if (!source?.schemas) {
+                    return []
+                }
+                if (showEnabledSchemasOnly) {
+                    return source.schemas.filter((schema) => schema.should_sync)
+                }
+                return source.schemas
+            },
+        ],
     }),
     forms(({ values, actions, props }) => ({
         sourceConfig: {
@@ -143,7 +182,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             errors: (sourceValues) => {
                 return getErrorsForFields(values.sourceFieldConfig?.fields ?? [], sourceValues as any)
             },
-            submit: async ({ payload = {} }) => {
+            submit: async ({ payload = {}, description }) => {
                 const newJobInputs = {
                     ...values.source?.job_inputs,
                     ...payload,
@@ -175,6 +214,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                     await externalDataSourcesLogic.asyncActions.updateSource({
                         ...values.source!,
                         job_inputs: newJobInputs,
+                        description: description !== '' ? description : (values.source?.description ?? null),
                     })
                     actions.loadSource()
                     lemonToast.success('Source updated')
@@ -188,13 +228,14 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             },
         },
     })),
-    listeners(({ values, actions, cache, props }) => ({
+    listeners(({ values, actions, props, cache }) => ({
         loadSourceSuccess: () => {
-            clearTimeout(cache.sourceRefreshTimeout)
-
-            cache.sourceRefreshTimeout = setTimeout(() => {
-                actions.loadSource()
-            }, REFRESH_INTERVAL)
+            cache.disposables.add(() => {
+                const timerId = setTimeout(() => {
+                    actions.loadSource()
+                }, REFRESH_INTERVAL)
+                return () => clearTimeout(timerId)
+            }, 'sourceRefreshTimeout')
 
             dataWarehouseSourceSceneLogic
                 .findMounted({
@@ -203,25 +244,28 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 ?.actions.setBreadcrumbName(values.source?.source_type ?? 'Source')
         },
         loadSourceFailure: () => {
-            clearTimeout(cache.sourceRefreshTimeout)
-
-            cache.sourceRefreshTimeout = setTimeout(() => {
-                actions.loadSource()
-            }, REFRESH_INTERVAL)
+            cache.disposables.add(() => {
+                const timerId = setTimeout(() => {
+                    actions.loadSource()
+                }, REFRESH_INTERVAL)
+                return () => clearTimeout(timerId)
+            }, 'sourceRefreshTimeout')
         },
         loadJobsSuccess: () => {
-            clearTimeout(cache.jobsRefreshTimeout)
-
-            cache.jobsRefreshTimeout = setTimeout(() => {
-                actions.loadJobs()
-            }, REFRESH_INTERVAL)
+            cache.disposables.add(() => {
+                const timerId = setTimeout(() => {
+                    actions.loadJobs()
+                }, REFRESH_INTERVAL)
+                return () => clearTimeout(timerId)
+            }, 'jobsRefreshTimeout')
         },
         loadJobsFailure: () => {
-            clearTimeout(cache.jobsRefreshTimeout)
-
-            cache.jobsRefreshTimeout = setTimeout(() => {
-                actions.loadJobs()
-            }, REFRESH_INTERVAL)
+            cache.disposables.add(() => {
+                const timerId = setTimeout(() => {
+                    actions.loadJobs()
+                }, REFRESH_INTERVAL)
+                return () => clearTimeout(timerId)
+            }, 'jobsRefreshTimeout')
         },
         reloadSchema: async ({ schema }) => {
             // Optimistic UI updates before sending updates to the backend
@@ -235,7 +279,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             try {
                 await api.externalDataSchemas.reload(schema.id)
 
-                posthog.capture('schema reloaded', { sourceType: clonedSource.source_type })
+                insights.capture('schema reloaded', { sourceType: clonedSource.source_type })
             } catch (e: any) {
                 if (e.message) {
                     lemonToast.error(e.message)
@@ -256,7 +300,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             try {
                 await api.externalDataSchemas.resync(schema.id)
 
-                posthog.capture('schema resynced', { sourceType: clonedSource.source_type })
+                insights.capture('schema resynced', { sourceType: clonedSource.source_type })
             } catch (e: any) {
                 if (e.message) {
                     lemonToast.error(e.message)
@@ -281,7 +325,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             try {
                 await api.externalDataSchemas.delete_data(schema.id)
 
-                posthog.capture('schema data deleted', { sourceType: clonedSource.source_type })
+                insights.capture('schema data deleted', { sourceType: clonedSource.source_type })
                 lemonToast.success(`Data for ${schema.name} has been deleted`)
             } catch (e: any) {
                 if (e.message) {
@@ -295,5 +339,9 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
     afterMount(({ actions }) => {
         actions.loadSource()
         actions.loadJobs()
+    }),
+
+    beforeUnmount(() => {
+        // Disposables handle cleanup automatically
     }),
 ])

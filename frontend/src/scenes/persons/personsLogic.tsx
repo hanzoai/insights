@@ -11,14 +11,14 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toParams } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { Scene } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import { DataTableNode, NodeKind } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
 import {
     ActivityScope,
     AnyPropertyFilter,
@@ -31,7 +31,7 @@ import {
     PersonsTabType,
 } from '~/types'
 
-import { asDisplay } from './person-utils'
+import { asDisplay, getInsightsqlQueryStringForPersonId } from './person-utils'
 import type { personsLogicType } from './personsLogicType'
 
 export interface PersonsLogicProps {
@@ -41,16 +41,20 @@ export interface PersonsLogicProps {
     fixedProperties?: PersonPropertyFilter[]
 }
 
+export const PERSON_EVENTS_CONTEXT_KEY = 'person-profile-events'
+
 function createInitialEventsPayload(personId: string): DataTableNode {
     return {
         kind: NodeKind.DataTableNode,
         full: true,
+        showEventsFilter: true,
+        showTableViews: true,
+        contextKey: PERSON_EVENTS_CONTEXT_KEY,
         hiddenColumns: [PERSON_DISPLAY_NAME_COLUMN_NAME],
         source: {
             kind: NodeKind.EventsQuery,
             select: defaultDataTableColumns(NodeKind.EventsQuery),
             personId: personId,
-            where: ["notEquals(event, '$exception')"],
             after: '-24h',
         },
     }
@@ -72,14 +76,38 @@ function createInitialExceptionsPayload(personId: string): DataTableNode {
     }
 }
 
+function createInitialSurveyResponsesPayload(personId: string): DataTableNode {
+    return {
+        kind: NodeKind.DataTableNode,
+        full: true,
+        showEventFilter: false,
+        hiddenColumns: [PERSON_DISPLAY_NAME_COLUMN_NAME],
+        source: {
+            kind: NodeKind.EventsQuery,
+            select: ['*', 'properties.$survey_name', 'properties.$lib', 'timestamp'],
+            personId: personId,
+            event: 'survey sent',
+            after: '-90d',
+        },
+    }
+}
+
 export const personsLogic = kea<personsLogicType>([
     props({} as PersonsLogicProps),
     key((props) => {
+        if (props.urlId) {
+            return `url_${props.urlId}`
+        }
+
         if (props.fixedProperties) {
             return JSON.stringify(props.fixedProperties)
         }
 
-        return props.cohort ? `cohort_${props.cohort}` : 'scene'
+        if (props.cohort) {
+            return `cohort_${props.cohort}`
+        }
+
+        return 'scene'
     }),
     path((key) => ['scenes', 'persons', 'personsLogic', key]),
     connect(() => ({
@@ -103,6 +131,7 @@ export const personsLogic = kea<personsLogicType>([
         setDistinctId: (distinctId: string) => ({ distinctId }),
         setEventsQuery: (eventsQuery: DataTableNode | null) => ({ eventsQuery }),
         setExceptionsQuery: (exceptionsQuery: DataTableNode | null) => ({ exceptionsQuery }),
+        setSurveyResponsesQuery: (surveyResponsesQuery: DataTableNode | null) => ({ surveyResponsesQuery }),
     }),
     loaders(({ values, actions, props }) => ({
         persons: [
@@ -150,17 +179,15 @@ export const personsLogic = kea<personsLogicType>([
                             actions.setEventsQuery(eventsQuery)
                             const exceptionsQuery = createInitialExceptionsPayload(person.id)
                             actions.setExceptionsQuery(exceptionsQuery)
+                            const surveyResponsesQuery = createInitialSurveyResponsesPayload(person.id)
+                            actions.setSurveyResponsesQuery(surveyResponsesQuery)
                         }
                     }
 
                     return person
                 },
                 loadPersonUUID: async ({ uuid }): Promise<PersonType | null> => {
-                    const response = await hogqlQuery(
-                        hogql`select id, groupArray(101)(pdi2.distinct_id) as distinct_ids, properties, is_identified, created_at from persons LEFT JOIN (SELECT argMax(pdi2.person_id, pdi2.version) AS person_id, pdi2.distinct_id AS distinct_id FROM raw_person_distinct_ids as pdi2 WHERE pdi2.person_id = {id} GROUP BY pdi2.distinct_id HAVING ifNull(equals(argMax(pdi2.is_deleted, pdi2.version), 0), 0)) as pdi2 ON pdi2.person_id=persons.id where id={id} group by id, properties, is_identified, created_at`,
-                        { id: uuid },
-                        'blocking'
-                    )
+                    const response = await insightsqlQuery(getInsightsqlQueryStringForPersonId(), { id: uuid }, 'blocking')
                     const row = response?.results?.[0]
                     if (row) {
                         const person: PersonType = {
@@ -177,6 +204,8 @@ export const personsLogic = kea<personsLogicType>([
                             actions.setEventsQuery(eventsQuery)
                             const exceptionsQuery = createInitialExceptionsPayload(person.id)
                             actions.setExceptionsQuery(exceptionsQuery)
+                            const surveyResponsesQuery = createInitialSurveyResponsesPayload(person.id)
+                            actions.setSurveyResponsesQuery(surveyResponsesQuery)
                         }
                         return person
                     }
@@ -285,20 +314,26 @@ export const personsLogic = kea<personsLogicType>([
                 setExceptionsQuery: (_, { exceptionsQuery }) => exceptionsQuery,
             },
         ],
+        surveyResponsesQuery: [
+            null as DataTableNode | null,
+            {
+                setSurveyResponsesQuery: (_, { surveyResponsesQuery }) => surveyResponsesQuery,
+            },
+        ],
     })),
     selectors(() => ({
         apiDocsURL: [
             () => [(_, props) => props.cohort],
             (cohort: PersonsLogicProps['cohort']) =>
                 cohort
-                    ? 'https://posthog.com/docs/api/cohorts#get-api-projects-project_id-cohorts-id-persons'
-                    : 'https://posthog.com/docs/api/persons',
+                    ? 'https://hanzo.ai/docs/api/cohorts#get-api-projects-project_id-cohorts-id-persons'
+                    : 'https://hanzo.ai/docs/api/persons',
         ],
         cohortId: [() => [(_, props) => props.cohort], (cohort: PersonsLogicProps['cohort']) => cohort],
         currentTab: [(s) => [s.activeTab, s.defaultTab], (activeTab, defaultTab) => activeTab || defaultTab],
         defaultTab: [
             (s) => [s.feedEnabled],
-            (feedEnabled) => (feedEnabled ? PersonsTabType.FEED : PersonsTabType.PROPERTIES),
+            (feedEnabled) => (feedEnabled ? PersonsTabType.PROFILE : PersonsTabType.PROPERTIES),
         ],
         breadcrumbs: [
             (s) => [s.person, router.selectors.location],
@@ -307,14 +342,16 @@ export const personsLogic = kea<personsLogicType>([
                 const breadcrumbs: Breadcrumb[] = [
                     {
                         key: Scene.Persons,
-                        name: 'People',
+                        name: 'Users',
                         path: urls.persons(),
+                        iconType: sceneConfigurations[Scene.Person].iconType || 'default_icon_type',
                     },
                 ]
                 if (showPerson) {
                     breadcrumbs.push({
                         key: [Scene.Person, person.id || 'unknown'],
                         name: asDisplay(person),
+                        iconType: sceneConfigurations[Scene.Person].iconType || 'default_icon_type',
                     })
                 }
                 return breadcrumbs
@@ -346,7 +383,7 @@ export const personsLogic = kea<personsLogicType>([
             ],
         ],
         urlId: [() => [(_, props) => props.urlId], (urlId) => urlId],
-        feedEnabled: [(s) => [s.featureFlags], (featureFlags) => !!featureFlags[FEATURE_FLAGS.PERSON_FEED_CANVAS]],
+        feedEnabled: [(s) => [s.featureFlags], (featureFlags) => !!featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS]],
         primaryDistinctId: [
             (s) => [s.person],
             (person): string | null => {
@@ -403,7 +440,7 @@ export const personsLogic = kea<personsLogicType>([
                 // :KLUDGE: Person properties are updated asynchronously in the plugin server - the response won't reflect
                 //      the _updated_ properties yet.
                 await api.persons.updateProperty(person.id, key, parsedValue)
-                lemonToast.success(`Person property ${action}`)
+                lemonToast.success(`User property ${action}`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated(
                     action,
@@ -423,7 +460,7 @@ export const personsLogic = kea<personsLogicType>([
                 actions.setPerson({ ...person, properties: updatedProperties }) // To update the UI immediately
                 // await api.create(`api/person/${person.id}/delete_property`, { $unset: key })
                 await api.persons.deleteProperty(person.id, key)
-                lemonToast.success(`Person property deleted`)
+                lemonToast.success(`User property deleted`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated('removed', 1, undefined, undefined)
             }
@@ -439,9 +476,18 @@ export const personsLogic = kea<personsLogicType>([
             }
         },
         navigateToTab: () => {
-            if (props.syncWithUrl && router.values.location.pathname.indexOf('/person') > -1) {
-                const searchParams = {}
-
+            if (
+                props.syncWithUrl &&
+                router.values.location.pathname.indexOf('/person') > -1 &&
+                router.values.hashParams.activeTab !== values.activeTab
+            ) {
+                // When navigating away from recordings tab, clear sessionRecordingId from search params
+                // to prevent urlToAction from forcing back to recordings tab
+                let searchParams = router.values.searchParams
+                if (values.activeTab !== PersonsTabType.SESSION_RECORDINGS && searchParams.sessionRecordingId) {
+                    const { sessionRecordingId: _, ...restSearchParams } = searchParams
+                    searchParams = restSearchParams
+                }
                 return [
                     router.values.location.pathname,
                     searchParams,
@@ -462,7 +508,7 @@ export const personsLogic = kea<personsLogicType>([
                     actions.navigateToTab(activeTab as PersonsTabType)
                 }
 
-                if (!activeTab) {
+                if (!activeTab && values.activeTab !== values.defaultTab) {
                     actions.setActiveTab(values.defaultTab)
                 }
 

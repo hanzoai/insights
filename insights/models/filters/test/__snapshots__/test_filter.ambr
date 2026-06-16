@@ -1,0 +1,313 @@
+# serializer version: 1
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_cohorts
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_cohorts.1
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_cohorts_no_match
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_cohorts_no_match.1
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.1
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.2
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.3
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.4
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.5
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.6
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---
+# name: TestDjangoPropertyGroupToQ.test_property_group_to_q_with_negation_cohorts.7
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_cohort"."id" = 99999
+         AND "insights_team"."project_id" = 99999)
+  ORDER BY "insights_cohort"."id" ASC
+  LIMIT 1
+  '''
+# ---

@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
     ActivityChange,
@@ -102,19 +104,19 @@ const featureFlagActionsMapping: Record<
                             const newButtons =
                                 nonEmptyProperties.map((property, idx) => {
                                     return (
-                                        <>
+                                        <Fragment key={property.key ?? idx}>
                                             {' '}
                                             {idx === 0 && (
                                                 <span>
                                                     <strong>{rollout_percentage ?? 100}%</strong> of{' '}
                                                 </span>
                                             )}
-                                            <PropertyFilterButton key={property.key} item={property} />
-                                        </>
+                                            <PropertyFilterButton item={property} />
+                                        </Fragment>
                                     )
                                 }) || []
                             newButtons[0] = (
-                                <>
+                                <Fragment key={nonEmptyProperties[0].key ?? 0}>
                                     <span>
                                         <strong>{rollout_percentage ?? 100}%</strong> of{' '}
                                     </span>
@@ -122,7 +124,7 @@ const featureFlagActionsMapping: Record<
                                         key={nonEmptyProperties[0].key}
                                         item={nonEmptyProperties[0]}
                                     />
-                                </>
+                                </Fragment>
                             )
                             groupAdditions.push(...newButtons)
                         } else {
@@ -240,17 +242,8 @@ const featureFlagActionsMapping: Record<
     deleted: function onSoftDelete(change, logItem) {
         const isDeleted = detectBoolean(change?.after)
         return {
-            description: [<>{isDeleted ? 'deleted' : 'un-deleted'}</>],
+            description: [<>{isDeleted ? 'deleted' : 'restored'}</>],
             suffix: <>{nameOrLinkToFlag(logItem?.item_id, logItem?.detail.name)}</>,
-        }
-    },
-    rollout_percentage: function onRolloutPercentage(change) {
-        return {
-            description: [
-                <>
-                    changed rollout percentage to <div className="highlighted-activity">{change?.after as string}%</div>
-                </>,
-            ],
         }
     },
     key: function onKey(change, logItem) {
@@ -276,6 +269,30 @@ const featureFlagActionsMapping: Record<
                 <>
                     changed the evaluation runtime from <strong>{getRuntimeLabel(runtimeBefore)}</strong> to{' '}
                     <strong>{getRuntimeLabel(runtimeAfter)}</strong>
+                </>,
+            ],
+        }
+    },
+    bucketing_identifier: function onBucketingIdentifier(change) {
+        const identifierAfter = change?.after as string
+        const identifierBefore = change?.before as string
+
+        const getBucketingLabel = (identifier: string): string => {
+            switch (identifier) {
+                case 'distinct_id':
+                    return 'User'
+                case 'device_id':
+                    return 'Device'
+                default:
+                    return identifier || 'User'
+            }
+        }
+
+        return {
+            description: [
+                <>
+                    changed the bucketing identifier from <strong>{getBucketingLabel(identifierBefore)}</strong> to{' '}
+                    <strong>{getBucketingLabel(identifierAfter)}</strong>
                 </>,
             ],
         }
@@ -306,19 +323,41 @@ const featureFlagActionsMapping: Record<
 
         return { description: changes }
     },
+    evaluation_tags: function onEvaluationTags(change) {
+        const tagsBefore = change?.before as string[]
+        const tagsAfter = change?.after as string[]
+        const addedTags = tagsAfter.filter((t) => tagsBefore.indexOf(t) === -1)
+        const removedTags = tagsBefore.filter((t) => tagsAfter.indexOf(t) === -1)
+
+        const changes: Description[] = []
+        if (addedTags.length) {
+            changes.push(
+                <>
+                    added {pluralize(addedTags.length, 'evaluation tag', 'evaluation tags', false)}{' '}
+                    <ObjectTags tags={addedTags} saving={false} style={{ display: 'inline' }} staticOnly />
+                </>
+            )
+        }
+        if (removedTags.length) {
+            changes.push(
+                <>
+                    removed {pluralize(removedTags.length, 'evaluation tag', 'evaluation tags', false)}{' '}
+                    <ObjectTags tags={removedTags} saving={false} style={{ display: 'inline' }} staticOnly />
+                </>
+            )
+        }
+
+        return { description: changes }
+    },
     // fields that are excluded on the backend
     id: () => null,
     created_at: () => null,
     created_by: () => null,
-    is_simple_flag: () => null,
+    updated_at: () => null,
     experiment_set: () => null,
     features: () => null,
     usage_dashboard: () => null,
-    // TODO: handle activity
-    rollback_conditions: () => null,
-    performed_rollback: () => null,
     can_edit: () => null,
-    analytics_dashboards: () => null,
     has_enriched_analytics: () => null,
     surveys: () => null,
     user_access_level: () => null,
@@ -327,7 +366,10 @@ const featureFlagActionsMapping: Record<
     status: () => null,
     version: () => null,
     last_modified_by: () => null,
+    last_called_at: () => null,
+    is_used_in_replay_settings: () => null,
     _create_in_folder: () => null,
+    _should_create_usage_dashboard: () => null,
 }
 
 const getActorName = (logItem: ActivityLogItem): JSX.Element => {
@@ -335,11 +377,12 @@ const getActorName = (logItem: ActivityLogItem): JSX.Element => {
     if (logItem.detail.trigger?.job_type === 'scheduled_change') {
         return (
             <>
-                <strong>{userName}</strong> <span className="text-muted">(via scheduled change)</span>
+                <strong className="ph-no-capture">{userName}</strong>{' '}
+                <span className="text-muted">(via scheduled change)</span>
             </>
         )
     }
-    return <strong>{userName}</strong>
+    return <strong className="ph-no-capture">{userName}</strong>
 }
 
 export function flagActivityDescriber(logItem: ActivityLogItem, asNotification?: boolean): HumanizedChange {
@@ -374,7 +417,11 @@ export function flagActivityDescriber(logItem: ActivityLogItem, asNotification?:
                 continue // feature flag updates have to have a "field" to be described
             }
 
-            const possibleLogItem = featureFlagActionsMapping[change.field as keyof FeatureFlagType](change, logItem)
+            const fieldHandler = featureFlagActionsMapping[change.field as keyof FeatureFlagType]
+            if (!fieldHandler) {
+                console.error({ field: change.field, change }, 'No activity describer found for feature flag field')
+            }
+            const possibleLogItem = fieldHandler ? fieldHandler(change, logItem) : null
             if (possibleLogItem) {
                 const { description, suffix } = possibleLogItem
                 if (description) {

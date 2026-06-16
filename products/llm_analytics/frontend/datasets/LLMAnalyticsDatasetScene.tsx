@@ -3,28 +3,34 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonTab, LemonTabs, Link, ProfilePicture } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonTab, LemonTabs, Link, ProfilePicture } from '@hanzo/lemon-ui'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
 import { NotFound } from 'lib/components/NotFound'
-import { PageHeader } from 'lib/components/PageHeader'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { createdAtColumn, updatedAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
+import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
-import { ScenePanel, ScenePanelActions, ScenePanelDivider, ScenePanelMetaInfo } from '~/layout/scenes/SceneLayout'
+import {
+    ScenePanel,
+    ScenePanelActionsSection,
+    ScenePanelDivider,
+    ScenePanelInfoSection,
+} from '~/layout/scenes/SceneLayout'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { SceneTextInput } from '~/lib/components/Scenes/SceneTextInput'
 import { SceneTextarea } from '~/lib/components/Scenes/SceneTextarea'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from '~/lib/lemon-ui/LemonTable'
-import { Dataset, DatasetItem } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType, Dataset, DatasetItem } from '~/types'
 
 import { truncateValue } from '../utils'
 import { DatasetItemModal } from './DatasetItemModal'
@@ -38,6 +44,7 @@ const RESOURCE_TYPE = 'dataset'
 export const scene: SceneExport<DatasetLogicProps> = {
     component: LLMAnalyticsDatasetScene,
     logic: llmAnalyticsDatasetLogic,
+    productKey: ProductKey.LLM_ANALYTICS,
     paramsToProps: ({ params: { id } }) => ({
         datasetId: id && id !== 'new' ? id : 'new',
     }),
@@ -64,6 +71,7 @@ export function LLMAnalyticsDatasetScene(): JSX.Element {
         triggerDatasetItemModal,
         onUnmount,
     } = useActions(llmAnalyticsDatasetLogic)
+    const { searchParams } = useValues(router)
 
     const displayEditForm = isNewDataset || isEditingDataset
 
@@ -90,68 +98,88 @@ export function LLMAnalyticsDatasetScene(): JSX.Element {
     return (
         <Form id="dataset-form" formKey="datasetForm" logic={llmAnalyticsDatasetLogic}>
             <SceneContent>
-                <PageHeader
-                    buttons={
-                        !shouldDisplaySkeleton ? (
-                            displayEditForm ? (
-                                <>
-                                    <LemonButton
-                                        type="secondary"
-                                        data-attr="cancel-dataset"
-                                        onClick={() => {
-                                            if (isEditingDataset) {
-                                                editDataset(false)
-                                                loadDataset()
-                                            } else {
-                                                router.actions.push(urls.llmAnalyticsDatasets())
-                                            }
-                                        }}
-                                        disabledReason={isDatasetFormSubmitting ? 'Saving…' : undefined}
-                                    >
-                                        Cancel
-                                    </LemonButton>
-                                    <LemonButton
-                                        type="primary"
-                                        data-attr="save-dataset"
-                                        onClick={submitDatasetForm}
-                                        loading={isDatasetFormSubmitting}
-                                    >
-                                        {isNewDataset ? 'Create dataset' : 'Save'}
-                                    </LemonButton>
-                                </>
-                            ) : (
-                                <>
-                                    <LemonButton
-                                        type="secondary"
-                                        onClick={() => editDataset(true)}
-                                        loading={false}
-                                        data-attr="edit-dataset"
-                                    >
-                                        Edit
-                                    </LemonButton>
-                                    <LemonButton
-                                        type="primary"
-                                        onClick={() => triggerDatasetItemModal(true)}
-                                        data-attr="add-dataset-item"
-                                        icon={<IconPlusSmall />}
-                                    >
-                                        Add item
-                                    </LemonButton>
-                                </>
-                            )
-                        ) : undefined
-                    }
-                />
                 <SceneTitleSection
                     name={datasetForm.name}
                     resourceType={{ type: 'llm_analytics' }}
                     isLoading={datasetLoading}
+                    actions={
+                        <>
+                            {!shouldDisplaySkeleton ? (
+                                displayEditForm ? (
+                                    <>
+                                        <LemonButton
+                                            type="secondary"
+                                            data-attr="cancel-dataset"
+                                            onClick={() => {
+                                                if (isEditingDataset) {
+                                                    editDataset(false)
+                                                    loadDataset()
+                                                } else {
+                                                    router.actions.push(
+                                                        combineUrl(urls.llmAnalyticsDatasets(), searchParams).url
+                                                    )
+                                                }
+                                            }}
+                                            disabledReason={isDatasetFormSubmitting ? 'Saving…' : undefined}
+                                            size="small"
+                                        >
+                                            Cancel
+                                        </LemonButton>
+                                        <AccessControlAction
+                                            resourceType={AccessControlResourceType.LlmAnalytics}
+                                            minAccessLevel={AccessControlLevel.Editor}
+                                        >
+                                            <LemonButton
+                                                type="primary"
+                                                data-attr="save-dataset"
+                                                onClick={submitDatasetForm}
+                                                loading={isDatasetFormSubmitting}
+                                                size="small"
+                                            >
+                                                {isNewDataset ? 'Create dataset' : 'Save'}
+                                            </LemonButton>
+                                        </AccessControlAction>
+                                    </>
+                                ) : (
+                                    <>
+                                        <AccessControlAction
+                                            resourceType={AccessControlResourceType.LlmAnalytics}
+                                            minAccessLevel={AccessControlLevel.Editor}
+                                        >
+                                            <LemonButton
+                                                type="secondary"
+                                                onClick={() => editDataset(true)}
+                                                loading={false}
+                                                data-attr="edit-dataset"
+                                                size="small"
+                                            >
+                                                Edit
+                                            </LemonButton>
+                                        </AccessControlAction>
+                                        <AccessControlAction
+                                            resourceType={AccessControlResourceType.LlmAnalytics}
+                                            minAccessLevel={AccessControlLevel.Editor}
+                                        >
+                                            <LemonButton
+                                                type="primary"
+                                                onClick={() => triggerDatasetItemModal(true)}
+                                                data-attr="add-dataset-item"
+                                                icon={<IconPlusSmall />}
+                                                size="small"
+                                            >
+                                                Add item
+                                            </LemonButton>
+                                        </AccessControlAction>
+                                    </>
+                                )
+                            ) : undefined}
+                        </>
+                    }
                 />
-                <SceneDivider />
 
                 {isDataset(dataset) && (
                     <ScenePanel>
-                        <ScenePanelMetaInfo>
+                        <ScenePanelInfoSection>
                             <SceneTextInput
                                 name="name"
                                 defaultValue={datasetForm.name}
@@ -161,6 +189,10 @@ export function LLMAnalyticsDatasetScene(): JSX.Element {
                                 }}
                                 dataAttrKey={RESOURCE_TYPE}
                                 isLoading={datasetLoading}
+                                canEdit={userHasAccess(
+                                    AccessControlResourceType.LlmAnalytics,
+                                    AccessControlLevel.Editor
+                                )}
                             />
                             <SceneTextarea
                                 name="description"
@@ -172,41 +204,50 @@ export function LLMAnalyticsDatasetScene(): JSX.Element {
                                 dataAttrKey={RESOURCE_TYPE}
                                 optional
                                 isLoading={datasetLoading}
+                                canEdit={userHasAccess(
+                                    AccessControlResourceType.LlmAnalytics,
+                                    AccessControlLevel.Editor
+                                )}
                             />
-                        </ScenePanelMetaInfo>
+                        </ScenePanelInfoSection>
                         <ScenePanelDivider />
-                        <ScenePanelActions>
+                        <ScenePanelActionsSection>
                             <ScenePanelDivider />
-                            <ButtonPrimitive
-                                onClick={() => {
-                                    LemonDialog.open({
-                                        title: 'Permanently delete dataset?',
-                                        description: 'This action cannot be undone.',
-                                        primaryButton: {
-                                            children: 'Delete',
-                                            type: 'primary',
-                                            status: 'danger',
-                                            'data-attr': 'confirm-delete-dataset',
-                                            onClick: deleteDataset,
-                                        },
-                                        secondaryButton: {
-                                            children: 'Close',
-                                            type: 'secondary',
-                                        },
-                                    })
-                                }}
-                                variant="danger"
-                                menuItem
-                                data-attr={`${RESOURCE_TYPE}-delete`}
-                                disabledReasons={{
-                                    'Dataset is loading': datasetLoading,
-                                    'Dataset is being deleted': isDeletingDataset,
-                                }}
+                            <AccessControlAction
+                                resourceType={AccessControlResourceType.LlmAnalytics}
+                                minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <IconTrash />
-                                Delete
-                            </ButtonPrimitive>
-                        </ScenePanelActions>
+                                <ButtonPrimitive
+                                    onClick={() => {
+                                        LemonDialog.open({
+                                            title: 'Permanently delete dataset?',
+                                            description: 'This action cannot be undone.',
+                                            primaryButton: {
+                                                children: 'Delete',
+                                                type: 'primary',
+                                                status: 'danger',
+                                                'data-attr': 'confirm-delete-dataset',
+                                                onClick: deleteDataset,
+                                            },
+                                            secondaryButton: {
+                                                children: 'Close',
+                                                type: 'secondary',
+                                            },
+                                        })
+                                    }}
+                                    variant="danger"
+                                    menuItem
+                                    data-attr={`${RESOURCE_TYPE}-delete`}
+                                    disabledReasons={{
+                                        'Dataset is loading': datasetLoading,
+                                        'Dataset is being deleted': isDeletingDataset,
+                                    }}
+                                >
+                                    <IconTrash />
+                                    Delete
+                                </ButtonPrimitive>
+                            </AccessControlAction>
+                        </ScenePanelActionsSection>
                     </ScenePanel>
                 )}
 
@@ -352,14 +393,19 @@ function DatasetItems({ dataset }: { dataset: Dataset }): JSX.Element {
                                     Edit
                                 </LemonButton>
 
-                                <LemonButton
-                                    status="danger"
-                                    onClick={() => deleteDatasetItem(item.id)}
-                                    data-attr={`dataset-item-${item.id}-dropdown-delete`}
-                                    fullWidth
+                                <AccessControlAction
+                                    resourceType={AccessControlResourceType.LlmAnalytics}
+                                    minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    Delete
-                                </LemonButton>
+                                    <LemonButton
+                                        status="danger"
+                                        onClick={() => deleteDatasetItem(item.id)}
+                                        data-attr={`dataset-item-${item.id}-dropdown-delete`}
+                                        fullWidth
+                                    >
+                                        Delete
+                                    </LemonButton>
+                                </AccessControlAction>
                             </>
                         }
                     />

@@ -7,7 +7,7 @@ import largeRecordingEventsJson from 'scenes/session-recordings/__mocks__/large_
 import largeRecordingMetaJson from 'scenes/session-recordings/__mocks__/large_recording_meta.json'
 import largeRecordingWebVitalsEventsPropertiesJson from 'scenes/session-recordings/__mocks__/large_recording_web_vitals_props.json'
 import { PlayerInspector } from 'scenes/session-recordings/player/inspector/PlayerInspector'
-import { sessionRecordingDataLogic } from 'scenes/session-recordings/player/sessionRecordingDataLogic'
+import { sessionRecordingDataCoordinatorLogic } from 'scenes/session-recordings/player/sessionRecordingDataCoordinatorLogic'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
 import { mswDecorator } from '~/mocks/browser'
@@ -30,9 +30,8 @@ const meta: Meta<typeof PlayerInspector> = {
                                 distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
                                 first_name: 'fasda',
                                 last_name: '',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
-                                hedgehog_config: null,
                                 role_at_organization: 'other',
                             },
                             deleted: false,
@@ -51,20 +50,18 @@ const meta: Meta<typeof PlayerInspector> = {
                 },
                 '/api/environments/:team_id/session_recordings/:id': largeRecordingMetaJson,
                 '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
-                    // with no sources, returns sources...
-                    if (req.url.searchParams.get('source') === 'blob') {
+                    if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(largeRecordingJSONL))
                     }
-                    // with no source requested should return sources
                     return [
                         200,
                         {
                             sources: [
                                 {
-                                    source: 'blob',
+                                    source: 'blob_v2',
                                     start_timestamp: '2023-08-11T12:03:36.097000Z',
                                     end_timestamp: '2023-08-11T12:04:52.268000Z',
-                                    blob_key: '1691755416097-1691755492268',
+                                    blob_key: '0',
                                 },
                             ],
                         },
@@ -75,7 +72,7 @@ const meta: Meta<typeof PlayerInspector> = {
                 '/api/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
-                    if (body.query.kind === 'HogQLQuery') {
+                    if (body.query.kind === 'InsightsQLQuery') {
                         if (body.query.query.includes("event in ['$web_vitals']")) {
                             return res(ctx.json(largeRecordingWebVitalsEventsPropertiesJson))
                         }
@@ -97,7 +94,7 @@ const meta: Meta<typeof PlayerInspector> = {
 export default meta
 
 const BasicTemplate: StoryFn<typeof PlayerInspector> = () => {
-    const dataLogic = sessionRecordingDataLogic({ sessionRecordingId: '12345', playerKey: 'story-template' })
+    const dataLogic = sessionRecordingDataCoordinatorLogic({ sessionRecordingId: '12345', playerKey: 'story-template' })
     const { sessionPlayerMetaData } = useValues(dataLogic)
 
     const { loadSnapshots, loadEvents } = useActions(dataLogic)

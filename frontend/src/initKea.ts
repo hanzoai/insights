@@ -6,13 +6,14 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import posthog, { PostHog } from 'posthog-js'
-import { posthogKeaLogger } from 'posthog-js/lib/src/customizations'
+import insights from '@hanzo/insights'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { hashCodeForString, identifierToHuman } from 'lib/utils'
+import { identifierToHuman } from 'lib/utils'
 import { addProjectIdIfMissing, removeProjectIdIfPresent } from 'lib/utils/router-utils'
 import { sceneLogic } from 'scenes/sceneLogic'
+
+import { disposablesPlugin } from '~/kea-disposables'
 
 /*
 Actions for which we don't want to show error alerts,
@@ -28,6 +29,7 @@ const ERROR_FILTER_ALLOW_LIST = [
     'loadBilling', // Gracefully handled if it fails
     'loadData', // Gracefully handled in the data table
     'loadRecordingMeta', // Gracefully handled in the recording player
+    'loadSimilarIssues', // Gracefully handled in the similar issues list
 ]
 
 interface InitKeaProps {
@@ -57,6 +59,7 @@ export function initKea({
 }: InitKeaProps = {}): void {
     const plugins = [
         ...(beforePlugins || []),
+        disposablesPlugin,
         localStoragePlugin(),
         windowValuesPlugin({ window: window }),
         routerPlugin({
@@ -99,17 +102,18 @@ export function initKea({
                 if (
                     !ERROR_FILTER_ALLOW_LIST.includes(actionKey) &&
                     error?.status !== undefined &&
-                    ![200, 201, 204, 401].includes(error.status) && // 401 is handled by api.ts and the userLogic
+                    ![200, 201, 204, 401, 409].includes(error.status) && // 401 is handled by api.ts and the userLogic, 409 is handled by approval workflow
                     !(isLoadAction && error.status === 403) // 403 access denied is handled by sceneLogic gates
                 ) {
                     let errorMessage = error.detail || error.statusText
                     const isTwoFactorError =
                         error.code === 'two_factor_setup_required' || error.code === 'two_factor_verification_required'
+                    const isSensitiveActionError = error.code === 'sensitive_action_required_reauth'
 
                     if (!errorMessage && error.status === 404) {
                         errorMessage = 'URL not found'
                     }
-                    if (isTwoFactorError) {
+                    if (isTwoFactorError || isSensitiveActionError) {
                         errorMessage = null
                     }
                     if (errorMessage) {
@@ -119,43 +123,16 @@ export function initKea({
                 if (!errorsSilenced) {
                     console.error({ error, reducerKey, actionKey })
                 }
-                posthog.captureException(error)
+                insights.captureException(error)
             },
         }),
         subscriptionsPlugin,
         waitForPlugin,
     ]
 
-    if (window.APP_STATE_LOGGING_SAMPLE_RATE) {
-        try {
-            const ph: PostHog | undefined = window.posthog
-            const session_id = ph?.get_session_id()
-            const sample_rate = parseFloat(window.APP_STATE_LOGGING_SAMPLE_RATE)
-            if (session_id) {
-                const sessionIdHash = hashCodeForString(session_id)
-                if (sessionIdHash % 100 < sample_rate * 100) {
-                    window.JS_KEA_VERBOSE_LOGGING = true
-                }
-            }
-        } catch (e) {
-            window.posthog.captureException(e)
-        }
-    }
-    // To enable logging, run localStorage.setItem("ph-kea-debug", true) in the console
-    if (window.JS_KEA_VERBOSE_LOGGING || ('localStorage' in window && window.localStorage.getItem('ph-kea-debug'))) {
-        plugins.push(
-            posthogKeaLogger({
-                logger: (title, stateEvent) => {
-                    const ph: PostHog | undefined = window.posthog
-                    ph?.sessionRecording?.tryAddCustomEvent('app-state', { title, stateEvent })
-                },
-            })
-        )
-    }
-
     if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
         // oxlint-disable-next-line no-console
-        console.log('NB Redux Dev Tools are disabled on PostHog. See: https://github.com/PostHog/posthog/issues/17482')
+        console.log('NB Redux Dev Tools are disabled on Insights. See: https://github.com/hanzoai/insights/issues/17482')
     }
 
     resetContext({

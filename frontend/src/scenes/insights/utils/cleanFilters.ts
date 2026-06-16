@@ -45,9 +45,11 @@ import { LocalFilter, toLocalFilters } from '../filters/ActionFilter/entityFilte
 
 export function getDefaultEvent(): Entity {
     const event = getDefaultEventName()
+    // When event is null (all events), we need to use null as the id but provide a display name
+    const displayName = event === null ? 'All events' : event
     return {
         id: event,
-        name: event,
+        name: displayName,
         type: EntityTypes.EVENTS,
         order: 0,
     }
@@ -351,8 +353,8 @@ export function cleanFilters(
             ...(filters.funnel_window_interval ? { funnel_window_interval: filters.funnel_window_interval } : {}),
             ...(filters.funnel_order_type ? { funnel_order_type: filters.funnel_order_type } : {}),
             ...(filters.hidden_legend_keys ? { hidden_legend_keys: filters.hidden_legend_keys } : {}),
-            ...(filters.funnel_aggregate_by_hogql
-                ? { funnel_aggregate_by_hogql: filters.funnel_aggregate_by_hogql }
+            ...(filters.funnel_aggregate_by_insightsql
+                ? { funnel_aggregate_by_insightsql: filters.funnel_aggregate_by_insightsql }
                 : {}),
             ...(filters.breakdown_attribution_type
                 ? { breakdown_attribution_type: filters.breakdown_attribution_type }
@@ -400,7 +402,7 @@ export function cleanFilters(
             // TODO: use FF for path_type undefined
             path_type: filters.path_type ? filters.path_type || PathType.PageView : undefined,
             include_event_types: filters.include_event_types || (filters.funnel_filter ? [] : [PathType.PageView]),
-            paths_hogql_expression: filters.paths_hogql_expression || undefined,
+            paths_insightsql_expression: filters.paths_insightsql_expression || undefined,
             path_groupings: filters.path_groupings || [],
             exclude_events: filters.exclude_events || [],
             ...(filters.include_event_types ? { include_event_types: filters.include_event_types } : {}),

@@ -2,16 +2,17 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api, { getCookie } from 'lib/api'
+import { globalSetupLogic } from 'lib/components/ProductSetup'
 import { fromParamsGivenUrl } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { urls } from 'scenes/urls'
 
 import { EmailIntegrationDomainGroupedType, IntegrationKind, IntegrationType } from '~/types'
 
-import { ChannelType } from 'products/messaging/frontend/Channels/MessageChannels'
+import { ChannelType } from 'products/workflows/frontend/Channels/MessageChannels'
 
 import type { integrationsLogicType } from './integrationsLogicType'
 import { ICONS } from './utils'
@@ -20,6 +21,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
     path(['lib', 'integrations', 'integrationsLogic']),
     connect(() => ({
         values: [preflightLogic, ['siteUrlMisconfigured', 'preflight']],
+        actions: [globalSetupLogic, ['markTaskAsCompleted']],
     })),
 
     actions({
@@ -79,7 +81,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
                     return res.results.map((integration) => {
                         return {
                             ...integration,
-                            // TODO: Make the icons endpoint independent of hog functions
+                            // TODO: Make the icons endpoint independent of custom functions
                             icon_url: ICONS[integration.kind],
                         }
                     })
@@ -179,7 +181,9 @@ export const integrationsLogic = kea<integrationsLogicType>([
                 })
 
                 // Add the integration ID to the replaceUrl so that the landing page can use it
-                replaceUrl += `${replaceUrl.includes('?') ? '&' : '?'}integration_id=${integration.id}`
+                const url = new URL(replaceUrl, window.location.origin)
+                url.searchParams.set('integration_id', String(integration.id))
+                replaceUrl = url.pathname + url.search + url.hash
 
                 actions.loadIntegrations()
                 lemonToast.success(`Integration successful.`)
@@ -199,7 +203,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
             LemonDialog.open({
                 title: `Do you want to disconnect from this ${integration.kind} integration?`,
                 description:
-                    'This cannot be undone. PostHog resources configured to use this integration will remain but will stop working.',
+                    'This cannot be undone. Insights resources configured to use this integration will remain but will stop working.',
                 primaryButton: {
                     children: 'Yes, disconnect',
                     status: 'danger',

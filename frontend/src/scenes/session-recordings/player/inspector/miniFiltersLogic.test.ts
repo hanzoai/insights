@@ -21,7 +21,7 @@ describe('miniFiltersLogic', () => {
             expectLogic(logic).toMatchValues({
                 showOnlyMatching: false,
                 selectedMiniFilters: [
-                    'events-posthog',
+                    'events-insights',
                     'events-custom',
                     'events-pageview',
                     'events-autocapture',
@@ -59,7 +59,7 @@ describe('miniFiltersLogic', () => {
 
         it('can unselect', async () => {
             await expectLogic(logic, () => {
-                logic.actions.setMiniFilter('events-posthog', false)
+                logic.actions.setMiniFilter('events-insights', false)
             }).toMatchValues({
                 selectedMiniFilters: [
                     'events-custom',

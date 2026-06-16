@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
 import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
@@ -15,17 +15,8 @@ import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
 import { FilterLogicalOperator, PropertyFilterType, UniversalFiltersGroup } from '~/types'
 
+import { TAXONOMIC_FILTER_LOGIC_KEY, TAXONOMIC_GROUP_TYPES } from './consts'
 import { issueFiltersLogic } from './issueFiltersLogic'
-
-export const taxonomicFilterLogicKey = 'error-tracking'
-export const taxonomicGroupTypes = [
-    TaxonomicFilterGroupType.ErrorTrackingProperties,
-    TaxonomicFilterGroupType.ErrorTrackingIssues,
-    TaxonomicFilterGroupType.EventProperties,
-    TaxonomicFilterGroupType.PersonProperties,
-    TaxonomicFilterGroupType.Cohorts,
-    TaxonomicFilterGroupType.HogQLExpression,
-]
 
 export const FilterGroup = (): JSX.Element => {
     const { filterGroup } = useValues(issueFiltersLogic)
@@ -33,10 +24,10 @@ export const FilterGroup = (): JSX.Element => {
 
     return (
         <UniversalFilters
-            rootKey={taxonomicFilterLogicKey}
+            rootKey={TAXONOMIC_FILTER_LOGIC_KEY}
             group={filterGroup.values[0] as UniversalFiltersGroup}
             // TODO: Probably makes sense to create a new taxonomic group for exception-specific event property filters only, keep it clean.
-            taxonomicGroupTypes={taxonomicGroupTypes}
+            taxonomicGroupTypes={TAXONOMIC_GROUP_TYPES}
             onChange={(group) => setFilterGroup({ type: FilterLogicalOperator.And, values: [group] })}
         >
             <UniversalSearch />
@@ -59,8 +50,8 @@ const UniversalSearch = (): JSX.Element => {
     }
 
     const taxonomicFilterLogicProps: TaxonomicFilterLogicProps = {
-        taxonomicFilterLogicKey,
-        taxonomicGroupTypes,
+        taxonomicFilterLogicKey: TAXONOMIC_FILTER_LOGIC_KEY,
+        taxonomicGroupTypes: TAXONOMIC_GROUP_TYPES,
         onChange: (taxonomicGroup, value, item, originalQuery) => {
             searchInputRef.current?.blur()
             setVisible(false)
@@ -79,14 +70,15 @@ const UniversalSearch = (): JSX.Element => {
         <BindLogic logic={taxonomicFilterLogic} props={taxonomicFilterLogicProps}>
             <LemonDropdown
                 overlay={
-                    <InfiniteSelectResults
-                        focusInput={() => searchInputRef.current?.focus()}
-                        taxonomicFilterLogicProps={taxonomicFilterLogicProps}
-                        popupAnchorElement={floatingRef.current}
-                        useVerticalLayout={true}
-                    />
+                    <div className="w-[400px] md:w-[600px]">
+                        <InfiniteSelectResults
+                            focusInput={() => searchInputRef.current?.focus()}
+                            taxonomicFilterLogicProps={taxonomicFilterLogicProps}
+                            popupAnchorElement={floatingRef.current}
+                            useVerticalLayout={true}
+                        />
+                    </div>
                 }
-                matchWidth
                 visible={visible}
                 closeOnClickInside={false}
                 floatingRef={floatingRef}
@@ -99,8 +91,9 @@ const UniversalSearch = (): JSX.Element => {
                     onClose={() => onClose()}
                     onChange={onChange}
                     size="small"
+                    autoFocus={false}
                     fullWidth
-                    docLink="https://posthog.com/docs/error-tracking/filter-and-search-issues"
+                    docLink="https://hanzo.ai/docs/error-tracking/filter-and-search-issues"
                 />
             </LemonDropdown>
         </BindLogic>
@@ -128,7 +121,7 @@ const UniversalFilterGroup = (): JSX.Element => {
                         filter={filterOrGroup}
                         onRemove={() => removeGroupValue(index)}
                         onChange={(value) => replaceGroupValue(index, value)}
-                        initiallyOpen={allowInitiallyOpen && filterOrGroup.type != PropertyFilterType.HogQL}
+                        initiallyOpen={allowInitiallyOpen && filterOrGroup.type != PropertyFilterType.InsightsQL}
                     />
                 )
             })}

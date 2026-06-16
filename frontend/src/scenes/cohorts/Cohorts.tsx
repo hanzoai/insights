@@ -3,11 +3,14 @@ import './Cohorts.scss'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
+import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
+import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ListHog } from 'lib/components/hedgehogs'
+import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
+import { ListMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
@@ -18,24 +21,25 @@ import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/column
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { cohortsSceneLogic } from 'scenes/cohorts/cohortsSceneLogic'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
-import { SceneExport } from 'scenes/sceneTypes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { CohortType, ProductKey } from '~/types'
-
-const RESOURCE_TYPE = 'cohort'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { CohortType, FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
 export const scene: SceneExport = {
     component: Cohorts,
     logic: cohortsSceneLogic,
+    productKey: ProductKey.PRODUCT_ANALYTICS,
 }
 
 export function Cohorts(): JSX.Element {
-    const { cohorts, cohortsLoading, pagination, cohortFilters, shouldShowEmptyState } = useValues(cohortsSceneLogic)
-    const { deleteCohort, exportCohortPersons, setCohortFilters } = useActions(cohortsSceneLogic)
+    const { cohorts, cohortsLoading, pagination, cohortFilters, shouldShowEmptyState, cohortSorting } =
+        useValues(cohortsSceneLogic)
+    const { deleteCohort, exportCohortPersons, setCohortFilters, setCohortSorting } = useActions(cohortsSceneLogic)
     const { searchParams } = useValues(router)
 
     const columns: LemonTableColumns<CohortType> = [
@@ -70,7 +74,7 @@ export function Cohorts(): JSX.Element {
         {
             title: 'Last calculated',
             tooltip:
-                'PostHog calculates what users belong to each cohort. This is then used when filtering on cohorts in the Trends page etc. Calculating happens every 24 hours, or whenever a cohort is updated',
+                'Insights calculates what users belong to each cohort. This is then used when filtering on cohorts in the Trends page etc. Calculating happens every 24 hours, or whenever a cohort is updated',
             render: function RenderCalculation(_: any, cohort: CohortType) {
                 if (cohort.is_static) {
                     return <>N/A</>
@@ -87,6 +91,7 @@ export function Cohorts(): JSX.Element {
         {
             width: 0,
             render: function RenderActions(_, cohort) {
+                const cohortId = typeof cohort.id === 'number' ? cohort.id : null
                 return (
                     <More
                         overlay={
@@ -94,25 +99,31 @@ export function Cohorts(): JSX.Element {
                                 <LemonButton to={urls.cohort(cohort.id)} fullWidth>
                                     Edit
                                 </LemonButton>
-                                <LemonButton
-                                    to={
-                                        combineUrl(urls.replay(), {
-                                            filters: {
-                                                properties: [
+                                {cohortId && (
+                                    <ViewRecordingsPlaylistButton
+                                        filters={{
+                                            filter_group: {
+                                                type: FilterLogicalOperator.And,
+                                                values: [
                                                     {
-                                                        key: 'id',
-                                                        label: cohort.name,
-                                                        type: 'cohort',
-                                                        value: cohort.id,
+                                                        type: FilterLogicalOperator.And,
+                                                        values: [
+                                                            {
+                                                                type: PropertyFilterType.Cohort,
+                                                                key: 'id',
+                                                                operator: PropertyOperator.In,
+                                                                value: cohortId,
+                                                            },
+                                                        ],
                                                     },
                                                 ],
                                             },
-                                        }).url
-                                    }
-                                    fullWidth
-                                >
-                                    View session recordings
-                                </LemonButton>
+                                        }}
+                                        fullWidth
+                                        label="View session recordings"
+                                        data-attr="cohort-view-recordings"
+                                    />
+                                )}
                                 <LemonButton
                                     onClick={() =>
                                         exportCohortPersons(cohort.id, [
@@ -138,7 +149,22 @@ export function Cohorts(): JSX.Element {
                                 <LemonButton
                                     status="danger"
                                     onClick={() => {
-                                        deleteCohort({ id: cohort.id, name: cohort.name, deleted: true })
+                                        LemonDialog.open({
+                                            title: 'Delete cohort?',
+                                            description: `Are you sure you want to delete "${cohort.name}"?`,
+                                            primaryButton: {
+                                                children: 'Delete',
+                                                status: 'danger',
+                                                onClick: () =>
+                                                    deleteCohort({ id: cohort.id, name: cohort.name, deleted: true }),
+                                                size: 'small',
+                                            },
+                                            secondaryButton: {
+                                                children: 'Cancel',
+                                                type: 'tertiary',
+                                                size: 'small',
+                                            },
+                                        })
                                     }}
                                     fullWidth
                                 >
@@ -154,15 +180,24 @@ export function Cohorts(): JSX.Element {
 
     const filtersSection = (
         <div className="flex justify-between gap-2 flex-wrap">
-            <LemonInput
-                className="w-60"
-                type="search"
-                placeholder="Search for cohorts"
-                onChange={(search) => {
-                    setCohortFilters({ search: search || undefined, page: 1 })
-                }}
-                value={cohortFilters.search}
-            />
+            <AppShortcut
+                name="SearchCohorts"
+                keybind={[keyBinds.filter]}
+                intent="Search cohorts"
+                interaction="click"
+                scope={Scene.Cohorts}
+            >
+                <LemonInput
+                    className="w-60"
+                    type="search"
+                    placeholder="Search for cohorts"
+                    onChange={(search) => {
+                        setCohortFilters({ search: search || undefined, page: 1 })
+                    }}
+                    value={cohortFilters.search}
+                />
+            </AppShortcut>
+
             <div className="flex items-center gap-2">
                 <span>
                     <b>Type</b>
@@ -211,27 +246,34 @@ export function Cohorts(): JSX.Element {
 
     return (
         <SceneContent>
-            <PersonsManagementSceneTabs
-                tabKey="cohorts"
-                buttons={
-                    <LemonButton
-                        type="primary"
-                        data-attr="new-cohort"
-                        onClick={() => router.actions.push(urls.cohort('new'))}
-                    >
-                        New cohort
-                    </LemonButton>
-                }
-            />
+            <PersonsManagementSceneTabs tabKey="cohorts" />
 
             <SceneTitleSection
-                name="Cohorts"
-                description="A catalog of identified persons and your created cohorts."
+                name={sceneConfigurations[Scene.Cohorts].name}
+                description={sceneConfigurations[Scene.Cohorts].description}
                 resourceType={{
-                    type: RESOURCE_TYPE,
+                    type: sceneConfigurations[Scene.Cohorts].iconType || 'default_icon_type',
                 }}
+                actions={
+                    <AppShortcut
+                        name="NewCohort"
+                        keybind={[keyBinds.new]}
+                        intent="New cohort"
+                        interaction="click"
+                        scope={Scene.Cohorts}
+                    >
+                        <LemonButton
+                            type="primary"
+                            size="small"
+                            data-attr="new-cohort"
+                            onClick={() => router.actions.push(urls.cohort('new'))}
+                            tooltip="New cohort"
+                        >
+                            New cohort
+                        </LemonButton>
+                    </AppShortcut>
+                }
             />
-            <SceneDivider />
 
             <ProductIntroduction
                 productName="Cohorts"
@@ -239,9 +281,9 @@ export function Cohorts(): JSX.Element {
                 thingName="cohort"
                 description="Use cohorts to group people together, such as users who used your app in the last week, or people who viewed the signup page but didn't convert."
                 isEmpty={shouldShowEmptyState}
-                docsURL="https://posthog.com/docs/data/cohorts"
+                docsURL="https://hanzo.ai/docs/data/cohorts"
                 action={() => router.actions.push(urls.cohort('new'))}
-                customHog={ListHog}
+                customInsights={ListMascot}
             />
 
             <div>{filtersSection}</div>
@@ -253,6 +295,11 @@ export function Cohorts(): JSX.Element {
                 dataSource={cohorts.results}
                 nouns={['cohort', 'cohorts']}
                 data-attr="cohorts-table"
+                sorting={cohortSorting}
+                onSort={(sorting) => {
+                    setCohortSorting(sorting)
+                }}
+                useURLForSorting={false}
             />
         </SceneContent>
     )

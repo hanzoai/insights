@@ -1,7 +1,7 @@
 import { BuiltLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconNotebook, IconPlusSmall } from '@posthog/icons'
+import { IconNotebook, IconPlusSmall } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -154,8 +154,11 @@ export function SceneNotebookMenuItems({
                                             notebooksContainingResource.map(
                                                 (notebook: NotebookListItemType) =>
                                                     notebook && (
-                                                        <Combobox.Group value={[notebook.title ?? '']}>
-                                                            <Combobox.Item key={notebook.short_id} asChild>
+                                                        <Combobox.Group
+                                                            key={notebook.short_id}
+                                                            value={[notebook.title ?? '']}
+                                                        >
+                                                            <Combobox.Item asChild>
                                                                 <ButtonPrimitive
                                                                     menuItem
                                                                     onClick={() => {
@@ -188,8 +191,11 @@ export function SceneNotebookMenuItems({
                                             notebooksNotContainingResource.map(
                                                 (notebook: NotebookListItemType) =>
                                                     notebook && (
-                                                        <Combobox.Group value={[notebook.title ?? '']}>
-                                                            <Combobox.Item key={notebook.short_id} asChild>
+                                                        <Combobox.Group
+                                                            key={notebook.short_id}
+                                                            value={[notebook.title ?? '']}
+                                                        >
+                                                            <Combobox.Item asChild>
                                                                 <ButtonPrimitive
                                                                     menuItem
                                                                     onClick={() => {

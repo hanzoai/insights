@@ -1,10 +1,10 @@
 from uuid import uuid4
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
-from posthog.models import Organization, Project, Team, User
+from insights.models import Organization, Project, Team, User
 
 from products.llm_analytics.backend.models.datasets import Dataset, DatasetItem
 
@@ -20,14 +20,14 @@ def _setup_team():
         test_account_filters=[
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
         ],
         has_completed_onboarding_for={"product_analytics": True},
     )
-    User.objects.create_and_join(org, "test-datasets@posthog.com", "testpassword123")
+    User.objects.create_and_join(org, "test-datasets@hanzo.ai", "testpassword123")
     return team
 
 

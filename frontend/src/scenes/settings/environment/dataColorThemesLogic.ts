@@ -8,7 +8,7 @@ import type { dataColorThemesLogicType } from './dataColorThemesLogicType'
 export const dataColorThemesLogic = kea<dataColorThemesLogicType>([
     path(['scenes', 'settings', 'environment', 'dataColorThemesLogic']),
     connect(() => ({
-        values: [dataThemeLogic, ['themes', 'themesLoading', 'defaultTheme', 'posthogTheme']],
+        values: [dataThemeLogic, ['themes', 'themesLoading', 'defaultTheme', 'insightsTheme']],
         actions: [dataColorThemesModalLogic, ['openModal', 'submitThemeSuccess'], dataThemeLogic, ['setThemes']],
     })),
     actions({
@@ -17,12 +17,12 @@ export const dataColorThemesLogic = kea<dataColorThemesLogicType>([
     listeners(({ values, actions }) => ({
         selectTheme: ({ id }) => {
             // we're not yet initialized
-            if (values.themes == null || values.posthogTheme == null || id == null) {
+            if (values.themes == null || values.insightsTheme == null || id == null) {
                 return
             }
 
             if (id === 'new') {
-                const { id, name, is_global, ...newTheme } = values.posthogTheme
+                const { id, name, is_global, ...newTheme } = values.insightsTheme
                 actions.openModal(newTheme)
             } else {
                 const existingTheme = values.themes.find((theme) => theme.id === id)

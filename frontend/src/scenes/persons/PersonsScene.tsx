@@ -1,26 +1,36 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
-import { IconEllipsis, IconPeople } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@posthog/lemon-ui'
+import { IconEllipsis, IconRewind } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
 
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { Link } from 'lib/lemon-ui/Link'
+import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
-import { SceneExport } from 'scenes/sceneTypes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
+import { ScenePanel, ScenePanelActionsSection } from '~/layout/scenes/SceneLayout'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { useFeatureFlag } from '~/lib/hooks/useFeatureFlag'
 import { Query } from '~/queries/Query/Query'
-import { OnboardingStepKey, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { CustomerProfileScope, OnboardingStepKey } from '~/types'
+
+import { FeedbackBanner } from 'products/customer_analytics/frontend/components/FeedbackBanner'
+import { PersonDisplayNameNudgeBanner } from 'products/customer_analytics/frontend/components/PersonDisplayNameNudgeBanner'
+import { customerProfileConfigLogic } from 'products/customer_analytics/frontend/customerProfileConfigLogic'
 
 import { personsSceneLogic } from './personsSceneLogic'
 
 export const scene: SceneExport = {
     component: PersonsScene,
     logic: personsSceneLogic,
+    productKey: ProductKey.PRODUCT_ANALYTICS,
 }
 
 export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
@@ -33,75 +43,127 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
         throw new Error('PersonsScene rendered with no tabId')
     }
 
-    const { query } = useValues(personsSceneLogic)
+    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
+    const { query, showDisplayNameNudge } = useValues(personsSceneLogic)
     const { setQuery } = useActions(personsSceneLogic)
     const { resetDeletedDistinctId } = useAsyncActions(personsSceneLogic)
-    const { currentTeam } = useValues(teamLogic)
+    const { currentTeam, baseCurrency } = useValues(teamLogic)
+    const { loadConfigs } = useActions(customerProfileConfigLogic({ scope: CustomerProfileScope.PERSON }))
+    const queryUniqueKey = `persons-query-${tabId}`
+
+    useOnMountEffect(() => {
+        loadConfigs()
+    })
 
     return (
         <SceneContent>
-            <PersonsManagementSceneTabs
-                tabKey="persons"
-                buttons={
-                    <LemonMenu
-                        items={[
-                            {
-                                label: 'Reset a deleted person...',
-                                onClick: () =>
-                                    LemonDialog.openForm({
-                                        width: '30rem',
-                                        title: 'Reset deleted person',
-                                        description: `Once a person is deleted, the "distinct_id" associated with them can no longer be used. 
-                                            You can use this tool to reset the "distinct_id" for a person so that new events associated with it will create a new Person profile.`,
-                                        initialValues: {
-                                            distinct_id: '',
-                                        },
-                                        content: (
-                                            <LemonField name="distinct_id" label="Distinct ID to reset">
-                                                <LemonInput type="text" autoFocus />
-                                            </LemonField>
-                                        ),
-                                        errors: {
-                                            distinct_id: (distinct_id) =>
-                                                !distinct_id ? 'This is required' : undefined,
-                                        },
-                                        onSubmit: async ({ distinct_id }) => await resetDeletedDistinctId(distinct_id),
-                                    }),
-                            },
-                        ]}
-                    >
-                        <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
-                    </LemonMenu>
-                }
-            />
+            <PersonsManagementSceneTabs tabKey="persons" />
 
             <SceneTitleSection
-                name="People"
-                description="A catalog of all the people behind your events"
+                name={sceneConfigurations[Scene.Persons].name}
+                description={sceneConfigurations[Scene.Persons].description}
                 resourceType={{
-                    type: 'person',
-                    forceIcon: <IconPeople />,
+                    type: sceneConfigurations[Scene.Persons].iconType || 'default_icon_type',
                 }}
+                actions={
+                    <>
+                        {isRemovingSidePanelFlag ? (
+                            <ScenePanel>
+                                <ScenePanelActionsSection>
+                                    <ButtonPrimitive
+                                        menuItem
+                                        variant="danger"
+                                        onClick={() => {
+                                            LemonDialog.openForm({
+                                                width: '30rem',
+                                                title: 'Reset deleted user',
+                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
+                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
+                                                initialValues: {
+                                                    distinct_id: '',
+                                                },
+                                                content: (
+                                                    <LemonField name="distinct_id" label="Distinct ID to reset">
+                                                        <LemonInput type="text" autoFocus />
+                                                    </LemonField>
+                                                ),
+                                                errors: {
+                                                    distinct_id: (distinct_id) =>
+                                                        !distinct_id ? 'This is required' : undefined,
+                                                },
+                                                onSubmit: async ({ distinct_id }) =>
+                                                    await resetDeletedDistinctId(distinct_id),
+                                            })
+                                        }}
+                                    >
+                                        <IconRewind />
+                                        Reset a deleted user...
+                                    </ButtonPrimitive>
+                                </ScenePanelActionsSection>
+                            </ScenePanel>
+                        ) : (
+                            <LemonMenu
+                                items={[
+                                    {
+                                        label: 'Reset a deleted user...',
+                                        onClick: () =>
+                                            LemonDialog.openForm({
+                                                width: '30rem',
+                                                title: 'Reset deleted user',
+                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
+                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
+                                                initialValues: {
+                                                    distinct_id: '',
+                                                },
+                                                content: (
+                                                    <LemonField name="distinct_id" label="Distinct ID to reset">
+                                                        <LemonInput type="text" autoFocus />
+                                                    </LemonField>
+                                                ),
+                                                errors: {
+                                                    distinct_id: (distinct_id) =>
+                                                        !distinct_id ? 'This is required' : undefined,
+                                                },
+                                                onSubmit: async ({ distinct_id }) =>
+                                                    await resetDeletedDistinctId(distinct_id),
+                                            }),
+                                    },
+                                ]}
+                            >
+                                <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
+                            </LemonMenu>
+                        )}
+                    </>
+                }
             />
-            <SceneDivider />
+            <PersonDisplayNameNudgeBanner uniqueKey={queryUniqueKey} />
+            {!showDisplayNameNudge && (
+                <FeedbackBanner
+                    feedbackButtonId="people-list"
+                    message="We're improving the users experience. Send us your feedback!"
+                />
+            )}
 
             <Query
-                uniqueKey={`persons-query-${tabId}`}
+                uniqueKey={queryUniqueKey}
                 attachTo={personsSceneLogic({ tabId })}
-                query={query}
+                query={{ ...query, showCount: true, showTableViews: true }}
                 setQuery={setQuery}
                 context={{
                     refresh: 'blocking',
                     emptyStateHeading: currentTeam?.ingested_event
-                        ? 'There are no matching persons for this query'
-                        : 'No persons exist because no events have been ingested',
+                        ? 'There are no matching users for this query'
+                        : 'No users exist because no events have been ingested',
                     emptyStateDetail: currentTeam?.ingested_event ? (
                         'Try changing the date range or property filters.'
                     ) : (
                         <>
                             Go to the{' '}
                             <Link
-                                to={urls.onboarding(ProductKey.PRODUCT_ANALYTICS, OnboardingStepKey.INSTALL)}
+                                to={urls.onboarding({
+                                    productKey: ProductKey.PRODUCT_ANALYTICS,
+                                    stepKey: OnboardingStepKey.INSTALL,
+                                })}
                                 data-attr="real_project_with_no_events-ingestion_link"
                             >
                                 onboarding wizard
@@ -109,6 +171,7 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                             to get things moving
                         </>
                     ),
+                    baseCurrency,
                 }}
                 dataAttr="persons-table"
             />

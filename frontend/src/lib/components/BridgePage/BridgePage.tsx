@@ -2,16 +2,9 @@ import './BridgePage.scss'
 
 import clsx from 'clsx'
 import { useValues } from 'kea'
-import { useState } from 'react'
-import { CSSTransition } from 'react-transition-group'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { WelcomeLogo } from 'scenes/authentication/WelcomeLogo'
-
-import { Region } from '~/types'
-
-import { LaptopHog4, LaptopHogEU } from '../hedgehogs'
 
 export type BridgePageCommonProps = {
     children?: React.ReactNode
@@ -22,48 +15,37 @@ export type BridgePageCommonProps = {
     sideLogo?: boolean
     fixedWidth?: boolean
     leftContainerContent?: JSX.Element
+    mascot?: boolean // kept for call-site compat, ignored
+    message?: React.ReactNode // kept for call-site compat, ignored
+    theme?: 'default' | 'twig'
+    style?: React.CSSProperties
 }
-
-interface NoHedgehogProps extends BridgePageCommonProps {
-    hedgehog?: false
-    message?: never
-}
-
-interface YesHedgehogProps extends BridgePageCommonProps {
-    hedgehog: true
-    message?: React.ReactNode
-}
-
-// Only allow setting of the hog message when a hog actually exists
-type BridgePageProps = NoHedgehogProps | YesHedgehogProps
 
 export function BridgePage({
     children,
     header,
     footer,
     view,
-    message,
     noLogo = false,
     sideLogo = false,
     fixedWidth = true,
     leftContainerContent,
-    hedgehog = false,
-}: BridgePageProps): JSX.Element {
-    const [messageShowing, setMessageShowing] = useState(false)
-    const { preflight } = useValues(preflightLogic)
-
-    useOnMountEffect(() => {
-        const t = setTimeout(() => {
-            setMessageShowing(true)
-        }, 200)
-
-        return () => clearTimeout(t)
-    })
+    theme = 'default',
+    style,
+}: BridgePageCommonProps): JSX.Element {
+    const { preflight: _preflight } = useValues(preflightLogic)
 
     return (
-        <div className={clsx('BridgePage', fixedWidth && 'BridgePage--fixed-width')}>
+        <div
+            className={clsx(
+                'BridgePage',
+                fixedWidth && 'BridgePage--fixed-width',
+                theme === 'twig' && 'BridgePage--twig'
+            )}
+            style={style}
+        >
             <div className="BridgePage__main">
-                {leftContainerContent || hedgehog ? (
+                {leftContainerContent ? (
                     <div className="BridgePage__left-wrapper">
                         <div className="BridgePage__left">
                             {!noLogo && sideLogo && (
@@ -72,24 +54,6 @@ export function BridgePage({
                                 </div>
                             )}
                             {leftContainerContent}
-                            {hedgehog && (
-                                <div className="BridgePage__left__art">
-                                    {preflight?.region === Region.EU ? (
-                                        <LaptopHogEU alt="" draggable="false" />
-                                    ) : (
-                                        <LaptopHog4 alt="" draggable="false" />
-                                    )}
-                                    {message ? (
-                                        <CSSTransition
-                                            in={messageShowing}
-                                            timeout={200}
-                                            classNames="BridgePage__left__message-"
-                                        >
-                                            <div className="BridgePage__left__message">{message}</div>
-                                        </CSSTransition>
-                                    ) : null}
-                                </div>
-                            )}
                         </div>
                     </div>
                 ) : null}

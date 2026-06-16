@@ -1,12 +1,10 @@
 import { BuiltLogic, useActions, useValues } from 'kea'
-import { PostHogErrorBoundary } from 'posthog-js/react'
+import { InsightsErrorBoundary } from '@hanzo/insights/react'
 import { useEffect, useMemo } from 'react'
-
-import { IconComment } from '@posthog/icons'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { RecordingsUniversalFiltersEmbed } from 'scenes/session-recordings/filters/RecordingsUniversalFiltersEmbed'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { sessionRecordingPlayerLogicType } from 'scenes/session-recordings/player/sessionRecordingPlayerLogicType'
@@ -21,6 +19,7 @@ import { urls } from 'scenes/urls'
 
 import { FilterType, RecordingUniversalFilters, ReplayTabs } from '~/types'
 
+import { notebookLogic } from '../Notebook/notebookLogic'
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
@@ -30,11 +29,13 @@ const Component = ({
 }: NotebookNodeProps<NotebookNodePlaylistAttributes>): JSX.Element => {
     const { pinned, nodeId, universalFilters } = attributes
     const playerKey = `notebook-${nodeId}`
+    const { personUUIDFromCanvasOverride } = useValues(notebookLogic)
 
     const recordingPlaylistLogicProps: SessionRecordingPlaylistLogicProps = useMemo(
         () => ({
             logicKey: playerKey,
             filters: universalFilters,
+            ...(personUUIDFromCanvasOverride ? { personUUID: personUUIDFromCanvasOverride } : {}),
             updateSearchParams: false,
             autoPlay: false,
             onFiltersChange: (newFilters) => updateAttributes({ universalFilters: newFilters }),
@@ -51,8 +52,7 @@ const Component = ({
         [playerKey, universalFilters, pinned]
     )
 
-    const { setActions, insertAfter, insertReplayCommentByTimestamp, setMessageListeners, scrollIntoView } =
-        useActions(notebookNodeLogic)
+    const { setActions, insertAfter, setMessageListeners, scrollIntoView } = useActions(notebookNodeLogic)
 
     const logic = sessionRecordingsPlaylistLogic(recordingPlaylistLogicProps)
     const { activeSessionRecording } = useValues(logic)
@@ -81,16 +81,6 @@ const Component = ({
                                       },
                                   },
                               })
-                          },
-                      },
-                      {
-                          text: 'Comment',
-                          icon: <IconComment />,
-                          onClick: () => {
-                              if (activeSessionRecording.id) {
-                                  const time = getReplayLogic(activeSessionRecording.id)?.values.currentPlayerTime
-                                  insertReplayCommentByTimestamp(time ?? 0, activeSessionRecording.id)
-                              }
                           },
                       },
                   ]
@@ -128,9 +118,9 @@ export const Settings = ({
     }
 
     return (
-        <PostHogErrorBoundary>
+        <InsightsErrorBoundary>
             <RecordingsUniversalFiltersEmbed filters={filters} setFilters={setFilters} />
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }
 
@@ -139,7 +129,7 @@ export type NotebookNodePlaylistAttributes = {
     pinned?: string[]
 }
 
-export const NotebookNodePlaylist = createPostHogWidgetNode<NotebookNodePlaylistAttributes>({
+export const NotebookNodePlaylist = createInsightsWidgetNode<NotebookNodePlaylistAttributes>({
     nodeType: NotebookNodeType.RecordingPlaylist,
     titlePlaceholder: 'Session replays',
     Component,

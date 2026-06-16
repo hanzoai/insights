@@ -120,7 +120,7 @@ fn parse_request(params: HashMap<String, String>) -> Params {
             .any(|st| st.as_str() == SEARCH_TRIGGER_WORD);
 
     // which columns should we fuzzy-search for each of the user-supplied search terms?
-    // defaults to "posthog_propertydefinition.name" column, but user can supply more
+    // defaults to "insights_propertydefinition.name" column, but user can supply more
     // DIVERGES FROM DJANGO API: the new Rust API will accept lists as space-separated query param values
     let mut search_fields: HashSet<String> = HashSet::from(["name".to_string()]);
     let sf_overrides: Vec<String> = params
@@ -175,15 +175,15 @@ fn parse_request(params: HashMap<String, String>) -> Params {
     // to just pass the result of those checks from the caller (Django) to this API? the flag decides
     // if the props def query should join in enterprise prop defs and (indirectly) the users table.
     // defaulting to true for now, but TBD if this is in parity w/original yet. see also:
-    // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L463
-    // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L504-L508
+    // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L463
+    // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L504-L508
     let use_enterprise_taxonomy = params
         .get("use_enterprise_taxonomy")
         .and_then(|s| s.parse::<bool>().ok())
         .unwrap_or(true);
 
     // DIVERGES FROM DJANGO API: the new Rust API will accept lists as space-separated query param values
-    // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L214
+    // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L214
     let event_names = params
         .get("event_names")
         .map(|raw| raw.split(" ").map(|s| s.trim().to_string()).collect())
@@ -232,7 +232,7 @@ pub struct Params {
 }
 
 impl Params {
-    // https://github.com/PostHog/posthog/blob/master/posthog/taxonomy/property_definition_api.py#L81-L96
+    // https://github.com/hanzoai/insights/blob/main/insights/taxonomy/property_definition_api.py#L81-L96
     pub fn valid(&self) -> Result<(), ApiError> {
         if self.parent_type == PropertyParentType::Group
             && !(0..GROUP_TYPE_LIMIT).contains(&self.group_type_index)

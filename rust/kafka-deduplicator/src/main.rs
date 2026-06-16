@@ -56,7 +56,9 @@ pub async fn index() -> &'static str {
 /// Setup metrics recorder with optimized histogram buckets for kafka-deduplicator
 /// Using fewer buckets to reduce cardinality
 fn setup_kafka_deduplicator_metrics() -> PrometheusHandle {
-    const BUCKETS: &[f64] = &[0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 100.0, 500.0, 5000.0];
+    const BUCKETS: &[f64] = &[
+        0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0,
+    ];
     // similarity scores are all in the range [0.0, 1.0] so we want
     // granular bucket ranges for higher fidelity metrics
     const SIMILARITY_BUCKETS: &[f64] = &[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
@@ -79,6 +81,11 @@ fn setup_kafka_deduplicator_metrics() -> PrometheusHandle {
         100.0 * 1024.0 * 1024.0 * 1024.0,
     ];
 
+    // Buckets for counting unique items (UUIDs, timestamps)
+    const COUNT_BUCKETS: &[f64] = &[
+        1.0, 2.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0, 10000.0,
+    ];
+
     PrometheusBuilder::new()
         .set_buckets(BUCKETS)
         .unwrap()
@@ -95,6 +102,13 @@ fn setup_kafka_deduplicator_metrics() -> PrometheusHandle {
         .set_buckets_for_metric(
             Matcher::Suffix("checkpoint_size_bytes".to_string()),
             CHECKPOINT_SIZE_BYTES_BUCKETS,
+        )
+        .unwrap()
+        .set_buckets_for_metric(Matcher::Suffix("unique_uuids".to_string()), COUNT_BUCKETS)
+        .unwrap()
+        .set_buckets_for_metric(
+            Matcher::Suffix("unique_timestamps".to_string()),
+            COUNT_BUCKETS,
         )
         .unwrap()
         .install_recorder()
@@ -151,15 +165,40 @@ async fn main() -> Result<()> {
         .context("Failed to load configuration from environment variables. Please check your environment setup.")?;
 
     // Initialize tracing with structured output similar to feature-flags
-    let log_layer = fmt::layer()
-        .with_span_events(
-            FmtSpan::NEW | FmtSpan::CLOSE | FmtSpan::ENTER | FmtSpan::EXIT | FmtSpan::ACTIVE,
-        )
-        .with_target(true)
-        .with_thread_ids(true)
-        .with_level(true)
-        .with_ansi(false)
-        .with_filter(EnvFilter::from_default_env());
+    let log_layer = {
+        let base = fmt::layer()
+            .with_target(true)
+            .with_thread_ids(true)
+            .with_level(true);
+
+        if config.otel_log_level == tracing::Level::DEBUG {
+            // local dev: pretty-print output to console
+            base.with_span_events(
+                FmtSpan::NEW | FmtSpan::CLOSE | FmtSpan::ENTER | FmtSpan::EXIT | FmtSpan::ACTIVE,
+            )
+            .with_ansi(true)
+            .with_filter(
+                EnvFilter::builder()
+                    .with_default_directive(LevelFilter::INFO.into())
+                    .from_env_lossy()
+                    .add_directive("pyroscope=warn".parse().unwrap()),
+            )
+            .boxed()
+        } else {
+            // production: use JSON format Loki/Grafana can extract useful filter tags from
+            base.json()
+                .flatten_event(true)
+                .with_span_list(true)
+                .with_current_span(true)
+                .with_filter(
+                    EnvFilter::builder()
+                        .with_default_directive(LevelFilter::INFO.into())
+                        .from_env_lossy()
+                        .add_directive("pyroscope=warn".parse().unwrap()),
+                )
+                .boxed()
+        }
+    };
 
     // OpenTelemetry layer if configured
     let otel_layer = if let Some(ref otel_url) = config.otel_url {
@@ -179,6 +218,24 @@ async fn main() -> Result<()> {
         .with(log_layer)
         .with(otel_layer)
         .init();
+
+    // Create a root span with pod hostname for all logs
+    // This adds "pod" field to every log line for Loki/Grafana filtering
+    let pod = config
+        .pod_hostname
+        .clone()
+        .unwrap_or_else(|| "unknown".to_string());
+    let _root_span = tracing::info_span!("service", pod = %pod).entered();
+
+    // Start continuous profiling if enabled (keep _agent alive for the duration of the program)
+    // NOTE: Must be after tracing is initialized so logs are visible
+    let _profiling_agent = match config.continuous_profiling.start_agent() {
+        Ok(agent) => agent,
+        Err(e) => {
+            tracing::warn!("Failed to start continuous profiling agent: {e:#}");
+            None
+        }
+    };
 
     info!("Starting Kafka Deduplicator service");
 

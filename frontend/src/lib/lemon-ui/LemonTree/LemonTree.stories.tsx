@@ -1,8 +1,8 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useRef } from 'react'
 
-import { IconArchive, IconShieldPeople } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconArchive, IconShieldPeople } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonTree, LemonTreeProps } from './LemonTree'
 
@@ -204,7 +204,7 @@ const BasicTemplate: StoryFn<typeof LemonTree> = (props: LemonTreeProps) => {
     const ref = useRef<HTMLDivElement>(null)
     return (
         <div className="deprecated-space-y-4">
-            <Link to="https://posthog.com">PostHog</Link>
+            <Link to="https://hanzo.ai">Insights</Link>
             <div className="deprecated-space-y-1">
                 <p>
                     Keyboard navigation: when focused inside the tree, try [up] [right] [down] [left] [enter] [home]
@@ -225,7 +225,7 @@ const BasicTemplate: StoryFn<typeof LemonTree> = (props: LemonTreeProps) => {
                     tabIndex={-1}
                 >
                     <h1>Your scene here</h1>
-                    <Link to="https://posthog.com">some content link</Link>
+                    <Link to="https://hanzo.ai">some content link</Link>
                 </main>
             </div>
         </div>

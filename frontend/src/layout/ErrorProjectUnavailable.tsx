@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { CreateOrganizationModal } from 'scenes/organization/CreateOrganizationModal'
@@ -59,7 +59,7 @@ export function ErrorProjectUnavailable(): JSX.Element {
                 </>
             ) : (
                 <>
-                    <h1>Welcome to {user?.organization?.name} on PostHog</h1>
+                    <h1>Welcome to {user?.organization?.name} on Insights</h1>
                     <p>You do not have access to any projects in this organization. You can {listOptions()}.</p>
                 </>
             )}

@@ -1,6 +1,8 @@
 pub mod content;
 pub mod format;
+pub mod serialization;
 
+#[derive(Debug)]
 pub struct Parsed<T> {
     pub data: T,
     // How many "parts" of the chunk (bytes, rows) were consumed to create the data. This allows for offset

@@ -1,7 +1,7 @@
 import { kea, key, listeners, path, props, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Dayjs, now } from 'lib/dayjs'
@@ -9,7 +9,7 @@ import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { urls } from 'scenes/urls'
 import { CalendarHeatMapProps } from 'scenes/web-analytics/CalendarHeatMap/CalendarHeatMap'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { ReplayTabs } from '~/types'
 
 import type { replayActiveHoursHeatMapLogicType } from './replayActiveHoursHeatMapLogicType'
@@ -53,7 +53,7 @@ export const onCellClick = (colIndex: number, rowIndex: number | undefined, time
         endDate = endDate.add(1, 'day')
     }
 
-    posthog.capture('clicked_replay_active_hours_heatmap_cell', {
+    insights.capture('clicked_replay_active_hours_heatmap_cell', {
         isColumnHeader: rowIndex == undefined,
         isIndividualCell: rowIndex != undefined,
         timezone,
@@ -80,7 +80,7 @@ export const replayActiveHoursHeatMapLogic = kea<replayActiveHoursHeatMapLogicTy
     lazyLoaders(() => ({
         recordingsPerHour: {
             loadRecordingsPerHour: async (_, breakpoint): Promise<number[][]> => {
-                const q = hogql`
+                const q = insightsql`
                     SELECT hour_block,
                            countIf(_toDate(mints) = today() - 6) AS "Day -6",
                            countIf(_toDate(mints) = today() - 5) AS "Day -5",
@@ -105,7 +105,7 @@ export const replayActiveHoursHeatMapLogic = kea<replayActiveHoursHeatMapLogicTy
                     GROUP BY hour_block
                     ORDER BY hour_block`
 
-                const qResponse = await api.queryHogQL(q)
+                const qResponse = await api.queryInsightsQL(q, { scene: 'Replay', productKey: 'session_replay' })
 
                 // this gives an array of arrays
                 // we're loading hours 0-4, 4-8, 8-12, 12-16, 16-20, 20-24

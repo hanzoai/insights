@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconWarning } from '@posthog/icons'
-import { Popover, Spinner } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { Popover, Spinner } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
@@ -59,7 +59,7 @@ export const ExplainCSPViolationButton = ({
                     {loading ? (
                         <div className="flex items-center justify-center min-h-40 gap-4">
                             <div className="text-l">
-                                <Spinner /> The security hogs are sniffing the violation{' '}
+                                <Spinner /> The security bots are sniffing the violation{' '}
                             </div>
                         </div>
                     ) : (

@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/posthog/posthog/livestream/auth"
-	"github.com/posthog/posthog/livestream/events"
+	"github.com/hanzoai/insights/livestream/auth"
+	"github.com/hanzoai/insights/livestream/events"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

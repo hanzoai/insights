@@ -55,7 +55,7 @@ pub fn validate_token(token: &str) -> Result<(), InvalidTokenReason> {
         return Err(InvalidTokenReason::NotAscii);
     }
 
-    if token.starts_with("phx_") {
+    if token.starts_with("phx_") || token.starts_with("hax_") {
         return Err(InvalidTokenReason::PersonalApiKey);
     }
 

@@ -1,12 +1,16 @@
 use crate::{
     api::{
-        errors::FlagError,
+        errors::{ClientFacingError, FlagError},
         types::{
             ConfigResponse, FlagsQueryParams, FlagsResponse, LegacyFlagsResponse, ServiceResponse,
         },
     },
-    handler::{process_request, RequestContext},
+    handler::{
+        decoding, process_request, run_with_canonical_log, with_canonical_log,
+        FlagsCanonicalLogLine, RequestContext,
+    },
     router,
+    utils::user_agent::UserAgentInfo,
 };
 // TODO: stream this instead
 use axum::extract::{MatchedPath, Query, State};
@@ -17,20 +21,9 @@ use axum_client_ip::InsecureClientIp;
 use bytes::Bytes;
 use serde_json;
 use std::collections::HashMap;
+use std::net::IpAddr;
 use tracing::Instrument;
 use uuid::Uuid;
-
-struct LogContext<'a> {
-    headers: &'a HeaderMap,
-    query_params: &'a FlagsQueryParams,
-    method: &'a Method,
-    path: &'a MatchedPath,
-    ip: &'a str,
-    request_id: Uuid,
-    is_from_decide: bool,
-    query_version: Option<i32>,
-    response_format: &'a str,
-}
 
 /// Extracts request ID from X-REQUEST-ID header, falling back to generating a new UUID if not present or invalid
 /// Good for tracing logs from the Contour layer all the way to the property evaluation
@@ -40,6 +33,70 @@ fn extract_request_id(headers: &HeaderMap) -> Uuid {
         .and_then(|v| v.to_str().ok())
         .and_then(|s| s.parse::<Uuid>().ok())
         .unwrap_or_else(Uuid::new_v4)
+}
+
+/// Extracts client IP address from request headers, checking X-Forwarded-For first
+/// then falling back to the direct client IP. Matches Python's get_ip_address function.
+fn extract_client_ip(headers: &HeaderMap, fallback_ip: IpAddr) -> IpAddr {
+    // Check X-Forwarded-For header first (case-insensitive)
+    if let Some(forwarded_for) = headers.get("X-Forwarded-For") {
+        if let Ok(forwarded_str) = forwarded_for.to_str() {
+            // Take the first IP from the comma-separated list
+            if let Some(first_ip) = forwarded_str.split(',').next() {
+                let trimmed = first_ip.trim();
+
+                // Strip port from IP address if present (Azure gateway compatibility)
+                let ip_without_port = if trimmed.starts_with('[') {
+                    // IPv6 with port (e.g., "[::1]:8080")
+                    trimmed
+                        .split(']')
+                        .next()
+                        .and_then(|s| s.strip_prefix('['))
+                        .unwrap_or(trimmed)
+                } else if trimmed.contains('.') {
+                    // Likely IPv4 - check for port after the last dot
+                    if let Some(colon_idx) = trimmed.rfind(':') {
+                        if let Some(last_dot_idx) = trimmed.rfind('.') {
+                            if colon_idx > last_dot_idx {
+                                // Port comes after the last dot, so this is IPv4:port
+                                &trimmed[..colon_idx]
+                            } else {
+                                // Colon before last dot? Malformed, return as-is
+                                trimmed
+                            }
+                        } else {
+                            // Has colon but no dot? Shouldn't happen for IPv4
+                            trimmed
+                        }
+                    } else {
+                        // No colon, just return the IP
+                        trimmed
+                    }
+                } else {
+                    // No dots and no brackets - assume IPv6 without port
+                    // IPv6 can have colons as part of the address, so don't strip
+                    trimmed
+                };
+
+                // Try to parse the IP address
+                if let Ok(parsed_ip) = ip_without_port.parse::<IpAddr>() {
+                    return parsed_ip;
+                }
+            }
+        }
+    }
+
+    // Fall back to the direct client IP
+    fallback_ip
+}
+
+/// Updates the canonical log with rate limit info and returns the error for early return.
+fn rate_limit_error(error: FlagError) -> FlagError {
+    with_canonical_log(|l| {
+        l.rate_limited = true;
+        l.set_error(&error);
+    });
+    error
 }
 
 fn get_minimal_flags_response(
@@ -52,23 +109,22 @@ fn get_minimal_flags_response(
     let version_num = version.map(|v| v.parse::<i32>().unwrap_or(1)).unwrap_or(1);
 
     // Create minimal config response
-    let config = ConfigResponse {
-        supported_compression: vec!["gzip".to_string(), "gzip-js".to_string()],
-        config: Some(serde_json::json!({"enable_collect_everything": true})),
-        toolbar_params: Some(serde_json::json!({})),
-        is_authenticated: Some(false),
-        session_recording: Some(crate::api::types::SessionRecordingField::Disabled(false)),
-        ..Default::default()
-    };
+    let mut config = ConfigResponse::new();
+    config.set(
+        "supportedCompression",
+        serde_json::json!(["gzip", "gzip-js"]),
+    );
+    config.set(
+        "config",
+        serde_json::json!({"enable_collect_everything": true}),
+    );
+    config.set("toolbarParams", serde_json::json!({}));
+    config.set("isAuthenticated", serde_json::json!(false));
+    config.set("sessionRecording", serde_json::json!(false));
 
     // Create empty flags response with minimal config
-    let response = FlagsResponse {
-        errors_while_computing_flags: false,
-        flags: HashMap::new(),
-        quota_limited: None,
-        request_id,
-        config,
-    };
+    let mut response = FlagsResponse::new(false, HashMap::new(), None, request_id);
+    response.config = config;
 
     // Return versioned response
     let service_response = if version_num >= 2 {
@@ -143,7 +199,7 @@ fn get_versioned_response(
 #[debug_handler]
 pub async fn flags(
     state: State<router::State>,
-    InsecureClientIp(ip): InsecureClientIp,
+    InsecureClientIp(direct_ip): InsecureClientIp,
     Query(query_params): Query<FlagsQueryParams>,
     headers: HeaderMap,
     method: Method,
@@ -152,7 +208,10 @@ pub async fn flags(
 ) -> Result<Response, FlagError> {
     let request_id = extract_request_id(&headers);
 
-    // Handle different HTTP methods
+    // Extract client IP, checking X-Forwarded-For header first
+    let ip = extract_client_ip(&headers, direct_ip);
+
+    // Handle different HTTP methods (these don't need canonical logging)
     match method {
         Method::GET => {
             // GET requests return minimal flags response
@@ -194,6 +253,26 @@ pub async fn flags(
         }
     }
 
+    // Convert IP to string once and reuse throughout the request
+    let ip_string = ip.to_string();
+
+    // Parse User-Agent and extract SDK info for logging
+    let user_agent = headers.get("user-agent").and_then(|v| v.to_str().ok());
+    let ua_info = UserAgentInfo::parse(user_agent);
+
+    // Initialize canonical log with all upfront request metadata.
+    // Fields discovered during processing (team_id, flags_evaluated, etc.) are set via with_canonical_log().
+    let canonical_log = FlagsCanonicalLogLine {
+        request_id,
+        ip: ip_string.clone(),
+        user_agent: user_agent.map(|s| s.to_string()),
+        lib: ua_info.lib_for_logging(),
+        // Browser SDK sends ver= query param, server SDKs send version in User-Agent
+        lib_version: query_params.lib_version.clone().or(ua_info.sdk_version),
+        api_version: query_params.version.clone(),
+        ..Default::default()
+    };
+
     // Check if this request came through the decide proxy
     let is_from_decide = headers
         .get("X-Original-Endpoint")
@@ -214,22 +293,20 @@ pub async fn flags(
         modified_query_params.config = Some(true);
     }
 
+    // Parse version from query params (needed for response formatting)
+    let query_version = modified_query_params
+        .version
+        .as_deref()
+        .map(|v| v.parse::<i32>().unwrap_or(1));
+
     let context = RequestContext {
         request_id,
-        state,
+        state: state.clone(),
         ip,
         headers: headers.clone(),
         meta: modified_query_params,
         body,
     };
-
-    // Parse version from query params
-    let query_version = context
-        .meta
-        .version
-        .clone()
-        .as_deref()
-        .map(|v| v.parse::<i32>().unwrap_or(1));
 
     // Create debug span for detailed tracing when debugging
     let _span = create_request_span(
@@ -237,66 +314,65 @@ pub async fn flags(
         &query_params,
         &method,
         &path,
-        &ip.to_string(),
+        &ip_string,
         request_id,
     );
 
-    let response = async move { process_request(context).await }
-        .instrument(_span)
-        .await?;
+    // Run the request within a canonical log scope.
+    // All code within can use with_canonical_log() to update the log.
+    let (result, mut log) = run_with_canonical_log(canonical_log, async {
+        // Rate limiting strategy (order matters for security):
+        // 1. IP-based rate limiting first - prevents DDoS with rotating tokens
+        // 2. Token-based rate limiting second - enforces per-project limits
+        //
+        // This order ensures that an attacker cannot bypass rate limiting by
+        // simply rotating through fake tokens from the same IP address.
 
-    // Determine the response format based on whether request is from decide and version
-    let (versioned_response, response_format) =
-        get_versioned_response(is_from_decide, query_version, response)?;
+        // Check IP-based rate limit first
+        if !state.ip_rate_limiter.allow_request(&ip_string) {
+            return Err(rate_limit_error(FlagError::ClientFacing(
+                ClientFacingError::IpRateLimited,
+            )));
+        }
 
-    let log_context = LogContext {
-        headers: &headers,
-        query_params: &query_params,
-        method: &method,
-        path: &path,
-        ip: &ip.to_string(),
-        request_id,
-        is_from_decide,
-        query_version,
-        response_format,
-    };
-    log_request_info(log_context);
+        // Check token-based rate limit
+        // Extract token from body, use IP as fallback if extraction fails
+        let rate_limit_key =
+            decoding::extract_token(&context.body).unwrap_or_else(|| ip_string.clone());
+        if !state.flags_rate_limiter.allow_request(&rate_limit_key) {
+            return Err(rate_limit_error(FlagError::ClientFacing(
+                ClientFacingError::TokenRateLimited,
+            )));
+        }
 
-    Ok(Json(versioned_response).into_response())
-}
+        process_request(context).await
+    })
+    .instrument(_span)
+    .await;
 
-fn log_request_info(ctx: LogContext) {
-    let user_agent = ctx
-        .headers
-        .get("user-agent")
-        .map_or("unknown", |v| v.to_str().unwrap_or("unknown"));
-    let content_encoding = ctx
-        .query_params
-        .compression
-        .as_ref()
-        .map_or("none", |c| c.as_str());
-    let content_type = ctx
-        .headers
-        .get("content-type")
-        .map_or("unknown", |v| v.to_str().unwrap_or("unknown"));
+    // Emit DB operations metrics before the canonical log
+    log.emit_db_operations_metrics();
 
-    tracing::info!(
-        user_agent = %user_agent,
-        content_encoding = %content_encoding,
-        content_type = %content_type,
-        version = %ctx.query_params.version.as_deref().unwrap_or("unknown"),
-        lib_version = %ctx.query_params.lib_version.as_deref().unwrap_or("unknown"),
-        compression = %ctx.query_params.compression.as_ref().map_or("none", |c| c.as_str()),
-        method = %ctx.method.as_str(),
-        path = %ctx.path.as_str().trim_end_matches('/'),
-        ip = %ctx.ip,
-        sent_at = %ctx.query_params.sent_at.unwrap_or(0).to_string(),
-        request_id = %ctx.request_id,
-        is_from_decide = %ctx.is_from_decide,
-        query_version = ?ctx.query_version,
-        response_format = %ctx.response_format,
-        "Processing request"
-    );
+    match result {
+        Ok(response) => {
+            // Determine the response format based on whether request is from decide and version
+            match get_versioned_response(is_from_decide, query_version, response) {
+                Ok((versioned_response, _response_format)) => {
+                    log.http_status = 200;
+                    log.emit();
+                    Ok(Json(versioned_response).into_response())
+                }
+                Err(e) => {
+                    log.emit_for_error(&e);
+                    Err(e)
+                }
+            }
+        }
+        Err(e) => {
+            log.emit_for_error(&e);
+            Err(e)
+        }
+    }
 }
 
 fn create_request_span(
@@ -450,6 +526,97 @@ mod tests {
 
         assert_eq!(params_config_missing.version, Some("1".to_string()));
         assert_eq!(params_config_missing.config, None);
+    }
+
+    #[test]
+    fn test_extract_client_ip() {
+        use axum::http::HeaderValue;
+        use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+
+        let fallback = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+
+        // Test case 1: X-Forwarded-For with single IP
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("192.168.1.1").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, IpAddr::V4(Ipv4Addr::new(192, 168, 1, 1)));
+
+        // Test case 2: X-Forwarded-For with multiple IPs (should take the first)
+        headers.clear();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("10.0.0.1, 192.168.1.1, 172.16.0.1").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)));
+
+        // Test case 3: X-Forwarded-For with IPv4 and port (Azure gateway compatibility)
+        headers.clear();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("203.0.113.195:8080").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, IpAddr::V4(Ipv4Addr::new(203, 0, 113, 195)));
+
+        // Test case 4: X-Forwarded-For with IPv6
+        headers.clear();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("2001:db8::8a2e:370:7334").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(
+            ip,
+            IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0x8a2e, 0x370, 0x7334))
+        );
+
+        // Test case 5: X-Forwarded-For with IPv6 and port
+        headers.clear();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("[2001:db8::1]:8080").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(
+            ip,
+            IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1))
+        );
+
+        // Test case 6: No X-Forwarded-For header (should use fallback)
+        headers.clear();
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, fallback);
+
+        // Test case 7: Invalid IP in X-Forwarded-For (should use fallback)
+        headers.clear();
+        headers.insert(
+            "X-Forwarded-For",
+            HeaderValue::from_str("invalid-ip").unwrap(),
+        );
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, fallback);
+
+        // Test case 8: Empty X-Forwarded-For (should use fallback)
+        headers.clear();
+        headers.insert("X-Forwarded-For", HeaderValue::from_str("").unwrap());
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, fallback);
+
+        // Test case 9: IPv6 address that could be confused with IPv4:port
+        headers.clear();
+        headers.insert("X-Forwarded-For", HeaderValue::from_str("::1").unwrap());
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)));
+
+        // Test case 10: Compact IPv6 address with few colons
+        headers.clear();
+        headers.insert("X-Forwarded-For", HeaderValue::from_str("fe80::1").unwrap());
+        let ip = extract_client_ip(&headers, fallback);
+        assert_eq!(ip, IpAddr::V6(Ipv6Addr::new(0xfe80, 0, 0, 0, 0, 0, 0, 1)));
     }
 
     #[test]

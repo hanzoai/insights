@@ -1,9 +1,9 @@
 import { useActions } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { BuilderHog3 } from 'lib/components/hedgehogs'
+import { BuilderMascot3 } from 'lib/components/mascots'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
 
@@ -17,7 +17,7 @@ export function BillingEarlyAccessBanner(): JSX.Element {
                     <LemonTag type="completion" className="absolute top-2.5 left-0 transform -rotate-12">
                         EARLY ACCESS
                     </LemonTag>
-                    <BuilderHog3 className="w-20 h-20 mt-6" />
+                    <BuilderMascot3 className="w-20 h-20 mt-6" />
                 </div>
                 <div className="text-primary">
                     <p>

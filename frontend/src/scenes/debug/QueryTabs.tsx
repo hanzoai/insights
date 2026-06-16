@@ -9,11 +9,13 @@ import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { Query } from '~/queries/Query/Query'
 import { Timings } from '~/queries/nodes/DataNode/ElapsedTime'
-import { HogQLMetadataResponse, InsightVizNode, Node, NodeKind, QueryTiming } from '~/queries/schema/schema-general'
+import { InsightsQLMetadataResponse, InsightVizNode, Node, NodeKind, QueryTiming } from '~/queries/schema/schema-general'
 import { isDataTableNode, isInsightQueryNode, isInsightVizNode } from '~/queries/utils'
 
-function toLineColumn(hogql: string, position: number): { line: number; column: number } {
-    const lines = hogql.split('\n')
+import { QueryLogTable } from './QueryLogTable'
+
+function toLineColumn(insightsql: string, position: number): { line: number; column: number } {
+    const lines = insightsql.split('\n')
     let line = 0
     let column = 0
     for (let i = 0; i < lines.length; i++) {
@@ -27,25 +29,32 @@ function toLineColumn(hogql: string, position: number): { line: number; column: 
     return { line, column }
 }
 
-function toLine(hogql: string, position: number): number {
-    return toLineColumn(hogql, position).line
+function toLine(insightsql: string, position: number): number {
+    return toLineColumn(insightsql, position).line
 }
 
-function toColumn(hogql: string, position: number): number {
-    return toLineColumn(hogql, position).column
+function toColumn(insightsql: string, position: number): number {
+    return toLineColumn(insightsql, position).column
 }
 interface QueryTabsProps<Q extends Node> {
     query: Q
     queryKey: `new-${string}`
     response?: Q['response'] | null
     setQuery: (query: Q) => void
+    onLoadQuery?: (query: string) => void
 }
-export function QueryTabs<Q extends Node>({ query, queryKey, setQuery, response }: QueryTabsProps<Q>): JSX.Element {
+export function QueryTabs<Q extends Node>({
+    query,
+    queryKey,
+    setQuery,
+    response,
+    onLoadQuery,
+}: QueryTabsProps<Q>): JSX.Element {
     const [tab, setTab] = useState<string | null>(null)
     const clickHouseTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './clickhouse_execute')?.t ?? 0
     const explainTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './explain')?.t ?? 0
     const totalTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === '.')?.t ?? 0
-    const hogQLTime = totalTime - explainTime - clickHouseTime
+    const insightsQLTime = totalTime - explainTime - clickHouseTime
     const tabs: LemonTabsProps<string>['tabs'] = query
         ? [
               response?.error && {
@@ -110,21 +119,21 @@ export function QueryTabs<Q extends Node>({ query, queryKey, setQuery, response 
                       />
                   ),
               },
-              response?.hogql && {
-                  key: 'hogql',
+              response?.insightsql && {
+                  key: 'insightsql',
                   label: (
                       <>
                           SQL
-                          {hogQLTime && <LemonTag className="ml-2">{Math.floor(hogQLTime * 10) / 10}s</LemonTag>}
+                          {insightsQLTime && <LemonTag className="ml-2">{Math.floor(insightsQLTime * 10) / 10}s</LemonTag>}
                       </>
                   ),
                   content: (
                       <CodeEditor
                           className="border"
                           language="sql"
-                          value={String(response.hogql)}
+                          value={String(response.insightsql)}
                           height={500}
-                          path={`debug/${queryKey}/hogql.sql`}
+                          path={`debug/${queryKey}/insightsql.sql`}
                       />
                   ),
               },
@@ -144,7 +153,7 @@ export function QueryTabs<Q extends Node>({ query, queryKey, setQuery, response 
                           language="sql"
                           value={String(response.clickhouse)}
                           height={500}
-                          path={`debug/${queryKey}/hogql.sql`}
+                          path={`debug/${queryKey}/insightsql.sql`}
                       />
                   ),
               },
@@ -177,22 +186,22 @@ export function QueryTabs<Q extends Node>({ query, queryKey, setQuery, response 
                   content: (
                       <LemonTable
                           dataSource={[
-                              ...(response.metadata as HogQLMetadataResponse).errors.map((error) => ({
+                              ...(response.metadata as InsightsQLMetadataResponse).errors.map((error) => ({
                                   type: 'error',
-                                  line: toLine(response.hogql ?? '', error.start ?? 0),
-                                  column: toColumn(response.hogql ?? '', error.start ?? 0),
+                                  line: toLine(response.insightsql ?? '', error.start ?? 0),
+                                  column: toColumn(response.insightsql ?? '', error.start ?? 0),
                                   ...error,
                               })),
-                              ...(response.metadata as HogQLMetadataResponse).warnings.map((warn) => ({
+                              ...(response.metadata as InsightsQLMetadataResponse).warnings.map((warn) => ({
                                   type: 'warning',
-                                  line: toLine(response.hogql ?? '', warn.start ?? 0),
-                                  column: toColumn(response.hogql ?? '', warn.start ?? 0),
+                                  line: toLine(response.insightsql ?? '', warn.start ?? 0),
+                                  column: toColumn(response.insightsql ?? '', warn.start ?? 0),
                                   ...warn,
                               })),
-                              ...(response.metadata as HogQLMetadataResponse).notices.map((notice) => ({
+                              ...(response.metadata as InsightsQLMetadataResponse).notices.map((notice) => ({
                                   type: 'notice',
-                                  line: toLine(response.hogql ?? '', notice.start ?? 0),
-                                  column: toColumn(response.hogql ?? '', notice.start ?? 0),
+                                  line: toLine(response.insightsql ?? '', notice.start ?? 0),
+                                  column: toColumn(response.insightsql ?? '', notice.start ?? 0),
                                   ...notice,
                               })),
                           ].sort((a, b) => (a.start ?? 0) - (b.start ?? 0))}
@@ -204,6 +213,11 @@ export function QueryTabs<Q extends Node>({ query, queryKey, setQuery, response 
                           ]}
                       />
                   ),
+              },
+              onLoadQuery && {
+                  key: 'query_log',
+                  label: 'Query log',
+                  content: <QueryLogTable queryKey={queryKey} onLoadQuery={onLoadQuery} />,
               },
           ]
               .filter(Boolean)

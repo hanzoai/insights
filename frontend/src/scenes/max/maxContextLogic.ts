@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { IconDashboard, IconGraph } from '@posthog/icons'
+import { IconBug, IconDashboard, IconGraph } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { objectsEqual } from 'lib/utils'
@@ -10,10 +10,18 @@ import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightSceneLogic } from 'scenes/insights/insightSceneLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
 
-import { DashboardFilter, HogQLVariable } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable } from '~/queries/schema/schema-general'
 import { ActionType, DashboardType, EventDefinition, InsightShortId, QueryBasedInsightModel } from '~/types'
 
+import {
+    REVENUE_ANALYTICS_QUERY_TO_NAME,
+    REVENUE_ANALYTICS_QUERY_TO_SHORT_ID,
+    RevenueAnalyticsQuery,
+    revenueAnalyticsLogic,
+} from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
+
 import type { maxContextLogicType } from './maxContextLogicType'
+import { maxGlobalLogic } from './maxGlobalLogic'
 import {
     InsightWithQuery,
     MaxActionContext,
@@ -22,6 +30,7 @@ import {
     MaxContextTaxonomicFilterOption,
     MaxContextType,
     MaxDashboardContext,
+    MaxErrorTrackingIssueContext,
     MaxEventContext,
     MaxInsightContext,
     MaxUIContext,
@@ -29,6 +38,7 @@ import {
 import {
     actionToMaxContextPayload,
     dashboardToMaxContext,
+    errorTrackingIssueToMaxContextPayload,
     eventToMaxContextPayload,
     insightToMaxContext,
 } from './utils'
@@ -57,28 +67,31 @@ export type LoadedEntitiesMap = { dashboard: number[]; insight: string[] }
 export const maxContextLogic = kea<maxContextLogicType>([
     path(['scenes', 'max', 'maxContextLogic']),
     connect(() => ({
-        values: [sceneLogic, ['activeSceneId', 'activeSceneLogic', 'activeLoadedScene']],
+        values: [sceneLogic, ['activeSceneId', 'activeSceneLogic', 'activeLoadedScene'], maxGlobalLogic, ['toolMap']],
         actions: [router, ['locationChanged']],
     })),
     actions({
         addOrUpdateContextInsight: (
             data: InsightWithQuery,
             filtersOverride?: DashboardFilter,
-            variablesOverride?: Record<string, HogQLVariable>
+            variablesOverride?: Record<string, InsightsQLVariable>
         ) => ({ data, filtersOverride, variablesOverride }),
         addOrUpdateContextDashboard: (data: DashboardType<QueryBasedInsightModel>) => ({ data }),
         addOrUpdateContextEvent: (data: EventDefinition) => ({ data }),
         addOrUpdateContextAction: (data: ActionType) => ({ data }),
+        addOrUpdateContextErrorTrackingIssue: (data: { id: string; name?: string | null }) => ({ data }),
         removeContextInsight: (id: string | number) => ({ id }),
         removeContextDashboard: (id: string | number) => ({ id }),
         removeContextEvent: (id: string | number) => ({ id }),
         removeContextAction: (id: string | number) => ({ id }),
+        removeContextErrorTrackingIssue: (id: string) => ({ id }),
         loadAndProcessDashboard: (data: DashboardItemInfo) => ({ data }),
         loadAndProcessInsight: (
             data: InsightItemInfo,
             filtersOverride?: DashboardFilter,
-            variablesOverride?: Record<string, HogQLVariable>
-        ) => ({ data, filtersOverride, variablesOverride }),
+            variablesOverride?: Record<string, InsightsQLVariable>,
+            revenueAnalyticsQuery?: RevenueAnalyticsQuery
+        ) => ({ data, filtersOverride, variablesOverride, revenueAnalyticsQuery }),
         setSelectedContextOption: (value: string) => ({ value }),
         handleTaxonomicFilterChange: (
             value: string | number,
@@ -139,6 +152,18 @@ export const maxContextLogic = kea<maxContextLogicType>([
                 addOrUpdateContextAction: (state: MaxActionContext[], { data }: { data: ActionType }) =>
                     addOrUpdateEntity(state, actionToMaxContextPayload(data)),
                 removeContextAction: (state: MaxActionContext[], { id }: { id: string | number }) =>
+                    removeEntity(state, id),
+                resetContext: () => [],
+            },
+        ],
+        contextErrorTrackingIssues: [
+            [] as MaxErrorTrackingIssueContext[],
+            {
+                addOrUpdateContextErrorTrackingIssue: (
+                    state: MaxErrorTrackingIssueContext[],
+                    { data }: { data: { id: string; name?: string | null } }
+                ) => addOrUpdateEntity(state, errorTrackingIssueToMaxContextPayload(data)),
+                removeContextErrorTrackingIssue: (state: MaxErrorTrackingIssueContext[], { id }: { id: string }) =>
                     removeEntity(state, id),
                 resetContext: () => [],
             },
@@ -234,28 +259,43 @@ export const maxContextLogic = kea<maxContextLogicType>([
                 actions.addOrUpdateContextDashboard(dashboard)
             }
         },
-        loadAndProcessInsight: async ({ data, filtersOverride, variablesOverride }, breakpoint) => {
+        loadAndProcessInsight: async (
+            { data, filtersOverride, variablesOverride, revenueAnalyticsQuery },
+            breakpoint
+        ) => {
             let insight = data.preloaded
 
             if (!insight || !insight.query) {
-                const insightLogicInstance = insightLogic.build({
-                    dashboardItemId: undefined,
-                    filtersOverride,
-                    variablesOverride,
-                })
-                insightLogicInstance.mount()
+                // Decide between revenue analytics query and querying the insight logic
+                if (revenueAnalyticsQuery) {
+                    const logic = revenueAnalyticsLogic.findMounted()!
+                    const query = logic.values.queries[revenueAnalyticsQuery]
+                    insight = {
+                        id: revenueAnalyticsQuery,
+                        short_id: REVENUE_ANALYTICS_QUERY_TO_SHORT_ID[revenueAnalyticsQuery],
+                        name: REVENUE_ANALYTICS_QUERY_TO_NAME[revenueAnalyticsQuery],
+                        query,
+                    } as QueryBasedInsightModel
+                } else {
+                    const insightLogicInstance = insightLogic.build({
+                        dashboardItemId: undefined,
+                        filtersOverride,
+                        variablesOverride,
+                    })
+                    insightLogicInstance.mount()
 
-                try {
-                    insightLogicInstance.actions.loadInsight(data.id)
+                    try {
+                        insightLogicInstance.actions.loadInsight(data.id)
 
-                    await breakpoint(50)
-                    while (!insightLogicInstance.values.insight.query) {
                         await breakpoint(50)
-                    }
+                        while (!insightLogicInstance.values.insight.query) {
+                            await breakpoint(50)
+                        }
 
-                    insight = insightLogicInstance.values.insight as QueryBasedInsightModel
-                } finally {
-                    insightLogicInstance.unmount()
+                        insight = insightLogicInstance.values.insight as QueryBasedInsightModel
+                    } finally {
+                        insightLogicInstance.unmount()
+                    }
                 }
             }
 
@@ -276,6 +316,13 @@ export const maxContextLogic = kea<maxContextLogicType>([
                     return
                 } else if (groupType === TaxonomicFilterGroupType.Actions) {
                     actions.addOrUpdateContextAction(item as ActionType)
+                    return
+                } else if (groupType === TaxonomicFilterGroupType.ErrorTrackingIssues) {
+                    const errorItem = item as { id: string; name?: string }
+                    actions.addOrUpdateContextErrorTrackingIssue({
+                        id: errorItem.id,
+                        name: errorItem.name ?? null,
+                    })
                     return
                 }
 
@@ -299,6 +346,13 @@ export const maxContextLogic = kea<maxContextLogicType>([
                                       id: _item.value,
                                       preloaded: null,
                                   }
+                        }
+                        if (_item.type === MaxContextType.ERROR_TRACKING_ISSUE) {
+                            actions.addOrUpdateContextErrorTrackingIssue({
+                                id: _item.value as string,
+                                name: _item.name ?? null,
+                            })
+                            return null // Already handled
                         }
                     }
 
@@ -339,14 +393,26 @@ export const maxContextLogic = kea<maxContextLogicType>([
                 // Handle insight selection
                 if (itemInfo.type === MaxContextType.INSIGHT) {
                     let filtersOverride: DashboardFilter | undefined = undefined
-                    let variablesOverride: Record<string, HogQLVariable> | undefined = undefined
+                    let variablesOverride: Record<string, InsightsQLVariable> | undefined = undefined
+                    let revenueAnalyticsQuery: RevenueAnalyticsQuery | undefined = undefined
 
                     // This is an "on this page" insight selection. Look for and add possible applied filters.
                     if (groupType === TaxonomicFilterGroupType.MaxAIContext) {
-                        const logic = insightSceneLogic.findAllMounted().find((l) => l.values.insightId === itemInfo.id)
-                        if (logic) {
-                            filtersOverride = logic.values.filtersOverride ?? undefined
-                            variablesOverride = logic.values.variablesOverride ?? undefined
+                        // The revenue analytics insights have some fixed short ids that don't overlap with the insight short ids
+                        // Let's check them first, and then fallback to looking for an insight logic
+                        const revenueAnalyticsShortIds = Object.values(REVENUE_ANALYTICS_QUERY_TO_SHORT_ID)
+                        if (revenueAnalyticsShortIds.includes(itemInfo.id as InsightShortId)) {
+                            revenueAnalyticsQuery = Object.entries(REVENUE_ANALYTICS_QUERY_TO_SHORT_ID).find(
+                                ([_, shortId]) => shortId === itemInfo.id
+                            )?.[0] as RevenueAnalyticsQuery | undefined
+                        } else {
+                            const logic = insightSceneLogic
+                                .findAllMounted()
+                                .find((l) => l.values.insightId === itemInfo.id)
+                            if (logic) {
+                                filtersOverride = logic.values.filtersOverride ?? undefined
+                                variablesOverride = logic.values.variablesOverride ?? undefined
+                            }
                         }
                     }
 
@@ -356,7 +422,8 @@ export const maxContextLogic = kea<maxContextLogicType>([
                             preloaded: itemInfo.preloaded as QueryBasedInsightModel | null,
                         },
                         filtersOverride,
-                        variablesOverride
+                        variablesOverride,
+                        revenueAnalyticsQuery
                     )
                 }
             } catch (error) {
@@ -389,7 +456,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
                 },
             ],
             (context: MaxContextItem[]): MaxContextItem[] => context,
-            { equalityCheck: objectsEqual },
+            { resultEqualityCheck: objectsEqual },
         ],
         sceneContext: [
             (s: any) => [s.rawSceneContext],
@@ -405,6 +472,8 @@ export const maxContextLogic = kea<maxContextLogicType>([
                                 return eventToMaxContextPayload(item.data)
                             case MaxContextType.ACTION:
                                 return actionToMaxContextPayload(item.data)
+                            case MaxContextType.ERROR_TRACKING_ISSUE:
+                                return errorTrackingIssueToMaxContextPayload(item.data)
                             default:
                                 return null
                         }
@@ -416,6 +485,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
             (s: any) => [s.sceneContext],
             (sceneContext: MaxContextItem[]): MaxContextTaxonomicFilterOption[] => {
                 const options: MaxContextTaxonomicFilterOption[] = []
+
                 sceneContext.forEach((item) => {
                     if (item.type == MaxContextType.INSIGHT) {
                         options.push({
@@ -442,6 +512,14 @@ export const maxContextLogic = kea<maxContextLogicType>([
                                 icon: IconGraph,
                             })
                         })
+                    } else if (item.type == MaxContextType.ERROR_TRACKING_ISSUE) {
+                        options.push({
+                            id: item.id,
+                            name: item.name || `Error ${item.id}`,
+                            value: item.id,
+                            type: MaxContextType.ERROR_TRACKING_ISSUE,
+                            icon: IconBug,
+                        })
                     }
                 })
 
@@ -467,19 +545,30 @@ export const maxContextLogic = kea<maxContextLogicType>([
                     TaxonomicFilterGroupType.Events,
                     TaxonomicFilterGroupType.Actions,
                     TaxonomicFilterGroupType.Insights,
-                    TaxonomicFilterGroupType.Dashboards
+                    TaxonomicFilterGroupType.Dashboards,
+                    TaxonomicFilterGroupType.ErrorTrackingIssues
                 )
                 return groupTypes
             },
         ],
         compiledContext: [
-            (s: any) => [s.hasData, s.contextInsights, s.contextDashboards, s.contextEvents, s.contextActions],
+            (s: any) => [
+                s.hasData,
+                s.contextInsights,
+                s.contextDashboards,
+                s.contextEvents,
+                s.contextActions,
+                s.contextErrorTrackingIssues,
+                s.sceneContext,
+            ],
             (
                 hasData: boolean,
                 contextInsights: MaxInsightContext[],
                 contextDashboards: MaxDashboardContext[],
                 contextEvents: MaxEventContext[],
-                contextActions: MaxActionContext[]
+                contextActions: MaxActionContext[],
+                contextErrorTrackingIssues: MaxErrorTrackingIssueContext[],
+                sceneContext: MaxContextItem[]
             ): MaxUIContext | null => {
                 const context: MaxUIContext = {}
 
@@ -535,18 +624,66 @@ export const maxContextLogic = kea<maxContextLogicType>([
                     context.actions = contextActions
                 }
 
+                // Add error tracking issues (combine manual selections + auto-added from scene context)
+                const sceneErrorTrackingIssues = sceneContext.filter(
+                    (item): item is MaxErrorTrackingIssueContext => item.type === MaxContextType.ERROR_TRACKING_ISSUE
+                )
+                const allErrorTrackingIssues = [...contextErrorTrackingIssues, ...sceneErrorTrackingIssues]
+                if (allErrorTrackingIssues.length > 0) {
+                    // Deduplicate by ID
+                    const uniqueIssues = new Map<string, MaxErrorTrackingIssueContext>()
+                    allErrorTrackingIssues.forEach((issue) => uniqueIssues.set(issue.id, issue))
+                    context.error_tracking_issues = Array.from(uniqueIssues.values())
+                }
+
                 return hasData ? context : null
             },
         ],
         hasData: [
-            (s: any) => [s.contextInsights, s.contextDashboards, s.contextEvents, s.contextActions],
+            (s: any) => [
+                s.contextInsights,
+                s.contextDashboards,
+                s.contextEvents,
+                s.contextActions,
+                s.contextErrorTrackingIssues,
+                s.sceneContext,
+            ],
             (
                 contextInsights: MaxInsightContext[],
                 contextDashboards: MaxDashboardContext[],
                 contextEvents: MaxEventContext[],
-                contextActions: MaxActionContext[]
+                contextActions: MaxActionContext[],
+                contextErrorTrackingIssues: MaxErrorTrackingIssueContext[],
+                sceneContext: MaxContextItem[]
             ): boolean => {
-                return [contextInsights, contextDashboards, contextEvents, contextActions].some((arr) => arr.length > 0)
+                return [
+                    contextInsights,
+                    contextDashboards,
+                    contextEvents,
+                    contextActions,
+                    contextErrorTrackingIssues,
+                    sceneContext,
+                ].some((arr) => arr.length > 0)
+            },
+        ],
+        toolContextItems: [
+            (s: any) => [s.toolMap],
+            (toolMap: any): Array<{ text: string; icon: any }> => {
+                const items: Array<{ text: string; icon: any }> = []
+                const addedNames = new Set<string>()
+
+                // First, add all tool context items (they have precedence)
+                Object.values(toolMap).forEach((tool: any) => {
+                    if (tool.contextDescription) {
+                        const itemName = tool.contextDescription.text.toLowerCase()
+                        if (!addedNames.has(itemName)) {
+                            items.push(tool.contextDescription)
+                            addedNames.add(itemName)
+                        }
+                    }
+                })
+
+                return items
             },
         ],
     }),

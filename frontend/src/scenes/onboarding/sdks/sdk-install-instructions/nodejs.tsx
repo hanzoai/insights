@@ -4,23 +4,23 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-type PostHogNodeOptions = {
+type InsightsNodeOptions = {
     enableExceptionAutocapture?: boolean
 }
 
 export function NodeInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Bash}>
-            {`npm install posthog-node
+            {`npm install insights-node
 # OR
-yarn add posthog-node
+yarn add insights-node
 # OR
-pnpm add posthog-node`}
+pnpm add insights-node`}
         </CodeSnippet>
     )
 }
 
-export function NodeSetupSnippet({ enableExceptionAutocapture = false }: PostHogNodeOptions): JSX.Element {
+export function NodeSetupSnippet({ enableExceptionAutocapture = false }: InsightsNodeOptions): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
 
     const options = [`host: '${apiHostOrigin()}'`]
@@ -31,9 +31,9 @@ export function NodeSetupSnippet({ enableExceptionAutocapture = false }: PostHog
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import { PostHog } from 'posthog-node'
+            {`import { Insights } from 'insights-node'
 
-const client = new PostHog(
+const client = new Insights(
     '${currentTeam?.api_token}',
     {
         ${options.join(',\n        ')}
@@ -43,7 +43,7 @@ const client = new PostHog(
     )
 }
 
-export function SDKInstallNodeInstructions(props: PostHogNodeOptions): JSX.Element {
+export function SDKInstallNodeInstructions(props: InsightsNodeOptions): JSX.Element {
     return (
         <>
             <h3>Install</h3>

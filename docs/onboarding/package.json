@@ -1,0 +1,7 @@
+{
+    "name": "@hanzo/docs-onboarding",
+    "peerDependencies": {
+        "@types/react": "*",
+        "react": "*"
+    }
+}

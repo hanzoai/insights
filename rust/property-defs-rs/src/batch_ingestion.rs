@@ -340,7 +340,7 @@ async fn write_event_properties_batch(
     loop {
         let result = sqlx::query(
             r#"
-            INSERT INTO posthog_eventproperty (event, property, team_id, project_id)
+            INSERT INTO insights_eventproperty (event, property, team_id, project_id)
                 (SELECT * FROM UNNEST(
                     $1::text[],
                     $2::text[],
@@ -361,7 +361,7 @@ async fn write_event_properties_batch(
                         .increment(1);
                     total_time.fin();
                     error!(
-                        "Batch write to posthog_eventproperty exhausted retries: {:?}",
+                        "Batch write to insights_eventproperty exhausted retries: {:?}",
                         &e
                     );
 
@@ -412,7 +412,7 @@ async fn write_property_definitions_batch(
     loop {
         // what if we just ditch properties without a property_type set? why update on conflict at all?
         let result = sqlx::query(r#"
-            INSERT INTO posthog_propertydefinition (id, name, type, group_type_index, is_numerical, team_id, project_id, property_type)
+            INSERT INTO insights_propertydefinition (id, name, type, group_type_index, is_numerical, team_id, project_id, property_type)
                 (SELECT * FROM UNNEST(
                     $1::uuid[],
                     $2::varchar[],
@@ -428,7 +428,7 @@ async fn write_property_definitions_batch(
                 DO UPDATE SET
                     property_type=EXCLUDED.property_type,
                     is_numerical=EXCLUDED.is_numerical
-                WHERE posthog_propertydefinition.property_type IS NULL"#,
+                WHERE insights_propertydefinition.property_type IS NULL"#,
             )
             .bind(&batch.ids)
             .bind(&batch.names)
@@ -447,7 +447,7 @@ async fn write_property_definitions_batch(
                         .increment(1);
                     total_time.fin();
                     error!(
-                        "Batch write to posthog_propertydefinition exhausted retries: {:?}",
+                        "Batch write to insights_propertydefinition exhausted retries: {:?}",
                         &e
                     );
 
@@ -509,7 +509,7 @@ async fn write_event_definitions_batch(
         // then convert this stmt to ON CONFLICT DO NOTHING
         let result = sqlx::query(
             r#"
-            INSERT INTO posthog_eventdefinition (id, name, team_id, project_id, last_seen_at, created_at)
+            INSERT INTO insights_eventdefinition (id, name, team_id, project_id, last_seen_at, created_at)
                 (SELECT * FROM UNNEST (
                     $1::uuid[],
                     $2::varchar[],
@@ -518,8 +518,9 @@ async fn write_event_definitions_batch(
                     $5::timestamptz[],
                     $5::timestamptz[]))
                 ON CONFLICT (coalesce(project_id, team_id::bigint), name) DO UPDATE
-                    SET last_seen_at=EXCLUDED.last_seen_at
-                    WHERE posthog_eventdefinition.last_seen_at < EXCLUDED.last_seen_at"#,
+                    SET last_seen_at=EXCLUDED.last_seen_at,
+                        created_at=COALESCE(insights_eventdefinition.created_at, EXCLUDED.created_at)
+                    WHERE insights_eventdefinition.last_seen_at IS NULL OR insights_eventdefinition.last_seen_at < EXCLUDED.last_seen_at"#,
         )
         .bind(&batch.ids)
         .bind(&batch.names)
@@ -536,7 +537,7 @@ async fn write_event_definitions_batch(
                         .increment(1);
                     total_time.fin();
                     error!(
-                        "Batch write to posthog_eventdefinition exhausted retries: {:?}",
+                        "Batch write to insights_eventdefinition exhausted retries: {:?}",
                         &e
                     );
 

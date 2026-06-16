@@ -4,16 +4,27 @@ import { router } from 'kea-router'
 
 import api from 'lib/api'
 import { TriggerExportProps, downloadBlob, downloadExportedAsset } from 'lib/components/ExportButton/exporter'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { delay } from 'lib/utils'
+import { newInternalTab } from 'lib/utils/newInternalTab'
 import { SessionRecordingPlayerMode } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { urls } from 'scenes/urls'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { cohortsModel } from '~/models/cohortsModel'
 import { AnyDataNode } from '~/queries/schema/schema-general'
-import { CohortType, ExportContext, ExportedAssetType, ExporterFormat, LocalExportContext, SidePanelTab } from '~/types'
+import {
+    APIErrorType,
+    CohortType,
+    ExportContext,
+    ExportedAssetType,
+    ExporterFormat,
+    LocalExportContext,
+    SidePanelTab,
+} from '~/types'
 
 import type { exportsLogicType } from './exportsLogicType'
 
@@ -34,6 +45,7 @@ export const exportsLogic = kea<exportsLogicType>([
         removeFresh: (exportedAsset: ExportedAssetType) => ({ exportedAsset }),
         createStaticCohort: (name: string, query: AnyDataNode) => ({ query, name }),
         setAssetFormat: (format: ExporterFormat | null) => ({ format }),
+        setHasReachedExportFullVideoLimit: (hasReached: boolean) => ({ hasReached }),
         startReplayExport: (
             sessionRecordingId: string,
             format?: ExporterFormat,
@@ -51,6 +63,7 @@ export const exportsLogic = kea<exportsLogicType>([
     }),
 
     connect(() => ({
+        values: [featureFlagLogic, ['featureFlags']],
         actions: [sidePanelStateLogic, ['openSidePanel']],
     })),
 
@@ -75,19 +88,25 @@ export const exportsLogic = kea<exportsLogicType>([
                 removeFresh: (state, { exportedAsset }) => state.filter((asset) => asset.id !== exportedAsset.id),
             },
         ],
+        hasReachedExportFullVideoLimit: [
+            false,
+            {
+                setHasReachedExportFullVideoLimit: (_, { hasReached }) => hasReached,
+            },
+        ],
     }),
 
     listeners(({ actions }) => ({
         startExport: async ({ exportData }) => {
             if (isLocalExport(exportData.export_context)) {
                 try {
-                    downloadBlob(
-                        new Blob([exportData.export_context.localData], { type: exportData.export_context.mediaType }),
-                        exportData.export_context.filename
-                    )
+                    const blob = new Blob([exportData.export_context.localData], {
+                        type: exportData.export_context.mediaType,
+                    })
+                    downloadBlob(blob, exportData.export_context.filename)
                     lemonToast.success('Export complete!')
-                } catch {
-                    lemonToast.error('Export failed!')
+                } catch (e: any) {
+                    lemonToast.error(`Export failed with error: ${e.message}`)
                 }
                 return
             }
@@ -95,8 +114,18 @@ export const exportsLogic = kea<exportsLogicType>([
             actions.createExport({ exportData })
         },
         createExportSuccess: () => {
-            actions.openSidePanel(SidePanelTab.Exports)
-            lemonToast.info('Export starting...')
+            if (featureFlagLogic.findMounted()?.values.featureFlags?.[FEATURE_FLAGS.UX_REMOVE_SIDEPANEL]) {
+                lemonToast.info('Export starting...', {
+                    button: {
+                        label: 'View exports',
+                        action: () => newInternalTab(urls.exports()),
+                    },
+                    autoClose: false,
+                })
+            } else {
+                actions.openSidePanel(SidePanelTab.Exports)
+                lemonToast.info('Export starting...')
+            }
             actions.loadExports()
         },
         loadExportsSuccess: async (_, breakpoint) => {
@@ -169,7 +198,7 @@ export const exportsLogic = kea<exportsLogicType>([
         },
     })),
 
-    loaders(({ values }) => ({
+    loaders(({ values, actions }) => ({
         exports: [
             [] as ExportedAssetType[],
             {
@@ -204,9 +233,9 @@ export const exportsLogic = kea<exportsLogicType>([
                                 expires_after: dayjs().add(6, 'hour').toJSON(),
                             })
 
-                            const currentExports = exportsLogic.values.exports
+                            const currentExports = values.exports
                             const updatedExports = [response, ...currentExports.filter((e) => e.id !== response.id)]
-                            exportsLogic.actions.loadExportsSuccess(updatedExports)
+                            actions.loadExportsSuccess(updatedExports)
 
                             // If this was a blocking export, we should download it now
                             if (response && response.has_content) {
@@ -215,8 +244,23 @@ export const exportsLogic = kea<exportsLogicType>([
                                 lemonToast.error('Export failed: ' + response.exception)
                             }
                         } catch (error) {
-                            const message = error instanceof Error ? error.message : String(error)
-                            lemonToast.error('Export failed: ' + message)
+                            const apiError = error as { data?: APIErrorType }
+                            // Show a survey when the user reaches the export limit
+                            if (apiError?.data?.attr === 'export_limit_exceeded') {
+                                actions.setHasReachedExportFullVideoLimit(true)
+                                lemonToast.error(apiError?.data?.detail || 'You reached your export limit.', {
+                                    autoClose: false,
+                                    button: {
+                                        label: 'I want more',
+                                        className: 'replay-export-limit-reached-button',
+                                        action: () => {}, //we trigger the survey by clicking the button, but we need to keep the action for the toast to show
+                                        dataAttr: 'export-limit-reached-button',
+                                    },
+                                })
+                            } else {
+                                const message = error instanceof Error ? error.message : String(error)
+                                lemonToast.error('Export failed: ' + message)
+                            }
                         }
                     })()
 

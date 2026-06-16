@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCode, IconExternal } from '@posthog/icons'
-import { LemonButton, LemonDropdown, LemonInput, LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconCode, IconExternal } from '@hanzo/icons'
+import { LemonButton, LemonDropdown, LemonInput, LemonSelect, Link } from '@hanzo/lemon-ui'
 
 import {
     CyclotronJobTemplateOption,
@@ -10,8 +10,8 @@ import {
 } from './cyclotronJobTemplateSuggestionsLogic'
 
 export type CyclotronJobTemplateSuggestionsProps = {
-    templating: 'hog' | 'liquid'
-    setTemplatingEngine?: (templating: 'hog' | 'liquid') => void
+    templating: 'fn' | 'liquid'
+    setTemplatingEngine?: (templating: 'fn' | 'liquid') => void
     value: string
     onOptionSelect: (option: CyclotronJobTemplateOption) => void
 }
@@ -65,7 +65,7 @@ export function CyclotronJobTemplateSuggestions({
                             value={templating}
                             onChange={setTemplatingEngine}
                             options={[
-                                { label: 'Hog', value: 'hog' },
+                                { label: 'Script', value: 'fn' },
                                 { label: 'Liquid', value: 'liquid' },
                             ]}
                             tooltip="Change the templating language"
@@ -74,7 +74,7 @@ export function CyclotronJobTemplateSuggestions({
                 </div>
                 <div className="text-xs text-secondary">
                     Below are a list of available functions for templating your inputs using <b>{templating}</b>.{' '}
-                    <Link to="https://posthog.com/docs/cdp/destinations/customizing-destinations#customizing-payload">
+                    <Link to="https://hanzo.ai/docs/cdp/destinations/customizing-destinations#customizing-payload">
                         Learn more
                     </Link>
                 </div>

@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { Fragment } from 'react'
 
-import { IconCopy, IconFlag, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonSnack, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCopy, IconFlag, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonInput, LemonLabel, LemonSelect, LemonSnack, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -14,23 +14,32 @@ import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { GroupsIntroductionOption } from 'lib/introductions/GroupsIntroductionOption'
 import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 import { LemonField } from 'lib/lemon-ui/LemonField'
+import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
 import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { IconArrowDown, IconArrowUp, IconErrorOutline, IconOpenInNew, IconSubArrowRight } from 'lib/lemon-ui/icons'
-import { capitalizeFirstLetter, dateFilterToText, dateStringToComponents, humanFriendlyNumber } from 'lib/utils'
+import { capitalizeFirstLetter, clamp, dateFilterToText, dateStringToComponents, humanFriendlyNumber } from 'lib/utils'
+import { FeatureFlagConditionWarning } from 'scenes/feature-flags/FeatureFlagConditionWarning'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { groupsModel } from '~/models/groupsModel'
 import { getFilterLabel } from '~/taxonomy/helpers'
-import { AnyPropertyFilter, FeatureFlagGroupType, PropertyFilterType, PropertyOperator } from '~/types'
+import {
+    AnyPropertyFilter,
+    FeatureFlagBucketingIdentifier,
+    FeatureFlagGroupType,
+    PropertyFilterType,
+    PropertyOperator,
+} from '~/types'
 
 import { featureFlagLogic } from './featureFlagLogic'
 import {
@@ -41,13 +50,7 @@ import {
 function PropertyValueComponent({ property }: { property: AnyPropertyFilter }): JSX.Element {
     if (property.type === PropertyFilterType.Cohort) {
         return (
-            <LemonButton
-                type="secondary"
-                size="xsmall"
-                to={urls.cohort(property.value)}
-                sideIcon={<IconOpenInNew />}
-                targetBlank
-            >
+            <LemonButton type="secondary" size="xsmall" to={urls.cohort(property.value)} sideIcon={<IconOpenInNew />}>
                 {property.cohort_name || `ID ${property.value}`}
             </LemonButton>
         )
@@ -95,6 +98,7 @@ export function FeatureFlagReleaseConditions({
     nonEmptyFeatureFlagVariants,
     showTrashIconWithOneCondition = false,
     removedLastConditionCallback,
+    evaluationRuntime,
 }: FeatureFlagReleaseConditionsLogicProps & {
     hideMatchOptions?: boolean
     isSuper?: boolean
@@ -118,6 +122,8 @@ export function FeatureFlagReleaseConditions({
         totalUsers,
         filtersTaxonomicOptions,
         aggregationTargetName,
+        properties,
+        filterGroups,
     } = useValues(releaseConditionsLogic)
 
     const {
@@ -131,14 +137,16 @@ export function FeatureFlagReleaseConditions({
     } = useActions(releaseConditionsLogic)
 
     const { showGroupsOptions, groupTypes, aggregationLabel } = useValues(groupsModel)
-    const { earlyAccessFeaturesList, hasEarlyAccessFeatures, featureFlagKey, nonEmptyVariants } =
+    const { earlyAccessFeaturesList, hasEarlyAccessFeatures, featureFlagKey, nonEmptyVariants, featureFlag } =
         useValues(featureFlagLogic)
+    const { setBucketingIdentifier } = useActions(featureFlagLogic)
 
     const { groupsAccessStatus } = useValues(groupsAccessLogic)
 
+    const showBucketingIdentifierUI = useFeatureFlag('FLAG_BUCKETING_IDENTIFIER')
+
     const featureFlagVariants = nonEmptyFeatureFlagVariants || nonEmptyVariants
 
-    const filterGroups: FeatureFlagGroupType[] = (isSuper ? filters?.super_groups : filters?.groups) || []
     // :KLUDGE: Match by select only allows Select.Option as children, so render groups option directly rather than as a child
     const matchByGroupsIntroductionOption = GroupsIntroductionOption()
 
@@ -205,10 +213,7 @@ export function FeatureFlagReleaseConditions({
                                             disabledReason={
                                                 index === filterGroups.length - 1
                                                     ? 'Cannot move last condition set down'
-                                                    : affectedUsers[index] === undefined ||
-                                                        affectedUsers[index + 1] === undefined
-                                                      ? 'Cannot move condition sets while calculating affected users'
-                                                      : null
+                                                    : null
                                             }
                                             onClick={() => moveConditionSetDown(index)}
                                         />
@@ -217,14 +222,7 @@ export function FeatureFlagReleaseConditions({
                                             icon={<IconArrowUp />}
                                             noPadding
                                             tooltip="Move condition set up in precedence"
-                                            disabledReason={
-                                                index === 0
-                                                    ? 'Cannot move first condition set up'
-                                                    : affectedUsers[index] === undefined ||
-                                                        affectedUsers[index - 1] === undefined
-                                                      ? 'Cannot move condition sets while calculating affected users'
-                                                      : null
-                                            }
+                                            disabledReason={index === 0 ? 'Cannot move first condition set up' : null}
                                             onClick={() => moveConditionSetUp(index)}
                                         />
                                     </div>
@@ -274,11 +272,18 @@ export function FeatureFlagReleaseConditions({
                             These properties aren't immediately available on first page load for unidentified persons.
                             This feature flag requires that at least one event is sent prior to becoming available to
                             your product or website.{' '}
-                            <Link to="https://posthog.com/docs/feature-flags/bootstrapping" target="_blank">
+                            <Link to="https://hanzo.ai/docs/feature-flags/bootstrapping" target="_blank">
                                 {' '}
                                 Learn more about how to make feature flags available instantly.
                             </Link>
                         </LemonBanner>
+                    )}
+                    {!readOnly && (
+                        <FeatureFlagConditionWarning
+                            properties={properties}
+                            evaluationRuntime={evaluationRuntime}
+                            className="mt-3 mb-3"
+                        />
                     )}
                     {readOnly ? (
                         <>
@@ -431,12 +436,18 @@ export function FeatureFlagReleaseConditions({
                                     )}
                                 />
                                 of <b>{aggregationTargetName}</b> in this set. Will match approximately{' '}
-                                {affectedUsers[index] !== undefined ? (
+                                {group.sort_key && affectedUsers[group.sort_key] !== undefined ? (
                                     <b>
                                         {`${
-                                            computeBlastRadiusPercentage(group.rollout_percentage, index).toPrecision(
-                                                2
-                                            ) * 1
+                                            Math.max(
+                                                computeBlastRadiusPercentage(
+                                                    Number.isNaN(group.rollout_percentage)
+                                                        ? 0
+                                                        : group.rollout_percentage,
+                                                    group.sort_key
+                                                ).toPrecision(2) * 1,
+                                                0
+                                            )
                                             // Multiplying by 1 removes trailing zeros after the decimal
                                             // point added by toPrecision
                                         }% `}
@@ -445,14 +456,17 @@ export function FeatureFlagReleaseConditions({
                                     <Spinner className="mr-1" />
                                 )}{' '}
                                 {(() => {
-                                    const affectedUserCount = affectedUsers[index]
+                                    const affectedUserCount = group.sort_key ? affectedUsers[group.sort_key] : undefined
                                     if (
                                         affectedUserCount !== undefined &&
                                         affectedUserCount >= 0 &&
                                         totalUsers !== null
                                     ) {
+                                        const rolloutPct = Number.isNaN(group.rollout_percentage)
+                                            ? 0
+                                            : (group.rollout_percentage ?? 100)
                                         return `(${humanFriendlyNumber(
-                                            Math.floor((affectedUserCount * (group.rollout_percentage ?? 100)) / 100)
+                                            Math.floor((affectedUserCount * clamp(rolloutPct, 0, 100)) / 100)
                                         )} / ${humanFriendlyNumber(totalUsers)})`
                                     }
                                     return ''
@@ -491,6 +505,7 @@ export function FeatureFlagReleaseConditions({
                                                 value: variant.key,
                                             }))}
                                             data-attr="feature-flags-variant-override-select"
+                                            truncateText={{ maxWidthClass: 'max-w-[7rem]' }}
                                         />
                                     </div>
                                 </div>
@@ -592,10 +607,11 @@ export function FeatureFlagReleaseConditions({
                         that matches.
                     </LemonBanner>
                 )}
-            {!readOnly && showGroupsOptions && !hideMatchOptions && (
-                <div className="centered">
+            {!readOnly && showGroupsOptions && !hideMatchOptions && !showBucketingIdentifierUI && (
+                <div className="centered flex items-center gap-2">
                     Match by
                     <LemonSelect
+                        size="small"
                         dropdownMatchSelectWidth={false}
                         data-attr="feature-flag-aggregation-filter"
                         onChange={(value) => {
@@ -630,6 +646,97 @@ export function FeatureFlagReleaseConditions({
                     />
                 </div>
             )}
+            {!readOnly && showGroupsOptions && !hideMatchOptions && showBucketingIdentifierUI && (
+                <div className="mb-4">
+                    <LemonLabel className="mb-2">Match by</LemonLabel>
+                    <LemonRadio
+                        data-attr="feature-flag-aggregation-filter"
+                        value={
+                            filters.aggregation_group_type_index != null
+                                ? 'group'
+                                : featureFlag.bucketing_identifier === FeatureFlagBucketingIdentifier.DEVICE_ID
+                                  ? 'device'
+                                  : 'user'
+                        }
+                        onChange={(value) => {
+                            if (value === 'user') {
+                                setAggregationGroupTypeIndex(null)
+                                setBucketingIdentifier(FeatureFlagBucketingIdentifier.DISTINCT_ID)
+                            } else if (value === 'device') {
+                                setAggregationGroupTypeIndex(null)
+                                setBucketingIdentifier(FeatureFlagBucketingIdentifier.DEVICE_ID)
+                            } else if (value === 'group') {
+                                // Default to first group type when selecting Group
+                                const firstGroupType = Array.from(groupTypes.values())[0]
+                                if (firstGroupType) {
+                                    setAggregationGroupTypeIndex(firstGroupType.group_type_index)
+                                }
+                                setBucketingIdentifier(null)
+                            }
+                        }}
+                        options={[
+                            {
+                                value: 'user',
+                                label: 'User',
+                                description: 'Stable assignment for logged-in users based on their distinct ID.',
+                            },
+                            {
+                                value: 'device',
+                                label: 'Device',
+                                description:
+                                    'Stable assignment per device. Good fit for experiments on anonymous users.',
+                            },
+                            {
+                                value: 'group',
+                                label: 'Group',
+                                description:
+                                    'Stable assignment for everyone in an organization, company, or other custom group type.',
+                                disabledReason: hasEarlyAccessFeatures
+                                    ? 'This feature flag cannot be group-based, because it is linked to an early access feature.'
+                                    : groupTypes.size === 0
+                                      ? 'No group types defined. Set up group analytics first.'
+                                      : undefined,
+                            },
+                        ]}
+                        radioPosition="top"
+                    />
+                    {filters.aggregation_group_type_index != null && groupTypes.size > 0 && (
+                        <div className="mt-3 ml-6">
+                            <LemonSelect
+                                dropdownMatchSelectWidth={false}
+                                data-attr="feature-flag-group-type-select"
+                                value={filters.aggregation_group_type_index}
+                                onChange={(value) => {
+                                    // MatchByGroupsIntroductionOption
+                                    if (value == -2) {
+                                        return
+                                    }
+                                    if (value != null) {
+                                        setAggregationGroupTypeIndex(value)
+                                    }
+                                }}
+                                options={[
+                                    ...Array.from(groupTypes.values()).map((groupType) => ({
+                                        value: groupType.group_type_index,
+                                        label: capitalizeFirstLetter(
+                                            aggregationLabel(groupType.group_type_index).plural
+                                        ),
+                                    })),
+                                    ...(includeGroupsIntroductionOption()
+                                        ? [
+                                              {
+                                                  value: -2,
+                                                  label: 'MatchByGroupsIntroductionOption',
+                                                  labelInMenu: matchByGroupsIntroductionOption,
+                                              },
+                                          ]
+                                        : []),
+                                ]}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
             <div className="FeatureConditionCard max-w-prose">
                 {filterGroups.map((group, index) => (
                     <div key={group.sort_key || index}>
@@ -640,7 +747,12 @@ export function FeatureFlagReleaseConditions({
                 ))}
             </div>
             {!readOnly && (
-                <LemonButton type="secondary" className="mt-0 w-max" onClick={addConditionSet} icon={<IconPlus />}>
+                <LemonButton
+                    type="secondary"
+                    className="mt-0 w-max"
+                    onClick={() => addConditionSet()}
+                    icon={<IconPlus />}
+                >
                     Add condition set
                 </LemonButton>
             )}

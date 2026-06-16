@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { useJsSnippet } from 'lib/components/JSSnippet'
@@ -18,13 +18,13 @@ export interface FlutterInstallProps {
 }
 
 function FlutterInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.YAML}>posthog_flutter: ^5.0.0</CodeSnippet>
+    return <CodeSnippet language={Language.YAML}>insights_flutter: ^5.0.0</CodeSnippet>
 }
 
 function FlutterDartSetup(props: FlutterSetupProps & FlutterInstallProps): JSX.Element {
     const configOptions = [
         props.includeReplay &&
-            `// check https://posthog.com/docs/session-replay/installation?tab=Flutter
+            `// check https://hanzo.ai/docs/session-replay/installation?tab=Flutter
   // for more config and to learn about how we capture sessions on mobile
   // and what to expect
   config.sessionReplay = true;
@@ -40,18 +40,18 @@ function FlutterDartSetup(props: FlutterSetupProps & FlutterInstallProps): JSX.E
         <CodeSnippet language={Language.Dart}>
             {`import 'package:flutter/material.dart';
 
-import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:insights_flutter/insights_flutter.dart';
 
 Future<void> main() async {
   // init WidgetsFlutterBinding if not yet
   WidgetsFlutterBinding.ensureInitialized();
-  final config = PostHogConfig('${props.apiToken}');
+  final config = InsightsConfig('${props.apiToken}');
   config.host = '${apiHostOrigin()}';
   config.debug = true;
   config.captureApplicationLifecycleEvents = true;
   ${configOptions}
-  // Setup PostHog with the given Context and Config
-  await Posthog().setup(config);
+  // Setup Insights with the given Context and Config
+  await Insights().setup(config);
   runApp(MyApp());
 }`}
         </CodeSnippet>
@@ -63,7 +63,7 @@ function InstallFlutterWidgetsAndObsserver(): JSX.Element {
         <CodeSnippet language={Language.Dart}>
             {`import 'package:flutter/material.dart';
 
-import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:insights_flutter/insights_flutter.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -80,19 +80,19 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap your App with PostHogWidget
-    return PostHogWidget(
+    // Wrap your App with InsightsWidget
+    return InsightsWidget(
       child: MaterialApp(
-        // Add PosthogObserver to your navigatorObservers
-        navigatorObservers: [PosthogObserver()],
+        // Add InsightsObserver to your navigatorObservers
+        navigatorObservers: [InsightsObserver()],
         title: 'My App',
         home: const HomeScreen(),
       ),
     );
   }
 }
-// If you're using go_router, check this page to learn how to set up the PosthogObserver
-// https://posthog.com/docs/libraries/flutter#capturing-screen-views`}
+// If you're using go_router, check this page to learn how to set up the InsightsObserver
+// https://hanzo.ai/docs/libraries/flutter#capturing-screen-views`}
         </CodeSnippet>
     )
 }
@@ -102,7 +102,7 @@ function InstallFlutterObserver(): JSX.Element {
         <CodeSnippet language={Language.Dart}>
             {`import 'package:flutter/material.dart';
 
-import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:insights_flutter/insights_flutter.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -120,16 +120,16 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        // Add PosthogObserver to your navigatorObservers
-        navigatorObservers: [PosthogObserver()],
+        // Add InsightsObserver to your navigatorObservers
+        navigatorObservers: [InsightsObserver()],
         title: 'My App',
         home: const HomeScreen(),
     );
 );
   }
 }
-// If you're using go_router, check this page to learn how to set up the PosthogObserver
-// https://posthog.com/docs/libraries/flutter#capturing-screen-views
+// If you're using go_router, check this page to learn how to set up the InsightsObserver
+// https://hanzo.ai/docs/libraries/flutter#capturing-screen-views
 
 `}
         </CodeSnippet>
@@ -160,7 +160,7 @@ function FlutterAndroidSetupSnippet({ requiresManualInstall }: FlutterSetupProps
             <>
                 <CodeSnippet language={Language.XML}>
                     {
-                        '<application>\n\t<activity>\n\t\t[...]\n\t</activity>\n\t<meta-data android:name="com.posthog.posthog.AUTO_INIT" android:value="false" />\n</application>'
+                        '<application>\n\t<activity>\n\t\t[...]\n\t</activity>\n\t<meta-data android:name="com.insights.insights.AUTO_INIT" android:value="false" />\n</application>'
                     }
                 </CodeSnippet>
                 {minSdkVersionInstructions}
@@ -170,11 +170,11 @@ function FlutterAndroidSetupSnippet({ requiresManualInstall }: FlutterSetupProps
     return (
         <>
             <CodeSnippet language={Language.XML}>
-                {'<application>\n\t<activity>\n\t\t[...]\n\t</activity>\n\t<meta-data android:name="com.posthog.posthog.API_KEY" android:value="' +
+                {'<application>\n\t<activity>\n\t\t[...]\n\t</activity>\n\t<meta-data android:name="com.insights.insights.API_KEY" android:value="' +
                     currentTeam?.api_token +
-                    '" />\n\t<meta-data android:name="com.posthog.posthog.POSTHOG_HOST" android:value="' +
+                    '" />\n\t<meta-data android:name="com.insights.insights.INSIGHTS_HOST" android:value="' +
                     url +
-                    '" />\n\t<meta-data android:name="com.posthog.posthog.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />\n\t<meta-data android:name="com.posthog.posthog.DEBUG" android:value="true" />\n</application>'}
+                    '" />\n\t<meta-data android:name="com.insights.insights.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />\n\t<meta-data android:name="com.insights.insights.DEBUG" android:value="true" />\n</application>'}
             </CodeSnippet>
             {minSdkVersionInstructions}
         </>
@@ -201,7 +201,7 @@ function FlutterIOSSetupSnippet({ requiresManualInstall }: FlutterSetupProps): J
         return (
             <>
                 <CodeSnippet language={Language.XML}>
-                    {'<dict>\n\t[...]\n\t<key>com.posthog.posthog.AUTO_INIT</key>\n\t<false/>\n\t[...]\n</dict>'}
+                    {'<dict>\n\t[...]\n\t<key>com.insights.insights.AUTO_INIT</key>\n\t<false/>\n\t[...]\n</dict>'}
                 </CodeSnippet>
                 {minPlatformVersionInstructions}
             </>
@@ -210,11 +210,11 @@ function FlutterIOSSetupSnippet({ requiresManualInstall }: FlutterSetupProps): J
     return (
         <>
             <CodeSnippet language={Language.XML}>
-                {'<dict>\n\t[...]\n\t<key>com.posthog.posthog.API_KEY</key>\n\t<string>' +
+                {'<dict>\n\t[...]\n\t<key>com.insights.insights.API_KEY</key>\n\t<string>' +
                     currentTeam?.api_token +
-                    '</string>\n\t<key>com.posthog.posthog.POSTHOG_HOST</key>\n\t<string>' +
+                    '</string>\n\t<key>com.insights.insights.INSIGHTS_HOST</key>\n\t<string>' +
                     url +
-                    '</string>\n\t<key>com.posthog.posthog.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>\n\t<true/>\n\t<key>com.posthog.posthog.DEBUG</key>\n\t<true/>\n</dict>'}
+                    '</string>\n\t<key>com.insights.insights.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>\n\t<true/>\n\t<key>com.insights.insights.DEBUG</key>\n\t<true/>\n</dict>'}
             </CodeSnippet>
             {minPlatformVersionInstructions}
         </>
@@ -258,7 +258,7 @@ export function SDKInstallFlutterInstructions(props: FlutterSetupProps): JSX.Ele
                     {props.includeSurveys && (
                         <>
                             <p className="prompt-text">
-                                Install the <strong>PosthogObserver</strong> to your app
+                                Install the <strong>InsightsObserver</strong> to your app
                             </p>
                             <InstallFlutterObserver />
                         </>
@@ -266,8 +266,8 @@ export function SDKInstallFlutterInstructions(props: FlutterSetupProps): JSX.Ele
                     {props.includeReplay && (
                         <>
                             <p className="prompt-text">
-                                Wrap your app with the <strong>PostHogWidget</strong> and install the{' '}
-                                <strong>PosthogObserver</strong>
+                                Wrap your app with the <strong>InsightsWidget</strong> and install the{' '}
+                                <strong>InsightsObserver</strong>
                             </p>
                             <InstallFlutterWidgetsAndObsserver />
                         </>
@@ -285,19 +285,19 @@ export function SDKInstallFlutterTrackScreenInstructions(): JSX.Element {
     return (
         <>
             <p>
-                With the <Link to="https://posthog.com/docs/libraries/flutter#example">PosthogObserver</Link> Observer,
-                PostHog will try to record all screen changes automatically.
+                With the <Link to="https://hanzo.ai/docs/libraries/flutter#example">InsightsObserver</Link> Observer,
+                Insights will try to record all screen changes automatically.
             </p>
             <p>
                 If you want to manually send a new screen capture event, use the <code>screen</code> function.
             </p>
-            <CodeSnippet language={Language.Dart}>{`import 'package:posthog_flutter/posthog_flutter.dart';
+            <CodeSnippet language={Language.Dart}>{`import 'package:insights_flutter/insights_flutter.dart';
 
-await Posthog().screen(
+await Insights().screen(
     screenName: 'Dashboard',
     properties: {
       'background': 'blue',
-      'hero': 'superhog'
+      'hero': 'supermascot'
     });
 `}</CodeSnippet>
         </>

@@ -83,12 +83,12 @@ pub struct WebhookWorker<'p> {
     max_concurrent_jobs: usize,
     /// The retry policy used to calculate retry intervals when a job fails with a retryable error.
     retry_policy: RetryPolicy,
-    /// Kafka producer used to send results when in Hog mode
+    /// Kafka producer used to send results when in IQL mode
     kafka_producer: FutureProducer<KafkaContext>,
-    /// The topic to send results to when in Hog mode
+    /// The topic to send results to when in IQL mode
     cdp_function_callbacks_topic: &'static str,
-    /// Whether we are running in Hog mode or not
-    hog_mode: bool,
+    /// Whether we are running in IQL mode or not
+    iql_mode: bool,
     /// The liveness check handle, to call on a schedule to report healthy
     liveness: HealthHandle,
 }
@@ -104,7 +104,7 @@ pub fn build_http_client(
     );
     let mut client_builder = reqwest::Client::builder()
         .default_headers(headers)
-        .user_agent("PostHog Webhook Worker")
+        .user_agent("Insights Webhook Worker")
         .timeout(request_timeout);
     if !allow_internal_ips {
         client_builder = client_builder.dns_resolver(Arc::new(PublicIPv4Resolver {}))
@@ -125,7 +125,7 @@ impl<'p> WebhookWorker<'p> {
         allow_internal_ips: bool,
         kafka_producer: FutureProducer<KafkaContext>,
         cdp_function_callbacks_topic: String,
-        hog_mode: bool,
+        iql_mode: bool,
         liveness: HealthHandle,
     ) -> Self {
         let http_client = build_http_client(request_timeout, allow_internal_ips)
@@ -141,7 +141,7 @@ impl<'p> WebhookWorker<'p> {
             retry_policy,
             kafka_producer,
             cdp_function_callbacks_topic: cdp_function_callbacks_topic.leak(),
-            hog_mode,
+            iql_mode,
             liveness,
         }
     }
@@ -199,7 +199,7 @@ impl<'p> WebhookWorker<'p> {
             let retry_policy = self.retry_policy.clone();
             let kafka_producer = self.kafka_producer.clone();
             let cdp_function_callbacks_topic = self.cdp_function_callbacks_topic;
-            let hog_mode = self.hog_mode;
+            let iql_mode = self.iql_mode;
 
             tokio::spawn(async move {
                 // Move `permits` into the closure so they will be dropped when the scope ends.
@@ -211,7 +211,7 @@ impl<'p> WebhookWorker<'p> {
                     retry_policy,
                     kafka_producer,
                     cdp_function_callbacks_topic,
-                    hog_mode,
+                    iql_mode,
                 )
                 .await
             });
@@ -221,14 +221,14 @@ impl<'p> WebhookWorker<'p> {
 
 async fn log_kafka_error_and_sleep(step: &str, error: Option<KafkaError>) {
     match error {
-        Some(error) => error!("error sending hog message to kafka ({}): {}", step, error),
-        None => error!("error sending hog message to kafka ({})", step),
+        Some(error) => error!("error sending IQL message to kafka ({}): {}", step, error),
+        None => error!("error sending IQL message to kafka ({})", step),
     }
 
     // Errors producing to Kafka *should* be exceedingly rare, but when they happen we don't want
     // to enter a tight loop where we re-send the hook payload, fail to produce to Kafka, and
     // repeat over and over again. We also don't want to commit the job as done and not produce
-    // something to Kafka, as the Hog task would then be lost.
+    // something to Kafka, as the IQL task would then be lost.
     //
     // For this reason, we sleep before aborting the batch, in hopes that Kafka has recovered by the
     // time we retry.
@@ -244,7 +244,7 @@ async fn process_batch<'a>(
     retry_policy: RetryPolicy,
     kafka_producer: FutureProducer<KafkaContext>,
     cdp_function_callbacks_topic: &'static str,
-    hog_mode: bool,
+    iql_mode: bool,
 ) {
     let mut futures = Vec::with_capacity(batch.jobs.len());
     let mut metadata_vec = Vec::with_capacity(batch.jobs.len());
@@ -257,7 +257,7 @@ async fn process_batch<'a>(
 
         metadata_vec.push(job.take_metadata());
 
-        let read_body = hog_mode;
+        let read_body = iql_mode;
         let future =
             async move { process_webhook_job(http_client, job, &retry_policy, read_body).await };
 
@@ -266,8 +266,8 @@ async fn process_batch<'a>(
 
     let results = join_all(futures).await;
 
-    if hog_mode
-        && push_hoghook_results_to_kafka(
+    if iql_mode
+        && push_insightshook_results_to_kafka(
             results,
             metadata_vec,
             kafka_producer,
@@ -284,7 +284,7 @@ async fn process_batch<'a>(
     });
 }
 
-async fn push_hoghook_results_to_kafka(
+async fn push_insightshook_results_to_kafka(
     results: Vec<Result<WebhookResult, WorkerError>>,
     metadata_vec: Vec<Value>,
     kafka_producer: FutureProducer<KafkaContext>,
@@ -294,7 +294,7 @@ async fn push_hoghook_results_to_kafka(
     for (result, mut metadata) in iter::zip(results, metadata_vec) {
         match result {
             Ok(result) => {
-                if let Some(payload) = create_hoghook_kafka_payload(result, &mut metadata).await {
+                if let Some(payload) = create_insightshook_kafka_payload(result, &mut metadata).await {
                     match kafka_producer.send_result(FutureRecord {
                         topic: cdp_function_callbacks_topic,
                         payload: Some(&payload),
@@ -317,13 +317,13 @@ async fn push_hoghook_results_to_kafka(
                                 .and_then(|t| t.as_number())
                                 .map(|t| t.to_string())
                                 .unwrap_or_else(|| "?".to_string());
-                            let hog_function_id = metadata
-                                .get("hogFunctionId")
+                            let insights_function_id = metadata
+                                .get("insightsFunctionId")
                                 .and_then(|h| h.as_str())
                                 .map(|h| h.to_string())
                                 .unwrap_or_else(|| "?".to_string());
 
-                            error!("dropping message due to size limit, team_id: {}, hog_function_id: {}", team_id, hog_function_id);
+                            error!("dropping message due to size limit, team_id: {}, insights_function_id: {}", team_id, insights_function_id);
                         }
                         Err((error, _)) => {
                             // Return early to avoid committing the batch.
@@ -365,7 +365,7 @@ async fn push_hoghook_results_to_kafka(
     Ok(())
 }
 
-async fn create_hoghook_kafka_payload(
+async fn create_insightshook_kafka_payload(
     result: WebhookResult,
     metadata: &mut Value,
 ) -> Option<String> {
@@ -585,7 +585,7 @@ async fn process_webhook_job<W: WebhookJob>(
                 WebhookRequestError::RetryableRequestError {
                     error,
                     retry_after,
-                    response, // Grab the response so we can send it back to hog for debug
+                    response, // Grab the response so we can send it back to IQL for debug
                     ..
                 } => {
                     let retry_interval =
@@ -875,7 +875,7 @@ mod tests {
         .await
         .expect("failed to enqueue job");
         let (_mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = false;
+        let iql_mode = false;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -887,7 +887,7 @@ mod tests {
             false,
             mock_producer,
             "cdp_function_callbacks".to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -914,13 +914,13 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_sends_kafka_payload_for_success(db: PgPool) {
+    async fn test_insightshook_sends_kafka_payload_for_success(db: PgPool) {
         use httpmock::prelude::*;
         use rdkafka::consumer::{Consumer, StreamConsumer};
         use rdkafka::{ClientConfig, Message};
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_sends_kafka_payload".to_string();
+        let queue_name = "test_insightshook_sends_kafka_payload".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 
@@ -932,7 +932,7 @@ mod tests {
             .await;
 
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -944,7 +944,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -981,7 +981,7 @@ mod tests {
             worker.retry_policy.clone(),
             worker.kafka_producer.clone(),
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
 
@@ -1030,13 +1030,13 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_sends_kafka_payload_for_bad_response(db: PgPool) {
+    async fn test_insightshook_sends_kafka_payload_for_bad_response(db: PgPool) {
         use httpmock::prelude::*;
         use rdkafka::consumer::{Consumer, StreamConsumer};
         use rdkafka::{ClientConfig, Message};
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_sends_kafka_payload".to_string();
+        let queue_name = "test_insightshook_sends_kafka_payload".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 
@@ -1048,7 +1048,7 @@ mod tests {
             .await;
 
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -1060,7 +1060,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -1097,7 +1097,7 @@ mod tests {
             worker.retry_policy.clone(),
             worker.kafka_producer.clone(),
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
 
@@ -1146,11 +1146,11 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_drops_large_payloads(db: PgPool) {
+    async fn test_insightshook_drops_large_payloads(db: PgPool) {
         use httpmock::prelude::*;
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_drops_large_payloads".to_string();
+        let queue_name = "test_insightshook_drops_large_payloads".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 
@@ -1189,7 +1189,7 @@ mod tests {
             .await;
 
         let (_, mock_producer) = create_mock_kafka().await;
-        let hog_mode = true;
+        let iql_mode = true;
         let worker = WebhookWorker::new(
             &worker_id,
             &queue,
@@ -1201,7 +1201,7 @@ mod tests {
             false,
             mock_producer,
             topic.to_string(),
-            hog_mode,
+            iql_mode,
             liveness,
         );
 
@@ -1213,19 +1213,27 @@ mod tests {
             worker.retry_policy,
             worker.kafka_producer,
             worker.cdp_function_callbacks_topic,
-            hog_mode,
+            iql_mode,
         )
         .await;
     }
 
     #[tokio::test]
     async fn test_send_webhook() {
+        use httpmock::prelude::*;
+
         let method = HttpMethod::POST;
-        let url = "http://localhost:18081/echo";
         let headers = collections::HashMap::new();
         let body = "a very relevant request body";
 
-        let response = send_webhook(localhost_client(), &method, url, &headers, body.to_owned())
+        let server = MockServer::start();
+        server.mock(|when, then| {
+            when.method(POST).path("/echo").body(body);
+            then.status(200).body(body);
+        });
+
+        let url = server.url("/echo");
+        let response = send_webhook(localhost_client(), &method, &url, &headers, body.to_owned())
             .await
             .expect("send_webhook failed");
 
@@ -1238,12 +1246,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_error_message_contains_response_body() {
+        use httpmock::prelude::*;
+
         let method = HttpMethod::POST;
-        let url = "http://localhost:18081/fail";
         let headers = collections::HashMap::new();
         let body = "this is an error message";
 
-        let err = send_webhook(localhost_client(), &method, url, &headers, body.to_owned())
+        let server = MockServer::start();
+        server.mock(|when, then| {
+            when.method(POST).path("/fail");
+            then.status(400).body(body);
+        });
+
+        let url = server.url("/fail");
+        let err = send_webhook(localhost_client(), &method, &url, &headers, body.to_owned())
             .await
             .expect_err("request didn't fail when it should have failed");
 
@@ -1252,37 +1268,51 @@ mod tests {
             assert_eq!(request_error.status(), Some(StatusCode::BAD_REQUEST));
             assert!(request_error.to_string().contains(body));
             // This is the display implementation of reqwest. Just checking it is still there.
-            // See: https://github.com/seanmonstar/reqwest/blob/master/src/error.rs
-            assert!(request_error.to_string().contains(
-                "HTTP status client error (400 Bad Request) for url (http://localhost:18081/fail)"
-            ));
+            // See: https://github.com/seanmonstar/reqwest/blob/main/src/error.rs
+            assert!(request_error
+                .to_string()
+                .contains("HTTP status client error (400 Bad Request)"));
         }
     }
 
     #[tokio::test]
     async fn test_error_message_contains_up_to_n_bytes_of_response_body() {
+        use httpmock::prelude::*;
+
         let method = HttpMethod::POST;
-        let url = "http://localhost:18081/fail";
         let headers = collections::HashMap::new();
         // This is double the current hardcoded amount of bytes.
         // TODO: Make this configurable and change it here too.
-        let body = (0..512 * 1024).map(|_| "a").collect::<Vec<_>>().concat();
+        let body = "a".repeat(512 * 1024);
 
-        let err = send_webhook(localhost_client(), &method, url, &headers, body.to_owned())
+        let server = MockServer::start();
+        server.mock(|when, then| {
+            when.method(POST).path("/fail");
+            then.status(400).body(body.clone());
+        });
+
+        let url = server.url("/fail");
+        let err = send_webhook(localhost_client(), &method, &url, &headers, body.to_owned())
             .await
             .expect_err("request didn't fail when it should have failed");
 
         assert!(matches!(err, WebhookError::Request(..)));
         if let WebhookError::Request(request_error) = err {
             assert_eq!(request_error.status(), Some(StatusCode::BAD_REQUEST));
-            assert!(request_error.to_string().contains(&body[0..256 * 1024]));
-            // The 81 bytes account for the reqwest error message as described below.
-            assert_eq!(request_error.to_string().len(), 256 * 1024 + 81);
+            let error_string = request_error.to_string();
+            // Verify the response body is truncated to 256KB
+            assert!(error_string.contains(&body[0..256 * 1024]));
+            // Verify truncation by checking the total length is less than full body + prefix
+            // The error format is: "HTTP status client error (400 Bad Request) for url ({url}): {truncated_body}"
+            // Full body would be 512KB, truncated should be 256KB
+            assert!(
+                error_string.len() < 300 * 1024,
+                "Error message should be truncated to ~256KB, got {} bytes",
+                error_string.len()
+            );
             // This is the display implementation of reqwest. Just checking it is still there.
-            // See: https://github.com/seanmonstar/reqwest/blob/master/src/error.rs
-            assert!(request_error.to_string().contains(
-                "HTTP status client error (400 Bad Request) for url (http://localhost:18081/fail)"
-            ));
+            // See: https://github.com/seanmonstar/reqwest/blob/main/src/error.rs
+            assert!(error_string.contains("HTTP status client error (400 Bad Request)"));
         }
     }
 

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { INTERNAL_EXCEPTION_PROPERTY_KEYS } from '@posthog/products-error-tracking/frontend/utils'
+import { INTERNAL_EXCEPTION_PROPERTY_KEYS } from '@hanzo/products-error-tracking/frontend/utils'
 
 import { eventPropertyFilteringLogic } from 'lib/components/EventPropertyTabs/eventPropertyFilteringLogic'
 import { HTMLElementsDisplay } from 'lib/components/HTMLElementsDisplay/HTMLElementsDisplay'
@@ -9,11 +9,15 @@ import { dayjs } from 'lib/dayjs'
 import { LemonTab, LemonTabs, LemonTabsProps } from 'lib/lemon-ui/LemonTabs'
 import { AutocaptureImageTab, autocaptureToImage } from 'lib/utils/autocapture-previews'
 
-import { CORE_FILTER_DEFINITIONS_BY_GROUP, POSTHOG_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
+import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
 import { EventType, RecordingEventType } from '~/types'
 
+import { ErrorEventType } from '../Errors/types'
+
+export type ErrorPropertyTabEvent = EventType | RecordingEventType | ErrorEventType
+
 export interface TabContentComponentFnProps {
-    event: EventType | RecordingEventType
+    event: ErrorPropertyTabEvent
     properties: Record<string, any>
     promotedKeys?: string[]
     tabKey: EventPropertyTabKey
@@ -28,34 +32,46 @@ type EventPropertyTabKey =
     | '$set_once_properties'
     | 'raw'
     | 'conversation'
+    | 'evaluation'
     | 'exception_properties'
     | 'error_display'
     | 'debug_properties'
     | 'metadata'
+    | 'survey_response'
 
 export const EventPropertyTabs = ({
     event,
     tabContentComponentFn,
     ...lemonTabsProps
 }: {
-    event: EventType | RecordingEventType
+    event: ErrorPropertyTabEvent
     tabContentComponentFn: (props: TabContentComponentFnProps) => JSX.Element
     dataAttr?: LemonTabsProps<EventPropertyTabKey>['data-attr']
     size?: LemonTabsProps<EventPropertyTabKey>['size']
     barClassName?: LemonTabsProps<EventPropertyTabKey>['barClassName']
 }): JSX.Element => {
     const isAIGenerationEvent = event.event === '$ai_generation'
-    const isAIEvent = isAIGenerationEvent || event.event === '$ai_span' || event.event === '$ai_trace'
+    const isAIConversationEvent = isAIGenerationEvent || event.event === '$ai_span' || event.event === '$ai_trace'
+    const isAIEvaluationEvent = event.event === '$ai_evaluation'
 
     const isErrorEvent = event.event === '$exception'
+    const isSurveyResponseEvent = event.event === 'survey sent'
 
     const { filterProperties } = useValues(eventPropertyFilteringLogic)
 
     const [activeTab, setActiveTab] = useState<EventPropertyTabKey>(
-        isAIEvent ? 'conversation' : isErrorEvent ? 'error_display' : 'properties'
+        isAIConversationEvent
+            ? 'conversation'
+            : isAIEvaluationEvent
+              ? 'evaluation'
+              : isErrorEvent
+                ? 'error_display'
+                : isSurveyResponseEvent
+                  ? 'survey_response'
+                  : 'properties'
     )
 
-    const promotedKeys = POSTHOG_EVENT_PROMOTED_PROPERTIES[event.event]
+    const promotedKeys = INSIGHTS_EVENT_PROMOTED_PROPERTIES[event.event]
 
     let properties = {}
     const featureFlagProperties = {}
@@ -90,13 +106,25 @@ export const EventPropertyTabs = ({
         isErrorEvent && {
             key: 'error_display',
             label: 'Exception',
-            content: tabContentComponentFn({ event, properties: errorProperties, tabKey: 'error_display' }),
+            content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'error_display' }),
         },
-        isAIEvent
+        isSurveyResponseEvent && {
+            key: 'survey_response',
+            label: 'Survey response',
+            content: tabContentComponentFn({ event, properties: event.properties, tabKey: 'survey_response' }),
+        },
+        isAIConversationEvent
             ? {
                   key: 'conversation',
                   label: 'Conversation',
                   content: tabContentComponentFn({ event, properties, tabKey: 'conversation' }),
+              }
+            : null,
+        isAIEvaluationEvent
+            ? {
+                  key: 'evaluation',
+                  label: 'Evaluation',
+                  content: tabContentComponentFn({ event, properties, tabKey: 'evaluation' }),
               }
             : null,
         {
@@ -136,7 +164,7 @@ export const EventPropertyTabs = ({
                   ),
               }
             : null,
-        autocaptureToImage(event.elements)
+        event.elements && autocaptureToImage(event.elements)
             ? {
                   key: 'image',
                   label: 'Image',
@@ -146,7 +174,7 @@ export const EventPropertyTabs = ({
         Object.keys(setProperties).length > 0
             ? {
                   key: '$set_properties',
-                  label: 'Person properties',
+                  label: 'User properties',
                   content: tabContentComponentFn({
                       properties: setProperties,
                       event,
@@ -158,7 +186,7 @@ export const EventPropertyTabs = ({
         Object.keys(setOnceProperties).length > 0
             ? {
                   key: '$set_once_properties',
-                  label: 'Set once person properties',
+                  label: 'Set once user properties',
                   content: tabContentComponentFn({
                       properties: setOnceProperties,
                       event,

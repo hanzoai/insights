@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { HeartHog, SurprisedHog } from 'lib/components/hedgehogs'
+import { HeartMascot, SurprisedMascot } from 'lib/components/mascots'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
@@ -25,7 +25,7 @@ export function Wizard(): JSX.Element {
                         <div className="mb-8">
                             <h1 className="text-3xl font-bold mb-3">AI wizard</h1>
                             <p className="text-muted-alt">
-                                Select which project the wizard should use to install PostHog.
+                                Select which project the wizard should use to install Insights.
                             </p>
                         </div>
 
@@ -66,15 +66,15 @@ export function Wizard(): JSX.Element {
                     <>
                         <h1 className="text-3xl font-bold">Success!</h1>
                         <div className="max-w-60 mb-12">
-                            <HeartHog className="w-48 h-48" />
+                            <HeartMascot className="w-48 h-48" />
                         </div>
-                        <p className="text-lg">You're all set! You can return to the PostHog setup wizard.</p>
+                        <p className="text-lg">You're all set! You can return to the Insights setup wizard.</p>
                     </>
                 )}
                 {view === 'invalid' && (
                     <>
                         <h1 className="text-xl font-bold">Something went wrong!</h1>
-                        <SurprisedHog className="h-48 w-48" />
+                        <SurprisedMascot className="h-48 w-48" />
                         <p className="text-lg">
                             There was a problem authenticating the setup wizard. Please try again later.
                         </p>

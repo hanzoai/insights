@@ -1,4 +1,4 @@
-import { IconGithub } from '@posthog/icons'
+import { IconGithub } from '@hanzo/icons'
 
 import { IconGitlab, IconGoogle, IconKey } from 'lib/lemon-ui/icons'
 
@@ -19,6 +19,15 @@ export const SocialLoginIcon = ({
         return <IconGitlab {...props} />
     } else if (provider === 'saml') {
         return <IconKey {...props} />
+    } else if (provider === 'oidc') {
+        return (
+            <img
+                src="https://cdn.hanzo.ai/img/logo-white.svg"
+                alt="Hanzo"
+                style={{ width: 28, height: 28, objectFit: 'contain' }}
+                {...(props as any)}
+            />
+        )
     }
     return null
 }

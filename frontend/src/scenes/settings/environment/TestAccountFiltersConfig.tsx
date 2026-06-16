@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@posthog/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE } from 'lib/components/PropertyFilters/utils'
@@ -77,7 +77,7 @@ function TestAccountFiltersConfig(): JSX.Element {
         <div className="mb-4 flex flex-col gap-2">
             <div className="mb-4 flex flex-col gap-2">
                 <LemonBanner type="info">
-                    When filtering out internal users by person properties, like email, we recommend creating a Cohort
+                    When filtering out internal users by user properties, like email, we recommend creating a Cohort
                     with those properties, and then adding that cohort with a "not in" operator in your ‘Filter out
                     internal and test users’ settings.
                 </LemonBanner>
@@ -140,7 +140,7 @@ function TestAccountFiltersConfig(): JSX.Element {
                 onChange={updateFilterTestAccounts}
                 checked={filterTestAccounts}
                 disabled={currentTeamLoading}
-                label="Filter test accounts out of revenue analytics"
+                label="Filter out internal and test users from revenue analytics"
                 bordered
             />
         </div>
@@ -148,27 +148,5 @@ function TestAccountFiltersConfig(): JSX.Element {
 }
 
 export function ProjectAccountFiltersSetting(): JSX.Element {
-    return (
-        <>
-            <p>
-                These filters apply only to queries when the toggle is enabled. Adding filters here does not prevent
-                events or recordings being ingested.{' '}
-                <Link to="https://posthog.com/tutorials/filter-internal-users">Learn more in our docs</Link>.
-            </p>
-            <div className="mt-4">
-                <strong>Example filters</strong>
-                <ul className="list-disc pl-4 mb-2">
-                    <li>
-                        Add a cohort where "<strong>Email</strong> does not contain <strong>yourcompany.com</strong>" to
-                        exclude your team.
-                    </li>
-                    <li>
-                        Add "<strong>Host</strong> does not contain <strong>localhost</strong>" to exclude local
-                        environments.
-                    </li>
-                </ul>
-            </div>
-            <TestAccountFiltersConfig />
-        </>
-    )
+    return <TestAccountFiltersConfig />
 }

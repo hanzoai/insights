@@ -1,28 +1,160 @@
 # Surveys
 
+## Setting up your environment
+
+1. Follow the [local development guide](https://hanzo.ai/handbook/engineering/developing-locally) to set up your environment.
+2. Run `python manage.py generate_random_surveys` to generate a survey with responses for testing. By default, this creates 1 survey with 50 responses covering all actionable question types (open, rating, single choice with open-ended, multiple choice with open-ended).
+
+   Available parameters:
+   - `count` - Number of surveys to generate (default: 1)
+   - `--responses` - Number of responses per survey (default: 50)
+   - `--team-id` - Team ID to create surveys for (default: first team)
+   - `--days-back` - Spread responses over the last N days (default: 30)
+
 ## How to test changes
 
-### PostHog App Changes (Backend/Frontend)
+### Insights App Changes (Backend/Frontend)
 
-- Run the app locally following the [local development guide](https://posthog.com/handbook/engineering/developing-locally)
+- Run the app locally following the [local development guide](https://hanzo.ai/handbook/engineering/developing-locally)
 - Write tests for logic changes, especially in `surveyLogic.tsx` or `surveysLogic.tsx`
 
 ### JS SDK Changes
 
-Most survey logic lives in the [PostHog JS SDK](https://github.com/PostHog/posthog-js/). To test changes:
+Most survey logic lives in the [Insights JS SDK](https://github.com/Hanzo Insights/insights-js/). To test changes:
 
-1. Use the [NextJS playground](https://github.com/PostHog/posthog-js/tree/main/playground/nextjs) (recommended)
+First, build the package with hot-reload:
 
-2. To test SDK changes in the main PostHog app:
-    - Update `package.json` to use your local SDK:
+```bash
+cd insights-js # root of repo
+pnpm package:watch # generates tarballs with hot-reload
+```
 
-    ```json
-    "posthog-js": "file:../posthog-js"
-    ```
+This watches for changes and rebuilds automatically. Now pick your testing environment:
 
-    - Restart the frontend process after running `bin/start`
+#### Option 1: NextJS playground (recommended)
 
-Because of RemoteConfig, you'll likely need to run the main PostHog app with your local posthog-js files to see the changes.
+The playground is the fastest way to iterate on SDK changes.
+
+1. Import the surveys module in `playground/nextjs/src/insights.ts`:
+
+```typescript
+import 'insights-js/dist/surveys'
+```
+
+2. (Optional) Disable consent checks to simplify testing:
+
+```typescript
+export const configForConsent = (): Partial<InsightsConfig> => {
+  const consentGiven = cookieConsentGiven()
+  return {
+    disable_surveys: false, // force surveys on
+    autocapture: consentGiven === 'granted',
+    disable_session_recording: consentGiven !== 'granted',
+  }
+}
+```
+
+3. Update `playground/nextjs/package.json` to use your local build:
+
+**Manually:**
+
+```json
+{
+  "dependencies": {
+    "insights-js": "file:/path/to/insights-js/target/insights-js.tgz"
+  }
+}
+```
+
+**Or via script** (run from insights-js root):
+
+```bash
+TGZ_PATH="$(pwd)/target/insights-js.tgz"
+sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" playground/nextjs/package.json
+```
+
+4. Clean & run:
+
+```bash
+cd playground/nextjs
+rm -rf node_modules .next && pnpm install && pnpm dev
+```
+
+Changes are picked up automatically via `package:watch`.
+
+#### Option 2: Main Insights repo
+
+1. Update `frontend/package.json` to use your local build:
+
+**Manually:**
+
+```json
+{
+  "dependencies": {
+    "insights-js": "file:/path/to/insights-js/target/insights-js.tgz"
+  }
+}
+```
+
+**Or via script:**
+
+```bash
+# Adjust these paths to match your setup
+INSIGHTS_JS_DIR=~/src/insights-js
+DOTCOM_DIR=~/src/dotcom
+
+TGZ_PATH="$INSIGHTS_JS_DIR/target/insights-js.tgz"
+sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" "$DOTCOM_DIR/frontend/package.json"
+cd "$DOTCOM_DIR" && pnpm install
+# restart the frontend
+```
+
+#### External (hosted) surveys
+
+**Quick context:**
+
+- The external survey template is in the main repo at `insights/templates/surveys/public_survey.html`
+- This template is served from the backend at `insights/api/survey.py`
+  - Look for function: `public_survey_page(request, survey_id: str)`
+
+**How to test**
+
+1. Build the JS SDK, either with `pnpm package:watch` or just `pnpm build`
+
+2. Copy the dist file to the main repo:
+
+```bash
+cp /path/to/insights-js/packages/browser/dist/array.full.js /path/to/insights/frontend/dist/
+```
+
+3. Update `insights/templates/surveys/public_survey.html` to load your local SDK file:
+
+```html
+<!-- keep this project config script as-is -->
+<!-- Insights JavaScript -->
+<script nonce="{{ request.csp_nonce }}">
+  // Project config from Django and helper functions
+  const survey = {{ survey_data | safe }};
+  const projectConfig = {{ project_config_json | safe }};
+  ...
+</script>
+
+<!-- add this just above the existing CDN loader -->
+<script src="/static/array.full.js" nonce="{{ request.csp_nonce }}"></script>
+
+<script nonce="{{ request.csp_nonce }}">
+  // Load Insights from CDN
+  !function (t, e) ...; // remove/comment this line!
+</script>
+```
+
+4. Start the backend services however you normally do, e.g. `insightscli start`
+
+5. You should be able to see a survey with your local SDK changes on port `8010` or `8000`, e.g.:
+
+```text
+http://localhost:8000/external_surveys/019aea73-43d7-0000-9638-02f9368f964b?q0=5&auto_submit=true
+```
 
 ### Mobile Device Testing
 
@@ -33,30 +165,30 @@ To test on mobile devices, use [ngrok](https://ngrok.com/) to expose localhost:
 ```yaml
 version: '3'
 agent:
-    authtoken: YOUR_AUTH_TOKEN
+  authtoken: YOUR_AUTH_TOKEN
 tunnels:
-    web:
-        proto: http
-        addr: 8010
-        host_header: rewrite
-        subdomain: posthog-web-test
-    app:
-        proto: http
-        addr: 3000
-        subdomain: posthog-app-test
+  web:
+    proto: http
+    addr: 8010
+    host_header: rewrite
+    subdomain: insights-web-test
+  app:
+    proto: http
+    addr: 3000
+    subdomain: insights-app-test
 ```
 
 2. Add this `.env` configuration:
 
 ```env
 # Core URLs
-SITE_URL=https://posthog-web-test.ngrok.io
-JS_URL=https://posthog-web-test.ngrok.io
+SITE_URL=https://insights-web-test.ngrok.io
+JS_URL=https://insights-web-test.ngrok.io
 
 # CORS and security
 CORS_ALLOW_ALL_ORIGINS=true
 CORS_ALLOW_CREDENTIALS=True
-ALLOWED_HOSTS=*,localhost,localhost:8010,127.0.0.1,127.0.0.1:8010,posthog-web-test
+ALLOWED_HOSTS=*,localhost,localhost:8010,127.0.0.1,127.0.0.1:8010,insights-web-test
 DISABLE_SECURE_SSL_REDIRECT=True
 SECURE_COOKIES=False
 
@@ -81,17 +213,17 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/PostHog/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/Hanzo Insights/insights/blob/main/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 
 ```python
 # In python manage.py shell
-from posthog.tasks.usage_report import get_teams_with_survey_responses_count_in_period
-from datetime import datetime, timedelta, timezone
+from insights.tasks.usage_report import get_teams_with_survey_responses_count_in_period
+from datetime import datetime, timedelta, UTC
 
 # Define the period for the last 60 days
-now = datetime.now(tz=timezone.utc)
+now = datetime.now(tz=UTC)
 start_time = now - timedelta(days=60)
 end_time = now
 
@@ -101,15 +233,15 @@ print(results)
 
 ## Debugging
 
-### posthog-js logs
+### insights-js logs
 
-We [added some logging on the JS SDK](https://github.com/PostHog/posthog-js/pull/1663) to help debug issues with surveys.
+We [added some logging on the JS SDK](https://github.com/Hanzo Insights/insights-js/pull/1663) to help debug issues with surveys.
 
-However, those logs are only enabled when posthog-js (v1.117.0 and higher) is set with debug=true.
+However, those logs are only enabled when insights-js (v1.117.0 and higher) is set with debug=true.
 
-For customer issues, if you need it, you can add the query parameter `__posthog_debug=true` to force the JS SDK to be loaded with debugging mode.
+For customer issues, if you need it, you can add the query parameter `__insights_debug=true` to force the JS SDK to be loaded with debugging mode.
 
-Example: `https://posthog.com/?__posthog_debug=true`
+Example: `https://hanzo.ai/?__insights_debug=true`
 
 If you ever need more logs, please create a PR and add them.
 
@@ -136,7 +268,7 @@ When to use:
 
 ```python
 # In Django shell (python manage.py shell_plus)
-from posthog.models.surveys.debug import (
+from insights.models.surveys.debug import (
     check_team_cache_consistency,
     fix_team_cache_consistency,
     find_teams_with_cache_inconsistencies,
@@ -160,18 +292,18 @@ fix_all_teams_cache_consistency()
 
 Access the database via Django admin, you can do so by opening:
 
-https://{eu|us}.posthog.com/admin/posthog/survey/{survey_id}/change/
+https://{eu|us}.hanzo.ai/admin/insights/survey/{survey_id}/change/
 
 Access the database via Metabase, you can do so by opening:
 
-- [EU](https://metabase.prod-eu.posthog.dev/browse/databases/34-posthog-postgres-prod-eu) - Posthog Survey
-- [US](https://metabase.prod-us.posthog.dev/browse/databases/34-posthog-postgres-prod-us-aurora) - Posthog Survey
+- [EU](https://metabase.prod-eu.insights.dev/browse/databases/34-insights-postgres-prod-eu) - Insights Survey
+- [US](https://metabase.prod-us.insights.dev/browse/databases/34-insights-postgres-prod-us-aurora) - Insights Survey
 
 You can execute SQL queries directly in Metabase.
 
 ```sql
-select * from posthog_survey
+select * from insights_survey
  where id = '{survey_id}'
 ```
 
-Access postgres directly, check the [runbook](http://runbooks/postgres#accessing-postgres) (internal PostHog link).
+Access postgres directly, check the [runbook](http://runbooks/postgres#accessing-postgres) (internal Insights link).

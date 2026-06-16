@@ -10,16 +10,19 @@ import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
 import { Link } from 'lib/lemon-ui/Link'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { autoCaptureEventToDescription } from 'lib/utils'
+import { autoCaptureEventToDescription, isURL } from 'lib/utils'
 import { COUNTRY_CODE_TO_LONG_NAME, countryCodeToFlag } from 'lib/utils/geography/country'
+import { formatCurrency } from 'lib/utils/geography/currency'
 import { GroupActorDisplay } from 'scenes/persons/GroupActorDisplay'
 import { PersonDisplay, PersonDisplayProps } from 'scenes/persons/PersonDisplay'
+import { sessionColumnRenderers } from 'scenes/sessions/sessionColumnRenderers'
 import { urls } from 'scenes/urls'
 
 import { errorColumn, loadingColumn } from '~/queries/nodes/DataTable/dataTableLogic'
-import { renderHogQLX } from '~/queries/nodes/HogQLX/render'
+import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 import { DeletePersonButton } from '~/queries/nodes/PersonsNode/DeletePersonButton'
 import {
+    CurrencyCode,
     DataTableNode,
     EventsQueryPersonColumn,
     HasPropertiesNode,
@@ -30,7 +33,7 @@ import {
     isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isPersonsNode,
     isRevenueExampleEventsQuery,
     isTracesQuery,
@@ -38,7 +41,18 @@ import {
 } from '~/queries/utils'
 import { AnyPropertyFilter, EventType, PersonType, PropertyFilterType, PropertyOperator } from '~/types'
 
+import { llmAnalyticsColumnRenderers } from 'products/llm_analytics/frontend/llmAnalyticsColumnRenderers'
+
 import { extractExpressionComment, removeExpressionComment } from './utils'
+
+const DATETIME_KEYS = ['timestamp', 'created_at', 'last_seen', 'session_start', 'session_end']
+
+// Registry for product-specific column renderers
+// Products can add their custom column renderers here to have them automatically applied across all DataTable instances
+const productColumnRenderers: Record<string, QueryContextColumn> = {
+    ...llmAnalyticsColumnRenderers,
+    ...sessionColumnRenderers,
+}
 
 export function getContextColumn(
     key: string,
@@ -83,6 +97,7 @@ export function renderColumn(
                 query={query}
                 recordIndex={recordIndex}
                 rowCount={rowCount}
+                context={context}
             />
         )
     } else if (context?.columns?.[key] && context?.columns?.[key].render) {
@@ -95,12 +110,25 @@ export function renderColumn(
                 query={query}
                 recordIndex={recordIndex}
                 rowCount={rowCount}
+                context={context}
             />
         ) : (
             String(value)
         )
+    } else if (productColumnRenderers[key]?.render) {
+        const Component = productColumnRenderers[key].render!
+        return (
+            <Component
+                record={record}
+                columnName={key}
+                value={value}
+                query={query}
+                recordIndex={recordIndex}
+                rowCount={rowCount}
+            />
+        )
     } else if (typeof value === 'object' && Array.isArray(value) && value[0] === '__hx_tag') {
-        return renderHogQLX(value)
+        return renderInsightsQLX(value)
     } else if (value === null) {
         return (
             <Tooltip title="NULL" placement="right" delayMs={0}>
@@ -109,7 +137,7 @@ export function renderColumn(
                 </span>
             </Tooltip>
         )
-    } else if (isHogQLQuery(query.source)) {
+    } else if (isInsightsQLQuery(query.source)) {
         if (typeof value === 'string') {
             try {
                 if (value.startsWith('{') && value.endsWith('}')) {
@@ -166,7 +194,7 @@ export function renderColumn(
         ) : (
             content
         )
-    } else if (key === 'timestamp' || key === 'created_at' || key === 'session_start' || key === 'session_end') {
+    } else if (DATETIME_KEYS.includes(key)) {
         return <TZLabel time={value} showSeconds />
     } else if (!Array.isArray(record) && key.startsWith('properties.')) {
         // TODO: remove after removing the old events table
@@ -283,7 +311,7 @@ export function renderColumn(
                 : urls.personByUUID(value.id)
         }
 
-        if (isTracesQuery(query.source)) {
+        if (isTracesQuery(query.source) && value) {
             displayProps.person = value.distinct_id ? (value as LLMTracePerson) : value
             displayProps.noPopover = false // If we are in a traces list, the popover experience is better
         }
@@ -294,7 +322,7 @@ export function renderColumn(
         const noPopover = isActorsQuery(query.source)
         const displayProps: PersonDisplayProps = {
             withIcon: true,
-            person: { id: value.id },
+            person: { id: value.id, distinct_id: value.distinct_id },
             displayName: value.display_name,
             noPopover,
         }
@@ -371,8 +399,13 @@ export function renderColumn(
     } else if (key === 'group_name' && isGroupsQuery(query.source)) {
         const key = (record as any[])[1] // 'key' is the second column in the groups query
         return <Link to={urls.group(query.source.group_type_index, key, true)}>{value}</Link>
+    } else if (trimQuotes(key).endsWith('$virt_mrr') || trimQuotes(key).endsWith('$virt_revenue')) {
+        if (value === null || value === undefined) {
+            return '—'
+        }
+        const baseCurrency = context?.baseCurrency || CurrencyCode.USD
+        return formatCurrency(Number(value), baseCurrency)
     }
-
     if (typeof value === 'object') {
         return <JSONViewer src={value} name={null} collapsed={Object.keys(value).length > 10 ? 0 : 1} />
     } else if (
@@ -384,6 +417,14 @@ export function renderColumn(
         } catch {
             // do nothing
         }
+    }
+
+    if (typeof value === 'string' && isURL(value)) {
+        return (
+            <Link to={value} target="_blank" targetBlankIcon>
+                {value}
+            </Link>
+        )
     }
 
     return String(value)

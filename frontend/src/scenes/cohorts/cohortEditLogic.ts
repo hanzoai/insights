@@ -1,11 +1,12 @@
-import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path, props, reducers } from 'kea'
+import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import { actionToUrl, router } from 'kea-router'
-import posthog from 'posthog-js'
+import { router } from 'kea-router'
+import insights from '@hanzo/insights'
 import { v4 as uuidv4 } from 'uuid'
 
 import api from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { ENTITY_MATCH_TYPE } from 'lib/constants'
 import { scrollToFormError } from 'lib/forms/scrollToFormError'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -26,7 +27,7 @@ import { urls } from 'scenes/urls'
 import { refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 import { cohortsModel, processCohort } from '~/models/cohortsModel'
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { DataTableNode, Node, NodeKind } from '~/queries/schema/schema-general'
+import { ActorsQuery, DataTableNode, InsightsQLQuery, Node, NodeKind } from '~/queries/schema/schema-general'
 import { isDataTableNode } from '~/queries/utils'
 import {
     AnyCohortCriteriaType,
@@ -42,20 +43,37 @@ import type { cohortEditLogicType } from './cohortEditLogicType'
 
 export type CohortLogicProps = {
     id?: CohortType['id']
+    tabId?: string
 }
+
+const checkIsPendingCalculation = (cohort: CohortType): boolean =>
+    cohort.pending_version != null && (cohort.version == null || cohort.pending_version !== cohort.version)
 
 export const cohortEditLogic = kea<cohortEditLogicType>([
     props({} as CohortLogicProps),
-    key((props) => props.id || 'new'),
+    key((props) => {
+        if (props.id === 'new' || !props.id) {
+            if (props.tabId == null) {
+                return 'new'
+            }
+            return `new-${props.tabId}`
+        }
+        if (props.tabId == null) {
+            return props.id
+        }
+        return `${props.id}-${props.tabId}`
+    }),
     path(['scenes', 'cohorts', 'cohortLogicEdit']),
     connect(() => ({
         actions: [eventUsageLogic, ['reportExperimentExposureCohortEdited']],
+        logic: [cohortsModel],
     })),
 
     actions({
         saveCohort: (cohortParams = {}) => ({ cohortParams }),
         setCohort: (cohort: CohortType) => ({ cohort }),
         deleteCohort: true,
+        restoreCohort: true,
         fetchCohort: (id: CohortType['id']) => ({ id }),
         setCohortMissing: true,
         onCriteriaChange: (newGroup: Partial<CohortGroupType>, id: string) => ({ newGroup, id }),
@@ -75,9 +93,12 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
         setQuery: (query: Node) => ({ query }),
         duplicateCohort: (asStatic: boolean) => ({ asStatic }),
         updateCohortCount: true,
-        setCreationPersonQuery: (query: Node) => ({ query }),
+        setCreationPersonQuery: (query: ActorsQuery) => ({ query }),
         addPersonToCreateStaticCohort: (personId: string) => ({ personId }),
         removePersonFromCreateStaticCohort: (personId: string) => ({ personId }),
+        removePersonFromCohort: (personId: string) => ({ personId }),
+        resetPersonsToCreateStaticCohort: true,
+        refreshPersonsData: true,
     }),
 
     reducers(({ props }) => ({
@@ -196,26 +217,25 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
             } as DataTableNode,
             {
                 setQuery: (state, { query }) => (isDataTableNode(query) ? query : state),
+                setCohort: (state, { cohort }) => ({
+                    ...state,
+                    source: {
+                        ...state.source,
+                        select: cohort.is_static
+                            ? ['person_display_name -- Person', 'id', 'created_at', 'person.$delete']
+                            : ['person_display_name -- Person', 'id', 'created_at'],
+                    },
+                }),
             },
         ],
         creationPersonQuery: [
             {
-                kind: NodeKind.DataTableNode,
-                source: {
-                    kind: NodeKind.ActorsQuery,
-                    fixedProperties: [],
-                    select: ['id', 'person_display_name -- Person'],
-                },
-                showPropertyFilter: false,
-                showEventFilter: false,
-                showExport: false,
-                showSearch: true,
-                showActions: false,
-                showElapsedTime: false,
-                showTimings: false,
-            } as DataTableNode,
+                kind: NodeKind.ActorsQuery,
+                fixedProperties: [],
+                select: ['id', 'person_display_name -- Person'],
+            } as ActorsQuery,
             {
-                setCreationPersonQuery: (state, { query }) => (isDataTableNode(query) ? query : state),
+                setCreationPersonQuery: (_state, { query }) => query,
             },
         ],
         personsToCreateStaticCohort: [
@@ -230,9 +250,26 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                     delete newState[personId]
                     return newState
                 },
+                resetPersonsToCreateStaticCohort: () => ({}),
             },
         ],
     })),
+
+    selectors({
+        canRemovePersonFromCohort: [
+            (s) => [s.cohort],
+            (cohort: CohortType) => {
+                return cohort.is_static && typeof cohort.id === 'number'
+            },
+        ],
+        isPendingCalculation: [(s) => [s.cohort], (cohort: CohortType) => checkIsPendingCalculation(cohort)],
+        isCalculatingOrPending: [
+            (s) => [s.cohort, s.isPendingCalculation],
+            (cohort: CohortType, isPendingCalculation: boolean) => {
+                return cohort.is_calculating || isPendingCalculation
+            },
+        ],
+    }),
 
     forms(({ actions, values }) => ({
         cohort: {
@@ -247,6 +284,11 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                 },
             }),
             submit: (cohort) => {
+                // Prevent multiple concurrent saves
+                if (values.cohortLoading) {
+                    return
+                }
+
                 if (cohort.id !== 'new') {
                     actions.saveCohort(cohort)
                 } else {
@@ -285,6 +327,19 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                         return values.cohort
                     }
                 },
+                restoreCohort: async () => {
+                    try {
+                        const restoredCohort = await api.cohorts.update(values.cohort.id, {
+                            deleted: false,
+                        })
+                        actions.setCohort(restoredCohort)
+                        lemonToast.success('Cohort restored successfully.')
+                        return restoredCohort
+                    } catch (error) {
+                        lemonToast.error(`Failed to restore cohort: '${error}'`)
+                        return values.cohort
+                    }
+                },
                 saveCohort: async ({ cohortParams }, breakpoint) => {
                     const existingCohort = values.cohort
                     let cohort = { ...existingCohort, ...cohortParams }
@@ -302,6 +357,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                         } else {
                             cohort = await api.cohorts.create(cohortFormData as Partial<CohortType>)
                             cohortsModel.actions.cohortCreated(cohort)
+                            globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.SetUpCohorts)
                         }
                     } catch (error: any) {
                         breakpoint()
@@ -314,7 +370,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                                 operation_type: cohort.id === 'new' ? 'create' : 'update',
                                 is_static: cohort.is_static,
                             })
-                            posthog.captureException(error, {
+                            insights.captureException(error, {
                                 cohort_operation: 'Cohort creation failed unexpectedly',
                                 // Cohort context (most valuable)
                                 cohort_name: cohort.name,
@@ -357,10 +413,14 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                     })
                     actions.checkIfFinishedCalculating(cohort)
                     if (cohort.id !== 'new') {
-                        const mountedDataNodeLogic = dataNodeLogic.findMounted({
-                            key: createCohortDataNodeLogicKey(cohort.id),
-                        })
-                        mountedDataNodeLogic?.actions.loadData('force_blocking')
+                        actions.refreshPersonsData()
+                    }
+                    if (existingCohort.id === 'new') {
+                        router.actions.push(urls.cohort(cohort.id))
+                        if (existingCohort.is_static) {
+                            actions.resetPersonsToCreateStaticCohort()
+                        }
+                        return { ...NEW_COHORT }
                     }
                     return processCohort(cohort)
                 },
@@ -398,7 +458,16 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                     try {
                         await breakpoint(200)
                         if (asStatic) {
-                            cohort = await api.cohorts.duplicate(values.cohort.id)
+                            const sourceTable = values.cohort.is_static ? 'static_cohort_people' : 'cohort_people'
+                            const query: InsightsQLQuery = {
+                                kind: NodeKind.InsightsQLQuery,
+                                query: `SELECT person_id FROM ${sourceTable} WHERE cohort_id = ${values.cohort.id}`,
+                            }
+                            cohort = await api.create('api/cohort', {
+                                is_static: true,
+                                name: `${values.cohort.name} (static copy)`,
+                                query,
+                            })
                         } else {
                             const data = { ...values.cohort }
                             data.name += ' (dynamic copy)'
@@ -425,11 +494,31 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                 },
             },
         ],
+
+        removePersonFromCohort: [
+            null as any,
+            {
+                removePersonFromCohort: async ({ personId }) => {
+                    if (!values.cohort.id || values.cohort.id === 'new') {
+                        throw new Error('Cannot remove person from unsaved cohort')
+                    }
+
+                    try {
+                        await api.cohorts.removePersonFromCohort(values.cohort.id, personId)
+                        lemonToast.success('Person removed from cohort')
+                    } catch (error: any) {
+                        throw error
+                    }
+                    // Refresh cohort data + count
+                    actions.refreshPersonsData()
+                    actions.updateCohortCount()
+                },
+            },
+        ],
     })),
     listeners(({ actions, values }) => ({
         deleteCohort: () => {
-            cohortsModel.findMounted()?.actions.deleteCohort({ id: values.cohort.id, name: values.cohort.name })
-            router.actions.push(urls.cohorts())
+            cohortsModel.actions.deleteCohort({ id: values.cohort.id, name: values.cohort.name })
         },
         submitCohortFailure: () => {
             scrollToFormError({
@@ -439,7 +528,10 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
             })
         },
         checkIfFinishedCalculating: async ({ cohort }, breakpoint) => {
-            if (cohort.is_calculating) {
+            const isPendingCalculation = checkIsPendingCalculation(cohort)
+            const isCalculatingOrPending = cohort.is_calculating || isPendingCalculation
+
+            if (isCalculatingOrPending) {
                 actions.setPollTimeout(
                     window.setTimeout(async () => {
                         const newCohort = await api.cohorts.get(cohort.id)
@@ -454,20 +546,25 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                     errors_calculating: cohort.errors_calculating,
                     last_calculation: cohort.last_calculation,
                     count: cohort.count,
+                    version: cohort.version,
+                    pending_version: cohort.pending_version,
                 }
                 actions.setCohort({ ...values.cohort, ...calculationFields })
                 cohortsModel.actions.updateCohort(cohort)
                 personsLogic.findMounted({ syncWithUrl: true })?.actions.loadCohorts() // To ensure sync on person page
+                actions.refreshPersonsData()
                 if (values.pollTimeout) {
                     clearTimeout(values.pollTimeout)
                     actions.setPollTimeout(null)
                 }
             }
         },
-    })),
-
-    actionToUrl(({ values }) => ({
-        saveCohortSuccess: () => urls.cohort(values.cohort.id),
+        refreshPersonsData: async (_, breakpoint) => {
+            await breakpoint(100)
+            // Refresh the persons data table
+            const dataNodeLogicKey = createCohortDataNodeLogicKey(values.cohort.id)
+            dataNodeLogic.findMounted({ key: dataNodeLogicKey })?.actions.loadData('force_blocking')
+        },
     })),
 
     afterMount(({ actions, props }) => {

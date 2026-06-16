@@ -2,31 +2,56 @@
     <tcp_port>9000</tcp_port>
 
     <remote_servers>
-        <posthog>
+        <insights>
             <shard>
                 <replica>
                     <host>clickhouse</host>
                     <port>9000</port>
                 </replica>
             </shard>
-        </posthog>
-        <posthog_single_shard>
+        </insights>
+        <insights_single_shard>
             <shard>
                 <replica>
                     <host>clickhouse</host>
                     <port>9000</port>
                 </replica>
             </shard>
-        </posthog_single_shard>
-        <posthog_migrations>
+        </insights_single_shard>
+        <insights_migrations>
             <shard>
                 <replica>
                     <host>clickhouse</host>
                     <port>9000</port>
                 </replica>
             </shard>
-        </posthog_migrations>
+        </insights_migrations>
+        <insights_writable>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </insights_writable>
+        <insights_primary_replica>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </insights_primary_replica>
     </remote_servers>
+
+    <named_collections>
+        <msk_cluster>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </msk_cluster>
+        <warpstream_ingestion>
+            <kafka_broker_list from_env="KAFKA_HOSTS"/>
+        </warpstream_ingestion>
+    </named_collections>
 
     <macros>
         <shard>01</shard>

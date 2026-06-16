@@ -2,8 +2,9 @@ import { useActions } from 'kea'
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
+import { IconRefresh } from '@hanzo/icons'
+
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconRefresh } from 'lib/lemon-ui/icons'
 
 import { ExperimentIdType } from '~/types'
 
@@ -12,17 +13,24 @@ import { AuthorizedUrlListType, KeyedAppUrl, authorizedUrlListLogic } from './au
 type EmptyStateProps = {
     type: AuthorizedUrlListType
     experimentId?: ExperimentIdType | null
+    productTourId?: string | null
     actionId?: number | null
     displaySuggestions?: boolean
 }
 
 export function EmptyState({
     experimentId,
+    productTourId,
     actionId,
     type,
     displaySuggestions = true,
 }: EmptyStateProps): JSX.Element | null {
-    const logic = authorizedUrlListLogic({ experimentId: experimentId ?? null, actionId: actionId ?? null, type })
+    const logic = authorizedUrlListLogic({
+        experimentId: experimentId ?? null,
+        productTourId: productTourId ?? null,
+        actionId: actionId ?? null,
+        type,
+    })
     const { urlsKeyed, suggestionsLoading, isAddUrlFormVisible } = useValues(logic)
     const { loadSuggestions } = useActions(logic)
 
@@ -56,7 +64,7 @@ export function EmptyState({
             return (
                 <p className="mb-0">
                     There are no authorized {domainOrUrl}s. <br />
-                    We've found some URLs you've used PostHog from in the last 3 days. Consider authorizing them. It'll
+                    We've found some URLs you've used Insights from in the last 3 days. Consider authorizing them. It'll
                     allow you to use these in{' '}
                     {type === AuthorizedUrlListType.RECORDING_DOMAINS ? (
                         <span>recordings.</span>

@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Link } from '@posthog/lemon-ui'
+import { IconDatabase, IconRefresh } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
-import { PageHeader } from 'lib/components/PageHeader'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
@@ -13,11 +14,15 @@ import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag/LemonTag'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconPlayCircle, IconRefresh, IconReplay } from 'lib/lemon-ui/icons'
+import { IconPlayCircle, IconReplay } from 'lib/lemon-ui/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { AsyncMigrationParametersModal } from 'scenes/instance/AsyncMigrations/AsyncMigrationParametersModal'
 import { SceneExport } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
+
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
 import { AsyncMigrationDetails } from './AsyncMigrationDetails'
 import { SettingUpdateField } from './SettingUpdateField'
@@ -60,18 +65,20 @@ export function AsyncMigrations(): JSX.Element {
         setActiveTab,
     } = useActions(asyncMigrationsLogic)
 
+    const { isVisible: isPageVisible } = usePageVisibility()
+
     useEffect(() => {
-        if (isAnyMigrationRunning) {
+        if (isAnyMigrationRunning && isPageVisible) {
             const interval = setInterval(() => loadAsyncMigrations(), STATUS_RELOAD_INTERVAL_MS)
             return () => clearInterval(interval)
         }
-    }, [isAnyMigrationRunning]) // oxlint-disable-line react-hooks/exhaustive-deps
+    }, [isAnyMigrationRunning, isPageVisible]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     const nameColumn: AsyncMigrationColumnType = {
         title: 'Migration',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const link =
-                'https://github.com/PostHog/posthog/blob/master/posthog/async_migrations/migrations/' +
+                'https://github.com/hanzoai/insights/blob/main/insights/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
             return <LemonTableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
@@ -201,15 +208,15 @@ export function AsyncMigrations(): JSX.Element {
     }
 
     const minVersionColumn: AsyncMigrationColumnType = {
-        title: 'Minimum PostHog version',
+        title: 'Minimum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
-            return <div>{asyncMigration.posthog_min_version}</div>
+            return <div>{asyncMigration.insights_min_version}</div>
         },
     }
     const maxVersionColumn: AsyncMigrationColumnType = {
-        title: 'Maximum PostHog version',
+        title: 'Maximum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
-            return <div>{asyncMigration.posthog_max_version}</div>
+            return <div>{asyncMigration.insights_max_version}</div>
         },
     }
 
@@ -258,25 +265,27 @@ export function AsyncMigrations(): JSX.Element {
     }
 
     return (
-        <div>
+        <SceneContent>
             {user?.is_staff ? (
                 <>
-                    <PageHeader
-                        caption={
-                            <>
-                                <p>Manage async migrations in your instance.</p>
-                                <p>
-                                    Read about async migrations on our{' '}
-                                    <Link to="https://posthog.com/docs/self-host/configure/async-migrations/overview">
-                                        dedicated docs page
-                                    </Link>
-                                    .
-                                </p>
-                            </>
-                        }
+                    <SceneTitleSection
+                        name="Async Migrations"
+                        description="Manage async migrations in your instance."
+                        markdown
+                        resourceType={{
+                            type: 'async_migrations',
+                            forceIcon: <IconDatabase />,
+                        }}
                     />
+                    <p>
+                        Read about async migrations on our{' '}
+                        <Link to="https://hanzo.ai/docs/self-host/configure/async-migrations/overview">
+                            dedicated docs page
+                        </Link>
+                        .
+                    </p>
 
-                    <LemonTabs activeKey={activeTab} onChange={setActiveTab} tabs={tabs} />
+                    <LemonTabs sceneInset activeKey={activeTab} onChange={setActiveTab} tabs={tabs} />
 
                     {[AsyncMigrationsTab.Management, AsyncMigrationsTab.FutureMigrations].includes(activeTab) ? (
                         <>
@@ -315,21 +324,23 @@ export function AsyncMigrations(): JSX.Element {
                     ) : null}
                 </>
             ) : (
-                <PageHeader
-                    caption={
-                        <>
-                            <p>
-                                Only users with staff access can manage async migrations. Please contact your instance
-                                admin.
-                            </p>
-                            <p>
-                                If you're an admin and don't have access, set <code>is_staff=true</code> for your user
-                                on the PostgreSQL <code>posthog_user</code> table.
-                            </p>
-                        </>
-                    }
-                />
+                <>
+                    <SceneTitleSection
+                        name="Async Migrations"
+                        description="Only users with staff access can manage async migrations. Please contact your instance admin. If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the PostgreSQL <code>insights_user</code> table."
+                        resourceType={{
+                            type: 'async_migrations',
+                            forceIcon: <IconDatabase />,
+                        }}
+                    />
+                    <p>Only users with staff access can manage async migrations. Please contact your instance admin.</p>
+                    <p>
+                        If you're an admin and don't have access, set <code>is_staff=true</code> for your user on the
+                        PostgreSQL <code>insights_user</code> table.
+                    </p>
+                    <SceneDivider />
+                </>
             )}
-        </div>
+        </SceneContent>
     )
 }

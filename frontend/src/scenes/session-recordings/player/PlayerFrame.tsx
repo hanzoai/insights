@@ -1,11 +1,12 @@
 import './PlayerFrame.scss'
+import './PlayerFrameLLMHighlight.scss'
 
 import useSize from '@react-hook/size'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { Handler, viewportResizeDimension } from '@posthog/rrweb-types'
+import { Handler, viewportResizeDimension } from '@hanzo/rrweb-types'
 
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
@@ -34,10 +35,13 @@ export const PlayerFrame = (): JSX.Element => {
 
             const parentDimensions = frameRef.current.parentElement.getBoundingClientRect()
 
+            // Cap at 0.999 instead of 1 to avoid a Chrome GPU compositing bug where
+            // an identity transform (scale(1)) causes the iframe layer to paint outside
+            // its clipping bounds, overlapping the rest of the UI.
             const scale = Math.min(
                 parentDimensions.width / replayDimensions.width,
                 parentDimensions.height / replayDimensions.height,
-                1
+                0.999
             )
 
             player.replayer.wrapper.style.transform = `scale(${scale})`
@@ -79,7 +83,9 @@ export const PlayerFrame = (): JSX.Element => {
     }, [containerDimensions, windowResize])
 
     return (
-        <div ref={containerRef} className="PlayerFrame ph-no-capture">
+        // Adding the LLM highlight class to override clicks animation, in case we decide to make it conditional.
+        // The initial approach was conditional, but everyone liked how it looked, so we decided to make it the default.
+        <div ref={containerRef} className={clsx('PlayerFrame ph-no-capture PlayerFrame--llm-highlight')}>
             <div
                 className={clsx('PlayerFrame__content', maskingWindow && 'PlayerFrame__content--masking-window')}
                 ref={frameRef}

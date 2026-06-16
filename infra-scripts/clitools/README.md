@@ -1,15 +1,16 @@
 # Toolbox CLI
 
-The primary function is to help manage and connect to PostHog toolbox pods in a Kubernetes environment.
+The primary function is to help manage and connect to Insights toolbox pods in a Kubernetes environment.
 
 ## Installation
 
 1. Ensure you have Python 3.x installed on your system
 2. Clone this repository or download `toolbox.py`
 3. Make the script executable (Unix-based systems):
-    ```bash
-    chmod +x toolbox.py
-    ```
+
+   ```bash
+   chmod +x toolbox.py
+   ```
 
 ## Requirements
 
@@ -36,7 +37,7 @@ Or directly (Unix-based systems):
 The toolbox CLI:
 
 1. Authenticates your AWS identity
-2. Finds an available PostHog toolbox pod or connects to one you've already claimed
+2. Finds an available Insights toolbox pod or connects to one you've already claimed
 3. Claims the pod for a specified duration (default 12 hours)
 4. Provides an interactive shell session to the pod
 5. Offers to delete the pod when you exit the shell

@@ -3,7 +3,6 @@ import { forms } from 'kea-forms'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { DashboardRestrictionLevel } from 'lib/constants'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -24,7 +23,6 @@ export interface NewDashboardForm {
     description: ''
     show: boolean
     useTemplate: string
-    restrictionLevel: DashboardRestrictionLevel
     _create_in_folder?: string | null
 }
 
@@ -33,7 +31,6 @@ const defaultFormValues: NewDashboardForm = {
     description: '',
     show: false,
     useTemplate: '',
-    restrictionLevel: DashboardRestrictionLevel.EveryoneInProjectCanEdit,
 }
 
 export interface NewDashboardLogicProps {
@@ -117,6 +114,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
         addDashboard: (form: Partial<NewDashboardForm>) => ({ form }),
         setActiveDashboardTemplate: (template: DashboardTemplateType) => ({ template }),
         clearActiveDashboardTemplate: true,
+        setRedirectAfterCreation: (redirect: boolean) => ({ redirect }),
         createDashboardFromTemplate: (
             template: DashboardTemplateType,
             variables: DashboardTemplateVariableType[],
@@ -166,18 +164,21 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
                 clearActiveDashboardTemplate: () => null,
             },
         ],
+        redirectAfterCreation: [
+            true,
+            {
+                setRedirectAfterCreation: (_, { redirect }) => redirect,
+                showNewDashboardModal: () => true,
+            },
+        ],
     }),
-    forms(({ actions, props }) => ({
+    forms(({ actions, props, values }) => ({
         newDashboard: {
             defaults: defaultFormValues,
-            errors: ({ name, restrictionLevel }) => ({
+            errors: ({ name }) => ({
                 name: !name ? 'Please give your dashboard a name.' : null,
-                restrictionLevel: !restrictionLevel ? 'Restriction level needs to be specified.' : null,
             }),
-            submit: async (
-                { name, description, useTemplate, restrictionLevel, show, _create_in_folder },
-                breakpoint
-            ) => {
+            submit: async ({ name, description, useTemplate, show, _create_in_folder }, breakpoint) => {
                 actions.setIsLoading(true)
                 try {
                     const result: DashboardType = await api.create(
@@ -186,7 +187,6 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
                             name: name,
                             description: description,
                             use_template: useTemplate,
-                            restriction_level: restrictionLevel,
                             ...(props.initialTags && { tags: props.initialTags }),
                             ...(typeof _create_in_folder === 'string' ? { _create_in_folder } : {}),
                         } as Partial<DashboardType>
@@ -196,7 +196,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
                     const queryBasedDashboard = getQueryBasedDashboard(result)
                     queryBasedDashboard && dashboardsModel.actions.addDashboardSuccess(queryBasedDashboard)
                     actions.submitNewDashboardSuccessWithResult(result)
-                    if (show) {
+                    if (show && values.redirectAfterCreation) {
                         breakpoint()
                         router.actions.push(urls.dashboard(result.id))
                     }
@@ -278,12 +278,12 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
     })),
     actionToUrl({
         hideNewDashboardModal: () => {
-            const hashParams = router.values.hashParams
+            const hashParams = { ...router.values.hashParams }
             delete hashParams['newDashboard']
             return [router.values.location.pathname, router.values.searchParams, hashParams]
         },
         showNewDashboardModal: () => {
-            const hashParams = router.values.hashParams
+            const hashParams = { ...router.values.hashParams }
             hashParams['newDashboard'] = 'modal'
             return [router.values.location.pathname, router.values.searchParams, hashParams]
         },

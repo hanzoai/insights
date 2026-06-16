@@ -1,16 +1,17 @@
 import './SidePanel.scss'
 
-import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconEllipsis, IconFeatures, IconGear, IconInfo, IconLock, IconNotebook, IconSupport } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonMenuItems, LemonModal, ProfilePicture } from '@posthog/lemon-ui'
+import { IconBook, IconEllipsis, IconGear, IconInfo, IconLock, IconLogomark, IconNotebook } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonMenuItems, LemonModal } from '@hanzo/lemon-ui'
 
+import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { cn } from 'lib/utils/css-classes'
 import { NotebookPanel } from 'scenes/notebooks/NotebookPanel/NotebookPanel'
-import { userLogic } from 'scenes/userLogic'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import {
@@ -18,49 +19,51 @@ import {
     SidePanelExportsIcon,
 } from '~/layout/navigation-3000/sidepanel/panels/exports/SidePanelExports'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { navigationLogic } from '~/layout/navigation/navigationLogic'
 import { panelLayoutLogic } from '~/layout/panel-layout/panelLayoutLogic'
+import { sceneLayoutLogic } from '~/layout/scenes/sceneLayoutLogic'
 import { SidePanelTab } from '~/types'
 
+import { SidePanelSupportIcon } from 'products/conversations/frontend/components/SidePanel/SidePanelSupportIcon'
+
+import { SidePanelNavigation } from './SidePanelNavigation'
+import { SidePanelChangelog } from './panels/SidePanelChangelog'
 import { SidePanelDocs } from './panels/SidePanelDocs'
+import { SidePanelHealth, SidePanelHealthIcon } from './panels/SidePanelHealth'
+import { SidePanelInfo, SidePanelInfoIcon } from './panels/SidePanelInfo'
 import { SidePanelMax } from './panels/SidePanelMax'
+import { SidePanelSdkDoctor, SidePanelSdkDoctorIcon } from './panels/SidePanelSdkDoctor'
 import { SidePanelSettings } from './panels/SidePanelSettings'
 import { SidePanelStatus, SidePanelStatusIcon } from './panels/SidePanelStatus'
 import { SidePanelSupport } from './panels/SidePanelSupport'
 import { SidePanelAccessControl } from './panels/access_control/SidePanelAccessControl'
-import { SidePanelActivation, SidePanelActivationIcon } from './panels/activation/SidePanelActivation'
 import { SidePanelActivity, SidePanelActivityIcon } from './panels/activity/SidePanelActivity'
 import { SidePanelDiscussion, SidePanelDiscussionIcon } from './panels/discussion/SidePanelDiscussion'
 import { sidePanelLogic } from './sidePanelLogic'
-import { WithinSidePanelContext, sidePanelStateLogic } from './sidePanelStateLogic'
+import { sidePanelStateLogic } from './sidePanelStateLogic'
+
+const SIDE_PANEL_TAB_KEYBINDS: Partial<Record<SidePanelTab, string[][]>> = {
+    [SidePanelTab.Max]: [['command', 'option', 'a']],
+    [SidePanelTab.Support]: [['command', 'option', 'h']],
+}
 
 export const SIDE_PANEL_TABS: Record<
     SidePanelTab,
     { label: string; Icon: any; Content: any; noModalSupport?: boolean }
 > = {
     [SidePanelTab.Max]: {
-        label: 'Max AI',
-        Icon: function IconMaxFromHedgehogConfig() {
-            const { user } = useValues(userLogic)
-            return (
-                <ProfilePicture
-                    user={{ hedgehog_config: { ...user?.hedgehog_config, use_as_profile: true } }}
-                    size="md"
-                    className="border bg-bg-light -scale-x-100" // Flip the hedegehog to face the scene
-                />
-            )
-        },
+        label: 'Insights AI',
+        Icon: IconLogomark,
         Content: SidePanelMax,
     },
     [SidePanelTab.Notebooks]: {
         label: 'Notebooks',
         Icon: IconNotebook,
         Content: NotebookPanel,
-        noModalSupport: true,
+        // noModalSupport: true,
     },
     [SidePanelTab.Support]: {
         label: 'Help',
-        Icon: IconSupport,
+        Icon: SidePanelSupportIcon,
         Content: SidePanelSupport,
     },
     [SidePanelTab.Docs]: {
@@ -69,12 +72,13 @@ export const SIDE_PANEL_TABS: Record<
         Content: SidePanelDocs,
         noModalSupport: true,
     },
-
-    [SidePanelTab.Activation]: {
-        label: 'Quick start',
-        Icon: SidePanelActivationIcon,
-        Content: SidePanelActivation,
+    [SidePanelTab.Changelog]: {
+        label: 'Changelog',
+        Icon: IconBook,
+        Content: SidePanelChangelog,
+        noModalSupport: true,
     },
+
     [SidePanelTab.Settings]: {
         label: 'Settings',
         Icon: IconGear,
@@ -107,21 +111,47 @@ export const SIDE_PANEL_TABS: Record<
         Icon: IconLock,
         Content: SidePanelAccessControl,
     },
+    [SidePanelTab.SdkDoctor]: {
+        label: 'SDK Doctor',
+        Icon: SidePanelSdkDoctorIcon,
+        Content: SidePanelSdkDoctor,
+    },
+    [SidePanelTab.Health]: {
+        label: 'Data Pipeline status',
+        Icon: SidePanelHealthIcon,
+        Content: SidePanelHealth,
+    },
+    [SidePanelTab.Info]: {
+        label: 'Actions',
+        Icon: SidePanelInfoIcon,
+        Content: SidePanelInfo,
+    },
 }
 
 const DEFAULT_WIDTH = 512
+const SIDE_PANEL_BAR_WIDTH = 40
+const SIDE_PANEL_MIN_WIDTH = 448 // Match --side-panel-min-width (28rem)
+const SIDE_PANEL_MIN_WIDTH_COMPACT = 330
 
-export function SidePanel(): JSX.Element | null {
+export function SidePanel({
+    className,
+    contentClassName,
+}: {
+    className?: string
+    contentClassName?: string
+}): JSX.Element | null {
     const { theme } = useValues(themeLogic)
     const { visibleTabs, extraTabs } = useValues(sidePanelLogic)
     const { selectedTab, sidePanelOpen, modalMode } = useValues(sidePanelStateLogic)
     const { openSidePanel, closeSidePanel, setSidePanelAvailable } = useActions(sidePanelStateLogic)
-    const { openAccountPopover } = useActions(navigationLogic)
-    const { featurePreviewChangeAcknowledged } = useValues(navigationLogic)
+    const { scenePanelIsPresent } = useValues(sceneLayoutLogic)
+    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
     const activeTab = sidePanelOpen && selectedTab
 
-    const PanelContent = activeTab && visibleTabs.includes(activeTab) ? SIDE_PANEL_TABS[activeTab]?.Content : null
+    const isInfoTabActive = activeTab === SidePanelTab.Info && scenePanelIsPresent
+    const PanelContent =
+        activeTab && (visibleTabs.includes(activeTab) || isInfoTabActive) ? SIDE_PANEL_TABS[activeTab]?.Content : null
 
     const ref = useRef<HTMLDivElement>(null)
 
@@ -137,7 +167,7 @@ export function SidePanel(): JSX.Element | null {
     }
 
     const { desiredSize, isResizeInProgress } = useValues(resizerLogic(resizerLogicProps))
-    const { setMainContentRect } = useActions(panelLayoutLogic)
+    const { setMainContentRect, setSidePanelWidth } = useActions(panelLayoutLogic)
     const { mainContentRef } = useValues(panelLayoutLogic)
 
     useEffect(() => {
@@ -154,19 +184,38 @@ export function SidePanel(): JSX.Element | null {
         }
     }, [desiredSize, sidePanelOpen, setMainContentRect, mainContentRef])
 
+    const sidePanelOpenAndAvailable =
+        selectedTab &&
+        sidePanelOpen &&
+        (visibleTabs.includes(selectedTab) || (selectedTab === SidePanelTab.Info && scenePanelIsPresent))
+    const sidePanelWidth = !visibleTabs.length
+        ? 0
+        : sidePanelOpenAndAvailable
+          ? Math.max(
+                desiredSize ?? DEFAULT_WIDTH,
+                isRemovingSidePanelFlag ? SIDE_PANEL_MIN_WIDTH_COMPACT : SIDE_PANEL_MIN_WIDTH
+            )
+          : isRemovingSidePanelFlag
+            ? 0
+            : SIDE_PANEL_BAR_WIDTH
+
+    // Update sidepanel width in panelLayoutLogic
+    useEffect(() => {
+        setSidePanelWidth(sidePanelWidth)
+    }, [sidePanelWidth, setSidePanelWidth])
+
     if (!visibleTabs.length) {
         return null
     }
-
-    const sidePanelOpenAndAvailable = selectedTab && sidePanelOpen && visibleTabs.includes(selectedTab)
 
     const menuOptions: LemonMenuItems | undefined = extraTabs
         ? [
               {
                   title: 'Open in side panel',
-                  items: [
-                      ...extraTabs.map((tab) => {
-                          const { Icon, label } = SIDE_PANEL_TABS[tab]
+                  items: extraTabs
+                      .filter((tab) => SIDE_PANEL_TABS[tab])
+                      .map((tab) => {
+                          const { Icon, label } = SIDE_PANEL_TABS[tab]!
 
                           return {
                               label: label,
@@ -174,35 +223,13 @@ export function SidePanel(): JSX.Element | null {
                               onClick: () => openSidePanel(tab),
                           }
                       }),
-                      // This is a off ramp for the feature previews moving from the side panel to the settings page,
-                      // TODO: Remove this in a while so all users have acknowledged the change.
-                      !featurePreviewChangeAcknowledged
-                          ? {
-                                label: 'Feature previews',
-                                icon: <IconFeatures />,
-                                onClick: () => {
-                                    openAccountPopover()
-                                },
-                                tooltip: (
-                                    <>
-                                        <div className="flex items-center gap-2">
-                                            <IconInfo className="size-4 shrink-0" />
-                                            <span>
-                                                <span className="font-bold">Feature previews</span> has moved, click
-                                                here to learn where to access it.
-                                            </span>
-                                        </div>
-                                    </>
-                                ),
-                            }
-                          : null,
-                  ],
               },
           ]
         : undefined
 
-    if (modalMode) {
+    if (modalMode && !isRemovingSidePanelFlag) {
         const supportsModal = activeTab ? !SIDE_PANEL_TABS[activeTab]?.noModalSupport : true
+
         return (
             <LemonModal
                 simple
@@ -218,62 +245,128 @@ export function SidePanel(): JSX.Element | null {
 
     return (
         <div
-            className={clsx(
-                'SidePanel3000',
-                sidePanelOpenAndAvailable && 'SidePanel3000--open',
-                isResizeInProgress && 'SidePanel3000--resizing'
+            className={cn(
+                'SidePanel3000 h-screen',
+                sidePanelOpenAndAvailable && 'SidePanel3000--open justify-end',
+                isResizeInProgress && 'SidePanel3000--resizing',
+                isRemovingSidePanelFlag &&
+                    '@container/side-panel bg-surface-secondary absolute top-0 right-0 bottom-0 h-full flex flex-col border-t-none',
+                isRemovingSidePanelFlag && !sidePanelOpen && 'hidden',
+                className
             )}
             ref={ref}
             // eslint-disable-next-line react/forbid-dom-props
             style={{
-                width: sidePanelOpenAndAvailable ? (desiredSize ?? DEFAULT_WIDTH) : undefined,
+                width: isRemovingSidePanelFlag ? (sidePanelOpenAndAvailable ? sidePanelWidth : '0px') : sidePanelWidth,
+                ...(isRemovingSidePanelFlag
+                    ? ({ '--side-panel-min-width': `${SIDE_PANEL_MIN_WIDTH_COMPACT}px` } as React.CSSProperties)
+                    : {}),
                 ...theme?.sidebarStyle,
             }}
             id="side-panel"
         >
-            <Resizer {...resizerLogicProps} />
-            <div className="SidePanel3000__bar">
-                <div className="SidePanel3000__tabs">
-                    <div className="SidePanel3000__tabs-content">
-                        {visibleTabs.map((tab: SidePanelTab) => {
-                            const { Icon, label } = SIDE_PANEL_TABS[tab]
-                            return (
-                                <LemonButton
-                                    key={tab}
-                                    icon={<Icon />}
-                                    onClick={() =>
-                                        activeTab === tab ? closeSidePanel() : openSidePanel(tab as SidePanelTab)
-                                    }
-                                    data-attr={`sidepanel-tab-${tab}`}
-                                    data-ph-capture-attribute-state-before-click={activeTab === tab ? 'open' : 'closed'}
-                                    active={activeTab === tab}
-                                    type="secondary"
-                                    status="alt"
-                                >
-                                    {label}
-                                </LemonButton>
-                            )
+            {sidePanelOpenAndAvailable && (
+                <>
+                    <Resizer
+                        {...resizerLogicProps}
+                        className={cn('top-[calc(var(--scene-layout-header-height)+8px)] left-[-1px] bottom-4', {
+                            'left-0': sidePanelOpenAndAvailable,
+                            // Hide handle line, make it as thick as the gap between scene and sidepanel (looking like split-screen, nice.)
+                            'top-0 h-full': sidePanelOpenAndAvailable && isRemovingSidePanelFlag,
                         })}
-                    </div>
-                </div>
-                {menuOptions ? (
-                    <div className="shrink-0 flex items-center m-2">
-                        <LemonMenu items={menuOptions}>
-                            <LemonButton size="small" icon={<IconEllipsis />} />
-                        </LemonMenu>
-                    </div>
-                ) : null}
-            </div>
+                    />
+                    {/* Overlay for mobile to click outside to close the side panel */}
+                    {isRemovingSidePanelFlag && (
+                        <div onClick={() => closeSidePanel()} className="lg:hidden fixed inset-0 -z-1" />
+                    )}
+                </>
+            )}
 
-            {PanelContent ? (
-                <div className="SidePanel3000__content">
-                    <WithinSidePanelContext.Provider value={true}>
-                        <ErrorBoundary>
-                            <PanelContent />
-                        </ErrorBoundary>
-                    </WithinSidePanelContext.Provider>
+            {!isRemovingSidePanelFlag && (
+                <div className="SidePanel3000__bar">
+                    <div className="SidePanel3000__tabs">
+                        <div className="SidePanel3000__tabs-content">
+                            {visibleTabs
+                                .filter((tab) => SIDE_PANEL_TABS[tab])
+                                .map((tab: SidePanelTab) => {
+                                    const { Icon, label } = SIDE_PANEL_TABS[tab]!
+                                    const keybind = SIDE_PANEL_TAB_KEYBINDS[tab]
+
+                                    const button = (
+                                        <LemonButton
+                                            key={tab}
+                                            icon={<Icon className="size-5" />}
+                                            onClick={() =>
+                                                activeTab === tab
+                                                    ? closeSidePanel()
+                                                    : openSidePanel(tab as SidePanelTab)
+                                            }
+                                            data-attr={`sidepanel-tab-${tab}`}
+                                            data-ph-capture-attribute-state-before-click={
+                                                activeTab === tab ? 'open' : 'closed'
+                                            }
+                                            active={activeTab === tab}
+                                            type="secondary"
+                                            status="alt"
+                                            tooltip={label}
+                                            size="xsmall"
+                                        >
+                                            {label}
+                                        </LemonButton>
+                                    )
+
+                                    if (keybind) {
+                                        return (
+                                            <AppShortcut
+                                                key={tab}
+                                                name={`SidePanel-${tab}`}
+                                                keybind={keybind}
+                                                intent={`Open ${label}`}
+                                                priority={label === 'Insights AI' ? 10 : 0}
+                                                interaction="click"
+                                            >
+                                                {button}
+                                            </AppShortcut>
+                                        )
+                                    }
+
+                                    return button
+                                })}
+                        </div>
+                    </div>
+                    {menuOptions ? (
+                        <div className="shrink-0 flex items-center m-2">
+                            <LemonMenu items={menuOptions}>
+                                <LemonButton size="small" icon={<IconEllipsis />} />
+                            </LemonMenu>
+                        </div>
+                    ) : null}
                 </div>
-            ) : null}
+            )}
+            {PanelContent && (
+                <>
+                    {!isRemovingSidePanelFlag ? (
+                        <div
+                            className={cn('SidePanel3000__content', contentClassName, {
+                                'border-l-0 h-full': isRemovingSidePanelFlag,
+                            })}
+                        >
+                            <ErrorBoundary>
+                                <PanelContent />
+                            </ErrorBoundary>
+                        </div>
+                    ) : (
+                        <SidePanelNavigation
+                            activeTab={activeTab as SidePanelTab}
+                            onTabChange={(tab) => openSidePanel(tab)}
+                        >
+                            <ErrorBoundary>
+                                <PanelContent />
+                            </ErrorBoundary>
+                        </SidePanelNavigation>
+                    )}
+                </>
+            )}
         </div>
     )
 }

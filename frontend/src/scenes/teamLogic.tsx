@@ -2,7 +2,8 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api, { ApiConfig } from 'lib/api'
-import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
+import { OrganizationMembershipLevel } from 'lib/constants'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 import { IconSwapHoriz } from 'lib/lemon-ui/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -17,9 +18,9 @@ import {
     addProductIntentForCrossSell,
 } from 'lib/utils/product-intents'
 
-import { activationLogic } from '~/layout/navigation-3000/sidepanel/panels/activation/activationLogic'
-import { CurrencyCode } from '~/queries/schema/schema-general'
-import { CorrelationConfigType, ProductKey, ProjectType, TeamPublicType, TeamType } from '~/types'
+import { customProductsLogic } from '~/layout/panel-layout/ProjectTree/customProductsLogic'
+import { CurrencyCode, CustomerAnalyticsConfig, ProductKey } from '~/queries/schema/schema-general'
+import { CorrelationConfigType, ProjectType, TeamPublicType, TeamType } from '~/types'
 
 import { organizationLogic } from './organizationLogic'
 import { projectLogic } from './projectLogic'
@@ -59,8 +60,15 @@ export interface FrequentMistakeAdvice {
 export const teamLogic = kea<teamLogicType>([
     path(['scenes', 'teamLogic']),
     connect(() => ({
-        actions: [userLogic, ['loadUser', 'switchTeam'], organizationLogic, ['loadCurrentOrganization']],
         values: [projectLogic, ['currentProject'], featureFlagLogic, ['featureFlags']],
+        actions: [
+            userLogic,
+            ['loadUser', 'switchTeam'],
+            organizationLogic,
+            ['loadCurrentOrganization'],
+            customProductsLogic,
+            ['loadCustomProducts'],
+        ],
     })),
     actions({
         deleteTeam: (team: TeamType) => ({ team }),
@@ -86,6 +94,7 @@ export const teamLogic = kea<teamLogicType>([
                         // If user is anonymous (i.e. viewing a shared dashboard logged out), don't load authenticated stuff
                         return null
                     }
+
                     try {
                         return await api.get('api/environments/@current')
                     } catch {
@@ -109,22 +118,15 @@ export const teamLogic = kea<teamLogicType>([
                         api.update(`api/environments/${values.currentTeam.id}`, payload),
                         undefined,
                     ]
-                    if (
-                        Object.keys(payload).length === 1 &&
-                        payload.name &&
-                        values.currentProject &&
-                        !values.featureFlags[FEATURE_FLAGS.ENVIRONMENTS]
-                    ) {
-                        // If we're only updating the name and the user doesn't have access to the environments feature,
-                        // update the project name as well, for 100% equivalence
-                        promises[0] = api.update(`api/projects/${values.currentProject.id}`, { name: payload.name })
+                    if (Object.keys(payload).length === 1 && payload.name && values.currentProject) {
+                        // If we're only updating the name, update the project name as well for equivalence
+                        promises[1] = api.update(`api/projects/${values.currentProject.id}`, { name: payload.name })
                     }
                     const [patchedTeam] = await Promise.all(promises)
                     breakpoint()
 
-                    // We need to reload current org (which lists its teams) in organizationLogic AND in userLogic
+                    // We need to reload current org (which lists its teams) in organizationLogic
                     actions.loadCurrentOrganization()
-                    actions.loadUser()
 
                     /* Notify user the update was successful  */
                     const updatedAttribute =
@@ -141,11 +143,19 @@ export const teamLogic = kea<teamLogicType>([
                         message = payload.feature_flag_confirmation_enabled
                             ? 'Feature flag confirmation enabled'
                             : 'Feature flag confirmation disabled'
+                    } else if (updatedAttribute === 'default_evaluation_contexts_enabled') {
+                        message = payload.default_evaluation_contexts_enabled
+                            ? 'Default evaluation contexts enabled'
+                            : 'Default evaluation contexts disabled'
+                    } else if (updatedAttribute === 'require_evaluation_contexts') {
+                        message = payload.require_evaluation_contexts
+                            ? 'Require evaluation contexts enabled'
+                            : 'Require evaluation contexts disabled'
                     } else if (
                         updatedAttribute === 'completed_snippet_onboarding' ||
                         updatedAttribute === 'has_completed_onboarding_for'
                     ) {
-                        message = "Congrats! You're now ready to use PostHog."
+                        message = "Congrats! You're now ready to use Insights."
                     } else {
                         message = `${parseUpdatedAttributeName(updatedAttribute)} updated successfully!`
                     }
@@ -160,6 +170,27 @@ export const teamLogic = kea<teamLogicType>([
 
                     if (!window.location.pathname.match(/\/(onboarding|products)/) && !isUpdatingOnboardingTasks) {
                         lemonToast.success(message)
+                    }
+
+                    const setupLogic = globalSetupLogic.findMounted()
+                    if (setupLogic) {
+                        if (payload.autocapture_web_vitals_opt_in) {
+                            setupLogic.actions.markTaskAsCompleted(SetupTaskId.SetUpWebVitals)
+                        }
+                        if (payload.session_recording_opt_in) {
+                            setupLogic.actions.markTaskAsCompleted(SetupTaskId.SetupSessionRecordings)
+                        }
+                        if (payload.capture_console_log_opt_in) {
+                            setupLogic.actions.markTaskAsCompleted(SetupTaskId.EnableConsoleLogs)
+                        }
+                        if (
+                            payload.session_recording_sample_rate ||
+                            payload.session_recording_minimum_duration_milliseconds ||
+                            payload.session_recording_linked_flag ||
+                            payload.session_recording_network_payload_capture_config
+                        ) {
+                            setupLogic.actions.markTaskAsCompleted(SetupTaskId.ConfigureRecordingSettings)
+                        }
                     }
 
                     return patchedTeam
@@ -180,15 +211,32 @@ export const teamLogic = kea<teamLogicType>([
                 deleteSecretTokenBackup: async () =>
                     await api.update(`api/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
                 /**
-                 * If adding a product intent that also represents regular product usage, see explainer in posthog.models.product_intent.product_intent.py.
+                 * If adding a product intent that also represents regular product usage, see explainer in insights.models.product_intent.product_intent.py.
+                 * Also, we refresh the list of custom products to show the possible new entry in the sidebar after we've added the intent.
                  */
-                addProductIntent: async (properties: ProductIntentProperties) => await addProductIntent(properties),
-                addProductIntentForCrossSell: async (properties: ProductCrossSellProperties) =>
-                    await addProductIntentForCrossSell(properties),
-                recordProductIntentOnboardingComplete: async ({ product_type }: { product_type: ProductKey }) =>
-                    await api.update(`api/environments/${values.currentTeamId}/complete_product_onboarding`, {
-                        product_type,
-                    }),
+                addProductIntent: async (properties: ProductIntentProperties) => {
+                    const result = await addProductIntent(properties)
+                    actions.loadCustomProducts()
+
+                    return result
+                },
+                addProductIntentForCrossSell: async (properties: ProductCrossSellProperties) => {
+                    const result = await addProductIntentForCrossSell(properties)
+                    actions.loadCustomProducts()
+
+                    return result
+                },
+                recordProductIntentOnboardingComplete: async ({ product_type }: { product_type: ProductKey }) => {
+                    const result = await api.update(
+                        `api/environments/${values.currentTeamId}/complete_product_onboarding`,
+                        {
+                            product_type,
+                        }
+                    )
+                    actions.loadCustomProducts()
+
+                    return result
+                },
             },
         ],
     })),
@@ -204,12 +252,6 @@ export const teamLogic = kea<teamLogicType>([
                     return false
                 }
                 return true
-            },
-        ],
-        hasIngestedEvent: [
-            (selectors) => [selectors.currentTeam],
-            (currentTeam): boolean => {
-                return currentTeam?.ingested_event ?? false
             },
         ],
         currentTeamId: [
@@ -260,7 +302,7 @@ export const teamLogic = kea<teamLogicType>([
                         frequentMistakes.push({
                             key: 'email',
                             type: 'event',
-                            fix: 'it is more common to filter email by person properties, not event properties',
+                            fix: 'it is more common to filter email by user properties, not event properties',
                         })
                     }
                 }
@@ -271,17 +313,26 @@ export const teamLogic = kea<teamLogicType>([
             (selectors) => [selectors.currentTeam],
             (currentTeam: TeamType): CurrencyCode => currentTeam?.base_currency ?? DEFAULT_CURRENCY,
         ],
+        customerAnalyticsConfig: [
+            (s) => [s.currentTeam],
+            (currentTeam: TeamType): CustomerAnalyticsConfig =>
+                currentTeam?.customer_analytics_config ?? ({} as CustomerAnalyticsConfig),
+        ],
     })),
     listeners(({ actions }) => ({
         loadCurrentTeamSuccess: ({ currentTeam }) => {
             if (currentTeam) {
                 ApiConfig.setCurrentTeamId(currentTeam.id)
             }
-        },
-        updateCurrentTeamSuccess: ({ currentTeam, payload }) => {
-            if (currentTeam && !payload?.onboarding_tasks) {
-                activationLogic.findMounted()?.actions?.onTeamLoad(currentTeam)
+
+            // Detect managed viewsets to mark them as completed in the product setup
+            if (currentTeam?.managed_viewsets?.['revenue_analytics']) {
+                globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.EnableRevenueAnalyticsViewset)
             }
+        },
+        updateCurrentTeamSuccess: () => {
+            // Reload user after team update to keep user object in sync
+            actions.loadUser()
         },
         createTeamSuccess: ({ currentTeam }) => {
             if (currentTeam) {
@@ -301,27 +352,18 @@ export const teamLogic = kea<teamLogicType>([
             lemonToast.success('Project has been deleted')
         },
     })),
-    afterMount(({ actions, values }) => {
+    afterMount(({ actions }) => {
         const appContext = getAppContext()
         const currentTeam = appContext?.current_team
-        const currentProject = appContext?.current_project
         const switchedTeam = appContext?.switched_team
         if (switchedTeam) {
-            lemonToast.info(
-                <>
-                    You've switched to&nbsp;project{' '}
-                    {values.featureFlags[FEATURE_FLAGS.ENVIRONMENTS]
-                        ? `${currentProject?.name}, environment ${currentTeam?.name}`
-                        : currentTeam?.name}
-                </>,
-                {
-                    button: {
-                        label: 'Switch back',
-                        action: () => actions.switchTeam(switchedTeam),
-                    },
-                    icon: <IconSwapHoriz />,
-                }
-            )
+            lemonToast.info(<>You've switched to&nbsp;project {currentTeam?.name}</>, {
+                button: {
+                    label: 'Switch back',
+                    action: () => actions.switchTeam(switchedTeam),
+                },
+                icon: <IconSwapHoriz />,
+            })
         }
 
         if (currentTeam) {

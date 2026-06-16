@@ -2,20 +2,20 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/docker-existing-docker-compose
 // If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
 {
-    "name": "PostHog codespaces development environment",
+    "name": "Insights codespaces development environment",
     "build": {
         "dockerfile": "Dockerfile",
         "context": "../",
-        "cacheFrom": "ghcr.io/posthog/posthog/codespaces:master"
+        "cacheFrom": "ghcr.io/hanzoai/insights-codespaces:latest"
     },
     "remoteUser": "vscode",
     "remoteEnv": {
         "DEBUG": "1",
-        "DATABASE_URL": "postgres://posthog:posthog@localhost:5432/posthog",
+        "DATABASE_URL": "postgres://insights:insights@localhost:5432/insights",
         "KAFKA_ENABLED": "true",
         "KAFKA_HOSTS": "kafka:9092",
         "CLICKHOUST_HOST": "localhost",
-        "CLICKHOUSE_DATABASE": "posthog_test",
+        "CLICKHOUSE_DATABASE": "insights_test",
         "CLICKHOUSE_VERIFY": "False",
         "REDIS_URL": "redis://localhost:6379",
         "SECRET_KEY": "<randomly generated secret key>"
@@ -31,7 +31,7 @@
         "--add-host",
         "kafka:127.0.0.1"
     ],
-    "workspaceFolder": "/workspaces/posthog",
+    "workspaceFolder": "/workspaces/insights",
     // Set *default* container specific settings.json values on container create.
     "settings": {
         /*
@@ -44,9 +44,7 @@
         "python.linting.flake8Enabled": true,
         "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
         "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-        // Configure formatting
-        "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
-        "python.formatting.provider": "black",
+        // Configure formatting (using ruff via editor extension)
         // Configure testing
         "python.testing.pytestEnabled": true,
         "python.testing.pytestPath": "/usr/local/py-utils/bin/pytest"

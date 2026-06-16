@@ -1,4 +1,4 @@
-import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, reducers, selectors } from 'kea'
+import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
 import { LemonTreeRef } from 'lib/lemon-ui/LemonTree/LemonTree'
@@ -7,14 +7,7 @@ import { removeProjectIdIfPresent } from 'lib/utils/router-utils'
 import { navigation3000Logic } from '../navigation-3000/navigationLogic'
 import type { panelLayoutLogicType } from './panelLayoutLogicType'
 
-export type PanelLayoutNavIdentifier =
-    | 'Project'
-    | 'Products'
-    | 'People'
-    | 'Games'
-    | 'Shortcuts'
-    | 'DataManagement'
-    | 'Database'
+export type PanelLayoutNavIdentifier = 'Project' | 'Products' | 'People' | 'Games' | 'Shortcuts' | 'DataManagement'
 export type PanelLayoutTreeRef = React.RefObject<LemonTreeRef> | null
 export type PanelLayoutMainContentRef = React.RefObject<HTMLElement> | null
 export const PANEL_LAYOUT_DEFAULT_WIDTH: number = 245
@@ -23,13 +16,12 @@ export const PANEL_LAYOUT_MIN_WIDTH: number = 160
 export const panelLayoutLogic = kea<panelLayoutLogicType>([
     path(['layout', 'panel-layout', 'panelLayoutLogic']),
     connect(() => ({
-        values: [navigation3000Logic, ['mobileLayout']],
+        values: [navigation3000Logic, ['mobileLayout'], router, ['location']],
     })),
     actions({
         closePanel: true,
         showLayoutNavBar: (visible: boolean) => ({ visible }),
         showLayoutPanel: (visible: boolean) => ({ visible }),
-        toggleLayoutPanelPinned: (pinned: boolean) => ({ pinned }),
         // TODO: This is a temporary action to set the active navbar item
         // We should remove this once we have a proper way to handle the navbar item
         setActivePanelIdentifier: (identifier: PanelLayoutNavIdentifier) => ({ identifier }),
@@ -43,6 +35,7 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
         setPanelWillHide: (willHide: boolean) => ({ willHide }),
         resetPanelLayout: (keyboardAction: boolean) => ({ keyboardAction }),
         setMainContentRect: (rect: DOMRect) => ({ rect }),
+        setSidePanelWidth: (width: number) => ({ width }),
     }),
     reducers({
         isLayoutNavbarVisibleForDesktop: [
@@ -64,7 +57,6 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
             true,
             {
                 showLayoutPanel: () => true,
-                toggleLayoutPanelPinned: () => false,
             },
         ],
         isLayoutNavbarVisible: [
@@ -76,21 +68,14 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
         ],
         isLayoutPanelVisible: [
             false,
-            { persist: true },
+            { persist: true, prefix: '2', separator: '.' },
             {
                 showLayoutPanel: (_, { visible }) => visible,
             },
         ],
-        isLayoutPanelPinned: [
-            false,
-            { persist: true },
-            {
-                toggleLayoutPanelPinned: (_, { pinned }) => pinned,
-            },
-        ],
         activePanelIdentifier: [
             '',
-            { persist: true },
+            { persist: true, prefix: '2', separator: '.' },
             {
                 setActivePanelIdentifier: (_, { identifier }) => identifier,
                 clearActivePanelIdentifier: () => '',
@@ -147,6 +132,12 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
                 setMainContentRect: (_, { rect }) => rect,
             },
         ],
+        sidePanelWidth: [
+            0,
+            {
+                setSidePanelWidth: (_, { width }) => width,
+            },
+        ],
     }),
     listeners(({ actions, values, cache }) => ({
         closePanel: () => {
@@ -162,11 +153,9 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
             }
         },
         resetPanelLayout: ({ keyboardAction = false }) => {
-            // Hide the panel if it's not pinned and clear active panel identifier
-            if (!values.isLayoutPanelPinned) {
-                actions.clearActivePanelIdentifier()
-                actions.showLayoutPanel(false)
-            }
+            // Hide the panel and clear active panel identifier
+            actions.clearActivePanelIdentifier()
+            actions.showLayoutPanel(false)
             // Hide the navbar if it's mobile and navbar is visible (which is an overlay on mobile)
             if (values.mobileLayout && values.isLayoutNavbarVisible) {
                 actions.showLayoutNavBar(false)
@@ -177,24 +166,25 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
             }
         },
         setMainContentRef: ({ ref }) => {
-            // Clean up old ResizeObserver
-            if (cache.resizeObserver) {
-                cache.resizeObserver.disconnect()
-                cache.resizeObserver = null
-            }
-
             // Measure width immediately when container ref is set
             if (ref?.current) {
                 actions.setMainContentRect(ref.current.getBoundingClientRect())
 
                 // Set up new ResizeObserver for the new container
                 if (typeof ResizeObserver !== 'undefined') {
-                    cache.resizeObserver = new ResizeObserver(() => {
-                        if (ref?.current) {
-                            actions.setMainContentRect(ref.current.getBoundingClientRect())
+                    cache.disposables.add(() => {
+                        // ref.current may be null when disposable resumes after visibility change
+                        if (!ref.current) {
+                            return () => {}
                         }
-                    })
-                    cache.resizeObserver.observe(ref.current)
+                        const observer = new ResizeObserver(() => {
+                            if (ref?.current) {
+                                actions.setMainContentRect(ref.current.getBoundingClientRect())
+                            }
+                        })
+                        observer.observe(ref.current)
+                        return () => observer.disconnect()
+                    }, 'resizeObserver')
                 }
             }
         },
@@ -220,27 +210,21 @@ export const panelLayoutLogic = kea<panelLayoutLogicType>([
                 return ''
             },
         ],
+        pathname: [(s) => [s.location], (location): string => location.pathname],
     }),
     afterMount(({ actions, cache, values }) => {
-        const handleResize = (): void => {
-            const mainContentRef = values.mainContentRef
-            if (mainContentRef?.current) {
-                actions.setMainContentRect(mainContentRef.current.getBoundingClientRect())
-            }
-        }
-        cache.handleResize = handleResize
-
         // Watch for window resize
         if (typeof window !== 'undefined') {
-            window.addEventListener('resize', handleResize)
-        }
-    }),
-    beforeUnmount(({ cache }) => {
-        if (typeof window !== 'undefined' && cache.handleResize) {
-            window.removeEventListener('resize', cache.handleResize)
-        }
-        if (cache.resizeObserver) {
-            cache.resizeObserver.disconnect()
+            cache.disposables.add(() => {
+                const handleResize = (): void => {
+                    const mainContentRef = values.mainContentRef
+                    if (mainContentRef?.current) {
+                        actions.setMainContentRect(mainContentRef.current.getBoundingClientRect())
+                    }
+                }
+                window.addEventListener('resize', handleResize)
+                return () => window.removeEventListener('resize', handleResize)
+            }, 'windowResize')
         }
     }),
 ])

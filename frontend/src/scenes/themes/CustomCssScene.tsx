@@ -1,14 +1,17 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconWrench } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
-import { PageHeader } from 'lib/components/PageHeader'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
 import { urls } from '../urls'
 
@@ -89,23 +92,29 @@ export function CustomCssScene(): JSX.Element {
     })
 
     const onPreview = (): void => {
-        router.actions.push(urls.projectHomepage())
+        router.actions.push(urls.projectRoot())
     }
 
     return (
-        <div className="flex flex-col deprecated-space-y-2">
-            <PageHeader
-                buttons={
+        <SceneContent>
+            <SceneTitleSection
+                name="Custom CSS"
+                resourceType={{
+                    type: 'customCss',
+                    forceIcon: <IconWrench />,
+                }}
+                actions={
                     <>
-                        <LemonButton type="secondary" onClick={onPreview}>
+                        <LemonButton type="secondary" onClick={onPreview} size="small">
                             Preview
                         </LemonButton>
                         <LemonButton
                             type="primary"
                             onClick={() => {
                                 saveCustomCss()
-                                router.actions.push(urls.projectHomepage())
+                                router.actions.push(urls.projectRoot())
                             }}
+                            size="small"
                         >
                             Save and set
                         </LemonButton>
@@ -113,10 +122,11 @@ export function CustomCssScene(): JSX.Element {
                 }
             />
             <p>
-                You can add custom CSS to change the style of your PostHog instance. If you need some inspiration try
+                You can add custom CSS to change the style of your Insights instance. If you need some inspiration try
                 our templates: <Link onClick={() => setPreviewingCustomCss(TRON_THEME)}>Tron</Link>,{' '}
                 <Link onClick={() => setPreviewingCustomCss(BARBIE_THEME)}>Barbie</Link>
             </p>
+            <SceneDivider />
             <CodeEditor
                 className="border"
                 language="css"
@@ -129,6 +139,6 @@ export function CustomCssScene(): JSX.Element {
                     },
                 }}
             />
-        </div>
+        </SceneContent>
     )
 }

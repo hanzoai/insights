@@ -1,19 +1,23 @@
 use std::str::FromStr;
 use std::time;
 
+use common_continuous_profiling::ContinuousProfilingConfig;
 use envconfig::Envconfig;
 
 use common_kafka::config::KafkaConfig;
 
 #[derive(Envconfig, Clone)]
 pub struct Config {
+    #[envconfig(nested = true)]
+    pub continuous_profiling: ContinuousProfilingConfig,
+
     #[envconfig(from = "BIND_HOST", default = "::")]
     pub host: String,
 
     #[envconfig(from = "BIND_PORT", default = "3301")]
     pub port: u16,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:15432/test_database")]
+    #[envconfig(default = "postgres://insights:insights@localhost:15432/test_database")]
     pub database_url: String,
 
     #[envconfig(default = "worker")]
@@ -44,7 +48,7 @@ pub struct Config {
     pub allow_internal_ips: bool,
 
     #[envconfig(default = "false")]
-    pub hog_mode: bool,
+    pub iql_mode: bool,
 
     #[envconfig(default = "cdp_function_callbacks")]
     pub cdp_function_callbacks_topic: String,

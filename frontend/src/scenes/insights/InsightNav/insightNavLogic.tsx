@@ -1,8 +1,6 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { IconExternal } from '@posthog/icons'
-
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -12,20 +10,22 @@ import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
 import { filterTestAccountsDefaultsLogic } from 'scenes/settings/environment/filterTestAccountDefaultsLogic'
 import { urls } from 'scenes/urls'
 
+import { expandGroupNodes } from '~/queries/nodes/InsightQuery/utils/filtersToQueryNode'
 import { nodeKindToInsightType } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
 import { getDefaultQuery } from '~/queries/nodes/InsightViz/utils'
 import {
-    ActionsNode,
-    DataWarehouseNode,
-    EventsNode,
+    AnyEntityNode,
+    CalendarHeatmapFilter,
     FunnelsFilter,
     FunnelsQuery,
+    GroupNode,
     InsightQueryNode,
     InsightVizNode,
     LifecycleFilter,
     LifecycleQuery,
     PathsFilter,
     PathsQuery,
+    ProductAnalyticsInsightQueryNode,
     RetentionFilter,
     RetentionQuery,
     StickinessFilter,
@@ -34,7 +34,7 @@ import {
     TrendsQuery,
 } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     filterKeyForQuery,
     getDisplay,
     getResultCustomizations,
@@ -42,8 +42,9 @@ import {
     getShowValuesOnSeries,
     isDataTableNode,
     isDataVisualizationNode,
+    isEndpointsUsageQuery,
     isFunnelsQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightQueryWithBreakdown,
     isInsightQueryWithSeries,
     isInsightVizNode,
@@ -52,6 +53,7 @@ import {
     isRetentionQuery,
     isStickinessQuery,
     isTrendsQuery,
+    isWebAnalyticsInsightQuery,
 } from '~/queries/utils'
 import { BaseMathType, InsightLogicProps, InsightType } from '~/types'
 
@@ -75,23 +77,33 @@ export interface CommonInsightFilter
         Partial<LifecycleFilter> {}
 
 export interface QueryPropertyCache
-    extends Omit<Partial<TrendsQuery>, 'kind' | 'response'>,
-        Omit<Partial<FunnelsQuery>, 'kind' | 'response'>,
-        Omit<Partial<RetentionQuery>, 'kind' | 'response'>,
+    extends Omit<Partial<TrendsQuery>, 'kind' | 'response' | 'series'>,
+        Omit<Partial<FunnelsQuery>, 'kind' | 'response' | 'series'>,
+        Omit<Partial<RetentionQuery>, 'kind' | 'response' | 'series'>,
         Omit<Partial<PathsQuery>, 'kind' | 'response'>,
-        Omit<Partial<StickinessQuery>, 'kind' | 'response'>,
-        Omit<Partial<LifecycleQuery>, 'kind' | 'response'> {
+        Omit<Partial<StickinessQuery>, 'kind' | 'response' | 'series'>,
+        Omit<Partial<LifecycleQuery>, 'kind' | 'response' | 'series'> {
+    series?: (AnyEntityNode | GroupNode)[]
     commonFilter: CommonInsightFilter
     commonFilterTrendsStickiness?: {
         resultCustomizations?: Record<string, any>
     }
+    trendsFilter?: Partial<TrendsQuery['trendsFilter']>
+    calendarHeatmapFilter?: Partial<CalendarHeatmapFilter>
 }
 
 const cleanSeriesEntityMath = (
-    entity: EventsNode | ActionsNode | DataWarehouseNode,
+    entity: AnyEntityNode | GroupNode,
     mathAvailability: MathAvailability
-): EventsNode | ActionsNode | DataWarehouseNode => {
-    const { math, math_property, math_group_type_index, math_hogql, ...baseEntity } = entity
+): AnyEntityNode | GroupNode => {
+    const { math, math_property, math_group_type_index, math_insightsql, ...baseEntity } = entity
+
+    // Recursively clean nested nodes in GroupNode
+    if ('nodes' in baseEntity && Array.isArray(baseEntity.nodes)) {
+        baseEntity.nodes = baseEntity.nodes.map(
+            (node) => cleanSeriesEntityMath(node, mathAvailability) as AnyEntityNode
+        )
+    }
 
     // TODO: This should be improved to keep a math that differs from the default.
     // For this we need to know wether the math was actively changed e.g.
@@ -108,9 +120,9 @@ const cleanSeriesEntityMath = (
 }
 
 const cleanSeriesMath = (
-    series: (EventsNode | ActionsNode | DataWarehouseNode)[],
+    series: (AnyEntityNode | GroupNode)[],
     mathAvailability: MathAvailability
-): (EventsNode | ActionsNode | DataWarehouseNode)[] => {
+): (AnyEntityNode | GroupNode)[] => {
     return series.map((entity) => cleanSeriesEntityMath(entity, mathAvailability))
 }
 
@@ -150,11 +162,15 @@ export const insightNavLogic = kea<insightNavLogicType>([
             (query) => {
                 if (isDataTableNode(query)) {
                     return InsightType.JSON
-                } else if (containsHogQLQuery(query)) {
+                } else if (containsInsightsQLQuery(query)) {
                     return InsightType.SQL
-                } else if (isHogQuery(query)) {
-                    return InsightType.HOG
+                } else if (isScriptQuery(query)) {
+                    return InsightType.SCRIPT
                 } else if (isInsightVizNode(query)) {
+                    // Check for Web Analytics queries first before using the mapping
+                    if (isWebAnalyticsInsightQuery(query.source)) {
+                        return InsightType.WEB_ANALYTICS
+                    }
                     return nodeKindToInsightType[query.source.kind] || InsightType.TRENDS
                 }
                 return InsightType.JSON
@@ -194,29 +210,39 @@ export const insightNavLogic = kea<insightNavLogicType>([
                         type: InsightType.LIFECYCLE,
                         dataAttr: 'insight-lifecycle-tab',
                     },
-                    {
-                        label: (
-                            <>
-                                SQL <IconExternal />
-                            </>
-                        ),
-                        type: InsightType.SQL,
-                        dataAttr: 'insight-sql-tab',
-                    },
                 ]
 
-                if (featureFlags[FEATURE_FLAGS.HOG] || activeView === InsightType.HOG) {
+                if (featureFlags[FEATURE_FLAGS.INSIGHTS_SCRIPT] || activeView === InsightType.SCRIPT) {
                     tabs.push({
-                        label: <>Hog 🦔</>,
-                        type: InsightType.HOG,
-                        dataAttr: 'insight-hog-tab',
+                        label: <>SQL</>,
+                        type: InsightType.SCRIPT,
+                        dataAttr: 'insight-sql-tab',
                     })
                 }
 
-                if (activeView === InsightType.JSON) {
+                if (activeView === InsightType.WEB_ANALYTICS) {
+                    // Like the json only, this is a temporary tab for Web Analytics insights.
+                    // We don't display it otherwise and humans shouldn't be able to click to select this tab
+                    // it only opens when you select "Open as new insight" from the Web Analytics dashboard.
+                    tabs.push({
+                        label: (
+                            <>
+                                Web Analytics{' '}
+                                <LemonTag type="warning" className="uppercase ml-2">
+                                    Beta
+                                </LemonTag>
+                            </>
+                        ),
+                        type: InsightType.WEB_ANALYTICS,
+                        dataAttr: 'insight-web-analytics-tab',
+                    })
+                }
+
+                if (activeView === InsightType.JSON && !isEndpointsUsageQuery(query)) {
                     // only display this tab when it is selected by the provided insight query
                     // don't display it otherwise... humans shouldn't be able to click to select this tab
                     // it only opens when you click the <OpenEditorButton/>
+                    // EndpointsUsage queries should not appear in the insight editor at all
                     const humanFriendlyQueryKind: string | null =
                         typeof query?.kind === 'string'
                             ? identifierToHuman(query.kind.replace(/(Node|Query)$/g, ''), 'title')
@@ -244,12 +270,12 @@ export const insightNavLogic = kea<insightNavLogicType>([
             const query = getDefaultQuery(view, values.filterTestAccountsDefault)
 
             if (isDataVisualizationNode(query)) {
-                router.actions.push(urls.sqlEditor(query.source.query))
+                router.actions.push(urls.sqlEditor({ query: query.source.query }))
             } else if (isInsightVizNode(query)) {
                 actions.setQuery({
                     ...query,
                     source: values.queryPropertyCache
-                        ? mergeCachedProperties(query.source, values.queryPropertyCache)
+                        ? mergeCachedProperties(query.source, values.queryPropertyCache, values.featureFlags)
                         : query.source,
                 } as InsightVizNode)
             } else {
@@ -294,7 +320,11 @@ const cachePropertiesFromQuery = (query: InsightQueryNode, cache: QueryPropertyC
         newCache.series = cache?.series
     }
 
-    /**  store the insight specific filter in commonFilter */
+    if (isWebAnalyticsInsightQuery(query)) {
+        return newCache
+    }
+
+    /** store the insight specific filter in commonFilter */
     const filterKey = filterKeyForQuery(query)
     // exclude properties that shouldn't be shared
     const { resultCustomizations, ...commonProperties } = query[filterKey] || {}
@@ -311,7 +341,11 @@ const cachePropertiesFromQuery = (query: InsightQueryNode, cache: QueryPropertyC
     return newCache
 }
 
-const mergeCachedProperties = (query: InsightQueryNode, cache: QueryPropertyCache): InsightQueryNode => {
+const mergeCachedProperties = (
+    query: InsightQueryNode,
+    cache: QueryPropertyCache,
+    featureFlags: Record<string, boolean | string | undefined>
+): InsightQueryNode => {
     const mergedQuery = {
         ...query,
         ...(cache.dateRange ? { dateRange: cache.dateRange } : {}),
@@ -322,15 +356,32 @@ const mergeCachedProperties = (query: InsightQueryNode, cache: QueryPropertyCach
     // series
     if (isInsightQueryWithSeries(mergedQuery)) {
         if (cache.series) {
-            if (isLifecycleQuery(mergedQuery)) {
-                mergedQuery.series = cleanSeriesMath(cache.series.slice(0, 1), MathAvailability.None)
+            if (isTrendsQuery(mergedQuery)) {
+                // Trends supports GroupNode, keep series as-is
+                mergedQuery.series = cleanSeriesMath(cache.series, MathAvailability.All) as TrendsQuery['series']
+            } else if (isFunnelsQuery(mergedQuery)) {
+                // Funnels supports GroupNode behind a feature flag, keep series as-is when the flag is enabled
+                const supportsCombinedEvents =
+                    !!featureFlags[FEATURE_FLAGS.PRODUCT_ANALYTICS_EVENTS_COMBINATION_IN_FUNNELS]
+                mergedQuery.series = cleanSeriesMath(
+                    supportsCombinedEvents ? cache.series : expandGroupNodes(cache.series),
+                    MathAvailability.FunnelsOnly
+                ) as FunnelsQuery['series']
             } else {
-                const mathAvailability = isTrendsQuery(mergedQuery)
-                    ? MathAvailability.All
-                    : isStickinessQuery(mergedQuery)
-                      ? MathAvailability.ActorsOnly
-                      : MathAvailability.None
-                mergedQuery.series = cleanSeriesMath(cache.series, mathAvailability)
+                // Expand GroupNodes for insight types that don't support them
+                const expandedSeries = expandGroupNodes(cache.series)
+
+                if (isLifecycleQuery(mergedQuery)) {
+                    mergedQuery.series = cleanSeriesMath(
+                        expandedSeries.slice(0, 1),
+                        MathAvailability.None
+                    ) as LifecycleQuery['series']
+                } else {
+                    const mathAvailability = isStickinessQuery(mergedQuery)
+                        ? MathAvailability.ActorsOnly
+                        : MathAvailability.None
+                    mergedQuery.series = cleanSeriesMath(expandedSeries, mathAvailability) as typeof mergedQuery.series
+                }
             }
         }
         // else if (cache.retentionFilter?.targetEntity || cache.retentionFilter?.returningEntity) {
@@ -399,8 +450,12 @@ const mergeCachedProperties = (query: InsightQueryNode, cache: QueryPropertyCach
         mergedQuery.funnelPathsFilter = cache.funnelPathsFilter
     }
 
+    if (isWebAnalyticsInsightQuery(mergedQuery as InsightQueryNode)) {
+        return mergedQuery as InsightQueryNode
+    }
+
     // insight specific filter
-    const filterKey = filterKeyForQuery(mergedQuery)
+    const filterKey = filterKeyForQuery(mergedQuery as ProductAnalyticsInsightQueryNode)
     if (cache[filterKey] || cache.commonFilter) {
         const node = { kind: mergedQuery.kind, [filterKey]: cache.commonFilter } as unknown as InsightQueryNode
         const nodeTrendsStickiness = (isTrendsQuery(mergedQuery) || isStickinessQuery(mergedQuery)
@@ -424,5 +479,5 @@ const mergeCachedProperties = (query: InsightQueryNode, cache: QueryPropertyCach
         }
     }
 
-    return mergedQuery
+    return mergedQuery as InsightQueryNode
 }

@@ -2,8 +2,8 @@
     "results": {
         "overview": [
             {
-                "key": "posthog_git_sha",
-                "metric": "PostHog Git SHA",
+                "key": "insights_git_sha",
+                "metric": "Insights Git SHA",
                 "value": "Undefined"
             },
             {

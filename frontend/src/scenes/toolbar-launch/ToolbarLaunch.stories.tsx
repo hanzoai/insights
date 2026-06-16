@@ -30,9 +30,9 @@ const meta: Meta = {
                     200,
                     {
                         results: [
-                            ['https://posthog.com', 150],
-                            ['https://app.posthog.com', 100],
-                            ['https://docs.posthog.com', 75],
+                            ['https://hanzo.ai', 150],
+                            ['https://insights.hanzo.ai', 100],
+                            ['https://docs.hanzo.ai', 75],
                         ],
                     },
                 ],

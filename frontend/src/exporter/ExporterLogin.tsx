@@ -137,11 +137,11 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
     return (
         <BridgePage
             view="login"
-            hedgehog
+
             message={
                 <>
                     Welcome to
-                    <br /> PostHog!
+                    <br /> Insights!
                 </>
             }
             footer={<SupportModalButton />}

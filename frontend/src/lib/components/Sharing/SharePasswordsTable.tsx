@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconPlus, IconTrash, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonModal } from '@posthog/lemon-ui'
+import { IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
 
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
 import { humanFriendlyDetailedTime } from 'lib/utils'
@@ -136,6 +136,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                 onClose={handleCloseModal}
                 title="Create new share password"
                 width={480}
+                zIndex="1166"
                 footer={
                     createdPasswordResult ? (
                         <LemonButton type="primary" onClick={handleCloseModal}>

@@ -1,22 +1,17 @@
 import { useActions, useValues } from 'kea'
 
-import { IconApps } from '@posthog/icons'
-
-import { PageHeader } from 'lib/components/PageHeader'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { SceneExport } from 'scenes/sceneTypes'
-import { urls } from 'scenes/urls'
+import { ActivitySceneTabs } from 'scenes/activity/ActivitySceneTabs'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Query } from '~/queries/Query/Query'
 import { QueryFeature } from '~/queries/nodes/DataTable/queryFeatures'
+import { ProductKey } from '~/queries/schema/schema-general'
 import { ActivityTab } from '~/types'
 
 import { eventsSceneLogic } from './eventsSceneLogic'
-
-const RESOURCE_TYPE = 'event'
 
 export function EventsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
     const { query } = useValues(eventsSceneLogic)
@@ -24,32 +19,14 @@ export function EventsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
 
     return (
         <SceneContent>
-            <PageHeader tabbedPage />
-            <LemonTabs
-                activeKey={ActivityTab.ExploreEvents}
-                tabs={[
-                    {
-                        key: ActivityTab.ExploreEvents,
-                        label: 'Explore',
-                        link: urls.activity(ActivityTab.ExploreEvents),
-                    },
-                    {
-                        key: ActivityTab.LiveEvents,
-                        label: 'Live',
-                        link: urls.activity(ActivityTab.LiveEvents),
-                    },
-                ]}
-                sceneInset
-            />
+            <ActivitySceneTabs activeKey={ActivityTab.ExploreEvents} />
             <SceneTitleSection
-                name="Explore events"
-                description="A catalog of all user interactions with your app or website."
+                name={sceneConfigurations[Scene.EventExplorer].name}
+                description={sceneConfigurations[Scene.EventExplorer].description}
                 resourceType={{
-                    type: RESOURCE_TYPE,
-                    forceIcon: <IconApps />,
+                    type: sceneConfigurations[Scene.ExploreEvents].iconType || 'default_icon_type',
                 }}
             />
-            <SceneDivider />
             <Query
                 attachTo={eventsSceneLogic({ tabId })}
                 uniqueKey={`events-scene-${tabId}`}
@@ -68,5 +45,5 @@ export function EventsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
 export const scene: SceneExport = {
     component: EventsScene,
     logic: eventsSceneLogic,
-    settingSectionId: 'environment-autocapture',
+    productKey: ProductKey.PRODUCT_ANALYTICS,
 }

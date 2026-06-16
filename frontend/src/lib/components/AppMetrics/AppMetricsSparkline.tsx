@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { Sparkline, SparklineTimeSeries } from 'lib/components/Sparkline'
 import { inStorybookTestRunner } from 'lib/utils'
@@ -13,10 +13,12 @@ export function AppMetricsSparkline(props: AppMetricsLogicProps): JSX.Element {
     const logic = appMetricsLogic(props)
     const { appMetricsTrends, appMetricsTrendsLoading, params } = useValues(logic)
     const { loadAppMetricsTrends } = useActions(logic)
-    const { ref: inViewRef, inView } = useInView()
+    const { ref: inViewRef, inView } = useInView({
+        triggerOnce: true,
+    })
 
     useEffect(() => {
-        if (inStorybookTestRunner() || (inView && !appMetricsTrends && !appMetricsTrendsLoading)) {
+        if (inStorybookTestRunner() || (inView && !appMetricsTrendsLoading)) {
             loadAppMetricsTrends()
         }
     }, [inView]) // oxlint-disable-line react-hooks/exhaustive-deps

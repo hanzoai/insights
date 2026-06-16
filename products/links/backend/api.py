@@ -3,15 +3,18 @@ from typing import Any
 from django.db.models import QuerySet
 
 import structlog
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.models.link import Link
-from posthog.models.team.team import Team
+from insights.schema import ProductKey
+
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.models.link import Link
+from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)
 
@@ -39,8 +42,8 @@ class LinkSerializer(serializers.ModelSerializer):
     def create(self, validated_data: dict[str, Any]) -> Link:
         team = Team.objects.get(id=self.context["team_id"])
 
-        if validated_data.get("short_link_domain") != "phog.gg":
-            raise serializers.ValidationError({"short_link_domain": "Only phog.gg is allowed as a short link domain"})
+        if validated_data.get("short_link_domain") != "insights.link":
+            raise serializers.ValidationError({"short_link_domain": "Only insights.link is allowed as a short link domain"})
 
         link = Link.objects.create(
             team=team,
@@ -52,6 +55,7 @@ class LinkSerializer(serializers.ModelSerializer):
         return link
 
 
+@extend_schema(tags=[ProductKey.LINKS])
 class LinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     """
     Create, read, update, and delete links.

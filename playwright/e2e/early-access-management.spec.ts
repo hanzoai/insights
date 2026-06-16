@@ -11,7 +11,7 @@ test.describe('Early Access Management', () => {
     test('Early access feature new and list', async ({ page }) => {
         // load an empty early access feature page
         await expect(page.locator('h1')).toContainText('Early access features')
-        await expect(page).toHaveTitle('Early access features • PostHog')
+        await expect(page).toHaveTitle('Early access features • Insights')
 
         // go to create a new feature
         await page.getByRole('link', { name: 'New feature' }).click()
