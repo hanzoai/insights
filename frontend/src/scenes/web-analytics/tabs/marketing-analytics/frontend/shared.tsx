@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGraph, IconLineGraph, IconTrending } from '@posthog/icons'
-import { LemonSegmentedButtonOption } from '@posthog/lemon-ui'
+import { IconGraph, IconLineGraph, IconTrending } from '@hanzo/icons'
+import { LemonSegmentedButtonOption } from '@hanzo/lemon-ui'
 
 import { getColorVar } from 'lib/colors'
 import { Tooltip } from 'lib/lemon-ui/Tooltip/Tooltip'

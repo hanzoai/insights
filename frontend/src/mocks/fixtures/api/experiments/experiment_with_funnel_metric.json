@@ -76,9 +76,9 @@
         "distinct_id": "TM2Vy3T9MqY0HHAxgKBj95zZEaZ45MYSpuSxu6MaVNj",
         "first_name": "Juraj",
         "last_name": "",
-        "email": "juraj@posthog.com",
+        "email": "juraj@hanzo.ai",
         "is_email_verified": false,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": "engineering"
     },
     "created_at": "2025-06-03T14:35:54.872677Z",

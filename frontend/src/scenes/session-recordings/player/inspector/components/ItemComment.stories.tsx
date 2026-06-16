@@ -48,6 +48,7 @@ function makeNotebookItem(
         type: 'comment',
         source: 'notebook',
         search: '',
+        key: 'id',
         ...itemOverrides,
     }
 }
@@ -74,7 +75,7 @@ function makeCommentItem(
                 distinct_id: 'BpwPZw8BGaeISf7DlDprsui5J9DMIYjhE3fTFMJiEMF',
                 first_name: 'fasdadafsfasdadafsfasdadafsfasdadafsfasdadafsfasdadafs',
                 last_name: '',
-                email: 'paul@posthog.com',
+                email: 'paul@hanzo.ai',
                 is_email_verified: false,
             },
             ...dataOverrides,
@@ -84,6 +85,7 @@ function makeCommentItem(
         type: 'comment',
         source: 'comment',
         search: '',
+        key: 'id',
         ...itemOverrides,
     }
 }

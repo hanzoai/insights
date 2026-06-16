@@ -13,18 +13,18 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import { loaders } from 'kea-loaders'
+import { lazyLoaders, loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
+import insights from '@hanzo/insights'
 
 import api, { ApiMethodOptions } from 'lib/api'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { shouldCancelQuery, uuid } from 'lib/utils'
 import { ConcurrencyController } from 'lib/utils/concurrencyController'
 import { UNSAVED_INSIGHT_MIN_REFRESH_INTERVAL_MINUTES } from 'scenes/insights/insightLogic'
 import { compareDataNodeQuery, haveVariablesOrFiltersChanged, validateQuery } from 'scenes/insights/utils/queryUtils'
 import { sceneLogic } from 'scenes/sceneLogic'
+import { Scene } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -43,9 +43,10 @@ import {
     EventsQueryResponse,
     GroupsQuery,
     GroupsQueryResponse,
-    HogQLQueryModifiers,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryModifiers,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     InsightVizNode,
     MarketingAnalyticsTableQuery,
     MarketingAnalyticsTableQueryResponse,
@@ -54,6 +55,8 @@ import {
     QueryStatus,
     QueryTiming,
     RefreshType,
+    SessionsQuery,
+    SessionsQueryResponse,
     TracesQuery,
     TracesQueryResponse,
 } from '~/queries/schema/schema-general'
@@ -62,11 +65,12 @@ import {
     isErrorTrackingQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightActorsQuery,
     isInsightQueryNode,
     isMarketingAnalyticsTableQuery,
     isPersonsNode,
+    isSessionsQuery,
     isTracesQuery,
 } from '~/queries/utils'
 import { TeamType } from '~/types'
@@ -89,38 +93,63 @@ export interface DataNodeLogicProps {
     /** Load priority. Higher priority (smaller number) queries will be loaded first. */
     loadPriority?: number
     /** Override modifiers when making the request */
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
 
     dataNodeCollectionId?: string
 
     /** Dashboard filters to override the ones in the query */
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
 
     /** Whether to automatically load data when the query changes. Used for manual override in SQL editor */
     autoLoad?: boolean
     /** Override the maximum pagination limit. */
     maxPaginationLimit?: number
+    /** Limit context sent to the /query endpoint */
+    limitContext?: 'insights_ai'
 }
 
 export const AUTOLOAD_INTERVAL = 30000
 const LOAD_MORE_ROWS_LIMIT = 10000
 
 const concurrencyController = new ConcurrencyController(1)
+const webAnalyticsConcurrencyController = new ConcurrencyController(3)
 const webAnalyticsPreAggConcurrencyController = new ConcurrencyController(5)
 
 function getConcurrencyController(query: DataNode, currentTeam: TeamType): ConcurrencyController {
+    const mountedSceneLogic = sceneLogic.findMounted()
+    const activeScene = mountedSceneLogic?.values.activeSceneId
+    if (
+        [
+            Scene.WebAnalytics,
+            Scene.WebAnalyticsWebVitals,
+            Scene.WebAnalyticsPageReports,
+            Scene.WebAnalyticsMarketing,
+            Scene.WebAnalyticsHealth,
+            Scene.WebAnalyticsLive,
+        ].includes(activeScene as Scene) &&
+        !currentTeam?.modifiers?.useWebAnalyticsPreAggregatedTables
+    ) {
+        return webAnalyticsConcurrencyController
+    }
+
     if (
         currentTeam?.modifiers?.useWebAnalyticsPreAggregatedTables &&
-        [NodeKind.WebOverviewQuery, NodeKind.WebStatsTableQuery, NodeKind.InsightVizNode].includes(query.kind)
+        [
+            NodeKind.WebOverviewQuery,
+            NodeKind.WebStatsTableQuery,
+            NodeKind.InsightVizNode,
+            NodeKind.WebVitalsQuery,
+            NodeKind.WebVitalsPathBreakdownQuery,
+        ].includes(query.kind)
     ) {
         return webAnalyticsPreAggConcurrencyController
     }
     return concurrencyController
 }
 
-function addModifiers(query: DataNode, modifiers?: HogQLQueryModifiers): DataNode {
+function addModifiers(query: DataNode, modifiers?: InsightsQLQueryModifiers): DataNode {
     if (!modifiers) {
         return query
     }
@@ -154,7 +183,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
     path(['queries', 'nodes', 'dataNodeLogic']),
     key((props) => props.key),
     connect((props: DataNodeLogicProps) => ({
-        values: [userLogic, ['user'], teamLogic, ['currentTeam', 'currentTeamId'], featureFlagLogic, ['featureFlags']],
+        values: [userLogic, ['user'], teamLogic, ['currentTeam', 'currentTeamId']],
         actions: [
             dataNodeCollectionLogic({ key: props.dataNodeCollectionId || props.key } as DataNodeCollectionProps),
             [
@@ -184,7 +213,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             // If there is an incomplete query, load the data with the same query_id which should return its status
             // We need to force a refresh in this case
             const refreshType =
-                isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'force_async' : 'force_blocking'
+                isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'force_async' : 'force_blocking'
             actions.loadData(refreshType, queryStatus.id)
         } else if (
             hasQueryChanged &&
@@ -200,9 +229,9 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             let refreshType: RefreshType
             if (queryVarsHaveChanged) {
                 refreshType =
-                    isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'force_async' : 'force_blocking'
+                    isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'force_async' : 'force_blocking'
             } else {
-                refreshType = isInsightQueryNode(props.query) || isHogQLQuery(props.query) ? 'async' : 'blocking'
+                refreshType = isInsightQueryNode(props.query) || isInsightsQLQuery(props.query) ? 'async' : 'blocking'
             }
 
             actions.loadData(refreshType)
@@ -236,6 +265,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         setLoadingTime: (seconds: number) => ({ seconds }),
         resetLoadingTimer: true,
         setQueryLogQueryId: (queryId: string) => ({ queryId }),
+        loadFilteredCount: true,
     }),
     loaders(({ actions, cache, values, props }) => ({
         response: [
@@ -249,9 +279,9 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                     // Use the explicit refresh type passed, or determine it based on query type
                     // Default to non-force variants
                     let refresh: RefreshType = refreshArg ?? (isInsightQueryNode(query) ? 'async' : 'blocking')
-                    if (values.featureFlags[FEATURE_FLAGS.ALWAYS_QUERY_BLOCKING] && !pollOnly) {
-                        refresh =
-                            refresh === 'force_async' ? 'force_blocking' : refresh === 'async' ? 'blocking' : refresh
+
+                    if (!pollOnly && ['async', 'force_async'].includes(refresh)) {
+                        refresh = refresh.startsWith('force_') ? 'force_blocking' : 'blocking'
                     }
 
                     if (props.doNotLoad) {
@@ -320,7 +350,8 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                             actions.setPollResponse,
                                             props.filtersOverride,
                                             props.variablesOverride,
-                                            pollOnly
+                                            pollOnly,
+                                            props.limitContext
                                         )) ?? null
                                     const duration = performance.now() - now
                                     return { data, duration }
@@ -360,7 +391,13 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                             (await performQuery(
                                 addModifiers(values.newQuery, props.modifiers),
                                 undefined,
-                                props.refresh
+                                props.refresh,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                false,
+                                props.limitContext
                             )) ?? null
                         actions.setElapsedTime(performance.now() - now)
                         if (values.response === null) {
@@ -393,13 +430,20 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         isGroupsQuery(props.query) ||
                         isTracesQuery(props.query) ||
                         isErrorTrackingQuery(props.query) ||
+                        isSessionsQuery(props.query) ||
                         isMarketingAnalyticsTableQuery(props.query)
                     ) {
                         const newResponse =
                             (await performQuery(
                                 addModifiers(values.nextQuery, props.modifiers),
                                 undefined,
-                                props.refresh
+                                props.refresh,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                false,
+                                props.limitContext
                             )) ?? null
                         actions.setElapsedTime(performance.now() - now)
                         const queryResponse = values.response as
@@ -408,6 +452,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                             | GroupsQueryResponse
                             | ErrorTrackingQueryResponse
                             | TracesQueryResponse
+                            | SessionsQueryResponse
                             | MarketingAnalyticsTableQueryResponse
 
                         let results = [...(queryResponse?.results ?? []), ...(newResponse?.results ?? [])]
@@ -426,7 +471,13 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                             (await performQuery(
                                 addModifiers(values.nextQuery, props.modifiers),
                                 undefined,
-                                props.refresh
+                                props.refresh,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                false,
+                                props.limitContext
                             )) ?? null
                         actions.setElapsedTime(performance.now() - now)
                         if (Array.isArray(values.response)) {
@@ -449,19 +500,17 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             },
         ],
         queryLog: [
-            null as HogQLQueryResponse | null,
+            null as InsightsQLQueryResponse | null,
             {
                 loadQueryLog: async (queryId, breakpoint) => {
                     if (!queryId) {
                         throw new Error('No query ID provided')
                     }
-                    if (!values.featureFlags[FEATURE_FLAGS.QUERY_EXECUTION_DETAILS]) {
-                        return null
-                    }
-
                     try {
                         const result = await api.queryLog.get(queryId)
-                        actions.setQueryLogQueryId(queryId)
+                        if (result?.results && result.results.length > 0) {
+                            actions.setQueryLogQueryId(queryId)
+                        }
                         return result
                     } catch (e: any) {
                         console.warn('Failed to get query execution details', e)
@@ -628,6 +677,50 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 loadData: () => null,
             },
         ],
+        shouldCalculateCount: [false, { loadTotalCount: () => true, loadFilteredCount: () => true }],
+    })),
+    lazyLoaders(({ values }) => ({
+        totalCount: [
+            null as number | null,
+            {
+                loadTotalCount: async () => {
+                    const query = values.totalCountQuery
+                    if (!query) {
+                        return null
+                    }
+
+                    try {
+                        const response = await performQuery(query)
+                        // Extract count from first row, first column
+                        return response?.results?.[0]?.[0] || 0
+                    } catch (error) {
+                        insights.captureException(error, { action: 'load total count in dataNodeLogic' })
+                        return null
+                    }
+                },
+            },
+        ],
+        filteredCount: [
+            null as number | null,
+            {
+                loadFilteredCount: async (_, breakpoint) => {
+                    await breakpoint(300)
+                    const query = values.filteredCountQuery
+                    if (!query) {
+                        return null
+                    }
+
+                    try {
+                        const response = await performQuery(query)
+                        breakpoint()
+                        return response?.results?.[0]?.[0] || 0
+                    } catch (error) {
+                        insights.captureException(error, { action: 'load filtered count in dataNodeLogic' })
+                        return null
+                    }
+                },
+            },
+        ],
     })),
     selectors(({ cache }) => ({
         variableOverridesAreSet: [
@@ -706,6 +799,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         isGroupsQuery(query) ||
                         isErrorTrackingQuery(query) ||
                         isTracesQuery(query) ||
+                        isSessionsQuery(query) ||
                         isMarketingAnalyticsTableQuery(query)) &&
                     !responseError &&
                     !dataLoading
@@ -718,6 +812,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                 | GroupsQueryResponse
                                 | ErrorTrackingQueryResponse
                                 | TracesQueryResponse
+                                | SessionsQueryResponse
                                 | MarketingAnalyticsTableQueryResponse
                         )?.hasMore
                     ) {
@@ -749,6 +844,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                     | GroupsQueryResponse
                                     | ErrorTrackingQueryResponse
                                     | TracesQueryResponse
+                                    | SessionsQueryResponse
                                     | MarketingAnalyticsTableQueryResponse
                             )?.results
                             return {
@@ -764,6 +860,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                                 | GroupsQuery
                                 | ErrorTrackingQuery
                                 | TracesQuery
+                                | SessionsQuery
                                 | MarketingAnalyticsTableQuery
                         }
                     }
@@ -800,11 +897,13 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         backToSourceQuery: [
             (s) => [s.query],
             (query): InsightVizNode | null => {
-                if (isActorsQuery(query) && isInsightActorsQuery(query.source) && !!query.source.source) {
-                    const insightQuery = query.source.source
+                const insightSource =
+                    (isActorsQuery(query) && isInsightActorsQuery(query.source) ? query.source.source : null) ??
+                    (isEventsQuery(query) && isInsightActorsQuery(query.source) ? query.source.source : null)
+                if (insightSource) {
                     const insightVizNode: InsightVizNode = {
                         kind: NodeKind.InsightVizNode,
-                        source: insightQuery,
+                        source: insightSource,
                         full: true,
                     }
                     return insightVizNode
@@ -877,6 +976,147 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                 return null
             },
         ],
+        hasActiveFilters: [
+            (_, p) => [p.query],
+            (query: DataNode): boolean => {
+                if (isActorsQuery(query)) {
+                    return !!(
+                        query.search ||
+                        (query.properties && Array.isArray(query.properties) && query.properties.length > 0) ||
+                        (query.fixedProperties &&
+                            Array.isArray(query.fixedProperties) &&
+                            query.fixedProperties.length > 0)
+                    )
+                }
+                if (isEventsQuery(query)) {
+                    return !!(
+                        query.event ||
+                        (query.properties && query.properties.length > 0) ||
+                        (query.where && query.where.length > 0) ||
+                        (query.fixedProperties && query.fixedProperties.length > 0)
+                    )
+                }
+                if (isGroupsQuery(query)) {
+                    return !!(query.search || (query.properties && query.properties.length > 0))
+                }
+                if (isSessionsQuery(query)) {
+                    return !!(query.properties && query.properties.length > 0)
+                }
+                return false
+            },
+        ],
+        totalCountQuery: [
+            (_, p) => [p.query],
+            (query: DataNode): DataNode | null => {
+                // Create a simplified version of the query for counting
+                if (isActorsQuery(query)) {
+                    return {
+                        kind: NodeKind.InsightsQLQuery,
+                        query: 'SELECT count(*) from persons',
+                    } as InsightsQLQuery
+                }
+
+                if (isEventsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(*)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                        // Remove all filters for total count
+                        event: undefined,
+                        properties: undefined,
+                        where: undefined,
+                    } as EventsQuery
+                }
+
+                if (isGroupsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(*)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                        // Remove all filters for total count
+                        search: undefined,
+                        properties: undefined,
+                    } as GroupsQuery
+                }
+
+                if (isSessionsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(distinct session_id)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                        // Remove all filters for total count
+                        properties: undefined,
+                    } as SessionsQuery
+                }
+
+                // Skip PersonsNode - it's deprecated
+                return null
+            },
+        ],
+        filteredCountQuery: [
+            (s) => [s.query, s.hasActiveFilters],
+            (query: DataNode, hasActiveFilters: boolean): DataNode | null => {
+                if (!hasActiveFilters) {
+                    return null
+                }
+
+                // Create a simplified version of the query for counting
+                // This keeps all the filters but removes pagination and ordering
+                if (isActorsQuery(query)) {
+                    return {
+                        kind: query.kind,
+                        source: query.source,
+                        select: ['count(DISTINCT id)'],
+                        // Keep filters but remove aggregated select fields
+                        search: query.search,
+                        properties: query.properties,
+                        fixedProperties: query.fixedProperties,
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                    } as ActorsQuery
+                }
+
+                if (isEventsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(*)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                    } as EventsQuery
+                }
+
+                if (isGroupsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(*)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                    } as GroupsQuery
+                }
+
+                if (isSessionsQuery(query)) {
+                    return {
+                        ...query,
+                        select: ['count(distinct session_id)'],
+                        orderBy: undefined,
+                        limit: undefined,
+                        offset: undefined,
+                    } as SessionsQuery
+                }
+
+                // Skip PersonsNode - it's deprecated
+                return null
+            },
+        ],
     })),
     listeners(({ actions, values, cache, props }) => ({
         abortAnyRunningQuery: () => {
@@ -918,42 +1158,46 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             props.onData?.(response as Record<string, unknown> | null | undefined)
         },
         resetLoadingTimer: () => {
-            if (cache.loadingTimer) {
-                window.clearInterval(cache.loadingTimer)
-                cache.loadingTimer = null
-            }
-
             if (values.dataLoading) {
                 const startTime = Date.now()
-                cache.loadingTimer = window.setInterval(() => {
-                    const seconds = Math.floor((Date.now() - startTime) / 1000)
-                    actions.setLoadingTime(seconds)
-                }, 1000)
+                cache.disposables.add(() => {
+                    const timerId = window.setInterval(() => {
+                        const seconds = Math.floor((Date.now() - startTime) / 1000)
+                        actions.setLoadingTime(seconds)
+                    }, 1000)
+                    return () => window.clearInterval(timerId)
+                }, 'loadingTimer')
             }
         },
     })),
-    subscriptions(({ props, actions, cache, values }) => ({
+    subscriptions(({ props, actions, values, cache }) => ({
         responseError: (error: string | null) => {
             props.onError?.(error)
         },
         autoLoadRunning: (autoLoadRunning) => {
-            if (cache.autoLoadInterval) {
-                window.clearInterval(cache.autoLoadInterval)
-                cache.autoLoadInterval = null
-            }
             if (autoLoadRunning) {
                 actions.loadNewData()
-                cache.autoLoadInterval = window.setInterval(() => {
-                    if (!values.responseLoading) {
-                        actions.loadNewData()
-                    }
-                }, AUTOLOAD_INTERVAL)
+                cache.disposables.add(() => {
+                    const timerId = window.setInterval(() => {
+                        if (!values.responseLoading) {
+                            actions.loadNewData()
+                        }
+                    }, AUTOLOAD_INTERVAL)
+                    return () => window.clearInterval(timerId)
+                }, 'autoLoadInterval')
+            } else {
+                cache.disposables.dispose('autoLoadInterval')
             }
         },
         dataLoading: (dataLoading) => {
-            if (cache.loadingTimer && !dataLoading) {
-                window.clearInterval(cache.loadingTimer)
-                cache.loadingTimer = null
+            if (!dataLoading) {
+                // Clear loading timer when data loading finishes
+                cache.disposables.dispose('loadingTimer')
+            }
+        },
+        filteredCountQuery: () => {
+            if (values.shouldCalculateCount) {
+                actions.loadFilteredCount()
             }
         },
     })),
@@ -976,7 +1220,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
             cancelQuery: actions.cancelQuery,
         })
     }),
-    beforeUnmount(({ actions, props, values, cache }) => {
+    beforeUnmount(({ actions, props, values }) => {
         if (values.autoLoadRunning) {
             actions.stopAutoLoad()
         }
@@ -985,10 +1229,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         }
 
         actions.unmountDataNode(props.key)
-        if (cache.loadingTimer) {
-            window.clearInterval(cache.loadingTimer)
-            cache.loadingTimer = null
-        }
+        // Disposables plugin handles timer cleanup automatically
     }),
 ])
 

@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconPencil, IconTrash, IconWarning } from '@posthog/icons'
-import { LemonCheckbox, LemonDialog, LemonInput, LemonMenu, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash, IconWarning } from '@hanzo/icons'
+import { LemonCheckbox, LemonDialog, LemonInput, LemonMenu, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -22,8 +22,8 @@ import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import {
     KNOWN_PROMOTED_PROPERTY_PARENTS,
-    POSTHOG_EVENT_PROMOTED_PROPERTIES,
-    isPostHogProperty,
+    INSIGHTS_EVENT_PROMOTED_PROPERTIES,
+    isInsightsProperty,
 } from '~/taxonomy/taxonomy'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { PropertyDefinitionType, PropertyType } from '~/types'
@@ -83,7 +83,7 @@ function ValueDisplay({
     const { describeProperty } = useValues(propertyDefinitionsModel)
 
     const [editing, setEditing] = useState(false)
-    // Can edit if a key and edit callback is set, the property is custom (i.e. not PostHog), and the value is in the root of the object (i.e. no nested objects)
+    // Can edit if a key and edit callback is set, the property is custom (i.e. not Insights), and the value is in the root of the object (i.e. no nested objects)
     const canEdit = rootKey && !PROPERTY_KEYS.includes(rootKey) && (!nestingLevel || nestingLevel <= 1) && onEdit
 
     const textBasedTypes = ['string', 'number', 'bigint'] // Values that are edited with a text box
@@ -196,7 +196,7 @@ interface PropertiesTableType extends BasePropertyType {
     embedded?: boolean
     onDelete?: (key: string) => void
     className?: string
-    /* only event types are detected and so describe-able. see https://github.com/PostHog/posthog/issues/9245 */
+    /* only event types are detected and so describe-able. see https://github.com/hanzoai/insights/issues/9245 */
     useDetectedPropertyType?: boolean
     tableProps?: Partial<LemonTableProps<Record<string, any>>>
     highlightedKeys?: string[]
@@ -226,8 +226,8 @@ export function PropertiesTable({
     parent,
 }: PropertiesTableType): JSX.Element {
     const [searchTerm, setSearchTerm] = useState('')
-    const { hidePostHogPropertiesInTable, hideNullValues } = useValues(userPreferencesLogic)
-    const { setHidePostHogPropertiesInTable, setHideNullValues } = useActions(userPreferencesLogic)
+    const { hideInsightsPropertiesInTable, hideNullValues } = useValues(userPreferencesLogic)
+    const { setHideInsightsPropertiesInTable, setHideNullValues } = useActions(userPreferencesLogic)
     const { isCloudOrDev } = useValues(preflightLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
@@ -239,7 +239,7 @@ export function PropertiesTable({
         let entries = Object.entries(properties)
         if (sortProperties) {
             entries = entries.sort((a, b) => {
-                // if this is a posthog property we want to sort by its label
+                // if this is a insights property we want to sort by its label
                 const propertyTypeMap: Record<PropertyDefinitionType, TaxonomicFilterGroupType> = {
                     [PropertyDefinitionType.Event]: TaxonomicFilterGroupType.EventProperties,
                     [PropertyDefinitionType.EventMetadata]: TaxonomicFilterGroupType.EventMetadata,
@@ -250,8 +250,11 @@ export function PropertiesTable({
                     [PropertyDefinitionType.LogEntry]: TaxonomicFilterGroupType.LogEntries,
                     [PropertyDefinitionType.Meta]: TaxonomicFilterGroupType.Metadata,
                     [PropertyDefinitionType.Resource]: TaxonomicFilterGroupType.Resources,
-                    [PropertyDefinitionType.Log]: TaxonomicFilterGroupType.LogAttributes,
+                    [PropertyDefinitionType.Log]: TaxonomicFilterGroupType.Logs,
+                    [PropertyDefinitionType.LogAttribute]: TaxonomicFilterGroupType.LogAttributes,
+                    [PropertyDefinitionType.LogResourceAttribute]: TaxonomicFilterGroupType.LogResourceAttributes,
                     [PropertyDefinitionType.FlagValue]: TaxonomicFilterGroupType.FeatureFlags,
+                    [PropertyDefinitionType.WorkflowVariable]: TaxonomicFilterGroupType.WorkflowVariables,
                 }
 
                 const propertyType = propertyTypeMap[type] || TaxonomicFilterGroupType.EventProperties
@@ -268,7 +271,7 @@ export function PropertiesTable({
                 return 0
             })
             if (parent) {
-                const promotedProperties = POSTHOG_EVENT_PROMOTED_PROPERTIES[parent]
+                const promotedProperties = INSIGHTS_EVENT_PROMOTED_PROPERTIES[parent]
                 const promotedItems = promotedProperties?.length
                     ? entries
                           .filter(([key]) => promotedProperties.includes(key))
@@ -298,8 +301,8 @@ export function PropertiesTable({
                 if (hideNullValues && value === null) {
                     return false
                 }
-                if (hidePostHogPropertiesInTable) {
-                    return !isPostHogProperty(key, isCloudOrDev)
+                if (hideInsightsPropertiesInTable) {
+                    return !isInsightsProperty(key, isCloudOrDev)
                 }
                 return true
             })
@@ -313,7 +316,7 @@ export function PropertiesTable({
             })
         }
         return entries
-    }, [properties, sortProperties, searchTerm, hidePostHogPropertiesInTable, hideNullValues]) // oxlint-disable-line react-hooks/exhaustive-deps
+    }, [properties, sortProperties, searchTerm, hideInsightsPropertiesInTable, hideNullValues]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     if (Array.isArray(properties)) {
         return (
@@ -509,10 +512,10 @@ export function PropertiesTable({
                             {filterable && (
                                 <>
                                     <LemonCheckbox
-                                        checked={hidePostHogPropertiesInTable}
-                                        label="Hide PostHog properties"
+                                        checked={hideInsightsPropertiesInTable}
+                                        label="Hide Insights properties"
                                         bordered
-                                        onChange={setHidePostHogPropertiesInTable}
+                                        onChange={setHideInsightsPropertiesInTable}
                                     />
 
                                     <LemonCheckbox
@@ -538,14 +541,14 @@ export function PropertiesTable({
                     className={className}
                     emptyState={
                         <>
-                            {hidePostHogPropertiesInTable || searchTerm ? (
+                            {hideInsightsPropertiesInTable || searchTerm ? (
                                 <span className="flex gap-2">
                                     <span>No properties found</span>
                                     <LemonButton
                                         noPadding
                                         onClick={() => {
                                             setSearchTerm('')
-                                            setHidePostHogPropertiesInTable(false)
+                                            setHideInsightsPropertiesInTable(false)
                                             setHideNullValues(false)
                                         }}
                                     >

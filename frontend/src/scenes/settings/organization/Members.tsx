@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonInput, LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -217,8 +217,11 @@ export function Members(): JSX.Element | null {
         {
             title: 'Name',
             key: 'user_name',
-            render: (_, member) =>
-                member.user.uuid == user.uuid ? `${fullName(member.user)} (you)` : fullName(member.user),
+            render: (_, member) => (
+                <span className="ph-no-capture">
+                    {member.user.uuid == user.uuid ? `${fullName(member.user)} (you)` : fullName(member.user)}
+                </span>
+            ),
             sorter: (a, b) => fullName(a.user).localeCompare(fullName(b.user)),
         },
         {
@@ -227,7 +230,7 @@ export function Members(): JSX.Element | null {
             render: (_, member) => {
                 return (
                     <>
-                        {member.user.email}
+                        <span className="ph-no-capture">{member.user.email}</span>
                         {!member.user.is_email_verified &&
                             !member.has_social_auth &&
                             preflight?.email_service_available && (
@@ -363,7 +366,7 @@ export function Members(): JSX.Element | null {
                 />
             </PayGateMini>
 
-            {posthog.isFeatureEnabled(FEATURE_FLAGS.MEMBERS_CAN_USE_PERSONAL_API_KEYS) && (
+            {insights.isFeatureEnabled(FEATURE_FLAGS.MEMBERS_CAN_USE_PERSONAL_API_KEYS) && (
                 <>
                     <h3 className="mt-4">Security settings</h3>
                     <PayGateMini feature={AvailableFeature.ORGANIZATION_SECURITY_SETTINGS}>

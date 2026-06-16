@@ -1,5 +1,5 @@
 import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { RefObject } from 'react'
 
 import {
@@ -9,7 +9,7 @@ import {
 } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import {
     DEFAULT_HEATMAP_FILTERS,
-    PostHogAppToolbarEvent,
+    InsightsAppToolbarEvent,
     calculateViewportRange,
 } from 'lib/components/IframedToolbarBrowser/utils'
 import { CommonFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
@@ -40,6 +40,9 @@ export const UserIntentVerb: {
     'edit-action': 'edit the action',
     'add-experiment': 'add web experiment',
     'edit-experiment': 'edit the experiment',
+    'add-product-tour': 'add product tour',
+    'edit-product-tour': 'edit the product tour',
+    'preview-product-tour': 'preview the product tour',
 }
 
 export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
@@ -67,7 +70,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         setBrowserUrl: (url: string | null) => ({ url }),
         setProposedBrowserUrl: (url: string | null) => ({ url }),
         onIframeLoad: true,
-        sendToolbarMessage: (type: PostHogAppToolbarEvent, payload?: Record<string, any>) => ({
+        sendToolbarMessage: (type: InsightsAppToolbarEvent, payload?: Record<string, any>) => ({
             type,
             payload,
         }),
@@ -78,7 +81,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         enableElementSelector: true,
         disableElementSelector: true,
         setNewActionName: (name: string | null) => ({ name }),
-        toolbarMessageReceived: (type: PostHogAppToolbarEvent, payload: Record<string, any>) => ({ type, payload }),
+        toolbarMessageReceived: (type: InsightsAppToolbarEvent, payload: Record<string, any>) => ({ type, payload }),
         setCurrentPath: (path: string) => ({ path }),
         setInitialPath: (path: string) => ({ path }),
     }),
@@ -95,7 +98,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         heatmapColorPalette: [
             'default' as string | null,
             {
-                setHeatmapColorPalette: (_, { Palette }) => Palette,
+                setHeatmapColorPalette: (_, { palette }) => palette,
             },
         ],
         heatmapFilters: [
@@ -199,8 +202,10 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         ],
     }),
 
-    listeners(({ actions, cache, props, values }) => ({
+    listeners(({ actions, props, values, cache }) => ({
         sendToolbarMessage: ({ type, payload }) => {
+            // it's ok to use we use a wildcard for the origin bc data isn't sensitive
+            // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
             props.iframeRef?.current?.contentWindow?.postMessage(
                 {
                     type,
@@ -221,13 +226,13 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
 
         // actions
         enableElementSelector: () => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: true })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: true })
         },
         disableElementSelector: () => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: false })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: false })
         },
         setNewActionName: ({ name }) => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_NEW_ACTION_NAME, { name })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_NEW_ACTION_NAME, { name })
         },
 
         onIframeLoad: () => {
@@ -236,11 +241,11 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
             // but there's no slam dunk way to do that
 
             const init = (): void => {
-                actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_APP_INIT)
+                actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_APP_INIT)
             }
 
             const onIframeMessage = (e: MessageEvent): void => {
-                const type: PostHogAppToolbarEvent = e?.data?.type
+                const type: InsightsAppToolbarEvent = e?.data?.type
                 const payload = e?.data?.payload
 
                 actions.toolbarMessageReceived(type, payload)
@@ -258,11 +263,11 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
                 }
 
                 switch (type) {
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_INIT:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_INIT:
                         return init()
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_READY:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_READY:
                         if (props.userIntent === 'heatmaps') {
-                            posthog.capture('in-app heatmap frame loaded', {
+                            insights.capture('in-app heatmap frame loaded', {
                                 inapp_heatmap_page_url_visited: values.browserUrl,
                                 inapp_heatmap_filters: values.heatmapFilters,
                                 inapp_heatmap_color_palette: values.heatmapColorPalette,
@@ -272,19 +277,22 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
                             return actions.startTrackingLoading()
                         }
                         return
-                    case PostHogAppToolbarEvent.PH_NEW_ACTION_CREATED:
+                    case InsightsAppToolbarEvent.PH_NEW_ACTION_CREATED:
                         actions.setNewActionName(null)
                         actions.disableElementSelector()
                         return
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_NAVIGATED:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_NAVIGATED:
                         // remove leading / from path
                         return actions.setCurrentPath(payload.path.replace(/^\/+/, ''))
                     default:
-                        console.warn(`[PostHog Heatmaps] Received unknown child window message: ${type}`)
+                        console.warn(`[Insights Heatmaps] Received unknown child window message: ${type}`)
                 }
             }
 
-            window.addEventListener('message', onIframeMessage, false)
+            cache.disposables.add(() => {
+                window.addEventListener('message', onIframeMessage, false)
+                return () => window.removeEventListener('message', onIframeMessage, false)
+            }, 'iframeMessageListener')
             // We call init in case the toolbar got there first (unlikely)
             init()
         },
@@ -297,25 +305,33 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         startTrackingLoading: () => {
             actions.setIframeBanner(null)
 
-            clearTimeout(cache.errorTimeout)
-            cache.errorTimeout = setTimeout(() => {
-                actions.setIframeBanner({ level: 'error', message: 'The heatmap failed to load (or is very slow).' })
-            }, 7500)
+            cache.disposables.add(() => {
+                const errorTimerId = setTimeout(() => {
+                    actions.setIframeBanner({
+                        level: 'error',
+                        message: 'The heatmap failed to load (or is very slow).',
+                    })
+                }, 7500)
+                return () => clearTimeout(errorTimerId)
+            }, 'errorTimeout')
 
-            clearTimeout(cache.warnTimeout)
-            cache.warnTimeout = setTimeout(() => {
-                actions.setIframeBanner({ level: 'warning', message: 'Still waiting for the toolbar to load.' })
-            }, 3000)
+            cache.disposables.add(() => {
+                const warnTimerId = setTimeout(() => {
+                    actions.setIframeBanner({ level: 'warning', message: 'Still waiting for the toolbar to load.' })
+                }, 3000)
+                return () => clearTimeout(warnTimerId)
+            }, 'warnTimeout')
         },
 
         stopTrackingLoading: () => {
             actions.setIframeBanner(null)
 
-            clearTimeout(cache.errorTimeout)
-            clearTimeout(cache.warnTimeout)
+            // Clear timeouts using disposables
+            cache.disposables.dispose('errorTimeout')
+            cache.disposables.dispose('warnTimeout')
         },
         setIframeBanner: ({ banner }) => {
-            posthog.capture('in-app iFrame banner set', {
+            insights.capture('in-app iFrame banner set', {
                 level: banner?.level,
                 message: banner?.message,
             })
@@ -339,5 +355,6 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
     }),
     beforeUnmount(({ actions, props }) => {
         props.clearBrowserUrlOnUnmount && actions.setBrowserUrl('')
+        // Note: Loading timeouts are automatically cleaned up by the disposables plugin
     }),
 ])

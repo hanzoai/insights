@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonTag } from '@posthog/lemon-ui'
+import { IconEllipsis, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonTag } from '@hanzo/lemon-ui'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -102,7 +102,7 @@ export function NotebooksTable(): JSX.Element {
                 dismissKey="notebooks-preview-banner"
             >
                 <b>Welcome to Notebooks</b> - a great way to bring Insights, Replays, Feature Flags and many more
-                PostHog products together into one place.
+                Insights products together into one place.
             </LemonBanner>
             <div className="flex justify-between gap-2 flex-wrap">
                 <LemonInput
@@ -114,7 +114,7 @@ export function NotebooksTable(): JSX.Element {
                     value={filters.search}
                     data-attr="notebooks-search"
                 />
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                     <ContainsTypeFilters filters={filters} setFilters={setFilters} />
                     <div className="flex items-center gap-2">
                         <span>Created by:</span>

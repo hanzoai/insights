@@ -1,0 +1,392 @@
+# serializer version: 1
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'feature_flag'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type.1
+  '''
+  SELECT "insights_integration"."id",
+         "insights_integration"."team_id",
+         "insights_integration"."kind",
+         "insights_integration"."integration_id",
+         "insights_integration"."config",
+         "insights_integration"."sensitive_config",
+         "insights_integration"."errors",
+         "insights_integration"."created_at",
+         "insights_integration"."created_by_id"
+  FROM "insights_integration"
+  WHERE ("insights_integration"."kind" = 'vercel'
+         AND "insights_integration"."team_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type.2
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'feature_flag'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type.3
+  '''
+  SELECT "insights_integration"."id",
+         "insights_integration"."team_id",
+         "insights_integration"."kind",
+         "insights_integration"."integration_id",
+         "insights_integration"."config",
+         "insights_integration"."sensitive_config",
+         "insights_integration"."errors",
+         "insights_integration"."created_at",
+         "insights_integration"."created_by_id"
+  FROM "insights_integration"
+  WHERE ("insights_integration"."kind" = 'vercel'
+         AND "insights_integration"."team_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type.4
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'feature_flag'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_db_matches_independent_of_string_or_number_type.5
+  '''
+  SELECT "insights_integration"."id",
+         "insights_integration"."team_id",
+         "insights_integration"."kind",
+         "insights_integration"."integration_id",
+         "insights_integration"."config",
+         "insights_integration"."sensitive_config",
+         "insights_integration"."errors",
+         "insights_integration"."created_at",
+         "insights_integration"."created_by_id"
+  FROM "insights_integration"
+  WHERE ("insights_integration"."kind" = 'vercel'
+         AND "insights_integration"."team_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_invalid_regex_match_flag
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'feature_flag'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_invalid_regex_match_flag.1
+  '''
+  SELECT "insights_integration"."id",
+         "insights_integration"."team_id",
+         "insights_integration"."kind",
+         "insights_integration"."integration_id",
+         "insights_integration"."config",
+         "insights_integration"."sensitive_config",
+         "insights_integration"."errors",
+         "insights_integration"."created_at",
+         "insights_integration"."created_by_id"
+  FROM "insights_integration"
+  WHERE ("insights_integration"."kind" = 'vercel'
+         AND "insights_integration"."team_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_numeric_operator_with_cohorts_and_nested_cohorts
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_team"."project_id" = 99999)
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_with_sql_injection_properties_and_other_aliases
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'cohort'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_with_sql_injection_properties_and_other_aliases.1
+  '''
+  SELECT "insights_filesystem"."team_id",
+         "insights_filesystem"."id",
+         "insights_filesystem"."path",
+         "insights_filesystem"."depth",
+         "insights_filesystem"."type",
+         "insights_filesystem"."ref",
+         "insights_filesystem"."href",
+         "insights_filesystem"."shortcut",
+         "insights_filesystem"."meta",
+         "insights_filesystem"."created_at",
+         "insights_filesystem"."created_by_id",
+         "insights_filesystem"."project_id"
+  FROM "insights_filesystem"
+  WHERE ("insights_filesystem"."ref" = '0001'
+         AND "insights_filesystem"."team_id" = 99999
+         AND "insights_filesystem"."type" = 'feature_flag'
+         AND NOT ("insights_filesystem"."shortcut"
+                  AND "insights_filesystem"."shortcut" IS NOT NULL))
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_with_sql_injection_properties_and_other_aliases.2
+  '''
+  SELECT "insights_integration"."id",
+         "insights_integration"."team_id",
+         "insights_integration"."kind",
+         "insights_integration"."integration_id",
+         "insights_integration"."config",
+         "insights_integration"."sensitive_config",
+         "insights_integration"."errors",
+         "insights_integration"."created_at",
+         "insights_integration"."created_by_id"
+  FROM "insights_integration"
+  WHERE ("insights_integration"."kind" = 'vercel'
+         AND "insights_integration"."team_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestFeatureFlagMatcher.test_with_sql_injection_properties_and_other_aliases.3
+  '''
+  SELECT "insights_cohort"."id",
+         "insights_cohort"."name",
+         "insights_cohort"."description",
+         "insights_cohort"."team_id",
+         "insights_cohort"."deleted",
+         "insights_cohort"."filters",
+         "insights_cohort"."query",
+         "insights_cohort"."version",
+         "insights_cohort"."pending_version",
+         "insights_cohort"."count",
+         "insights_cohort"."created_by_id",
+         "insights_cohort"."created_at",
+         "insights_cohort"."is_calculating",
+         "insights_cohort"."last_calculation",
+         "insights_cohort"."errors_calculating",
+         "insights_cohort"."last_error_at",
+         "insights_cohort"."is_static",
+         "insights_cohort"."cohort_type",
+         "insights_cohort"."groups"
+  FROM "insights_cohort"
+  INNER JOIN "insights_team" ON ("insights_cohort"."team_id" = "insights_team"."id")
+  WHERE (NOT "insights_cohort"."deleted"
+         AND "insights_team"."project_id" = 99999)
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging
+  'BEGIN'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.1
+  '''
+  
+  SET LOCAL statement_timeout = 99999
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.10
+  '''
+  
+  SELECT key
+  FROM insights_featureflag flag
+  JOIN insights_team team ON flag.team_id = team.id
+  WHERE team.project_id = 99999
+    AND flag.ensure_experience_continuity = TRUE
+    AND flag.active = TRUE
+    AND flag.deleted = FALSE
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.11
+  'COMMIT'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.2
+  '''
+  
+  SELECT key
+  FROM insights_featureflag flag
+  JOIN insights_team team ON flag.team_id = team.id
+  WHERE team.project_id = 99999
+    AND flag.ensure_experience_continuity = TRUE
+    AND flag.active = TRUE
+    AND flag.deleted = FALSE
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.3
+  'COMMIT'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.4
+  'BEGIN'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.5
+  '''
+  
+  SET LOCAL statement_timeout = 99999
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.6
+  '''
+  
+  SELECT key
+  FROM insights_featureflag flag
+  JOIN insights_team team ON flag.team_id = team.id
+  WHERE team.project_id = 99999
+    AND flag.ensure_experience_continuity = TRUE
+    AND flag.active = TRUE
+    AND flag.deleted = FALSE
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.7
+  'COMMIT'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.8
+  'BEGIN'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_error_race_conditions_on_person_merging.9
+  '''
+  
+  SET LOCAL statement_timeout = 99999
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging
+  'BEGIN'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.1
+  '''
+  
+  SET LOCAL statement_timeout = 99999
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.2
+  '''
+  
+  SELECT key
+  FROM insights_featureflag flag
+  JOIN insights_team team ON flag.team_id = team.id
+  WHERE team.project_id = 99999
+    AND flag.ensure_experience_continuity = TRUE
+    AND flag.active = TRUE
+    AND flag.deleted = FALSE
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.3
+  'COMMIT'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.4
+  'BEGIN'
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.5
+  '''
+  
+  SET LOCAL statement_timeout = 99999
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.6
+  '''
+  
+  SELECT key
+  FROM insights_featureflag flag
+  JOIN insights_team team ON flag.team_id = team.id
+  WHERE team.project_id = 99999
+    AND flag.ensure_experience_continuity = TRUE
+    AND flag.active = TRUE
+    AND flag.deleted = FALSE
+  '''
+# ---
+# name: TestHashKeyOverridesRaceConditions.test_hash_key_overrides_with_simulated_race_conditions_on_person_merging.7
+  'COMMIT'
+# ---

@@ -16,11 +16,20 @@ describe('toolbar toolbarLogic', () => {
 
     beforeEach(() => {
         initKeaTests()
-        logic = toolbarConfigLogic({ apiURL: 'http://localhost' })
+        logic = toolbarConfigLogic.build({ apiURL: 'http://localhost' })
         logic.mount()
     })
 
     it('is not authenticated', () => {
         expectLogic(logic).toMatchValues({ isAuthenticated: false })
+    })
+
+    it('normalizes uiHost to not end with a slash', () => {
+        const logicWithUiHost = toolbarConfigLogic.build({
+            insights: { config: { ui_host: 'https://insights.hanzo.ai/' } } as any,
+        } as any)
+        logicWithUiHost.mount()
+        expect(logicWithUiHost.values.uiHost.endsWith('/')).toBe(false)
+        expect(logicWithUiHost.values.uiHost).toBe('https://insights.hanzo.ai')
     })
 })

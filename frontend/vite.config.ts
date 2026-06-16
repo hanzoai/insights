@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 
 // import { toolbarDenylistPlugin } from './vite-toolbar-plugin'
 import { htmlGenerationPlugin } from './vite-html-plugin'
+import { insightsJsPlugin } from './vite-insights-js-plugin'
 import { publicAssetsPlugin } from './vite-public-assets-plugin'
 
 // https://vitejs.dev/config/
@@ -18,6 +19,8 @@ export default defineConfig(({ mode }) => {
             htmlGenerationPlugin(),
             // Copy public assets to src/assets for development
             publicAssetsPlugin(),
+            // Copy insights-js files from node_modules to dist for development
+            insightsJsPlugin(),
             {
                 name: 'startup-message',
                 configureServer(server) {
@@ -25,10 +28,10 @@ export default defineConfig(({ mode }) => {
                         setTimeout(() => {
                             console.info(`
 ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-                                                            
-   🚀 Visit http://localhost:8010 to see the app             
-   ⚠️  You may need to wait for the other services to start   
-                                                            
+
+   🚀 Visit http://localhost:8010 to see the app
+   ⚠️  You may need to wait for the other services to start
+
 ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 `)
                         }, 1000)
@@ -40,7 +43,7 @@ export default defineConfig(({ mode }) => {
             alias: {
                 '~': fileURLToPath(new URL('./src', import.meta.url)),
                 '@': fileURLToPath(new URL('./src', import.meta.url)),
-                // Add direct mappings for PostHog's import structure from tsconfig.json
+                // Add direct mappings for Insights's import structure from tsconfig.json
                 lib: resolve(__dirname, 'src/lib'),
                 scenes: resolve(__dirname, 'src/scenes'),
                 queries: resolve(__dirname, 'src/queries'),
@@ -52,15 +55,16 @@ export default defineConfig(({ mode }) => {
                 exporter: resolve(__dirname, 'src/exporter'),
                 stories: resolve(__dirname, 'src/stories'),
                 types: resolve(__dirname, 'src/types.ts'),
-                // @posthog/lemon-ui aliases
-                '@posthog/lemon-ui': resolve(__dirname, '@posthog/lemon-ui/src/index'),
-                '@posthog/lemon-ui/': resolve(__dirname, '@posthog/lemon-ui/src/'),
+                // @hanzo/lemon-ui aliases
+                '@hanzo/lemon-ui': resolve(__dirname, '@hanzo/lemon-ui/src/index'),
+                '@hanzo/lemon-ui/': resolve(__dirname, '@hanzo/lemon-ui/src/'),
                 // Other aliases from tsconfig.json
                 storybook: resolve(__dirname, '../.storybook'),
-                '@posthog/ee/exports': resolve(__dirname, '../ee/frontend/exports.ts'),
                 // Just for Vite: we copy public assets to src/assets, we need to alias it to the correct path
                 public: resolve(__dirname, 'src/assets'),
                 products: resolve(__dirname, '../products'),
+                '@hanzo/shared-onboarding': resolve(__dirname, '../docs/onboarding'),
+                '@hanzo/shared-onboarding/*': resolve(__dirname, '../docs/onboarding/*'),
                 // Node.js polyfills for browser compatibility
                 buffer: 'buffer',
             },
@@ -73,6 +77,7 @@ export default defineConfig(({ mode }) => {
                 input: {
                     index: resolve(__dirname, 'src/index.tsx'),
                     exporter: resolve(__dirname, 'src/exporter/index.tsx'),
+                    render_query: resolve(__dirname, 'src/render-query/index.tsx'),
                     toolbar: resolve(__dirname, 'src/toolbar/index.tsx'),
                 },
                 output: {
@@ -83,15 +88,29 @@ export default defineConfig(({ mode }) => {
             },
             sourcemap: true,
         },
+        worker: {
+            format: 'es', // Use ES modules to support WASM imports
+            plugins: () => [react()],
+            rollupOptions: {
+                output: {
+                    entryFileNames: isDev ? '[name].js' : '[name]-[hash].js',
+                },
+            },
+        },
         server: {
             port: 8234,
             host: process.argv.includes('--host') ? '0.0.0.0' : 'localhost',
-            cors: {
-                // Allow Django backend to access Vite dev server
-                origin: ['http://localhost:8000', 'http://localhost:8010'],
-            },
+            // this is just used in dev
+            // nosemgrep: trailofbits.javascript.apollo-graphql.v3-cors-audit.v3-potentially-bad-cors
+            cors: true, // This disables CORS in dev, key for using ngrok (e.g. for testing Slack integration)
             // Configure origin for proper asset URL generation
             origin: 'http://localhost:8234',
+            proxy: {
+                '/static': {
+                    target: 'http://localhost:8000',
+                    changeOrigin: true,
+                },
+            },
         },
         define: {
             global: 'globalThis',
@@ -102,6 +121,7 @@ export default defineConfig(({ mode }) => {
         },
         optimizeDeps: {
             include: ['react', 'react-dom', 'buffer'],
+            exclude: ['snappy-wasm'], // Don't pre-bundle snappy-wasm so WASM file stays with JS
         },
     }
 })

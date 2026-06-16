@@ -41,9 +41,11 @@ describe('Max Logics Integration Tests', () => {
     it('does not update conversation and thread when stream is active', async () => {
         const streamSpy = mockStream()
 
-        logic = maxLogic()
+        logic = maxLogic({ tabId: 'test' })
         logic.mount()
-        threadLogic = maxThreadLogic({ conversationId: MOCK_CONVERSATION_ID })
+        // Set the conversation ID so activeThreadKey matches the thread logic's conversationId
+        logic.actions.setConversationId(MOCK_CONVERSATION_ID)
+        threadLogic = maxThreadLogic({ conversationId: MOCK_CONVERSATION_ID, tabId: 'test' })
         threadLogic.mount()
 
         // Wait for all the microtasks to finish
@@ -54,13 +56,13 @@ describe('Max Logics Integration Tests', () => {
 
         // update props
         maxThreadLogic({
+            tabId: 'test',
             conversationId: MOCK_CONVERSATION_ID,
             conversation: {
                 ...MOCK_IN_PROGRESS_CONVERSATION,
                 messages: [
                     {
                         content: 'hello2',
-                        status: 'completed',
                         type: AssistantMessageType.Assistant,
                         id: 'test-id',
                     },
@@ -72,20 +74,20 @@ describe('Max Logics Integration Tests', () => {
 
         await expectLogic(threadLogic).toMatchValues({
             threadGrouped: [
-                [
-                    {
-                        content: 'hello',
-                        status: 'completed',
-                        type: AssistantMessageType.Human,
-                    },
-                ],
-                [
-                    partial({
-                        type: AssistantMessageType.Reasoning,
-                        status: 'completed',
-                        id: 'loader',
+                {
+                    content: 'hello',
+                    status: 'completed',
+                    type: AssistantMessageType.Human,
+                    trace_id: expect.any(String),
+                },
+                partial({
+                    type: AssistantMessageType.Assistant,
+                    status: 'completed',
+                    id: 'loader',
+                    meta: partial({
+                        thinking: expect.any(Array),
                     }),
-                ],
+                }),
             ],
         })
     })

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonTab, LemonTabs } from '@posthog/lemon-ui'
+import { LemonTab, LemonTabs } from '@hanzo/lemon-ui'
 
 import { ChartDisplayType } from '~/types'
 
@@ -31,7 +31,9 @@ const TABS_TO_CONTENT: Record<SideBarTab, TabContent> = {
         label: 'Display',
         content: <DisplayTab />,
         shouldShow: (displayType: ChartDisplayType): boolean =>
-            displayType !== ChartDisplayType.ActionsTable && displayType !== ChartDisplayType.BoldNumber,
+            displayType !== ChartDisplayType.ActionsTable &&
+            displayType !== ChartDisplayType.BoldNumber &&
+            displayType !== ChartDisplayType.TwoDimensionalHeatmap,
     },
 }
 

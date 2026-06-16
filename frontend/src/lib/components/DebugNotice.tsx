@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconCode, IconWarning, IconX } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCode, IconWarning, IconX } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -91,7 +91,7 @@ export function DebugNotice({ isCollapsed }: DebugNoticeProps): JSX.Element | nu
                             <br />
                             which only serves the web app, without capture (/e/).
                             <br />
-                            Use port 8010 for full PostHog, proxied via Caddy.
+                            Use port 8010 for full Insights, proxied via Caddy.
                         </>
                     }
                     placement="right"

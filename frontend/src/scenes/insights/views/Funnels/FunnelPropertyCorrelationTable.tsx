@@ -4,8 +4,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { useState } from 'react'
 
-import { IconArchive, IconTrending } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonTable } from '@posthog/lemon-ui'
+import { IconArchive, IconTrending } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonTable } from '@hanzo/lemon-ui'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
@@ -267,7 +267,7 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                         <p className="m-auto">
                                             Highlight properties which are likely to have affected the conversion rate
                                             within the funnel.{' '}
-                                            <Link to="https://posthog.com/docs/product-analytics/correlation">
+                                            <Link to="https://hanzo.ai/docs/product-analytics/correlation">
                                                 Learn more about correlation analysis.
                                             </Link>
                                         </p>

@@ -52,7 +52,7 @@ const meta: Meta = {
                                 uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
                                 distinct_id: 'qs3Sp9pxE3nC827IbjDB6qNW6pD22X4tmGWwonM20p7',
                                 first_name: 'paul',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: true,
                             },
                             deleted: false,
@@ -76,7 +76,7 @@ const meta: Meta = {
                                 uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
                                 distinct_id: 'qs3Sp9pxE3nC827IbjDB6qNW6pD22X4tmGWwonM20p7',
                                 first_name: 'paul',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: true,
                             },
                         },
@@ -88,20 +88,18 @@ const meta: Meta = {
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
                 '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
-                    // with no sources, returns sources...
-                    if (req.url.searchParams.get('source') === 'blob') {
+                    if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(snapshotsAsJSONLines()))
                     }
-                    // with no source requested should return sources
                     return [
                         200,
                         {
                             sources: [
                                 {
-                                    source: 'blob',
+                                    source: 'blob_v2',
                                     start_timestamp: '2023-08-11T12:03:36.097000Z',
                                     end_timestamp: '2023-08-11T12:04:52.268000Z',
-                                    blob_key: '1691755416097-1691755492268',
+                                    blob_key: '0',
                                 },
                             ],
                         },
@@ -131,7 +129,7 @@ const meta: Meta = {
                 '/api/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
                     if (
-                        body.query.kind === 'HogQLQuery' &&
+                        body.query.kind === 'InsightsQLQuery' &&
                         // very lazy match
                         body.query.query.includes('any(properties.$geoip_country_code) as $geoip_country_code')
                     ) {
@@ -157,10 +155,10 @@ const meta: Meta = {
                                         'Desktop',
                                         'Max OS',
                                         '',
-                                        'hedgehog.io',
+                                        'mascot.io',
                                         'Spikeville',
                                         'Hogington',
-                                        'https://hedgehog.io/entry-page',
+                                        'https://mascot.io/entry-page',
                                     ],
                                 ],
                             })

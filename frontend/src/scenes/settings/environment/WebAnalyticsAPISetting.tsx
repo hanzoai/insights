@@ -1,10 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { teamLogic } from 'scenes/teamLogic'
+
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 export function WebAnalyticsEnablePreAggregatedTables(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
@@ -19,19 +22,25 @@ export function WebAnalyticsEnablePreAggregatedTables(): JSX.Element {
 
     return (
         <>
-            <p>
-                When enabled, this project will use the new query engine for Web Analytics whenever possible. This
-                setting is mandatory if you wish to enable the Web Analytics API.
-            </p>
-            <LemonSwitch checked={enableNewQueryEngine} onChange={(enabled) => setEnableNewQueryEngine(enabled)} />
+            <AccessControlAction
+                resourceType={AccessControlResourceType.WebAnalytics}
+                minAccessLevel={AccessControlLevel.Editor}
+            >
+                <LemonSwitch checked={enableNewQueryEngine} onChange={(enabled) => setEnableNewQueryEngine(enabled)} />
+            </AccessControlAction>
             <div className="mt-4">
-                <LemonButton
-                    type="primary"
-                    onClick={handleSave}
-                    disabledReason={enableNewQueryEngine === savedSetting ? 'No changes to save' : undefined}
+                <AccessControlAction
+                    resourceType={AccessControlResourceType.WebAnalytics}
+                    minAccessLevel={AccessControlLevel.Editor}
                 >
-                    Save
-                </LemonButton>
+                    <LemonButton
+                        type="primary"
+                        onClick={handleSave}
+                        disabledReason={enableNewQueryEngine === savedSetting ? 'No changes to save' : undefined}
+                    >
+                        Save
+                    </LemonButton>
+                </AccessControlAction>
             </div>
         </>
     )

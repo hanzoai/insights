@@ -1,16 +1,16 @@
 import { useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@hanzo/lemon-ui'
 
-import { HogQLEditor } from 'lib/components/HogQLEditor/HogQLEditor'
+import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
+import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'
 import { FUNNEL_STEP_COUNT_LIMIT } from 'scenes/insights/EditorFilters/FunnelsQuerySteps'
-import { TIME_INTERVAL_BOUNDS } from 'scenes/insights/views/Funnels/FunnelConversionWindowFilter'
 
 import { groupsModel } from '~/models/groupsModel'
 import { BreakdownAttributionType, FunnelConversionWindowTimeUnit, StepOrderValue } from '~/types'
@@ -28,13 +28,13 @@ export const commonActionFilterProps = {
         TaxonomicFilterGroupType.Cohorts,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.SessionProperties,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
         TaxonomicFilterGroupType.DataWarehouseProperties,
         TaxonomicFilterGroupType.DataWarehousePersonProperties,
     ],
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/filters/AggregationSelect.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/filters/AggregationSelect.tsx
 export function FunnelAggregationSelect({
     value,
     onChange,
@@ -80,15 +80,15 @@ export function FunnelAggregationSelect({
         label: 'Custom SQL expression',
         options: [
             {
-                // This is a bit of a hack so that the HogQL option is only highlighted as active when the user has
-                // set a custom value (because actually _all_ the options are HogQL)
+                // This is a bit of a hack so that the InsightsQL option is only highlighted as active when the user has
+                // set a custom value (because actually _all_ the options are InsightsQL)
                 value: !value || baseValues.includes(value) ? '' : value,
                 label: <span className="font-mono">{value}</span>,
-                labelInMenu: function CustomHogQLOptionWrapped({ onSelect }) {
+                labelInMenu: function CustomInsightsQLOptionWrapped({ onSelect }) {
                     return (
                         // eslint-disable-next-line react/forbid-dom-props
                         <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                            <HogQLEditor
+                            <InsightsQLEditor
                                 onChange={onSelect}
                                 value={value}
                                 placeholder={
@@ -116,7 +116,7 @@ export function FunnelAggregationSelect({
     )
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
 export function FunnelConversionWindowFilter({
     funnelWindowInterval,
     funnelWindowIntervalUnit,
@@ -172,7 +172,7 @@ export function FunnelConversionWindowFilter({
     )
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
 export function FunnelAttributionSelect({
     value,
     onChange,
@@ -212,7 +212,7 @@ export function FunnelAttributionSelect({
                             </ul>
                             <div>
                                 Read more in the{' '}
-                                <Link to="https://posthog.com/docs/product-analytics/funnels#attribution-types">
+                                <Link to="https://hanzo.ai/docs/product-analytics/funnels#attribution-types">
                                     documentation.
                                 </Link>
                             </div>

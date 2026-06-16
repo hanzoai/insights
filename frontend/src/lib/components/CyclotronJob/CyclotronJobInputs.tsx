@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconGear, IconLock, IconPlus, IconTrash, IconX } from '@posthog/icons'
+import { IconGear, IconLock, IconPlus, IconTrash, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -18,7 +18,7 @@ import {
     LemonTag,
     LemonTextArea,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown/LemonMarkdown'
@@ -29,7 +29,7 @@ import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { CyclotronJobInputSchemaType, CyclotronJobInputType, CyclotronJobInvocationGlobalsWithInputs } from '~/types'
 
-import { EmailTemplater } from '../../../scenes/hog-functions/email-templater/EmailTemplater'
+import { EmailTemplater } from '../../../scenes/insights-functions/email-templater/EmailTemplater'
 import { CyclotronJobTemplateSuggestionsButton } from './CyclotronJobTemplateSuggestions'
 import { cyclotronJobInputLogic, formatJsonValue } from './cyclotronJobInputLogic'
 import { CyclotronJobInputIntegration } from './integrations/CyclotronJobInputIntegration'
@@ -122,7 +122,8 @@ function JsonConfigField(props: {
     sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs | null
 }): JSX.Element {
     const key = useMemo(() => `json_field_${uuid()}`, [])
-    const templatingKind = props.input.templating ?? 'hog'
+    const templatingKind = props.input.templating ?? 'fn'
+    const [isExpanded, setIsExpanded] = useState(true)
 
     // Set up validation logic for this JSON field
     const logic = cyclotronJobInputLogic({
@@ -140,12 +141,12 @@ function JsonConfigField(props: {
     const panels = [
         {
             key: 1,
-            header: 'Click to edit',
+            header: isExpanded ? 'Click to collapse' : 'Click to expand',
             content: (
                 <LemonField.Pure error={error}>
                     <span className={clsx('group relative', props.className)}>
                         <CodeEditorResizeable
-                            language={props.templating ? (templatingKind === 'hog' ? 'hogJson' : 'liquid') : 'json'}
+                            language={props.templating ? (templatingKind === 'fn' ? 'iqlJson' : 'liquid') : 'json'}
                             value={formattedValue}
                             embedded={true}
                             onChange={(value) => setJsonValue(value || '{}')}
@@ -157,6 +158,7 @@ function JsonConfigField(props: {
                                 scrollbar: {
                                     vertical: 'hidden',
                                     verticalScrollbarSize: 0,
+                                    alwaysConsumeMouseWheel: false,
                                 },
                             }}
                             globals={props.templating ? (props.sampleGlobalsWithInputs ?? undefined) : undefined}
@@ -182,7 +184,15 @@ function JsonConfigField(props: {
         },
     ]
 
-    return <LemonCollapse embedded={false} panels={panels} size="xsmall" />
+    return (
+        <LemonCollapse
+            embedded={false}
+            panels={panels}
+            size="xsmall"
+            activeKey={isExpanded ? 1 : undefined}
+            onChange={(key) => setIsExpanded(key === 1)}
+        />
+    )
 }
 
 function EmailTemplateField({
@@ -215,7 +225,7 @@ function CyclotronJobTemplateInput(props: {
     input: CyclotronJobInputType
     sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs | null
 }): JSX.Element {
-    const templating = props.input.templating ?? 'hog'
+    const templating = props.input.templating ?? 'fn'
 
     if (!props.templating) {
         return (
@@ -233,7 +243,7 @@ function CyclotronJobTemplateInput(props: {
                 minHeight="37" // Match other inputs
                 value={props.input.value ?? ''}
                 onChange={(val) => props.onChange?.({ ...props.input, value: val ?? '' })}
-                language={props.input.templating === 'hog' ? 'hogTemplate' : 'liquid'}
+                language={props.input.templating === 'fn' ? 'scriptTemplate' : 'liquid'}
                 globals={props.sampleGlobalsWithInputs ?? undefined}
             />
             <span className="absolute top-0 right-0 z-10 p-px opacity-0 transition-opacity group-hover:opacity-100">
@@ -262,7 +272,7 @@ function DictionaryField({
     sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs | null
 }): JSX.Element {
     const value = input.value ?? {}
-    const [entries, setEntries] = useState<[string, string][]>(Object.entries(value))
+    const [entries, setEntries] = useState<[string, string][]>(() => Object.entries(value))
     const prevFilteredEntriesRef = useRef<[string, string][]>(entries)
 
     useEffect(() => {
@@ -282,7 +292,7 @@ function DictionaryField({
     }, [entries, onChange])
 
     const handleEnableIncludeObject = (): void => {
-        setEntries([[EXTEND_OBJECT_KEY, '{event.properties}'], ...entries])
+        setEntries((prev) => [[EXTEND_OBJECT_KEY, '{event.properties}'], ...prev])
     }
 
     return (
@@ -300,9 +310,11 @@ function DictionaryField({
                             disabled={key === EXTEND_OBJECT_KEY}
                             className="flex-1 min-w-60"
                             onChange={(key) => {
-                                const newEntries = [...entries]
-                                newEntries[index] = [key, newEntries[index][1]]
-                                setEntries(newEntries)
+                                setEntries((prev) => {
+                                    const newEntries = [...prev]
+                                    newEntries[index] = [key, newEntries[index][1]]
+                                    return newEntries
+                                })
                             }}
                             placeholder="Key"
                         />
@@ -312,12 +324,15 @@ function DictionaryField({
                         className="overflow-hidden flex-2"
                         input={{ ...input, value: val }}
                         onChange={(val) => {
-                            const newEntries = [...entries]
-                            newEntries[index] = [newEntries[index][0], val.value ?? '']
                             if (val.templating) {
                                 onChange?.({ ...input, templating: val.templating })
                             }
-                            setEntries(newEntries)
+
+                            setEntries((prev) => {
+                                const newEntries = [...prev]
+                                newEntries[index] = [newEntries[index][0], val.value ?? '']
+                                return newEntries
+                            })
                         }}
                         templating={templating}
                         sampleGlobalsWithInputs={sampleGlobalsWithInputs}
@@ -327,9 +342,11 @@ function DictionaryField({
                         icon={<IconX />}
                         size="small"
                         onClick={() => {
-                            const newEntries = [...entries]
-                            newEntries.splice(index, 1)
-                            setEntries(newEntries)
+                            setEntries((prev) => {
+                                const newEntries = [...prev]
+                                newEntries.splice(index, 1)
+                                return newEntries
+                            })
                         }}
                     />
                 </div>
@@ -339,7 +356,7 @@ function DictionaryField({
                 size="small"
                 type="secondary"
                 onClick={() => {
-                    setEntries([...entries, ['', '']])
+                    setEntries((prev) => [...prev, ['', '']])
                 }}
             >
                 Add entry

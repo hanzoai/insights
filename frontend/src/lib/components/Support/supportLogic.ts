@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -51,7 +51,7 @@ function getCurrentLocationLink(): string {
 }
 
 function getSessionReplayLink(): string {
-    const replayUrl = posthog
+    const replayUrl = insights
         .get_session_replay_url({ withTimestamp: true, timestampLookBack: 30 })
         .replace(window.location.origin + '/replay/', 'http://go/session/')
     return `\nSession: ${replayUrl}`
@@ -61,7 +61,7 @@ function getErrorTrackingLink(uuid?: string): string {
     const values = [
         {
             key: '$session_id',
-            value: [posthog.get_session_id()],
+            value: [insights.get_session_id()],
             operator: 'exact',
             type: 'event',
         },
@@ -69,7 +69,7 @@ function getErrorTrackingLink(uuid?: string): string {
 
     if (uuid) {
         values.push({
-            type: 'hogql',
+            type: 'insightsql',
             key: `uuid = '${uuid}'`,
             value: null,
         } as any)
@@ -87,7 +87,7 @@ function getErrorTrackingLink(uuid?: string): string {
         })
     )
 
-    return `\nExceptions: https://us.posthog.com/project/2/error_tracking?filterGroup=${filterGroup}`
+    return `\nExceptions: https://insights.hanzo.ai/project/2/error_tracking?filterGroup=${filterGroup}`
 }
 
 function getDjangoAdminLink(
@@ -99,7 +99,7 @@ function getDjangoAdminLink(
     if (!user || !cloudRegion) {
         return ''
     }
-    const link = `http://go/admin${cloudRegion}/${user.email}`
+    const link = `https://${cloudRegion.toLowerCase()}.hanzo.ai/admin/insights/user/${user.id}/change/`
     return `\nAdmin: ${link} (organization ID ${currentOrganization?.id}: ${currentOrganization?.name}, project ID ${currentTeam?.id}: ${currentTeam?.name})`
 }
 
@@ -175,6 +175,11 @@ export const TARGET_AREA_TO_NAME = [
                 'data-attr': `support-form-target-area-onboarding`,
                 label: 'SDK / Implementation',
             },
+            {
+                value: 'setup-wizard',
+                'data-attr': `support-form-target-area-setup-wizard`,
+                label: 'Wizard',
+            },
         ],
     },
     {
@@ -184,6 +189,11 @@ export const TARGET_AREA_TO_NAME = [
                 value: 'data_warehouse',
                 'data-attr': `support-form-target-area-data_warehouse`,
                 label: 'Data warehouse (sources)',
+            },
+            {
+                value: 'data_modeling',
+                'data-attr': `support-form-target-area-data_modeling`,
+                label: 'Data modeling (views, matviews, endpoints)',
             },
             {
                 value: 'batch_exports',
@@ -216,19 +226,34 @@ export const TARGET_AREA_TO_NAME = [
                 label: 'Group analytics',
             },
             {
+                value: 'customer_analytics',
+                'data-attr': `support-form-target-area-customer-analytics`,
+                label: 'Customer analytics',
+            },
+            {
                 value: 'llm-analytics',
                 'data-attr': `support-form-target-area-llm-analytics`,
                 label: 'LLM analytics',
             },
             {
-                value: 'max-ai',
-                'data-attr': `support-form-target-area-max-ai`,
-                label: 'Max AI',
+                value: 'logs',
+                'data-attr': `support-form-target-area-logs`,
+                label: 'Logs',
             },
             {
-                value: 'messaging',
-                'data-attr': `support-form-target-area-messaging`,
-                label: 'Messaging',
+                value: 'max-ai',
+                'data-attr': `support-form-target-area-max-ai`,
+                label: 'Insights AI',
+            },
+            {
+                value: 'mcp-server',
+                'data-attr': `support-form-target-area-mcp-server`,
+                label: 'MCP Server',
+            },
+            {
+                value: 'workflows',
+                'data-attr': `support-form-target-area-workflows`,
+                label: 'Workflows / Messaging',
             },
             {
                 value: 'analytics',
@@ -260,6 +285,11 @@ export const TARGET_AREA_TO_NAME = [
                 'data-attr': `support-form-target-area-web_analytics`,
                 label: 'Web analytics',
             },
+            {
+                value: 'logs',
+                'data-attr': `support-form-target-area-logs`,
+                label: 'Logs',
+            },
         ],
     },
 ]
@@ -287,6 +317,7 @@ export type SupportTicketTargetArea =
     | 'data_management'
     | 'notebooks'
     | 'data_warehouse'
+    | 'data_modeling'
     | 'feature_flags'
     | 'analytics'
     | 'session_replay'
@@ -297,9 +328,11 @@ export type SupportTicketTargetArea =
     | 'cdp_destinations'
     | 'data_ingestion'
     | 'batch_exports'
-    | 'messaging'
+    | 'workflows'
     | 'platform_addons'
     | 'max-ai'
+    | 'customer-analytics'
+    | 'logs'
 export type SupportTicketSeverityLevel = keyof typeof SEVERITY_LEVEL_TO_NAME
 export type SupportTicketKind = keyof typeof SUPPORT_KIND_TO_SUBJECT
 
@@ -341,8 +374,9 @@ export const URL_PATH_TO_TARGET_AREA: Record<string, SupportTicketTargetArea> = 
     transformations: 'cdp_destinations',
     source: 'data_warehouse',
     sources: 'data_warehouse',
-    messaging: 'messaging',
+    workflows: 'workflows',
     billing: 'billing',
+    logs: 'logs',
 }
 
 export const SUPPORT_TICKET_TEMPLATES = {
@@ -356,7 +390,7 @@ export const SUPPORT_TICKET_TEMPLATES = {
 export function getURLPathToTargetArea(pathname: string): SupportTicketTargetArea | null {
     const pathParts = pathname.split('/')
 
-    if (pathname.includes('pipeline/destinations/') && !pathname.includes('/hog-')) {
+    if (pathname.includes('pipeline/destinations/') && !pathname.includes('/script-')) {
         return 'batch_exports'
     }
 
@@ -382,6 +416,7 @@ export type SupportFormFields = {
     message: string
     exception_event?: SupportTicketExceptionEvent
     isEmailFormOpen?: boolean | 'true' | 'false'
+    tags?: string[]
 }
 
 export const supportLogic = kea<supportLogicType>([
@@ -412,6 +447,7 @@ export const supportLogic = kea<supportLogicType>([
         updateUrlParams: true,
         openEmailForm: true,
         closeEmailForm: true,
+        setLastSubmittedTicketId: (ticketId: string | null) => ({ ticketId }),
     })),
     reducers(() => ({
         isSupportFormOpen: [
@@ -426,6 +462,13 @@ export const supportLogic = kea<supportLogicType>([
             {
                 openEmailForm: () => true,
                 closeEmailForm: () => false,
+            },
+        ],
+        lastSubmittedTicketId: [
+            null as string | null,
+            {
+                setLastSubmittedTicketId: (_, { ticketId }) => ticketId,
+                openSupportForm: () => null, // Reset when opening a new form
             },
         ],
     })),
@@ -465,7 +508,7 @@ export const supportLogic = kea<supportLogicType>([
             (sendSupportRequest) =>
                 sendSupportRequest.kind
                     ? SUPPORT_TICKET_KIND_TO_TITLE[sendSupportRequest.kind]
-                    : 'Leave a message with PostHog',
+                    : 'Leave a message with Insights',
         ],
         targetArea: [
             (s) => [s.sendSupportRequest],
@@ -536,6 +579,7 @@ export const supportLogic = kea<supportLogicType>([
             severity_level,
             message,
             exception_event,
+            tags,
         }: SupportFormFields) => {
             const zendesk_ticket_uuid = uuid()
             const subject =
@@ -610,7 +654,7 @@ export const supportLogic = kea<supportLogicType>([
                 request: {
                     requester: { name: name, email: email },
                     subject: subject,
-                    tags: [planLevelTag, accountOwnerTag],
+                    tags: [planLevelTag, accountOwnerTag, ...(tags || [])],
                     custom_fields: [
                         {
                             id: 22084126888475,
@@ -618,7 +662,7 @@ export const supportLogic = kea<supportLogicType>([
                         },
                         {
                             id: 22129191462555,
-                            value: posthog.get_distinct_id(),
+                            value: insights.get_distinct_id(),
                         },
                         {
                             id: 27242745654043,
@@ -678,7 +722,7 @@ export const supportLogic = kea<supportLogicType>([
                 const zendeskRequestBody = JSON.stringify(payload, undefined, 4)
 
                 // First attempt with standard fetch (unchanged from original)
-                const response = await fetch('https://posthoghelp.zendesk.com/api/v2/requests.json', {
+                const response = await fetch('https://insightshelp.zendesk.com/api/v2/requests.json', {
                     method: 'POST',
                     body: zendeskRequestBody,
                     headers: { 'Content-Type': 'application/json' },
@@ -693,7 +737,7 @@ export const supportLogic = kea<supportLogicType>([
 
                     // Try Beacon API
                     const beaconSuccess = navigator.sendBeacon(
-                        'https://posthoghelp.zendesk.com/api/v2/requests.json',
+                        'https://insightshelp.zendesk.com/api/v2/requests.json',
                         zendeskRequestBody
                     )
 
@@ -707,7 +751,7 @@ export const supportLogic = kea<supportLogicType>([
                             submission_method: 'beacon',
                             browser: isFirefox ? 'firefox' : 'other',
                         }
-                        posthog.capture('support_ticket', properties)
+                        insights.capture('support_ticket', properties)
                         lemonToast.success(
                             "Got the message! If we have follow-up information for you, we'll reply via email."
                         )
@@ -731,7 +775,7 @@ export const supportLogic = kea<supportLogicType>([
                             body_size: body?.length,
                         },
                     }
-                    posthog.captureException(error, {
+                    insights.captureException(error, {
                         ...extra,
                         ...contexts,
                     })
@@ -746,7 +790,7 @@ export const supportLogic = kea<supportLogicType>([
                 const json = await response.json()
 
                 const zendesk_ticket_id = json.request.id
-                const zendesk_ticket_link = `https://posthoghelp.zendesk.com/agent/tickets/${zendesk_ticket_id}`
+                const zendesk_ticket_link = `https://insightshelp.zendesk.com/agent/tickets/${zendesk_ticket_id}`
                 const properties = {
                     zendesk_ticket_uuid,
                     kind,
@@ -755,16 +799,17 @@ export const supportLogic = kea<supportLogicType>([
                     zendesk_ticket_id,
                     zendesk_ticket_link,
                 }
-                posthog.capture('support_ticket', properties)
+                insights.capture('support_ticket', properties)
                 lemonToast.success("Got the message! If we have follow-up information for you, we'll reply via email.")
 
                 actions.ensureZendeskOrganization()
+                actions.setLastSubmittedTicketId(zendesk_ticket_id)
 
                 // Only close and reset the form on success
                 actions.closeSupportForm()
                 actions.resetSendSupportRequest()
             } catch (e) {
-                posthog.captureException(e)
+                insights.captureException(e)
 
                 // More helpful error message
                 // Use the same error message regardless of browser
@@ -801,7 +846,7 @@ export const supportLogic = kea<supportLogicType>([
                     organization_name: currentOrganization.name,
                 })
             } catch (error) {
-                posthog.captureException(error, {
+                insights.captureException(error, {
                     context: 'zendesk_organization_creation',
                     organization_id: organizationLogic.values.currentOrganization?.id,
                     organization_name: organizationLogic.values.currentOrganization?.name,

@@ -1,17 +1,20 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { windowValues } from 'kea-window-values'
-import posthog from 'posthog-js'
-import React from 'react'
+import insights from '@hanzo/insights'
+
+import { FEATURE_FLAGS } from 'lib/constants'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { SidePanelTab } from '~/types'
 
 import type { sidePanelStateLogicType } from './sidePanelStateLogicType'
 
-export const WithinSidePanelContext = React.createContext<boolean>(false)
-
 // The side panel imports a lot of other components so this allows us to avoid circular dependencies
 
+/**
+ * @deprecated Sidepanel is soft-deprecated as only notebooks will be kept in sidepanel in future releases.
+ */
 export const sidePanelStateLogic = kea<sidePanelStateLogicType>([
     path(['scenes', 'navigation', 'sidepanel', 'sidePanelStateLogic']),
     actions({
@@ -20,6 +23,7 @@ export const sidePanelStateLogic = kea<sidePanelStateLogicType>([
         setSidePanelOpen: (open: boolean) => ({ open }),
         setSidePanelOptions: (options: string | null) => ({ options }),
         setSidePanelAvailable: (available: boolean) => ({ available }),
+        onSceneTabChanged: (previousTabId: string | null, newTabId: string) => ({ previousTabId, newTabId }),
     }),
 
     reducers(() => ({
@@ -56,21 +60,58 @@ export const sidePanelStateLogic = kea<sidePanelStateLogicType>([
     windowValues(() => ({
         modalMode: (window: Window) => window.innerWidth < 992, // Sync width threshold with Sass variable $lg!
     })),
-    listeners(({ actions, values }) => ({
+    listeners(({ actions, values, cache }) => ({
         // NOTE: We explicitly reference the actions instead of connecting so that people don't accidentally
         // use this logic instead of sidePanelStateLogic
         openSidePanel: ({ tab }) => {
-            posthog.capture('sidebar opened', { tab })
+            insights.capture('sidebar opened', { tab })
             actions.setSidePanelOpen(true)
         },
         closeSidePanel: ({ tab }) => {
-            posthog.capture('sidebar closed', { tab })
+            insights.capture('sidebar closed', { tab })
             if (!tab) {
                 // If we aren't specifiying the tab we always close
                 actions.setSidePanelOpen(false)
             } else if (values.selectedTab === tab) {
                 // Otherwise we only close it if the tab is the currently open one
                 actions.setSidePanelOpen(false)
+            }
+        },
+        onSceneTabChanged: ({ previousTabId, newTabId }) => {
+            const featureFlags = featureFlagLogic.findMounted()?.values.featureFlags
+            if (!featureFlags?.[FEATURE_FLAGS.UX_REMOVE_SIDEPANEL]) {
+                return
+            }
+
+            // Skip if we already processed this exact transition (activateTab fires early, setScene fires later)
+            const transitionKey = `${previousTabId}->${newTabId}`
+            if (cache.lastProcessedTransition === transitionKey) {
+                return
+            }
+            cache.lastProcessedTransition = transitionKey
+
+            if (!cache.sidePanelStateByTab) {
+                cache.sidePanelStateByTab = {}
+            }
+
+            // Save current side panel state for the previous tab
+            if (previousTabId) {
+                cache.sidePanelStateByTab[previousTabId] = {
+                    open: values.sidePanelOpen,
+                    selectedTab: values.selectedTab,
+                    selectedTabOptions: values.selectedTabOptions,
+                }
+            }
+
+            // Restore state for the new tab (preserve current state for never-visited tabs
+            // so the URL hash handler can set it if needed)
+            const savedState = cache.sidePanelStateByTab[newTabId]
+            if (savedState) {
+                if (savedState.open && savedState.selectedTab) {
+                    actions.openSidePanel(savedState.selectedTab, savedState.selectedTabOptions ?? undefined)
+                } else {
+                    actions.closeSidePanel()
+                }
             }
         },
     })),

@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import React from 'react'
 
-import { IconPlusSmall } from '@posthog/icons'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 
@@ -53,6 +53,8 @@ export const Positioning: StoryFn<typeof LemonBadge> = () => {
 export const Sizes: StoryFn<typeof LemonBadge> = () => {
     return (
         <div className="flex deprecated-space-x-2 items-center">
+            <span>xsmall:</span>
+            <LemonBadge content={<IconPlusSmall />} size="xsmall" />
             <span>small:</span>
             <LemonBadge content={<IconPlusSmall />} size="small" />
             <span>medium:</span>

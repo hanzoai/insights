@@ -1,8 +1,9 @@
+use common_types::error_tracking::FrameId;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
 
 use crate::{
-    frames::{Context, ContextLine, Frame, FrameId},
+    frames::{Context, ContextLine, Frame},
     langs::CommonFrameMetadata,
 };
 
@@ -19,6 +20,7 @@ pub struct RawPythonFrame {
     pub pre_context: Vec<String>, // The lines of code before the context line
     #[serde(default)]
     pub post_context: Vec<String>, // The lines of code after the context line
+    pub code_variables: Option<serde_json::Value>,
     #[serde(flatten)]
     pub meta: CommonFrameMetadata,
 }
@@ -59,14 +61,15 @@ impl RawPythonFrame {
         let before = self
             .pre_context
             .iter()
+            .rev()
             .enumerate()
-            .map(|(i, line)| ContextLine::new(lineno - i as u32 - 1, line.clone()))
+            .map(|(i, line)| ContextLine::new_rel(lineno, -(i as i32) - 1, line.clone()))
             .collect();
         let after = self
             .post_context
             .iter()
             .enumerate()
-            .map(|(i, line)| ContextLine::new(lineno + i as u32 + 1, line.clone()))
+            .map(|(i, line)| ContextLine::new_rel(lineno, (i as i32) + 1, line.clone()))
             .collect();
         Some(Context {
             before,
@@ -79,7 +82,7 @@ impl RawPythonFrame {
 impl From<&RawPythonFrame> for Frame {
     fn from(raw: &RawPythonFrame) -> Self {
         Frame {
-            raw_id: FrameId::placeholder(),
+            frame_id: FrameId::placeholder(),
             mangled_name: raw.function.clone(),
             line: raw.lineno,
             column: None,
@@ -93,6 +96,9 @@ impl From<&RawPythonFrame> for Frame {
             context: raw.get_context(),
             release: None,
             synthetic: raw.meta.synthetic,
+            suspicious: false,
+            module: raw.module.clone(),
+            code_variables: raw.code_variables.clone(),
         }
     }
 }

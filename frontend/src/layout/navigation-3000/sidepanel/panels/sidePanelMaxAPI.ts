@@ -33,7 +33,7 @@ export const sidePanelMaxAPI = {
         })
 
         if (!response.ok) {
-            throw new Error('Failed to send message to Max')
+            throw new Error('Failed to send message to AI Assistant')
         }
 
         const data = await response.json()

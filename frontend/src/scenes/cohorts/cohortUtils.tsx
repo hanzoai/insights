@@ -208,6 +208,49 @@ export function validateGroup(
         }
     }
 
+    // Validate BETWEEN and NOT_BETWEEN operators
+    const betweenCriteria = criteria.filter(
+        (c) => c.operator === PropertyOperator.Between || c.operator === PropertyOperator.NotBetween
+    )
+    if (betweenCriteria.length > 0) {
+        const betweenErrors: DeepPartialMap<CohortCriteriaType, ValidationErrorType>[] = criteria.map((c) => {
+            if (c.operator !== PropertyOperator.Between && c.operator !== PropertyOperator.NotBetween) {
+                return {}
+            }
+
+            const value = 'value_property' in c ? c.value_property : null
+            if (!Array.isArray(value) || value.length !== 2) {
+                return {
+                    id: CohortClientErrors.EmptyBetweenValues,
+                    value_property: CohortClientErrors.EmptyBetweenValues,
+                }
+            }
+
+            const [min, max] = value
+            if (min === null || max === null || Number.isNaN(Number(min)) || Number.isNaN(Number(max))) {
+                return {
+                    id: CohortClientErrors.EmptyBetweenValues,
+                    value_property: CohortClientErrors.EmptyBetweenValues,
+                }
+            }
+
+            if (Number(min) > Number(max)) {
+                return {
+                    id: CohortClientErrors.BetweenMinGreaterThanMax,
+                    value_property: CohortClientErrors.BetweenMinGreaterThanMax,
+                }
+            }
+
+            return {}
+        }) as DeepPartialMap<CohortCriteriaType, ValidationErrorType>[]
+
+        if (betweenErrors.some((e) => e.value_property)) {
+            return {
+                values: betweenErrors,
+            }
+        }
+    }
+
     // Complete event regularly time comparison
     const regularEventCriteria = criteria.filter((c) => c.value === BehavioralLifecycleType.PerformEventRegularly)
     if (
@@ -291,7 +334,7 @@ export function validateGroup(
             const eventFilterError =
                 c?.event_filters &&
                 c.event_filters.length > 0 &&
-                c.event_filters.some((prop) => prop?.type !== PropertyFilterType.HogQL && isEmptyProperty(prop))
+                c.event_filters.some((prop) => prop?.type !== PropertyFilterType.InsightsQL && isEmptyProperty(prop))
                     ? CohortClientErrors.EmptyEventFilters
                     : undefined
 

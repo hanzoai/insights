@@ -1,14 +1,18 @@
-import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import '../../DataTable/DataTable.scss'
 
-import { LemonTable, LemonTableColumn } from '@posthog/lemon-ui'
+import { useActions, useValues } from 'kea'
+import React from 'react'
 
-import { execHog } from 'lib/hog'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
+import insights from '@hanzo/insights'
+import { LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
+
+import { execScript } from 'lib/iql'
 import { lightenDarkenColor } from 'lib/utils'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { DataVisualizationNode, HogQLQueryResponse, NodeKind } from '~/queries/schema/schema-general'
+import { DataVisualizationNode, InsightsQLQueryResponse, NodeKind } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 
 import { LoadNext } from '../../DataNode/LoadNext'
@@ -20,11 +24,29 @@ interface TableProps {
     query: DataVisualizationNode
     uniqueKey: string | number | undefined
     context: QueryContext<DataVisualizationNode> | undefined
-    cachedResults: HogQLQueryResponse | undefined
+    cachedResults: InsightsQLQueryResponse | undefined
     embedded?: boolean
 }
 
 export const DEFAULT_PAGE_SIZE = 500
+
+function formatColumnTitle(title: string): React.ReactNode {
+    const parts = title.split(/([_-])/)
+    if (parts.length === 1) {
+        return title
+    }
+    // inserts <wbr> (word break opportunity tag) at dashes and unders for natural break points
+    return parts.map((part, i) =>
+        part === '_' || part === '-' ? (
+            <React.Fragment key={i}>
+                {part}
+                <wbr />
+            </React.Fragment>
+        ) : (
+            part
+        )
+    )
+}
 
 export const Table = (props: TableProps): JSX.Element => {
     const { isDarkModeOn } = useValues(themeLogic)
@@ -37,36 +59,70 @@ export const Table = (props: TableProps): JSX.Element => {
         responseError,
         queryCancelled,
         response,
+        pinnedColumns,
+        isColumnPinned,
+        isPinningEnabled,
     } = useValues(dataVisualizationLogic)
+    const { toggleColumnPin } = useActions(dataVisualizationLogic)
 
     const tableColumns: LemonTableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(
         ({ column, settings }, index) => {
             const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
 
+            const columnTitle = settings?.display?.label || title || column.name
+
+            const formattedTitle = typeof columnTitle === 'string' ? formatColumnTitle(columnTitle) : columnTitle
+
             return {
                 ...columnMeta,
-                title: settings?.display?.label || title || column.name,
+                key: column.name,
+                title: (
+                    <div className="flex items-center gap-1">
+                        <span>{formattedTitle}</span>
+                        {isPinningEnabled && (
+                            <Tooltip title={isColumnPinned(column.name) ? 'Unpin column' : 'Pin column'}>
+                                <span
+                                    className="inline-flex items-center justify-center cursor-pointer p-1 -m-1"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        toggleColumnPin(column.name)
+                                    }}
+                                >
+                                    {isColumnPinned(column.name) ? (
+                                        <IconPinFilled className="text-sm" />
+                                    ) : (
+                                        <IconPin className="text-sm" />
+                                    )}
+                                </span>
+                            </Tooltip>
+                        )}
+                    </div>
+                ),
                 render: (_, data, recordIndex: number, rowCount: number) => {
-                    return renderColumn(column.name, data[index].formattedValue, data, recordIndex, rowCount, {
-                        kind: NodeKind.DataTableNode,
-                        source: props.query.source,
-                    })
+                    return (
+                        <div className="truncate">
+                            {renderColumn(column.name, data[index].formattedValue, data, recordIndex, rowCount, {
+                                kind: NodeKind.DataTableNode,
+                                source: props.query.source,
+                            })}
+                        </div>
+                    )
                 },
                 style: (_, data) => {
                     const cf = conditionalFormattingRules
                         .filter((n) => n.columnName === column.name)
                         .filter((n) => {
-                            const isValidHog = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
-                            if (!isValidHog) {
-                                posthog.captureException(new Error('Invalid hog bytecode for conditional formatting'), {
+                            const isValidBytecode = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
+                            if (!isValidBytecode) {
+                                insights.captureException(new Error('Invalid bytecode for conditional formatting'), {
                                     formatRule: n,
                                 })
                             }
 
-                            return isValidHog
+                            return isValidBytecode
                         })
                         .map((n) => {
-                            const res = execHog(n.bytecode, {
+                            const res = execScript(n.bytecode, {
                                 globals: {
                                     value: data[index].value,
                                     input: convertTableValue(n.input, column.type.name),
@@ -115,10 +171,13 @@ export const Table = (props: TableProps): JSX.Element => {
 
     return (
         <LemonTable
+            className="DataVisualizationTable"
             dataSource={tabularData}
             columns={tableColumns}
+            pinnedColumns={isPinningEnabled ? pinnedColumns : undefined}
             loading={responseLoading}
             pagination={{ pageSize: DEFAULT_PAGE_SIZE }}
+            maxHeaderWidth="15rem"
             emptyState={
                 responseError ? (
                     <InsightErrorState

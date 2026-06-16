@@ -10,7 +10,7 @@ import {
     LemonSelectOptions,
     LemonTextAreaMarkdown,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { shortTimeZone } from 'lib/utils'
@@ -154,7 +154,7 @@ export function AnnotationModal({
                         label={
                             <span>
                                 Date and time (
-                                <Link to={urls.settings('project', 'date-and-time')} target="_blank">
+                                <Link to={urls.settings('environment-customization', 'date-and-time')} target="_blank">
                                     {shortTimeZone(timezone)}
                                 </Link>
                                 )

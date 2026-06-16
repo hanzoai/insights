@@ -1,12 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@posthog/lemon-ui'
+import { IconDownload } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
 
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
+import { SaveToCohortModalContent } from 'lib/components/SaveToCohortModalContent/SaveToCohortModalContent'
 import { PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES } from 'lib/constants'
 import { LemonField } from 'lib/lemon-ui/LemonField'
+import { pluralize } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { copyTableToCsv, copyTableToExcel, copyTableToJson } from '~/queries/nodes/DataTable/clipboardUtils'
@@ -22,15 +24,16 @@ import {
     isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isMarketingAnalyticsTableQuery,
+    isNonIntegratedConversionsTableQuery,
     isPersonsNode,
 } from '~/queries/utils'
 import { ExporterFormat } from '~/types'
 
 import { dataTableLogic } from './dataTableLogic'
 
-// Sync with posthog/hogql/constants.py
+// Sync with insights/insightsql/constants.py
 export const MAX_SELECT_RETURNED_ROWS = 50000
 
 const columnDisallowList = ['person.$delete', '*']
@@ -112,7 +115,11 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
     const canExportAllColumns =
         (isEventsQuery(source) && source.select.includes('*')) || isPersonsNode(source) || isActorsQuery(source)
     const showExportClipboardButtons =
-        isPersonsNode(source) || isEventsQuery(source) || isHogQLQuery(source) || isMarketingAnalyticsTableQuery(source)
+        isPersonsNode(source) ||
+        isEventsQuery(source) ||
+        isInsightsQLQuery(source) ||
+        isMarketingAnalyticsTableQuery(source) ||
+        isNonIntegratedConversionsTableQuery(source)
     const canSaveAsCohort = isActorsQuery(source)
 
     return (
@@ -195,7 +202,7 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
                     ],
                 },
                 canSaveAsCohort && {
-                    label: 'Save as cohort',
+                    label: 'Save to cohort',
                     items: [
                         {
                             label: 'Save as static cohort',
@@ -223,12 +230,28 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
                                 })
                             },
                         },
+                        {
+                            label: 'Add to existing cohort',
+                            onClick: () => {
+                                LemonDialog.open({
+                                    title: 'Add to existing cohort',
+                                    description: 'This will add the current list of people to a static cohort.',
+                                    content: (closeDialog) => (
+                                        <SaveToCohortModalContent closeModal={closeDialog} query={source} />
+                                    ),
+                                    primaryButton: null,
+                                    secondaryButton: {
+                                        children: 'Cancel',
+                                    },
+                                })
+                            },
+                        },
                     ],
                 },
             ].filter(Boolean)}
         >
-            <LemonButton type="secondary" icon={<IconDownload />} data-attr="data-table-export-menu">
-                Export{filterCount > 0 ? ` (${filterCount} filter${filterCount === 1 ? '' : 's'})` : ''}
+            <LemonButton type="secondary" icon={<IconDownload />} data-attr="data-table-export-menu" size="small">
+                Export{filterCount > 0 ? ` (${pluralize(filterCount, 'filter')})` : ''}
             </LemonButton>
         </LemonMenu>
     )

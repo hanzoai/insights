@@ -2,8 +2,8 @@ import './InviteModal.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonTextArea, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonInput, LemonSelect, LemonTextArea, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
@@ -31,8 +31,8 @@ export function EmailUnavailableForInvitesBanner(): JSX.Element {
     return (
         <LemonBanner type="info" className="my-2">
             <>
-                This PostHog instance isn't{' '}
-                <Link to="https://posthog.com/docs/self-host/configure/email" target="_blank" targetBlankIcon>
+                This Insights instance isn't{' '}
+                <Link to="https://hanzo.ai/docs/self-host/configure/email" target="_blank" targetBlankIcon>
                     configured&nbsp;to&nbsp;send&nbsp;emails&nbsp;
                 </Link>
                 .<br />
@@ -87,7 +87,7 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                         <span>
                             Give this user access to specific projects. These access controls will be applied when the
                             user accepts the invite and joins the organization. Learn more about{' '}
-                            <Link to="https://posthog.com/docs/settings/access-control" target="_blank">
+                            <Link to="https://hanzo.ai/docs/settings/access-control" target="_blank">
                                 access controls
                             </Link>{' '}
                             in our docs.
@@ -189,7 +189,15 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
     )
 }
 
-export function InviteRow({ index, isDeletable }: { index: number; isDeletable: boolean }): JSX.Element {
+export function InviteRow({
+    index,
+    isDeletable,
+    hideProjectAccessSelector = false,
+}: {
+    index: number
+    isDeletable: boolean
+    hideProjectAccessSelector?: boolean
+}): JSX.Element {
     const name = PLACEHOLDER_NAMES[index % PLACEHOLDER_NAMES.length]
 
     const { hasAvailableFeature } = useValues(userLogic)
@@ -216,7 +224,7 @@ export function InviteRow({ index, isDeletable }: { index: number; isDeletable: 
             <div className="flex gap-2">
                 <div className="flex-2">
                     <LemonInput
-                        placeholder={`${name.toLowerCase()}@posthog.com`}
+                        placeholder={`${name.toLowerCase()}@hanzo.ai`}
                         type="email"
                         className={`error-on-blur${!invitesToSend[index]?.isValid ? ' errored' : ''}`}
                         onChange={(v) => {
@@ -290,12 +298,16 @@ export function InviteRow({ index, isDeletable }: { index: number; isDeletable: 
                 )}
             </div>
 
-            {hasAdvancedPermissions && <ProjectAccessSelector inviteIndex={index} />}
+            {hasAdvancedPermissions && !hideProjectAccessSelector && <ProjectAccessSelector inviteIndex={index} />}
         </div>
     )
 }
 
-export function InviteTeamMatesComponent(): JSX.Element {
+export function InviteTeamMatesComponent({
+    hideProjectAccessSelector = false,
+}: {
+    hideProjectAccessSelector?: boolean
+}): JSX.Element {
     const { preflight } = useValues(preflightLogic)
     const { invitesToSend, inviteContainsOwnerLevel } = useValues(inviteLogic)
     const { appendInviteRow, updateMessage, setIsInviteConfirmed } = useActions(inviteLogic)
@@ -320,8 +332,8 @@ export function InviteTeamMatesComponent(): JSX.Element {
         <>
             {preflight?.licensed_users_available === 0 && (
                 <LemonBanner type="warning">
-                    You've hit the limit of team members you can invite to your PostHog instance given your license.
-                    Please contact <Link to="mailto:sales@posthog.com">sales@posthog.com</Link> to upgrade your license.
+                    You've hit the limit of team members you can invite to your Insights instance given your license.
+                    Please contact <Link to="mailto:sales@hanzo.ai">sales@hanzo.ai</Link> to upgrade your license.
                 </LemonBanner>
             )}
             <div className="deprecated-space-y-4">
@@ -334,7 +346,12 @@ export function InviteTeamMatesComponent(): JSX.Element {
                 </div>
 
                 {invitesToSend.map((_, index) => (
-                    <InviteRow index={index} key={index.toString()} isDeletable={areInvitesDeletable} />
+                    <InviteRow
+                        hideProjectAccessSelector={hideProjectAccessSelector}
+                        index={index}
+                        key={index.toString()}
+                        isDeletable={areInvitesDeletable}
+                    />
                 ))}
 
                 <div className="mt-2 flex justify-end">
@@ -352,7 +369,7 @@ export function InviteTeamMatesComponent(): JSX.Element {
                     </div>
                     <LemonTextArea
                         data-attr="invite-optional-message"
-                        placeholder="Tell your teammates why you're inviting them to PostHog"
+                        placeholder="Tell your teammates why you're inviting them to Insights"
                         onChange={(e) => updateMessage(e)}
                     />
                 </div>
@@ -404,17 +421,17 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                     onClose()
                 }}
                 width={800}
-                title={<>Invite others to {user?.organization?.name || 'PostHog'}</>}
+                title={<>Invite others to {user?.organization?.name || 'Insights'}</>}
                 description={
                     preflight?.email_service_available ? (
                         <p>
-                            Invite others to your organization to collaborate together in PostHog. An invite is specific
+                            Invite others to your organization to collaborate together in Insights. An invite is specific
                             to an email address and expires after 3 days. Name can be provided for the team member's
                             convenience.
                         </p>
                     ) : (
                         <p>
-                            This PostHog instance isn't configured to send emails. In the meantime, you can generate a
+                            This Insights instance isn't configured to send emails. In the meantime, you can generate a
                             link for each team member you want to invite. You can always invite others at a later time.{' '}
                             <strong>Make sure you share links with the organization members you want to invite.</strong>
                         </p>

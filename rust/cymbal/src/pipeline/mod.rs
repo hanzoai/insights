@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use billing::apply_billing_limits;
-use chrono::{DateTime, NaiveDateTime, Utc};
 use clean::clean_set_props;
 use common_kafka::{
     kafka_consumer::Offset, kafka_messages::ingest_warning::IngestionWarning,
@@ -53,17 +52,17 @@ pub async fn handle_batch(
     offsets: &[Offset], // Used purely for debugging
     context: Arc<AppContext>,
 ) -> Result<Vec<PipelineResult>, PipelineFailure> {
-    let log_err = |err: PipelineFailure| {
-        let (index, err) = (err.index, err.error);
-        let offset = &offsets[index];
-        error!("Error handling event: {:?}; offset: {:?}", err, offset);
-        err
+    let log_err = |err: &PipelineFailure| {
+        error!(
+            "Error handling event: {:?}; offset: {:?}",
+            err.error, offsets[err.index]
+        );
     };
 
     let billing_limits_time = common_metrics::timing_guard(BILLING_LIMITS_TIME, &[]);
     let buffer = apply_billing_limits(buffer, &context)
         .await
-        .map_err(log_err)
+        .inspect_err(log_err)
         .unwrap();
     billing_limits_time.label("outcome", "success").fin();
 
@@ -74,12 +73,14 @@ pub async fn handle_batch(
     let team_lookup_time = common_metrics::timing_guard(TEAM_LOOKUP_TIME, &[]);
     let teams_lut = do_team_lookups(context.clone(), &buffer)
         .await
-        .map_err(log_err)
+        .inspect_err(log_err)
         .unwrap();
     team_lookup_time.label("outcome", "success").fin();
 
     let prepare_time = common_metrics::timing_guard(PREPARE_EVENTS_TIME, &[]);
-    let buffer = prepare_events(buffer, teams_lut).map_err(log_err).unwrap();
+    let buffer = prepare_events(buffer, teams_lut)
+        .inspect_err(log_err)
+        .unwrap();
     prepare_time.label("outcome", "success").fin();
     assert_eq!(start_count, buffer.len());
 
@@ -105,7 +106,7 @@ pub async fn handle_batch(
     let exception_time = common_metrics::timing_guard(EXCEPTION_PROCESSING_TIME, &[]);
     let buffer = do_exception_handling(buffer, context.clone())
         .await
-        .map_err(log_err)
+        .inspect_err(log_err)
         .unwrap();
     exception_time.label("outcome", "success").fin();
     assert_eq!(start_count, buffer.len());
@@ -113,7 +114,7 @@ pub async fn handle_batch(
     let person_time = common_metrics::timing_guard(PERSON_PROCESSING_TIME, &[]);
     let buffer = add_person_properties(buffer, context.clone())
         .await
-        .map_err(log_err)
+        .inspect_err(log_err)
         .unwrap();
     person_time.label("outcome", "success").fin();
     assert_eq!(start_count, buffer.len());
@@ -148,24 +149,6 @@ pub fn filter_by_team_id(
         .collect()
 }
 
-// Equivalent to the JS:'yyyy-MM-dd HH:mm:ss.u'
-const CH_FORMAT: &str = "%Y-%m-%d %H:%M:%S%.3f";
-pub fn parse_ts_assuming_utc(input: &str) -> Result<DateTime<Utc>, EventError> {
-    let mut parsed = DateTime::parse_from_rfc3339(input).map(|d| d.to_utc());
-
-    if parsed.is_err() {
-        // If we can't parse a timestamp, try parsing it as a naive datetime
-        // and assuming UTC
-        parsed = NaiveDateTime::parse_from_str(input, "%Y-%m-%d %H:%M:%S%.f").map(|d| d.and_utc())
-    }
-
-    parsed.map_err(|e| EventError::InvalidTimestamp(input.to_string(), e.to_string()))
-}
-
-pub fn format_ch_timestamp(ts: DateTime<Utc>) -> String {
-    ts.format(CH_FORMAT).to_string()
-}
-
 pub async fn emit_ingestion_warnings(
     context: &AppContext,
     warnings: Vec<IngestionWarning>,
@@ -184,10 +167,10 @@ pub async fn emit_ingestion_warnings(
 #[cfg(test)]
 mod test {
 
-    use common_types::{ClickHouseEvent, PersonMode};
+    use common_types::{format::parse_datetime_assuming_utc, ClickHouseEvent, PersonMode};
     use uuid::Uuid;
 
-    use crate::{app_context::FilterMode, pipeline::parse_ts_assuming_utc};
+    use crate::app_context::FilterMode;
 
     use super::filter_by_team_id;
 
@@ -217,14 +200,16 @@ mod test {
             group3_created_at: None,
             group4_created_at: None,
             person_mode: PersonMode::Propertyless,
+            captured_at: None,
+            historical_migration: None,
         };
 
-        let ts = parse_ts_assuming_utc(&event.timestamp).unwrap();
+        let ts = parse_datetime_assuming_utc(&event.timestamp).unwrap();
         assert_eq!(ts.to_rfc3339(), "2021-08-02T12:34:56.789+00:00");
 
         event.timestamp = "invalid".to_string();
 
-        let ts = parse_ts_assuming_utc(&event.timestamp);
+        let ts = parse_datetime_assuming_utc(&event.timestamp);
         assert!(ts.is_err());
     }
 
@@ -254,6 +239,8 @@ mod test {
             group3_created_at: None,
             group4_created_at: None,
             person_mode: PersonMode::Propertyless,
+            captured_at: None,
+            historical_migration: None,
         };
 
         let buffer = vec![Ok(event)];

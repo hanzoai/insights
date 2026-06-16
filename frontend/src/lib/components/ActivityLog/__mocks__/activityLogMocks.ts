@@ -7,7 +7,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'Ben',
             last_name: 'White',
-            email: 'ben@posthog.com',
+            email: 'ben@hanzo.ai',
         },
         unread: false,
         is_system: false,
@@ -16,7 +16,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         scope: ActivityScope.TEAM,
         detail: {
             merge: null,
-            name: '🦔 PostHog App + Website',
+            name: '🦔 Insights App + Website',
             type: undefined,
             changes: [
                 {
@@ -42,7 +42,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'Paul',
             last_name: "D'Ambra",
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_system: false,
@@ -51,7 +51,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         scope: ActivityScope.TEAM,
         detail: {
             merge: null,
-            name: '🦔 PostHog App + Website',
+            name: '🦔 Insights App + Website',
             type: undefined,
             changes: [
                 {
@@ -77,7 +77,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'sdavasdadadsadas',
             last_name: '',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_staff: false,
@@ -107,7 +107,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'sdavasdadadsadas',
             last_name: '',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_staff: false,
@@ -137,7 +137,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'sdavasdadadsadas',
             last_name: '',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_staff: false,
@@ -169,7 +169,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'sdavasdadadsadas',
             last_name: '',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_staff: false,
@@ -199,7 +199,7 @@ export const teamActivityResponseJson: ActivityLogItem[] = [
         user: {
             first_name: 'sdavasdadadsadas',
             last_name: '',
-            email: 'paul@posthog.com',
+            email: 'paul@hanzo.ai',
         },
         unread: false,
         is_staff: false,
@@ -231,7 +231,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Neil',
-            email: 'neil@posthog.com',
+            email: 'neil@hanzo.ai',
         },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
@@ -284,7 +284,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-20T15:26:58.006900Z',
     },
     {
-        user: { first_name: 'Paul', email: 'paul@posthog.com' },
+        user: { first_name: 'Paul', email: 'paul@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1353',
@@ -436,7 +436,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-20T15:26:13.314035Z',
     },
     {
-        user: { first_name: 'Alex Kim', email: 'alex@posthog.com' },
+        user: { first_name: 'Alex Kim', email: 'alex@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1474',
@@ -477,7 +477,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-19T16:58:47.747634Z',
     },
     {
-        user: { first_name: 'Alex Kim', email: 'alex@posthog.com' },
+        user: { first_name: 'Alex Kim', email: 'alex@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1474',
@@ -532,7 +532,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:58:55.792014Z',
     },
     {
-        user: { first_name: 'Neil', email: 'neil@posthog.com' },
+        user: { first_name: 'Neil', email: 'neil@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1846',
@@ -547,7 +547,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:50:25.894422Z',
     },
     {
-        user: { first_name: 'Neil', email: 'neil@posthog.com' },
+        user: { first_name: 'Neil', email: 'neil@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1846',
@@ -562,7 +562,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:50:25.894422Z',
     },
     {
-        user: { first_name: 'Neil', email: 'neil@posthog.com' },
+        user: { first_name: 'Neil', email: 'neil@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1846',
@@ -583,7 +583,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:50:25.894422Z',
     },
     {
-        user: { first_name: 'Neil', email: 'neil@posthog.com' },
+        user: { first_name: 'Neil', email: 'neil@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1846',
@@ -604,7 +604,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:50:25.894422Z',
     },
     {
-        user: { first_name: 'Neil', email: 'neil@posthog.com' },
+        user: { first_name: 'Neil', email: 'neil@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1846',
@@ -625,7 +625,7 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-03-21T15:50:25.894422Z',
     },
     {
-        user: { first_name: 'Paul', email: 'paul@posthog.com' },
+        user: { first_name: 'Paul', email: 'paul@hanzo.ai' },
         activity: 'created',
         scope: ActivityScope.FEATURE_FLAG,
         item_id: '1825',
@@ -868,7 +868,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Employee 427',
-            email: 'test@posthog.com',
+            email: 'test@hanzo.ai',
         },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
@@ -937,7 +937,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Cory',
-            email: 'cory@posthog.com',
+            email: 'cory@hanzo.ai',
         },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
@@ -986,7 +986,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
                         full: true,
                         kind: 'DataTableNode',
                         source: {
-                            kind: 'HogQLQuery',
+                            kind: 'InsightsQLQuery',
                             query: '   select event,\n          person.properties.email,\n          properties.$browser,\n          count()\n     from events\n    where timestamp > now () - interval 1 day\n      and person.properties.email is not null\n group by event,\n          properties.$browser,\n          person.properties.email\n order by count() desc\n    limit 100',
                         },
                     },
@@ -1000,7 +1000,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2023-04-20T18:35:14.033429Z',
     },
     {
-        user: { first_name: 'Cameron', email: 'cameron@posthog.com' },
+        user: { first_name: 'Cameron', email: 'cameron@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1040,7 +1040,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2023-07-03T15:54:15.604336Z',
     },
     {
-        user: { first_name: 'Cameron', email: 'cameron@posthog.com' },
+        user: { first_name: 'Cameron', email: 'cameron@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1062,7 +1062,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-05-03T15:27:20.265216Z',
     },
     {
-        user: { first_name: 'Michael', email: 'michael@posthog.com' },
+        user: { first_name: 'Michael', email: 'michael@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1084,7 +1084,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-05-03T15:27:14.031192Z',
     },
     {
-        user: { first_name: 'Michael', email: 'michael@posthog.com' },
+        user: { first_name: 'Michael', email: 'michael@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1106,7 +1106,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-05-03T15:27:14.031192Z',
     },
     {
-        user: { first_name: 'Michael', email: 'michael@posthog.com' },
+        user: { first_name: 'Michael', email: 'michael@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1128,7 +1128,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-05-03T15:27:14.031192Z',
     },
     {
-        user: { first_name: 'Michael', email: 'michael@posthog.com' },
+        user: { first_name: 'Michael', email: 'michael@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1152,7 +1152,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Ben',
-            email: 'ben@posthog.com',
+            email: 'ben@hanzo.ai',
         },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
@@ -1177,7 +1177,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Ben',
-            email: 'ben@posthog.com',
+            email: 'ben@hanzo.ai',
         },
         activity: 'exported',
         scope: ActivityScope.INSIGHT,
@@ -1200,7 +1200,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
         created_at: '2022-06-24T14:53:24.194502Z',
     },
     {
-        user: { first_name: 'Paul', email: 'paul@posthog.com' },
+        user: { first_name: 'Paul', email: 'paul@hanzo.ai' },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,
         item_id: '738061',
@@ -1310,7 +1310,7 @@ export const insightsActivityResponseJson: ActivityLogItem[] = [
     {
         user: {
             first_name: 'Ben',
-            email: 'ben@posthog.com',
+            email: 'ben@hanzo.ai',
         },
         activity: 'updated',
         scope: ActivityScope.INSIGHT,

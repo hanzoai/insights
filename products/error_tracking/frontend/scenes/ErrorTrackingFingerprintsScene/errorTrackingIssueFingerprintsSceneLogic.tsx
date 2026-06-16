@@ -1,7 +1,7 @@
 import { actions, connect, defaults, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ErrorTrackingFingerprint } from 'lib/components/Errors/types'
@@ -41,9 +41,9 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
         }),
     }),
 
-    connect({
+    connect(() => ({
         actions: [issueActionsLogic, ['splitIssue']],
-    }),
+    })),
 
     defaults({
         issue: null as ErrorTrackingRelationalIssue | null,
@@ -79,7 +79,10 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                         issue.first_seen,
                         fingerprints.map((fingerprint) => fingerprint.fingerprint)
                     )
-                    const response = await api.queryHogQL(query)
+                    const response = await api.queryInsightsQL(query, {
+                        scene: 'ErrorTrackingIssueFingerprints',
+                        productKey: 'error_tracking',
+                    })
                     return response.results.map(([fingerprint, count, samples]) => {
                         return {
                             fingerprint,
@@ -106,8 +109,9 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                 const breadcrumbs: Breadcrumb[] = [
                     {
                         key: Scene.ErrorTracking,
-                        name: 'Error tracking',
+                        name: 'Error Tracking',
                         path: urls.errorTracking(),
+                        iconType: 'error_tracking',
                     },
                 ]
 
@@ -118,10 +122,12 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                             key: [Scene.ErrorTrackingIssue, name],
                             path: urls.errorTrackingIssue(issue.id),
                             name: name,
+                            iconType: 'error_tracking',
                         },
                         {
                             key: Scene.ErrorTrackingIssueFingerprints,
                             name: 'Fingerprints',
+                            iconType: 'error_tracking',
                         }
                     )
                 } else {
@@ -129,10 +135,12 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                         {
                             key: [Scene.ErrorTrackingIssue, 'Issue'],
                             name: 'Issue',
+                            iconType: 'error_tracking',
                         },
                         {
                             key: Scene.ErrorTrackingIssueFingerprints,
                             name: 'Fingerprints',
+                            iconType: 'error_tracking',
                         }
                     )
                 }

@@ -11,14 +11,14 @@ export interface iOSSetupProps {
 }
 
 function IOSInstallCocoaPodsSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Ruby}>{'pod "PostHog", "~> 3.0"'}</CodeSnippet>
+    return <CodeSnippet language={Language.Ruby}>{'pod "Insights", "~> 3.0"'}</CodeSnippet>
 }
 
 function IOSInstallSPMSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Swift}>
             {`dependencies: [
-  .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+  .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
 ]`}
         </CodeSnippet>
     )
@@ -29,7 +29,7 @@ function IOSSetupSnippet(props: iOSSetupProps): JSX.Element {
 
     const configOptions = [
         props.includeReplay &&
-            `// check https://posthog.com/docs/session-replay/installation?tab=iOS
+            `// check https://hanzo.ai/docs/session-replay/installation?tab=iOS
         // for more config and to learn about how we capture sessions on mobile
         // and what to expect
         config.sessionReplay = true
@@ -49,17 +49,17 @@ function IOSSetupSnippet(props: iOSSetupProps): JSX.Element {
     return (
         <CodeSnippet language={Language.Swift}>
             {`import Foundation
-${props.includeExperimentalSpi ? '@_spi(Experimental) import PostHog' : 'import PostHog'}
+${props.includeExperimentalSpi ? '@_spi(Experimental) import Insights' : 'import Insights'}
 import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        let POSTHOG_API_KEY = "${currentTeam?.api_token}"
-        let POSTHOG_HOST = "${apiHostOrigin()}"
+        let INSIGHTS_API_KEY = "${currentTeam?.api_token}"
+        let INSIGHTS_HOST = "${apiHostOrigin()}"
 
-        let config = PostHogConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+        let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
         ${configSection}
-        PostHogSDK.shared.setup(config)
+        InsightsSDK.shared.setup(config)
 
         return true
     }
@@ -85,7 +85,7 @@ export function SDKInstallIOSTrackScreenInstructions(): JSX.Element {
     return (
         <>
             <p>
-                With <code>configuration.captureScreenViews</code> set as <code>true</code>, PostHog will try to record
+                With <code>configuration.captureScreenViews</code> set as <code>true</code>, Insights will try to record
                 all screen changes automatically.
             </p>
             <p>
@@ -93,7 +93,7 @@ export function SDKInstallIOSTrackScreenInstructions(): JSX.Element {
             </p>
             <CodeSnippet
                 language={Language.Swift}
-            >{`PostHogSDK.shared.screen("Dashboard", properties: ["fromIcon": "bottom"])`}</CodeSnippet>
+            >{`InsightsSDK.shared.screen("Dashboard", properties: ["fromIcon": "bottom"])`}</CodeSnippet>
         </>
     )
 }

@@ -1,29 +1,38 @@
-import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import { useValues } from 'kea'
+import insights from '@hanzo/insights'
+import { useState } from 'react'
 
-import { IconRewindPlay } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { LemonCollapse, LemonTable, LemonTableColumns, LemonTabs } from '@hanzo/lemon-ui'
 
+import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
+import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { humanFriendlyNumber } from 'lib/utils'
-import { ResultsBreakdown } from 'scenes/experiments/components/ResultsBreakdown/ResultsBreakdown'
-import { ResultsBreakdownSkeleton } from 'scenes/experiments/components/ResultsBreakdown/ResultsBreakdownSkeleton'
-import { ResultsInsightInfoBanner } from 'scenes/experiments/components/ResultsBreakdown/ResultsInsightInfoBanner'
-import { ResultsQuery } from 'scenes/experiments/components/ResultsBreakdown/ResultsQuery'
+import { VariantTag } from 'scenes/experiments/ExperimentView/components'
+import { FunnelChart } from 'scenes/experiments/charts/funnel/FunnelChart'
+import { experimentLogic } from 'scenes/experiments/experimentLogic'
 import { getViewRecordingFilters } from 'scenes/experiments/utils'
-import { urls } from 'scenes/urls'
 
 import {
-    CachedExperimentQueryResponse,
+    CachedNewExperimentQueryResponse,
     ExperimentMetric,
+    NodeKind,
     isExperimentFunnelMetric,
     isExperimentMeanMetric,
     isExperimentRatioMetric,
 } from '~/queries/schema/schema-general'
-import { Experiment, FilterLogicalOperator, RecordingUniversalFilters, ReplayTabs } from '~/types'
+import {
+    EntityType,
+    Experiment,
+    FilterLogicalOperator,
+    FunnelStep,
+    FunnelStepWithNestedBreakdown,
+    RecordingUniversalFilters,
+} from '~/types'
 
 import {
     ExperimentVariantResult,
-    formatChanceToWin,
+    formatChanceToWinForGoal,
     formatMetricValue,
     formatPValue,
     getIntervalLabel,
@@ -32,22 +41,140 @@ import {
     isFrequentistResult,
 } from '../shared/utils'
 
+/**
+ * Convert new experiment results directly to DataDrivenFunnel format
+ */
+function convertExperimentResultToFunnelSteps(
+    result: CachedNewExperimentQueryResponse,
+    metric: ExperimentMetric
+): FunnelStepWithNestedBreakdown[] {
+    const allResults = [result.baseline, ...(result.variant_results || [])]
+    // Use step_counts from any variant that has data, not just baseline (which might have 0 users)
+    const stepCountsSource = allResults.find((r) => r.step_counts && r.step_counts.length > 0) || result.baseline
+    const numSteps = (stepCountsSource.step_counts?.length || 0) + 1
+    const funnelSteps: FunnelStepWithNestedBreakdown[] = []
+
+    for (let stepIndex = 0; stepIndex < numSteps; stepIndex++) {
+        const variantSteps: FunnelStep[] = allResults.map((variantResult, variantIndex) => {
+            let count: number
+            if (stepIndex === 0) {
+                count = variantResult.number_of_samples
+            } else {
+                count = variantResult.step_counts?.[stepIndex - 1] || 0
+            }
+
+            let stepName: string
+            if (stepIndex === 0) {
+                stepName = 'Experiment exposure'
+            } else if (isExperimentFunnelMetric(metric) && metric.series?.[stepIndex - 1]) {
+                const series = metric.series[stepIndex - 1]
+                if (series.kind === NodeKind.EventsNode) {
+                    stepName = series.custom_name || series.name || series.event || `Step ${stepIndex}`
+                } else {
+                    stepName = series.custom_name || series.name || `Action ${series.id}`
+                }
+            } else {
+                stepName = `Step ${stepIndex}`
+            }
+
+            return {
+                name: stepName,
+                custom_name: null,
+                count: count,
+                type: 'events' as EntityType,
+                breakdown_value: variantResult.key,
+                breakdown_index: variantIndex,
+            } as FunnelStep & { breakdown_index: number }
+        })
+
+        const baseStep = variantSteps[0]
+        const totalCount = variantSteps.reduce((sum, step) => sum + step.count, 0)
+
+        funnelSteps.push({
+            ...baseStep,
+            count: totalCount,
+            nested_breakdown: variantSteps,
+        })
+    }
+
+    return funnelSteps
+}
+
+function SqlCollapsible({
+    insightsql,
+    clickhouseSql,
+    showClickhouseSql,
+}: {
+    insightsql?: string
+    clickhouseSql?: string
+    showClickhouseSql: boolean
+}): JSX.Element {
+    const [activeTab, setActiveTab] = useState<'insightsql' | 'clickhouse'>('insightsql')
+
+    return (
+        <LemonCollapse
+            panels={[
+                {
+                    key: 'sql',
+                    header: 'SQL',
+                    content: showClickhouseSql ? (
+                        <LemonTabs
+                            activeKey={activeTab}
+                            onChange={setActiveTab}
+                            tabs={[
+                                {
+                                    key: 'insightsql',
+                                    label: 'InsightsQL',
+                                    content: insightsql ? (
+                                        <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
+                                            {insightsql}
+                                        </CodeSnippet>
+                                    ) : (
+                                        <div className="text-muted">No InsightsQL available</div>
+                                    ),
+                                },
+                                {
+                                    key: 'clickhouse',
+                                    label: 'ClickHouse',
+                                    content: clickhouseSql ? (
+                                        <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
+                                            {clickhouseSql}
+                                        </CodeSnippet>
+                                    ) : (
+                                        <div className="text-muted">No SQL available</div>
+                                    ),
+                                },
+                            ]}
+                        />
+                    ) : insightsql ? (
+                        <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
+                            {insightsql}
+                        </CodeSnippet>
+                    ) : (
+                        <div className="text-muted">No SQL available</div>
+                    ),
+                },
+            ]}
+        />
+    )
+}
+
 export function ResultDetails({
     experiment,
     result,
     metric,
-    isSecondary,
 }: {
     experiment: Experiment
-    result: CachedExperimentQueryResponse
+    result: CachedNewExperimentQueryResponse
     metric: ExperimentMetric
-    isSecondary: boolean
 }): JSX.Element {
+    const { featureFlags } = useValues(experimentLogic)
+
     const columns: LemonTableColumns<ExperimentVariantResult & { key: string }> = [
         {
             key: 'variant',
             title: 'Variant',
-            render: (_, item) => <div className="font-semibold">{item.key}</div>,
+            render: (_, item) => <VariantTag variantKey={item.key} />,
         },
         {
             key: 'total-users',
@@ -75,7 +202,7 @@ export function ResultDetails({
                 }
 
                 if (isBayesianResult(item)) {
-                    return <div className="font-semibold">{formatChanceToWin(item.chance_to_win)}</div>
+                    return <div className="font-semibold">{formatChanceToWinForGoal(item, metric.goal)}</div>
                 } else if (isFrequentistResult(item)) {
                     return <div className="font-semibold">{formatPValue(item.p_value)}</div>
                 }
@@ -119,36 +246,36 @@ export function ResultDetails({
                 const variantKey = item.key
                 const filters = getViewRecordingFilters(experiment, metric, variantKey)
 
+                const filterGroup: Partial<RecordingUniversalFilters> = {
+                    filter_group: {
+                        type: FilterLogicalOperator.And,
+                        values: [
+                            {
+                                type: FilterLogicalOperator.And,
+                                values: filters,
+                            },
+                        ],
+                    },
+                    date_from: experiment?.start_date,
+                    date_to: experiment?.end_date,
+                    filter_test_accounts: experiment.exposure_criteria?.filterTestAccounts ?? false,
+                }
+
                 return (
-                    <LemonButton
+                    <ViewRecordingsPlaylistButton
+                        filters={filterGroup}
                         size="xsmall"
-                        icon={<IconRewindPlay />}
+                        type="secondary"
                         tooltip="Watch recordings of people who were exposed to this variant."
+                        disabled={filters.length === 0}
                         disabledReason={
                             filters.length === 0 ? 'Unable to identify recordings for this metric' : undefined
                         }
-                        type="secondary"
+                        data-attr="experiment-metrics-view-recordings"
                         onClick={() => {
-                            const filterGroup: Partial<RecordingUniversalFilters> = {
-                                filter_group: {
-                                    type: FilterLogicalOperator.And,
-                                    values: [
-                                        {
-                                            type: FilterLogicalOperator.And,
-                                            values: filters,
-                                        },
-                                    ],
-                                },
-                                date_from: experiment?.start_date,
-                                date_to: experiment?.end_date,
-                                filter_test_accounts: experiment.exposure_criteria?.filterTestAccounts ?? false,
-                            }
-                            router.actions.push(urls.replay(ReplayTabs.Home, filterGroup))
-                            posthog.capture('viewed recordings from experiment', { variant: variantKey })
+                            insights.capture('viewed recordings from experiment', { variant: variantKey })
                         }}
-                    >
-                        View recordings
-                    </LemonButton>
+                    />
                 )
             },
         },
@@ -162,40 +289,24 @@ export function ResultDetails({
     ]
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
             <LemonTable columns={columns} dataSource={dataSource} loading={false} />
             {isExperimentFunnelMetric(metric) && (
-                <ResultsBreakdown
-                    result={result}
+                <FunnelChart
+                    steps={convertExperimentResultToFunnelSteps(result, metric)}
+                    showPersonsModal={false}
+                    disableBaseline={true}
+                    inCardView={true}
+                    experimentResult={result}
                     experiment={experiment}
-                    metricUuid={metric.uuid || ''}
-                    isPrimary={!isSecondary}
-                >
-                    {({
-                        query,
-                        breakdownResultsLoading,
-                        breakdownResults,
-                        exposureDifference,
-                        breakdownLastRefresh,
-                    }) => {
-                        return (
-                            <>
-                                {breakdownResultsLoading && <ResultsBreakdownSkeleton />}
-                                {query && breakdownResults && (
-                                    <>
-                                        <ResultsInsightInfoBanner exposureDifference={exposureDifference} />
-                                        <ResultsQuery
-                                            query={query}
-                                            breakdownResults={breakdownResults}
-                                            breakdownLastRefresh={breakdownLastRefresh}
-                                        />
-                                    </>
-                                )}
-                            </>
-                        )
-                    }}
-                </ResultsBreakdown>
+                    metric={metric}
+                />
             )}
+            <SqlCollapsible
+                insightsql={result.insightsql}
+                clickhouseSql={result.clickhouse_sql}
+                showClickhouseSql={!!featureFlags[FEATURE_FLAGS.EXPERIMENTS_SHOW_SQL]}
+            />
         </div>
     )
 }

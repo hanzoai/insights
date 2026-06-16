@@ -1,22 +1,28 @@
-import './NotebookScene.scss'
-
 import { useActions, useValues } from 'kea'
+import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconInfo, IconOpenSidebar } from '@posthog/icons'
-import { LemonButton, LemonTag } from '@posthog/lemon-ui'
+import { IconInfo, IconOpenSidebar } from '@hanzo/icons'
+import { LemonButton, LemonTag } from '@hanzo/lemon-ui'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
+import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { cn } from 'lib/utils/css-classes'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneBreadcrumbBackButton } from '~/layout/scenes/components/SceneBreadcrumbs'
 
 import { Notebook } from './Notebook/Notebook'
 import { NotebookLoadingState } from './Notebook/NotebookLoadingState'
-import { NotebookExpandButton, NotebookSyncInfo, NotebookTableOfContentsButton } from './Notebook/NotebookMeta'
+import {
+    NotebookExpandButton,
+    NotebookKernelInfoButton,
+    NotebookSyncInfo,
+    NotebookTableOfContentsButton,
+} from './Notebook/NotebookMeta'
 import { NotebookShareModal } from './Notebook/NotebookShareModal'
 import { notebookLogic } from './Notebook/notebookLogic'
 import { NotebookMenu } from './NotebookMenu'
@@ -45,14 +51,38 @@ export function NotebookScene(): JSX.Element {
     )
     const { selectNotebook, closeSidePanel } = useActions(notebookPanelLogic)
     const { selectedNotebook, visibility } = useValues(notebookPanelLogic)
+    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
     useEffect(() => {
         if (notebookId === 'new') {
             // NOTE: We don't do this in the logic afterMount as the logic can get cached by the router
-            createNotebook(NotebookTarget.Scene)
+            let content: JSONContent[] | undefined
+            let title: string | undefined
+
+            const searchParams = new URLSearchParams(router.values.location.search)
+            const contentParam = searchParams.get('notebook')
+            if (contentParam) {
+                try {
+                    const decoded = decodeURIComponent(contentParam)
+                    const parsedNotebook = JSON.parse(decoded)
+                    content = parsedNotebook['body'] as JSONContent[]
+                    title = parsedNotebook['title'] as string
+                } catch (error) {
+                    console.error('Failed to parse content query parameter:', error)
+                }
+            }
+
+            createNotebook(NotebookTarget.Scene, title, content)
         }
         // oxlint-disable-next-line exhaustive-deps
     }, [notebookId])
+
+    useFileSystemLogView({
+        type: 'notebook',
+        ref: notebook?.short_id,
+        enabled: Boolean(notebook?.short_id && notebookId !== 'new' && !loading && !conflictWarningVisible),
+        deps: [notebook?.short_id, notebookId, loading, conflictWarningVisible],
+    })
 
     if (accessDeniedToNotebook) {
         return <AccessDenied object="notebook" />
@@ -70,7 +100,7 @@ export function NotebookScene(): JSX.Element {
                 </h2>
 
                 <p>
-                    You can navigate around PostHog and <b>drag and drop</b> thing into it. Or you can close the sidebar
+                    You can navigate around Insights and <b>drag and drop</b> thing into it. Or you can close the sidebar
                     and it will be full screen here instead.
                 </p>
 
@@ -88,12 +118,8 @@ export function NotebookScene(): JSX.Element {
     }
 
     return (
-        <div className={cn('NotebookScene h-[calc(100vh-var(--scene-layout-header-height))]')}>
-            <div
-                className={cn(
-                    'flex items-center justify-between border-b py-2 mb-2 sticky top-0 bg-primary z-10 top-0'
-                )}
-            >
+        <>
+            <div className="flex items-center justify-between">
                 <div className="flex gap-2 items-center">
                     <SceneBreadcrumbBackButton />
                     {isTemplate && <LemonTag type="highlight">TEMPLATE</LemonTag>}
@@ -123,7 +149,8 @@ export function NotebookScene(): JSX.Element {
                         Guide
                     </LemonButton>
                     <NotebookTableOfContentsButton type="secondary" size="small" />
-                    <NotebookExpandButton type="secondary" size="small" />
+                    <NotebookKernelInfoButton type="secondary" size="small" />
+                    <NotebookExpandButton type="secondary" size="small" inPanel={false} />
                     <LemonButton
                         type="secondary"
                         size="small"
@@ -132,20 +159,21 @@ export function NotebookScene(): JSX.Element {
                         }}
                         tooltip={
                             <>
-                                Opens the notebook in a side panel, that can be accessed from anywhere in the PostHog
-                                app. This is great for dragging and dropping elements like insights, recordings or even
-                                feature flags into your active notebook.
+                                Opens the notebook in a {isRemovingSidePanelFlag ? 'context panel' : 'side panel'}, that
+                                can be accessed from anywhere in the Insights app. This is great for dragging and
+                                dropping elements like insights, recordings or even feature flags into your active
+                                notebook.
                             </>
                         }
                         sideIcon={<IconOpenSidebar />}
                     >
-                        Open in side panel
+                        {isRemovingSidePanelFlag ? 'Open in context panel' : 'Open in side panel'}
                     </LemonButton>
                 </div>
             </div>
 
             <Notebook key={notebookId} shortId={notebookId} editable={!isTemplate} />
             <NotebookShareModal shortId={notebookId} />
-        </div>
+        </>
     )
 }

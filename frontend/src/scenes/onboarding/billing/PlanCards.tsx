@@ -4,16 +4,18 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconCheck, IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCheck, IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { HeartHog } from 'lib/components/hedgehogs'
+import { HeartMascot } from 'lib/components/mascots'
+import { pluralize } from 'lib/utils'
+import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
 
-import { type BillingProductV2Type } from '~/types'
+import { type BillingProductV2Type, OnboardingStepKey } from '~/types'
 
 import { onboardingLogic } from '../onboardingLogic'
 import { FreeTierLimits } from './FreeTierLimits'
@@ -46,12 +48,14 @@ type PlanCardProps = {
     planData: PlanData
     product: BillingProductV2Type
     highlight?: boolean
-    hogPosition?: 'top-right' | 'top-left'
+    mascotPosition?: 'top-right' | 'top-left'
 }
 
-export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, hogPosition = 'top-right' }) => {
+export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, mascotPosition = 'top-right' }) => {
     const { billing } = useValues(billingLogic)
     const { billingProductLoading } = useValues(billingProductLogic({ product }))
+    const { reportOnboardingStepCompleted } = useActions(eventUsageLogic)
+
     const [isHovering, setIsHovering] = useState<boolean | undefined>(undefined)
     const { goToNextStep } = useActions(onboardingLogic)
     const { startPaymentEntryFlow } = useActions(paymentEntryLogic)
@@ -70,7 +74,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
         ...(projectLimitFeature?.limit
             ? [
                   {
-                      name: `${projectLimitFeature.limit} project${projectLimitFeature.limit === 1 ? '' : 's'}`,
+                      name: pluralize(projectLimitFeature.limit, 'project'),
                       available: true,
                   },
               ]
@@ -81,17 +85,17 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
         ...planData.features,
     ]
 
-    const hogPositionClass = hogPosition === 'top-right' ? 'CheekyHogTopRight' : 'CheekyHogTopLeft'
+    const mascotPositionClass = mascotPosition === 'top-right' ? 'CheekyMascotTopRight' : 'CheekyMascotTopLeft'
 
     return (
         <div className="relative" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
-            <HeartHog
+            <HeartMascot
                 width="100"
                 height="100"
                 className={clsx(
-                    hogPositionClass,
-                    isHovering === true && `${hogPositionClass}--peek`,
-                    isHovering === false && `${hogPositionClass}--hide`
+                    mascotPositionClass,
+                    isHovering === true && `${mascotPositionClass}--peek`,
+                    isHovering === false && `${mascotPositionClass}--hide`
                 )}
             />
             <div
@@ -163,7 +167,10 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
                             fullWidth
                             center
                             status={highlight ? 'alt' : undefined}
-                            onClick={() => goToNextStep()}
+                            onClick={() => {
+                                reportOnboardingStepCompleted(OnboardingStepKey.PLANS)
+                                goToNextStep()
+                            }}
                         >
                             {planData.ctaText}
                         </LemonButton>
@@ -185,7 +192,7 @@ const PLANS_DATA: PlanData[] = [
             { name: 'Community support', available: true },
             { name: 'Capped usage', available: false },
             { name: 'Group analytics + Data pipeline addons', available: false },
-            { name: 'Happy hedgehogs', available: false },
+            { name: 'Priority support', available: false },
         ],
         ctaText: 'Select this plan',
         ctaAction: 'next',
@@ -202,7 +209,7 @@ const PLANS_DATA: PlanData[] = [
             { name: 'Email support', available: true },
             { name: 'Unlimited usage', available: true },
             { name: 'Group analytics + Data pipeline addons', available: true },
-            { name: 'Happy hedgehogs', available: true },
+            { name: 'Priority support', available: true },
         ],
         ctaText: 'Unlock all features',
         ctaAction: 'billing',
@@ -220,7 +227,7 @@ export const PlanCards: React.FC<{ product: BillingProductV2Type }> = ({ product
                             planData={planData}
                             product={product}
                             highlight={planData.plan === Plan.RIDICULOUSLY_CHEAP}
-                            hogPosition={index === 0 ? 'top-left' : 'top-right'}
+                            mascotPosition={index === 0 ? 'top-left' : 'top-right'}
                         />
                     ))}
                 </div>

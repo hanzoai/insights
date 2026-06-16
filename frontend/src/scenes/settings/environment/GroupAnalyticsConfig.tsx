@@ -1,11 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, Link } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { GroupsIntroduction } from 'scenes/groups/GroupsIntroduction'
 
 import { GroupType } from '~/types'
 
@@ -30,7 +31,7 @@ export function openDeleteGroupTypeDialog({ onConfirm, groupTypeName }: DeleteGr
                 <br />
                 <br />
                 For more information about groups, see{' '}
-                <Link to="https://posthog.com/docs/product-analytics/group-analytics" target="_blank">
+                <Link to="https://hanzo.ai/docs/product-analytics/group-analytics" target="_blank">
                     the docs
                 </Link>
             </div>
@@ -53,11 +54,10 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
         useValues(groupAnalyticsConfigLogic)
     const { setSingular, setPlural, reset, save, deleteGroupType } = useActions(groupAnalyticsConfigLogic)
 
-    const { groupsAccessStatus } = useValues(groupsAccessLogic)
+    const { groupsAccessStatus, needsUpgradeForGroups } = useValues(groupsAccessLogic)
 
-    if (groupsAccessStatus === GroupsAccessStatus.NoAccess) {
-        // Hide settings if the user doesn't have access
-        return null
+    if (needsUpgradeForGroups) {
+        return <GroupsIntroduction />
     }
 
     const columns: LemonTableColumns<GroupType> = [
@@ -126,16 +126,11 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
 
     return (
         <>
-            <p>
-                This project has access to group analytics. Below you can configure how various group types are
-                displayed throughout the app.
-            </p>
-
-            {groupsAccessStatus !== GroupsAccessStatus.HasGroupTypes && (
+            {groupsAccessStatus !== GroupsAccessStatus.AlreadyUsing && (
                 <LemonBanner type="info" className="mb-4">
                     Group types will show up here after you send your first event associated with a group. Take a look
                     at{' '}
-                    <Link to="https://posthog.com/docs/product-analytics/group-analytics" target="_blank">
+                    <Link to="https://hanzo.ai/docs/product-analytics/group-analytics" target="_blank">
                         this guide
                     </Link>{' '}
                     for more information on getting started.

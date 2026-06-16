@@ -3,13 +3,14 @@ import './InsightLabel.scss'
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SeriesLetter } from 'lib/components/SeriesGlyph'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { capitalizeFirstLetter, hexToRGBA, midEllipsis } from 'lib/utils'
+import { formatEventName } from 'scenes/insights/utils'
 import { mathsLogic } from 'scenes/trends/mathsLogic'
 
 import { groupsModel } from '~/models/groupsModel'
@@ -38,7 +39,7 @@ interface InsightsLabelProps {
     iconStyle?: Record<string, any> // style on series color icon
     seriesStatus?: string // Used by lifecycle chart to display the series name
     fallbackName?: string // Name to display for the series if it can be determined from `action`
-    hasMultipleSeries?: boolean // Whether the graph has multiple discrete series (not breakdown values)
+    hasMultipleSeries?: boolean // Whether the query defines multiple series (not breakdown values). Derived from !isSingleSeriesDefinition.
     showCountedByTag?: boolean // Force 'counted by' tag to show (always shown when action.math is set)
     allowWrap?: boolean // Allow wrapping to multiple lines (useful for long values like URLs)
     onLabelClick?: () => void // Click handler for inner label
@@ -51,11 +52,11 @@ interface InsightsLabelProps {
 interface MathTagProps {
     math: string | undefined
     mathProperty: string | undefined | null
-    mathHogQL: string | undefined | null
+    mathInsightsQL: string | undefined | null
     mathGroupTypeIndex: number | null | undefined
 }
 
-function MathTag({ math, mathProperty, mathHogQL, mathGroupTypeIndex }: MathTagProps): JSX.Element {
+function MathTag({ math, mathProperty, mathInsightsQL, mathGroupTypeIndex }: MathTagProps): JSX.Element {
     const { mathDefinitions } = useValues(mathsLogic)
     const { aggregationLabel } = useValues(groupsModel)
 
@@ -67,6 +68,12 @@ function MathTag({ math, mathProperty, mathHogQL, mathGroupTypeIndex }: MathTagP
     }
     if (math === 'unique_group' && mathGroupTypeIndex != undefined) {
         return <LemonTag>Unique {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
+    }
+    if (math === 'weekly_active' && mathGroupTypeIndex != undefined) {
+        return <LemonTag>Weekly active {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
+    }
+    if (math === 'monthly_active' && mathGroupTypeIndex != undefined) {
+        return <LemonTag>Monthly active {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
     }
     if (math && ['sum', 'avg', 'min', 'max', 'median', 'p75', 'p90', 'p95', 'p99'].includes(math)) {
         return (
@@ -81,8 +88,8 @@ function MathTag({ math, mathProperty, mathHogQL, mathGroupTypeIndex }: MathTagP
             </>
         )
     }
-    if (math === 'hogql') {
-        return <LemonTag className="max-w-60 text-ellipsis overflow-hidden">{String(mathHogQL) || 'SQL'}</LemonTag>
+    if (math === 'insightsql') {
+        return <LemonTag className="max-w-60 text-ellipsis overflow-hidden">{String(mathInsightsQL) || 'SQL'}</LemonTag>
     }
     // Use mathDefinitions first, then fall back to capitalizing the math string
     return <LemonTag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</LemonTag>
@@ -112,7 +119,18 @@ export function InsightLabel({
     showSingleName = false,
 }: InsightsLabelProps): JSX.Element {
     const showEventName = _showEventName || !breakdownValue || (hasMultipleSeries && !Array.isArray(breakdownValue))
-    const eventName = seriesStatus ? capitalizeFirstLetter(seriesStatus) : action?.name || fallbackName || ''
+
+    const displayAction = action
+        ? {
+              ...action,
+              name: formatEventName(action.name),
+          }
+        : undefined
+
+    const eventName = seriesStatus
+        ? capitalizeFirstLetter(seriesStatus)
+        : displayAction?.name || formatEventName(fallbackName) || ''
+
     const iconSizePx = iconSize === IconSize.Large ? 14 : iconSize === IconSize.Medium ? 12 : 10
     const pillValues = [...(hideBreakdown ? [] : [breakdownValue].flat()), hideCompare ? null : compareValue].filter(
         (pill) => !!pill
@@ -149,9 +167,9 @@ export function InsightLabel({
                 >
                     {showEventName && (
                         <>
-                            {action ? (
+                            {displayAction ? (
                                 <EntityFilterInfo
-                                    filter={action}
+                                    filter={displayAction}
                                     allowWrap={allowWrap}
                                     showSingleName={showSingleName}
                                 />
@@ -172,7 +190,7 @@ export function InsightLabel({
                             <MathTag
                                 math={action?.math}
                                 mathProperty={action?.math_property}
-                                mathHogQL={action?.math_hogql}
+                                mathInsightsQL={action?.math_insightsql}
                                 mathGroupTypeIndex={action?.math_group_type_index}
                             />
                         </div>

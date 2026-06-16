@@ -1,9 +1,9 @@
 import { PERSON_DISPLAY_NAME_COLUMN_NAME } from 'lib/constants'
 
 import { QueryFeature, getQueryFeatures } from '~/queries/nodes/DataTable/queryFeatures'
-import { DataNode, DataTableNode, EventsQuery, HogQLExpression, NodeKind } from '~/queries/schema/schema-general'
+import { DataNode, DataTableNode, EventsQuery, InsightsQLExpression, NodeKind } from '~/queries/schema/schema-general'
 
-export const defaultDataTableEventColumns: HogQLExpression[] = [
+export const defaultDataTableEventColumns: InsightsQLExpression[] = [
     '*',
     'event',
     PERSON_DISPLAY_NAME_COLUMN_NAME,
@@ -12,23 +12,35 @@ export const defaultDataTableEventColumns: HogQLExpression[] = [
     'timestamp',
 ]
 
-export const defaultDataTablePersonColumns: HogQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
+export const defaultDataTablePersonColumns: InsightsQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
 
-export const defaultDataTableGroupColumns: HogQLExpression[] = ['group_name', 'key', 'created_at']
+export const defaultDataTableGroupColumns: InsightsQLExpression[] = ['group_name', 'key', 'created_at']
 
-export function defaultDataTableColumns(kind: NodeKind): HogQLExpression[] {
+export const defaultDataTableSessionColumns: InsightsQLExpression[] = [
+    'session_id',
+    '$start_timestamp',
+    '$end_timestamp',
+    '$session_duration',
+    '$entry_current_url',
+    '$pageview_count',
+    '$is_bounce',
+]
+
+export function defaultDataTableColumns(kind: NodeKind): InsightsQLExpression[] {
     return kind === NodeKind.PersonsNode || kind === NodeKind.ActorsQuery
         ? defaultDataTablePersonColumns
         : kind === NodeKind.EventsQuery
           ? defaultDataTableEventColumns
-          : kind === NodeKind.EventsNode
-            ? defaultDataTableEventColumns.filter((c) => c !== '*')
-            : kind === NodeKind.GroupsQuery
-              ? defaultDataTableGroupColumns
-              : []
+          : kind === NodeKind.SessionsQuery
+            ? defaultDataTableSessionColumns
+            : kind === NodeKind.EventsNode
+              ? defaultDataTableEventColumns.filter((c) => c !== '*')
+              : kind === NodeKind.GroupsQuery
+                ? defaultDataTableGroupColumns
+                : []
 }
 
-export function getDataNodeDefaultColumns(source: DataNode): HogQLExpression[] {
+export function getDataNodeDefaultColumns(source: DataNode): InsightsQLExpression[] {
     if (
         getQueryFeatures(source).has(QueryFeature.selectAndOrderByColumns) &&
         Array.isArray((source as EventsQuery).select) &&
@@ -39,7 +51,7 @@ export function getDataNodeDefaultColumns(source: DataNode): HogQLExpression[] {
     return defaultDataTableColumns(source.kind)
 }
 
-export function getColumnsForQuery(query: DataTableNode): HogQLExpression[] {
+export function getColumnsForQuery(query: DataTableNode): InsightsQLExpression[] {
     return query.columns ?? getDataNodeDefaultColumns(query.source)
 }
 
@@ -48,6 +60,34 @@ export function extractExpressionComment(query: string): string {
         return query.split('--').pop()?.trim() || query
     }
     return query
+}
+
+/** Extract AS alias from SQL expression (e.g., "expr AS foo" -> "foo") */
+export function extractAsAlias(query: string): string | null {
+    if (!query || typeof query !== 'string') {
+        return null
+    }
+    const trimmed = query.trim()
+    if (!trimmed) {
+        return null
+    }
+
+    // Match: whitespace + AS (case-insensitive) + whitespace + (backticked or word alias), optionally followed by comment
+    const asMatch = trimmed.match(/\s+[Aa][Ss]\s+(`[^`]+`|[\w\u0080-\uFFFF]+)(\s*--.*)?$/)
+    if (asMatch) {
+        const alias = asMatch[1]
+        return alias.startsWith('`') && alias.endsWith('`') ? alias.slice(1, -1) : alias
+    }
+    return null
+}
+
+/** Get display label for an expression, trying AS alias first, then comment syntax */
+export function extractDisplayLabel(query: string): string {
+    if (!query || typeof query !== 'string') {
+        return query
+    }
+    // Parse `expr AS column` first, fallback to `expr -- column`
+    return extractAsAlias(query) ?? extractExpressionComment(query)
 }
 
 export function removeExpressionComment(query: string): string {

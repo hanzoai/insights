@@ -1,9 +1,9 @@
 import './UnsubscribeSurveyModal.scss'
 
 import { useActions, useValues } from 'kea'
-import { SurveyEventProperties } from 'posthog-js'
 import { useState } from 'react'
 
+import { SurveyEventProperties } from '@hanzo/insights'
 import {
     LemonBanner,
     LemonButton,
@@ -14,11 +14,11 @@ import {
     LemonTextArea,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartHog } from 'lib/components/hedgehogs'
+import { HeartMascot } from 'lib/components/mascots'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
@@ -36,10 +36,10 @@ export const UnsubscribeSurveyModal = ({
 }: {
     product: BillingProductV2Type | BillingProductV2AddonType
 }): JSX.Element | null => {
-    const { trigger, HogfettiComponent } = useHogfetti()
+    const { trigger, ConfettiComponent } = useConfetti()
 
     const { surveyID, surveyResponse, isAddonProduct, unsubscribeModalStep, unsubscribeReasonQuestions } = useValues(
-        billingProductLogic({ product, hogfettiTrigger: trigger })
+        billingProductLogic({ product, confettiTrigger: trigger })
     )
     const {
         setSurveyResponse,
@@ -47,8 +47,8 @@ export const UnsubscribeSurveyModal = ({
         reportSurveyDismissed,
         setUnsubscribeModalStep,
         resetUnsubscribeModalStep,
-        setHedgehogSatisfied,
-        triggerMoreHedgehogs,
+        setSatisfied,
+        triggerConfetti,
     } = useActions(billingProductLogic({ product }))
     const { deactivateProduct, resetUnsubscribeError } = useActions(billingLogic)
     const { unsubscribeError, billingLoading, billing } = useValues(billingLogic)
@@ -67,26 +67,26 @@ export const UnsubscribeSurveyModal = ({
     }
 
     const handleUnsubscribe = (): void => {
-        if (surveyResponse['$survey_response_2'].includes('Not enough hedgehogs')) {
+        if (surveyResponse['$survey_response_2'].includes('Missing features')) {
             setUnsubscribeModalStep(2)
-            triggerMoreHedgehogs()
+            triggerConfetti()
         } else {
             deactivateProduct(billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type)
         }
     }
 
-    const renderHedgehogStep = (): JSX.Element => (
+    const renderConfirmStep = (): JSX.Element => (
         <div className="flex flex-col gap-4">
             <div className="text-center">
-                <h3 className="text-lg mb-2">How about now? Was that enough hedgehogs?</h3>
-                <p className="text-secondary mb-4">Look at all these adorable hedgehogs dancing just for you! 🦔✨</p>
+                <h3 className="text-lg mb-2">Are you sure you want to leave?</h3>
+                <p className="text-secondary mb-4">We would love to keep you around!</p>
                 <div className="flex justify-center items-center">
-                    <HeartHog width="100" height="100" />
+                    <HeartMascot width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
-                <Link onClick={triggerMoreHedgehogs} disabled={billingLoading}>
-                    Still not enough! More hedgehogs! 🦔
+                <Link onClick={triggerConfetti} disabled={billingLoading}>
+                    I still want to leave
                 </Link>
             </div>
             <LemonDivider />
@@ -95,7 +95,7 @@ export const UnsubscribeSurveyModal = ({
                     type="primary"
                     loading={billingLoading}
                     onClick={() => {
-                        setHedgehogSatisfied(true)
+                        setSatisfied(true)
                         deactivateProduct(
                             billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type
                         )
@@ -119,7 +119,7 @@ export const UnsubscribeSurveyModal = ({
 
     return (
         <>
-            <HogfettiComponent />
+            <ConfettiComponent />
             <LemonModal
                 onClose={() => {
                     reportSurveyDismissed(surveyID)
@@ -229,7 +229,7 @@ export const UnsubscribeSurveyModal = ({
                             <p>
                                 {'Are you looking to control your costs? Learn about ways to '}
                                 <Link
-                                    to="https://posthog.com/docs/billing/estimating-usage-costs#how-to-reduce-your-posthog-costs"
+                                    to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs"
                                     target="_blank"
                                     onClick={() => {
                                         reportSurveyDismissed(surveyID)
@@ -252,7 +252,7 @@ export const UnsubscribeSurveyModal = ({
                                     <>
                                         {', or '}
                                         <Link
-                                            to="mailto:sales@posthog.com?subject=Joining%session%replay%controls%20beta"
+                                            to="mailto:sales@hanzo.ai?subject=Joining%session%replay%controls%20beta"
                                             target="_blank"
                                             onClick={() => {
                                                 reportSurveyDismissed(surveyID)
@@ -268,7 +268,7 @@ export const UnsubscribeSurveyModal = ({
                         </LemonBanner>
                     </div>
                 ) : (
-                    renderHedgehogStep()
+                    renderConfirmStep()
                 )}
             </LemonModal>
         </>

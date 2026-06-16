@@ -1,9 +1,10 @@
 import '~/styles'
 
+import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill'
 import { getContext } from 'kea'
-import posthog from 'posthog-js'
-import { PostHogProvider } from 'posthog-js/react'
+import insights from '@hanzo/insights'
+import { InsightsProvider } from '@hanzo/insights/react'
 import { createRoot } from 'react-dom/client'
 
 import { App } from 'scenes/App'
@@ -11,10 +12,12 @@ import { App } from 'scenes/App'
 import './buffer-polyfill'
 import { initKea } from './initKea'
 import { ErrorBoundary } from './layout/ErrorBoundary'
-import { loadPostHogJS } from './loadPostHogJS'
+import { loadInsightsJS } from './loadInsightsJS'
+import { preWarmDecompression } from './scenes/session-recordings/player/snapshot-processing/DecompressionWorkerManager'
 
-loadPostHogJS()
+loadInsightsJS()
 initKea()
+preWarmDecompression()
 
 // On Chrome + Windows, the country flag emojis don't render correctly. This is a polyfill for that.
 // It won't be applied on other platforms.
@@ -38,13 +41,15 @@ function renderApp(): void {
     if (root) {
         createRoot(root).render(
             <ErrorBoundary>
-                <PostHogProvider client={posthog}>
-                    <App />
-                </PostHogProvider>
+                <InsightsProvider client={insights}>
+                    <BaseTooltip.Provider delay={500} closeDelay={0} timeout={400}>
+                        <App />
+                    </BaseTooltip.Provider>
+                </InsightsProvider>
             </ErrorBoundary>
         )
     } else {
-        console.error('Attempted, but could not render PostHog app because <div id="root" /> is not found.')
+        console.error('Attempted, but could not render Insights app because <div id="root" /> is not found.')
     }
 }
 

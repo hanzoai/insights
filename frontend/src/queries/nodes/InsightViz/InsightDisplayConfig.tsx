@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { ReactNode } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonInput, Tooltip } from '@posthog/lemon-ui'
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { ChartFilter } from 'lib/components/ChartFilter'
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
@@ -23,6 +23,7 @@ import { ScalePicker } from 'scenes/insights/EditorFilters/ScalePicker'
 import { ShowAlertThresholdLinesFilter } from 'scenes/insights/EditorFilters/ShowAlertThresholdLinesFilter'
 import { ShowLegendFilter } from 'scenes/insights/EditorFilters/ShowLegendFilter'
 import { ShowMultipleYAxesFilter } from 'scenes/insights/EditorFilters/ShowMultipleYAxesFilter'
+import { ShowPieTotalFilter } from 'scenes/insights/EditorFilters/ShowPieTotalFilter'
 import { ShowTrendLinesFilter } from 'scenes/insights/EditorFilters/ShowTrendLinesFilter'
 import { ValueOnSeriesFilter } from 'scenes/insights/EditorFilters/ValueOnSeriesFilter'
 import { RetentionDatePicker } from 'scenes/insights/RetentionDatePicker'
@@ -40,7 +41,7 @@ import { PathStepPicker } from 'scenes/insights/views/Paths/PathStepPicker'
 import { RetentionBreakdownFilter } from 'scenes/retention/RetentionBreakdownFilter'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
 
-import { isValidBreakdown } from '~/queries/utils'
+import { isValidBreakdown, isWebAnalyticsInsightQuery } from '~/queries/utils'
 import { isTrendsQuery } from '~/queries/utils'
 import { ChartDisplayType } from '~/types'
 
@@ -78,16 +79,22 @@ export function InsightDisplayConfig(): JSX.Element {
 
     const showCompare =
         (isTrends && display !== ChartDisplayType.ActionsAreaGraph && display !== ChartDisplayType.CalendarHeatmap) ||
-        isStickiness
+        isStickiness ||
+        isWebAnalyticsInsightQuery(querySource)
     const showInterval =
         isTrendsFunnel ||
         isLifecycle ||
         ((isTrends || isStickiness) && !(display && NON_TIME_SERIES_DISPLAY_TYPES.includes(display)))
     const showSmoothing =
-        isTrends && !isValidBreakdown(breakdownFilter) && (!display || display === ChartDisplayType.ActionsLineGraph)
-    const showMultipleYAxesConfig = isTrends || isStickiness
-    const showAlertThresholdLinesConfig = isTrends
-    const isLineGraph = display === ChartDisplayType.ActionsLineGraph || (!display && isTrendsQuery(querySource))
+        isTrends &&
+        !isValidBreakdown(breakdownFilter) &&
+        (!display || display === ChartDisplayType.ActionsLineGraph || display === ChartDisplayType.ActionsAreaGraph)
+    const showMultipleYAxesConfig = (isTrends || isStickiness) && !isNonTimeSeriesDisplay
+    const showAlertThresholdLinesConfig = isTrends && !isNonTimeSeriesDisplay
+    const isLineGraph =
+        display === ChartDisplayType.ActionsLineGraph ||
+        display === ChartDisplayType.ActionsAreaGraph ||
+        (!display && isTrendsQuery(querySource))
     const isLinearScale = !yAxisScaleType || yAxisScaleType === 'linear'
 
     const { showValuesOnSeries, mightContainFractionalNumbers, showConfidenceIntervals, showMovingAverage } = useValues(
@@ -108,11 +115,14 @@ export function InsightDisplayConfig(): JSX.Element {
                           ...(supportsValueOnSeries ? [{ label: () => <ValueOnSeriesFilter /> }] : []),
                           ...(supportsPercentStackView ? [{ label: () => <PercentStackViewFilter /> }] : []),
                           ...(hasLegend ? [{ label: () => <ShowLegendFilter /> }] : []),
+                          ...(display === ChartDisplayType.ActionsPie ? [{ label: () => <ShowPieTotalFilter /> }] : []),
                           ...(showAlertThresholdLinesConfig
                               ? [{ label: () => <ShowAlertThresholdLinesFilter /> }]
                               : []),
                           ...(showMultipleYAxesConfig ? [{ label: () => <ShowMultipleYAxesFilter /> }] : []),
-                          ...(isTrends || isRetention ? [{ label: () => <ShowTrendLinesFilter /> }] : []),
+                          ...((isTrends || isRetention || isTrendsFunnel) && !isNonTimeSeriesDisplay
+                              ? [{ label: () => <ShowTrendLinesFilter /> }]
+                              : []),
                       ],
                   },
               ]
@@ -194,7 +204,7 @@ export function InsightDisplayConfig(): JSX.Element {
                                       checked={showMovingAverage}
                                       disabledReason={
                                           !isLineGraph
-                                              ? 'Moving average is only available for line graphs'
+                                              ? 'Moving average is only available for line and area graphs'
                                               : !isLinearScale
                                                 ? 'Moving average is only supported for linear scale.'
                                                 : undefined
@@ -355,7 +365,7 @@ function DecimalPrecisionInput(): JSX.Element {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     const reportChange = useDebouncedCallback(() => {
-        posthog.capture('decimal places changed', {
+        insights.capture('decimal places changed', {
             decimal_places: trendsFilter?.decimalPlaces,
         })
     }, 500)

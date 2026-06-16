@@ -6,8 +6,8 @@ from typing import Any
 
 from temporalio import activity, workflow
 
-from posthog.batch_exports.service import BackfillDetails, NoOpInputs
-from posthog.temporal.common.base import PostHogWorkflow
+from insights.batch_exports.service import BackfillDetails, NoOpInputs
+from insights.temporal.common.base import InsightsWorkflow
 
 
 @dataclass
@@ -25,7 +25,7 @@ async def noop_activity(inputs: NoopActivityArgs) -> str:
 
 
 @workflow.defn(name="no-op")
-class NoOpWorkflow(PostHogWorkflow):
+class NoOpWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> Any:
         """Parse inputs from the management command CLI.

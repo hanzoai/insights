@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal, IconX } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconExternal, IconX } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { IntegrationView } from 'lib/integrations/IntegrationView'
@@ -11,7 +11,9 @@ import { urls } from 'scenes/urls'
 
 import { CyclotronJobInputSchemaType } from '~/types'
 
-import { ChannelSetupModal } from 'products/messaging/frontend/Channels/ChannelSetupModal'
+import { getAllRegisteredIntegrationSetups, getIntegrationSetup } from './integrationSetupRegistry'
+// Side-effect import: register all integration setups
+import './integrationSetups'
 
 export type IntegrationConfigureProps = {
     value?: number
@@ -47,7 +49,7 @@ export function IntegrationChoice({
 
     const kindName = getIntegrationNameFromKind(kind)
 
-    function uploadKey(kind: string): void {
+    function uploadKey(kindForUpload: string): void {
         const input = document.createElement('input')
         input.type = 'file'
         input.accept = '.json'
@@ -56,10 +58,29 @@ export function IntegrationChoice({
             if (!file) {
                 return
             }
-            newGoogleCloudKey(kind, file, (integration) => onChange?.(integration.id))
+            newGoogleCloudKey(kindForUpload, file, (integ) => onChange?.(integ.id))
         }
         input.click()
     }
+
+    const handleModalComplete = (integrationId?: number): void => {
+        if (typeof integrationId === 'number') {
+            onChange?.(integrationId)
+        }
+        closeNewIntegrationModal()
+    }
+
+    const setupDef = getIntegrationSetup(kind)
+    const setupMenuItem = setupDef
+        ? setupDef.menuItem({ kind, openModal: openNewIntegrationModal, uploadKey })
+        : {
+              to: api.integrations.authorizeUrl({ kind, next: redirectUrl }),
+              disableClientSideRouting: true,
+              onClick: beforeRedirect,
+              label: integrationsOfKind?.length
+                  ? `Connect to a different integration for ${kindName}`
+                  : `Connect to ${kindName}`,
+          }
 
     const button = (
         <LemonMenu
@@ -67,57 +88,22 @@ export function IntegrationChoice({
                 integrationsOfKind?.length
                     ? {
                           items: [
-                              ...(integrationsOfKind?.map((integration) => ({
-                                  icon: <img src={integration.icon_url} className="w-6 h-6 rounded" />,
-                                  onClick: () => onChange?.(integration.id),
-                                  active: integration.id === value,
-                                  label: integration.display_name,
+                              ...(integrationsOfKind?.map((integ) => ({
+                                  icon: (
+                                      <img
+                                          src={integ.icon_url}
+                                          alt={`${integ.display_name} icon`}
+                                          className="w-6 h-6 rounded"
+                                      />
+                                  ),
+                                  onClick: () => onChange?.(integ.id),
+                                  active: integ.id === value,
+                                  label: integ.display_name,
                               })) || []),
                           ],
                       }
                     : null,
-                ['google-pubsub', 'google-cloud-storage'].includes(kind)
-                    ? {
-                          items: [
-                              {
-                                  onClick: () => uploadKey(kind),
-                                  label: 'Upload Google Cloud .json key file',
-                              },
-                          ],
-                      }
-                    : ['email'].includes(kind)
-                      ? {
-                            items: [
-                                {
-                                    to: urls.messaging('channels'),
-                                    label: 'Configure new email sender domain',
-                                },
-                            ],
-                        }
-                      : ['twilio'].includes(kind)
-                        ? {
-                              items: [
-                                  {
-                                      label: 'Configure new Twilio account',
-                                      onClick: () => openNewIntegrationModal('twilio'),
-                                  },
-                              ],
-                          }
-                        : {
-                              items: [
-                                  {
-                                      to: api.integrations.authorizeUrl({
-                                          kind,
-                                          next: redirectUrl,
-                                      }),
-                                      disableClientSideRouting: true,
-                                      onClick: beforeRedirect,
-                                      label: integrationsOfKind?.length
-                                          ? `Connect to a different integration for ${kindName}`
-                                          : `Connect to ${kindName}`,
-                                  },
-                              ],
-                          },
+                { items: [setupMenuItem] },
                 {
                     items: [
                         {
@@ -152,12 +138,22 @@ export function IntegrationChoice({
                 button
             )}
 
-            <ChannelSetupModal
-                isOpen={newIntegrationModalKind === 'twilio'}
-                channelType="twilio"
-                integration={integrationKind || undefined}
-                onComplete={closeNewIntegrationModal}
-            />
+            {getAllRegisteredIntegrationSetups()
+                .filter((def) => def.SetupModal)
+                .map((def) => {
+                    const modalKind = Array.isArray(def.kind) ? def.kind[0] : def.kind
+                    const SetupModalComponent = def.SetupModal!
+                    return (
+                        <SetupModalComponent
+                            key={modalKind}
+                            isOpen={newIntegrationModalKind === modalKind}
+                            kind={modalKind}
+                            integration={integrationKind || undefined}
+                            onComplete={handleModalComplete}
+                            onClose={closeNewIntegrationModal}
+                        />
+                    )
+                })}
         </>
     )
 }

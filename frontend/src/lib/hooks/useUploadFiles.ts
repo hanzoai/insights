@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useRef, useState } from 'react'
 
 import api from 'lib/api'
@@ -14,7 +14,7 @@ export const lazyImageBlobReducer = async (blob: Blob): Promise<Blob> => {
         try {
             return await simpleImageResize(blob)
         } catch (error) {
-            posthog.captureException(
+            insights.captureException(
                 new Error('Image compression fallback failed', {
                     cause: error,
                 })

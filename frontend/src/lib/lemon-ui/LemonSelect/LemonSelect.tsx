@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import React, { useMemo } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { LemonDropdownProps } from 'lib/lemon-ui/LemonDropdown'
 
@@ -65,6 +65,8 @@ export interface LemonSelectPropsBase<T>
         | 'onClick'
         | 'tabIndex'
         | 'type'
+        | 'status'
+        | 'active'
         | 'tooltip'
         | 'icon'
     > {
@@ -81,6 +83,7 @@ export interface LemonSelectPropsBase<T>
     menu?: Pick<LemonMenuProps, 'className' | 'closeParentPopoverOnClickInside'>
     visible?: LemonDropdownProps['visible']
     startVisible?: LemonDropdownProps['startVisible']
+    truncateText?: { maxWidthClass: string }
 }
 
 export interface LemonSelectPropsClearable<T> extends LemonSelectPropsBase<T> {
@@ -119,6 +122,7 @@ export function LemonSelect<T extends string | number | boolean | null>({
     renderButtonContent,
     visible,
     startVisible,
+    truncateText,
     ...buttonProps
 }: LemonSelectProps<T>): JSX.Element {
     const [items, allLeafOptions] = useMemo(
@@ -160,7 +164,7 @@ export function LemonSelect<T extends string | number | boolean | null>({
                               icon: <IconX />,
                               divider: false,
                               onClick: () => {
-                                  onChange?.(null as T)
+                                  onChange?.(null as unknown as T)
                               },
                           }
                         : null
@@ -173,12 +177,18 @@ export function LemonSelect<T extends string | number | boolean | null>({
                 tooltip={activeLeaf?.tooltip}
                 {...buttonProps}
             >
-                <span className="flex flex-1">
+                <span
+                    className={
+                        truncateText
+                            ? `block w-full overflow-hidden text-ellipsis whitespace-nowrap ${truncateText.maxWidthClass}`
+                            : 'flex flex-1'
+                    }
+                >
                     {renderButtonContent
                         ? renderButtonContent(activeLeaf)
                         : activeLeaf
                           ? activeLeaf.label
-                          : (value ?? placeholder)}
+                          : ((value ?? placeholder) as React.ReactNode)}
                 </span>
             </LemonButton>
         </LemonMenu>

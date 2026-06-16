@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCopy, IconPencil } from '@posthog/icons'
+import { IconCopy, IconPencil } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -10,7 +10,7 @@ import {
     LemonTableColumns,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
@@ -18,10 +18,8 @@ import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/column
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
-import { userLogic } from 'scenes/userLogic'
 
 import { NodeKind } from '~/queries/schema/schema-general'
-import { AvailableFeature } from '~/types'
 
 import { isLegacySharedMetric } from '../utils'
 import { SharedMetric } from './sharedMetricLogic'
@@ -34,8 +32,6 @@ export const scene: SceneExport = {
 
 export function SharedMetrics(): JSX.Element {
     const { sharedMetrics, sharedMetricsLoading } = useValues(sharedMetricsLogic)
-
-    const { hasAvailableFeature } = useValues(userLogic)
 
     const columns: LemonTableColumns<SharedMetric> = [
         {
@@ -51,7 +47,7 @@ export function SharedMetrics(): JSX.Element {
                                 {isLegacySharedMetric(sharedMetric) && (
                                     <Tooltip
                                         title="This metric uses the legacy engine, so some features and improvements may be missing."
-                                        docLink="https://posthog.com/docs/experiments/new-experimentation-engine"
+                                        docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
                                     >
                                         <LemonTag type="warning" className="ml-1">
                                             Legacy
@@ -70,17 +66,13 @@ export function SharedMetrics(): JSX.Element {
             title: 'Description',
             dataIndex: 'description',
         },
-        ...(hasAvailableFeature(AvailableFeature.TAGGING)
-            ? [
-                  {
-                      title: 'Tags',
-                      dataIndex: 'tags' as keyof SharedMetric,
-                      render: function Render(tags: SharedMetric['tags']) {
-                          return tags ? <ObjectTags tags={tags} staticOnly /> : null
-                      },
-                  } as LemonTableColumn<SharedMetric, keyof SharedMetric | undefined>,
-              ]
-            : []),
+        {
+            title: 'Tags',
+            dataIndex: 'tags' as keyof SharedMetric,
+            render: function Render(tags: SharedMetric['tags']) {
+                return tags ? <ObjectTags tags={tags} staticOnly /> : null
+            },
+        } as LemonTableColumn<SharedMetric, keyof SharedMetric | undefined>,
         {
             title: 'Type',
             key: 'type',

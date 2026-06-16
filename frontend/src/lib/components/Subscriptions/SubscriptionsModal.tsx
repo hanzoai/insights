@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonButtonWithDropdown } from '@posthog/lemon-ui'
+import { LemonButton, LemonButtonWithDropdown } from '@hanzo/lemon-ui'
 
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
@@ -36,7 +36,7 @@ export function SubscriptionsModal(props: SubscriptionsModalProps): JSX.Element 
                 handleSubmit={closeModal}
                 background={false}
                 className="py-8"
-                docsLink="https://posthog.com/docs/user-guides/subscriptions"
+                docsLink="https://hanzo.ai/docs/user-guides/subscriptions"
             >
                 {!subscriptionId ? (
                     <ManageSubscriptions

@@ -5,7 +5,7 @@
             "id": "6e190b56-64dd-443d-832f-b889ea2df252",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com/3",
+                "$current_url": "http://insightsflix.com/3",
                 "$browser": "Firefox",
                 "$lib": "web"
             },
@@ -39,7 +39,7 @@
             "id": "903ca401-5824-4907-a00a-f6dd0484fde5",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com/2",
+                "$current_url": "http://insightsflix.com/2",
                 "$browser": "Firefox",
                 "$lib": "web",
                 "$event_type": "click"
@@ -58,7 +58,7 @@
             "id": "730ce2d4-f73b-4517-9e9b-743cca25497d",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com/2",
+                "$current_url": "http://insightsflix.com/2",
                 "$browser": "Firefox",
                 "$lib": "web"
             },
@@ -76,7 +76,7 @@
             "id": "ef872ab0-56c5-4e46-bc87-b3bebbf0274b",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com/1",
+                "$current_url": "http://insightsflix.com/1",
                 "$browser": "Firefox",
                 "$lib": "web",
                 "$event_type": "click"
@@ -95,7 +95,7 @@
             "id": "b0cfbc8d-203d-4af7-b663-2308f9fab579",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://insightsflix.com",
                 "$browser": "Firefox",
                 "$lib": "web",
                 "$event_type": "click"
@@ -114,7 +114,7 @@
             "id": "96b47179-4ab2-43da-94d8-8df753b7bb3d",
             "distinct_id": "01779064-53be-000c-683f-23b1a8c8eb4c",
             "properties": {
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://insightsflix.com",
                 "$browser": "Firefox",
                 "$lib": "web"
             },

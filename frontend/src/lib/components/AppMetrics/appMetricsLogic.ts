@@ -1,5 +1,5 @@
-import { actions, connect, kea, key, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
-import { lazyLoaders } from 'kea-loaders'
+import { actions, afterMount, connect, kea, key, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
+import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
@@ -7,7 +7,7 @@ import { Dayjs, dayjs } from 'lib/dayjs'
 import { dateStringToDayJs, objectsEqual } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { HogQLQueryString, hogql } from '~/queries/utils'
+import { InsightsQLQueryString, insightsql } from '~/queries/utils'
 
 import type { appMetricsLogicType } from './appMetricsLogicType'
 
@@ -30,6 +30,8 @@ export type AppMetricsLogicProps = {
     forceParams?: Partial<AppMetricsCommonParams>
     defaultParams?: Partial<AppMetricsCommonParams>
     loadOnChanges?: boolean
+    /** If true, loads data immediately when logic mounts. Default: false */
+    loadOnMount?: boolean
 }
 
 export type AppMetricsTimeSeriesRequest = AppMetricsCommonParams
@@ -60,39 +62,41 @@ export const loadAppMetricsTotals = async (
 ): Promise<AppMetricsTotalsResponse> => {
     const breakdownBy = request.breakdownBy || ['metric_name']
 
-    let query = hogql`
+    let query = insightsql`
         SELECT
             sum(count) AS total,
-            ${hogql.raw(breakdownBy.join(', '))}
+            ${insightsql.raw(breakdownBy.join(', '))}
         FROM app_metrics
         WHERE app_source = ${request.appSource}
     `
 
     if (request.appSourceId) {
-        query = (query + hogql`\nAND app_source_id = ${request.appSourceId}`) as HogQLQueryString
+        query = (query + insightsql`\nAND app_source_id = ${request.appSourceId}`) as InsightsQLQueryString
     }
     if (typeof request.instanceId === 'string') {
-        query = (query + hogql`\nAND instance_id = ${request.instanceId}`) as HogQLQueryString
+        query = (query + insightsql`\nAND instance_id = ${request.instanceId}`) as InsightsQLQueryString
     }
     if (request.metricName) {
         const metricNames = Array.isArray(request.metricName) ? request.metricName : [request.metricName]
-        query = (query + hogql`\nAND metric_name IN ${metricNames}`) as HogQLQueryString
+        query = (query + insightsql`\nAND metric_name IN ${metricNames}`) as InsightsQLQueryString
     }
     if (request.metricKind) {
         const metricKinds = Array.isArray(request.metricKind) ? request.metricKind : [request.metricKind]
-        query = (query + hogql`\nAND metric_kind IN ${metricKinds}`) as HogQLQueryString
+        query = (query + insightsql`\nAND metric_kind IN ${metricKinds}`) as InsightsQLQueryString
     }
 
     query = (query +
-        hogql`
+        insightsql`
             AND toTimeZone(timestamp, ${timezone}) >= toDateTime(${request.dateFrom}, ${timezone})
             AND toTimeZone(timestamp, ${timezone}) < toDateTime(${request.dateTo}, ${timezone})
-            GROUP BY ${hogql.raw(breakdownBy.join(', '))}
-        `) as HogQLQueryString
+            GROUP BY ${insightsql.raw(breakdownBy.join(', '))}
+        `) as InsightsQLQueryString
 
-    const response = await api.queryHogQL(query, {
-        refresh: 'force_blocking',
-    })
+    const response = await api.queryInsightsQL(
+        query,
+        { scene: 'InsightsFunction', productKey: 'pipeline_destinations' },
+        { refresh: 'async_except_on_cache_miss' }
+    )
 
     const res: AppMetricsTotalsResponse = {}
 
@@ -114,7 +118,7 @@ const loadAppMetricsTimeSeries = async (
 ): Promise<AppMetricsTimeSeriesResponse> => {
     const interval = request.interval || DEFAULT_INTERVAL
 
-    let query = hogql`
+    let query = insightsql`
         WITH
             ${timezone} AS tz,
             ${interval} AS g,
@@ -161,7 +165,7 @@ const loadAppMetricsTimeSeries = async (
             FROM
             (
                 SELECT
-                    ${hogql.raw(request.breakdownBy!)} AS breakdown,
+                    ${insightsql.raw(request.breakdownBy!)} AS breakdown,
                     -- Convert data to user's TZ before truncating
                     dateTrunc(g, toTimeZone(timestamp, tz), tz) AS bucket,
                     sum(count) AS cnt
@@ -170,22 +174,22 @@ const loadAppMetricsTimeSeries = async (
     `
 
     if (request.appSourceId) {
-        query = (query + hogql`\nAND app_source_id = ${request.appSourceId}`) as HogQLQueryString
+        query = (query + insightsql`\nAND app_source_id = ${request.appSourceId}`) as InsightsQLQueryString
     }
     if (typeof request.instanceId === 'string') {
-        query = (query + hogql`\nAND instance_id = ${request.instanceId}`) as HogQLQueryString
+        query = (query + insightsql`\nAND instance_id = ${request.instanceId}`) as InsightsQLQueryString
     }
     if (request.metricName) {
         const metricNames = Array.isArray(request.metricName) ? request.metricName : [request.metricName]
-        query = (query + hogql`\nAND metric_name IN ${metricNames}`) as HogQLQueryString
+        query = (query + insightsql`\nAND metric_name IN ${metricNames}`) as InsightsQLQueryString
     }
     if (request.metricKind) {
         const metricKinds = Array.isArray(request.metricKind) ? request.metricKind : [request.metricKind]
-        query = (query + hogql`\nAND metric_kind IN ${metricKinds}`) as HogQLQueryString
+        query = (query + insightsql`\nAND metric_kind IN ${metricKinds}`) as InsightsQLQueryString
     }
 
     query = (query +
-        hogql`
+        insightsql`
                 AND toTimeZone(timestamp, tz) >= start_bucket
                 AND toTimeZone(timestamp, tz) < multiIf(
                         g = 'minute', addMinutes(end_bucket, 1),
@@ -200,11 +204,13 @@ const loadAppMetricsTimeSeries = async (
             GROUP BY breakdown
         )
         ORDER BY breakdown
-        `) as HogQLQueryString
+        `) as InsightsQLQueryString
 
-    const response = await api.queryHogQL(query, {
-        refresh: 'force_blocking',
-    })
+    const response = await api.queryInsightsQL(
+        query,
+        { scene: 'InsightsFunction', productKey: 'pipeline_destinations' },
+        { refresh: 'async_except_on_cache_miss' }
+    )
 
     const labels = response.results?.[0]?.[0].map((label: string) => {
         switch (interval) {
@@ -235,7 +241,7 @@ const convertDateFieldToDayJs = (date: string, timezone: string): Dayjs => {
 export const appMetricsLogic = kea<appMetricsLogicType>([
     props({} as unknown as AppMetricsLogicProps),
     key(({ logicKey }: AppMetricsLogicProps) => logicKey),
-    path((id) => ['scenes', 'hog-functions', 'metrics', 'appMetricsLogic', id]),
+    path((id) => ['scenes', 'insights-functions', 'metrics', 'appMetricsLogic', id]),
     connect(() => ({
         values: [teamLogic, ['currentTeam']],
     })),
@@ -257,7 +263,7 @@ export const appMetricsLogic = kea<appMetricsLogicType>([
             },
         ],
     })),
-    lazyLoaders(({ values }) => ({
+    loaders(({ values }) => ({
         appMetricsTrends: [
             null as AppMetricsTimeSeriesResponse | null,
             {
@@ -362,6 +368,14 @@ export const appMetricsLogic = kea<appMetricsLogicType>([
             }
         },
     })),
+
+    afterMount(({ actions, props }) => {
+        // Auto-load data immediately on mount if explicitly requested
+        if (props.loadOnMount) {
+            actions.loadAppMetricsTrends()
+            actions.loadAppMetricsTrendsPreviousPeriod()
+        }
+    }),
 
     propsChanged(({ actions, props }, oldProps) => {
         if (props.forceParams && !objectsEqual(props.forceParams, oldProps.forceParams)) {

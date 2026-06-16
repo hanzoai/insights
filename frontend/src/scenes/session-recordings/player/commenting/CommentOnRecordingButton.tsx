@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { IconComment, IconEmoji } from '@posthog/icons'
-import { LemonButton, LemonDropdown } from '@posthog/lemon-ui'
+import { IconComment, IconEmoji } from '@hanzo/icons'
+import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
@@ -101,7 +101,7 @@ export function EmojiCommentOnRecordingButton({ className }: { className?: strin
             visible={quickEmojiIsOpen}
             closeOnClickInside={false}
             onClickOutside={() => {
-                setQuickEmojiIsOpen(!quickEmojiIsOpen)
+                setQuickEmojiIsOpen(false)
             }}
             onVisibilityChange={(visible) => {
                 setQuickEmojiIsOpen(visible)

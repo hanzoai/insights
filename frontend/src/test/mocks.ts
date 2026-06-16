@@ -3,6 +3,7 @@ import { PROPERTY_MATCH_TYPE } from 'lib/constants'
 import { BehavioralFilterKey } from 'scenes/cohorts/CohortFilters/types'
 
 import {
+    AccessControlLevel,
     BehavioralEventType,
     CohortType,
     EventDefinition,
@@ -23,7 +24,7 @@ export const mockBasicUser: UserBasicType = {
     uuid: '1234',
     distinct_id: '1234',
     first_name: 'Tim',
-    email: 'tim@posthog.com',
+    email: 'tim@hanzo.ai',
 }
 
 export const mockEvent: EventType = {
@@ -39,7 +40,7 @@ export const mockEvent: EventType = {
         is_identified: true,
         distinct_ids: ['abcde'],
         properties: {
-            email: 'alex@posthog.com',
+            email: 'alex@hanzo.ai',
         },
     },
     elements: [],
@@ -59,6 +60,7 @@ export const mockEventDefinitions: EventDefinition[] = [
     name: name || `misc-${index}-generated`,
     description: `${name || 'name generation'} is the best!`,
     tags: [],
+    last_seen_at: '2022-01-24T21:32:38.359756Z',
 }))
 
 export const mockEventPropertyDefinition = {
@@ -143,6 +145,7 @@ export const mockActionDefinition = {
     team_id: 1,
     created_by: null,
     pinned_at: null,
+    user_access_level: AccessControlLevel.Editor,
 }
 
 export const mockCohort: CohortType = {
@@ -194,7 +197,7 @@ export const mockSubscription: SubscriptionType = {
     id: 1,
     title: 'My example subscription',
     target_type: 'email',
-    target_value: 'ben@posthog.com,geoff@other-company.com',
+    target_value: 'ben@hanzo.ai,geoff@other-company.com',
     frequency: 'monthly',
     interval: 2,
     start_date: '2022-01-01T00:09:00',
@@ -216,7 +219,7 @@ export const mockIntegration: IntegrationType = {
     config: {
         team: {
             id: '123',
-            name: 'PostHog',
+            name: 'Insights',
         },
     },
     icon_url: '',
@@ -263,3 +266,17 @@ export const mockSlackChannels: SlackChannelType[] = [
         is_member: false,
     },
 ]
+
+export const mockGetEventDefinitions = (req: { url: URL }): [number, Record<string, any>] => {
+    const search = req.url.searchParams.get('search') ?? ''
+    const results = search ? mockEventDefinitions.filter((e) => e.name.includes(search)) : mockEventDefinitions
+    return [200, { results, count: results.length }]
+}
+
+export const mockGetPropertyDefinitions = (req: { url: URL }): [number, Record<string, any>] => {
+    const search = req.url.searchParams.get('search') ?? ''
+    const results = search
+        ? mockEventPropertyDefinitions.filter((p) => p.name.includes(search))
+        : mockEventPropertyDefinitions
+    return [200, { results, count: results.length }]
+}

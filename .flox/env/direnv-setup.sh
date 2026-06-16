@@ -48,7 +48,7 @@ esac
 
 # Add hook to shell config if not already present
 if ! grep -q "direnv hook" "$config_file" 2>/dev/null; then
-    echo -e "\n# Initialize direnv - added by PostHog's Flox activation hook (../posthog/.flox/env/manifest.toml)\n$hook_command" >> "$config_file"
+    echo -e "\n# Initialize direnv - added by Hanzo Insights's Flox activation hook (../insights/.flox/env/manifest.toml)\n$hook_command" >> "$config_file"
     echo "✅ Injected direnv hook into $config_file"
 else
     echo "⏩ direnv hook already present in $config_file"
@@ -58,7 +58,7 @@ fi
 direnv_config_file="$HOME/.config/direnv/direnv.toml"
 mkdir -p "$(dirname "$direnv_config_file")"
 if ! grep -q "warn_timeout" "$direnv_config_file" 2>/dev/null; then
-    echo -e "[global]\nwarn_timeout = 0 # Ignore timeout from this issue: https://github.com/direnv/direnv/issues/1065 - added by PostHog's Flox activation hook (../posthog/.flox/env/manifest.toml)" >> "$direnv_config_file"
+    echo -e "[global]\nwarn_timeout = 0 # Ignore timeout from this issue: https://github.com/direnv/direnv/issues/1065 - added by Hanzo Insights's Flox activation hook (../insights/.flox/env/manifest.toml)" >> "$direnv_config_file"
     echo "✅ Configured $direnv_config_file"
 else
     echo "⏩ $direnv_config_file already configured"

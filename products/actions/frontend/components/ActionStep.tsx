@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, Link } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSegmentedButton, Link } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -13,12 +13,24 @@ import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
 import { IconOpenInApp } from 'lib/lemon-ui/icons'
 
 import { groupsModel } from '~/models/groupsModel'
-import { ActionStepStringMatching, ActionStepType } from '~/types'
+import {
+    ActionStepStringMatching,
+    ActionStepType,
+    AnyPropertyFilter,
+    PropertyFilterType,
+    PropertyOperator,
+} from '~/types'
 
 import { URL_MATCHING_HINTS } from '../utils/hints'
+import {
+    SCREEN_NAME_MATCHING_LABEL,
+    SCREEN_NAME_PROPERTY,
+    type ScreenNameMatching,
+    isScreenNameFilter,
+} from '../utils/screenName'
 import { EventName } from './EventName'
 
-const learnMoreLink = 'https://posthog.com/docs/data/actions?utm_medium=in-product&utm_campaign=action-page'
+const learnMoreLink = 'https://hanzo.ai/docs/data/actions?utm_medium=in-product&utm_campaign=action-page'
 
 interface Props {
     step: ActionStepType
@@ -26,14 +38,21 @@ interface Props {
     isOnlyStep: boolean
     index: number
     identifier: string
+    disabledReason?: string
     onDelete: () => void
     onChange: (step: ActionStepType) => void
 }
 
-export function ActionStep({ step, actionId, isOnlyStep, index, identifier, onDelete, onChange }: Props): JSX.Element {
-    const sendStep = (stepToSend: ActionStepType): void => {
-        onChange(stepToSend)
-    }
+export function ActionStep({
+    step,
+    actionId,
+    isOnlyStep,
+    index,
+    identifier,
+    disabledReason,
+    onDelete,
+    onChange: sendStep,
+}: Props): JSX.Element {
     const { groupsTaxonomicTypes } = useValues(groupsModel)
 
     return (
@@ -54,66 +73,96 @@ export function ActionStep({ step, actionId, isOnlyStep, index, identifier, onDe
                             size="small"
                             aria-label="delete"
                             onClick={onDelete}
+                            disabledReason={disabledReason}
                         />
                     )}
                 </div>
-                <TypeSwitcher step={step} sendStep={sendStep} />
+                <TypeSwitcher step={step} sendStep={sendStep} disabledReason={disabledReason} />
 
                 {step.event === '$autocapture' && (
-                    <AutocaptureFields step={step} sendStep={sendStep} actionId={actionId} />
+                    <AutocaptureFields
+                        step={step}
+                        sendStep={sendStep}
+                        actionId={actionId}
+                        disabledReason={disabledReason}
+                    />
                 )}
-                {step.event !== undefined && step.event !== '$autocapture' && step.event !== '$pageview' && (
-                    <div className="deprecated-space-y-1">
-                        <LemonLabel>Event name</LemonLabel>
-                        <EventName
-                            value={step.event}
-                            onChange={(value) =>
-                                sendStep({
-                                    ...step,
-                                    event: value,
-                                })
-                            }
-                            placeholder="All events"
-                            allEventsOption="explicit"
-                        />
+                {step.event !== undefined &&
+                    step.event !== '$autocapture' &&
+                    step.event !== '$pageview' &&
+                    step.event !== '$screen' && (
+                        <div className="deprecated-space-y-1">
+                            <LemonLabel>Event name</LemonLabel>
+                            <EventName
+                                value={step.event}
+                                onChange={(value) =>
+                                    sendStep({
+                                        ...step,
+                                        event: value,
+                                    })
+                                }
+                                placeholder="All events"
+                                allEventsOption="explicit"
+                                disabled={!!disabledReason}
+                            />
 
-                        <small>
-                            <Link to="https://posthog.com/docs/libraries" target="_blank">
-                                See documentation
-                            </Link>{' '}
-                            on how to send custom events in lots of languages.
-                        </small>
-                    </div>
-                )}
+                            <small>
+                                <Link to="https://hanzo.ai/docs/libraries" target="_blank">
+                                    See documentation
+                                </Link>{' '}
+                                on how to send custom events in lots of languages.
+                            </small>
+                        </div>
+                    )}
                 {step.event === '$pageview' && (
                     <div>
                         <Option
                             step={step}
                             sendStep={sendStep}
                             item="url"
-                            labelExtra={<StringMatchingSelection field="url" step={step} sendStep={sendStep} />}
+                            labelExtra={
+                                <StringMatchingSelection
+                                    field="url"
+                                    step={step}
+                                    sendStep={sendStep}
+                                    disabledReason={disabledReason}
+                                />
+                            }
                             label="URL"
+                            disabledReason={disabledReason}
                         />
                         {step.url_matching && step.url_matching in URL_MATCHING_HINTS && (
                             <small>{URL_MATCHING_HINTS[step.url_matching]}</small>
                         )}
                     </div>
                 )}
+                {step.event === '$screen' && (
+                    <ScreenNameField step={step} sendStep={sendStep} disabledReason={disabledReason} />
+                )}
 
                 <div className="mt-4 deprecated-space-y-2">
                     <LemonLabel>Filters</LemonLabel>
                     <PropertyFilters
-                        propertyFilters={step.properties}
+                        propertyFilters={
+                            step.event === '$screen'
+                                ? step.properties?.filter((p) => !isScreenNameFilter(p))
+                                : step.properties
+                        }
                         pageKey={identifier}
                         eventNames={step.event ? [step.event] : []}
                         taxonomicGroupTypes={[...DEFAULT_TAXONOMIC_GROUP_TYPES, ...groupsTaxonomicTypes]}
                         onChange={(properties) => {
+                            const screenNameFilter =
+                                step.event === '$screen'
+                                    ? (step.properties?.filter((p) => isScreenNameFilter(p)) ?? [])
+                                    : []
                             sendStep({
                                 ...step,
-                                properties: properties as [],
+                                properties: [...screenNameFilter, ...(properties as [])] as AnyPropertyFilter[],
                             })
                         }}
                         showConditionBadge
+                        disabledReason={disabledReason ?? undefined}
                     />
                 </div>
             </div>
@@ -128,7 +177,8 @@ function Option({
     label,
     placeholder = 'Specify a value to match on this',
     caption,
-    labelExtra: extra_options,
+    labelExtra,
+    disabledReason,
 }: {
     step: ActionStepType
     sendStep: (stepToSend: ActionStepType) => void
@@ -137,6 +187,7 @@ function Option({
     labelExtra?: JSX.Element | string
     placeholder?: string
     caption?: JSX.Element | string
+    disabledReason?: string
 }): JSX.Element {
     const onOptionChange = (val: string): void => {
         sendStep({
@@ -149,7 +200,7 @@ function Option({
         <div className="deprecated-space-y-1">
             <div className="flex flex-wrap gap-1">
                 <LemonLabel>{label}</LemonLabel>
-                {extra_options}
+                {labelExtra}
             </div>
             {caption && <div className="action-step-caption">{caption}</div>}
             <LemonInput
@@ -158,6 +209,7 @@ function Option({
                 onChange={onOptionChange}
                 value={step[item] || ''}
                 placeholder={placeholder}
+                disabledReason={disabledReason}
             />
         </div>
     )
@@ -175,10 +227,12 @@ function AutocaptureFields({
     step,
     actionId,
     sendStep,
+    disabledReason,
 }: {
     step: ActionStepType
     sendStep: (stepToSend: ActionStepType) => void
     actionId: number
+    disabledReason?: string
 }): JSX.Element {
     const onSelectElement = (): void => {
         LemonDialog.open({
@@ -200,7 +254,13 @@ function AutocaptureFields({
     return (
         <div className="deprecated-space-y-4">
             <div className="flex items-center gap-2">
-                <LemonButton size="small" type="secondary" onClick={onSelectElement} sideIcon={<IconOpenInApp />}>
+                <LemonButton
+                    size="small"
+                    type="secondary"
+                    onClick={onSelectElement}
+                    sideIcon={<IconOpenInApp />}
+                    disabledReason={disabledReason}
+                >
                     Select element on site
                 </LemonButton>
                 <Link to={`${learnMoreLink}#1-autocapture`} target="_blank">
@@ -211,15 +271,30 @@ function AutocaptureFields({
                 step={step}
                 sendStep={sendStep}
                 item="text"
-                labelExtra={<StringMatchingSelection field="text" step={step} sendStep={sendStep} />}
+                labelExtra={
+                    <StringMatchingSelection
+                        field="text"
+                        step={step}
+                        sendStep={sendStep}
+                        disabledReason={disabledReason}
+                    />
+                }
                 label="Element text"
+                disabledReason={disabledReason}
             />
             <AndSeparator />
             <Option
                 step={step}
                 sendStep={sendStep}
                 item="href"
-                labelExtra={<StringMatchingSelection field="href" step={step} sendStep={sendStep} />}
+                labelExtra={
+                    <StringMatchingSelection
+                        field="href"
+                        step={step}
+                        sendStep={sendStep}
+                        disabledReason={disabledReason}
+                    />
+                }
                 label="Element link target"
                 caption={
                     <>
@@ -227,6 +302,7 @@ function AutocaptureFields({
                         matched.
                     </>
                 }
+                disabledReason={disabledReason}
             />
             {step['tag_name'] ? (
                 <>
@@ -243,6 +319,7 @@ function AutocaptureFields({
                                 instead. This field will disappear when cleared.
                             </span>
                         }
+                        disabledReason={disabledReason}
                     />
                 </>
             ) : undefined}
@@ -259,15 +336,24 @@ function AutocaptureFields({
                         <Link to={`${learnMoreLink}#matching-selectors`}>Learn more in Docs.</Link>
                     </span>
                 }
+                disabledReason={disabledReason}
             />
             <AndSeparator />
             <Option
                 step={step}
                 sendStep={sendStep}
                 item="url"
-                labelExtra={<StringMatchingSelection field="url" step={step} sendStep={sendStep} />}
+                labelExtra={
+                    <StringMatchingSelection
+                        field="url"
+                        step={step}
+                        sendStep={sendStep}
+                        disabledReason={disabledReason}
+                    />
+                }
                 label="Page URL"
                 caption="The page on which the interaction occurred."
+                disabledReason={disabledReason}
             />
             {step?.url_matching && step.url_matching in URL_MATCHING_HINTS && (
                 <small>{URL_MATCHING_HINTS[step.url_matching]}</small>
@@ -279,21 +365,21 @@ function AutocaptureFields({
 function TypeSwitcher({
     step,
     sendStep,
+    disabledReason,
 }: {
     step: ActionStepType
     sendStep: (stepToSend: ActionStepType) => void
+    disabledReason?: string
 }): JSX.Element {
     const handleChange = (type: string): void => {
-        if (type === '$autocapture') {
-            sendStep({ ...step, event: '$autocapture' })
-        } else if (type === 'event') {
-            sendStep({ ...step, event: null })
-        } else if (type === '$pageview') {
-            sendStep({
-                ...step,
-                event: '$pageview',
-                url: step.url,
-            })
+        const overrides: Record<string, Partial<ActionStepType>> = {
+            $autocapture: { event: '$autocapture' },
+            event: { event: null },
+            $pageview: { event: '$pageview' },
+            $screen: { event: '$screen', url: null, url_matching: null },
+        }
+        if (type in overrides) {
+            sendStep({ ...step, ...overrides[type] })
         }
     }
 
@@ -302,7 +388,10 @@ function TypeSwitcher({
             <LemonSegmentedButton
                 onChange={handleChange}
                 value={
-                    step.event === '$autocapture' || step.event === '$pageview' || step.event === undefined
+                    step.event === '$autocapture' ||
+                    step.event === '$pageview' ||
+                    step.event === '$screen' ||
+                    step.event === undefined
                         ? step.event
                         : 'event'
                 }
@@ -311,16 +400,25 @@ function TypeSwitcher({
                         value: '$pageview',
                         label: 'Pageview',
                         'data-attr': 'action-type-pageview',
+                        disabledReason,
                     },
                     {
                         value: '$autocapture',
                         label: 'Autocapture',
                         'data-attr': 'action-type-autocapture',
+                        disabledReason,
+                    },
+                    {
+                        value: '$screen',
+                        label: 'Screen',
+                        'data-attr': 'action-type-screen',
+                        disabledReason,
                     },
                     {
                         value: 'event',
                         label: 'Other events',
                         'data-attr': 'action-type-other',
+                        disabledReason,
                     },
                 ]}
                 fullWidth
@@ -330,14 +428,81 @@ function TypeSwitcher({
     )
 }
 
+function ScreenNameField({
+    step,
+    sendStep,
+    disabledReason,
+}: {
+    step: ActionStepType
+    sendStep: (stepToSend: ActionStepType) => void
+    disabledReason?: string
+}): JSX.Element {
+    const existingFilter = step.properties?.find(isScreenNameFilter)
+    const screenName = (existingFilter && 'value' in existingFilter ? (existingFilter.value as string) : '') ?? ''
+    const operator: ScreenNameMatching =
+        existingFilter && 'operator' in existingFilter
+            ? (existingFilter.operator as ScreenNameMatching)
+            : PropertyOperator.IContains
+
+    const setFilter = (name: string, op: ScreenNameMatching): void => {
+        const otherProperties = (step.properties || []).filter((p) => !isScreenNameFilter(p))
+        sendStep({
+            ...step,
+            properties: [
+                ...otherProperties,
+                {
+                    key: SCREEN_NAME_PROPERTY,
+                    value: name,
+                    operator: op as PropertyOperator,
+                    type: PropertyFilterType.Event,
+                },
+            ],
+        })
+    }
+
+    const clearFilter = (): void => {
+        sendStep({ ...step, properties: (step.properties || []).filter((p) => !isScreenNameFilter(p)) })
+    }
+
+    return (
+        <div className="deprecated-space-y-1">
+            <div className="flex flex-wrap gap-1">
+                <LemonLabel>Screen name</LemonLabel>
+                <div className="flex flex-1 justify-end">
+                    <LemonSegmentedButton
+                        onChange={(value) => setFilter(screenName, value as ScreenNameMatching)}
+                        value={operator}
+                        options={Object.entries(SCREEN_NAME_MATCHING_LABEL).map(([value, label]) => ({
+                            value,
+                            label,
+                            disabledReason,
+                        }))}
+                        size="xsmall"
+                    />
+                </div>
+            </div>
+            <LemonInput
+                data-attr="edit-action-screen-name-input"
+                allowClear
+                onChange={(val) => (val ? setFilter(val, operator) : clearFilter())}
+                value={screenName}
+                placeholder="e.g. HomeScreen, Settings"
+                disabledReason={disabledReason}
+            />
+        </div>
+    )
+}
+
 function StringMatchingSelection({
     field,
     step,
     sendStep,
+    disabledReason,
 }: {
     field: 'url' | 'text' | 'href'
     step: ActionStepType
     sendStep: (stepToSend: ActionStepType) => void
+    disabledReason?: string
 }): JSX.Element {
     const key = `${field}_matching` as keyof ActionStepType
     const handleURLMatchChange = (value: string): void => {
@@ -354,14 +519,17 @@ function StringMatchingSelection({
                     {
                         value: 'exact',
                         label: 'matches exactly',
+                        disabledReason,
                     },
                     {
                         value: 'regex',
                         label: 'matches regex',
+                        disabledReason,
                     },
                     {
                         value: 'contains',
                         label: 'contains',
+                        disabledReason,
                     },
                 ]}
                 size="xsmall"

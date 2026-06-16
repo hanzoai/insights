@@ -1,1 +1,37 @@
 # If a file is set here, then PRs will require that team's approval to get that code merged.
+
+# WE DO NOT USE CODEOWNERS FOR MANAGING ORDINARY RISK.
+
+# Risk of outages, incidents, and operational difficulty
+# are not sufficient reason to add a region of the codebase
+# to the CODEOWNERS file. Handle these by de-risking your
+# code, or by modifying CI to suit your products needs.
+
+# Adding entries to the codeowners file is an anti-social
+# and anti-insights-values thing to do. It must have extraordinary
+# justification. If you are not _certain_ there is _no other way_
+# to manage the risk you're thinking about, do not add an entry.
+
+# ClickHouse team owns Clickhouse migrations
+insights/clickhouse/migrations/** @hanzoai/clickhouse
+
+# InsightsQL team owns InsightsQL changes
+insights/insightsql/** @hanzoai/insightsql
+
+# Being open source brings us unwanted problems because Github Actions are untrusted and inherently unsafe
+# so we have to be extra careful with changes here. Let's have the security team own these checks.
+.github/workflows/ci-security.yaml @hanzoai/team-security
+.github/workflows/codeql.yml @hanzoai/team-security
+
+# This workflow runs on the `pull_request_target` event so that it can run without needing a GitHub org member to explicitly approve it.
+# We must be careful to only execute code from this repo's default branch, and never execute code from the PR's branch.
+.github/workflows/auto-assign-reviewers.yml @hanzoai/team-security
+.github/scripts/assign-reviewers.js @hanzoai/team-security
+
+# And of course modifying this file can bring us problems so let's have the security team own it.
+# This does not affect CODEOWNERS-soft which is used for assigning non-required reviewers and it's much safer to change.
+CODEOWNERS @hanzoai/team-security
+
+# Critical authentication logic
+insights/api/authentication.py @hanzoai/team-security
+insights/auth.py @hanzoai/team-security

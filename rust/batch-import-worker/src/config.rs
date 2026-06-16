@@ -1,4 +1,5 @@
 use crate::job::backoff::BackoffPolicy;
+use common_continuous_profiling::ContinuousProfilingConfig;
 use envconfig::Envconfig;
 
 // Re-export KafkaConfig for testing
@@ -6,6 +7,9 @@ pub use common_kafka::config::KafkaConfig;
 
 #[derive(Envconfig, Clone)]
 pub struct Config {
+    #[envconfig(nested = true)]
+    pub continuous_profiling: ContinuousProfilingConfig,
+
     // ~100MB
     #[envconfig(default = "100000000")]
     pub chunk_size: usize,
@@ -19,7 +23,7 @@ pub struct Config {
     #[envconfig(nested = true)]
     pub kafka: KafkaConfig,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
 
     // Rust service connect directly to postgres, not via pgbouncer, so we keep this low
@@ -70,6 +74,10 @@ pub struct Config {
     pub group_memory_cache_capacity: u64,
     #[envconfig(from = "GROUP_MEMORY_CACHE_TTL_SECONDS", default = "3600")]
     pub group_memory_cache_ttl_seconds: u64,
+
+    // Force disable person processing for specific token:distinct_id pairs
+    #[envconfig(from = "FORCE_DISABLE_PERSON_PROCESSING", default = "")]
+    pub force_disable_person_processing: String,
 }
 
 impl Config {

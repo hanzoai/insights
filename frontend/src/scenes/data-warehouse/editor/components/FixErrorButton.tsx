@@ -1,16 +1,16 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
-import { IconMagicWand, IconWarning } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconSparkles, IconWarning } from '@hanzo/icons'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 
 import { fixSQLErrorsLogic } from '../fixSQLErrorsLogic'
-import { multitabEditorLogic } from '../multitabEditorLogic'
+import { sqlEditorLogic } from '../sqlEditorLogic'
 
 interface FixErrorButtonProps {
     type: LemonButtonProps['type']
@@ -20,15 +20,15 @@ interface FixErrorButtonProps {
 }
 
 export function FixErrorButton({ type, size, contentOverride, source }: FixErrorButtonProps): JSX.Element {
-    const { queryInput, fixErrorsError, metadata } = useValues(multitabEditorLogic)
-    const { fixErrors: fixHogQLErrors } = useActions(multitabEditorLogic)
+    const { queryInput, fixErrorsError, metadata } = useValues(sqlEditorLogic)
+    const { fixErrors: fixInsightsQLErrors } = useActions(sqlEditorLogic)
     const { responseError } = useValues(dataNodeLogic)
-    const { responseLoading: fixHogQLErrorsLoading } = useValues(fixSQLErrorsLogic)
+    const { responseLoading: fixInsightsQLErrorsLoading } = useValues(fixSQLErrorsLogic)
 
     const queryError = responseError || metadata?.errors?.map((n) => n.message)?.join('. ') || undefined
 
     const icon = useMemo(() => {
-        if (fixHogQLErrorsLoading) {
+        if (fixInsightsQLErrorsLoading) {
             return <Spinner />
         }
 
@@ -36,8 +36,8 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             return <IconWarning className="text-warning" />
         }
 
-        return <IconMagicWand />
-    }, [fixHogQLErrorsLoading, fixErrorsError])
+        return <IconSparkles />
+    }, [fixInsightsQLErrorsLoading, fixErrorsError])
 
     const disabledReason = useMemo(() => {
         if (!queryError) {
@@ -52,7 +52,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
     }, [queryError, fixErrorsError])
 
     const content = useMemo(() => {
-        if (fixHogQLErrorsLoading) {
+        if (fixInsightsQLErrorsLoading) {
             return 'Fixing...'
         }
 
@@ -60,8 +60,8 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             return "Can't fix"
         }
 
-        return contentOverride ?? 'Fix errors'
-    }, [fixErrorsError, fixHogQLErrorsLoading, contentOverride])
+        return contentOverride ?? 'Fix errors with AI'
+    }, [fixErrorsError, fixInsightsQLErrorsLoading, contentOverride])
 
     return (
         <LemonButton
@@ -70,8 +70,8 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             disabledReason={disabledReason}
             icon={icon}
             onClick={() => {
-                fixHogQLErrors(queryInput ?? '', queryError)
-                posthog.capture(`sql-editor-fix-error-click`, { source })
+                fixInsightsQLErrors(queryInput ?? '', queryError)
+                insights.capture(`sql-editor-fix-error-click`, { source })
             }}
         >
             {content}

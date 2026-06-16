@@ -59,7 +59,7 @@ const BasicTemplate: StoryFn<ToolbarStoryProps> = (props) => {
         userIntent: undefined,
         dataAttributes: ['data-attr'],
         apiURL: '/',
-        userEmail: 'foobar@posthog.com',
+        userEmail: 'foobar@hanzo.ai',
     }
     useToolbarStyles()
 
@@ -88,7 +88,6 @@ const BasicTemplate: StoryFn<ToolbarStoryProps> = (props) => {
             '/api/projects/@current/actions/': listActionsAPIResponse,
             '/api/projects/@current/web_experiments/': listExperimentsAPIResponse,
             '/api/environments/@current/web_vitals/': listWebVitalsAPIResponse,
-            '/api/users/@me/hedgehog_config/': {},
         },
     })
 
@@ -150,8 +149,8 @@ export const Experiments = (): JSX.Element => {
 }
 
 export const ExperimentsDisabledInParent = (): JSX.Element => {
-    // fake that the host site posthog config disables web experiments
-    window.parent.posthog = { config: { disable_web_experiments: true } }
+    // fake that the host site insights config disables web experiments
+    window.parent.insights = { config: { disable_web_experiments: true } }
     return <BasicTemplate menu="experiments" />
 }
 

@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useAsyncActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconTrash } from '@posthog/icons'
+import { IconInfo, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -12,7 +12,7 @@ import {
     LemonSelectProps,
     LemonTable,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
@@ -21,6 +21,7 @@ import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { ProfileBubbles, ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { capitalizeFirstLetter, fullName } from 'lib/utils'
+import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -38,14 +39,22 @@ import {
 import { AccessControlLogicProps, accessControlLogic } from './accessControlLogic'
 
 export function AccessControlObject(props: AccessControlLogicProps): JSX.Element | null {
-    const { canEditAccessControls, humanReadableResource } = useValues(accessControlLogic(props))
+    const { canEditAccessControls, humanReadableResource, resource } = useValues(accessControlLogic(props))
 
     const suffix = `this ${humanReadableResource}`
+    const tooltipText = getAccessControlTooltip(resource)
 
     return (
         <BindLogic logic={accessControlLogic} props={props}>
             <div>
-                <h2>{props.title}</h2>
+                <h2 className="flex items-center gap-2">
+                    {props.title}
+                    {tooltipText && (
+                        <Tooltip title={tooltipText}>
+                            <IconInfo className="text-base text-muted" />
+                        </Tooltip>
+                    )}
+                </h2>
                 <p>{props.description}</p>
                 <PayGateMini feature={AvailableFeature.ADVANCED_PERMISSIONS}>
                     <div className="deprecated-space-y-6">
@@ -149,7 +158,7 @@ function AccessControlObjectUsers(): JSX.Element | null {
                         </p>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2">
+                    <div className="ph-no-capture flex items-center gap-2">
                         <ProfilePicture user={member(ac as AccessControlTypeMember)?.user} />
                         <div>
                             <p className="font-medium mb-0">
@@ -368,7 +377,7 @@ function SimplLevelComponent(props: {
     onChange: (newValue: AccessControlLevel) => void
     disabled?: boolean
 }): JSX.Element | null {
-    const { canEditAccessControls } = useValues(accessControlLogic)
+    const { canEditAccessControls, minimumAccessLevel } = useValues(accessControlLogic)
 
     return (
         <LemonSelect
@@ -377,10 +386,16 @@ function SimplLevelComponent(props: {
             value={props.level}
             onChange={(newValue) => props.onChange(newValue as AccessControlLevel)}
             disabledReason={!canEditAccessControls || props.disabled ? 'You cannot edit this' : undefined}
-            options={props.levels.map((level) => ({
-                value: level,
-                label: capitalizeFirstLetter(level ?? ''),
-            }))}
+            options={props.levels.map((level) => {
+                const isDisabled = minimumAccessLevel
+                    ? props.levels.indexOf(level) < props.levels.indexOf(minimumAccessLevel)
+                    : false
+                return {
+                    value: level,
+                    label: capitalizeFirstLetter(level ?? ''),
+                    disabledReason: isDisabled ? 'Not available for this resource type' : undefined,
+                }
+            })}
         />
     )
 }

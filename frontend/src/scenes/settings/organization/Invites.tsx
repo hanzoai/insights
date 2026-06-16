@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -85,7 +85,7 @@ export function InvitesTable(): JSX.Element {
             key: 'target_email',
             render: function TargetEmail(_, invite): JSX.Element | string {
                 return invite.target_email ? (
-                    <div className="flex items-center">
+                    <div className="ph-no-capture flex items-center">
                         {invite.target_email}
                         {invite.first_name ? ` (${invite.first_name})` : ''}
                     </div>

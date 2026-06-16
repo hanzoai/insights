@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { teamLogic } from 'scenes/teamLogic'
@@ -16,7 +16,7 @@ import { Breadcrumb, ProjectTreeRef } from '~/types'
 import type { linkLogicType } from './linkLogicType'
 import { linksLogic } from './linksLogic'
 
-export type AvailableDomain = 'phog.gg' | 'postho.gg' | 'hog.gg' | 'custom'
+export type AvailableDomain = 'go.hanzo.ai' | 'link.hanzo.ai' | 's.hanzo.ai' | 'custom'
 export type DomainDefinition = {
     label: string
     value: AvailableDomain
@@ -25,13 +25,13 @@ export type DomainDefinition = {
 }
 
 export const AVAILABLE_DOMAINS: DomainDefinition[] = [
-    { label: 'phog.gg', value: 'phog.gg' },
-    { label: 'postho.gg', value: 'postho.gg', soon: true },
-    { label: 'hog.gg', value: 'hog.gg', soon: true },
+    { label: 'go.hanzo.ai', value: 'go.hanzo.ai' },
+    { label: 'link.hanzo.ai', value: 'link.hanzo.ai', soon: true },
+    { label: 's.hanzo.ai', value: 's.hanzo.ai', soon: true },
     { label: 'Custom (BYOD)', value: 'custom', soon: true, paid: true },
 ]
 
-export const DEFAULT_SHORT_LINK_DOMAIN = 'phog.gg'
+export const DEFAULT_SHORT_LINK_DOMAIN = 'go.hanzo.ai'
 export const NEW_LINK: Partial<LinkType> = {
     id: 'new',
     short_link_domain: DEFAULT_SHORT_LINK_DOMAIN,
@@ -114,10 +114,12 @@ export const linkLogic = kea<linkLogicType>([
                     key: 'Link',
                     name: 'Link Management',
                     path: urls.links(),
+                    iconType: 'link',
                 },
                 {
                     key: ['Link', link.id || 'new'],
                     name: `${link.short_code} (${link.redirect_url})`,
+                    iconType: 'link',
                 },
             ],
         ],

@@ -1,4 +1,5 @@
 import { connect, kea, path, selectors } from 'kea'
+import { objectsEqual } from 'kea-test-utils'
 
 import { dayjs } from 'lib/dayjs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -6,18 +7,18 @@ import { isAddonVisible } from 'scenes/billing/billing-utils'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { BillingSpendResponse, billingSpendLogic } from 'scenes/billing/billingSpendLogic'
 import { BillingUsageResponse, billingUsageLogic } from 'scenes/billing/billingUsageLogic'
-import { hogFunctionsListLogic } from 'scenes/hog-functions/list/hogFunctionsListLogic'
+import { insightsFunctionsListLogic } from 'scenes/insights-functions/list/insightsFunctionsListLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { BillingType, HogFunctionType, TeamType } from '~/types'
+import { BillingType, InsightsFunctionType, TeamType } from '~/types'
 
 import type { maxBillingContextLogicType } from './maxBillingContextLogicType'
 
 export const DEFAULT_BILLING_DATE_FROM = dayjs().subtract(1, 'month').subtract(1, 'day').format('YYYY-MM-DD')
 export const DEFAULT_BILLING_DATE_TO = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 
-// Simplified addon information for Max context
+// Simplified addon information for AI assistant context
 export interface MaxAddonInfo {
     type: string
     name: string
@@ -32,7 +33,7 @@ export interface MaxAddonInfo {
     projected_amount_usd_with_limit?: string | null
 }
 
-// Simplified product information for Max context
+// Simplified product information for AI assistant context
 export interface MaxProductInfo {
     type: string
     name: string
@@ -118,7 +119,7 @@ export const billingToMaxContext = (
     billing: BillingType | null,
     featureFlags: Record<string, any>,
     currentTeam: TeamType,
-    destinations: HogFunctionType[],
+    destinations: InsightsFunctionType[],
     usageResponse?: BillingUsageResponse | null,
     spendResponse?: BillingSpendResponse | null
 ): MaxBillingContext | null => {
@@ -270,8 +271,8 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
             ['currentTeam'],
             featureFlagLogic,
             ['featureFlags'],
-            hogFunctionsListLogic({ type: 'destination' }),
-            ['hogFunctions'],
+            insightsFunctionsListLogic({ type: 'destination' }),
+            ['insightsFunctions'],
         ],
     })),
     selectors({
@@ -283,7 +284,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 s.isAdminOrOwner,
                 s.currentTeam,
                 s.featureFlags,
-                s.hogFunctions,
+                s.insightsFunctions,
             ],
             (
                 billing: BillingType | null,
@@ -292,7 +293,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 isAdminOrOwner: boolean,
                 currentTeam: TeamType,
                 featureFlags: Record<string, any>,
-                destinations: HogFunctionType[]
+                destinations: InsightsFunctionType[]
             ): MaxBillingContext | null => {
                 if (!isAdminOrOwner) {
                     return null
@@ -306,22 +307,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                     billingSpendResponse
                 )
             },
-            {
-                equalityCheck: (prev: any[], next: any[]) => {
-                    if (!prev || !next) {
-                        return prev === next
-                    }
-                    return (
-                        prev[0] === next[0] /* billing */ &&
-                        prev[1] === next[1] /* billingUsageResponse */ &&
-                        prev[2] === next[2] /* billingSpendResponse */ &&
-                        prev[3] === next[3] /* isAdminOrOwner */ &&
-                        prev[4]?.autocapture_opt_out === next[4]?.autocapture_opt_out /* currentTeam */ &&
-                        prev[5] === next[5] /* featureFlags */ &&
-                        prev[6]?.length === next[6]?.length /* destinations */
-                    )
-                },
-            },
+            { resultEqualityCheck: objectsEqual },
         ],
     }),
 ])

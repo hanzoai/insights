@@ -19,7 +19,7 @@ impl GroupType {
     {
         sqlx::query_as!(
             Self,
-            "SELECT id, group_type, group_type_index, team_id FROM posthog_grouptypemapping WHERE team_id = $1 AND group_type_index = $2",
+            "SELECT id, group_type, group_type_index, team_id FROM insights_grouptypemapping WHERE team_id = $1 AND group_type_index = $2",
             team_id,
             index
         )
@@ -37,7 +37,7 @@ impl GroupType {
     {
         sqlx::query_as!(
             Self,
-            "SELECT id, group_type, group_type_index, team_id FROM posthog_grouptypemapping WHERE team_id = $1 AND group_type = $2",
+            "SELECT id, group_type, group_type_index, team_id FROM insights_grouptypemapping WHERE team_id = $1 AND group_type = $2",
             team_id,
             name
         )
@@ -51,7 +51,7 @@ impl GroupType {
     {
         sqlx::query_as!(
             Self,
-            "SELECT id, group_type, group_type_index, team_id FROM posthog_grouptypemapping WHERE team_id = $1",
+            "SELECT id, group_type, group_type_index, team_id FROM insights_grouptypemapping WHERE team_id = $1",
             team_id
         )
         .fetch_all(e)

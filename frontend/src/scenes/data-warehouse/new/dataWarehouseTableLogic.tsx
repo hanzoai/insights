@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
@@ -69,13 +69,13 @@ export const dataWarehouseTableLogic = kea<dataWarehouseTableLogicType>([
         createTableSuccess: async ({ table }) => {
             lemonToast.success(<>Table {table.name} created</>)
             actions.loadDatabase()
-            router.actions.replace(urls.dataPipelines('sources'))
+            router.actions.replace(urls.sources())
         },
         updateTableSuccess: async ({ table }) => {
             lemonToast.success(<>Table {table.name} updated</>)
             actions.editingTable(false)
             actions.loadDatabase()
-            router.actions.replace(urls.dataPipelines('sources'))
+            router.actions.replace(urls.sources())
         },
         loadTableSuccess: async ({ table }) => {
             if (props.id) {
@@ -105,8 +105,8 @@ export const dataWarehouseTableLogic = kea<dataWarehouseTableLogicType>([
         table: {
             defaults: { ...NEW_WAREHOUSE_TABLE } as DataWarehouseTable,
             errors: ({ name, url_pattern, credential, format }) => {
-                const HOGQL_TABLE_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/
-                if (!HOGQL_TABLE_NAME_REGEX.test(name)) {
+                const INSIGHTSQL_TABLE_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/
+                if (!INSIGHTSQL_TABLE_NAME_REGEX.test(name)) {
                     return {
                         name: 'Invalid table name. Table names must start with a letter or underscore and contain only alphanumeric characters or underscores.',
                     }

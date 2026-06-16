@@ -43,7 +43,7 @@ const meta: Meta<typeof ErrorDisplay> = {
                                     },
                                 ],
                             },
-                            symbol_set_ref: 'https://static.posthog.com/chunks.js',
+                            symbol_set_ref: 'https://static.hanzo.ai/chunks.js',
                         },
                     ],
                 },
@@ -59,8 +59,8 @@ function errorProperties(properties: Record<string, any>): EventType['properties
         $os_version: '10.0',
         $browser: 'Chrome',
         $device_type: 'Desktop',
-        $current_url: 'https://app.posthog.com/home',
-        $host: 'app.posthog.com',
+        $current_url: 'https://insights.hanzo.ai/home',
+        $host: 'insights.hanzo.ai',
         $pathname: '/home',
         $browser_version: 113,
         $browser_language: 'es-ES',
@@ -81,15 +81,15 @@ function errorProperties(properties: Record<string, any>): EventType['properties
             project: '00000000-0000-0000-1847-88f0ffa23444',
             organization: '00000000-0000-0000-a050-5d4557279956',
             customer: 'the-customer',
-            instance: 'https://app.posthog.com',
+            instance: 'https://insights.hanzo.ai',
         },
         $exception_fingerprint: 'Error',
-        $exception_personURL: 'https://app.posthog.com/person/the-person-id',
+        $exception_personURL: 'https://insights.hanzo.ai/person/the-person-id',
         $sentry_event_id: 'id-from-the-sentry-integration',
         $sentry_exception: {
             values: [
                 {
-                    value: "DB::Exception: There was an error on [localhost:9000]: Code: 701. DB::Exception: Requested cluster 'posthog_single_shard' not found. (CLUSTER_DOESNT_EXIST) (version 23.11.2.11 (official build)). Stack trace: 0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c4fd597 in /usr/bin/clickhouse 1. DB::DDLQueryStatusSource::generate() @ 0x00000000113205f8 in /usr/bin/clickhouse 2. DB::ISource::tryGenerate() @ 0x0000000012290275 in /usr/bin/clickhouse 3. DB::ISource::work() @ 0x000000001228fcc3 in /usr/bin/clickhouse 4. DB::ExecutionThreadContext::executeTask() @ 0x00000000122a78ba in /usr/bin/clickhouse 5. DB::PipelineExecutor::executeStepImpl(unsigned long, std::atomic<bool>*) @ 0x000000001229e5d0 in /usr/bin/clickhouse 6. DB::PipelineExecutor::execute(unsigned long, bool) @ 0x000000001229d860 in /usr/bin/clickhouse 7. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<DB::PullingAsyncPipelineExecutor::pull(DB::Chunk&, unsigned long)::$_0>(DB::PullingAsyncPipelineExecutor::pull(DB::Chunk&, unsigned long)::$_0&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x00000000122ab1cf in /usr/bin/clickhouse 8. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c5e45d3 in /usr/bin/clickhouse 9. ? @ 0x00007429a8071609 in ? 10. ? @ 0x00007429a7f96133 in ?",
+                    value: "DB::Exception: There was an error on [localhost:9000]: Code: 701. DB::Exception: Requested cluster 'insights_single_shard' not found. (CLUSTER_DOESNT_EXIST) (version 23.11.2.11 (official build)). Stack trace: 0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c4fd597 in /usr/bin/clickhouse 1. DB::DDLQueryStatusSource::generate() @ 0x00000000113205f8 in /usr/bin/clickhouse 2. DB::ISource::tryGenerate() @ 0x0000000012290275 in /usr/bin/clickhouse 3. DB::ISource::work() @ 0x000000001228fcc3 in /usr/bin/clickhouse 4. DB::ExecutionThreadContext::executeTask() @ 0x00000000122a78ba in /usr/bin/clickhouse 5. DB::PipelineExecutor::executeStepImpl(unsigned long, std::atomic<bool>*) @ 0x000000001229e5d0 in /usr/bin/clickhouse 6. DB::PipelineExecutor::execute(unsigned long, bool) @ 0x000000001229d860 in /usr/bin/clickhouse 7. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<DB::PullingAsyncPipelineExecutor::pull(DB::Chunk&, unsigned long)::$_0>(DB::PullingAsyncPipelineExecutor::pull(DB::Chunk&, unsigned long)::$_0&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x00000000122ab1cf in /usr/bin/clickhouse 8. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c5e45d3 in /usr/bin/clickhouse 9. ? @ 0x00007429a8071609 in ? 10. ? @ 0x00007429a7f96133 in ?",
                     type: 'Error',
                     mechanism: {
                         type: 'onerror',
@@ -101,7 +101,7 @@ function errorProperties(properties: Record<string, any>): EventType['properties
                         frames: [
                             {
                                 column: 0,
-                                source: 'https://app.posthog.com/home',
+                                source: 'https://insights.hanzo.ai/home',
                                 resolved_name: '?',
                                 in_app: true,
                                 line: 0,
@@ -114,11 +114,11 @@ function errorProperties(properties: Record<string, any>): EventType['properties
         $sentry_exception_message: 'ResizeObserver loop limit exceeded',
         $sentry_exception_type: 'Error',
         $sentry_tags: {
-            'PostHog Person URL': 'https://app.posthog.com/person/the-person-id',
-            'PostHog Recording URL': 'https://app.posthog.com/replay/the-session-id?t=866',
+            'Insights Person URL': 'https://insights.hanzo.ai/person/the-person-id',
+            'Insights Recording URL': 'https://insights.hanzo.ai/replay/the-session-id?t=866',
         },
         $sentry_url:
-            'https://sentry.io/organizations/posthog/issues/?project=the-sentry-project-id&query=the-sentry-id',
+            'https://sentry.io/organizations/insights/issues/?project=the-sentry-project-id&query=the-sentry-id',
         $session_id: 'the-session-id',
         $window_id: 'the-window-id',
         $pageview_id: 'the-pageview-id',
@@ -213,13 +213,13 @@ export function ChainedErrorStack(): JSX.Element {
                             type: 'resolved',
                             frames: [
                                 {
-                                    source: '/posthog-python/example2.py',
+                                    source: '/insights-python/example2.py',
                                     resolved_name: 'will_raise',
                                     line: 33,
                                     in_app: true,
                                 },
                                 {
-                                    source: '/posthog-python/example2.py',
+                                    source: '/insights-python/example2.py',
                                     resolved_name: 'more_obfuscation',
                                     line: 29,
                                 },
@@ -234,13 +234,13 @@ export function ChainedErrorStack(): JSX.Element {
                             type: 'resolved',
                             frames: [
                                 {
-                                    source: '/Users/neilkakkar/Project/posthog-python/example2.py',
+                                    source: '/Users/neilkakkar/Project/insights-python/example2.py',
                                     resolved_name: '<module>',
                                     line: 37,
                                     in_app: true,
                                 },
                                 {
-                                    source: '/Users/neilkakkar/Project/posthog-python/example2.py',
+                                    source: '/Users/neilkakkar/Project/insights-python/example2.py',
                                     resolved_name: 'will_raise',
                                     line: 35,
                                     in_app: true,
@@ -312,7 +312,7 @@ export function LegacyEventProperties(): JSX.Element {
             eventProperties={errorProperties({
                 $exception_message: 'ResizeObserver loop limit exceeded',
                 $exception_type: 'Error',
-                $exception_personURL: 'https://app.posthog.com/person/the-person-id',
+                $exception_personURL: 'https://insights.hanzo.ai/person/the-person-id',
                 $exception_synthetic: true,
             })}
             eventId="error"

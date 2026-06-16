@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, props, reducers, se
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -20,6 +20,9 @@ export interface TwoFactorStatus {
     is_enabled: boolean
     backup_codes: string[]
     method: string | null
+    has_passkeys?: boolean
+    has_totp?: boolean
+    passkeys_enabled_for_2fa?: boolean
 }
 
 export interface TwoFactorLogicProps {

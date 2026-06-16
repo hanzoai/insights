@@ -1,6 +1,6 @@
 import { Attribute, ExtendedRegExpMatchArray } from '@tiptap/core'
 
-import { LemonButtonProps } from '@posthog/lemon-ui'
+import { LemonButtonProps } from '@hanzo/lemon-ui'
 
 import {
     JSONContent,
@@ -38,6 +38,9 @@ export type NotebookType = NotebookListItemType &
 export enum NotebookNodeType {
     Mention = RichContentNodeType.Mention,
     Query = 'ph-query',
+    Python = 'ph-python',
+    DuckSQL = 'ph-duck-sql',
+    InsightsQLSQL = 'ph-insightsql-sql',
     Recording = 'ph-recording',
     RecordingPlaylist = 'ph-recording-playlist',
     FeatureFlag = 'ph-feature-flag',
@@ -52,17 +55,25 @@ export enum NotebookNodeType {
     ReplayTimestamp = 'ph-replay-timestamp',
     Image = 'ph-image',
     PersonFeed = 'ph-person-feed',
-    Properties = 'ph-properties',
+    PersonProperties = 'ph-person-properties',
+    GroupProperties = 'ph-group-properties',
     Map = 'ph-map',
     Embed = 'ph-embed',
     Latex = 'ph-latex',
     TaskCreate = 'ph-task-create',
+    LLMTrace = 'ph-llm-trace',
+    Issues = 'ph-issues',
+    UsageMetrics = 'ph-usage-metrics',
+    ZendeskTickets = 'ph-zendesk-tickets',
+    RelatedGroups = 'ph-related-groups',
 }
 
 export type NotebookNodeResource = {
     attrs: Record<string, any>
     type: NotebookNodeType
 }
+
+export type NotebookNodeSettingsPlacement = 'inline' | 'left'
 
 export enum NotebookTarget {
     Popover = 'popover',
@@ -75,7 +86,7 @@ export type NotebookPopoverVisibility = 'hidden' | 'visible' | 'peek'
 
 export type CustomNotebookNodeAttributes = Record<string, any>
 
-export type CreatePostHogWidgetNodeOptions<T extends CustomNotebookNodeAttributes> = Omit<
+export type CreateInsightsWidgetNodeOptions<T extends CustomNotebookNodeAttributes> = Omit<
     NodeWrapperProps<T>,
     'updateAttributes'
 > & {
@@ -106,7 +117,7 @@ export type NodeWrapperProps<T extends CustomNotebookNodeAttributes> = Omit<Note
         autoHideMetadata?: boolean
         /** Expand the node if the component is clicked */
         expandOnClick?: boolean
-        settingsIcon?: JSX.Element | 'filter' | 'gear'
+        settingsPlacement?: NotebookNodeSettingsPlacement
     }
 
 export type NotebookNodeAttributes<T extends CustomNotebookNodeAttributes> = T & {

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
@@ -32,7 +32,7 @@ export function SurveyResponsesCollection(): JSX.Element | null {
     return (
         <div className="flex flex-col gap-1">
             <LemonField.Pure
-                info="Storing the response for any question requires at least version 1.240.0 or higher of posthog-js. Doesn't work with the mobile SDKs for now"
+                info="Storing the response for any question requires at least version 1.240.0 or higher of insights-js. Doesn't work with the mobile SDKs for now"
                 label={<h3 className="mb-0">Response collection</h3>}
             >
                 <LemonRadio

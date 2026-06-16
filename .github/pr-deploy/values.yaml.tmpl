@@ -4,7 +4,7 @@ ingress:
   enabled: false
 
 image:
-  repository: ghcr.io/posthog/posthog/posthog
+  repository: ghcr.io/hanzoai/insights
   pullPolicy: Always
 
 env:
@@ -13,7 +13,7 @@ env:
 - name: COMMIT_SHA
   value: $COMMIT_SHA
 
-siteUrl: https://$NAMESPACE.hedgehog-kitefin.ts.net
+siteUrl: https://$NAMESPACE.insights-kitefin.ts.net
 tailscale:
   enabled: true
   hostname: $NAMESPACE
@@ -31,12 +31,12 @@ kafka:
 postgresql:
   persistence:
     size: 10Gi
-  master:
+  main:
     nodeSelector:
       kubernetes.io/arch: amd64
 
 redis:
-  master:
+  main:
     persistence:
       size: 1Gi
     nodeSelector:

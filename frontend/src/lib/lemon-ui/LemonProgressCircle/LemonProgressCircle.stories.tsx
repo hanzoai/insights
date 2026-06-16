@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useEffect, useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
+import { IconGear } from '@hanzo/icons'
 
 import { LemonButton } from '../LemonButton'
 import { LemonCheckbox } from '../LemonCheckbox'
@@ -16,7 +16,7 @@ const meta: Meta<typeof LemonProgressCircle> = {
             description: {
                 component: `
 
-[Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/PostHog-Design-System-One?node-id=3139%3A1388)
+[Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/Insights-Design-System-One?node-id=3139%3A1388)
 
 Lemon Labels provide common styling and options for labeling form elements. They can be used directly but most commonly should be used via the \`Field\` component.
 

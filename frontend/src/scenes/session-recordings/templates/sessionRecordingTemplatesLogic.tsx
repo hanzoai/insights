@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -139,7 +139,7 @@ export const sessionReplayTemplatesLogic = kea<sessionReplayTemplatesLogicType>(
                             },
                         ],
                     },
-                    // TODO this should set order on the filter group after https://github.com/PostHog/posthog/pull/25701
+                    // TODO this should set order on the filter group after https://github.com/hanzoai/insights/pull/25701
                 }
                 return filterGroup
             },
@@ -156,7 +156,7 @@ export const sessionReplayTemplatesLogic = kea<sessionReplayTemplatesLogicType>(
     }),
     listeners(({ values, props }) => ({
         navigate: () => {
-            posthog.capture('session replay template used', {
+            insights.capture('session replay template used', {
                 template: props.template.key,
                 category: props.category,
             })

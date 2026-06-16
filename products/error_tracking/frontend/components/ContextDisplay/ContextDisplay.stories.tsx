@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonCard } from '@posthog/lemon-ui'
+import { LemonCard } from '@hanzo/lemon-ui'
 
 import { getAdditionalProperties, getExceptionAttributes } from 'lib/components/Errors/utils'
 

@@ -6,7 +6,7 @@ import subprocess
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from posthog.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
+from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
 
 filename = "frontend/src/taxonomy/core-filter-definitions-by-group.json"
 

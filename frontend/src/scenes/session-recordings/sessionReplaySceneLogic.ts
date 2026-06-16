@@ -1,14 +1,22 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
-import { actionToUrl, router, urlToAction } from 'kea-router'
+import { router } from 'kea-router'
 
+import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
+import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
+import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { Scene } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { ActivityScope, Breadcrumb, ReplayTabs } from '~/types'
 
 import type { sessionReplaySceneLogicType } from './sessionReplaySceneLogicType'
+
+export interface SessionReplaySceneLogicProps {
+    tabId?: string
+}
 
 export const humanFriendlyTabName = (tab: ReplayTabs): string => {
     switch (tab) {
@@ -17,7 +25,7 @@ export const humanFriendlyTabName = (tab: ReplayTabs): string => {
         case ReplayTabs.Playlists:
             return 'Collections'
         case ReplayTabs.Templates:
-            return 'Figure out what to watch'
+            return 'What to watch'
         case ReplayTabs.Settings:
             return 'Settings'
         default:
@@ -27,6 +35,7 @@ export const humanFriendlyTabName = (tab: ReplayTabs): string => {
 
 export const sessionReplaySceneLogic = kea<sessionReplaySceneLogicType>([
     path(() => ['scenes', 'session-recordings', 'sessionReplaySceneLogic']),
+    tabAwareScene(),
     actions({
         setTab: (tab: ReplayTabs = ReplayTabs.Home) => ({ tab }),
         hideNewBadge: true,
@@ -55,9 +64,9 @@ export const sessionReplaySceneLogic = kea<sessionReplaySceneLogicType>([
         },
     })),
 
-    actionToUrl(({ values }) => {
+    tabAwareActionToUrl(({ values }) => {
         return {
-            setTab: () => [urls.replay(values.tab), router.values.searchParams],
+            setTab: () => [urls.replay(values.tab), router.values.searchParams, router.values.hashParams],
         }
     }),
 
@@ -69,13 +78,15 @@ export const sessionReplaySceneLogic = kea<sessionReplaySceneLogicType>([
                 if (tab !== ReplayTabs.Home) {
                     breadcrumbs.push({
                         key: Scene.Replay,
-                        name: 'Replay',
+                        name: 'Session Replay',
                         path: urls.replay(),
+                        iconType: sceneConfigurations[Scene.Replay].iconType || 'default_icon_type',
                     })
                 }
                 breadcrumbs.push({
                     key: tab,
                     name: humanFriendlyTabName(tab),
+                    iconType: sceneConfigurations[Scene.Replay].iconType || 'default_icon_type',
                 })
 
                 return breadcrumbs
@@ -83,18 +94,20 @@ export const sessionReplaySceneLogic = kea<sessionReplaySceneLogicType>([
         ],
         [SIDE_PANEL_CONTEXT_KEY]: [
             () => [router.selectors.searchParams],
-            (searchParams: Record<string, any>): SidePanelSceneContext | null => {
+            (searchParams: Record<string, any>): SidePanelSceneContext => {
                 return searchParams.sessionRecordingId
                     ? {
                           activity_scope: ActivityScope.REPLAY,
                           activity_item_id: searchParams.sessionRecordingId,
                       }
-                    : null
+                    : {
+                          activity_scope: ActivityScope.REPLAY,
+                      }
             },
         ],
     })),
 
-    urlToAction(({ actions, values }) => {
+    tabAwareUrlToAction(({ actions, values }) => {
         return {
             '/replay/:tab': ({ tab }) => {
                 // we saw a page get stuck in a redirect loop between recent and home

@@ -10,6 +10,12 @@ declare module '*.png' {
     export default content
 }
 
+// This fixes TS errors when importing a .gif file
+declare module '*.gif' {
+    const content: any
+    export default content
+}
+
 // This fixes TS errors when importing an .mp3 file
 declare module '*.mp3' {
     const content: any
@@ -37,6 +43,12 @@ declare module '*.json' {
 // This fixes TS errors when importing an .json file with ?url suffix
 declare module '*.json?url' {
     const content: any
+    export default content
+}
+
+// This fixes TS errors when importing an .sql file with ?raw suffix
+declare module '*.sql?raw' {
+    const content: string
     export default content
 }
 

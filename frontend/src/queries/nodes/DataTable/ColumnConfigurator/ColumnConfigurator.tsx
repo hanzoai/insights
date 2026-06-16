@@ -6,10 +6,10 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
-import { AutoSizer } from 'react-virtualized/dist/es/AutoSizer'
 
-import { IconPencil, IconX } from '@posthog/icons'
+import { IconPencil, IconX } from '@hanzo/icons'
 
+import { AutoSizer } from 'lib/components/AutoSizer'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -25,10 +25,13 @@ import { IconTuning, SortableDragIcon } from 'lib/lemon-ui/icons'
 import { dataTableLogic } from '~/queries/nodes/DataTable/dataTableLogic'
 import { DataTableNode } from '~/queries/schema/schema-general'
 import {
+    isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    taxonomicEventFilterToHogQL,
-    taxonomicGroupFilterToHogQL,
+    isSessionsQuery,
+    taxonomicEventFilterToInsightsQL,
+    taxonomicGroupFilterToInsightsQL,
+    taxonomicPersonFilterToInsightsQL,
     trimQuotes,
 } from '~/queries/utils'
 import { GroupTypeIndex, PropertyFilterType } from '~/types'
@@ -52,7 +55,7 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
         isPersistent: !!query.showPersistentColumnConfigurator,
         columns: columnsInQuery,
         setColumns: (columns: string[]) => {
-            if (isEventsQuery(query.source)) {
+            if (isEventsQuery(query.source) || isSessionsQuery(query.source)) {
                 let orderBy = query.source.orderBy
                 if (orderBy && orderBy.length > 0) {
                     const orderColumn = removeExpressionComment(
@@ -71,7 +74,7 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
                         select: columns,
                     },
                 })
-            } else if (isGroupsQuery(query.source)) {
+            } else if (isActorsQuery(query.source) || isGroupsQuery(query.source)) {
                 setQuery?.({
                     ...query,
                     source: {
@@ -88,6 +91,8 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
             : isGroupsQuery(query.source)
               ? { type: 'groups', groupTypeIndex: query.source.group_type_index as GroupTypeIndex }
               : { type: 'team_columns' },
+        contextKey: query.contextKey,
+        showTableViews: query.showTableViews,
     }
     const { showModal } = useActions(columnConfiguratorLogic(columnConfiguratorLogicProps))
 
@@ -98,6 +103,7 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
                 data-attr="events-table-column-selector"
                 icon={<IconTuning />}
                 onClick={showModal}
+                size="small"
             >
                 Configure columns
             </LemonButton>
@@ -123,17 +129,32 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
         }
     }
 
-    const taxonomicGroupTypes = isGroupsQuery(query.source)
-        ? [
-              `${TaxonomicFilterGroupType.GroupsPrefix}_${query.source.group_type_index}` as TaxonomicFilterGroupType,
-              TaxonomicFilterGroupType.HogQLExpression,
-          ]
-        : [
-              TaxonomicFilterGroupType.EventProperties,
-              TaxonomicFilterGroupType.EventFeatureFlags,
-              TaxonomicFilterGroupType.PersonProperties,
-              ...(isEventsQuery(query.source) ? [TaxonomicFilterGroupType.HogQLExpression] : []),
-          ]
+    let taxonomicGroupTypes: TaxonomicFilterGroupType[] = []
+    if (isGroupsQuery(query.source)) {
+        taxonomicGroupTypes = [
+            `${TaxonomicFilterGroupType.GroupsPrefix}_${query.source.group_type_index}` as TaxonomicFilterGroupType,
+            TaxonomicFilterGroupType.InsightsQLExpression,
+        ]
+    } else if (isActorsQuery(query.source)) {
+        taxonomicGroupTypes = [TaxonomicFilterGroupType.PersonProperties, TaxonomicFilterGroupType.InsightsQLExpression]
+    } else if (isSessionsQuery(query.source)) {
+        taxonomicGroupTypes = [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.InsightsQLExpression]
+    } else {
+        taxonomicGroupTypes = [
+            TaxonomicFilterGroupType.EventProperties,
+            TaxonomicFilterGroupType.EventFeatureFlags,
+            TaxonomicFilterGroupType.PersonProperties,
+            ...(isEventsQuery(query.source)
+                ? [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.InsightsQLExpression]
+                : []),
+        ]
+    }
+
+    const showPersistedColumnReorder =
+        isEventsQuery(query.source) ||
+        isGroupsQuery(query.source) ||
+        isSessionsQuery(query.source) ||
+        isActorsQuery(query.source)
 
     return (
         <LemonModal
@@ -145,7 +166,9 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                     <div className="flex-1">
                         <LemonButton
                             type="secondary"
-                            onClick={() => setColumns(defaultDataTableColumns(query.source.kind))}
+                            onClick={() =>
+                                setColumns(query.defaultColumns || defaultDataTableColumns(query.source.kind))
+                            }
                         >
                             Reset to defaults
                         </LemonButton>
@@ -158,10 +181,11 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                     </LemonButton>
                 </>
             }
+            className="w-full max-w-248"
         >
             <div className="ColumnConfiguratorModal">
-                <div className="Columns">
-                    <div className="HalfColumn">
+                <div className="flex flex-col gap-4">
+                    <div className="w-full">
                         <h4 className="secondary uppercase text-secondary">
                             Visible columns ({columns.length}) - Drag to reorder
                         </h4>
@@ -189,50 +213,53 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                             </SortableContext>
                         </DndContext>
                     </div>
-                    <div className="HalfColumn">
+                    <div className="w-full">
                         <h4 className="secondary uppercase text-secondary">Available columns</h4>
-                        <div className="h-[360px]">
-                            <AutoSizer>
-                                {({ height, width }: { height: number; width: number }) => (
-                                    <TaxonomicFilter
-                                        height={height}
-                                        width={width}
-                                        taxonomicGroupTypes={taxonomicGroupTypes}
-                                        value={undefined}
-                                        onChange={(group, value) => {
-                                            const column = isGroupsQuery(query.source)
-                                                ? taxonomicGroupFilterToHogQL(group.type, value)
-                                                : taxonomicEventFilterToHogQL(group.type, value)
-                                            if (column !== null) {
-                                                selectColumn(column)
-                                            }
-                                        }}
-                                        popoverEnabled={false}
-                                        selectFirstItem={false}
-                                    />
-                                )}
-                            </AutoSizer>
+                        <div className="h-[min(480px,60vh)]">
+                            <AutoSizer
+                                renderProp={({ height, width }) =>
+                                    height && width ? (
+                                        <TaxonomicFilter
+                                            height={height}
+                                            width={width}
+                                            taxonomicGroupTypes={taxonomicGroupTypes}
+                                            value={undefined}
+                                            onChange={(group, value) => {
+                                                const column = isGroupsQuery(query.source)
+                                                    ? taxonomicGroupFilterToInsightsQL(group.type, value)
+                                                    : isActorsQuery(query.source)
+                                                      ? taxonomicPersonFilterToInsightsQL(group.type, value)
+                                                      : taxonomicEventFilterToInsightsQL(group.type, value)
+                                                if (column !== null) {
+                                                    selectColumn(column)
+                                                }
+                                            }}
+                                            popoverEnabled={false}
+                                            selectFirstItem={false}
+                                        />
+                                    ) : null
+                                }
+                            />
                         </div>
                     </div>
                 </div>
-                {(isEventsQuery(query.source) || isGroupsQuery(query.source)) &&
-                    query.showPersistentColumnConfigurator && (
-                        <LemonCheckbox
-                            label={
-                                context?.type === 'groups'
-                                    ? 'Save as default columns for this group type'
-                                    : context?.type === 'event_definition'
-                                      ? 'Save as default columns for this event type'
-                                      : 'Save as default for all project members'
-                            }
-                            className="mt-2"
-                            data-attr="events-table-save-columns-as-default-toggle"
-                            bordered
-                            checked={saveAsDefault}
-                            onChange={toggleSaveAsDefault}
-                            disabledReason={restrictionReason}
-                        />
-                    )}
+                {showPersistedColumnReorder && query.showPersistentColumnConfigurator && (
+                    <LemonCheckbox
+                        label={
+                            context?.type === 'groups'
+                                ? 'Save as default columns for this group type'
+                                : context?.type === 'event_definition'
+                                  ? 'Save as default columns for this event type'
+                                  : 'Save as default for all project members'
+                        }
+                        className="mt-2"
+                        data-attr="events-table-save-columns-as-default-toggle"
+                        bordered
+                        checked={saveAsDefault}
+                        onChange={toggleSaveAsDefault}
+                        disabledReason={restrictionReason}
+                    />
+                )}
             </div>
         </LemonModal>
     )
@@ -262,6 +289,11 @@ const SelectedColumn = ({
     if (column.startsWith('properties.')) {
         columnType = PropertyFilterType.Event
         columnKey = column.substring(11)
+    }
+    if (column.startsWith('session.')) {
+        columnType = PropertyFilterType.Session
+        filterGroupType = TaxonomicFilterGroupType.SessionProperties
+        columnKey = column.substring(8)
     }
 
     columnKey = trimQuotes(extractExpressionComment(columnKey))

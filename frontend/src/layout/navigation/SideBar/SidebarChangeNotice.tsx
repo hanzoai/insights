@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { Fragment, useState } from 'react'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonDivider, TooltipProps } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonDivider, TooltipProps } from '@hanzo/lemon-ui'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -88,7 +88,7 @@ export function useSidebarChangeNotices({ identifier }: SidebarChangeNoticeProps
 
     const onAcknowledged = (): void => {
         notices.forEach((change) => {
-            posthog.capture('sidebar notice acknowledged', {
+            insights.capture('sidebar notice acknowledged', {
                 change: change.flagSuffix,
                 $set: {
                     [`sidebar_notice/${change.flagSuffix}`]: true,

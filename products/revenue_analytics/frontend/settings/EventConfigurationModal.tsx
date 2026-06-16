@@ -1,19 +1,25 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonInput, LemonModal, LemonSelect, LemonSwitch, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonInput, LemonModal, LemonSelect, LemonSwitch, Link } from '@hanzo/lemon-ui'
 
-import { userHasAccess } from 'lib/components/AccessControlAction'
 import { CurrencyDropdown } from 'lib/components/BaseCurrency/CurrencyDropdown'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { userHasAccess } from 'lib/utils/accessControlUtils'
+import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { RevenueAnalyticsEventItem, SubscriptionDropoffMode } from '~/queries/schema/schema-general'
-import { AccessControlResourceType } from '~/types'
+import {
+    ProductIntentContext,
+    ProductKey,
+    RevenueAnalyticsEventItem,
+    SubscriptionDropoffMode,
+} from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { revenueAnalyticsSettingsLogic } from './revenueAnalyticsSettingsLogic'
 
@@ -38,13 +44,15 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
         updateEventSubscriptionDropoffMode,
         save,
     } = useActions(revenueAnalyticsSettingsLogic)
+    const { reportRevenueAnalyticsEventCreated, reportRevenueAnalyticsEventEdited } = useActions(eventUsageLogic)
+    const { addProductIntent } = useActions(teamLogic)
 
     // Track the name of the event we care about
     const [eventName, setEventName] = useState<string | null>(() => event?.eventName ?? null)
     const [originalEvent] = useState<RevenueAnalyticsEventItem | null>(() => (event ? { ...event } : null))
 
     // Don't show the modal if the user doesn't have access to the revenue analytics resource
-    if (!userHasAccess(AccessControlResourceType.RevenueAnalytics, 'editor')) {
+    if (!userHasAccess(AccessControlResourceType.RevenueAnalytics, AccessControlLevel.Editor)) {
         onClose()
         return null
     }
@@ -54,6 +62,18 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
 
     const handleSave = (): void => {
         save()
+        if (eventName) {
+            if (originalEvent) {
+                reportRevenueAnalyticsEventEdited(eventName)
+            } else {
+                reportRevenueAnalyticsEventCreated(eventName)
+                addProductIntent({
+                    product_type: ProductKey.REVENUE_ANALYTICS,
+                    intent_context: ProductIntentContext.REVENUE_ANALYTICS_EVENT_CREATED,
+                    metadata: { event_name: eventName },
+                })
+            }
+        }
         onClose()
     }
 
@@ -88,7 +108,7 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
                 <div className="space-y-4">
                     {!originalEvent && (
                         <LemonBanner type="info" className="text-sm">
-                            <strong>How it works:</strong> PostHog will track this event and use these properties for
+                            <strong>How it works:</strong> Insights will track this event and use these properties for
                             revenue calculations. You can always modify these settings later.
                         </LemonBanner>
                     )}

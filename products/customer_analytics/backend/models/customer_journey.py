@@ -1,0 +1,15 @@
+from django.db import models
+
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDModel
+
+
+class CustomerJourney(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    insight = models.ForeignKey("insights.Insight", on_delete=models.CASCADE)
+    name = models.CharField(max_length=400)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["team_id", "insight_id"], name="unique insight journey per team"),
+        ]

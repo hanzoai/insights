@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 
@@ -8,6 +8,10 @@ interface AutocapturedImage {
     src: string | undefined
     width: string | undefined
     height: string | undefined
+}
+
+function isBlobImage(img: AutocapturedImage): boolean {
+    return img.src?.startsWith('blob:') || false
 }
 
 function ensureNoTrailingSlash(origin: string): string {
@@ -35,7 +39,7 @@ function correctRelativeSrcImages(
                 src: ensureNoTrailingSlash(origin) + img.src,
             }
         } catch (e) {
-            posthog.captureException(e, { imageSource: img.src, properties: properties || {} })
+            insights.captureException(e, { imageSource: img.src, properties: properties || {} })
             // don't show this image... something is unexpected about the URL
             return null
         }
@@ -54,7 +58,7 @@ export function autocaptureToImage(elements: ElementType[] | undefined): null | 
 }
 
 function AutocaptureImage({ img }: { img: AutocapturedImage }): JSX.Element | null {
-    if (img) {
+    if (img && !isBlobImage(img)) {
         return (
             <div className="flex bg-primary items-center justify-center relative border-2">
                 {/* Transparent grid background */}

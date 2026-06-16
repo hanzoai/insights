@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
+import { useEffect } from 'react'
 
-import { IconRabbit, IconSearch, IconTortoise } from '@posthog/icons'
-import { LemonButton, LemonDialog, Link } from '@posthog/lemon-ui'
+import { IconRabbit, IconSearch, IconTortoise } from '@hanzo/icons'
+import { LemonButton, LemonDialog, Link } from '@hanzo/lemon-ui'
 
-import { FlaggedFeature } from 'lib/components/FlaggedFeature'
-import { FEATURE_FLAGS } from 'lib/constants'
+import { SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS } from 'lib/constants'
 import { IconHeatmap } from 'lib/lemon-ui/icons'
 import { humanFriendlyDuration } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
@@ -15,10 +15,7 @@ import {
     PLAYBACK_SPEEDS,
     sessionRecordingPlayerLogic,
 } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
-
-import { playerMetaLogic } from './playerMetaLogic'
-
-const TTL_WARNING_THRESHOLD_DAYS = 10 // days
+import { urls } from 'scenes/urls'
 
 function SetPlaybackSpeed(): JSX.Element {
     const { speed, sessionPlayerData } = useValues(sessionRecordingPlayerLogic)
@@ -68,14 +65,20 @@ function InspectDOM(): JSX.Element {
 }
 
 function TTLWarning(): JSX.Element | null {
-    const { logicProps } = useValues(sessionRecordingPlayerLogic)
     const { sessionPlayerMetaData } = useValues(sessionRecordingPlayerLogic)
-    const { sessionTTLDays } = useValues(playerMetaLogic(logicProps))
+    const lowTtl =
+        sessionPlayerMetaData?.recording_ttl &&
+        sessionPlayerMetaData.recording_ttl <= SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS
 
-    if (sessionTTLDays === null || sessionTTLDays > TTL_WARNING_THRESHOLD_DAYS) {
+    useEffect(() => {
+        if (lowTtl) {
+            insights.capture('recording viewed with very low TTL', sessionPlayerMetaData)
+        }
+    }, [sessionPlayerMetaData, lowTtl])
+
+    if (!lowTtl) {
         return null
     }
-    posthog.capture('recording viewed with very low TTL', sessionPlayerMetaData)
 
     return (
         <div className="font-medium">
@@ -89,12 +92,21 @@ function TTLWarning(): JSX.Element | null {
                         title: 'Recording about to expire',
                         description: (
                             <span>
-                                This recording will expire in <strong>{sessionTTLDays} days</strong>. If you wish to
-                                keep it around, you should add it to a collection.
+                                <br />
+                                This recording will expire in{' '}
+                                <strong>{sessionPlayerMetaData.recording_ttl} days</strong>.
+                                <br />
+                                <br />
+                                Go to{' '}
+                                <Link to={urls.settings('project-replay', 'replay-retention')}>
+                                    Session Replay settings
+                                </Link>{' '}
+                                to increase your retention period to keep future recordings around for longer.
+                                <br />
                                 <br />
                                 Refer to{' '}
                                 <Link
-                                    to="https://posthog.com/docs/session-replay/data-retention"
+                                    to="https://hanzo.ai/docs/session-replay/data-retention"
                                     disableClientSideRouting
                                     disableDocsPanel
                                     target="_blank"
@@ -108,7 +120,7 @@ function TTLWarning(): JSX.Element | null {
                 }}
                 noPadding
             >
-                This recording will expire in {sessionTTLDays} days
+                This recording will expire in {sessionPlayerMetaData.recording_ttl} days
             </LemonButton>
         </div>
     )
@@ -116,7 +128,7 @@ function TTLWarning(): JSX.Element | null {
 
 export function PlayerMetaTopSettings(): JSX.Element {
     const {
-        logicProps: { noInspector },
+        logicProps: { withSidebar },
         hoverModeIsEnabled,
         showPlayerChrome,
     } = useValues(sessionRecordingPlayerLogic)
@@ -126,7 +138,7 @@ export function PlayerMetaTopSettings(): JSX.Element {
         <div
             className={cn(
                 hoverModeIsEnabled
-                    ? 'absolute top-full left-0 right-0 z-10 transition-all duration-750 ease-in-out'
+                    ? 'absolute top-full left-0 right-0 z-10 transition-all duration-25 ease-in-out'
                     : '',
                 hoverModeIsEnabled && showPlayerChrome
                     ? 'opacity-100 pointer-events-auto'
@@ -146,20 +158,18 @@ export function PlayerMetaTopSettings(): JSX.Element {
                     </div>
 
                     <div className="flex flex-row gap-0.5">
-                        <FlaggedFeature match={true} flag={FEATURE_FLAGS.HEATMAPS_UI}>
-                            <SettingsButton
-                                size="xsmall"
-                                icon={<IconHeatmap />}
-                                onClick={() => {
-                                    setPause()
-                                    openHeatmap()
-                                }}
-                                label="View heatmap"
-                                tooltip="Use the HTML from this point in the recording as the background for your heatmap data"
-                            />
-                        </FlaggedFeature>
-                        {noInspector ? null : <InspectDOM />}
-                        {noInspector ? null : <PlayerInspectorButton />}
+                        <SettingsButton
+                            size="xsmall"
+                            icon={<IconHeatmap />}
+                            onClick={() => {
+                                setPause()
+                                openHeatmap()
+                            }}
+                            label="View heatmap"
+                            tooltip="Use the HTML from this point in the recording as the background for your heatmap data"
+                        />
+                        {withSidebar && <InspectDOM />}
+                        {withSidebar && <PlayerInspectorButton />}
                     </div>
                 </div>
             </SettingsBar>

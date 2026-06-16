@@ -2,8 +2,9 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconChevronDown, IconDocument, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconChevronDown, IconDocument, IconInfo } from '@hanzo/icons'
+import { IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
@@ -11,12 +12,12 @@ import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconChevronRight } from 'lib/lemon-ui/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter, humanFriendlyCurrency } from 'lib/utils'
-import { getProductIcon } from 'scenes/products/Products'
+import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
 
-import { BillingProductV2AddonType, BillingProductV2Type, BillingTierType, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { BillingProductV2AddonType, BillingProductV2Type, BillingTierType } from '~/types'
 
 import { BillingGauge } from './BillingGauge'
 import { BillingLimit } from './BillingLimit'
@@ -24,7 +25,12 @@ import { BillingProductAddon } from './BillingProductAddon'
 import { BillingProductPricingTable } from './BillingProductPricingTable'
 import { ProductPricingModal } from './ProductPricingModal'
 import { UnsubscribeSurveyModal } from './UnsubscribeSurveyModal'
-import { createGaugeItems, isProductVariantPrimary, summarizeUsage } from './billing-utils'
+import {
+    createGaugeItems,
+    createProductValueFormatter,
+    getProductUnitLabel,
+    isProductVariantPrimary,
+} from './billing-utils'
 import { billingLogic } from './billingLogic'
 import { billingProductLogic } from './billingProductLogic'
 import { REALTIME_DESTINATIONS_BILLING_START_DATE } from './constants'
@@ -36,13 +42,16 @@ export const getTierDescription = (
     product: BillingProductV2Type | BillingProductV2AddonType,
     interval: string
 ): string => {
+    const formatValue = createProductValueFormatter(product)
+    const unitLabel = getProductUnitLabel(product)
+
     return i === 0
         ? tiers[i].up_to
-            ? `First ${summarizeUsage(tiers[i].up_to)} ${product.unit}s / ${interval}`
-            : `All ${product.unit}s`
+            ? `First ${formatValue(tiers[i].up_to)}${unitLabel ? ` ${unitLabel}` : ''} / ${interval}`
+            : `All ${unitLabel || product.display_unit || (product.unit ? product.unit + 's' : 'units')}`
         : tiers[i].up_to
-          ? `${summarizeUsage(tiers?.[i - 1].up_to || null)} - ${summarizeUsage(tiers[i].up_to)}`
-          : `> ${summarizeUsage(tiers?.[i - 1].up_to || null)}`
+          ? `${formatValue(tiers?.[i - 1].up_to || null)} - ${formatValue(tiers[i].up_to)}`
+          : `> ${formatValue(tiers?.[i - 1].up_to || null)}`
 }
 
 export const BillingProduct = ({ product }: { product: BillingProductV2Type }): JSX.Element | null => {
@@ -79,6 +88,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
 
     const productDisplayNameOverrides: Record<string, string> = {
         realtime_destinations: 'Data pipelines',
+        workflows_emails: 'Workflows',
     }
     const displayProductName = productDisplayNameOverrides[product.type] || product.name
 
@@ -116,7 +126,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                     <div className="flex gap-4 items-center justify-between">
                         {/* Product name and description */}
                         <div className="flex gap-x-2">
-                            <div>{getProductIcon(displayProductName, product.icon_key, 'text-2xl shrink-0')}</div>
+                            <div>{getProductIcon(product.icon_key, { className: 'text-2xl shrink-0' })}</div>
                             <div>
                                 <h3 className="font-bold mb-0 flex items-center gap-x-2">
                                     {displayProductName}{' '}
@@ -153,7 +163,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     {product.subscribed && <p className="m-0">Need to manage your plan?</p>}
                                     <LemonButton
                                         type="primary"
-                                        to="mailto:sales@posthog.com?subject=Enterprise%20plan%20request"
+                                        to="mailto:sales@hanzo.ai?subject=Enterprise%20plan%20request"
                                     >
                                         Get in touch
                                     </LemonButton>
@@ -165,7 +175,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                             <>
                                                 <LemonButton
                                                     fullWidth
-                                                    to="https://posthog.com/docs/billing/estimating-usage-costs#how-to-reduce-your-posthog-costs"
+                                                    to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs"
                                                 >
                                                     Learn how to reduce your bill
                                                 </LemonButton>
@@ -183,7 +193,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                                     ) : (
                                                         <LemonButton
                                                             fullWidth
-                                                            to="mailto:sales@posthog.com?subject=Custom%20plan%20unsubscribe%20request"
+                                                            to="mailto:sales@hanzo.ai?subject=Custom%20plan%20unsubscribe%20request"
                                                         >
                                                             Contact support to unsubscribe
                                                         </LemonButton>
@@ -365,7 +375,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     <p className="m-0">
                                         Need additional platform and support (aka enterprise) features like{' '}
                                         <b>SAML SSO</b>, <b>advanced permissioning</b>, and more?{' '}
-                                        <Link to="mailto:sales@posthog.com?subject=Enterprise%20plan%20request">
+                                        <Link to="mailto:sales@hanzo.ai?subject=Enterprise%20plan%20request">
                                             Get in touch
                                         </Link>{' '}
                                         for a quick chat.
@@ -591,7 +601,7 @@ export const FeatureFlagUsageNotice = ({ product }: { product: BillingProductV2T
             <p className="mt-0 ml-0 text-sm text-secondary italic">
                 <IconInfo className="mr-1" />
                 Questions? Here's{' '}
-                <Link to="https://posthog.com/docs/feature-flags/common-questions#billing--usage" className="italic">
+                <Link to="https://hanzo.ai/docs/feature-flags/common-questions#billing--usage" className="italic">
                     how we calculate usage
                 </Link>{' '}
                 for feature flags.

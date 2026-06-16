@@ -1,19 +1,18 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconCalendar, IconRefresh } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconRefresh } from 'lib/lemon-ui/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 
 import { deadLetterQueueLogic } from './deadLetterQueueLogic'
 
-// keep in sync with posthog/api/dead_letter_queue.py
+// keep in sync with insights/api/dead_letter_queue.py
 const ROWS_LIMIT = 10
 
 export function MetricsTab(): JSX.Element {

@@ -8,7 +8,7 @@ import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
-import { ActionStepType, ActionType, ActivityScope, Breadcrumb, HogFunctionType, ProjectTreeRef } from '~/types'
+import { ActionStepType, ActionType, ActivityScope, Breadcrumb, InsightsFunctionType, ProjectTreeRef } from '~/types'
 
 import { actionEditLogic } from './actionEditLogic'
 import type { actionLogicType } from './actionLogicType'
@@ -42,11 +42,11 @@ export const actionLogic = kea<actionLogicType>([
                 },
             },
         ],
-        matchingHogFunctions: [
-            null as HogFunctionType[] | null,
+        matchingInsightsFunctions: [
+            null as InsightsFunctionType[] | null,
             {
-                loadMatchingHogFunctions: async () => {
-                    const res = await api.hogFunctions.list({
+                loadMatchingInsightsFunctions: async () => {
+                    const res = await api.insightsFunctions.list({
                         filter_groups: [{ actions: [{ id: `${props.id}`, type: 'actions' }] }],
                     })
 
@@ -95,11 +95,13 @@ export const actionLogic = kea<actionLogicType>([
                     key: DataManagementTab.Actions,
                     name: 'Actions',
                     path: urls.actions(),
+                    iconType: 'action',
                 },
                 {
                     key: [Scene.Action, action?.id || 'new'],
                     name: inProgressName ?? (action?.name || ''),
                     forceEditMode: !action?.id,
+                    iconType: 'action',
                 },
             ],
         ],
@@ -111,8 +113,8 @@ export const actionLogic = kea<actionLogicType>([
                     ? {
                           activity_scope: ActivityScope.ACTION,
                           activity_item_id: `${action.id}`,
-                          //   access_control_resource: 'action',
-                          //   access_control_resource_id: `${action.id}`,
+                          access_control_resource: 'action',
+                          access_control_resource_id: `${action.id}`,
                       }
                     : null
             },

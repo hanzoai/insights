@@ -1,7 +1,7 @@
 import './ToolbarLaunch.scss'
 
-import { IconFlag, IconPieChart, IconSearch, IconTestTube, IconToolbar } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -12,13 +12,13 @@ import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { ProductKey } from '~/queries/schema/schema-general'
 
 export const scene: SceneExport = {
     component: ToolbarLaunch,
-    settingSectionId: 'environment-details',
+    productKey: ProductKey.TOOLBAR,
 }
 
 export function ToolbarLaunch(): JSX.Element {
@@ -55,7 +55,7 @@ export function ToolbarLaunch(): JSX.Element {
                   {
                       title: 'Experiments',
                       caption: 'Run experiments and A/B test your website.',
-                      icon: <IconTestTube />,
+                      icon: <IconFlask />,
                   },
               ]
             : []),
@@ -64,21 +64,18 @@ export function ToolbarLaunch(): JSX.Element {
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Toolbar"
-                description="PostHog toolbar launches PostHog right in your app or website."
+                name="Site Inspector"
+                description="Site Inspector launches Insights right in your app or website."
                 resourceType={{
                     type: 'toolbar',
-                    forceIcon: <IconToolbar />,
                 }}
             />
 
-            <SceneDivider />
-
-            <SceneSection title="Authorized URLs for Toolbar" description="Click on the URL to launch the toolbar.">
+            <SceneSection title="Authorized URLs for Site Inspector" description="Click on the URL to launch the Site Inspector.">
                 <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} addText="Add authorized URL" />
                 <LemonBanner type="info">
                     Make sure you're using the <Link to={`${urls.settings('project')}#snippet`}>HTML snippet</Link> or
-                    the latest <code>posthog-js</code> version.
+                    the latest <code>insights-js</code> version.
                 </LemonBanner>
             </SceneSection>
 

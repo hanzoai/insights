@@ -13,32 +13,42 @@ import {
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { IconDragHandle, IconLink } from 'lib/lemon-ui/icons'
-import { LemonButton, LemonMenu, LemonMenuItems } from '@posthog/lemon-ui'
+import { LemonButton, LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
 import './NodeWrapper.scss'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { BindLogic, BuiltLogic, useActions, useMountedLogic, useValues } from 'kea'
+import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { notebookLogic } from '../Notebook/notebookLogic'
+import { hashCodeForString } from 'lib/utils'
 import { useInView } from 'react-intersection-observer'
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { NotebookNodeLogicProps, notebookNodeLogic } from './notebookNodeLogic'
-import { posthogNodeInputRule, posthogNodePasteRule, useSyncedAttributes } from './utils'
+import { insightsNodeInputRule, insightsNodePasteRule, useSyncedAttributes } from './utils'
 import { KNOWN_NODES } from '../utils'
-import { useWhyDidIRender } from 'lib/hooks/useWhyDidIRender'
 import { NotebookNodeTitle } from './components/NotebookNodeTitle'
-import { notebookNodeLogicType } from './notebookNodeLogicType'
+import { DuckSqlRunMenu } from './components/DuckSqlRunMenu'
+import { InsightsqlSqlRunMenu } from './components/InsightsqlSqlRunMenu'
+import { PythonRunMenu } from './components/PythonRunMenu'
 import { SlashCommandsPopover } from '../Notebook/SlashCommands'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { NotebookNodeContext } from './NotebookNodeContext'
-import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconFilter, IconGear, IconPlus, IconX } from '@posthog/icons'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconPlus, IconX } from '@hanzo/icons'
 import {
-    CreatePostHogWidgetNodeOptions,
+    CreateInsightsWidgetNodeOptions,
     CustomNotebookNodeAttributes,
     NodeWrapperProps,
     NotebookNodeProps,
     NotebookNodeResource,
+    NotebookNodeType,
 } from '../types'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
+
+const NON_COPYABLE_NODES = [
+    NotebookNodeType.PersonProperties,
+    NotebookNodeType.Person,
+    NotebookNodeType.GroupProperties,
+    NotebookNodeType.Group,
+    NotebookNodeType.RelatedGroups,
+]
 
 function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperProps<T>): JSX.Element {
     const {
@@ -55,16 +65,12 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         attributes,
         updateAttributes,
         Settings = null,
-        settingsIcon,
     } = props
 
-    useWhyDidIRender('NodeWrapper.props', props)
-
     const mountedNotebookLogic = useMountedLogic(notebookLogic)
-    const { isEditable, editingNodeId, containerSize } = useValues(mountedNotebookLogic)
+    const { isEditable, editingNodeIds, containerSize, notebook, mode } = useValues(mountedNotebookLogic)
     const { unregisterNodeLogic, insertComment, selectComment } = useActions(notebookLogic)
     const [slashCommandsPopoverVisible, setSlashCommandsPopoverVisible] = useState<boolean>(false)
-    const hasDiscussions = useFeatureFlag('DISCUSSIONS')
 
     const logicProps: NotebookNodeLogicProps = {
         ...props,
@@ -73,7 +79,24 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
 
     // nodeId can start null, but should then immediately be generated
     const nodeLogic = useMountedLogic(notebookNodeLogic(logicProps))
-    const { resizeable, expanded, actions, nodeId, sourceComment } = useValues(nodeLogic)
+    const {
+        resizeable,
+        expanded,
+        actions,
+        nodeId,
+        pythonRunLoading,
+        duckSqlRunLoading,
+        duckSqlRunQueued,
+        insightsqlSqlRunLoading,
+        insightsqlSqlRunQueued,
+        pythonRunQueued,
+        settingsPlacement: resolvedSettingsPlacement,
+        sourceComment,
+        duckSqlReturnVariable,
+        insightsqlSqlReturnVariable,
+        customMenuItems,
+        kernelInfo,
+    } = useValues(nodeLogic)
     const {
         setRef,
         setExpanded,
@@ -83,6 +106,9 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         toggleEditingTitle,
         copyToClipboard,
         convertToBacklink,
+        runPythonNodeWithMode,
+        runDuckSqlNodeWithMode,
+        runInsightsqlSqlNodeWithMode,
     } = useActions(nodeLogic)
 
     const { ref: inViewRef, inView } = useInView({ triggerOnce: true })
@@ -99,16 +125,6 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     // TRICKY: child nodes mount the parent logic so we need to control the mounting / unmounting directly in this component
     useOnMountEffect(() => {
         return () => unregisterNodeLogic(nodeId)
-    })
-
-    useWhyDidIRender('NodeWrapper.logicProps', {
-        resizeable,
-        expanded,
-        actions,
-        setExpanded,
-        deleteNode,
-        toggleEditing,
-        mountedNotebookLogic,
     })
 
     const contentRef = useRef<HTMLDivElement | null>(null)
@@ -128,12 +144,13 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
             if (heightAttr && heightAttr !== initialHeightAttr) {
                 updateAttributes({
                     height: contentRef.current?.clientHeight,
+                    ...(nodeType === NotebookNodeType.Python ? { autoHeight: false } : {}),
                 } as any)
             }
         }
 
         window.addEventListener('mouseup', onResizedEnd)
-    }, [resizeable, updateAttributes])
+    }, [nodeType, resizeable, updateAttributes])
 
     const onActionsAreaClick = (): void => {
         // Clicking in the area of the actions without selecting a specific action likely indicates the user wants to
@@ -148,19 +165,79 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     // Element is resizable if resizable is set to true. If expandable is set to true then is is only resizable if expanded is true
     const isResizeable = resizeable && (!expandable || expanded)
     const isDraggable = !!(isEditable && getPos)
+    const isPythonNode = nodeType === NotebookNodeType.Python
+    const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
+    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
+    const runDisabledReason = !notebook ? 'Notebook not loaded' : undefined
+    const pythonAttributes = attributes as {
+        code?: string
+        pythonExecutionCodeHash?: number | null
+        pythonExecutionSandboxId?: string | null
+    }
+    const pythonExecutionCodeHash = pythonAttributes.pythonExecutionCodeHash ?? null
+    const pythonCodeHash = hashCodeForString(typeof pythonAttributes.code === 'string' ? pythonAttributes.code : '')
+    const pythonExecutionSandboxId = pythonAttributes.pythonExecutionSandboxId ?? null
+    const kernelSandboxId = kernelInfo?.sandbox_id ?? null
+    const kernelIsRunning = kernelInfo?.status === 'running'
+    const pythonHasExecution = pythonExecutionCodeHash !== null
+    const pythonSandboxMatches =
+        pythonExecutionSandboxId !== null && kernelSandboxId !== null && pythonExecutionSandboxId === kernelSandboxId
+    const pythonIsFresh =
+        pythonHasExecution && pythonExecutionCodeHash === pythonCodeHash && pythonSandboxMatches && kernelIsRunning
+    const pythonIsStale = pythonHasExecution && !pythonIsFresh
+    const duckSqlAttributes = attributes as {
+        code?: string
+        duckExecutionCodeHash?: number | null
+        duckExecutionSandboxId?: string | null
+        returnVariable?: string
+    }
+    const duckSqlExecutionCodeHash = duckSqlAttributes.duckExecutionCodeHash ?? null
+    const duckSqlCodeHash = hashCodeForString(
+        `${typeof duckSqlAttributes.code === 'string' ? duckSqlAttributes.code : ''}\n${duckSqlReturnVariable}`
+    )
+    const duckSqlExecutionSandboxId = duckSqlAttributes.duckExecutionSandboxId ?? null
+    const duckSqlHasExecution = duckSqlExecutionCodeHash !== null
+    const duckSqlSandboxMatches =
+        duckSqlExecutionSandboxId !== null && kernelSandboxId !== null && duckSqlExecutionSandboxId === kernelSandboxId
+    const duckSqlIsFresh =
+        duckSqlHasExecution && duckSqlExecutionCodeHash === duckSqlCodeHash && duckSqlSandboxMatches && kernelIsRunning
+    const duckSqlIsStale = duckSqlHasExecution && !duckSqlIsFresh
+    const insightsqlSqlAttributes = attributes as {
+        code?: string
+        insightsqlExecutionCodeHash?: number | null
+        insightsqlExecutionSandboxId?: string | null
+        returnVariable?: string
+    }
+    const insightsqlSqlExecutionCodeHash = insightsqlSqlAttributes.insightsqlExecutionCodeHash ?? null
+    const insightsqlSqlCodeHash = hashCodeForString(`${insightsqlSqlAttributes.code ?? ''}\n${insightsqlSqlReturnVariable}`)
+    const insightsqlSqlExecutionSandboxId = insightsqlSqlAttributes.insightsqlExecutionSandboxId ?? null
+    const insightsqlSqlHasExecution = insightsqlSqlExecutionCodeHash !== null
+    const insightsqlSqlSandboxMatches =
+        insightsqlSqlExecutionSandboxId !== null &&
+        kernelSandboxId !== null &&
+        insightsqlSqlExecutionSandboxId === kernelSandboxId
+    const insightsqlSqlIsFresh =
+        insightsqlSqlHasExecution &&
+        insightsqlSqlExecutionCodeHash === insightsqlSqlCodeHash &&
+        insightsqlSqlSandboxMatches &&
+        kernelIsRunning
+    const insightsqlSqlIsStale = insightsqlSqlHasExecution && !insightsqlSqlIsFresh
 
-    const menuItems: LemonMenuItems = [
-        {
-            label: 'Copy',
-            onClick: () => copyToClipboard(),
-            sideIcon: <IconCopy />,
-        },
+    const defaultMenuItems: LemonMenuItems = [
+        !NON_COPYABLE_NODES.includes(nodeType)
+            ? {
+                  label: 'Copy',
+                  onClick: () => copyToClipboard(),
+                  sideIcon: <IconCopy />,
+              }
+            : null,
         isEditable && isResizeable
             ? {
                   label: 'Reset height to default',
                   onClick: () => {
                       updateAttributes({
                           height: null,
+                          ...(nodeType === NotebookNodeType.Python ? { autoHeight: true } : {}),
                       } as any)
                   },
               }
@@ -173,7 +250,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
               }
             : null,
         isEditable ? { label: 'Edit title', onClick: () => toggleEditingTitle(true) } : null,
-        isEditable && hasDiscussions
+        isEditable
             ? sourceComment
                 ? { label: 'Show comment', onClick: () => selectComment(nodeId) }
                 : { label: 'Comment', onClick: () => insertComment({ type: 'node', id: nodeId }) }
@@ -181,7 +258,10 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         isEditable ? { label: 'Remove', onClick: () => deleteNode(), sideIcon: <IconX />, status: 'danger' } : null,
     ]
 
+    const menuItems = customMenuItems ?? defaultMenuItems
+
     const hasMenu = menuItems.some((x) => !!x)
+    const isInCanvas = mode === 'canvas'
 
     return (
         <NotebookNodeContext.Provider value={nodeLogic}>
@@ -224,6 +304,47 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                     <LemonButton size="small" icon={<IconLink />} to={parsedHref} />
                                                 )}
 
+                                                {isPythonNode ? (
+                                                    <PythonRunMenu
+                                                        isFresh={pythonIsFresh}
+                                                        isStale={pythonIsStale}
+                                                        loading={pythonRunLoading}
+                                                        queued={pythonRunQueued}
+                                                        disabledReason={runDisabledReason}
+                                                        onRun={(mode) => void runPythonNodeWithMode({ mode })}
+                                                    />
+                                                ) : null}
+
+                                                {isDuckSqlNode ? (
+                                                    <DuckSqlRunMenu
+                                                        isFresh={duckSqlIsFresh}
+                                                        isStale={duckSqlIsStale}
+                                                        loading={duckSqlRunLoading}
+                                                        queued={duckSqlRunQueued}
+                                                        disabledReason={runDisabledReason}
+                                                        onRun={(mode) => void runDuckSqlNodeWithMode({ mode })}
+                                                    />
+                                                ) : null}
+                                                {isInsightsqlSqlNode ? (
+                                                    <InsightsqlSqlRunMenu
+                                                        isFresh={insightsqlSqlIsFresh}
+                                                        isStale={insightsqlSqlIsStale}
+                                                        loading={insightsqlSqlRunLoading}
+                                                        queued={insightsqlSqlRunQueued}
+                                                        disabledReason={runDisabledReason}
+                                                        onRun={(mode) => void runInsightsqlSqlNodeWithMode({ mode })}
+                                                    />
+                                                ) : null}
+
+                                                {(isEditable || isInCanvas) && Settings ? (
+                                                    <LemonButton
+                                                        onClick={() => toggleEditing()}
+                                                        size="small"
+                                                        icon={<IconPencil />}
+                                                        active={editingNodeIds[nodeId]}
+                                                    />
+                                                ) : null}
+
                                                 {expandable && (
                                                     <LemonButton
                                                         onClick={() => setExpanded(!expanded)}
@@ -231,29 +352,6 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                         icon={expanded ? <IconCollapse /> : <IconExpand />}
                                                     />
                                                 )}
-
-                                                {isEditable ? (
-                                                    <>
-                                                        {Settings ? (
-                                                            <LemonButton
-                                                                onClick={() => toggleEditing()}
-                                                                size="small"
-                                                                icon={
-                                                                    typeof settingsIcon === 'string' ? (
-                                                                        settingsIcon === 'gear' ? (
-                                                                            <IconGear />
-                                                                        ) : (
-                                                                            <IconFilter />
-                                                                        )
-                                                                    ) : (
-                                                                        (settingsIcon ?? <IconFilter />)
-                                                                    )
-                                                                }
-                                                                active={editingNodeId === nodeId}
-                                                            />
-                                                        ) : null}
-                                                    </>
-                                                ) : null}
 
                                                 {hasMenu ? (
                                                     <LemonMenu items={menuItems} placement="bottom-end">
@@ -263,7 +361,9 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                             </div>
                                         </div>
 
-                                        {Settings && editingNodeId === nodeId && containerSize === 'small' ? (
+                                        {Settings &&
+                                        editingNodeIds[nodeId] &&
+                                        (containerSize === 'small' || resolvedSettingsPlacement === 'inline') ? (
                                             <div className="NotebookNode__settings">
                                                 <ErrorBoundary>
                                                     <Settings
@@ -346,8 +446,8 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
 
 export const MemoizedNodeWrapper = memo(NodeWrapper) as typeof NodeWrapper
 
-export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
-    options: CreatePostHogWidgetNodeOptions<T>
+export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>(
+    options: CreateInsightsWidgetNodeOptions<T>
 ): Node {
     const { Component, pasteOptions, inputOptions, attributes, serializedText, ...wrapperProps } = options
 
@@ -355,7 +455,6 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
 
     // NOTE: We use NodeViewProps here as we convert them to NotebookNodeProps
     const WrappedComponent = (props: NodeViewProps): JSX.Element => {
-        useWhyDidIRender('NodeWrapper(WrappedComponent)', props)
         const [attributes, updateAttributes] = useSyncedAttributes<T>(props)
 
         if (props.node.attrs.nodeId === null) {
@@ -369,7 +468,7 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
 
         useEffect(() => {
             if (props.node.attrs.nodeId === null) {
-                posthog.capture('notebook node added', { node_type: props.node.type.name })
+                insights.capture('notebook node added', { node_type: props.node.type.name })
             }
             // oxlint-disable-next-line exhaustive-deps
         }, [props.node.attrs.nodeId])
@@ -403,6 +502,21 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
         },
 
         addAttributes() {
+            const nodeAttributes = Object.fromEntries(
+                Object.entries(attributes as Record<string, any>).map(([name, config]) => {
+                    return [
+                        name,
+                        {
+                            ...config,
+                            parseHTML: (element: HTMLElement) => {
+                                const attribute = element.getAttribute(name)
+                                return attribute ? JSON.parse(atob(attribute)) : null
+                            },
+                        },
+                    ]
+                })
+            )
+
             return {
                 height: {},
                 title: {},
@@ -411,7 +525,7 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
                 },
                 __init: { default: null },
                 children: {},
-                ...attributes,
+                ...nodeAttributes,
             }
         },
 
@@ -447,7 +561,7 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
         addPasteRules() {
             return pasteOptions
                 ? [
-                      posthogNodePasteRule({
+                      insightsNodePasteRule({
                           editor: this.editor,
                           type: this.type,
                           ...pasteOptions,
@@ -459,7 +573,7 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
         addInputRules() {
             return inputOptions
                 ? [
-                      posthogNodeInputRule({
+                      insightsNodeInputRule({
                           editor: this.editor,
                           type: this.type,
                           ...inputOptions,
@@ -471,16 +585,14 @@ export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
 }
 
 export const NotebookNodeChildRenderer = ({
-    nodeLogic,
+    // nodeLogic: nodeLogic,
     content,
 }: {
-    nodeLogic: BuiltLogic<notebookNodeLogicType>
+    // nodeLogic: BuiltLogic<notebookNodeLogicType>
     content: NotebookNodeResource
 }): JSX.Element => {
     const options = KNOWN_NODES[content.type]
 
-    // eslint-disable-next-line no-console
-    console.log(nodeLogic)
     // TODO: Respect attr changes
 
     // TODO: Allow deletion
@@ -493,10 +605,7 @@ export const NotebookNodeChildRenderer = ({
             nodeType={content.type}
             titlePlaceholder={options.titlePlaceholder}
             attributes={content.attrs}
-            updateAttributes={(newAttrs) => {
-                // eslint-disable-next-line no-console
-                console.log('updated called (TODO)', newAttrs)
-            }}
+            updateAttributes={() => undefined}
             selected={false}
         />
     )

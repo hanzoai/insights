@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconX } from '@posthog/icons'
-import { LemonButton, LemonInput } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 
@@ -20,7 +20,7 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
     const { setSearch } = useActions(assigneeSelectLogic)
 
     return (
-        <div className="max-w-100 deprecated-space-y-2 overflow-hidden">
+        <div className="max-w-100 deprecated-space-y-2">
             <LemonInput type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
             <ul className="deprecated-space-y-2">
                 {assignee && (

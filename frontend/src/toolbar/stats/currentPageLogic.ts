@@ -1,4 +1,6 @@
-import { actions, afterMount, beforeUnmount, kea, listeners, path, reducers } from 'kea'
+import { actions, afterMount, kea, listeners, path, reducers } from 'kea'
+
+import { makeNavigateWrapper } from '~/toolbar/utils'
 
 import type { currentPageLogicType } from './currentPageLogicType'
 
@@ -21,12 +23,34 @@ const replaceWithWildcard = (part: string): string => {
     return part
 }
 
+const autoWildcardHref = (url: string): string => {
+    const urlParts = url.split('?')
+
+    url = urlParts[0]
+        .split('/')
+        .map((part) => replaceWithWildcard(part))
+        .join('/')
+
+    // Iterate over query params and do the same for their values
+    if (urlParts.length > 1) {
+        const queryParams = urlParts[1].split('&')
+
+        for (let i = 0; i < queryParams.length; i++) {
+            const [key, value] = queryParams[i].split('=')
+            queryParams[i] = `${key}=${replaceWithWildcard(value)}`
+        }
+
+        url = `${url}\\?${queryParams.join('&')}`
+    }
+
+    return url
+}
 /**
- * Sometimes we are able to set the href before the posthog init fragment is removed
+ * Sometimes we are able to set the href before the insights init fragment is removed
  * we never want to store it as it will mean the heatmap URL is too specific and doesn't match
  * this ensures we never store it
  */
-export function withoutPostHogInit(href: string): string {
+export function withoutInsightsInit(href: string): string {
     try {
         // we can't use `new URL(href)` because it behaves differently between browsers
         // and e.g. converts `https://*.example.com/` to `https://%2A.example.com/`
@@ -35,7 +59,7 @@ export function withoutPostHogInit(href: string): string {
             return href
         }
         return href
-            .replace(/__posthog=\{[^}]*}[^#]*/, '')
+            .replace(/__insights=\{[^}]*}[^#]*/, '')
             .replace('##', '#')
             .replace(/#$/, '')
     } catch {
@@ -45,60 +69,51 @@ export function withoutPostHogInit(href: string): string {
 
 export const currentPageLogic = kea<currentPageLogicType>([
     path(['toolbar', 'stats', 'currentPageLogic']),
+
     actions(() => ({
         setHref: (href: string) => ({ href }),
         setWildcardHref: (href: string) => ({ href }),
         autoWildcardHref: true,
+        setAutoWildcardEnabled: (enabled: boolean) => ({ enabled }),
     })),
     reducers(() => ({
-        href: [window.location.href, { setHref: (_, { href }) => withoutPostHogInit(href) }],
+        href: [withoutInsightsInit(window.location.href), { setHref: (_, { href }) => withoutInsightsInit(href) }],
         wildcardHref: [
-            window.location.href,
+            withoutInsightsInit(window.location.href),
             {
-                setHref: (_, { href }) => withoutPostHogInit(href),
-                setWildcardHref: (_, { href }) => withoutPostHogInit(href),
+                setHref: (_, { href }) => withoutInsightsInit(href),
+                setWildcardHref: (_, { href }) => withoutInsightsInit(href),
+            },
+        ],
+        autoWildcardEnabled: [
+            false,
+            { persist: true },
+            {
+                setAutoWildcardEnabled: (_, { enabled }) => enabled,
             },
         ],
     })),
 
     listeners(({ actions, values }) => ({
         autoWildcardHref: () => {
-            let url = values.wildcardHref
-
-            const urlParts = url.split('?')
-
-            url = urlParts[0]
-                .split('/')
-                .map((part) => replaceWithWildcard(part))
-                .join('/')
-
-            // Iterate over query params and do the same for their values
-            if (urlParts.length > 1) {
-                const queryParams = urlParts[1].split('&')
-
-                for (let i = 0; i < queryParams.length; i++) {
-                    const [key, value] = queryParams[i].split('=')
-                    queryParams[i] = `${key}=${replaceWithWildcard(value)}`
-                }
-
-                url = `${url}\\?${queryParams.join('&')}`
-            }
-
-            actions.setWildcardHref(url)
+            actions.setWildcardHref(autoWildcardHref(values.wildcardHref))
         },
     })),
 
     afterMount(({ actions, values, cache }) => {
-        actions.setHref(withoutPostHogInit(values.href))
-
-        cache.interval = window.setInterval(() => {
-            if (window.location.href !== values.href) {
-                actions.setHref(withoutPostHogInit(window.location.href))
-            }
-        }, 500)
-    }),
-
-    beforeUnmount(({ cache }) => {
-        window.clearInterval(cache.interval)
+        if (values.autoWildcardEnabled) {
+            actions.autoWildcardHref()
+        }
+        cache.disposables.add(
+            makeNavigateWrapper((): void => {
+                if (window.location.href !== values.href) {
+                    actions.setHref(withoutInsightsInit(window.location.href))
+                    if (values.autoWildcardEnabled) {
+                        actions.autoWildcardHref()
+                    }
+                }
+            }, '__ph_current_page_logic_wrapped__'),
+            'historyProxy'
+        )
     }),
 ])

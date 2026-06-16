@@ -2,73 +2,30 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconGear, IconPencil, IconRefresh, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonModal, Link, ProfilePicture, Tooltip } from '@posthog/lemon-ui'
+import { IconGear, IconPencil, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonModal, LemonTag, Link, ProfilePicture, Tooltip } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { dayjs } from 'lib/dayjs'
-import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
 import { Label } from 'lib/ui/Label/Label'
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'
 
-import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
-import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { ExperimentStatsMethod, ProgressStatus } from '~/types'
+import { ExperimentProgressStatus, ExperimentStatsMethod } from '~/types'
 
 import { CONCLUSION_DISPLAY_CONFIG } from '../constants'
 import { experimentLogic } from '../experimentLogic'
+import type { ExperimentSceneLogicProps } from '../experimentSceneLogic'
 import { getExperimentStatus } from '../experimentsLogic'
 import { modalsLogic } from '../modalsLogic'
 import { ExperimentDuration } from './ExperimentDuration'
+import { ExperimentReloadAction } from './ExperimentReloadAction'
+import { RunningTimeNew } from './RunningTimeNew'
 import { StatsMethodModal } from './StatsMethodModal'
 import { StatusTag } from './components'
 
-export const ExperimentLastRefresh = ({
-    isRefreshing,
-    lastRefresh,
-    onClick,
-}: {
-    isRefreshing: boolean
-    lastRefresh: string
-    onClick: () => void
-}): JSX.Element => {
-    usePeriodicRerender(15000) // Re-render every 15 seconds for up-to-date last refresh time
-
-    return (
-        <div className="flex flex-col">
-            <Label intent="menu">Last refreshed</Label>
-            <div className="inline-flex deprecated-space-x-2">
-                <span
-                    className={`${
-                        lastRefresh
-                            ? dayjs().diff(dayjs(lastRefresh), 'hours') > 12
-                                ? 'text-danger'
-                                : dayjs().diff(dayjs(lastRefresh), 'hours') > 6
-                                  ? 'text-warning'
-                                  : ''
-                            : ''
-                    }`}
-                >
-                    {isRefreshing ? 'Loading…' : lastRefresh ? dayjs(lastRefresh).fromNow() : 'a while ago'}
-                </span>
-                <LemonButton
-                    type="secondary"
-                    size="xsmall"
-                    onClick={onClick}
-                    data-attr="refresh-experiment"
-                    icon={<IconRefresh />}
-                    tooltip="Refresh experiment results"
-                />
-            </div>
-        </div>
-    )
-}
-
-export function Info(): JSX.Element {
+export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.Element {
     const {
         experiment,
         legacyPrimaryMetricsResults,
@@ -79,12 +36,19 @@ export function Info(): JSX.Element {
         secondaryMetricsResultsLoading,
         statsMethod,
         usesNewQueryRunner,
-        experimentLoading,
         isExperimentDraft,
+        isSingleVariantShipped,
+        shippedVariantKey,
+        autoRefresh,
     } = useValues(experimentLogic)
-    const { updateExperiment, refreshExperimentResults } = useActions(experimentLogic)
-    const { openEditConclusionModal, openDescriptionModal, closeDescriptionModal, openStatsEngineModal } =
-        useActions(modalsLogic)
+    const { updateExperiment, refreshExperimentResults, reportExperimentMetricsRefreshed } = useActions(experimentLogic)
+    const {
+        openEditConclusionModal,
+        openDescriptionModal,
+        closeDescriptionModal,
+        openStatsEngineModal,
+        openRunningTimeConfigModal,
+    } = useActions(modalsLogic)
     const { isDescriptionModalOpen } = useValues(modalsLogic)
 
     const [tempDescription, setTempDescription] = useState(experiment.description || '')
@@ -110,37 +74,44 @@ export function Info(): JSX.Element {
     const status = getExperimentStatus(experiment)
 
     return (
-        <SceneContent>
-            <SceneTitleSection
-                name={experiment?.name}
-                description={null}
-                resourceType={{
-                    type: 'experiment',
-                }}
-                isLoading={experimentLoading}
-                onNameChange={(name) => updateExperiment({ name })}
-                onDescriptionChange={(description) => updateExperiment({ description })}
-                canEdit
-                renameDebounceMs={1000}
-            />
-            <SceneDivider />
-            <div className="grid gap-2 overflow-hidden grid-cols-1 min-[1200px]:grid-cols-[1fr_26rem]">
+        <>
+            <div className="grid gap-2 overflow-hidden grid-cols-1 min-[1400px]:grid-cols-[2fr_3fr]">
                 {/* Column 1 */}
-                <div className="flex flex-col gap-0 overflow-hidden">
+                <div className="flex flex-col gap-0 overflow-hidden min-w-0">
                     {/* Row 1: Status, Feature flag, Stats engine */}
-                    <div className="inline-flex deprecated-space-x-8">
+                    <div className="flex flex-wrap gap-x-8 gap-y-2">
                         <div className="flex flex-col" data-attr="experiment-status">
                             <Label intent="menu">Status</Label>
-                            <StatusTag status={status} />
+                            <div className="flex gap-1">
+                                {status === ExperimentProgressStatus.Paused ? (
+                                    <Tooltip
+                                        placement="bottom"
+                                        title="Your experiment is paused. The linked flag is disabled and no data is being collected."
+                                    >
+                                        <StatusTag status={status} />
+                                    </Tooltip>
+                                ) : (
+                                    <StatusTag status={status} />
+                                )}
+                                {isSingleVariantShipped && (
+                                    <Tooltip
+                                        title={`Variant "${shippedVariantKey}" has been rolled out to 100% of users`}
+                                    >
+                                        <LemonTag type="completion" className="cursor-default">
+                                            <b className="uppercase">100% rollout</b>
+                                        </LemonTag>
+                                    </Tooltip>
+                                )}
+                            </div>
                         </div>
                         {experiment.feature_flag && (
-                            <div className="flex flex-col">
+                            <div className="flex flex-col max-w-[500px]">
                                 <Label intent="menu">Feature flag</Label>
                                 <div className="flex gap-1 items-center">
-                                    {status === ProgressStatus.Running && !experiment.feature_flag.active && (
+                                    {status === ExperimentProgressStatus.Paused && (
                                         <Tooltip
                                             placement="bottom"
-                                            title="Your experiment is running, but the linked flag is disabled. No data is being collected."
+                                            title="Your experiment is paused. The linked flag is disabled and no data is being collected."
                                         >
                                             <IconWarning
                                                 style={{ transform: 'translateY(2px)' }}
@@ -171,10 +142,14 @@ export function Info(): JSX.Element {
                             </div>
                         )}
                         <div className="flex flex-col">
-                            <Label intent="menu">Stats Engine</Label>
+                            <Label intent="menu">Statistics</Label>
                             <div className="inline-flex deprecated-space-x-2">
                                 <span>
                                     {statsMethod === ExperimentStatsMethod.Bayesian ? 'Bayesian' : 'Frequentist'}
+                                    {' / '}
+                                    {statsMethod === ExperimentStatsMethod.Bayesian
+                                        ? `${((experiment.stats_config?.bayesian?.ci_level ?? 0.95) * 100).toFixed(0)}%`
+                                        : `${((1 - (experiment.stats_config?.frequentist?.alpha ?? 0.05)) * 100).toFixed(0)}%`}
                                 </span>
                                 {usesNewQueryRunner && (
                                     <>
@@ -185,7 +160,7 @@ export function Info(): JSX.Element {
                                                 openStatsEngineModal()
                                             }}
                                             icon={<IconGear />}
-                                            tooltip="Change stats engine"
+                                            tooltip="Configure statistics"
                                         />
                                         <StatsMethodModal />
                                     </>
@@ -205,9 +180,9 @@ export function Info(): JSX.Element {
                             />
                         </div>
                         {experiment.description ? (
-                            <p className={cn('py-2 m-0 py-0')}>{experiment.description}</p>
+                            <p className={cn('m-0 mt-2')}>{experiment.description}</p>
                         ) : (
-                            <p className={cn('py-2 m-0 text-secondary py-0')}>Add your hypothesis for this test</p>
+                            <p className={cn('m-0 mt-2 text-secondary italic')}>Add your hypothesis for this test</p>
                         )}
 
                         <LemonModal
@@ -244,18 +219,34 @@ export function Info(): JSX.Element {
                 </div>
 
                 {/* Column 2 */}
-                <div className="flex flex-col gap-4 overflow-hidden items-start min-[1200px]:items-end">
-                    {/* Row 1: Duration */}
+                <div className="flex flex-col gap-4 overflow-hidden items-start min-[1400px]:items-end min-w-0">
+                    {/* Row 1: Duration (date pickers) - only for launched experiments */}
                     {!isExperimentDraft && <ExperimentDuration />}
 
-                    {/* Row 2: Last refreshed, Created by */}
-                    <div className="flex flex-col overflow-hidden items-start min-[1200px]:items-end">
-                        <div className="inline-flex deprecated-space-x-8">
+                    {/* Row 2: Running time, Last refreshed, Created by */}
+                    <div className="flex flex-col overflow-hidden items-start min-[1400px]:items-end">
+                        <div className="flex flex-wrap gap-x-8 gap-y-2 justify-end">
+                            {tabId && (
+                                <RunningTimeNew
+                                    experiment={experiment}
+                                    tabId={tabId}
+                                    onClick={openRunningTimeConfigModal}
+                                    isExperimentDraft={isExperimentDraft}
+                                />
+                            )}
                             {experiment.start_date && (
-                                <ExperimentLastRefresh
+                                <ExperimentReloadAction
                                     isRefreshing={primaryMetricsResultsLoading || secondaryMetricsResultsLoading}
                                     lastRefresh={lastRefresh}
-                                    onClick={() => refreshExperimentResults(true)}
+                                    onClick={() => {
+                                        // Track manual refresh click
+                                        reportExperimentMetricsRefreshed(experiment, true, {
+                                            triggered_by: 'manual',
+                                            auto_refresh_enabled: autoRefresh.enabled,
+                                            auto_refresh_interval: autoRefresh.interval,
+                                        })
+                                        refreshExperimentResults(true)
+                                    }}
                                 />
                             )}
                             <div className="flex flex-col">
@@ -266,38 +257,35 @@ export function Info(): JSX.Element {
                     </div>
                 </div>
             </div>
-            <div className={cn('block mt-4 mt-0')}>
-                <div className="flex gap-6">
-                    {experiment.conclusion && experiment.end_date && (
-                        <div className="w-[500px]">
-                            <div className="flex items-center gap-2">
-                                <Label intent="menu">Conclusion</Label>
-                                <LemonButton
-                                    type="secondary"
-                                    size="xsmall"
-                                    icon={<IconPencil />}
-                                    onClick={openEditConclusionModal}
-                                />
-                            </div>
-                            <div className={cn('py-2 py-0')}>
-                                <div className="font-semibold flex items-center gap-2">
-                                    <div
-                                        className={clsx(
-                                            'w-2 h-2 rounded-full',
-                                            CONCLUSION_DISPLAY_CONFIG[experiment.conclusion]?.color || ''
-                                        )}
-                                    />
-                                    <span>
-                                        {CONCLUSION_DISPLAY_CONFIG[experiment.conclusion]?.title ||
-                                            experiment.conclusion}
-                                    </span>
-                                </div>
-                                <div>{experiment.conclusion_comment}</div>
-                            </div>
+            <div className="flex gap-6">
+                {experiment.conclusion && experiment.end_date && (
+                    <div className="w-[500px]">
+                        <div className="flex items-center gap-2">
+                            <Label intent="menu">Conclusion</Label>
+                            <LemonButton
+                                type="secondary"
+                                size="xsmall"
+                                icon={<IconPencil />}
+                                onClick={openEditConclusionModal}
+                            />
                         </div>
-                    )}
-                </div>
+                        <div>
+                            <div className="font-semibold flex items-center gap-2">
+                                <div
+                                    className={clsx(
+                                        'w-2 h-2 rounded-full',
+                                        CONCLUSION_DISPLAY_CONFIG[experiment.conclusion]?.color || ''
+                                    )}
+                                />
+                                <span>
+                                    {CONCLUSION_DISPLAY_CONFIG[experiment.conclusion]?.title || experiment.conclusion}
+                                </span>
+                            </div>
+                            <div>{experiment.conclusion_comment}</div>
+                        </div>
+                    </div>
+                )}
             </div>
-        </SceneContent>
+        </>
     )
 }

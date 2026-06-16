@@ -1,22 +1,23 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonButtonProps, LemonInput, LemonSelect, LemonTable, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonButtonProps, LemonInput, LemonSelect, LemonTable, Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 import { LemonField } from 'lib/lemon-ui/LemonField'
-import { HogFunctionIcon } from 'scenes/hog-functions/configuration/HogFunctionIcon'
+import { InsightsFunctionIcon } from 'scenes/insights-functions/configuration/InsightsFunctionIcon'
 
 import { IntegrationType, OnboardingStepKey } from '~/types'
 
 import { OnboardingStep } from '../OnboardingStep'
+import { OnboardingStepComponentType } from '../onboardingLogic'
 import {
     ErrorTrackingAlertIntegrationType,
     onboardingErrorTrackingAlertsLogic,
 } from './onboardingErrorTrackingAlertsLogic'
 
-export function OnboardingErrorTrackingAlertsStep({ stepKey }: { stepKey: OnboardingStepKey }): JSX.Element {
+export const OnboardingErrorTrackingAlertsStep: OnboardingStepComponentType = () => {
     const { integration, slackIntegrations, slackAvailable, connectionConfig, isConnectionConfigSubmitting } =
         useValues(onboardingErrorTrackingAlertsLogic)
     const { setIntegration } = useActions(onboardingErrorTrackingAlertsLogic)
@@ -58,7 +59,12 @@ export function OnboardingErrorTrackingAlertsStep({ stepKey }: { stepKey: Onboar
     }
 
     return (
-        <OnboardingStep title="Configure alerts" stepKey={stepKey} continueOverride={<></>} showSkip={!integration}>
+        <OnboardingStep
+            title="Configure alerts"
+            stepKey={OnboardingStepKey.ALERTS}
+            showContinue={false}
+            showSkip={!integration}
+        >
             <p>Get notified when a new issue occurs. Don't worry this can always be reconfigured later.</p>
             {integration === null ? (
                 <LemonTable
@@ -70,7 +76,7 @@ export function OnboardingErrorTrackingAlertsStep({ stepKey }: { stepKey: Onboar
                             render: (_, record) => {
                                 return (
                                     <div className="flex gap-2 font-bold items-center">
-                                        <HogFunctionIcon size="small" src={record.icon} />
+                                        <InsightsFunctionIcon size="small" src={record.icon} />
                                         {record.name}
                                     </div>
                                 )
@@ -109,6 +115,8 @@ export function OnboardingErrorTrackingAlertsStep({ stepKey }: { stepKey: Onboar
         </OnboardingStep>
     )
 }
+
+OnboardingErrorTrackingAlertsStep.stepKey = OnboardingStepKey.ALERTS
 
 const FormFields = ({
     integration,

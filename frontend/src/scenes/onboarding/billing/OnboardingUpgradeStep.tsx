@@ -1,23 +1,23 @@
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
-import { SupermanHog } from 'lib/components/hedgehogs'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { SupermanMascot } from 'lib/components/mascots'
 import { billingLogic } from 'scenes/billing/billingLogic'
 
-import type { BillingProductV2Type, OnboardingStepKey } from '~/types'
+import { type BillingProductV2Type, OnboardingStepKey } from '~/types'
 
 import { OnboardingStep } from '../OnboardingStep'
+import { OnboardingStepComponentType } from '../onboardingLogic'
 import PlanCards from './PlanCards'
 
-type Props = {
+type OnboardingUpgradeStepProps = {
     product: BillingProductV2Type
-    stepKey: OnboardingStepKey
 }
 
-export const OnboardingUpgradeStep = ({ product, stepKey }: Props): JSX.Element => {
+export const OnboardingUpgradeStep: OnboardingStepComponentType<OnboardingUpgradeStepProps> = ({ product }) => {
     const { billingLoading } = useValues(billingLogic)
 
     if (billingLoading) {
@@ -29,19 +29,16 @@ export const OnboardingUpgradeStep = ({ product, stepKey }: Props): JSX.Element 
     }
 
     return (
-        <OnboardingStep
-            title="Select a plan"
-            stepKey={stepKey}
-            continueOverride={!product.subscribed ? <></> : undefined}
-        >
+        <OnboardingStep title="Select a plan" stepKey={OnboardingStepKey.PLANS} showContinue={!!product.subscribed}>
             {!product.subscribed && <PlanCards product={product} />}
             {product.subscribed && <ProductSubscribed product={product} />}
         </OnboardingStep>
     )
 }
+OnboardingUpgradeStep.stepKey = OnboardingStepKey.PLANS
 
 const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.Element => {
-    const { trigger, HogfettiComponent } = useHogfetti({ count: 100, duration: 3000 })
+    const { trigger, ConfettiComponent } = useConfetti({ count: 100, duration: 3000 })
 
     useEffect(() => {
         const run = async (): Promise<void> => {
@@ -57,11 +54,11 @@ const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.
 
     return (
         <div className="relative flex flex-col items-center text-center">
-            <HogfettiComponent />
+            <ConfettiComponent />
 
-            {/* Superman Hog floating animation */}
+            {/* Superman floating animation */}
             <div className="w-40 h-40 animate-float">
-                <SupermanHog className="w-full h-full object-contain" />
+                <SupermanMascot className="w-full h-full object-contain" />
             </div>
 
             {/* Text Below */}

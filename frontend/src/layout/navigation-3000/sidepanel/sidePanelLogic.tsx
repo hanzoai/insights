@@ -1,52 +1,62 @@
 import { connect, kea, path, selectors } from 'kea'
 import { combineUrl, router, urlToAction } from 'kea-router'
 
-import { FEATURE_FLAGS } from 'lib/constants'
-import { dayjs } from 'lib/dayjs'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { activationLogic } from '~/layout/navigation-3000/sidepanel/panels/activation/activationLogic'
 import { sidePanelNotificationsLogic } from '~/layout/navigation-3000/sidepanel/panels/activity/sidePanelNotificationsLogic'
 import { AvailableFeature, SidePanelTab } from '~/types'
 
 import { sidePanelContextLogic } from './panels/sidePanelContextLogic'
-import { sidePanelStatusLogic } from './panels/sidePanelStatusLogic'
+import { sidePanelHealthLogic } from './panels/sidePanelHealthLogic'
+import { sidePanelSdkDoctorLogic } from './panels/sidePanelSdkDoctorLogic'
+import { sidePanelStatusIncidentIoLogic } from './panels/sidePanelStatusIncidentIoLogic'
 import type { sidePanelLogicType } from './sidePanelLogicType'
 import { sidePanelStateLogic } from './sidePanelStateLogic'
 
-const ALWAYS_EXTRA_TABS = [SidePanelTab.Settings, SidePanelTab.Activity, SidePanelTab.Status, SidePanelTab.Exports]
+const ALWAYS_EXTRA_TABS = [
+    SidePanelTab.Settings,
+    SidePanelTab.Activity,
+    SidePanelTab.Status,
+    SidePanelTab.Exports,
+    SidePanelTab.SdkDoctor,
+    SidePanelTab.Health,
+    SidePanelTab.Changelog,
+]
 
 const TABS_REQUIRING_A_TEAM = [
     SidePanelTab.Max,
     SidePanelTab.Notebooks,
+
     SidePanelTab.Activity,
-    SidePanelTab.Activation,
     SidePanelTab.Discussion,
     SidePanelTab.AccessControl,
     SidePanelTab.Exports,
+    SidePanelTab.Health,
 ]
 
+/**
+ * @deprecated Sidepanel is soft-deprecated as only notebooks will be kept in sidepanel in future releases.
+ */
 export const sidePanelLogic = kea<sidePanelLogicType>([
     path(['scenes', 'navigation', 'sidepanel', 'sidePanelLogic']),
     connect(() => ({
         values: [
-            featureFlagLogic,
-            ['featureFlags'],
             preflightLogic,
             ['isCloudOrDev'],
-            activationLogic,
-            ['shouldShowActivationTab'],
             sidePanelStateLogic,
             ['selectedTab', 'sidePanelOpen'],
             // We need to mount this to ensure that marking as read works when the panel closes
             sidePanelNotificationsLogic,
             ['unreadCount'],
-            sidePanelStatusLogic,
+            sidePanelStatusIncidentIoLogic,
             ['status'],
+            sidePanelSdkDoctorLogic,
+            ['needsAttention'],
+            sidePanelHealthLogic,
+            ['hasIssues'],
             userLogic,
             ['hasAvailableFeature'],
             sidePanelContextLogic,
@@ -59,53 +69,42 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
 
     selectors({
         enabledTabs: [
-            (s) => [
-                s.selectedTab,
-                s.sidePanelOpen,
-                s.isCloudOrDev,
-                s.featureFlags,
-                s.sceneSidePanelContext,
-                s.currentTeam,
-            ],
-            (selectedTab, sidePanelOpen, isCloudOrDev, featureFlags, sceneSidePanelContext, currentTeam) => {
+            (s) => [s.isCloudOrDev, s.sceneSidePanelContext, s.currentTeam],
+            (isCloudOrDev, sceneSidePanelContext, currentTeam) => {
                 const tabs: SidePanelTab[] = []
 
-                if (featureFlags[FEATURE_FLAGS.ARTIFICIAL_HOG] || (sidePanelOpen && selectedTab === SidePanelTab.Max)) {
-                    // Show Max if user is already enrolled into beta OR they got a link to Max (even if they haven't enrolled)
-                    tabs.push(SidePanelTab.Max)
-                }
-                tabs.push(SidePanelTab.Notebooks)
-                tabs.push(SidePanelTab.Docs)
-                if (isCloudOrDev) {
-                    tabs.push(SidePanelTab.Support)
-                }
-                tabs.push(SidePanelTab.Activity)
-
-                if (currentTeam?.created_at) {
-                    const teamCreatedAt = dayjs(currentTeam.created_at)
-
-                    if (dayjs().diff(teamCreatedAt, 'day') < 30) {
-                        tabs.push(SidePanelTab.Activation)
-                    }
-                }
-
-                if (featureFlags[FEATURE_FLAGS.DISCUSSIONS]) {
-                    tabs.push(SidePanelTab.Discussion)
-                }
-
-                if (sceneSidePanelContext.access_control_resource && sceneSidePanelContext.access_control_resource_id) {
-                    tabs.push(SidePanelTab.AccessControl)
-                }
-                tabs.push(SidePanelTab.Exports)
-                tabs.push(SidePanelTab.Settings)
+                /* Always show Insights AI at the top of the tabs list */
+                tabs.push(SidePanelTab.Max)
 
                 if (isCloudOrDev) {
                     tabs.push(SidePanelTab.Status)
                 }
 
+                tabs.push(SidePanelTab.Notebooks)
+                tabs.push(SidePanelTab.Docs)
+                if (isCloudOrDev) {
+                    tabs.push(SidePanelTab.Support)
+                }
+
+                tabs.push(SidePanelTab.Activity)
+                tabs.push(SidePanelTab.Discussion)
+
+                if (sceneSidePanelContext.access_control_resource && sceneSidePanelContext.access_control_resource_id) {
+                    tabs.push(SidePanelTab.AccessControl)
+                }
+
+                tabs.push(SidePanelTab.Exports)
+                tabs.push(SidePanelTab.Settings)
+                if (isCloudOrDev) {
+                    tabs.push(SidePanelTab.SdkDoctor)
+                }
+                tabs.push(SidePanelTab.Health)
+                tabs.push(SidePanelTab.Changelog)
+
                 if (!currentTeam) {
                     return tabs.filter((tab) => !TABS_REQUIRING_A_TEAM.includes(tab))
                 }
+
                 return tabs
             },
         ],
@@ -117,8 +116,9 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
                 s.sidePanelOpen,
                 s.unreadCount,
                 s.status,
+                s.needsAttention,
+                s.hasIssues,
                 s.hasAvailableFeature,
-                s.shouldShowActivationTab,
             ],
             (
                 enabledTabs,
@@ -126,8 +126,9 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
                 sidePanelOpen,
                 unreadCount,
                 status,
-                hasAvailableFeature,
-                shouldShowActivationTab
+                needsAttention,
+                hasIssues,
+                hasAvailableFeature
             ): SidePanelTab[] => {
                 return enabledTabs.filter((tab) => {
                     if (tab === selectedTab && sidePanelOpen) {
@@ -146,8 +147,12 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
                         return true
                     }
 
-                    if (tab === SidePanelTab.Activation && !shouldShowActivationTab) {
-                        return false
+                    if (tab === SidePanelTab.SdkDoctor && needsAttention) {
+                        return true
+                    }
+
+                    if (tab === SidePanelTab.Health && hasIssues) {
+                        return true
                     }
 
                     // Hide certain tabs unless they are selected

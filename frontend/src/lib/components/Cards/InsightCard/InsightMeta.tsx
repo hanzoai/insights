@@ -2,10 +2,9 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconThumbsDown, IconThumbsUp } from '@posthog/icons'
-import { lemonToast } from '@posthog/lemon-ui'
+import { IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
+import { lemonToast } from '@hanzo/lemon-ui'
 
-import { accessLevelSatisfied } from 'lib/components/AccessControlAction'
 import { CardMeta } from 'lib/components/Cards/CardMeta'
 import { TopHeading } from 'lib/components/Cards/InsightCard/TopHeading'
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
@@ -23,13 +22,19 @@ import { Splotch, SplotchColor } from 'lib/lemon-ui/Splotch'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
+import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
 import { insightDataLogic } from 'scenes/insights/insightDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
+import { getOverrideWarningPropsForButton } from 'scenes/insights/utils'
+import { SurveyOpportunityButton } from 'scenes/surveys/components/SurveyOpportunityButton'
+import { SURVEY_CREATED_SOURCE } from 'scenes/surveys/constants'
+import { isSurveyableFunnelInsight } from 'scenes/surveys/utils/opportunityDetection'
 import { urls } from 'scenes/urls'
 
 import { dashboardsModel } from '~/models/dashboardsModel'
+import { ProductKey } from '~/queries/schema/schema-general'
 import { isDataVisualizationNode } from '~/queries/utils'
 import {
     AccessControlLevel,
@@ -66,6 +71,7 @@ interface InsightMetaProps
         | 'filtersOverride'
         | 'variablesOverride'
         | 'placement'
+        | 'surveyOpportunity'
     > {
     tile?: DashboardTile<QueryBasedInsightModel>
     insight: QueryBasedInsightModel
@@ -97,11 +103,12 @@ export function InsightMeta({
     showDetailsControls = true,
     moreButtons,
     placement,
+    surveyOpportunity,
 }: InsightMetaProps): JSX.Element {
     const { short_id, name, dashboards, next_allowed_client_refresh: nextAllowedClientRefresh } = insight
     const { insightProps, insightFeedback } = useValues(insightLogic)
     const { setInsightFeedback } = useActions(insightLogic)
-    const { exportContext } = useValues(insightDataLogic(insightProps))
+    const { exportContext, insightData } = useValues(insightDataLogic(insightProps))
     const { samplingFactor } = useValues(insightVizDataLogic(insightProps))
     const { nameSortedDashboards } = useValues(dashboardsModel)
     const { featureFlags } = useValues(featureFlagLogic)
@@ -130,8 +137,6 @@ export function InsightMeta({
           )
         : true
 
-    const canAccessTileOverrides = !!featureFlags[FEATURE_FLAGS.DASHBOARD_TILE_OVERRIDES]
-
     const summary = useSummarizeInsight()(insight.query)
 
     // Feedback buttons for Customer Analytics
@@ -153,6 +158,17 @@ export function InsightMeta({
                     disabledReason={insightFeedback === 'disliked' ? 'Already disliked' : ''}
                 />
             </div>
+        ) : null
+
+    const surveyOpportunityButton =
+        surveyOpportunity && isSurveyableFunnelInsight(insight) ? (
+            <SurveyOpportunityButton
+                insight={insight}
+                disableAutoPromptSubmit={true}
+                source={SURVEY_CREATED_SOURCE.INSIGHT_CROSS_SELL}
+                fromProduct={ProductKey.PRODUCT_ANALYTICS}
+                tooltip="Create a survey to understand why users are dropping off"
+            />
         ) : null
 
     // If user can't view the insight, show minimal interface
@@ -203,6 +219,7 @@ export function InsightMeta({
                     query={insight.query}
                     lastRefresh={insight.last_refresh}
                     hasTileOverrides={Object.keys(tile?.filters_overrides ?? {}).length > 0}
+                    resolvedDateRange={insightData?.resolved_date_range}
                 />
             }
             content={
@@ -229,22 +246,37 @@ export function InsightMeta({
             moreButtons={
                 <>
                     {/* Insight related */}
+                    {canViewInsight && (
+                        <LemonButton
+                            to={urls.insightView(
+                                short_id,
+                                dashboardId,
+                                variablesOverride,
+                                filtersOverride,
+                                tile?.filters_overrides
+                            )}
+                            fullWidth
+                        >
+                            View
+                        </LemonButton>
+                    )}
                     {canEditInsight && (
                         <>
                             <LemonButton
                                 to={
                                     isDataVisualizationNode(insight.query)
-                                        ? urls.sqlEditor(undefined, undefined, short_id)
-                                        : urls.insightEdit(short_id)
+                                        ? urls.sqlEditor({ insightShortId: short_id })
+                                        : urls.insightEdit(short_id, dashboardId)
                                 }
                                 fullWidth
+                                {...getOverrideWarningPropsForButton(filtersOverride, variablesOverride)}
                             >
                                 Edit
                             </LemonButton>
                             <LemonButton onClick={rename} fullWidth>
                                 Rename
                             </LemonButton>
-                            {canAccessTileOverrides && tile && (
+                            {tile && (
                                 <LemonButton onClick={setOverride} fullWidth>
                                     Set override
                                 </LemonButton>
@@ -413,7 +445,7 @@ export function InsightMeta({
             moreTooltip={
                 canEditInsight ? 'Rename, duplicate, export, refresh and more…' : 'Duplicate, export, refresh and more…'
             }
-            extraControls={feedbackButtons}
+            extraControls={surveyOpportunityButton ?? feedbackButtons}
         />
     )
 }
@@ -452,7 +484,11 @@ export function InsightMetaContent({
         </h4>
     )
     if (link) {
-        titleEl = <Link to={link}>{titleEl}</Link>
+        titleEl = (
+            <Link to={link} className="max-w-full truncate">
+                {titleEl}
+            </Link>
+        )
     }
 
     return (

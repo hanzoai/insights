@@ -48,7 +48,7 @@
         "uuid": "0188ea22-05ae-0000-6d0b-d47602552d2c",
         "distinct_id": "wnATPtp3kGKinrPUTgGGuR80MmuzrJLRwzGgtoJCt4V",
         "first_name": "Paul",
-        "email": "paul@posthog.com",
+        "email": "paul@hanzo.ai",
         "is_email_verified": false
     },
     "last_modified_at": "2023-07-03T17:03:51.166530Z",
@@ -57,7 +57,7 @@
         "uuid": "0188ea22-05ae-0000-6d0b-d47602552d2c",
         "distinct_id": "wnATPtp3kGKinrPUTgGGuR80MmuzrJLRwzGgtoJCt4V",
         "first_name": "Paul",
-        "email": "paul@posthog.com",
+        "email": "paul@hanzo.ai",
         "is_email_verified": false
     },
     "user_access_level": "editor"

@@ -1,6 +1,6 @@
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.database.models import BooleanDatabaseField, DateTimeDatabaseField, StringDatabaseField
+from insights.insightsql.database.models import BooleanDatabaseField, DateTimeDatabaseField, StringDatabaseField
 
 from ._definitions import BASE_CURRENCY_FIELDS, FieldsDict, Schema
 

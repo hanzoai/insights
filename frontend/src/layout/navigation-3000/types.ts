@@ -1,7 +1,7 @@
 import { Logic, LogicWrapper } from 'kea'
 import React from 'react'
 
-import { LemonTagType, SideAction } from '@posthog/lemon-ui'
+import { LemonTagType, SideAction } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dayjs } from 'lib/dayjs'

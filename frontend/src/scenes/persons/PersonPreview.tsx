@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
@@ -60,9 +60,9 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
             <div className="p-2 max-w-160">
                 <h4>No profile associated with this ID</h4>
                 <p>
-                    Person profiles allow you to see a detailed view of a Person's user properties, track users across
-                    devices, and more. To create person profiles, see{' '}
-                    <Link to="https://posthog.com/docs/data/persons#capturing-person-profiles">here.</Link>
+                    User profiles allow you to see a detailed view of a user's properties, track users across
+                    devices, and more. To create user profiles, see{' '}
+                    <Link to="https://hanzo.ai/docs/data/persons#capturing-person-profiles">here.</Link>
                 </p>
                 <div className="flex justify-center mt-2 w-fit">
                     <LemonButton
@@ -91,7 +91,7 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
                 <NotebookSelectButton
                     resource={{
                         type: NotebookNodeType.Person,
-                        attrs: { id: person?.distinct_ids[0] },
+                        attrs: { id: person?.uuid },
                     }}
                     onNotebookOpened={() => props.onClose?.()}
                     size="small"

@@ -1,4 +1,4 @@
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'
@@ -48,7 +48,7 @@ export function SceneSection({
                         </Component>
                         {description && <p className="text-sm text-secondary my-0 max-w-prose">{description}</p>}
                     </div>
-                    {actions && <div className="flex gap-x-2 flex-none self-center">{actions}</div>}
+                    {actions && <div className="flex gap-x-2 flex-none self-end">{actions}</div>}
                 </div>
                 <WrappingLoadingSkeleton>{children}</WrappingLoadingSkeleton>
             </div>
@@ -77,7 +77,7 @@ export function SceneSection({
                         </Component>
                         {description && <p className="text-sm text-secondary my-0 max-w-prose">{description}</p>}
                     </div>
-                    {actions && <div className="flex gap-x-2 flex-none self-center">{actions}</div>}
+                    {actions && <div className="flex gap-x-2 flex-none self-end">{actions}</div>}
                 </div>
             )}
             {children}

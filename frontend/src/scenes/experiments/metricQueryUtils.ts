@@ -5,10 +5,7 @@ import { EXPERIMENT_DEFAULT_DURATION, FunnelLayout } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 
-import {
-    FilterTypeActionsAndEvents,
-    actionsAndEventsToSeries,
-} from '~/queries/nodes/InsightQuery/utils/filtersToQueryNode'
+import { actionsAndEventsToSeries } from '~/queries/nodes/InsightQuery/utils/filtersToQueryNode'
 import type {
     ActionsNode,
     BreakdownFilter,
@@ -237,7 +234,7 @@ const getFunnelSeries = (funnelMetric: ExperimentFunnelMetric): (EventsNode | Ac
             actions,
             events,
             data_warehouse: [], // Data warehouse not supported in funnels
-        } as FilterTypeActionsAndEvents,
+        } as any,
         true, // includeProperties
         MathAvailability.None // No math for funnels
     ).filter((series) => series.kind === NodeKind.EventsNode || series.kind === NodeKind.ActionsNode) as (
@@ -345,7 +342,7 @@ export function filterToMetricSource(
             name: events[0].name,
             math: events[0].math || ExperimentMetricMathType.TotalCount,
             math_property: events[0].math_property,
-            math_hogql: events[0].math_hogql,
+            math_insightsql: events[0].math_insightsql,
             math_group_type_index: events[0].math_group_type_index,
             properties: events[0].properties,
         }
@@ -358,7 +355,7 @@ export function filterToMetricSource(
             name: actions[0].name,
             math: actions[0].math || ExperimentMetricMathType.TotalCount,
             math_property: actions[0].math_property,
-            math_hogql: actions[0].math_hogql,
+            math_insightsql: actions[0].math_insightsql,
             math_group_type_index: actions[0].math_group_type_index,
             properties: actions[0].properties,
         }
@@ -374,7 +371,7 @@ export function filterToMetricSource(
             data_warehouse_join_key: data_warehouse[0].data_warehouse_join_key,
             math: data_warehouse[0].math || ExperimentMetricMathType.TotalCount,
             math_property: data_warehouse[0].math_property,
-            math_hogql: data_warehouse[0].math_hogql,
+            math_insightsql: data_warehouse[0].math_insightsql,
             math_group_type_index: data_warehouse[0].math_group_type_index,
             properties: data_warehouse[0].properties,
         }
@@ -568,10 +565,10 @@ export const addExposureToQuery =
     (exposureEvent: EventsNode | ActionsNode) =>
     (query: FunnelsQuery | TrendsQuery | undefined): FunnelsQuery | TrendsQuery | undefined =>
         query
-            ? {
+            ? ({
                   ...query,
                   series: [exposureEvent, ...query.series],
-              }
+              } as typeof query)
             : undefined
 
 type InsightVizNodeOptions = {

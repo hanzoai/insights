@@ -64,7 +64,7 @@
         "uuid": "01827ddb-2c5a-0000-8b59-d02c5e3a4cdc",
         "distinct_id": "NbZZRONLD9Jn2FUgBbwKkGP0L6qemQZ0x3l7T5HBuCT",
         "first_name": "Employee 427",
-        "email": "427@posthog.com"
+        "email": "427@hanzo.ai"
     },
     "description": "",
     "updated_at": "2022-08-08T14:32:27.143626Z",
@@ -76,11 +76,9 @@
         "uuid": "01827ddb-2c5a-0000-8b59-d02c5e3a4cdc",
         "distinct_id": "NbZZRONLD9Jn2FUgBbwKkGP0L6qemQZ0x3l7T5HBuCT",
         "first_name": "Employee 427",
-        "email": "427@posthog.com"
+        "email": "427@hanzo.ai"
     },
     "is_sample": false,
-    "effective_restriction_level": 21,
-    "effective_privilege_level": 37,
     "timezone": null,
     "tags": [],
     "query": {

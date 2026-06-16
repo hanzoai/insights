@@ -2,7 +2,7 @@ import { expectLogic, partial } from 'kea-test-utils'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { performQuery } from '~/queries/query'
-import { DashboardFilter, HogQLVariable, NodeKind } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable, NodeKind } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
 import { initKeaTests } from '~/test/init'
 
@@ -445,7 +445,7 @@ describe('dataNodeLogic', () => {
         })
 
         // Autoload is running in the background and will fire in 5 seconds. Check that there's a background script for this.
-        expect(logic.cache.autoLoadInterval).toBeTruthy()
+        expect(logic.cache.disposables.registry.has('autoLoadInterval')).toBe(true)
         jest.advanceTimersByTime(31000)
         await expectLogic(logic)
             .toDispatchActions(['loadNewData', 'loadNewDataSuccess'])
@@ -469,6 +469,8 @@ describe('dataNodeLogic', () => {
             cachedResults: { result: [1, 2, 3] },
         })
         logic.mount()
+
+        // Query to fetch the count will still be called
         expect(performQuery).toHaveBeenCalledTimes(0)
 
         await expectLogic(logic).toMatchValues({ response: { result: [1, 2, 3] } })
@@ -498,12 +500,13 @@ describe('dataNodeLogic', () => {
             expect.any(Function),
             { date_from: '2022-12-24T17:00:41.165000Z' },
             undefined,
-            false
+            false,
+            undefined
         )
     })
 
     it('passes variablesOverride to api', async () => {
-        const variablesOverride: Record<string, HogQLVariable> = {
+        const variablesOverride: Record<string, InsightsQLVariable> = {
             test_1: {
                 variableId: 'some_id',
                 code_name: 'some_name',
@@ -531,7 +534,8 @@ describe('dataNodeLogic', () => {
             expect.any(Function),
             undefined,
             { test_1: { code_name: 'some_name', value: 'hello world', variableId: 'some_id' } },
-            false
+            false,
+            undefined
         )
     })
 
@@ -556,7 +560,8 @@ describe('dataNodeLogic', () => {
             expect.any(Function),
             undefined,
             undefined,
-            false
+            false,
+            undefined
         )
     })
 
@@ -581,7 +586,34 @@ describe('dataNodeLogic', () => {
             expect.any(Function),
             undefined,
             undefined,
-            false
+            false,
+            undefined
+        )
+    })
+
+    it('passes limitContext to api', async () => {
+        const query = setLatestVersionsOnQuery({
+            kind: NodeKind.EventsQuery,
+            select: ['*', 'event', 'timestamp'],
+        })
+
+        logic = dataNodeLogic({
+            key: 'key',
+            query,
+            limitContext: 'insights_ai',
+        })
+        logic.mount()
+
+        expect(performQuery).toHaveBeenCalledWith(
+            query,
+            expect.anything(),
+            'blocking',
+            expect.any(String),
+            expect.any(Function),
+            undefined,
+            undefined,
+            false,
+            'insights_ai'
         )
     })
 })

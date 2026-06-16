@@ -1,0 +1,65 @@
+from typing import Optional
+
+from django.conf import settings
+
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.models import FunctionCallTable
+from insights.insightsql.escape_sql import escape_insightsql_identifier
+
+from insights.person_db_router import PERSONS_DB_MODELS
+
+
+def build_function_call(postgres_table_name: str, context: Optional[InsightsQLContext] = None):
+    raw_params: dict[str, str] = {}
+
+    def add_param(value: str, is_sensitive: bool = True) -> str:
+        if context is not None:
+            if is_sensitive:
+                return context.add_sensitive_value(value)
+            return context.add_value(value)
+
+        param_name = f"value_{len(raw_params.items())}"
+        raw_params[param_name] = value
+        return f"%({param_name})s"
+
+    table = add_param(postgres_table_name)
+
+    if settings.DEBUG or settings.TEST:
+        databases = settings.DATABASES
+        # Determine which database to use based on table name
+        # Extract model name from postgres table name (e.g., "insights_group" -> "group")
+        model_name = postgres_table_name.replace("insights_", "")
+        db_name = "persons_db_writer" if model_name in PERSONS_DB_MODELS else "default"
+        database = databases[db_name]
+
+        address = add_param("db:5432")  # docker container for postgres from clickhouse
+        db = add_param(database["NAME"])
+        user = add_param(database["USER"])
+        password = add_param(database["PASSWORD"])
+    else:
+        host_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_HOST
+        port_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_PORT
+        database_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_DATABASE
+        user_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_USER
+        password_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_PASSWORD
+
+        if not host_var or not port_var or not database_var or not user_var or not password_var:
+            raise ValueError("CLICKHOUSE_INSIGHTSQL_RDSPROXY env vars missing to create postgresql link from clickhouse")
+
+        address = add_param(f"{host_var}:{port_var}")
+        db = add_param(database_var)
+        user = add_param(user_var)
+        password = add_param(password_var)
+
+    return f"postgresql({address}, {db}, {table}, {user}, {password})"
+
+
+class PostgresTable(FunctionCallTable):
+    requires_args: bool = False
+    postgres_table_name: str
+
+    def to_printed_insightsql(self):
+        return escape_insightsql_identifier(self.name)
+
+    def to_printed_clickhouse(self, context):
+        return build_function_call(self.postgres_table_name, context)

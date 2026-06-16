@@ -43,6 +43,7 @@
         margin-bottom: 0.375em;
         font-weight: 600;
         line-height: 1.2;
+        color: inherit;
     }
 
     h1,
@@ -73,6 +74,18 @@
 
     img {
         max-width: 100%;
+    }
+
+    blockquote {
+        padding: 0.5em 1em;
+        margin: 0.5em 0;
+        color: var(--muted);
+        background-color: var(--bg-light);
+        border-left: 3px solid var(--border);
+
+        p:last-child {
+            margin-bottom: 0;
+        }
     }
 
     // Table styling - minimal approach

@@ -1,5 +1,5 @@
-import { IconCopy } from '@posthog/icons'
-import { lemonToast } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 export async function copyToClipboard(value: string, description: string = 'text'): Promise<boolean> {
     if (!navigator.clipboard) {

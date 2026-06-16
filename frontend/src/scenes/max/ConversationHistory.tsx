@@ -1,49 +1,65 @@
 import { useActions, useValues } from 'kea'
-import { router } from 'kea-router'
+import { combineUrl } from 'kea-router'
 
-import { IconChevronLeft, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { IconExternal, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
+import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { Conversation, ConversationStatus, ConversationType, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { Conversation, ConversationStatus, ConversationType } from '~/types'
 
 import { maxLogic } from './maxLogic'
-import { formatConversationDate, getConversationUrl } from './utils'
+import { formatConversationDate, getSlackThreadUrl } from './utils'
 
 export interface ConversationHistoryProps {
     sidePanel?: boolean
+    compact?: boolean
 }
 
-export function ConversationHistory({ sidePanel = false }: ConversationHistoryProps): JSX.Element {
-    const { location } = useValues(router)
-    const { conversationHistory, conversationHistoryLoading } = useValues(maxLogic)
-    const { toggleConversationHistory, startNewConversation } = useActions(maxLogic)
+export function ConversationHistory({ sidePanel = false, compact = false }: ConversationHistoryProps): JSX.Element {
+    const { conversationHistory, conversationHistoryLoading, conversationId } = useValues(maxLogic)
+    const { toggleConversationHistory, openConversation } = useActions(maxLogic)
     const { updateHasSeenProductIntroFor } = useActions(userLogic)
+
+    if (compact) {
+        return (
+            <div className="flex flex-col gap-1 w-full pb-10">
+                {conversationHistory.length > 0 ? (
+                    conversationHistory.map((conversation) => (
+                        <CompactConversationCard
+                            key={conversation.id}
+                            conversation={conversation}
+                            openConversation={openConversation}
+                            isActive={conversation.id === conversationId}
+                        />
+                    ))
+                ) : conversationHistoryLoading ? (
+                    <div className="flex flex-col gap-1">
+                        <LemonSkeleton className="h-8" />
+                        <LemonSkeleton className="h-8 opacity-60" />
+                        <LemonSkeleton className="h-8 opacity-30" />
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-center py-8 text-muted">
+                        <p className="text-sm mb-0">No chats yet</p>
+                    </div>
+                )}
+            </div>
+        )
+    }
 
     return (
         <div className="@container/chat-history flex flex-col gap-4 w-full self-center px-4 py-8 grow max-w-screen-lg">
-            {!sidePanel && (
-                <div className="flex items-center gap-4 mb-4">
-                    <LemonButton
-                        size="small"
-                        icon={<IconChevronLeft />}
-                        onClick={() => startNewConversation()}
-                        tooltip="Go back to home"
-                        tooltipPlacement="bottom"
-                    />
-                    <h2 className="text-xl font-bold mb-0">Chat history</h2>
-                </div>
-            )}
             {conversationHistory.length > 0 ? (
                 conversationHistory.map((conversation) => (
                     <ConversationCard
                         key={conversation.id}
                         conversation={conversation}
-                        pathname={location.pathname}
-                        search={location.search}
-                        includeHash={sidePanel}
+                        openConversation={openConversation}
+                        sidePanel={sidePanel}
                     />
                 ))
             ) : conversationHistoryLoading ? (
@@ -60,12 +76,12 @@ export function ConversationHistory({ sidePanel = false }: ConversationHistoryPr
                 <div className="flex items-center flex-1">
                     <ProductIntroduction
                         isEmpty
-                        productName="Max"
+                        productName="AI Assistant"
                         productKey={ProductKey.MAX}
                         thingName="chat"
-                        titleOverride="Start chatting with Max"
-                        description="Max is an AI product analyst in PostHog that answers data questions, gets things done in UI, and provides insights from PostHog’s documentation."
-                        docsURL="https://posthog.com/docs/data/max-ai"
+                        titleOverride="Start getting things done with Insights AI"
+                        description="Insights AI is an agent that answers data questions, gets things done in UI, and provides insights from Insights's documentation."
+                        docsURL="https://hanzo.ai/docs/data/max-ai"
                         actionElementOverride={
                             <LemonButton
                                 type="primary"
@@ -85,31 +101,79 @@ export function ConversationHistory({ sidePanel = false }: ConversationHistoryPr
     )
 }
 
-function ConversationCard({
-    conversation,
-    pathname,
-    search,
-    includeHash,
-}: {
+interface ConversationCardProps {
     conversation: Conversation
-    pathname: string
-    search: string
-    includeHash: boolean
-}): JSX.Element {
+    openConversation: (conversationId: string) => void
+    sidePanel: boolean
+}
+
+function ConversationCard({ conversation, openConversation, sidePanel }: ConversationCardProps): JSX.Element {
     return (
         <Link
             className="p-4 flex flex-row bg-surface-primary rounded-lg gap-2 w-full min-h-14 items-center justify-between"
-            to={getConversationUrl({ pathname, search, conversationId: conversation.id, includeHash })}
+            to={combineUrl(urls.ai(conversation.id), { from: 'history' }).url}
+            onClick={(e) => {
+                if (sidePanel) {
+                    e.preventDefault()
+                    openConversation(conversation.id)
+                }
+            }}
         >
             <div className="flex items-center gap-2">
                 <span className="flex-1 line-clamp-1">{conversation.title}</span>
-                {conversation.type === ConversationType.DeepResearch && <LemonTag>Deep research</LemonTag>}
+                {conversation.is_internal && <LemonTag type="muted">Impersonated</LemonTag>}
+                {conversation.type === ConversationType.DeepResearch && <LemonTag>Research</LemonTag>}
+                {conversation.slack_thread_key && (
+                    <LemonTag>
+                        <Link
+                            to={getSlackThreadUrl(conversation.slack_thread_key, conversation.slack_workspace_domain)}
+                            target="_blank"
+                            className="flex items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                            tooltip="This chat was started in Slack"
+                        >
+                            Slack thread <IconExternal />
+                        </Link>
+                    </LemonTag>
+                )}
             </div>
             {conversation.status === ConversationStatus.InProgress ? (
                 <Spinner className="h-4 w-4" />
             ) : (
                 <span className="text-secondary">{formatConversationDate(conversation.updated_at)}</span>
             )}
+        </Link>
+    )
+}
+
+interface CompactConversationCardProps {
+    conversation: Conversation
+    openConversation: (conversationId: string) => void
+    isActive?: boolean
+}
+
+function CompactConversationCard({
+    conversation,
+    openConversation,
+    isActive,
+}: CompactConversationCardProps): JSX.Element {
+    return (
+        <Link
+            to={combineUrl(urls.ai(conversation.id), { from: 'history' }).url}
+            onClick={(e) => {
+                e.preventDefault()
+                openConversation(conversation.id)
+            }}
+            buttonProps={{
+                active: isActive,
+                fullWidth: true,
+            }}
+            tooltip={conversation.title || 'view conversation'}
+            tooltipPlacement="right"
+        >
+            <span className="flex-1 line-clamp-1 text-primary">{conversation.title}</span>
+            {conversation.status === ConversationStatus.InProgress && <Spinner className="h-3 w-3" />}
+            <span className="opacity-30 text-xs">{formatConversationDate(conversation.updated_at)}</span>
         </Link>
     )
 }

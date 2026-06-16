@@ -4,7 +4,7 @@
 import { CanvasReplayerPlugin } from './canvas-plugin'
 
 // Mock rrweb canvasMutation function
-jest.mock('@posthog/rrweb', () => ({
+jest.mock('@hanzo/rrweb', () => ({
     canvasMutation: jest.fn().mockResolvedValue(undefined),
 }))
 

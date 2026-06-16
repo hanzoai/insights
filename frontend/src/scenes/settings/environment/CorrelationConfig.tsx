@@ -1,12 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
 import { IconSelectEvents, IconSelectProperties } from 'lib/lemon-ui/icons'
 import { teamLogic } from 'scenes/teamLogic'
@@ -39,18 +38,12 @@ export function CorrelationConfig(): JSX.Element {
 
     return (
         <>
-            <p>Globally exclude events or properties that do not provide relevant signals for your conversions.</p>
-
-            <LemonBanner type="info">
-                Correlation analysis can automatically surface relevant signals for conversion, and help you understand
-                why your users dropped off and what makes them convert.
-            </LemonBanner>
             {currentTeam && (
-                <div className="mt-4 deprecated-space-y-2">
+                <div className="deprecated-space-y-2">
                     <div>
                         <h3 className="flex items-center gap-2">
                             <IconSelectProperties className="text-lg" />
-                            Excluded person properties
+                            Excluded user properties
                         </h3>
                         <PropertySelect
                             taxonomicFilterGroup={TaxonomicFilterGroupType.PersonProperties}

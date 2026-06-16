@@ -1,24 +1,21 @@
+# Misc stuff, should be categorized/explained in the future
+# This is sorted in ascending order, keep it that way if you wanna please
+# people's OCDs ^_^
 __emails__
 __pycache__/
-# Local files generated for the ANTLR VS Code extension (https://github.com/mike-lischke/vscode-antlr4)
-.antlr
 .coverage
 .dlt
 .dmypy.json
 .DS_Store
-.env*
 .eslintcache
-.idea
 .mypy_cache
 .parcel-cache
-# pyenv local config
+.insights/
+.postgres-backups/
 .python-version
 .temporal-worker-settings
 .turbo
 .venv
-.vscode/*
-!.vscode/launch.json
-!.vscode/settings.example.json
 .wokeignore
 .yalc
 *-esbuild-bundle-visualization.html
@@ -27,12 +24,11 @@ __pycache__/
 *.db
 *.isorted
 *.log
+*.npy
 *.pyc
 *.swo
 *.swp
 **/*.tsbuildinfo
-*Type.ts
-CLAUDE.local.md
 /env
 /playwright-report/
 /test-results/
@@ -40,10 +36,10 @@ a11y/
 build-storybook.log
 celerybeat-schedule
 celerybeat.pid
-common/hogvm/typescript/.parcel-cache
-common/hogvm/typescript/dist
+common/scriptvm/typescript/.parcel-cache
+common/scriptvm/typescript/dist
 common/plugin_transpiler/dist
-common/tailwind/dist
+common/storybook/dist
 coverage-*.xml
 debug.log
 docker-compose.prod.yml
@@ -52,63 +48,89 @@ ee/support_sidebar_max/.env
 ee/support_sidebar_max/.vscode
 ee/support_sidebar_max/.vscode/settings.json
 ee/support_sidebar_max/max-venv/
-frontend/__snapshots__/__diff_output__/
-frontend/__snapshots__/__failures__/
-frontend/.cache/
-frontend/@posthog/apps-common/dist/
-frontend/dist/
-frontend/pnpm-error.log
-frontend/public/Matter*.woff* # Paid font
-frontend/tmp
-frontend/types/
-frontend/src/products.tsx
-# Vite-specific assets (we copy public assets to src/assets) just for development
-frontend/src/assets
-.typegen
-# ANTLR-generated temp files when "npm run grammar:build" crashes
-gen/
+frontend/storybook-static
 max-test-venv/
 node_modules/
 object_storage/
 playwright/e2e-vrt/**/*-darwin.png
 pnpm-error.log
-# pyright config (keep this until we have a standardized one)
 pyrightconfig.json
 settings.yml
 share/GeoLite2-City.*
 staticfiles
 storybook-static
-frontend/storybook-static
-common/storybook/dist
 temp_test_run_data.json
-# ignore all dagster tmp directories that may be created
 tmp*/
 upgrade/
 venv
 yalc.lock
+
+# Local ide config should be ignored but keep the example insights.iml file
+.idea
+!.idea/insights.iml
+
+# Local VSCode config should be ignored
+# but make sure we commit examples and the shared `launch.json` file
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.example.json
+
+# Ignoring local Zed config
+# but commit shared `debug.json` file
+.zed/*
+!.zed/debug.json
+
+# Kea types should be ignored
+*Type.ts
+
+# Local files generated for the ANTLR VS Code extension (https://github.com/mike-lischke/vscode-antlr4)
+.antlr
+
+# ANTLR-generated temp files when "npm run grammar:build" crashes
+gen/
+
+# Vite-specific assets (we copy public assets to src/assets) just for development
+.typegen
+frontend/src/assets
+
 # Flox.dev lockfile (will differ slightly per local dev env, even with consistent pinning in TOML file)
 .flox/env/manifest.lock
 
-playwright/.auth/
+# Playwright cache + reports
 playwright-report/
-test-results/
+playwright/.auth/
 playwright/playwright-report/
 playwright/test-results/
+test-results/
 
+# Dagster
 .dagster_home/*
-!.dagster_home/.gitkeep
-!.dagster_home/workspace.yaml
-!.dagster_home/dagster.yaml
 .tmp_dagster_home*/*
+!.dagster_home/.gitkeep
+!.dagster_home/dagster.yaml
+!.dagster_home/workspace.yaml
+
+# Frontend caching, build artifacts, logs, private assets, etc.
+common/tailwind/dist
+frontend/__snapshots__/__diff_output__/
+frontend/__snapshots__/__failures__/
+frontend/.cache/
+frontend/@hanzo/apps-common/dist/
+frontend/dist/
+frontend/pnpm-error.log
+frontend/public/Matter*.woff*
+frontend/tmp
+frontend/types/
 
 # Dist release target dir
 target/*
 
 # Ignore user's Cursor rules
 .cursor/**/user*.mdc
+CLAUDE.local.md
 
 # Ignore file for clearing demo data on local
-posthog/management/commands/clear_demo_data.py
+insights/management/commands/clear_demo_data.py
 
 # Ignore Claude Code settings
 .claude/settings.local.json
@@ -116,5 +138,51 @@ posthog/management/commands/clear_demo_data.py
 # Ignore local mprocs configs
 bin/mprocs*.local.yaml
 
+# Ignore bin lockfiles
+bin/*.lock
+
+# Avoid commiting built binaries, they can be built locally easily
+# We deploy them to releases via the `build-hobby-installer.yml` workflow
+bin/hobby-installer-*
+bin/hobby-installer/hobby-installer
+bin/hobby-installer/hobby-installer.log
+
 # Debug output of our session summaries product
 .session-summaries
+
+# Claude Code review outputs
+CODE_DEBUGGING_SESSION.md
+CODE_REVIEW.md
+
+# SeaweedFS data + migration checkpoint
+.migration-checkpoint.json
+data/seaweedfs
+data/seaweedfs/
+
+# No env files except for examples and direnv config
+# All secrets MUST come from KMS (kms.hanzo.ai) -- never commit credentials.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+.env*
+!.env.example
+!.envrc
+
+# Ignore Agent OS (Claude Code) files
+.claude/agents/agent-os
+.claude/commands/agent-os
+
+agent-os/
+
+# MCP build files
+services/mcp/ui-apps-dist
+
+# Product skills
+.claude/skills/error-tracking
+
+# Downloaded GitHub issues for signals
+products/signals/backend/github_issues/
+CLAUDE.md

@@ -1,7 +1,7 @@
 import FuseClass from 'fuse.js'
 import { actions, kea, key, path, props, reducers, selectors } from 'kea'
 
-import { STL as HOG_STL } from '@posthog/hogvm'
+import { STL as SCRIPT_STL } from '@hanzo/scriptvm'
 
 import type { cyclotronJobTemplateSuggestionsLogicType } from './cyclotronJobTemplateSuggestionsLogicType'
 
@@ -17,13 +17,13 @@ export type CyclotronJobTemplateOptionCategory = {
 }
 
 export type CyclotronJobTemplateSuggestionsLogicProps = {
-    templating: 'hog' | 'liquid'
+    templating: 'fn' | 'liquid'
 }
 
 // Helping kea-typegen navigate the exported default class for Fuse
 export interface Fuse extends FuseClass<CyclotronJobTemplateOption> {}
 
-const HOG_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
+const SCRIPT_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     {
         key: 'ternary',
         example: `$1 = true ? 'Yes' : 'No'`,
@@ -36,7 +36,7 @@ const HOG_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     },
 ]
 
-const HOG_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(HOG_STL).map(([key, value]) => ({
+const SCRIPT_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(SCRIPT_STL).map(([key, value]) => ({
     key,
     example: value.example,
     description: value.description,
@@ -47,6 +47,11 @@ const LIQUID_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
         key: 'property',
         example: `{{ person.properties.email }}`,
         description: 'Access a property of an event or person',
+    },
+    {
+        key: 'workflow variable',
+        example: `{{ variables.MY_VARIABLE_KEY }}`,
+        description: 'Access a workflow variable set earlier in the workflow',
     },
     {
         key: 'if',
@@ -86,7 +91,7 @@ export const cyclotronJobTemplateSuggestionsLogic = kea<cyclotronJobTemplateSugg
         allOptions: [
             (_, p) => [p.templating],
             (templating): CyclotronJobTemplateOption[] => {
-                return templating === 'hog' ? [...HOG_USAGE_EXAMPLES, ...HOG_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
+                return templating === 'fn' ? [...SCRIPT_USAGE_EXAMPLES, ...SCRIPT_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
             },
         ],
 

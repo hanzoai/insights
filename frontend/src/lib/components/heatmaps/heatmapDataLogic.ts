@@ -4,9 +4,16 @@ import { encodeParams } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { windowValues } from 'kea-window-values'
 
-import { DEFAULT_HEATMAP_FILTERS, calculateViewportRange } from 'lib/components/IframedToolbarBrowser/utils'
+import {
+    DEFAULT_HEATMAP_FILTERS,
+    DEFAULT_HEATMAP_HEIGHT,
+    DEFAULT_HEATMAP_WIDTH,
+    calculateViewportRange,
+} from 'lib/components/IframedToolbarBrowser/utils'
 import {
     CommonFilters,
+    HeatmapArea,
+    HeatmapEventsResponse,
     HeatmapFilters,
     HeatmapFixedPositionMode,
     HeatmapJsData,
@@ -33,6 +40,8 @@ export interface HeatmapDataLogicProps {
     exportToken?: string | null
 }
 
+export type HrefMatchType = 'exact' | 'pattern'
+
 export const heatmapDataLogic = kea<heatmapDataLogicType>([
     path((key) => ['lib', 'components', 'heatmap', 'heatmapDataLogic', key]),
     props({ context: 'toolbar', exportToken: null } as HeatmapDataLogicProps),
@@ -43,12 +52,17 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
         setHeatmapFilters: (filters: HeatmapFilters) => ({ filters }),
         patchHeatmapFilters: (filters: Partial<HeatmapFilters>) => ({ filters }),
         setHeatmapFixedPositionMode: (mode: HeatmapFixedPositionMode) => ({ mode }),
-        setHeatmapColorPalette: (Palette: string | null) => ({ Palette }),
+        setHeatmapColorPalette: (palette: string | null) => ({ palette }),
         setHref: (href: string) => ({ href }),
-        setHrefMatchType: (matchType: 'exact' | 'pattern') => ({ matchType }),
-        setHeatmapScrollY: (scrollY: number) => ({ scrollY }),
+        setHrefMatchType: (matchType: HrefMatchType) => ({ matchType }),
         setWindowWidthOverride: (widthOverride: number | null) => ({ widthOverride }),
         setIsReady: (isReady: boolean) => ({ isReady }),
+        // Click-to-view-events actions
+        setSelectedArea: (area: HeatmapArea | null) => ({ area }),
+        clearSelectedArea: true,
+        setShowEventsPanel: (show: boolean) => ({ show }),
+        loadMoreAreaEvents: true,
+        loadMoreAreaEventsSuccess: (payload: HeatmapEventsResponse) => ({ payload }),
     }),
     windowValues(() => ({
         windowWidth: (window: Window) => window.innerWidth,
@@ -56,13 +70,14 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
     })),
     reducers({
         hrefMatchType: [
-            'exact' as 'exact' | 'pattern',
+            'exact' as HrefMatchType,
             {
                 setHrefMatchType: (_, { matchType }) => matchType,
             },
         ],
         commonFilters: [
             { date_from: '-7d' } as CommonFilters,
+            { persist: true },
             {
                 setCommonFilters: (_, { filters }) => filters,
             },
@@ -77,6 +92,7 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
         ],
         heatmapFixedPositionMode: [
             'fixed' as HeatmapFixedPositionMode,
+            { persist: true },
             {
                 setHeatmapFixedPositionMode: (_, { mode }) => mode,
             },
@@ -85,7 +101,7 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
             'default' as string | null,
             { persist: true },
             {
-                setHeatmapColorPalette: (_, { Palette }) => Palette,
+                setHeatmapColorPalette: (_, { palette }) => palette,
             },
         ],
         href: [
@@ -96,14 +112,9 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
                 },
             },
         ],
-        heatmapScrollY: [
-            0,
-            {
-                setHeatmapScrollY: (_, { scrollY }) => scrollY,
-            },
-        ],
         windowWidthOverride: [
             null as number | null,
+            { persist: true },
             {
                 setWindowWidthOverride: (_, { widthOverride }) => widthOverride,
             },
@@ -112,6 +123,35 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
             false as boolean,
             {
                 setIsReady: (_, { isReady }) => isReady,
+            },
+        ],
+        selectedArea: [
+            null as HeatmapArea | null,
+            {
+                setSelectedArea: (_, { area }) => area,
+                clearSelectedArea: () => null,
+            },
+        ],
+        showEventsPanel: [
+            false as boolean,
+            {
+                setShowEventsPanel: (_, { show }) => show,
+                clearSelectedArea: () => false,
+            },
+        ],
+        areaEventsLoadingMore: [
+            false as boolean,
+            {
+                loadMoreAreaEvents: () => true,
+                loadMoreAreaEventsSuccess: () => false,
+            },
+        ],
+        // Additional reducers for areaEvents (loader is defined below)
+        areaEvents: [
+            null as HeatmapEventsResponse | null,
+            {
+                loadMoreAreaEventsSuccess: (_, { payload }) => payload,
+                clearSelectedArea: () => null,
             },
         ],
     }),
@@ -173,6 +213,50 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
                 },
             },
         ],
+        areaEvents: [
+            null as HeatmapEventsResponse | null,
+            {
+                loadAreaEvents: async (_, breakpoint) => {
+                    const area = values.selectedArea
+                    if (!area || !values.href) {
+                        return null
+                    }
+
+                    await breakpoint(100)
+
+                    const { date_from, date_to, filter_test_accounts } = values.commonFilters
+                    const { type } = values.heatmapFilters
+
+                    const apiURL = `/api/heatmap/events/${encodeParams(
+                        {
+                            type,
+                            date_from,
+                            date_to,
+                            url_exact: values.hrefMatchType === 'exact' ? values.href : undefined,
+                            url_pattern: values.hrefMatchType === 'pattern' ? values.href : undefined,
+                            viewport_width_min: values.viewportRange.min,
+                            viewport_width_max: values.viewportRange.max,
+                            filter_test_accounts,
+                            points: JSON.stringify(area.points),
+                        },
+                        '?'
+                    )}`
+
+                    const response = await (props.context === 'toolbar'
+                        ? toolbarFetch(apiURL, 'GET')
+                        : props.exportToken
+                          ? fetch(apiURL, { headers: { Authorization: `Bearer ${props.exportToken}` } })
+                          : fetch(apiURL))
+                    breakpoint()
+
+                    if (response.status !== 200) {
+                        throw new Error('API error')
+                    }
+
+                    return await response.json()
+                },
+            },
+        ],
     })),
     selectors({
         dateRange: [
@@ -219,6 +303,12 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
                 calculateViewportRange(heatmapFilters, windowWidthOverride ?? windowWidth),
         ],
 
+        // Derived width with default applied
+        widthOverride: [
+            (s) => [s.windowWidthOverride],
+            (windowWidthOverride: number | null): number => windowWidthOverride ?? DEFAULT_HEATMAP_WIDTH,
+        ],
+
         heatmapTooltipLabel: [
             (s) => [s.heatmapFilters],
             (heatmapFilters) => {
@@ -236,33 +326,41 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
             },
         ],
 
+        maxYFromEvents: [
+            (s) => [s.heatmapElements],
+            (heatmapElements: HeatmapElement[]): number => {
+                if (!heatmapElements || heatmapElements.length === 0) {
+                    return 0
+                }
+                return Math.max(...heatmapElements.map((el: HeatmapElement) => el.y))
+            },
+        ],
+
+        // Derived height - maximum of calculated height from events and viewport height
+        heightOverride: [
+            (s) => [s.maxYFromEvents, s.windowHeight],
+            (maxYFromEvents: number, windowHeight: number): number => {
+                // Limit canvas height to prevent browser freezing with heatmap.js
+                // Large canvases (e.g., 24000px) cause heatmap.js to block the main thread
+                const MAX_HEATMAP_HEIGHT = 8000
+                if (maxYFromEvents > 0) {
+                    const calculatedHeight = Math.ceil((maxYFromEvents + 100) / 100) * 100
+                    return Math.min(Math.max(calculatedHeight, windowHeight), MAX_HEATMAP_HEIGHT)
+                }
+                return Math.max(DEFAULT_HEATMAP_HEIGHT, windowHeight)
+            },
+        ],
+
         heatmapJsData: [
-            (s) => [
-                s.heatmapElements,
-                s.heatmapScrollY,
-                s.windowWidth,
-                s.windowWidthOverride,
-                s.heatmapFixedPositionMode,
-            ],
-            (
-                heatmapElements,
-                heatmapScrollY,
-                windowWidth,
-                windowWidthOverride,
-                heatmapFixedPositionMode
-            ): HeatmapJsData => {
+            (s) => [s.heatmapElements, s.windowWidth, s.windowWidthOverride, s.heatmapFixedPositionMode],
+            (heatmapElements, windowWidth, windowWidthOverride, heatmapFixedPositionMode): HeatmapJsData => {
                 const width = windowWidthOverride ?? windowWidth
-                // We want to account for all the fixed position elements, the scroll of the context and the browser width
                 const data = heatmapElements.reduce((acc, element) => {
                     if (heatmapFixedPositionMode === 'hidden' && element.targetFixed) {
                         return acc
                     }
 
-                    const y = Math.round(
-                        element.targetFixed && heatmapFixedPositionMode === 'fixed'
-                            ? element.y
-                            : element.y - heatmapScrollY
-                    )
+                    const y = Math.round(element.y)
                     const x = Math.round(element.xPercentage * width)
 
                     acc.push({ x, y, value: element.count })
@@ -282,20 +380,18 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
             },
         ],
     }),
-    listeners(({ actions }) => ({
+    listeners(({ actions, values, props }) => ({
         setCommonFilters: () => {
             actions.loadHeatmap()
         },
         setHeatmapFilters: () => {
             actions.loadHeatmap()
         },
-        patchHeatmapFilters: () => {
-            actions.loadHeatmap()
-        },
-        setHeatmapFixedPositionMode: () => {
-            actions.loadHeatmap()
-        },
-        setHeatmapColorPalette: () => {
+        patchHeatmapFilters: ({ filters }) => {
+            // Clear old data when switching heatmap types
+            if (filters.type) {
+                actions.resetHeatmapData()
+            }
             actions.loadHeatmap()
         },
         setHref: () => {
@@ -303,6 +399,57 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
         },
         setWindowWidthOverride: () => {
             actions.loadHeatmap()
+        },
+        setSelectedArea: ({ area }) => {
+            if (area) {
+                actions.loadAreaEvents({})
+                actions.setShowEventsPanel(true)
+            }
+        },
+        loadMoreAreaEvents: async () => {
+            const area = values.selectedArea
+            const currentEvents = values.areaEvents
+            if (!area || !values.href || !currentEvents?.results) {
+                return
+            }
+
+            const { date_from, date_to, filter_test_accounts } = values.commonFilters
+            const { type } = values.heatmapFilters
+            const nextOffset = currentEvents.results.length
+
+            const apiURL = `/api/heatmap/events/${encodeParams(
+                {
+                    type,
+                    date_from,
+                    date_to,
+                    url_exact: values.hrefMatchType === 'exact' ? values.href : undefined,
+                    url_pattern: values.hrefMatchType === 'pattern' ? values.href : undefined,
+                    viewport_width_min: values.viewportRange.min,
+                    viewport_width_max: values.viewportRange.max,
+                    filter_test_accounts,
+                    points: JSON.stringify(area.points),
+                    offset: nextOffset,
+                },
+                '?'
+            )}`
+
+            const response = await (props.context === 'toolbar'
+                ? toolbarFetch(apiURL, 'GET')
+                : props.exportToken
+                  ? fetch(apiURL, { headers: { Authorization: `Bearer ${props.exportToken}` } })
+                  : fetch(apiURL))
+
+            if (response.status !== 200) {
+                return
+            }
+
+            const newData: HeatmapEventsResponse = await response.json()
+
+            actions.loadMoreAreaEventsSuccess({
+                results: [...currentEvents.results, ...(newData.results || [])],
+                total_count: newData.total_count,
+                has_more: newData.has_more,
+            })
         },
     })),
     subscriptions(({ actions }) => ({

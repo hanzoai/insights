@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPulse } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconPulse } from '@hanzo/icons'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
@@ -26,7 +26,7 @@ export function SceneMetalyticsSummaryButton({ dataAttrKey }: SceneDataAttrKeyPr
         <FlaggedFeature flag="metalytics">
             <ButtonPrimitive
                 onClick={() => openSidePanel(SidePanelTab.Activity, 'metalytics')}
-                tooltip={`${safeUniqueUsers} PostHog members have viewed this a total of ${safeViewCount} times. Click to see more.`}
+                tooltip={`${safeUniqueUsers} Insights members have viewed this a total of ${safeViewCount} times. Click to see more.`}
                 menuItem
                 disabled={viewCountLoading}
                 data-attr={`${dataAttrKey}-metalytics-summary-button`}

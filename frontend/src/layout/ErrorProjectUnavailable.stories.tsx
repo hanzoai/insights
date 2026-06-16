@@ -38,7 +38,10 @@ const meta: Meta = {
         layout: 'fullscreen',
         viewMode: 'story',
         mockDate: '2023-02-01',
-        pageUrl: urls.projectHomepage(),
+        pageUrl: urls.projectRoot(),
+        testOptions: {
+            waitForLoadersToDisappear: true,
+        },
     },
 }
 export default meta
@@ -51,8 +54,8 @@ export const AccessRevoked = (): JSX.Element => {
             '/api/users/@me/': () => [
                 200,
                 {
-                    email: 'test@posthog.com',
-                    first_name: 'Test PostHog',
+                    email: 'test@hanzo.ai',
+                    first_name: 'Test Insights',
                     organization: {
                         name: 'Test org',
                         teams: [],
@@ -91,8 +94,8 @@ export const NoSelectableProjects = (): JSX.Element => {
             '/api/users/@me/': () => [
                 200,
                 {
-                    email: 'test@posthog.com',
-                    first_name: 'Test PostHog',
+                    email: 'test@hanzo.ai',
+                    first_name: 'Test Insights',
                     organization: {
                         name: 'Test org',
                         teams: [],

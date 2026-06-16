@@ -1,6 +1,6 @@
-//Parse method copied from https://github.com/brianc/node-postgres/tree/master/packages/pg-connection-string
+//Parse method copied from https://github.com/brianc/node-postgres/tree/main/packages/pg-connection-string
 //Copyright (c) 2010-2014 Brian Carlson (brian.m.carlson@gmail.com)
-//Adapted & Repurposed for TypeScript by Peter Hicks (peter.h@posthog.com)
+//Adapted & Repurposed for TypeScript by Peter Hicks (peter.h@hanzo.ai)
 //MIT License
 
 interface Config {
@@ -19,9 +19,11 @@ export function parseConnectionString(str: string): Config {
     let result: URL
     let dummyHost = false
 
-    // Allow "postgres://" and "postgresql://"
+    // Allow "postgres://", "postgresql://", and "redshift://"
     if (str.startsWith('postgres://')) {
         str = 'postgresql://' + str.substring('postgres://'.length)
+    } else if (str.startsWith('redshift://')) {
+        str = 'postgresql://' + str.substring('redshift://'.length)
     }
 
     if (/ |%[^a-f0-9]|%[a-f0-9][^a-f0-9]/i.test(str)) {

@@ -8,7 +8,6 @@ import { Toolbar } from './bar/Toolbar'
 import { ToolbarFixedZones } from './bar/ToolbarFixedZones'
 import { toolbarLogic } from './bar/toolbarLogic'
 import { Elements } from './elements/Elements'
-import { HedgehogButton } from './hedgehog/HedgehogButton'
 import { toolbarConfigLogic } from './toolbarConfigLogic'
 
 export function ToolbarContainer(): JSX.Element {
@@ -24,15 +23,15 @@ export function ToolbarContainer(): JSX.Element {
     const ref = useRef<HTMLDivElement | null>(null)
 
     return (
-        <Fade visible={buttonVisible} className="toolbar-global-fade-container ph-no-capture">
-            <Elements />
-            <ToolbarFixedZones />
-            <div id="button-toolbar" ref={ref} className="ph-no-capture" {...themeProps}>
-                <FloatingContainerContext.Provider value={ref}>
+        <Fade visible={buttonVisible} className="toolbar-global-fade-container">
+            <FloatingContainerContext.Provider value={ref}>
+                <Elements />
+                <ToolbarFixedZones />
+                <div id="button-toolbar" {...themeProps}>
                     <Toolbar />
-                </FloatingContainerContext.Provider>
-            </div>
-            <HedgehogButton />
+                </div>
+                <div ref={ref} className="fixed inset-0 pointer-events-none z-[2147483647] [&>*]:pointer-events-auto" />
+            </FloatingContainerContext.Provider>
         </Fade>
     )
 }

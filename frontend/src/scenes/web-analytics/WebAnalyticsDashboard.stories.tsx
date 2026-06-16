@@ -2,6 +2,7 @@ import { Meta } from '@storybook/react'
 import { useActions } from 'kea'
 import { useEffect } from 'react'
 
+import { FEATURE_FLAGS } from 'lib/constants'
 import { App } from 'scenes/App'
 import { urls } from 'scenes/urls'
 
@@ -24,6 +25,7 @@ const meta: Meta = {
         viewMode: 'story',
         mockDate: '2023-02-01',
         pageUrl: urls.webAnalytics(),
+        featureFlags: [FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2],
         testOptions: {
             includeNavigationInSnapshot: true,
             waitForLoadersToDisappear: true,
@@ -80,4 +82,24 @@ export function WebAnalyticsDashboard(): JSX.Element {
     }, [setDeviceTab, setSourceTab])
 
     return <App />
+}
+
+export function WebAnalyticsDashboardMobile(): JSX.Element {
+    const { setSourceTab, setDeviceTab } = useActions(webAnalyticsLogic)
+
+    useEffect(() => {
+        setSourceTab(SourceTab.REFERRING_DOMAIN)
+        setDeviceTab(DeviceTab.BROWSER)
+    }, [setDeviceTab, setSourceTab])
+
+    return <App />
+}
+
+WebAnalyticsDashboardMobile.parameters = {
+    testOptions: {
+        includeNavigationInSnapshot: true,
+        waitForLoadersToDisappear: true,
+        waitForSelector: '[data-attr=trend-line-graph] > canvas',
+        viewport: { width: 414, height: 896 },
+    },
 }

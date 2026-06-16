@@ -1,0 +1,17 @@
+{% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
+{% block heading %}{{ invitee.first_name }} accepted their Insights invitation{% endblock %}
+{% block section %}
+<!-- prettier-ignore -->
+<p>
+    {{ invitee.first_name }} (<a href="mailto:{{ invitee.email }}">{{ invitee.email }}</a>) just joined you at {{ organization.name }}.
+</p>
+<div class="mb mt text-center">
+    <a class="button" href="{% absolute_uri %}">View Insights</a>
+</div>
+<div class="mt">
+    <p>
+        If the button above doesn't work, paste this link into your browser:<br />
+        <a href="{% absolute_uri %}">{% absolute_uri %}</a>
+    </p>
+</div>
+{% endblock %}

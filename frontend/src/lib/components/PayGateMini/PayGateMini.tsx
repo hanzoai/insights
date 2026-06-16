@@ -1,14 +1,14 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { IconInfo, IconOpenSidebar, IconUnlock } from '@posthog/icons'
-import { LemonButton, LemonSkeleton, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
+import { LemonButton, LemonSkeleton, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
-import { getProductIcon } from 'scenes/products/Products'
+import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature, BillingFeatureType, BillingProductV2AddonType, BillingProductV2Type } from '~/types'
@@ -63,7 +63,7 @@ export function PayGateMini({
 
     useEffect(() => {
         if (gateVariant) {
-            posthog.capture('pay gate shown', {
+            insights.capture('pay gate shown', {
                 product_key: productWithFeature?.type,
                 feature: feature,
                 gate_variant: gateVariant,
@@ -76,7 +76,7 @@ export function PayGateMini({
         if (handleSubmit) {
             handleSubmit()
         }
-        posthog.capture('pay gate CTA clicked', {
+        insights.capture('pay gate CTA clicked', {
             product_key: productWithFeature?.type,
             feature: feature,
             gate_variant: gateVariant,
@@ -191,9 +191,7 @@ function PayGateContent({
                 'PayGateMini rounded flex flex-col items-center p-4 text-center'
             )}
         >
-            <div className="flex mb-2 text-4xl text-warning">
-                {getProductIcon(productWithFeature.name, featureInfo.icon_key)}
-            </div>
+            <div className="flex mb-2 text-4xl text-warning">{getProductIcon(featureInfo.icon_key)}</div>
             <h2>{featureInfo.name}</h2>
             {renderUsageLimitMessage(
                 featureAvailableOnOrg,
@@ -279,7 +277,7 @@ const renderGateVariantMessage = (
     isAddonProduct?: boolean
 ): JSX.Element => {
     if (gateVariant === 'move-to-cloud') {
-        return <>This feature is only available on PostHog Cloud.</>
+        return <>This feature is only available on Insights Cloud.</>
     } else if (isAddonProduct) {
         return (
             <>
@@ -307,7 +305,7 @@ const DocsLink = ({ url }: { url: string }): JSX.Element => {
     return (
         <div className="mb-4">
             <Link to={url} target="_blank">
-                Learn more in PostHog Docs.
+                Learn more in Insights Docs.
             </Link>
         </div>
     )

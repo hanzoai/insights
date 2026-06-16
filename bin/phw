@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostHog Worktree wrapper function installer
+# Insights Worktree wrapper function installer
 # Source this file in your shell profile to use the phw function
 
 # Get the directory of this script when being sourced
@@ -53,7 +53,7 @@ _switch_to_worktree() {
 }
 
 phw() {
-    local script_path="${_phw_script_dir}/posthog-worktree"
+    local script_path="${_phw_script_dir}/insights-worktree"
     local command="$1"
     local branch="$2"
     
@@ -96,7 +96,7 @@ phw() {
     
     # Auto-cd to worktree after successful command execution
     if [[ -n "$branch" ]]; then
-        local worktree_base="${POSTHOG_WORKTREE_BASE:-$HOME/.worktrees/posthog}"
+        local worktree_base="${INSIGHTS_WORKTREE_BASE:-$HOME/.worktrees/insights}"
         local worktree_path=""
         
         case "$command" in
@@ -197,4 +197,4 @@ elif [ -n "$ZSH_VERSION" ]; then
     fi
 fi
 
-echo "PostHog worktree helper loaded. Use 'phw' command."
+echo "Insights worktree helper loaded. Use 'phw' command."

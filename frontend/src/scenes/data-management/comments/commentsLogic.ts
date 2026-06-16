@@ -1,11 +1,12 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSelectOption, lemonToast } from '@posthog/lemon-ui'
+import { LemonSelectOption, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { capitalizeFirstLetter } from 'lib/utils'
+import { getRecordingLinkInfo } from 'scenes/comments/commentUtils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
@@ -23,12 +24,13 @@ SCOPE_OPTIONS.unshift({
     label: 'Any',
 })
 
+const replayUrlWithTimestamp = (c: CommentType): string | null => getRecordingLinkInfo(c)?.url ?? null
+
 const openUrls: Partial<Record<ActivityScope, (c: CommentType) => string | null>> = {
     [ActivityScope.INSIGHT]: (c) =>
         c.item_context?.short_id ? urls.insightView(c.item_context?.short_id as InsightShortId) : null,
-    // TODO we only support this in modal apparently, but we should be able to open these at the timestamp of the comment
-    [ActivityScope.REPLAY]: (c) => (c.item_id ? urls.replaySingle(c.item_id as string) : null),
-    [ActivityScope.RECORDING]: (c) => (c.item_id ? urls.replaySingle(c.item_id as string) : null),
+    [ActivityScope.REPLAY]: replayUrlWithTimestamp,
+    [ActivityScope.RECORDING]: replayUrlWithTimestamp,
     [ActivityScope.DASHBOARD]: (c) => (c.item_id ? urls.dashboard(c.item_id) : null),
     [ActivityScope.FEATURE_FLAG]: (c) => (c.item_id ? urls.featureFlag(c.item_id) : null),
     [ActivityScope.EXPERIMENT]: (c) => (c.item_id ? urls.experiment(c.item_id) : null),
@@ -46,7 +48,7 @@ const openUrls: Partial<Record<ActivityScope, (c: CommentType) => string | null>
     [ActivityScope.GROUP]: (c) =>
         c.item_context?.group_type_index && c.item_id ? urls.group(c.item_context.group_type_index, c.item_id) : null,
     [ActivityScope.PLUGIN]: (c) => (c.item_id ? urls.legacyPlugin(c.item_id) : null),
-    [ActivityScope.HOG_FUNCTION]: (c) => (c.item_id ? urls.hogFunction(c.item_id) : null),
+    [ActivityScope.INSIGHTS_FUNCTION]: (c) => (c.item_id ? urls.insightsFunction(c.item_id) : null),
     // These don't have specific item URLs:
     [ActivityScope.TEAM]: () => urls.settings('project'),
     [ActivityScope.DATA_MANAGEMENT]: () => urls.eventDefinitions(),
@@ -141,7 +143,7 @@ export const commentsLogic = kea<commentsLogicType>([
             lemonToast.success('Comment deleted')
         },
         deleteCommentFailure: (e) => {
-            posthog.captureException(e, { action: 'data management scene deleting comment' })
+            insights.captureException(e, { action: 'data management scene deleting comment' })
             lemonToast.error('Could not delete comment, refresh and try again')
         },
     })),

@@ -1,7 +1,7 @@
 import { cva } from 'cva'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-import { Link, Spinner } from '@posthog/lemon-ui'
+import { Link, Spinner } from '@hanzo/lemon-ui'
 
 import { Dayjs } from 'lib/dayjs'
 import { useAsyncCallback } from 'lib/hooks/useAsyncCallback'
@@ -110,8 +110,8 @@ export function SessionTimeline({
     useImperativeHandle(ref, () => ({ scrollToItem }))
 
     return (
-        <div className={cn('flex', className)}>
-            <div className="flex flex-col justify-between items-center p-1 border-r border-gray-3">
+        <div className={cn('flex h-full', className)}>
+            <div className="flex flex-col justify-between items-center p-1 border-r border-gray-3 shrink-0">
                 <div className="flex flex-col items-center gap-2">
                     {collector.getCategories().map((cat) => (
                         <ItemCategoryToggle
@@ -140,7 +140,7 @@ export function SessionTimeline({
                     scrollRefCb(el)
                     containerRef.current = el
                 }}
-                className="h-[500px] w-full overflow-y-auto relative"
+                className="h-full w-full overflow-y-auto relative"
                 style={{ scrollbarGutter: 'stable' }}
             >
                 {beforeLoading && (

@@ -1,78 +1,52 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconList } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconList } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
-import { FEATURE_FLAGS } from 'lib/constants'
 import { IconAreaChart } from 'lib/lemon-ui/icons'
+import { AddMetricButton } from 'scenes/experiments/Metrics/AddMetricButton'
+import { METRIC_CONTEXTS } from 'scenes/experiments/Metrics/experimentMetricModalLogic'
 
-import { ExperimentMetric } from '~/queries/schema/schema-general'
+import type { CachedNewExperimentQueryResponse, ExperimentMetric } from '~/queries/schema/schema-general'
 
 import { experimentLogic } from '../../experimentLogic'
 import { modalsLogic } from '../../modalsLogic'
 import { MetricsReorderModal } from '../MetricsReorderModal'
-import { AddPrimaryMetric, AddSecondaryMetric } from '../shared/AddMetric'
 import { HowToReadTooltip } from './HowToReadTooltip'
 import { MetricsTable } from './MetricsTable'
 import { ResultDetails } from './ResultDetails'
 
-export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element {
+export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element | null {
     const {
         experiment,
         getInsightType,
-        getOrderedMetrics,
-        primaryMetricsResults,
-        secondaryMetricsResults,
-        secondaryMetricsResultsErrors,
-        primaryMetricsResultsErrors,
+        orderedPrimaryMetricsWithResults,
+        orderedSecondaryMetricsWithResults,
         hasMinimumExposureForResults,
-        featureFlags,
     } = useValues(experimentLogic)
 
     const { openPrimaryMetricsReorderModal, openSecondaryMetricsReorderModal } = useActions(modalsLogic)
 
     const variants = experiment?.feature_flag?.filters?.multivariate?.variants
     if (!variants) {
-        return <></>
+        return null
     }
 
-    const unorderedResults = isSecondary ? secondaryMetricsResults : primaryMetricsResults
-    const unorderedErrors = isSecondary ? secondaryMetricsResultsErrors : primaryMetricsResultsErrors
+    const metricsWithResults = isSecondary ? orderedSecondaryMetricsWithResults : orderedPrimaryMetricsWithResults
 
-    const metrics = getOrderedMetrics(!!isSecondary)
-
-    // Create maps of UUID -> result/error from original arrays
-    const resultsMap = new Map()
-    const errorsMap = new Map()
-
-    // Get original metrics in their original order
-    const originalMetrics = isSecondary ? experiment.metrics_secondary : experiment.metrics
-    const sharedMetrics = (experiment.saved_metrics || [])
-        .filter((sharedMetric) => sharedMetric.metadata.type === (isSecondary ? 'secondary' : 'primary'))
-        .map((sharedMetric) => sharedMetric.query)
-    const allOriginalMetrics = [...originalMetrics, ...sharedMetrics]
-
-    // Map results and errors by UUID
-    allOriginalMetrics.forEach((metric, index) => {
-        const uuid = metric.uuid || metric.query?.uuid
-        if (uuid) {
-            resultsMap.set(uuid, unorderedResults[index])
-            errorsMap.set(uuid, unorderedErrors[index])
-        }
-    })
-
-    // Reorder results and errors to match the ordered metrics
-    const results = metrics.map((metric) => resultsMap.get(metric.uuid))
-    const errors = metrics.map((metric) => errorsMap.get(metric.uuid))
+    const metrics = metricsWithResults.map(({ metric }: { metric: ExperimentMetric }) => metric)
+    const results = metricsWithResults.map(({ result }: { result: CachedNewExperimentQueryResponse }) => result)
+    const errors = metricsWithResults.map(({ error }: { error: any }) => error)
+    const metricIndexes = metricsWithResults.map(({ metricIndex }: { metricIndex: number }) => metricIndex)
 
     const showResultDetails = metrics.length === 1 && results[0] && hasMinimumExposureForResults && !isSecondary
     const hasSomeResults =
-        results?.some((result) => result?.variant_results && result.variant_results.length > 0) &&
-        hasMinimumExposureForResults
-    const hasHowToReadTooltip = featureFlags[FEATURE_FLAGS.HOW_TO_READ_METRICS_EXPLANATION] === 'test'
+        results?.some(
+            (result: CachedNewExperimentQueryResponse) => result?.variant_results && result.variant_results.length > 0
+        ) && hasMinimumExposureForResults
 
     return (
-        <div className="mb-4 -mt-2">
+        <div className="mb-4 -mt-2" data-attr="experiment-creation-goal-metric">
             {experiment?.id && (
                 <>
                     <MetricsReorderModal isSecondary={false} />
@@ -96,7 +70,7 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                                 <IconInfo className="text-secondary text-lg" />
                             </Tooltip>
                         )}
-                        {hasSomeResults && !isSecondary && hasHowToReadTooltip && <HowToReadTooltip />}
+                        {hasSomeResults && !isSecondary && <HowToReadTooltip />}
                     </div>
                 </div>
 
@@ -104,7 +78,9 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                     <div className="ml-auto">
                         {metrics.length > 0 && (
                             <div className="mb-2 mt-4 justify-end flex gap-2">
-                                {isSecondary ? <AddSecondaryMetric /> : <AddPrimaryMetric />}
+                                <AddMetricButton
+                                    metricContext={isSecondary ? METRIC_CONTEXTS.secondary : METRIC_CONTEXTS.primary}
+                                />
                                 {metrics.length > 1 && (
                                     <LemonButton
                                         type="secondary"
@@ -129,6 +105,7 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                         metrics={metrics}
                         results={results}
                         errors={errors}
+                        metricIndexes={metricIndexes}
                         isSecondary={!!isSecondary}
                         getInsightType={getInsightType}
                         showDetailsModal={!showResultDetails}
@@ -137,12 +114,8 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                         <div className="mt-4">
                             <ResultDetails
                                 metric={metrics[0] as ExperimentMetric}
-                                result={{
-                                    ...results[0],
-                                    metric: metrics[0] as ExperimentMetric,
-                                }}
+                                result={results[0]}
                                 experiment={experiment}
-                                isSecondary={!!isSecondary}
                             />
                         </div>
                     )}
@@ -158,7 +131,9 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                                     : 'Primary metrics represent the main goal of the experiment and directly measure if your hypothesis was successful.'}
                             </p>
                         </div>
-                        {isSecondary ? <AddSecondaryMetric /> : <AddPrimaryMetric />}
+                        <AddMetricButton
+                            metricContext={isSecondary ? METRIC_CONTEXTS.secondary : METRIC_CONTEXTS.primary}
+                        />
                     </div>
                 </div>
             )}

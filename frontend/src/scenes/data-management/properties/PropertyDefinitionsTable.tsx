@@ -2,8 +2,7 @@ import './PropertyDefinitionsTable.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconApps } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonTag, Link } from '@posthog/lemon-ui'
+import { LemonInput, LemonSelect, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -13,11 +12,11 @@ import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/Le
 import { cn } from 'lib/utils/css-classes'
 import { DefinitionHeader, getPropertyDefinitionIcon } from 'scenes/data-management/events/DefinitionHeader'
 import { propertyDefinitionsTableLogic } from 'scenes/data-management/properties/propertyDefinitionsTableLogic'
-import { organizationLogic } from 'scenes/organizationLogic'
+import { Scene } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { PropertyDefinition } from '~/types'
 
@@ -25,7 +24,6 @@ export function PropertyDefinitionsTable(): JSX.Element {
     const { propertyDefinitions, propertyDefinitionsLoading, filters, propertyTypeOptions } =
         useValues(propertyDefinitionsTableLogic)
     const { loadPropertyDefinitions, setFilters, setPropertyType } = useActions(propertyDefinitionsTableLogic)
-    const { hasTagging } = useValues(organizationLogic)
 
     const columns: LemonTableColumns<PropertyDefinition> = [
         {
@@ -62,34 +60,28 @@ export function PropertyDefinitionsTable(): JSX.Element {
                 )
             },
         },
-        ...(hasTagging
-            ? [
-                  {
-                      title: 'Tags',
-                      key: 'tags',
-                      render: function Render(_, definition: PropertyDefinition) {
-                          return <ObjectTags tags={definition.tags ?? []} staticOnly />
-                      },
-                  } as LemonTableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
-              ]
-            : []),
+        {
+            title: 'Tags',
+            key: 'tags',
+            render: function Render(_, definition: PropertyDefinition) {
+                return <ObjectTags tags={definition.tags ?? []} staticOnly />
+            },
+        } as LemonTableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
     ]
 
     return (
         <SceneContent data-attr="manage-events-table">
             <SceneTitleSection
-                name="Properties"
-                description="Properties are additional fields you can configure to be sent along with an event capture."
+                name={sceneConfigurations[Scene.PropertyDefinition].name}
+                description={sceneConfigurations[Scene.PropertyDefinition].description}
                 resourceType={{
-                    type: 'property',
-                    forceIcon: <IconApps />,
+                    type: sceneConfigurations[Scene.PropertyDefinition].iconType || 'default_icon_type',
                 }}
             />
-            <SceneDivider />
             <LemonBanner type="info">
                 Looking for {filters.type === 'person' ? 'person ' : ''}property usage statistics?{' '}
                 <Link
-                    to={urls.insightNewHogQL({
+                    to={urls.insightNewInsightsQL({
                         query:
                             'SELECT arrayJoin(JSONExtractKeys(properties)) AS property_key, count()\n' +
                             (filters.type === 'person' ? 'FROM persons\n' : 'FROM events\n') +

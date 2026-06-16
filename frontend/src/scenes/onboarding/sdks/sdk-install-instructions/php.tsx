@@ -5,7 +5,7 @@ import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
 function PHPInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>composer require posthog/posthog-php</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>composer require insights/insights-php</CodeSnippet>
 }
 
 function PHPSetupSnippet(): JSX.Element {
@@ -13,8 +13,9 @@ function PHPSetupSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.PHP}>
-            {`PostHog\\PostHog::init('${currentTeam?.api_token}',
-    array('host' => '${apiHostOrigin()}')
+            {`Insights\\Insights::init(
+    '${currentTeam?.api_token}',
+    ['host' => '${apiHostOrigin()}']
 );`}
         </CodeSnippet>
     )

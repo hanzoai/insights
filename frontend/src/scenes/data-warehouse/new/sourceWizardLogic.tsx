@@ -1,31 +1,38 @@
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
-import { ProductIntentContext } from 'lib/utils/product-intents'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { Scene } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
+import {
+    VALID_NON_NATIVE_MARKETING_SOURCES,
+    VALID_SELF_MANAGED_MARKETING_SOURCES,
+} from 'scenes/web-analytics/tabs/marketing-analytics/frontend/logic/utils'
 
-import { ActivationTask, activationLogic } from '~/layout/navigation-3000/sidepanel/panels/activation/activationLogic'
 import {
     ExternalDataSourceType,
+    ProductIntentContext,
+    ProductKey,
     SourceConfig,
     SourceFieldConfig,
     SourceFieldSwitchGroupConfig,
+    SuggestedTable,
+    VALID_NATIVE_MARKETING_SOURCES,
     externalDataSources,
 } from '~/queries/schema/schema-general'
 import {
     Breadcrumb,
     ExternalDataSourceCreatePayload,
     ExternalDataSourceSyncSchema,
+    IncrementalField,
     ManualLinkSourceType,
-    ProductKey,
     manualLinkSources,
 } from '~/types'
 
@@ -158,7 +165,7 @@ export const buildKeaFormDefaultFromSourceDetails = (
 
             return defaults
         },
-        { prefix: '', payload: {} } as Record<string, any>
+        { prefix: '', description: '', payload: {} } as Record<string, any>
     )
 }
 
@@ -167,6 +174,46 @@ const manualLinkSourceMap: Record<ManualLinkSourceType, string> = {
     'google-cloud': 'Google Cloud Storage',
     'cloudflare-r2': 'Cloudflare R2',
     azure: 'Azure',
+}
+
+const isTimestampType = (field: IncrementalField): boolean => {
+    const type = field.type || field.field_type
+    return type === 'timestamp' || type === 'datetime' || type === 'date'
+}
+
+const resolveIncrementalField = (fields: IncrementalField[]): IncrementalField | undefined => {
+    // check for timestamp field matching "updated_at" or "updatedAt" case insensitive
+    const updatedAt = fields.find((field) => {
+        const regex = /^updated/i
+        return regex.test(field.label) && isTimestampType(field)
+    })
+    if (updatedAt) {
+        return updatedAt
+    }
+    // fallback to timestamp field matching "created_at" or "createdAt" case insensitive
+    const createdAt = fields.find((field) => {
+        const regex = /^created/i
+        return regex.test(field.label) && isTimestampType(field)
+    })
+    if (createdAt) {
+        return createdAt
+    }
+    // fallback to any timestamp or datetime field
+    const timestamp = fields.find((field) => isTimestampType(field))
+    if (timestamp) {
+        return timestamp
+    }
+    // fallback to numeric fields matching "id" or "uuid" case insensitive
+    const id = fields.find((field) => {
+        const idRegex = /^id/i
+        const uuidRegex = /^uuid/i
+        return (idRegex.test(field.label) || uuidRegex.test(field.label)) && field.type === 'integer'
+    })
+    if (id) {
+        return id
+    }
+    // leave unset and require user configuration
+    return undefined
 }
 
 export interface SourceWizardLogicProps {
@@ -211,11 +258,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
         setManualLinkingProvider: (provider: ManualLinkSourceType) => ({ provider }),
         openSyncMethodModal: (schema: ExternalDataSourceSyncSchema) => ({ schema }),
         cancelSyncMethodModal: true,
-        updateSyncTimeOfDay: (schema: ExternalDataSourceSyncSchema, syncTimeOfDay: string) => ({
-            schema,
-            syncTimeOfDay,
-        }),
-        setIsProjectTime: (isProjectTime: boolean) => ({ isProjectTime }),
+        toggleAllTables: (selectAll: boolean) => ({ selectAll }),
     }),
     connect(() => ({
         values: [
@@ -233,6 +276,8 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
             ['loadSources'],
             teamLogic,
             ['addProductIntent'],
+            globalSetupLogic,
+            ['markTaskAsCompleted'],
         ],
     })),
     reducers({
@@ -275,12 +320,6 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                         should_sync: s.table === schema.table ? shouldSync : s.should_sync,
                     }))
                 },
-                updateSyncTimeOfDay: (state, { schema, syncTimeOfDay }) => {
-                    return state.map((s) => ({
-                        ...s,
-                        sync_time_of_day: s.table === schema.table ? syncTimeOfDay : s.sync_time_of_day,
-                    }))
-                },
                 updateSchemaSyncType: (state, { schema, syncType, incrementalField, incrementalFieldType }) => {
                     return state.map((s) => ({
                         ...s,
@@ -293,21 +332,23 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
             },
         ],
         source: [
-            { payload: {}, prefix: '' } as {
+            { payload: {}, prefix: '', description: '' } as {
                 prefix: string
+                description: string
                 payload: Record<string, any>
             },
             {
                 updateSource: (state, { source }) => {
                     return {
                         prefix: source.prefix ?? state.prefix,
+                        description: source.description ?? state.description,
                         payload: {
                             ...state.payload,
                             ...source.payload,
                         },
                     }
                 },
-                clearSource: () => ({ payload: {}, prefix: '' }),
+                clearSource: () => ({ payload: {}, prefix: '', description: '' }),
             },
         ],
         isLoading: [
@@ -343,28 +384,34 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 }),
             },
         ],
-        isProjectTime: [
-            false as boolean,
-            {
-                setIsProjectTime: (_, { isProjectTime }) => isProjectTime,
-            },
-        ],
     }),
     selectors({
         availableSources: [() => [(_, p) => p.availableSources], (availableSources) => availableSources],
+        suggestedTablesMap: [
+            (s) => [s.selectedConnector],
+            (selectedConnector: SourceConfig | null): Record<string, string | null> => {
+                if (!selectedConnector?.suggestedTables) {
+                    return {}
+                }
+
+                return selectedConnector.suggestedTables.reduce(
+                    (acc: Record<string, string | null>, suggested: SuggestedTable) => {
+                        acc[suggested.table] = suggested.tooltip ?? null
+                        return acc
+                    },
+                    {} as Record<string, string | null>
+                )
+            },
+        ],
         breadcrumbs: [
             (s) => [s.selectedConnector, s.manualLinkingProvider, s.manualConnectors],
             (selectedConnector, manualLinkingProvider, manualConnectors): Breadcrumb[] => {
                 return [
                     {
-                        key: Scene.DataPipelines,
-                        name: 'Data pipelines',
-                        path: urls.dataPipelines('overview'),
-                    },
-                    {
-                        key: [Scene.DataPipelines, 'sources'],
-                        name: `Sources`,
-                        path: urls.dataPipelines('sources'),
+                        key: Scene.Sources,
+                        name: 'Sources',
+                        path: urls.sources(),
+                        iconType: 'data_pipeline',
                     },
                     {
                         key: Scene.DataWarehouseSource,
@@ -373,6 +420,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                             (manualLinkingProvider
                                 ? manualConnectors.find((c) => c.type === manualLinkingProvider)?.name
                                 : 'New'),
+                        iconType: 'data_pipeline',
                     },
                 ]
             },
@@ -437,6 +485,9 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
         connectors: [
             (s) => [s.dataWarehouseSources, s.availableSources],
             (sources, availableSources: Record<string, SourceConfig>): SourceConfig[] => {
+                if (!availableSources) {
+                    return []
+                }
                 return Object.values(availableSources).map((connector) => ({
                     ...connector,
                     disabledReason:
@@ -457,6 +508,18 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                     name: manualLinkSourceMap[source],
                     type: source,
                 })),
+        ],
+        isSelfManagedSource: [
+            (s) => [s.manualLinkingProvider],
+            (manualLinkingProvider: ManualLinkSourceType | null): boolean => manualLinkingProvider !== null,
+        ],
+        tablesAllToggledOn: [
+            (s) => [s.databaseSchema],
+            (databaseSchema: ExternalDataSourceSyncSchema[]): boolean | 'indeterminate' => {
+                const enabledCount = databaseSchema.filter((schema) => schema.should_sync).length
+                const totalCount = databaseSchema.length
+                return enabledCount === totalCount ? true : enabledCount > 0 ? 'indeterminate' : false
+            },
         ],
         modalTitle: [
             (s) => [s.currentStep],
@@ -498,7 +561,6 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
         },
         onSubmit: () => {
             // Shared function that triggers different actions depending on the current step
-
             if (values.currentStep === 1) {
                 return
             }
@@ -507,25 +569,96 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 actions.submitSourceConnectionDetails()
             } else if (values.currentStep === 2 && values.isManualLinkFormVisible) {
                 dataWarehouseTableLogic.actions.submitTable()
-                posthog.capture('source created', { sourceType: 'Manual' })
+                insights.capture('source created', { sourceType: 'Manual' })
             }
 
             if (values.currentStep === 3 && values.selectedConnector?.name) {
-                actions.updateSource({
-                    payload: {
-                        schemas: values.databaseSchema.map((schema) => ({
-                            name: schema.table,
-                            should_sync: schema.should_sync,
-                            sync_type: schema.sync_type,
-                            incremental_field: schema.incremental_field,
-                            incremental_field_type: schema.incremental_field_type,
-                            sync_time_of_day: schema.sync_time_of_day,
-                        })),
+                const ignoredTables = values.databaseSchema.filter(
+                    (schema) => !schema.should_sync || schema.sync_type === null
+                )
+                const appendOnlyTables = values.databaseSchema.filter(
+                    (schema) => schema.should_sync && schema.sync_type === 'append'
+                )
+                const incrementalTables = values.databaseSchema.filter(
+                    (schema) => schema.should_sync && schema.sync_type === 'incremental'
+                )
+                const fullRefreshTables = values.databaseSchema.filter(
+                    (schema) => schema.should_sync && schema.sync_type === 'full_refresh'
+                )
+
+                const confirmation = (
+                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 mt-2">
+                        {/* Incremental - Good */}
+                        <div className="font-bold text-success">Incremental</div>
+                        <div>
+                            <span className="text-muted">
+                                {tableCountFormatter(incrementalTables.length)}
+                                {incrementalTables.length === 69 ? ' (nice)' : ''}
+                                {incrementalTables.length === 67 ? ' (nice but only for genz)' : ''}
+                            </span>{' '}
+                            — Ideal. Syncs only changed rows using a field like{' '}
+                            <span className="font-mono text-xs">updated_at</span>.
+                        </div>
+
+                        {/* Append-only - Caution */}
+                        <div className="font-bold text-warning">Append-only</div>
+                        <div>
+                            <span className="text-muted">{tableCountFormatter(appendOnlyTables.length)}</span> — Use a
+                            field that doesn't change on updates, like{' '}
+                            <span className="font-mono text-xs">created_at</span>.
+                        </div>
+
+                        {/* Full refresh - Danger */}
+                        <div className="font-bold text-danger">Full refresh</div>
+                        <div>
+                            <span className="text-muted">
+                                {tableCountFormatter(fullRefreshTables.length, { none: 'None ✓' })}
+                            </span>{' '}
+                            — Re-syncs all rows every time. Can significantly increase costs.
+                        </div>
+
+                        {/* Ignored - Muted */}
+                        <div className="font-bold text-muted">Ignored</div>
+                        <div>
+                            <span className="text-muted">{tableCountFormatter(ignoredTables.length)}</span> — Tables
+                            without sync configured will be skipped.
+                        </div>
+                    </div>
+                )
+
+                LemonDialog.open({
+                    title: 'Confirm your table configurations',
+                    content: confirmation,
+                    primaryButton: {
+                        children: 'Confirm',
+                        type: 'primary',
+                        onClick: () => {
+                            actions.updateSource({
+                                payload: {
+                                    schemas: values.databaseSchema.map((schema) => ({
+                                        name: schema.table,
+                                        should_sync: schema.should_sync,
+                                        sync_type: schema.sync_type,
+                                        incremental_field: schema.incremental_field,
+                                        incremental_field_type: schema.incremental_field_type,
+                                        sync_time_of_day: schema.sync_time_of_day,
+                                    })),
+                                },
+                            })
+                            actions.setIsLoading(true)
+                            actions.createSource()
+                            if (values.selectedConnector) {
+                                insights.capture('source created', { sourceType: values.selectedConnector.name })
+                            }
+                        },
+                        size: 'small',
+                    },
+                    secondaryButton: {
+                        children: 'Cancel',
+                        type: 'tertiary',
+                        size: 'small',
                     },
                 })
-                actions.setIsLoading(true)
-                actions.createSource()
-                posthog.capture('source created', { sourceType: values.selectedConnector.name })
             }
 
             if (values.currentStep === 4) {
@@ -541,7 +674,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
         },
         closeWizard: () => {
             actions.cancelWizard()
-            router.actions.push(urls.dataPipelines('sources'))
+            router.actions.push(urls.sources())
         },
         cancelWizard: () => {
             actions.onClear()
@@ -554,6 +687,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 // This should never happen
                 return
             }
+
             try {
                 const { id } = await api.externalDataSources.create({
                     ...values.source,
@@ -562,11 +696,10 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
 
                 lemonToast.success('New data resource created')
 
-                activationLogic.findMounted()?.actions.markTaskAsCompleted(ActivationTask.ConnectSource)
-
                 actions.setSourceId(id)
                 actions.resetSourceConnectionDetails()
                 actions.loadSources(null)
+                actions.markTaskAsCompleted(SetupTaskId.ConnectSource)
                 actions.onNext()
             } catch (e: any) {
                 lemonToast.error(e.data?.message ?? e.message)
@@ -599,13 +732,44 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                     values.selectedConnector.name,
                     values.source.payload ?? {}
                 )
+
+                let showToast = false
+
+                for (const schema of schemas) {
+                    if (schema.sync_type === null) {
+                        showToast = true
+                        schema.should_sync = true
+
+                        // Use incremental if available
+                        if (schema.incremental_available || schema.append_available) {
+                            const method = schema.incremental_available ? 'incremental' : 'append'
+                            const resolvedField = resolveIncrementalField(schema.incremental_fields)
+                            schema.sync_type = method
+                            if (resolvedField) {
+                                schema.incremental_field = resolvedField.field
+                                schema.incremental_field_type = resolvedField.field_type
+                            } else {
+                                schema.sync_type = 'full_refresh'
+                            }
+                        } else {
+                            schema.sync_type = 'full_refresh'
+                        }
+                    }
+                }
+
+                if (showToast) {
+                    lemonToast.info(
+                        "We've setup some defaults for you! Please take a look to make sure you're happy with the results."
+                    )
+                }
+
                 actions.setDatabaseSchemas(schemas)
                 actions.onNext()
             } catch (e: any) {
                 const errorMessage = e.data?.message ?? e.message
                 lemonToast.error(errorMessage)
 
-                posthog.capture('warehouse credentials invalid', {
+                insights.capture('warehouse credentials invalid', {
                     sourceType: values.selectedConnector.name,
                     errorMessage,
                 })
@@ -613,21 +777,56 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
 
             actions.setIsLoading(false)
         },
-        setManualLinkingProvider: () => {
+        setManualLinkingProvider: ({ provider }) => {
             actions.onNext()
+
+            // Track marketing analytics intent for self-managed marketing sources
+            if (provider && VALID_SELF_MANAGED_MARKETING_SOURCES.includes(provider)) {
+                actions.addProductIntent({
+                    product_type: ProductKey.MARKETING_ANALYTICS,
+                    intent_context: ProductIntentContext.MARKETING_ANALYTICS_ADS_INTEGRATION_VISITED,
+                })
+            }
         },
-        selectConnector: () => {
+        selectConnector: ({ connector }) => {
             actions.addProductIntent({
                 product_type: ProductKey.DATA_WAREHOUSE,
                 intent_context: ProductIntentContext.SELECTED_CONNECTOR,
             })
+
+            // Track interest for marketing ad sources and marketing analytics
+            const isNativeMarketingSource =
+                connector?.name &&
+                VALID_NATIVE_MARKETING_SOURCES.includes(
+                    connector.name as (typeof VALID_NATIVE_MARKETING_SOURCES)[number]
+                )
+            const isExternalMarketingSource =
+                connector?.name &&
+                VALID_NON_NATIVE_MARKETING_SOURCES.includes(
+                    connector.name as (typeof VALID_NON_NATIVE_MARKETING_SOURCES)[number]
+                )
+
+            if (isNativeMarketingSource || isExternalMarketingSource) {
+                actions.addProductIntent({
+                    product_type: ProductKey.MARKETING_ANALYTICS,
+                    intent_context: ProductIntentContext.MARKETING_ANALYTICS_ADS_INTEGRATION_VISITED,
+                })
+            }
+        },
+        toggleAllTables: ({ selectAll }) => {
+            actions.setDatabaseSchemas(
+                values.databaseSchema.map((schema) => ({
+                    ...schema,
+                    should_sync: selectAll,
+                }))
+            )
         },
     })),
     urlToAction(({ actions, values }) => {
         const handleUrlChange = (_: Record<string, string | undefined>, searchParams: Record<string, string>): void => {
             const kind = searchParams.kind?.toLowerCase()
-            const source = values.connectors.find((s) => s.name.toLowerCase() === kind)
-            const manualSource = values.manualConnectors.find((s) => s.type.toLowerCase() === kind)
+            const source = values.connectors?.find((s) => s?.name?.toLowerCase?.() === kind)
+            const manualSource = values.manualConnectors?.find((s) => s?.type?.toLowerCase() === kind)
 
             if (manualSource) {
                 actions.toggleManualLinkFormVisible(true)
@@ -789,4 +988,19 @@ export const getErrorsForFields = (
     }
 
     return errors
+}
+
+const tableCountFormatter = (
+    count: number,
+    { none = 'None', one = '1 table', many = 'tables' }: { none?: string; one?: string; many?: string } = {}
+): string => {
+    if (count === 0) {
+        return none
+    }
+
+    if (count === 1) {
+        return one
+    }
+
+    return `${count} ${many}`
 }

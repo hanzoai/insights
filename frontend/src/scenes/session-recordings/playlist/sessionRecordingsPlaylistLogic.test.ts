@@ -7,12 +7,13 @@ import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import { FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
-import { sessionRecordingDataLogic } from '../player/sessionRecordingDataLogic'
-import { playlistLogic } from './playlistLogic'
+import { sessionRecordingDataCoordinatorLogic } from '../player/sessionRecordingDataCoordinatorLogic'
+import { playlistFiltersLogic } from './playlistFiltersLogic'
 import {
     DEFAULT_RECORDING_FILTERS,
     convertLegacyFiltersToUniversalFilters,
     convertUniversalFiltersToRecordingsQuery,
+    getDefaultFilters,
     sessionRecordingsPlaylistLogic,
 } from './sessionRecordingsPlaylistLogic'
 
@@ -23,14 +24,20 @@ describe('sessionRecordingsPlaylistLogic', () => {
         viewed: false,
         recording_duration: 10,
         start_time: '2023-10-12T16:55:36.404000Z',
+        end_time: '2023-10-12T16:55:46.404000Z',
         console_error_count: 50,
+        viewers: [],
+        snapshot_source: 'web' as const,
     }
     const bRecording = {
         id: 'def',
         viewed: false,
         recording_duration: 10,
         start_time: '2023-05-12T16:55:36.404000Z',
+        end_time: '2023-05-12T16:55:46.404000Z',
         console_error_count: 100,
+        viewers: [],
+        snapshot_source: 'web' as const,
     }
     const listOfSessionRecordings = [aRecording, bRecording]
     const offsetRecording = {
@@ -38,7 +45,10 @@ describe('sessionRecordingsPlaylistLogic', () => {
         viewed: false,
         recording_duration: 10,
         start_time: '2023-08-12T16:55:36.404000Z',
+        end_time: '2023-08-12T16:55:46.404000Z',
         console_error_count: 75,
+        viewers: [],
+        snapshot_source: 'web' as const,
     }
 
     beforeEach(() => {
@@ -128,12 +138,12 @@ describe('sessionRecordingsPlaylistLogic', () => {
     describe('global logic', () => {
         beforeEach(() => {
             logic = sessionRecordingsPlaylistLogic({
-                key: 'tests',
+                logicKey: 'tests',
                 updateSearchParams: true,
             })
             logic.mount()
-            playlistLogic.mount()
-            playlistLogic.actions.setIsFiltersExpanded(false)
+            playlistFiltersLogic.mount()
+            playlistFiltersLogic.actions.setIsFiltersExpanded(false)
         })
 
         describe('core assumptions', () => {
@@ -182,7 +192,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
 
             it('mounts and loads the recording when a recording is opened', () => {
                 expectLogic(logic, async () => logic.asyncActions.setSelectedRecordingId('abcd'))
-                    .toMount(sessionRecordingDataLogic({ sessionRecordingId: 'abcd' }))
+                    .toMount(sessionRecordingDataCoordinatorLogic({ sessionRecordingId: 'abcd' }))
                     .toDispatchActions(['loadEntireRecording'])
             })
 
@@ -271,7 +281,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
 
             it('reads filters from the logic props', async () => {
                 logic = sessionRecordingsPlaylistLogic({
-                    key: 'tests-with-props',
+                    logicKey: 'tests-with-props',
                     filters: {
                         duration: [],
                         filter_group: {
@@ -387,7 +397,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 router.actions.push('/replay/recent', { sessionRecordingId: 'abc' })
 
                 logic = sessionRecordingsPlaylistLogic({
-                    key: 'hash-recording-tests',
+                    logicKey: 'hash-recording-tests',
                     updateSearchParams: true,
                 })
                 logic.mount()
@@ -395,8 +405,6 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 await expectLogic(logic).toDispatchActions(['loadSessionRecordingsSuccess']).toMatchValues({
                     selectedRecordingId: 'abc',
                 })
-
-                logic.actions.setSelectedRecordingId('1234')
             })
         })
 
@@ -548,74 +556,12 @@ describe('sessionRecordingsPlaylistLogic', () => {
                     },
                 })
         })
-
-        it('reads advanced filters from the URL', async () => {
-            router.actions.push('/replay', {
-                advancedFilters: {
-                    events: [{ id: '$autocapture', type: 'events', order: 0, name: '$autocapture' }],
-                },
-            })
-
-            await expectLogic(logic)
-                .toDispatchActions(['setFilters'])
-                .toMatchValues({
-                    filters: expect.objectContaining({
-                        filter_group: {
-                            type: FilterLogicalOperator.And,
-                            values: [
-                                {
-                                    type: FilterLogicalOperator.And,
-                                    values: [{ id: '$autocapture', type: 'events', order: 0, name: '$autocapture' }],
-                                },
-                            ],
-                        },
-                    }),
-                })
-        })
-
-        it('reads simple filters from the URL', async () => {
-            router.actions.push('/replay', {
-                simpleFilters: {
-                    properties: [
-                        {
-                            key: '$geoip_country_name',
-                            value: ['Australia'],
-                            operator: PropertyOperator.Exact,
-                            type: PropertyFilterType.Person,
-                        },
-                    ],
-                },
-            })
-
-            await expectLogic(logic)
-                .toDispatchActions(['setFilters'])
-                .toMatchValues({
-                    filters: expect.objectContaining({
-                        filter_group: {
-                            type: FilterLogicalOperator.And,
-                            values: [
-                                {
-                                    type: FilterLogicalOperator.And,
-                                    values: [
-                                        {
-                                            key: '$geoip_country_name',
-                                            value: ['Australia'],
-                                            operator: PropertyOperator.Exact,
-                                            type: PropertyFilterType.Person,
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    }),
-                })
-        })
     })
 
     describe('person specific logic', () => {
         beforeEach(() => {
             logic = sessionRecordingsPlaylistLogic({
-                key: 'cool_user_99',
+                logicKey: 'cool_user_99',
                 personUUID: 'cool_user_99',
                 updateSearchParams: true,
             })
@@ -632,14 +578,16 @@ describe('sessionRecordingsPlaylistLogic', () => {
             router.actions.push('/person/123', { sessionRecordingId: 'abc' })
             expect(router.values.searchParams).toHaveProperty('sessionRecordingId', 'abc')
 
-            await expectLogic(logic).toDispatchActions([logic.actionCreators.setSelectedRecordingId('abc')])
+            await expectLogic(logic)
+                .toDispatchActions([logic.actionCreators.setSelectedRecordingId('abc')])
+                .toFinishAllListeners()
         })
     })
 
     describe('total filters count', () => {
         beforeEach(() => {
             logic = sessionRecordingsPlaylistLogic({
-                key: 'cool_user_99',
+                logicKey: 'cool_user_99',
                 personUUID: 'cool_user_99',
                 updateSearchParams: true,
             })
@@ -699,7 +647,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
     describe('resetting filters', () => {
         beforeEach(() => {
             logic = sessionRecordingsPlaylistLogic({
-                key: 'cool_user_99',
+                logicKey: 'cool_user_99',
                 personUUID: 'cool_user_99',
                 updateSearchParams: true,
             })
@@ -734,7 +682,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
     describe('set filters', () => {
         beforeEach(() => {
             logic = sessionRecordingsPlaylistLogic({
-                key: 'cool_user_99',
+                logicKey: 'cool_user_99',
                 personUUID: 'cool_user_99',
                 updateSearchParams: true,
             })
@@ -755,7 +703,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
     })
 
     describe('convertUniversalFiltersToRecordingsQuery', () => {
-        it('expands the visited_page filter to a pageview with $current_url property', () => {
+        it('passes the visited_page filter as a recording property', () => {
             const result = convertUniversalFiltersToRecordingsQuery({
                 ...DEFAULT_RECORDING_FILTERS,
                 filter_group: {
@@ -783,21 +731,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 console_log_filters: [],
                 date_from: '-3d',
                 date_to: null,
-                events: [
-                    {
-                        id: '$pageview',
-                        name: '$pageview',
-                        properties: [
-                            {
-                                key: '$current_url',
-                                operator: 'exact',
-                                type: 'event',
-                                value: ['https://example-url.com'],
-                            },
-                        ],
-                        type: 'events',
-                    },
-                ],
+                events: [],
                 filter_test_accounts: false,
                 having_predicates: [
                     {
@@ -811,7 +745,53 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 operand: 'AND',
                 order: 'console_error_count',
                 order_direction: 'DESC',
+                properties: [
+                    {
+                        key: 'visited_page',
+                        operator: 'exact',
+                        type: 'recording',
+                        value: ['https://example-url.com'],
+                    },
+                ],
+            })
+        })
+
+        it('passes through session_ids when provided', () => {
+            const result = convertUniversalFiltersToRecordingsQuery({
+                ...DEFAULT_RECORDING_FILTERS,
+                filter_group: {
+                    type: FilterLogicalOperator.And,
+                    values: [
+                        {
+                            type: FilterLogicalOperator.And,
+                            values: [],
+                        },
+                    ],
+                },
+                session_ids: ['session-1', 'session-2', 'session-3'],
+            })
+
+            expect(result).toEqual({
+                actions: [],
+                console_log_filters: [],
+                date_from: '-3d',
+                date_to: null,
+                events: [],
+                filter_test_accounts: false,
+                having_predicates: [
+                    {
+                        key: 'active_seconds',
+                        operator: 'gt',
+                        type: 'recording',
+                        value: 5,
+                    },
+                ],
+                kind: 'RecordingsQuery',
+                operand: 'AND',
+                order: 'start_time',
+                order_direction: 'DESC',
                 properties: [],
+                session_ids: ['session-1', 'session-2', 'session-3'],
             })
         })
     })
@@ -847,11 +827,11 @@ describe('sessionRecordingsPlaylistLogic', () => {
         it('should parse even the most complex queries', () => {
             const result = convertLegacyFiltersToUniversalFilters(
                 {
-                    events: [{ key: 'email', value: ['email@posthog.com'], operator: 'exact', type: 'person' }],
+                    events: [{ key: 'email', value: ['email@hanzo.ai'], operator: 'exact', type: 'person' }],
                 },
                 {
                     date_from: '-7d',
-                    events: [{ key: 'email', value: ['test@posthog.com'], operator: 'exact', type: 'person' }],
+                    events: [{ key: 'email', value: ['test@hanzo.ai'], operator: 'exact', type: 'person' }],
                     console_logs: ['info', 'warn'],
                     console_search_query: 'this is a query log',
                     filter_test_accounts: true,
@@ -881,8 +861,8 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         {
                             type: 'AND',
                             values: [
-                                { key: 'email', value: ['email@posthog.com'], operator: 'exact', type: 'person' },
-                                { key: 'email', value: ['test@posthog.com'], operator: 'exact', type: 'person' },
+                                { key: 'email', value: ['email@hanzo.ai'], operator: 'exact', type: 'person' },
+                                { key: 'email', value: ['test@hanzo.ai'], operator: 'exact', type: 'person' },
                                 {
                                     key: 'level',
                                     operator: 'exact',
@@ -903,6 +883,39 @@ describe('sessionRecordingsPlaylistLogic', () => {
                 order: 'start_time',
                 order_direction: 'DESC',
             })
+        })
+    })
+
+    describe('getDefaultFilters', () => {
+        beforeEach(() => {
+            localStorage.clear()
+        })
+
+        it('returns filter_test_accounts as false when localStorage is empty', () => {
+            const result = getDefaultFilters()
+            expect(result.filter_test_accounts).toBe(false)
+        })
+
+        it('returns filter_test_accounts as true when localStorage has default_filter_test_accounts set to true', () => {
+            localStorage.setItem('default_filter_test_accounts', 'true')
+            const result = getDefaultFilters()
+            expect(result.filter_test_accounts).toBe(true)
+        })
+
+        it('returns filter_test_accounts as false when localStorage has default_filter_test_accounts set to false', () => {
+            localStorage.setItem('default_filter_test_accounts', 'false')
+            const result = getDefaultFilters()
+            expect(result.filter_test_accounts).toBe(false)
+        })
+
+        it('returns date_from as -30d for person recordings', () => {
+            const result = getDefaultFilters('person-uuid')
+            expect(result.date_from).toBe('-30d')
+        })
+
+        it('returns date_from as -3d for non-person recordings', () => {
+            const result = getDefaultFilters()
+            expect(result.date_from).toBe('-3d')
         })
     })
 })

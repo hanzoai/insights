@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
-import { Link } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
 import { BillingPlan, BillingProductV2Type, StartupProgramLabel } from '~/types'
 
@@ -42,7 +43,7 @@ interface CopyVariation {
 
 const BADGE_CONFIG: Record<BillingPlan | StartupProgramLabel, CopyVariation> = {
     [BillingPlan.Free]: {
-        title: 'Get the whole hog.',
+        title: 'Get the full suite.',
         subtitle: 'Only pay for what you use.',
         backgroundColor: 'bg-danger-highlight',
         getDescription: () => (
@@ -135,10 +136,7 @@ const BADGE_CONFIG: Record<BillingPlan | StartupProgramLabel, CopyVariation> = {
         backgroundColor: 'bg-warning-highlight',
         getDescription: (_billingPlan: BillingPlan, scrollToProduct: (productType: string) => void) => (
             <>
-                <p>
-                    Enjoy your founder merch, and don't forget to say hello in the{' '}
-                    <Link to="https://posthog.slack.com/archives/C04J1TJ11UZ">Founders Club!</Link>
-                </p>
+                <p>You'll get $50K in credits every year, forever. Your credits will renew automatically.</p>
                 <p>
                     If you're growing like crazy, you might want to check out our{' '}
                     {scrollToProduct ? (
@@ -159,12 +157,13 @@ export const BillingHero = ({ product }: { product: BillingProductV2Type }): JSX
     const { scrollToProduct } = useActions(billingLogic)
     const { isPlanComparisonModalOpen, billingProductLoading } = useValues(billingProductLogic({ product }))
     const { toggleIsPlanComparisonModalOpen } = useActions(billingProductLogic({ product }))
+    const showUpgradeToManagedAccount = useFeatureFlag('SHOW_UPGRADE_TO_MANAGED_ACCOUNT')
 
     if (!billingPlan) {
         return null
     }
 
-    const showUpgradeOptions = billingPlan === BillingPlan.Free && !isManagedAccount
+    const showUpgradeOptions = billingPlan === BillingPlan.Free && (!isManagedAccount || showUpgradeToManagedAccount)
     const copyVariation =
         (startupProgramLabelCurrent ? BADGE_CONFIG[startupProgramLabelCurrent] : BADGE_CONFIG[billingPlan]) ||
         BADGE_CONFIG[BillingPlan.Paid]

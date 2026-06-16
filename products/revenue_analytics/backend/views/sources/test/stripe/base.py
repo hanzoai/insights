@@ -10,19 +10,19 @@ from uuid import uuid4
 
 from unittest.mock import Mock
 
-from posthog.schema import CurrencyCode
+from insights.schema import CurrencyCode
 
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.temporal.data_imports.sources.stripe.constants import (
     CHARGE_RESOURCE_NAME,
     CUSTOMER_RESOURCE_NAME,
     INVOICE_RESOURCE_NAME,
     PRODUCT_RESOURCE_NAME,
     SUBSCRIPTION_RESOURCE_NAME,
 )
-from posthog.warehouse.models.external_data_schema import ExternalDataSchema
-from posthog.warehouse.models.external_data_source import ExternalDataSource
-from posthog.warehouse.models.table import DataWarehouseTable
 
+from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
+from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
+from products.data_warehouse.backend.models.table import DataWarehouseTable
 from products.revenue_analytics.backend.views.core import SourceHandle
 from products.revenue_analytics.backend.views.sources.test.base import RevenueAnalyticsViewSourceBaseTest
 

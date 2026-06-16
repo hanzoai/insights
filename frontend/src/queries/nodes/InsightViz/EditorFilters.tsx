@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import { IconInfo, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { NON_BREAKDOWN_DISPLAY_TYPES } from 'lib/constants'
 import { pluralize } from 'lib/utils'
@@ -16,29 +16,39 @@ import { GoalLines } from 'scenes/insights/EditorFilters/GoalLines'
 import { PathsAdvanced } from 'scenes/insights/EditorFilters/PathsAdvanced'
 import { PathsEventsTypes } from 'scenes/insights/EditorFilters/PathsEventTypes'
 import { PathsExclusions } from 'scenes/insights/EditorFilters/PathsExclusions'
-import { PathsHogQL } from 'scenes/insights/EditorFilters/PathsHogQL'
+import { PathsInsightsQL } from 'scenes/insights/EditorFilters/PathsInsightsQL'
 import { PathsTargetEnd, PathsTargetStart } from 'scenes/insights/EditorFilters/PathsTarget'
 import { PathsWildcardGroups } from 'scenes/insights/EditorFilters/PathsWildcardGroups'
 import { PoeFilter } from 'scenes/insights/EditorFilters/PoeFilter'
 import { RetentionCondition } from 'scenes/insights/EditorFilters/RetentionCondition'
 import { RetentionOptions } from 'scenes/insights/EditorFilters/RetentionOptions'
-import { SamplingFilter } from 'scenes/insights/EditorFilters/SamplingFilter'
+import { SamplingDeprecationNotice } from 'scenes/insights/EditorFilters/SamplingDeprecationNotice'
+import { WebAnalyticsEditorFilters } from 'scenes/insights/EditorFilters/WebAnalyticsEditorFilters'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { compareInsightTopLevelSections } from 'scenes/insights/utils'
 import MaxTool from 'scenes/max/MaxTool'
 import { castAssistantQuery } from 'scenes/max/utils'
+import { QUERY_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 import { userLogic } from 'scenes/userLogic'
 
 import { StickinessCriteria } from '~/queries/nodes/InsightViz/StickinessCriteria'
 import {
     AssistantFunnelsQuery,
-    AssistantHogQLQuery,
+    AssistantInsightsQLQuery,
     AssistantRetentionQuery,
     AssistantTrendsQuery,
 } from '~/queries/schema/schema-assistant-queries'
-import { DataVisualizationNode, InsightQueryNode, InsightVizNode, NodeKind } from '~/queries/schema/schema-general'
-import { isHogQLQuery } from '~/queries/utils'
+import {
+    DataVisualizationNode,
+    InsightQueryNode,
+    InsightVizNode,
+    NodeKind,
+    QuerySchema,
+    WebOverviewQuery,
+    WebStatsTableQuery,
+} from '~/queries/schema/schema-general'
+import { isInsightsQLQuery, isInsightQueryNode, isWebAnalyticsInsightQuery } from '~/queries/utils'
 import {
     AvailableFeature,
     ChartDisplayType,
@@ -99,6 +109,17 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
         return null
     }
 
+    // Web Analytics insights use their custom filter UI
+    if (isWebAnalyticsInsightQuery(query)) {
+        return (
+            <WebAnalyticsEditorFilters
+                query={query as WebOverviewQuery | WebStatsTableQuery}
+                showing={showing}
+                embedded={embedded}
+            />
+        )
+    }
+
     // MaxTool should not be active when insights are embedded (e.g., in notebooks)
     const maxToolActive = !embedded
 
@@ -109,13 +130,17 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
         isRetention
     const hasPathsAdvanced = hasAvailableFeature(AvailableFeature.PATHS_ADVANCED)
     const hasAttribution = isStepsFunnel || isTrendsFunnel
-    const hasPathsHogQL = isPaths && pathsFilter?.includeEventTypes?.includes(PathType.HogQL)
+    const hasPathsInsightsQL = isPaths && pathsFilter?.includeEventTypes?.includes(PathType.InsightsQL)
     const displayGoalLines =
         (isTrends &&
             [ChartDisplayType.ActionsLineGraph, ChartDisplayType.ActionsLineGraphCumulative].includes(
                 display || ChartDisplayType.ActionsLineGraph
             )) ||
-        (isFunnels && isTrendsFunnel)
+        (isFunnels && isTrendsFunnel) ||
+        (isRetention &&
+            [ChartDisplayType.ActionsLineGraph, ChartDisplayType.ActionsBar].includes(
+                display || ChartDisplayType.ActionsLineGraph
+            ))
 
     const leftEditorFilterGroups: InsightEditorFilterGroup[] = [
         {
@@ -148,10 +173,10 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                               label: 'Event Types',
                               component: PathsEventsTypes,
                           },
-                          hasPathsHogQL && {
-                              key: 'hogql',
+                          hasPathsInsightsQL && {
+                              key: 'insightsql',
                               label: 'SQL Expression',
-                              component: PathsHogQL,
+                              component: PathsInsightsQL,
                           },
                           hasPathsAdvanced && {
                               key: 'wildcard-groups',
@@ -294,7 +319,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                           key: 'attribution',
                           label: () => (
                               <div className="flex">
-                                  <span>Attribution type</span>
+                                  <span>Breakdown attribution</span>
                                   <Tooltip
                                       closeDelayMs={200}
                                       title={
@@ -329,7 +354,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                                               </ul>
                                               <div>
                                                   Read more in the{' '}
-                                                  <Link to="https://posthog.com/docs/product-analytics/funnels#attribution-types">
+                                                  <Link to="https://hanzo.ai/docs/product-analytics/funnels#attribution-types">
                                                       documentation.
                                                   </Link>
                                               </div>
@@ -368,10 +393,6 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                           key: 'poe',
                           component: PoeFilter,
                       },
-                      {
-                          key: 'sampling',
-                          component: SamplingFilter,
-                      },
                       displayGoalLines && {
                           key: 'goal-lines',
                           label: 'Goal lines',
@@ -382,6 +403,10 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                               </>
                           ),
                           component: GoalLines,
+                      },
+                      {
+                          key: 'sampling-deprecation',
+                          component: SamplingDeprecationNotice,
                       },
                   ]),
               }
@@ -396,6 +421,8 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
         },
     ]
 
+    const QueryTypeIcon = QUERY_TYPES_METADATA[query.kind].icon
+
     return (
         <CSSTransition in={showing} timeout={250} classNames="anim-" mountOnEnter unmountOnExit>
             <div className="EditorFiltersWrapper">
@@ -403,47 +430,61 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                     <LemonBanner type="info" className="mb-4">
                         When using sessions and session properties, events without session IDs will be excluded from the
                         set of results.{' '}
-                        <Link to="https://posthog.com/docs/user-guides/sessions">Learn more about sessions.</Link>
+                        <Link to="https://hanzo.ai/docs/user-guides/sessions">Learn more about sessions.</Link>
                     </LemonBanner>
                 ) : null}
 
                 <div>
                     <MaxTool
-                        identifier="create_and_query_insight"
+                        identifier="create_insight"
                         context={{
                             current_query: querySource,
+                        }}
+                        contextDescription={{
+                            text: 'Current query',
+                            icon: <QueryTypeIcon />,
                         }}
                         callback={(
                             toolOutput:
                                 | AssistantTrendsQuery
                                 | AssistantFunnelsQuery
                                 | AssistantRetentionQuery
-                                | AssistantHogQLQuery
+                                | AssistantInsightsQLQuery
                         ) => {
                             const source = castAssistantQuery(toolOutput)
-                            let node: DataVisualizationNode | InsightVizNode
-                            if (isHogQLQuery(source)) {
+                            if (!source) {
+                                return
+                            }
+
+                            let node: QuerySchema
+                            if (isInsightsQLQuery(source)) {
                                 node = {
                                     kind: NodeKind.DataVisualizationNode,
                                     source,
                                 } satisfies DataVisualizationNode
-                            } else {
+                            } else if (isInsightQueryNode(source)) {
                                 node = { kind: NodeKind.InsightVizNode, source } satisfies InsightVizNode
+                            } else {
+                                node = source
                             }
+
                             handleInsightSuggested(node)
                             setQuery(node)
                         }}
                         initialMaxPrompt="Show me users who "
-                        className="EditorFiltersWrapper"
+                        className="EditorFiltersWrapper__max-tool"
                         active={maxToolActive}
                     >
                         <div
-                            className={clsx('flex flex-row flex-wrap gap-8 bg-surface-primary', {
+                            className={clsx('@container/editor flex flex-row flex-wrap gap-8 bg-surface-primary', {
                                 'p-4 rounded border': !embedded,
                             })}
                         >
                             {filterGroupsGroups.map(({ title, editorFilterGroups }) => (
-                                <div key={title} className="flex-1 flex flex-col gap-4 max-w-full">
+                                <div
+                                    key={title}
+                                    className="flex-1 flex flex-col gap-4 max-w-full @[600px]/editor:min-w-0"
+                                >
                                     {editorFilterGroups.map((editorFilterGroup) => (
                                         <EditorFilterGroup
                                             key={editorFilterGroup.title}

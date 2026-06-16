@@ -1,5 +1,5 @@
-import { IconCheckCircle, IconX } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconX } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { BillingFeatureType } from '~/types'
 

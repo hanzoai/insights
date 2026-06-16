@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { IconRefresh } from 'lib/lemon-ui/icons'
 import { systemStatusLogic } from 'scenes/instance/SystemStatus/systemStatusLogic'
 
 import { QuerySummary } from '~/types'

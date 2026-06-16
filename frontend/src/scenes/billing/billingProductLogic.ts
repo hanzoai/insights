@@ -1,13 +1,16 @@
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
-import posthog from 'posthog-js'
+import { router } from 'kea-router'
+import insights from '@hanzo/insights'
 import React from 'react'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { organizationLogic } from 'scenes/organizationLogic'
+import { userLogic } from 'scenes/userLogic'
 
 import {
     BillingPlan,
@@ -22,6 +25,7 @@ import { calculateFreeTier, createGaugeItems, isAddonVisible, isProductVariantPr
 import { billingLogic } from './billingLogic'
 import type { billingProductLogicType } from './billingProductLogicType'
 import { DATA_PIPELINES_CUTOFF_DATE } from './constants'
+import { paymentEntryLogic } from './paymentEntryLogic'
 import { BillingGaugeItemKind, BillingGaugeItemType } from './types'
 
 const DEFAULT_BILLING_LIMIT: number = 500
@@ -33,12 +37,12 @@ type UnsubscribeReason = {
 
 export const UNSUBSCRIBE_REASONS: UnsubscribeReason[] = [
     { reason: 'Too expensive', question: 'What will you be using instead?' },
-    { reason: 'Not getting enough value', question: 'What prevented you from getting more value out of PostHog?' },
+    { reason: 'Not getting enough value', question: 'What prevented you from getting more value out of Insights?' },
     { reason: 'Not using the product', question: 'Why are you not using the product?' },
     { reason: 'Found a better alternative', question: 'What service will you be moving to?' },
     { reason: 'Poor customer support', question: 'Please provide details on your support experience.' },
     { reason: 'Too difficult to use', question: 'What was difficult to use?' },
-    { reason: 'Not enough hedgehogs', question: 'How many hedgehogs do you need? (but really why are you leaving)' },
+    { reason: 'Missing features', question: 'What features were you hoping to find? (but really why are you leaving)' },
     { reason: 'Shutting down company', question: "We're sorry to hear that ❤️. What was your favorite feature?" },
     { reason: 'Technical issues', question: 'What technical problems did you experience?' },
     { reason: 'Other (let us know below!)', question: 'Why are you leaving?' },
@@ -73,7 +77,7 @@ export interface BillingProductLogicProps {
     product: BillingProductV2Type | BillingProductV2AddonType
     productRef?: React.MutableRefObject<HTMLDivElement | null>
     billingLimitInputRef?: React.MutableRefObject<HTMLInputElement | null>
-    hogfettiTrigger?: () => void
+    confettiTrigger?: () => void
 }
 
 export const billingProductLogic = kea<billingProductLogicType>([
@@ -83,7 +87,16 @@ export const billingProductLogic = kea<billingProductLogicType>([
     connect(() => ({
         values: [
             billingLogic,
-            ['billing', 'isUnlicensedDebug', 'scrollToProductKey', 'unsubscribeError'],
+            [
+                'billing',
+                'isUnlicensedDebug',
+                'scrollToProductKey',
+                'unsubscribeError',
+                'currentPlatformAddon',
+                'platformAddons',
+                'timeRemainingInSeconds',
+                'timeTotalInSeconds',
+            ],
             featureFlagLogic,
             ['featureFlags'],
         ],
@@ -98,6 +111,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 'setProductSpecificAlert',
                 'setScrollToProductKey',
                 'deactivateProductSuccess',
+                'switchFlatrateSubscriptionPlan',
+                'setSwitchPlanLoading',
             ],
         ],
     })),
@@ -137,9 +152,15 @@ export const billingProductLogic = kea<billingProductLogicType>([
         setTrialLoading: (loading: boolean) => ({ loading }),
         setUnsubscribeModalStep: (step: number) => ({ step }),
         resetUnsubscribeModalStep: true,
-        setHedgehogSatisfied: (satisfied: boolean) => ({ satisfied }),
-        triggerMoreHedgehogs: true,
+        setSatisfied: (satisfied: boolean) => ({ satisfied }),
+        triggerConfetti: true,
         removeBillingLimitNextPeriod: (productType: string) => ({ productType }),
+        showConfirmUpgradeModal: true,
+        hideConfirmUpgradeModal: true,
+        confirmProductUpgrade: true,
+        showConfirmDowngradeModal: true,
+        hideConfirmDowngradeModal: true,
+        confirmProductDowngrade: true,
     }),
     reducers({
         billingLimitInput: [
@@ -239,14 +260,65 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 resetUnsubscribeModalStep: () => 1,
             },
         ],
-        hedgehogSatisfied: [
+        satisfied: [
             false as boolean,
             {
-                setHedgehogSatisfied: (_, { satisfied }) => satisfied,
+                setSatisfied: (_, { satisfied }) => satisfied,
+            },
+        ],
+        confirmUpgradeModalOpen: [
+            false as boolean,
+            {
+                showConfirmUpgradeModal: () => true,
+                hideConfirmUpgradeModal: () => false,
+            },
+        ],
+        confirmDowngradeModalOpen: [
+            false as boolean,
+            {
+                showConfirmDowngradeModal: () => true,
+                hideConfirmDowngradeModal: () => false,
             },
         ],
     }),
     selectors(({ values }) => ({
+        proratedAmount: [
+            (s) => [s.currentAndUpgradePlans, s.timeRemainingInSeconds, s.timeTotalInSeconds],
+            (currentAndUpgradePlans, timeRemainingInSeconds, timeTotalInSeconds): number => {
+                if (!timeTotalInSeconds) {
+                    return 0
+                }
+                const amountUsd = currentAndUpgradePlans.upgradePlan?.unit_amount_usd
+                const unitAmountInt = amountUsd ? parseFloat(amountUsd) : 0
+                const ratio = Math.max(0, Math.min(1, timeRemainingInSeconds / timeTotalInSeconds)) // make sure ratio is between 0 and 1
+                return Math.round(unitAmountInt * ratio * 100) / 100
+            },
+        ],
+        isProrated: [
+            (s) => [s.billing, s.currentAndUpgradePlans, s.proratedAmount],
+            (billing, currentAndUpgradePlans, proratedAmount): boolean => {
+                const hasActiveSubscription = billing?.has_active_subscription
+                const amountUsd = currentAndUpgradePlans.upgradePlan?.unit_amount_usd
+                if (!hasActiveSubscription || !amountUsd) {
+                    return false
+                }
+                return proratedAmount !== parseFloat(amountUsd)
+            },
+        ],
+        isLowerTierThanCurrentAddon: [
+            (s, p) => [p.product, s.currentPlatformAddon, s.platformAddons],
+            (product, currentPlatformAddon, platformAddons): boolean => {
+                if (!currentPlatformAddon || platformAddons.length === 0) {
+                    return false
+                }
+                const currentIdx = platformAddons.findIndex((a) => a.type === currentPlatformAddon.type)
+                const targetIdx = platformAddons.findIndex((a) => a.type === product.type)
+                if (currentIdx < 0 || targetIdx < 0) {
+                    return false
+                }
+                return targetIdx < currentIdx
+            },
+        ],
         isSubscribedToAnotherAddon: [
             (s, p) => [s.billing, p.product],
             (billing: BillingType, addon: BillingProductV2AddonType) => {
@@ -268,9 +340,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
                     return false
                 }
 
-                // Check if they are subscribed to another add-on that is not a legacy add-on
-                // This is because if they are on a legacy add-on, we want them to be able to move to a new add-on.
-                return parentProduct.addons.some((a: BillingProductV2AddonType) => a.subscribed && !a.legacy_product)
+                return parentProduct.addons.some((a: BillingProductV2AddonType) => a.subscribed)
             },
         ],
         customLimitUsd: [
@@ -417,6 +487,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
 
                 const displayNameOverrides: Record<string, string> = {
                     session_replay: 'Web session replay',
+                    data_warehouse: 'Synced rows',
+                    data_warehouse_historical: 'Free historical synced rows',
                 }
 
                 const mainProduct = product as BillingProductV2Type
@@ -540,25 +612,25 @@ export const billingProductLogic = kea<billingProductLogicType>([
             )
         },
         reportSurveyShown: ({ surveyID }) => {
-            posthog.capture(SurveyEventName.SHOWN, {
+            insights.capture(SurveyEventName.SHOWN, {
                 $survey_id: surveyID,
             })
             actions.setSurveyID(surveyID)
         },
         reportSurveySent: ({ surveyID, surveyResponse }) => {
-            // @note(zach): this is submitting to https://us.posthog.com/project/2/surveys/018b6e13-590c-0000-decb-c727a2b3f462?edit=true
+            // @note(zach): this is submitting to https://insights.hanzo.ai/project/2/surveys/018b6e13-590c-0000-decb-c727a2b3f462?edit=true
             // $survey_response: open text response
             // $survey_response_1: this is the product type
             // $survey_response_2: list of reasons
             // The order is due to the form being built before reasons we're supported. Please do not change the order.
-            posthog.capture(SurveyEventName.SENT, {
+            insights.capture(SurveyEventName.SENT, {
                 $survey_id: surveyID,
                 ...surveyResponse,
             })
             actions.setSurveyID('')
         },
         reportSurveyDismissed: ({ surveyID }) => {
-            posthog.capture(SurveyEventName.DISMISSED, {
+            insights.capture(SurveyEventName.DISMISSED, {
                 $survey_id: surveyID,
             })
             actions.setSurveyID('')
@@ -571,8 +643,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
             }
         },
         setScrollToProductKey: ({ scrollToProductKey }) => {
-            // Only scroll to the product if it's an addon product. With subscribe to all products we don't need it for parent products.
-            if (scrollToProductKey && values.isAddonProduct && scrollToProductKey === props.product.type) {
+            // Scroll to the product or parent product
+            if (scrollToProductKey && scrollToProductKey === props.product.type) {
                 setTimeout(() => {
                     if (props.productRef?.current) {
                         props.productRef?.current.scrollIntoView({
@@ -588,10 +660,78 @@ export const billingProductLogic = kea<billingProductLogicType>([
             const products = `${product.type}:${plan?.plan_key}`
             actions.handleProductUpgrade(products, redirectPath)
         },
-        handleProductUpgrade: ({ products, redirectPath }) => {
-            window.location.href = `/api/billing/activate?products=${products}${
-                redirectPath && `&redirect_path=${redirectPath}`
-            }`
+        handleProductUpgrade: async ({ products, redirectPath }) => {
+            try {
+                const body: Record<string, string> = { products }
+                const response = await api.create('api/billing/activate', body)
+
+                if (response.success) {
+                    await billingLogic.asyncActions.loadBilling()
+                    if (redirectPath) {
+                        window.location.pathname = redirectPath
+                    } else {
+                        router.actions.push(router.values.location.pathname, {
+                            ...router.values.searchParams,
+                            upgraded: 'true',
+                            products,
+                        })
+                        organizationLogic.actions.loadCurrentOrganization()
+                        userLogic.actions.loadUser()
+                    }
+                } else if (response.must_setup_payment) {
+                    paymentEntryLogic.actions.setRedirectPath(redirectPath || null)
+                    paymentEntryLogic.actions.showPaymentEntryModal()
+                } else {
+                    lemonToast.error(response.error || 'Failed to activate subscription')
+                }
+            } catch (error) {
+                insights.captureException(new Error('payment entry api error - product upgrade error', { cause: error }))
+                lemonToast.error('Failed to activate subscription. Please try again.')
+            } finally {
+                actions.setBillingProductLoading(null)
+            }
+        },
+        confirmProductUpgrade: () => {
+            const upgradePlan = values.currentAndUpgradePlans.upgradePlan
+            const currentPlatformAddon = values.currentPlatformAddon
+            if (!upgradePlan || !currentPlatformAddon) {
+                return
+            }
+            const currentPlanKey =
+                currentPlatformAddon.plans?.find((p) => p.current_plan)?.plan_key ||
+                currentPlatformAddon.plans?.[0]?.plan_key
+            actions.switchFlatrateSubscriptionPlan({
+                from_product_key: String(currentPlatformAddon.type),
+                from_plan_key: String(currentPlanKey),
+                to_product_key: props.product.type,
+                to_plan_key: String(upgradePlan.plan_key),
+            })
+        },
+        confirmProductDowngrade: () => {
+            const targetPlan = values.currentAndUpgradePlans.upgradePlan
+            const currentPlatformAddon = values.currentPlatformAddon
+            if (!targetPlan || !currentPlatformAddon) {
+                return
+            }
+            const currentPlanKey =
+                currentPlatformAddon.plans?.find((p) => p.current_plan)?.plan_key ||
+                currentPlatformAddon.plans?.[0]?.plan_key
+            actions.switchFlatrateSubscriptionPlan({
+                from_product_key: String(currentPlatformAddon.type),
+                from_plan_key: String(currentPlanKey),
+                to_product_key: props.product.type,
+                to_plan_key: String(targetPlan.plan_key),
+            })
+        },
+        setSwitchPlanLoading: ({ productKey }) => {
+            if (productKey === null) {
+                if (values.confirmUpgradeModalOpen) {
+                    actions.hideConfirmUpgradeModal()
+                }
+                if (values.confirmDowngradeModalOpen) {
+                    actions.hideConfirmDowngradeModal()
+                }
+            }
         },
         activateTrial: async (_, breakpoint) => {
             actions.setTrialLoading(true)
@@ -625,9 +765,9 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 actions.loadBilling()
             }
         },
-        triggerMoreHedgehogs: async (_, breakpoint) => {
+        triggerConfetti: async (_, breakpoint) => {
             for (let i = 0; i < 5; i++) {
-                props.hogfettiTrigger?.()
+                props.confettiTrigger?.()
                 await breakpoint(200)
             }
         },
@@ -650,8 +790,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
             errors: ({ input }) => ({
                 input:
                     input === null || Number.isInteger(input)
-                        ? input > 25000
-                            ? 'Please enter a number less than 25,000'
+                        ? input > 50000
+                            ? 'Please enter a number less than 50,000'
                             : undefined
                         : 'Please enter a whole number',
             }),

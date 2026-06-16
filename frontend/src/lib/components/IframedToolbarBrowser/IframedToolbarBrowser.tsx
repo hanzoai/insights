@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
-import { LemonBanner, Spinner } from '@posthog/lemon-ui'
+import { LemonBanner, Spinner } from '@hanzo/lemon-ui'
 
 import { ToolbarUserIntent } from '~/types'
 
@@ -55,6 +55,7 @@ export function IframedToolbarBrowser({
             <LoadingOverlay />
             <iframe
                 ref={iframeRef}
+                title="Toolbar browser preview"
                 className="w-full h-full bg-white"
                 src={appEditorUrl(browserUrl + '/' + initialPath, {
                     userIntent: userIntent,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { IconClock } from '@posthog/icons'
-import { LemonSelect } from '@posthog/lemon-ui'
+import { IconClock } from '@hanzo/icons'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { useWindowSize } from 'lib/hooks/useWindowSize'

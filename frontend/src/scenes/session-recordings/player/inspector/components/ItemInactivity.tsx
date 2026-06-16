@@ -1,4 +1,4 @@
-import { IconClock } from '@posthog/icons'
+import { IconClock } from '@hanzo/icons'
 
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 import { humanFriendlyDuration } from 'lib/utils'

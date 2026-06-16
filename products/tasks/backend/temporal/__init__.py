@@ -1,42 +1,46 @@
-from .activities import ai_agent_work_activity
-from .github_activities import (
-    cleanup_repo_activity,
-    clone_repo_and_create_branch_activity,
-    commit_local_changes_activity,
-    create_branch_activity,
-    create_pr_activity,
-    create_pr_and_update_task_activity,
+from .create_snapshot.activities import (
+    cleanup_sandbox as snapshot_cleanup_sandbox,
+    clone_repository as snapshot_clone_repository,
+    create_sandbox as snapshot_create_sandbox,
+    create_snapshot as snapshot_create_snapshot,
+    get_snapshot_context,
+    setup_repository as snapshot_setup_repository,
 )
-from .workflow_activities import (
-    check_temporal_workflow_permissions_activity,
-    execute_agent_for_transition_activity,
-    get_agent_triggered_transition_activity,
-    get_workflow_configuration_activity,
-    move_task_to_stage_activity,
-    should_trigger_agent_workflow_activity,
-    trigger_task_processing_activity,
+from .create_snapshot.workflow import CreateSnapshotForRepositoryWorkflow
+from .process_task.activities import (
+    cleanup_sandbox,
+    execute_task_in_sandbox,
+    get_sandbox_for_repository,
+    get_task_processing_context,
+    post_slack_update,
+    read_sandbox_logs,
+    start_agent_server,
+    track_workflow_event,
+    update_task_run_status,
 )
-from .workflows import WorkflowAgnosticTaskProcessingWorkflow
+from .process_task.workflow import ProcessTaskWorkflow
 
 WORKFLOWS = [
-    WorkflowAgnosticTaskProcessingWorkflow,
+    ProcessTaskWorkflow,
+    CreateSnapshotForRepositoryWorkflow,
 ]
 
 ACTIVITIES = [
-    ai_agent_work_activity,
-    # github activities
-    clone_repo_and_create_branch_activity,
-    cleanup_repo_activity,
-    create_branch_activity,
-    create_pr_activity,
-    create_pr_and_update_task_activity,
-    commit_local_changes_activity,
-    # workflow activities
-    check_temporal_workflow_permissions_activity,
-    execute_agent_for_transition_activity,
-    get_agent_triggered_transition_activity,
-    get_workflow_configuration_activity,
-    move_task_to_stage_activity,
-    trigger_task_processing_activity,
-    should_trigger_agent_workflow_activity,
+    # process_task activities
+    get_task_processing_context,
+    get_sandbox_for_repository,
+    execute_task_in_sandbox,
+    start_agent_server,
+    read_sandbox_logs,
+    cleanup_sandbox,
+    track_workflow_event,
+    post_slack_update,
+    update_task_run_status,
+    # create_snapshot activities
+    get_snapshot_context,
+    snapshot_create_sandbox,
+    snapshot_clone_repository,
+    snapshot_setup_repository,
+    snapshot_create_snapshot,
+    snapshot_cleanup_sandbox,
 ]

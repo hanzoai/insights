@@ -1,13 +1,13 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconRocket } from '@posthog/icons'
-import { LemonDivider, LemonTag } from '@posthog/lemon-ui'
+import { IconFlag, IconRocket } from '@hanzo/icons'
+import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { urls } from '~/scenes/urls'
 import { EarlyAccessFeatureStage, EarlyAccessFeatureType } from '~/types'
@@ -21,7 +21,7 @@ import {
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { buildFlagContent } from './NotebookNodeFlag'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { UUID_REGEX_MATCH_GROUPS } from './utils'
+import { OPTIONAL_PROJECT_NON_CAPTURE_GROUP, UUID_REGEX_MATCH_GROUPS } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeEarlyAccessAttributes>): JSX.Element => {
     const { id } = attributes
@@ -127,7 +127,7 @@ type NotebookNodeEarlyAccessAttributes = {
     id: EarlyAccessFeatureLogicProps['id']
 }
 
-export const NotebookNodeEarlyAccessFeature = createPostHogWidgetNode<NotebookNodeEarlyAccessAttributes>({
+export const NotebookNodeEarlyAccessFeature = createInsightsWidgetNode<NotebookNodeEarlyAccessAttributes>({
     nodeType: NotebookNodeType.EarlyAccessFeature,
     titlePlaceholder: 'Early Access Management',
     Component,
@@ -138,7 +138,7 @@ export const NotebookNodeEarlyAccessFeature = createPostHogWidgetNode<NotebookNo
         id: {},
     },
     pasteOptions: {
-        find: urls.earlyAccessFeature(UUID_REGEX_MATCH_GROUPS),
+        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.earlyAccessFeature(UUID_REGEX_MATCH_GROUPS),
         getAttributes: async (match) => {
             return { id: match[1] }
         },

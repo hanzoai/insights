@@ -1,18 +1,19 @@
 import { Meta, StoryFn } from '@storybook/react'
 
-import { getQueryBasedInsightModel } from '~/queries/nodes/InsightViz/utils'
-import { InsightModel } from '~/types'
+import { QueryBasedInsightModel } from '~/types'
 
 import { InsightDetails as InsightDetailsComponent } from './InsightDetails'
 
 const meta: Meta = {
     title: 'Components/Cards/Insight Details',
     component: InsightDetailsComponent,
+    parameters: {
+        mockDate: '2025-12-10',
+    },
 }
 export default meta
 
-const Template: StoryFn<{ insight: InsightModel }> = ({ insight: legacyInsight }) => {
-    const insight = getQueryBasedInsightModel(legacyInsight)
+const Template: StoryFn<{ insight: QueryBasedInsightModel }> = ({ insight }) => {
     return (
         <div className="bg-surface-primary w-[24rem] p-4 rounded">
             <InsightDetailsComponent query={insight.query} footerInfo={insight} />
@@ -46,6 +47,11 @@ TrendsWorldMap.args = {
     insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/trendsWorldMap.json'),
 }
 
+export const TrendsFormulas = Template.bind({})
+TrendsFormulas.args = {
+    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/trendsFormulas.json'),
+}
+
 export const Funnel = Template.bind({})
 Funnel.args = {
     insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/funnelLeftToRight.json'),
@@ -69,14 +75,14 @@ Lifecycle.args = {
     insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/lifecycle.json'),
 }
 
-export const DataTableHogQLQuery = Template.bind({})
-DataTableHogQLQuery.args = {
-    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataTableHogQL.json'),
+export const DataTableInsightsQLQuery = Template.bind({})
+DataTableInsightsQLQuery.args = {
+    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataTableInsightsQL.json'),
 }
 
-export const DataVisualizationHogQLQuery = Template.bind({})
-DataVisualizationHogQLQuery.args = {
-    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataVisualizationHogQL.json'),
+export const DataVisualizationInsightsQLQuery = Template.bind({})
+DataVisualizationInsightsQLQuery.args = {
+    insight: require('../../../../mocks/fixtures/api/projects/team_id/insights/dataVisualizationInsightsQL.json'),
 }
 
 export const DataTableEventsQuery = Template.bind({})

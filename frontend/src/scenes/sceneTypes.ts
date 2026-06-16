@@ -1,8 +1,7 @@
 import { LogicWrapper } from 'kea'
 
+import type { FileSystemIconType, ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlResourceType, ActivityScope } from '~/types'
-
-import { SettingSectionId } from './settings/types'
 
 // The enum here has to match the first and only exported component of the scene.
 // If so, we can preload the scene's required chunks in parallel with the scene itself.
@@ -11,6 +10,9 @@ export enum Scene {
     Action = 'Action',
     Actions = 'Actions',
     AdvancedActivityLogs = 'AdvancedActivityLogs',
+    Annotations = 'Annotations',
+    Approval = 'Approval',
+    Apps = 'Apps',
     AsyncMigrations = 'AsyncMigrations',
     BatchExport = 'BatchExport',
     BatchExportNew = 'BatchExportNew',
@@ -18,21 +20,26 @@ export enum Scene {
     BillingAuthorizationStatus = 'BillingAuthorizationStatus',
     BillingSection = 'BillingSection',
     Canvas = 'Canvas',
+    CLIAuthorize = 'CLIAuthorize',
+    CLILive = 'CLILive',
     Cohort = 'Cohort',
+    CohortCalculationHistory = 'CohortCalculationHistory',
     Cohorts = 'Cohorts',
+    Comments = 'Comments',
     CustomCss = 'CustomCss',
     CustomerAnalytics = 'CustomerAnalytics',
+    CustomerAnalyticsConfiguration = 'CustomerAnalyticsConfiguration',
     Dashboard = 'Dashboard',
     Dashboards = 'Dashboards',
     DataManagement = 'DataManagement',
-    DataPipelines = 'DataPipelines',
     DataPipelinesNew = 'DataPipelinesNew',
     DataWarehouse = 'DataWarehouse',
     DataWarehouseRedirect = 'DataWarehouseRedirect',
     DataWarehouseSource = 'DataWarehouseSource',
     DataWarehouseSourceNew = 'DataWarehouseSourceNew',
     DeadLetterQueue = 'DeadLetterQueue',
-    DebugHog = 'DebugHog',
+    Destinations = 'Destinations',
+    DebugFn = 'DebugFn',
     DebugQuery = 'DebugQuery',
     EarlyAccessFeatures = 'EarlyAccessFeatures',
     Error404 = '404',
@@ -44,12 +51,15 @@ export enum Scene {
     ErrorTrackingIssue = 'ErrorTrackingIssue',
     ErrorTrackingIssueFingerprints = 'ErrorTrackingIssueFingerprints',
     EventDefinition = 'EventDefinition',
+    EventDefinitions = 'EventDefinitions',
     EventDefinitionEdit = 'EventDefinitionEdit',
     Experiment = 'Experiment',
     Experiments = 'Experiments',
+    Exports = 'Exports',
     ExperimentsSharedMetric = 'ExperimentsSharedMetric',
     ExperimentsSharedMetrics = 'ExperimentsSharedMetrics',
     ExploreEvents = 'ExploreEvents',
+    ExploreSessions = 'ExploreSessions',
     FeatureFlag = 'FeatureFlag',
     FeatureFlags = 'FeatureFlags',
     Game368 = 'Game368',
@@ -57,86 +67,139 @@ export enum Scene {
     Groups = 'Groups',
     GroupsNew = 'GroupsNew',
     Heatmaps = 'Heatmaps',
-    HogFunction = 'HogFunction',
+    Heatmap = 'Heatmap',
+    Inbox = 'Inbox',
+    HeatmapNew = 'HeatmapNew',
+    HeatmapRecording = 'HeatmapRecording',
+    InsightsFunction = 'InsightsFunction',
     Insight = 'Insight',
+    InsightOptions = 'InsightOptions',
     IntegrationsRedirect = 'IntegrationsRedirect',
+    IngestionWarnings = 'IngestionWarnings',
     InviteSignup = 'InviteSignup',
     LegacyPlugin = 'LegacyPlugin',
     Link = 'Link',
     Links = 'Links',
+    LiveDebugger = 'LiveDebugger',
+    EventExplorer = 'EventExplorer',
     LiveEvents = 'LiveEvents',
     Login = 'Login',
     Login2FA = 'Login2FA',
+    EmailMFAVerify = 'EmailMFAVerify',
+    MaterializedColumns = 'MaterializedColumns',
     Max = 'Max',
-    Messaging = 'Messaging',
-    MessagingCampaign = 'MessagingCampaign',
-    MoveToPostHogCloud = 'MoveToPostHogCloud',
+    Models = 'Models',
+    MoveToInsightsCloud = 'MoveToInsightsCloud',
     NewTab = 'NewTab',
     Notebook = 'Notebook',
     Notebooks = 'Notebooks',
     OAuthAuthorize = 'OAuthAuthorize',
     Onboarding = 'Onboarding',
+    OnboardingCoupon = 'OnboardingCoupon',
     OrganizationCreateFirst = 'OrganizationCreate',
     OrganizationCreationConfirm = 'OrganizationCreationConfirm',
     PasswordReset = 'PasswordReset',
     PasswordResetComplete = 'PasswordResetComplete',
+    TwoFactorReset = 'TwoFactorReset',
     Person = 'Person',
     Persons = 'Persons',
     Pipeline = 'Pipeline',
+    PipelineStatus = 'PipelineStatus',
     PipelineNode = 'PipelineNode',
     PipelineNodeNew = 'PipelineNodeNew',
     PreflightCheck = 'PreflightCheck',
-    Products = 'Products',
+    ProductTour = 'ProductTour',
+    ProductTours = 'ProductTours',
     ProjectCreateFirst = 'ProjectCreate',
     ProjectHomepage = 'ProjectHomepage',
     PropertyDefinition = 'PropertyDefinition',
+    PropertyDefinitions = 'PropertyDefinitions',
     PropertyDefinitionEdit = 'PropertyDefinitionEdit',
     Replay = 'Replay',
     ReplayFilePlayback = 'ReplayFilePlayback',
     ReplayPlaylist = 'ReplayPlaylist',
     ReplaySettings = 'ReplaySettings',
     ReplaySingle = 'ReplaySingle',
+    ReplayKiosk = 'ReplayKiosk',
+    ResourceTransfer = 'ResourceTransfer',
     RevenueAnalytics = 'RevenueAnalytics',
+    SqlVariableEdit = 'SqlVariableEdit',
     SQLEditor = 'SQLEditor',
     SavedInsights = 'SavedInsights',
+    Health = 'Health',
+    SdkDoctor = 'SdkDoctor',
     SessionAttributionExplorer = 'SessionAttributionExplorer',
+    SessionGroupSummariesTable = 'SessionGroupSummariesTable',
+    SessionGroupSummary = 'SessionGroupSummary',
+    SessionSummaries = 'SessionSummaries',
+    SessionProfile = 'SessionProfile',
     Settings = 'Settings',
     Signup = 'Signup',
+    SignalsDebug = 'SignalsDebug',
     Site = 'Site',
+    Coupons = 'Coupons',
+    Sources = 'Sources',
     StartupProgram = 'StartupProgram',
     Survey = 'Survey',
     SurveyTemplates = 'SurveyTemplates',
+    SurveyWizard = 'SurveyWizard',
     Surveys = 'Surveys',
     SystemStatus = 'SystemStatus',
     ToolbarLaunch = 'ToolbarLaunch',
+    Transformations = 'Transformations',
     Unsubscribe = 'Unsubscribe',
     UserInterview = 'UserInterview',
     UserInterviews = 'UserInterviews',
+    VercelLinkError = 'VercelLinkError',
     VerifyEmail = 'VerifyEmail',
     WebAnalytics = 'WebAnalytics',
     WebAnalyticsMarketing = 'WebAnalyticsMarketing',
     WebAnalyticsPageReports = 'WebAnalyticsPageReports',
     WebAnalyticsWebVitals = 'WebAnalyticsWebVitals',
-    EmbeddedAnalytics = 'EmbeddedAnalytics',
+    WebAnalyticsHealth = 'WebAnalyticsHealth',
+    WebAnalyticsLive = 'WebAnalyticsLive',
+    Endpoints = 'Endpoints',
+    Endpoint = 'Endpoint',
+    Workflow = 'Workflow',
+    Workflows = 'Workflows',
     Wizard = 'Wizard',
+    EarlyAccessFeature = 'EarlyAccessFeature',
+    EndpointsScene = 'EndpointsScene',
+    Game368Mascots = 'Game368Mascots',
+    LLMAnalytics = 'LLMAnalytics',
+    LLMAnalyticsDataset = 'LLMAnalyticsDataset',
+    LLMAnalyticsDatasets = 'LLMAnalyticsDatasets',
+    LLMAnalyticsEvaluation = 'LLMAnalyticsEvaluation',
+    LLMAnalyticsEvaluations = 'LLMAnalyticsEvaluations',
+    LLMAnalyticsPlayground = 'LLMAnalyticsPlayground',
+    LLMAnalyticsTrace = 'LLMAnalyticsTrace',
+    LLMAnalyticsUsers = 'LLMAnalyticsUsers',
+    Logs = 'Logs',
+    ManagedMigration = 'ManagedMigration',
+    ManagedMigrationNew = 'ManagedMigrationNew',
+    MarketingAnalytics = 'MarketingAnalytics',
+    MessagingLibraryTemplate = 'MessagingLibraryTemplate',
+    NewAction = 'NewAction',
+    TaskDetail = 'TaskDetail',
+    TaskTracker = 'TaskTracker',
+    OrganizationDeactivated = 'OrganizationDeactivated',
 }
 
 export type SceneComponent<T> = (props: T) => JSX.Element | null
+export type SceneProps = Record<string, any>
 
-export interface SceneExport<T = {}> {
+export interface SceneExport<T = SceneProps> {
     /** component to render for this scene */
     component: SceneComponent<T>
     /** logic to mount for this scene */
     logic?: LogicWrapper
-    /** setting section id to open when clicking the settings button */
-    settingSectionId?: SettingSectionId
+    /** product key associated with this scene - used for Quick Start setup tracking */
+    productKey?: ProductKey
     /** convert URL parameters from scenes.ts into logic props */
     paramsToProps?: (params: SceneParams) => T
     /** when was the scene last touched, unix timestamp for sortability */
     lastTouch?: number
 }
-
-type SceneProps = Record<string, any>
 
 // KLUDGE: LoadedScene is used in a logic and therefore cannot accept generics
 // we use an untyped SceneProps to satisfy the types
@@ -154,6 +217,8 @@ export interface SceneTab {
     title: string
     active: boolean
     customTitle?: string
+    iconType: FileSystemIconType | 'loading' | 'blank'
+    pinned?: boolean
 
     sceneId?: string
     sceneKey?: string
@@ -173,9 +238,11 @@ export interface Params {
 export interface SceneConfig {
     /** Custom name for the scene */
     name?: string
-    /** Route should only be accessed when logged out (N.B. should be added to posthog/urls.py too) */
+    /** Optional static description of the scene or product. Used both in the UI and by the AI assistant as context on what the scene is for */
+    description?: string
+    /** Route should only be accessed when logged out (N.B. should be added to insights/urls.py too) */
     onlyUnauthenticated?: boolean
-    /** Route **can** be accessed when logged out (i.e. can be accessed when logged in too; should be added to posthog/urls.py too) */
+    /** Route **can** be accessed when logged out (i.e. can be accessed when logged in too; should be added to insights/urls.py too) */
     allowUnauthenticated?: boolean
     /**
      * If `app`, navigation is shown, and the scene has default padding.
@@ -202,12 +269,24 @@ export interface SceneConfig {
     activityScope?: ActivityScope | string
     /** Default docs path - what the docs side panel will open by default when this scene is active  */
     defaultDocsPath?: string | (() => string) | (() => Promise<string>)
+    /** Team slug for changelog - appended as ?team= to the changelog URL in the side panel */
+    changelogTeamSlug?: string
+    /** Category for changelog - appended as ?category= to the changelog URL in the side panel */
+    changelogCategory?: string
     /** Component import, used only in manifests */
     import?: () => Promise<any>
+    /** Custom icon for the tabs */
+    iconType?: FileSystemIconType
+    /** If true, uses canvas background (--color-bg-surface-primary) for the scene and its tab */
+    canvasBackground?: boolean
 }
 
 // Map scenes to their access control resource types
 export const sceneToAccessControlResourceType: Partial<Record<Scene, AccessControlResourceType>> = {
+    // Actions
+    [Scene.Action]: AccessControlResourceType.Action,
+    [Scene.Actions]: AccessControlResourceType.Action,
+
     // Feature flags
     [Scene.FeatureFlag]: AccessControlResourceType.FeatureFlag,
     [Scene.FeatureFlags]: AccessControlResourceType.FeatureFlag,
@@ -231,4 +310,40 @@ export const sceneToAccessControlResourceType: Partial<Record<Scene, AccessContr
 
     // Revenue analytics
     [Scene.RevenueAnalytics]: AccessControlResourceType.RevenueAnalytics,
+
+    // Web Analytics
+    [Scene.WebAnalytics]: AccessControlResourceType.WebAnalytics,
+    [Scene.WebAnalyticsMarketing]: AccessControlResourceType.WebAnalytics,
+    [Scene.WebAnalyticsPageReports]: AccessControlResourceType.WebAnalytics,
+    [Scene.WebAnalyticsWebVitals]: AccessControlResourceType.WebAnalytics,
+    [Scene.WebAnalyticsHealth]: AccessControlResourceType.WebAnalytics,
+
+    // Marketing Analytics
+    [Scene.MarketingAnalytics]: AccessControlResourceType.WebAnalytics,
+
+    // Surveys
+    [Scene.Survey]: AccessControlResourceType.Survey,
+    [Scene.Surveys]: AccessControlResourceType.Survey,
+    [Scene.SurveyTemplates]: AccessControlResourceType.Survey,
+
+    // Product Tours
+    [Scene.ProductTour]: AccessControlResourceType.ProductTour,
+    [Scene.ProductTours]: AccessControlResourceType.ProductTour,
+
+    // Experiments
+    [Scene.Experiment]: AccessControlResourceType.Experiment,
+    [Scene.Experiments]: AccessControlResourceType.Experiment,
+
+    // LLM Analytics
+    [Scene.LLMAnalytics]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsDataset]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsDatasets]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsEvaluation]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsEvaluations]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsPlayground]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsTrace]: AccessControlResourceType.LlmAnalytics,
+    [Scene.LLMAnalyticsUsers]: AccessControlResourceType.LlmAnalytics,
+
+    // Data warehouse sources - not included here because self-managed sources don't have access control.
+    // Managed sources handle access control at the logic level via SIDE_PANEL_CONTEXT_KEY.
 }

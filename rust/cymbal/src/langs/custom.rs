@@ -1,8 +1,9 @@
+use common_types::error_tracking::FrameId;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
 
 use crate::{
-    frames::{Context, ContextLine, Frame, FrameId},
+    frames::{Context, ContextLine, Frame},
     langs::CommonFrameMetadata,
 };
 
@@ -67,14 +68,14 @@ impl CustomFrame {
             .iter()
             .take(10)
             .enumerate()
-            .map(|(i, line)| ContextLine::new(lineno - i as u32 - 1, line.clone()))
+            .map(|(i, line)| ContextLine::new_rel(lineno, -(i as i32) - 1, line.clone()))
             .collect();
         let after = self
             .post_context
             .iter()
             .take(10)
             .enumerate()
-            .map(|(i, line)| ContextLine::new(lineno + i as u32 + 1, line.clone()))
+            .map(|(i, line)| ContextLine::new_rel(lineno, i as i32 + 1, line.clone()))
             .collect();
         Some(Context {
             before,
@@ -87,7 +88,7 @@ impl CustomFrame {
 impl From<&CustomFrame> for Frame {
     fn from(value: &CustomFrame) -> Self {
         Frame {
-            raw_id: FrameId::placeholder(),
+            frame_id: FrameId::placeholder(),
             mangled_name: value.function.clone(),
             line: value.lineno,
             column: value.colno,
@@ -101,6 +102,9 @@ impl From<&CustomFrame> for Frame {
             context: value.get_context(),
             release: None,
             synthetic: value.meta.synthetic,
+            suspicious: false,
+            module: value.module.clone(),
+            code_variables: None,
         }
     }
 }
