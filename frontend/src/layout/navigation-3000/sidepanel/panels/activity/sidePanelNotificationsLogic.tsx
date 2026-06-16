@@ -1,6 +1,6 @@
-import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, reducers, selectors } from 'kea'
+import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import posthog, { JsonRecord } from 'posthog-js'
+import insights, { JsonRecord } from '@hanzo/insights'
 
 import api from 'lib/api'
 import { describerFor } from 'lib/components/ActivityLog/activityLogLogic'
@@ -26,7 +26,7 @@ export interface ChangelogFlagPayload {
     // For optimal display, ensure images are reasonably sized (e.g., width < 800px)
     // and optimized for web (e.g., < 500KB).
     // We suggest you upload it to a CDN to reduce load times/server load.
-    // If you're a PostHog employee, check https://posthog.com/handbook/engineering/posthog-com/assets out
+    // If you're an Insights employee, check https://hanzo.ai/handbook/engineering/insights-com/assets out
     markdown: string
 
     // Optional fields used if you want to override this to a specific person rather than Joe
@@ -63,8 +63,6 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                 loadImportantChanges: async ({ onlyUnread }, breakpoint) => {
                     await breakpoint(1)
 
-                    clearTimeout(cache.pollTimeout)
-
                     try {
                         const response = await api.get<ChangesResponse>(
                             `api/projects/${values.currentProjectId}/my_notifications?` +
@@ -84,7 +82,10 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                             ? POLL_TIMEOUT * values.errorCounter
                             : POLL_TIMEOUT
 
-                        cache.pollTimeout = window.setTimeout(actions.loadImportantChanges, pollTimeoutMilliseconds)
+                        cache.disposables.add(() => {
+                            const timerId = window.setTimeout(actions.loadImportantChanges, pollTimeoutMilliseconds)
+                            return () => clearTimeout(timerId)
+                        }, 'pollTimeout')
                     }
                 },
                 markAllAsRead: async () => {
@@ -121,7 +122,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
             if (pageIsVisible) {
                 actions.loadImportantChanges()
             } else {
-                clearTimeout(cache.pollTimeout)
+                cache.disposables.dispose('pollTimeout')
             }
         },
     })),
@@ -132,7 +133,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                 try {
                     let importantChangesHumanized = humanize(importantChanges?.results || [], describerFor, true)
 
-                    const flagPayload = posthog.getFeatureFlagPayload('changelog-notification')
+                    const flagPayload = insights.getFeatureFlagPayload('changelog-notification')
                     const changelogNotifications = flagPayload
                         ? (flagPayload as JsonRecord[]).map(
                               (notification) =>
@@ -153,7 +154,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                             ...changelogNotifications.map(
                                 (changelogNotification) =>
                                     ({
-                                        email: changelogNotification.email || 'joe@posthog.com',
+                                        email: changelogNotification.email || 'joe@hanzo.ai',
                                         name: changelogNotification.name || 'Joe',
                                         isSystem: true,
                                         description: <LemonMarkdown>{changelogNotification.markdown}</LemonMarkdown>,
@@ -193,13 +194,12 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
         hasUnread: [(s) => [s.unreadCount], (unreadCount) => unreadCount > 0],
     }),
     afterMount(({ cache, actions }) => {
-        cache.onVisibilityChange = () => {
-            actions.togglePolling(document.visibilityState === 'visible')
-        }
-        document.addEventListener('visibilitychange', cache.onVisibilityChange)
-    }),
-    beforeUnmount(({ cache }) => {
-        clearTimeout(cache.pollTimeout)
-        document.removeEventListener('visibilitychange', cache.onVisibilityChange)
+        cache.disposables.add(() => {
+            const onVisibilityChange = (): void => {
+                actions.togglePolling(document.visibilityState === 'visible')
+            }
+            document.addEventListener('visibilitychange', onVisibilityChange)
+            return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+        }, 'visibilityListener')
     }),
 ])

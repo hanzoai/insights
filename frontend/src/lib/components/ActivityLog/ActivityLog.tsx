@@ -5,8 +5,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonTabs } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonTabs } from '@hanzo/lemon-ui'
 
 import { ActivityLogLogicProps, activityLogLogic } from 'lib/components/ActivityLog/activityLogLogic'
 import { ActivityChange, HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
@@ -16,11 +16,14 @@ import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { PaginationControl, usePagination } from 'lib/lemon-ui/PaginationControl'
 import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { userLogic } from 'scenes/userLogic'
 
-import { AvailableFeature, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType, AvailableFeature } from '~/types'
 
+import { AccessDenied } from '../AccessDenied'
 import MonacoDiffEditor from '../MonacoDiffEditor'
 import { PayGateMini } from '../PayGateMini/PayGateMini'
 import { ProductIntroduction } from '../ProductIntroduction/ProductIntroduction'
@@ -61,12 +64,12 @@ export const SkeletonLog = (): JSX.Element => {
 
 const Loading = (): JSX.Element => {
     return (
-        <>
+        <div className="space-y-4">
             <SkeletonLog />
             <SkeletonLog />
             <SkeletonLog />
             <SkeletonLog />
-        </>
+        </div>
     )
 }
 
@@ -136,10 +139,10 @@ export const ActivityLogRow = ({ logItem }: { logItem: HumanizedActivityLogItem 
                 <ProfilePicture
                     showName={false}
                     user={{
-                        first_name: logItem.isSystem ? logItem.name : undefined,
+                        first_name: logItem.isSystem || logItem.wasImpersonated ? logItem.name : undefined,
                         email: logItem.email ?? undefined,
                     }}
-                    type={logItem.isSystem ? 'system' : 'person'}
+                    type={logItem.isSystem || logItem.wasImpersonated ? 'system' : 'person'}
                     size="xl"
                 />
                 <div className="ActivityLogRow__details flex-grow">
@@ -211,7 +214,13 @@ export const ActivityLog = ({ scope, id, caption, startingPage = 1 }: ActivityLo
     const { featureFlags } = useValues(featureFlagLogic)
     const { billingLoading } = useValues(billingLogic)
 
+    const hasAccess = userHasAccess(AccessControlResourceType.ActivityLog, AccessControlLevel.Viewer)
+
     const paginationState = usePagination(humanizedActivity || [], pagination)
+
+    if (!hasAccess) {
+        return <AccessDenied object="activity logs" />
+    }
 
     return (
         <div className="ActivityLog">

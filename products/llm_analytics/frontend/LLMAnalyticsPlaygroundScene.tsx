@@ -1,8 +1,9 @@
-import { BindLogic, useActions, useValues } from 'kea'
+import { useActions, useMountedLogic, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconGear, IconMessage, IconPencil, IconPlay, IconPlus, IconTrash } from '@posthog/icons'
+import { IconGear, IconMessage, IconPencil, IconPlay, IconPlus, IconTrash } from '@hanzo/icons'
 import {
+    LemonBanner,
     LemonButton,
     LemonInput,
     LemonModal,
@@ -13,9 +14,11 @@ import {
     LemonTableColumns,
     LemonTag,
     LemonTextArea,
-} from '@posthog/lemon-ui'
+    Link,
+} from '@hanzo/lemon-ui'
 
 import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { humanFriendlyDuration } from 'lib/utils'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { llmAnalyticsPlaygroundLogic } from './llmAnalyticsPlaygroundLogic'
@@ -38,16 +41,51 @@ export const scene: SceneExport = {
 }
 
 export function LLMAnalyticsPlaygroundScene(): JSX.Element {
+    useMountedLogic(llmAnalyticsPlaygroundLogic)
+
+    return <PlaygroundLayout />
+}
+
+function RateLimitBanner(): JSX.Element | null {
+    const { rateLimitedUntil } = useValues(llmAnalyticsPlaygroundLogic)
+
+    if (rateLimitedUntil === null || Date.now() >= rateLimitedUntil) {
+        return null
+    }
+
     return (
-        <BindLogic logic={llmAnalyticsPlaygroundLogic} props={{ key: 'llm-analytics-playground-scene' }}>
-            <PlaygroundLayout />
-        </BindLogic>
+        <LemonBanner type="warning" className="mb-4">
+            You've hit our playground request limit. You can make another request in{' '}
+            <strong>{humanFriendlyDuration(Math.ceil((rateLimitedUntil - Date.now()) / 1000), { maxUnits: 1 })}</strong>
+            . We're working on bring-your-own-key and other improvements to remove this limit.
+        </LemonBanner>
+    )
+}
+
+function SubscriptionRequiredBanner(): JSX.Element | null {
+    const { subscriptionRequired } = useValues(llmAnalyticsPlaygroundLogic)
+
+    if (!subscriptionRequired) {
+        return null
+    }
+
+    return (
+        <LemonBanner type="warning" className="mb-4">
+            The playground requires a{' '}
+            <Link to="/organization/billing" className="font-semibold">
+                valid payment method
+            </Link>{' '}
+            on file to prevent abuse.
+        </LemonBanner>
     )
 }
 
 function PlaygroundLayout(): JSX.Element {
     return (
         <div className="flex flex-col min-h-[calc(100vh-120px)] relative">
+            <RateLimitBanner />
+            <SubscriptionRequiredBanner />
+
             {/* Main conversation area - full width */}
             <div className="flex flex-col border rounded overflow-hidden flex-1">
                 <ConversationPanel />
@@ -419,6 +457,7 @@ function OutputSection(): JSX.Element {
                             size="small"
                             onClick={addCurrentRunToComparison}
                             tooltip="Add this run to comparison table"
+                            data-attr="playground-add-to-compare"
                         >
                             Add to compare
                         </LemonButton>
@@ -455,16 +494,30 @@ function OutputSection(): JSX.Element {
     )
 }
 
+function getModelOptionsErrorMessage(errorStatus: number | null): string | null {
+    if (errorStatus === null) {
+        return null
+    }
+
+    if (errorStatus === 429) {
+        return 'Too many requests. Please wait a moment and try again.'
+    }
+
+    return 'Failed to load models. Please refresh the page or try again later.'
+}
+
 function ConfigurationPanel(): JSX.Element {
-    const { maxTokens, thinking, reasoningLevel, model, modelOptions, modelOptionsLoading } =
+    const { maxTokens, thinking, reasoningLevel, model, modelOptions, modelOptionsLoading, modelOptionsErrorStatus } =
         useValues(llmAnalyticsPlaygroundLogic)
-    const { setMaxTokens, setThinking, setReasoningLevel, setModel } = useActions(llmAnalyticsPlaygroundLogic)
+    const { setMaxTokens, setThinking, setReasoningLevel, setModel, loadModelOptions } =
+        useActions(llmAnalyticsPlaygroundLogic)
 
     const handleThinkingToggle = (e: React.ChangeEvent<HTMLInputElement>): void => {
         setThinking(e.target.checked)
     }
 
     const options = Array.isArray(modelOptions) ? modelOptions : []
+    const errorMessage = getModelOptionsErrorMessage(modelOptionsErrorStatus)
 
     return (
         <div className="space-y-4">
@@ -485,10 +538,22 @@ function ConfigurationPanel(): JSX.Element {
                         }))}
                         loading={modelOptionsLoading}
                         disabled={modelOptionsLoading || options.length === 0}
+                        data-attr="playground-model-selector"
                     />
                 )}
                 {options.length === 0 && !modelOptionsLoading && (
-                    <p className="text-xs text-danger mt-1">No models available. Check proxy status.</p>
+                    <div className="mt-1">
+                        <p className="text-xs text-danger">
+                            {errorMessage || 'No models available. Check proxy status.'}
+                        </p>
+                        <button
+                            type="button"
+                            className="text-xs text-link mt-1 underline"
+                            onClick={() => loadModelOptions()}
+                        >
+                            Retry
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -640,7 +705,8 @@ function StickyActionBar(): JSX.Element {
                                 addMessage()
                                 scrollToBottom()
                             }}
-                            disabled={submitting}
+                            disabledReason={submitting ? 'Generating...' : undefined}
+                            data-attr="ai-playground-run-button"
                         >
                             Add message
                         </LemonButton>
@@ -649,7 +715,13 @@ function StickyActionBar(): JSX.Element {
                             status="danger"
                             icon={<IconTrash />}
                             onClick={clearConversation}
-                            disabled={submitting || messages.length === 0}
+                            disabledReason={
+                                messages.length === 0
+                                    ? 'Add messages to start the conversation'
+                                    : submitting
+                                      ? 'Generating...'
+                                      : undefined
+                            }
                             tooltip="Clear all messages"
                         >
                             Clear all
@@ -708,6 +780,7 @@ function StickyActionBar(): JSX.Element {
                             onClick={submitPrompt}
                             loading={submitting}
                             disabledReason={submitting ? 'Generating...' : runDisabledReason}
+                            data-attr="playground-run"
                         >
                             Run
                         </LemonButton>

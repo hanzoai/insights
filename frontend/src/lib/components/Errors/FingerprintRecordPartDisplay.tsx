@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 
-import { Tooltip } from '@posthog/lemon-ui'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { IconFingerprint } from 'lib/lemon-ui/icons'
@@ -18,7 +18,11 @@ export function FingerprintRecordPartDisplay({
     const iconRef = useRef<HTMLDivElement>(null)
     const isHovering = useIsHovering(iconRef)
     return (
-        <Tooltip title={renderPartTooltip(part)} placement="right">
+        <Tooltip
+            title={renderPartTooltip(part)}
+            placement="right"
+            docLink="https://hanzo.ai/docs/error-tracking/fingerprints"
+        >
             <span ref={iconRef} className="inline-flex items-center">
                 <IconFingerprint className={className} color={isHovering ? 'red' : 'gray'} fontSize="17px" />
             </span>

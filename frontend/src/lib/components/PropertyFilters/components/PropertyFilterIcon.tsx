@@ -1,4 +1,4 @@
-import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@posthog/icons'
+import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'
@@ -15,7 +15,7 @@ export function PropertyFilterIcon({ type }: { type?: PropertyFilterType }): JSX
             )
         case 'person':
             return (
-                <Tooltip title="Person property">
+                <Tooltip title="User property">
                     <IconPerson />
                 </Tooltip>
             )

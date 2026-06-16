@@ -1,9 +1,10 @@
-import { BindLogic, BuiltLogic, Logic, LogicWrapper, useActions, useMountedLogic, useValues } from 'kea'
+import { BindLogic, BuiltLogic, Logic, LogicWrapper, useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
-import { DebugCHQueries } from 'lib/components/CommandPalette/DebugCHQueries'
+import { DebugCHQueries } from 'lib/components/AppShortcuts/utils/DebugCHQueries'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { InsightPageHeader } from 'scenes/insights/InsightPageHeader'
 import { insightSceneLogic } from 'scenes/insights/insightSceneLogic'
@@ -13,11 +14,11 @@ import { urls } from 'scenes/urls'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { Query } from '~/queries/Query/Query'
 import { Node } from '~/queries/schema/schema-general'
-import { containsHogQLQuery, isInsightVizNode } from '~/queries/utils'
+import { containsInsightsQLQuery, isInsightVizNode } from '~/queries/utils'
 import { InsightShortId, ItemMode } from '~/types'
 
+import { teamLogic } from '../teamLogic'
 import { InsightsNav } from './InsightNav/InsightsNav'
-import { insightCommandLogic } from './insightCommandLogic'
 import { insightDataLogic } from './insightDataLogic'
 import { insightLogic } from './insightLogic'
 
@@ -29,12 +30,14 @@ export interface InsightAsSceneProps {
 
 export function InsightAsScene({ insightId, attachTo, tabId }: InsightAsSceneProps): JSX.Element | null {
     // insightSceneLogic
-    const { insightMode, insight, filtersOverride, variablesOverride, hasOverrides, freshQuery } =
+    const { insightMode, insight, filtersOverride, variablesOverride, hasOverrides, freshQuery, dashboardId } =
         useValues(insightSceneLogic)
+    const { currentTeamId } = useValues(teamLogic)
 
     // insightLogic
     const logic = insightLogic({
         dashboardItemId: insightId || `new-${tabId}`,
+        dashboardId: dashboardId ?? undefined,
         tabId,
         // don't use cached insight if we have overrides
         cachedInsight: hasOverrides && insight?.short_id === insightId ? insight : null,
@@ -47,16 +50,23 @@ export function InsightAsScene({ insightId, attachTo, tabId }: InsightAsScenePro
     const { query, showQueryEditor, showDebugPanel } = useValues(insightDataLogic(insightProps))
     const { setQuery: setInsightQuery } = useActions(insightDataLogic(insightProps))
 
+    useFileSystemLogView({
+        type: 'insight',
+        ref: insight?.short_id,
+        enabled: Boolean(currentTeamId && insight?.short_id && insight?.saved && !accessDeniedToInsight),
+        deps: [currentTeamId, insight?.short_id, insight?.saved, accessDeniedToInsight],
+    })
+
     // other logics
-    useMountedLogic(insightCommandLogic(insightProps))
     useAttachedLogic(logic, attachTo) // insightLogic(insightProps)
     useAttachedLogic(insightDataLogic(insightProps), attachTo)
 
     const actuallyShowQueryEditor = insightMode === ItemMode.Edit && showQueryEditor
 
-    const setQuery = (query: Node, isSourceUpdate?: boolean): void => {
-        if (!isInsightVizNode(query) || isSourceUpdate) {
-            setInsightQuery(query)
+    const setQuery = (q: Node | ((q: Node) => Node), isSourceUpdate?: boolean): void => {
+        let node = typeof q === 'function' ? (query ? q(query) : null) : q
+        if (!isInsightVizNode(node) || isSourceUpdate) {
+            setInsightQuery(node)
         }
     }
 
@@ -107,7 +117,7 @@ export function InsightAsScene({ insightId, attachTo, tabId }: InsightAsScenePro
                     context={{
                         showOpenEditorButton: false,
                         showQueryEditor: actuallyShowQueryEditor,
-                        showQueryHelp: insightMode === ItemMode.Edit && !containsHogQLQuery(query),
+                        showQueryHelp: insightMode === ItemMode.Edit && !containsInsightsQLQuery(query),
                         insightProps,
                     }}
                     filtersOverride={filtersOverride}

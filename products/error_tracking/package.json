@@ -1,20 +1,22 @@
 {
-    "name": "@posthog/products-error-tracking",
-    "scripts": {},
+    "name": "@hanzo/products-error-tracking",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
     "dependencies": {
-        "kea": "^3.1.7",
-        "kea-forms": "^3.2.0",
-        "kea-loaders": "^3.1.1",
-        "kea-router": "^3.4.1",
-        "kea-subscriptions": "^3.0.1",
-        "posthog-js": "1.268.0"
+        "kea": "catalog:",
+        "kea-forms": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "@hanzo/insights": "catalog:"
     },
     "peerDependencies": {
         "@dnd-kit/core": "*",
         "@dnd-kit/modifiers": "*",
         "@dnd-kit/sortable": "*",
         "@dnd-kit/utilities": "*",
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/addon-actions": "*",
         "@storybook/react": "*",
         "@types/d3": "*",

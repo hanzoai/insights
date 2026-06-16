@@ -5,14 +5,17 @@ import { CSSProperties } from 'react'
 import { CLICK_TARGETS, CLICK_TARGET_SELECTOR, TAGS_TO_IGNORE, escapeRegex } from 'lib/actionUtils'
 import { cssEscape } from 'lib/utils/cssEscape'
 
+import { patch } from '~/toolbar/patch'
 import { ActionStepForm, ElementRect } from '~/toolbar/types'
 import { ActionStepType } from '~/types'
 
 import { ActionStepPropertyKey } from './actions/ActionStep'
 
-export const TOOLBAR_ID = '__POSTHOG_TOOLBAR__'
+export const TOOLBAR_ID = '__INSIGHTS_TOOLBAR__'
+
+const elementToQueryCache = new WeakMap<HTMLElement, string | undefined>()
 export const TOOLBAR_CONTAINER_CLASS = 'toolbar-global-fade-container'
-export const LOCALSTORAGE_KEY = '_postHogToolbarParams'
+export const LOCALSTORAGE_KEY = '_insightsToolbarParams'
 
 export function getSafeText(el: HTMLElement): string {
     if (!el.childNodes || !el.childNodes.length) {
@@ -37,6 +40,16 @@ export function elementToQuery(element: HTMLElement, dataAttributes: string[]): 
         return
     }
 
+    if (elementToQueryCache.has(element)) {
+        return elementToQueryCache.get(element)
+    }
+
+    const result = computeElementQuery(element, dataAttributes)
+    elementToQueryCache.set(element, result)
+    return result
+}
+
+function computeElementQuery(element: HTMLElement, dataAttributes: string[]): string | undefined {
     for (const { name, value } of Array.from(element.attributes)) {
         if (!dataAttributes.includes(name)) {
             continue
@@ -47,7 +60,7 @@ export function elementToQuery(element: HTMLElement, dataAttributes: string[]): 
 
         if (querySelectorAllDeep(escapedSelector).length == 1) {
             // if we return the _valid_ escaped CSS,
-            // the action matching in PostHog might not match it
+            // the action matching in Insights might not match it
             // because it's not really CSS matching
             return unescapedSelector
         }
@@ -56,10 +69,11 @@ export function elementToQuery(element: HTMLElement, dataAttributes: string[]): 
     try {
         const foundSelector = finder(element, {
             tagName: (name) => !TAGS_TO_IGNORE.includes(name),
-            seedMinLength: 5, // include several selectors e.g. prefer .project-homepage > .project-header > .project-title over .project-title
+            // include several selectors e.g. prefer .project-homepage > .project-header > .project-title over .project-title
+            seedMinLength: 5,
             attr: (name) => {
                 // preference to data attributes if they exist
-                // that aren't in the PostHog preferred list - they were returned early above
+                // that aren't in the Insights preferred list - they were returned early above
                 return name.startsWith('data-')
             },
         })
@@ -154,17 +168,63 @@ export function inBounds(min: number, value: number, max: number): number {
     return Math.max(min, Math.min(max, value))
 }
 
-export function elementIsVisible(element: HTMLElement): boolean {
+export function elementIsVisible(element: HTMLElement, cache: WeakMap<HTMLElement, boolean>): boolean {
     try {
+        const alreadyCached = cache.get(element)
+        if (alreadyCached !== undefined) {
+            return alreadyCached
+        }
+
+        if (element.checkVisibility) {
+            const nativeIsVisible = element.checkVisibility({
+                checkOpacity: true,
+                checkVisibilityCSS: true,
+            })
+            cache.set(element, nativeIsVisible)
+            return nativeIsVisible
+        }
+
         const style = window.getComputedStyle(element)
-        return (
-            style.display !== 'none' &&
-            style.visibility !== 'hidden' &&
-            parseFloat(style.opacity) !== 0 &&
-            style.height !== '0px' &&
-            style.width !== '0px' &&
-            (element.parentElement ? elementIsVisible(element.parentElement) : true)
-        )
+        const isInvisible = style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0
+        if (isInvisible) {
+            cache.set(element, false)
+            return false
+        }
+
+        // Check parent chain for display/visibility
+        let parent = element.parentElement
+        while (parent) {
+            // Check cache first
+            const cached = cache.get(parent)
+            if (cached !== undefined) {
+                if (!cached) {
+                    return false
+                }
+                // If cached as visible, skip to next parent
+                parent = parent.parentElement
+                continue
+            }
+
+            const parentStyle = window.getComputedStyle(parent)
+            const parentVisible = parentStyle.display !== 'none' && parentStyle.visibility !== 'hidden'
+
+            cache.set(parent, parentVisible)
+
+            if (!parentVisible) {
+                return false
+            }
+            parent = parent.parentElement
+        }
+
+        // Check if element has actual rendered dimensions
+        const rect = element.getBoundingClientRect()
+        const elementHasActualRenderedDimensions =
+            rect.width > 0 ||
+            rect.height > 0 ||
+            // Some elements might be 0x0 but still visible (e.g., inline elements with content)
+            element.getClientRects().length > 0
+        cache.set(element, elementHasActualRenderedDimensions)
+        return elementHasActualRenderedDimensions
     } catch {
         // if we can't get the computed style, we'll assume the element is visible
         return true
@@ -201,7 +261,8 @@ export function getAllClickTargets(
         .filter((e) => e)
     const uniqueElements = Array.from(new Set(selectedElements)) as HTMLElement[]
 
-    return uniqueElements.filter(elementIsVisible)
+    const visibilityCache = new WeakMap<HTMLElement, boolean>()
+    return uniqueElements.filter((el) => elementIsVisible(el, visibilityCache))
 }
 
 export function stepMatchesHref(step: ActionStepType, href: string): boolean {
@@ -444,4 +505,72 @@ export function getHeatMapHue(count: number, maxCount: number): number {
  */
 export function slashDotDataAttrUnescape(foundSelector: string): string | undefined {
     return foundSelector.replace(/\\./g, '.')
+}
+
+export function makeNavigateWrapper(onNavigate: () => void, patchKey: string): () => () => void {
+    return () => {
+        let unwrapPushState: undefined | (() => void)
+        let unwrapReplaceState: undefined | (() => void)
+        if (!(window.history.pushState as any)?.[patchKey]) {
+            unwrapPushState = patch(
+                window.history,
+                'pushState',
+                (originalPushState) => {
+                    return function patchedPushState(
+                        this: History,
+                        state: any,
+                        title: string,
+                        url?: string | URL | null
+                    ): void {
+                        ;(originalPushState as History['pushState']).call(this, state, title, url)
+                        onNavigate()
+                    }
+                },
+                patchKey
+            )
+        }
+
+        if (!(window.history.replaceState as any)?.[patchKey]) {
+            unwrapReplaceState = patch(
+                window.history,
+                'replaceState',
+                (originalReplaceState) => {
+                    return function patchedReplaceState(
+                        this: History,
+                        state: any,
+                        title: string,
+                        url?: string | URL | null
+                    ): void {
+                        ;(originalReplaceState as History['replaceState']).call(this, state, title, url)
+                        onNavigate()
+                    }
+                },
+                patchKey
+            )
+        }
+
+        return () => {
+            unwrapPushState?.()
+            unwrapReplaceState?.()
+        }
+    }
+}
+
+export function joinWithUiHost(uiHost: string, path: string): string {
+    const trimmedHost = (uiHost || '').replace(/\/+$/, '')
+    const trimmedPath = (path || '').trim()
+
+    if (!trimmedHost) {
+        return trimmedPath
+    }
+    if (!trimmedPath) {
+        return trimmedHost
+    }
+
+    // If a full URL is passed, don't try to join it.
+    if (/^https?:\/\//i.test(trimmedPath) || /^\/\/[^/]/.test(trimmedPath)) {
+        return trimmedPath
+    }
+
+    return `${trimmedHost}/${trimmedPath.replace(/^\/+/, '')}`
 }

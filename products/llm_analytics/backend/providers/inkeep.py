@@ -8,8 +8,7 @@ from typing import Any
 from django.conf import settings
 
 import openai
-import posthoganalytics
-from anthropic.types import MessageParam
+import hanzo_insights
 
 from products.llm_analytics.backend.providers.formatters.openai_formatter import convert_to_openai_messages
 
@@ -37,7 +36,7 @@ class InkeepProvider:
     def stream_response(
         self,
         system: str,
-        messages: list[MessageParam],
+        messages: list[dict[str, Any]],
         thinking: bool = False,
         temperature: float | None = None,
         max_tokens: int | None = None,
@@ -51,8 +50,8 @@ class InkeepProvider:
         """
 
         try:
-            # Manually track with PostHog since Inkeep doesn't have native support
-            posthoganalytics.capture(
+            # Manually track with Insights since Inkeep doesn't have native support
+            hanzo_insights.capture(
                 distinct_id=distinct_id,
                 event="$ai_generation",
                 properties={

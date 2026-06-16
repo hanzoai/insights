@@ -10,12 +10,17 @@
         "build",
         "rust",
         "cli",
-        "plugin-server",
-        "common/hogvm/typescript",
-        "common/hogvm/typescript/dist",
+        "nodejs",
+        "common/scriptvm/typescript",
+        "common/scriptvm/typescript/dist",
         "common/plugin_transpiler/dist",
-        "common/hogvm/__tests__/__snapshots__",
-        "common/hogvm/__tests__/__snapshots__/**"
+        "common/scriptvm/__tests__/__snapshots__",
+        "common/scriptvm/__tests__/__snapshots__/**",
+        "frontend/src/queries/validators.js",
+        "frontend/src/generated/**",
+        "services/mcp/**/generated.ts",
+        "services/mcp/schema/tool-inputs.json",
+        "products/**/frontend/generated/**"
     ],
     "rules": {
         "no-constant-condition": "off",
@@ -104,7 +109,7 @@
                 "forbid": [
                     {
                         "propName": "style",
-                        "message": "style should be avoided in favor of utility CSS classes - see https://storybook.posthog.net/?path=/docs/lemon-ui-utilities--overview"
+                        "message": "style should be avoided in favor of utility CSS classes - see https://storybook.dev.insights.dev/?path=/docs/lemon-ui-utilities--overview"
                     }
                 ]
             }
@@ -223,18 +228,6 @@
         "no-constant-binary-expression": "error",
         "no-useless-rename": "error",
         "no-useless-call": "error",
-        "import/no-restricted-paths": [
-            "error",
-            {
-                "zones": [
-                    {
-                        "target": "./frontend/**",
-                        "from": "./ee/frontend/**",
-                        "message": "EE licensed TypeScript should only be accessed via the posthogEE objects. Use `import posthogEE from '@posthog/ee/exports'`"
-                    }
-                ]
-            }
-        ],
         "jest/no-restricted-matchers": [
             "error",
             {
@@ -247,6 +240,23 @@
             "files": ["*.stories.tsx"],
             "rules": {
                 "react-hooks/rules-of-hooks": "off"
+            }
+        },
+        {
+            "files": ["services/mcp/src/ui-apps/**/*.ts"],
+            "rules": {
+                "no-console": [
+                    "error",
+                    {
+                        "allow": ["debug", "info", "warn", "error"]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["docs/onboarding/**/*.tsx"],
+            "rules": {
+                "react/forbid-elements": "off"
             }
         }
     ]

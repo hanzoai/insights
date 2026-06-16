@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBalance, IconFlag } from '@posthog/icons'
+import { IconBalance, IconFlag } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -9,24 +9,25 @@ import {
     LemonModal,
     LemonTable,
     LemonTableColumns,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { IconOpenInApp } from 'lib/lemon-ui/icons'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
 
-import { Experiment, MultivariateFlagVariant } from '~/types'
+import { MultivariateFlagVariant } from '~/types'
 
 import { experimentLogic } from '../experimentLogic'
 import { modalsLogic } from '../modalsLogic'
+import { isEvenlyDistributed } from '../utils'
 import { HoldoutSelector } from './HoldoutSelector'
 import { VariantScreenshot } from './VariantScreenshot'
 import { VariantTag } from './components'
 
-export function DistributionModal({ experimentId }: { experimentId: Experiment['id'] }): JSX.Element {
-    const { experiment, experimentLoading } = useValues(experimentLogic({ experimentId }))
-    const { updateDistribution } = useActions(experimentLogic({ experimentId }))
+export function DistributionModal(): JSX.Element {
+    const { experiment, experimentLoading } = useValues(experimentLogic)
+    const { updateDistribution } = useActions(experimentLogic)
     const { closeDistributionModal } = useActions(modalsLogic)
     const { isDistributionModalOpen } = useValues(modalsLogic)
 
@@ -91,10 +92,15 @@ export function DistributionModal({ experimentId }: { experimentId: Experiment['
                         <LemonButton
                             size="small"
                             onClick={distributeVariantsEqually}
-                            tooltip="Redistribute variant rollout percentages equally"
+                            tooltip="Distribute split evenly"
                             icon={<IconBalance />}
+                            className={
+                                isEvenlyDistributed(featureFlag?.filters?.multivariate?.variants || [])
+                                    ? 'invisible'
+                                    : ''
+                            }
                         >
-                            Distribute equally
+                            Distribute evenly
                         </LemonButton>
                     </div>
 
@@ -107,7 +113,7 @@ export function DistributionModal({ experimentId }: { experimentId: Experiment['
                                 render: (value) => <span className="font-semibold">{value}</span>,
                             },
                             {
-                                title: 'Rollout Percentage',
+                                title: 'Split',
                                 dataIndex: 'rollout_percentage',
                                 render: (_, record, index) => (
                                     <LemonInput
@@ -125,7 +131,7 @@ export function DistributionModal({ experimentId }: { experimentId: Experiment['
 
                     {!areVariantRolloutsValid && (
                         <p className="text-danger mt-2">
-                            Percentage rollouts must sum to 100 (currently {variantRolloutSum}).
+                            Percentage splits must sum to 100 (currently {variantRolloutSum}).
                         </p>
                     )}
                 </div>
@@ -137,10 +143,8 @@ export function DistributionModal({ experimentId }: { experimentId: Experiment['
 
 export function DistributionTable(): JSX.Element {
     const { openDistributionModal } = useActions(modalsLogic)
-    const { experimentId, experiment, legacyPrimaryMetricsResults } = useValues(experimentLogic)
+    const { experiment } = useValues(experimentLogic)
     const { reportExperimentReleaseConditionsViewed } = useActions(experimentLogic)
-
-    const result = legacyPrimaryMetricsResults?.[0]
 
     const onSelectElement = (variant: string): void => {
         LemonDialog.open({
@@ -168,16 +172,13 @@ export function DistributionTable(): JSX.Element {
             key: 'key',
             title: 'Variant',
             render: function Key(_, item): JSX.Element {
-                if (!result || !result.insight) {
-                    return <span className="font-semibold">{item.key}</span>
-                }
-                return <VariantTag experimentId={experimentId} variantKey={item.key} />
+                return <VariantTag variantKey={item.key} />
             },
         },
         {
             className: className,
             key: 'rollout_percentage',
-            title: 'Rollout',
+            title: 'Split',
             render: function Key(_, item): JSX.Element {
                 return <div>{`${item.rollout_percentage}%`}</div>
             },

@@ -1,7 +1,7 @@
 import { kea, path } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 

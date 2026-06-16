@@ -1,15 +1,15 @@
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 
 import { EventsQuery, NodeKind } from '~/queries/schema/schema-general'
-import { escapePropertyAsHogQLIdentifier } from '~/queries/utils'
+import { escapePropertyAsInsightsQLIdentifier } from '~/queries/utils'
 import { TeamType } from '~/types'
 
-/** Indicates HogQL usage if team.live_events_columns = [HOGQL_COLUMNS_KEY, ...] */
-export const HOGQL_COLUMNS_KEY = '--v2:hogql'
+/** Indicates InsightsQL usage if team.live_events_columns = [INSIGHTSQL_COLUMNS_KEY, ...] */
+export const INSIGHTSQL_COLUMNS_KEY = '--v2:insightsql'
 
 export function cleanLiveEventsColumns(columns: string[]): string[] {
     // new columns
-    if (columns.length > 0 && columns[0] === HOGQL_COLUMNS_KEY) {
+    if (columns.length > 0 && columns[0] === INSIGHTSQL_COLUMNS_KEY) {
         return columns.slice(1)
     }
     // legacy columns
@@ -25,7 +25,7 @@ export function cleanLiveEventsColumns(columns: string[]): string[] {
             if (column === 'source') {
                 return 'properties.$lib'
             }
-            return `properties.${escapePropertyAsHogQLIdentifier(String(column))}`
+            return `properties.${escapePropertyAsInsightsQLIdentifier(String(column))}`
         }),
         'timestamp',
     ]
@@ -48,7 +48,7 @@ export function getEventsQueriesForTeam(team: Partial<TeamType>): Record<string,
     const projectDefault = getDefaultEventsQueryForTeam(team)
     return {
         ...(projectDefault ? { 'Project default view': projectDefault } : {}),
-        'PostHog default view': getDefaultEventsSceneQuery().source as EventsQuery,
+        'Insights default view': getDefaultEventsSceneQuery().source as EventsQuery,
         'Event counts view': {
             kind: NodeKind.EventsQuery,
             select: ['event', 'count()'],

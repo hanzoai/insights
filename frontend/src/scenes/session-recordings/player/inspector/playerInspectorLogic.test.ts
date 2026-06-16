@@ -2,20 +2,19 @@ import { expectLogic } from 'kea-test-utils'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { playerInspectorLogic } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
-import { sessionRecordingDataLogic } from 'scenes/session-recordings/player/sessionRecordingDataLogic'
+import { sessionRecordingDataCoordinatorLogic } from 'scenes/session-recordings/player/sessionRecordingDataCoordinatorLogic'
 
-import { useMocks } from '~/mocks/jest'
-import { initKeaTests } from '~/test/init'
+import { setupSessionRecordingTest } from '../__mocks__/test-setup'
 
 const playerLogicProps = { sessionRecordingId: '1', playerKey: 'playlist' }
 
 describe('playerInspectorLogic', () => {
     let logic: ReturnType<typeof playerInspectorLogic.build>
-    let dataLogic: ReturnType<typeof sessionRecordingDataLogic.build>
+    let dataLogic: ReturnType<typeof sessionRecordingDataCoordinatorLogic.build>
 
     beforeEach(() => {
-        useMocks({
-            get: {
+        setupSessionRecordingTest({
+            getMocks: {
                 '/api/environments/:team_id/session_recordings/1/': {},
                 '/api/projects/:team/notebooks/recording_comments': {
                     results: [
@@ -38,9 +37,8 @@ describe('playerInspectorLogic', () => {
                                 distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
                                 first_name: 'fasda',
                                 last_name: '',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
-                                hedgehog_config: null,
                                 role_at_organization: 'other',
                             },
                             deleted: false,
@@ -63,9 +61,8 @@ describe('playerInspectorLogic', () => {
                                 distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
                                 first_name: 'fasda',
                                 last_name: '',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
-                                hedgehog_config: null,
                                 role_at_organization: 'other',
                             },
                             deleted: false,
@@ -84,10 +81,9 @@ describe('playerInspectorLogic', () => {
                 },
             },
         })
-        initKeaTests()
         featureFlagLogic.mount()
 
-        dataLogic = sessionRecordingDataLogic(playerLogicProps)
+        dataLogic = sessionRecordingDataCoordinatorLogic(playerLogicProps)
         dataLogic.mount()
 
         logic = playerInspectorLogic(playerLogicProps)
@@ -132,9 +128,8 @@ describe('playerInspectorLogic', () => {
                         created_at: '2025-07-23T20:21:53.197354Z',
                         created_by: {
                             distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
-                            email: 'paul@posthog.com',
+                            email: 'paul@hanzo.ai',
                             first_name: 'fasda',
-                            hedgehog_config: null,
                             id: 1,
                             is_email_verified: false,
                             last_name: '',
@@ -157,9 +152,8 @@ describe('playerInspectorLogic', () => {
                         created_at: '2025-07-23T19:36:47.813482Z',
                         created_by: {
                             distinct_id: 'xugZUZjVMSe5Ceo67Y1KX85kiQqB4Gp5OSdC02cjsWl',
-                            email: 'paul@posthog.com',
+                            email: 'paul@hanzo.ai',
                             first_name: 'fasda',
-                            hedgehog_config: null,
                             id: 1,
                             is_email_verified: false,
                             last_name: '',
@@ -185,7 +179,7 @@ describe('playerInspectorLogic', () => {
     describe('setTrackedWindow', () => {
         it('starts with no tracked window', async () => {
             await expectLogic(logic, () => {
-                logic.actions.setTrackedWindow(null as unknown as string)
+                logic.actions.setTrackedWindow(null)
             })
                 .toDispatchActions(['setTrackedWindow'])
                 .toMatchValues({
@@ -198,11 +192,11 @@ describe('playerInspectorLogic', () => {
                 trackedWindow: null,
             })
             await expectLogic(logic, () => {
-                logic.actions.setTrackedWindow('nightly')
+                logic.actions.setTrackedWindow(1)
             })
                 .toDispatchActions(['setTrackedWindow'])
                 .toMatchValues({
-                    trackedWindow: 'nightly',
+                    trackedWindow: 1,
                 })
         })
     })

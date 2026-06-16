@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonInput, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonInput, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 import { humanFriendlyNumber } from 'lib/utils'
@@ -160,7 +160,7 @@ export function DataCollectionCalculator({ experimentId }: ExperimentCalculatorP
                                     </div>
                                     <div>
                                         Read more in the{' '}
-                                        <Link to="https://posthog.com/docs/experiments/sample-size-running-time#minimum-detectable-effect-mde">
+                                        <Link to="https://hanzo.ai/docs/experiments/sample-size-running-time#minimum-detectable-effect-mde">
                                             documentation.
                                         </Link>
                                     </div>

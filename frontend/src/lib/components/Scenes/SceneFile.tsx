@@ -1,15 +1,16 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFolderMove, IconFolderOpen, IconShortcut } from '@posthog/icons'
+import { IconFolderMove, IconFolderOpen, IconShortcut } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuOpenIndicator,
     DropdownMenuTrigger,
 } from 'lib/ui/DropdownMenu/DropdownMenu'
+import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
 
 import { PROJECT_TREE_KEY } from '~/layout/panel-layout/ProjectTree/ProjectTree'
 import { projectTreeDataLogic } from '~/layout/panel-layout/ProjectTree/projectTreeDataLogic'
@@ -34,43 +35,45 @@ export function SceneFile({ dataAttrKey }: { dataAttrKey: string }): JSX.Element
                     <ButtonPrimitive variant="panel" menuItem data-attr={`${dataAttrKey}-file-dropdown-menu-trigger`}>
                         <IconFolderOpen />
                         {splitPath(projectTreeRefEntry.path).slice(0, -1).join('/')}
-                        <DropdownMenuOpenIndicator className="ml-auto" />
+                        <MenuOpenIndicator className="ml-auto" />
                     </ButtonPrimitive>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" matchTriggerWidth>
-                    <DropdownMenuItem className="w-full">
-                        <ButtonPrimitive
-                            menuItem
-                            onClick={() => {
-                                assureVisibility({ type: 'folder', ref: projectTreeRefEntry.path })
-                                showLayoutPanel(true)
-                                setActivePanelIdentifier('Project')
-                            }}
-                        >
-                            <IconFolderOpen />
-                            Open in project tree
-                        </ButtonPrimitive>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <ButtonPrimitive
-                            menuItem
-                            onClick={() => openMoveToModal([projectTreeRefEntry])}
-                            data-attr={`${dataAttrKey}-move-to-dropdown-menu-item`}
-                        >
-                            <IconFolderMove />
-                            Move to another folder
-                        </ButtonPrimitive>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <ButtonPrimitive
-                            menuItem
-                            onClick={() => addShortcutItem(projectTreeRefEntry)}
-                            data-attr={`${dataAttrKey}-add-to-shortcuts-dropdown-menu-item`}
-                        >
-                            <IconShortcut />
-                            Add to shortcuts panel
-                        </ButtonPrimitive>
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                        <DropdownMenuItem className="w-full">
+                            <ButtonPrimitive
+                                menuItem
+                                onClick={() => {
+                                    assureVisibility({ type: 'folder', ref: projectTreeRefEntry.path })
+                                    showLayoutPanel(true)
+                                    setActivePanelIdentifier('Project')
+                                }}
+                            >
+                                <IconFolderOpen />
+                                Open in project tree
+                            </ButtonPrimitive>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <ButtonPrimitive
+                                menuItem
+                                onClick={() => openMoveToModal([projectTreeRefEntry])}
+                                data-attr={`${dataAttrKey}-move-to-dropdown-menu-item`}
+                            >
+                                <IconFolderMove />
+                                Move to another folder
+                            </ButtonPrimitive>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <ButtonPrimitive
+                                menuItem
+                                onClick={() => addShortcutItem(projectTreeRefEntry)}
+                                data-attr={`${dataAttrKey}-add-to-shortcuts-dropdown-menu-item`}
+                            >
+                                <IconShortcut />
+                                Add to shortcuts panel
+                            </ButtonPrimitive>
+                        </DropdownMenuItem>
+                    </DropdownMenuGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
         </ScenePanelLabel>

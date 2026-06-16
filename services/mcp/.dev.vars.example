@@ -1,0 +1,10 @@
+# Custom API base URL for self-hosted Insights instances.
+# WARNING: In Insights Production, do NOT set this - the code automatically handles US/EU routing.
+# See getAuthorizationServerUrl() in src/lib/constants.ts for details.
+INSIGHTS_API_BASE_URL=http://localhost:8010
+
+# Insights base URL for MCP Apps analytics (CSP and event ingestion)
+INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL=http://localhost:8010
+INSIGHTS_UI_APPS_TOKEN=your_insights_ui_apps_token_here
+
+INKEEP_API_KEY=your_inkeep_api_key_here

@@ -1,0 +1,357 @@
+import re
+import json
+import uuid
+import logging
+from typing import Any
+
+from django.core.exceptions import ValidationError
+from django.db import models
+
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.visitor import CloningVisitor
+
+from insights.exceptions_capture import capture_exception
+from insights.models.team import Team
+from insights.models.user import User
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
+
+logger = logging.getLogger(__name__)
+
+
+class _ReplacePlaceholdersWithDummies(CloningVisitor):
+    """Replace all {variables.foo} placeholders with empty string constants."""
+
+    def visit_placeholder(self, node: ast.Placeholder) -> ast.Constant:
+        return ast.Constant(value="")
+
+
+_PLACEHOLDER_REPLACER = _ReplacePlaceholdersWithDummies()
+
+
+# Matches Nullable(...) and LowCardinality(...) — single-arg wrappers
+_TRANSPARENT_WRAPPER_RE = re.compile(r"^(?:Nullable|LowCardinality)\((.+)\)$")
+# Matches SimpleAggregateFunction(func, Type) and AggregateFunction(func, Type)
+_AGG_FUNC_RE = re.compile(r"^(?:Simple)?AggregateFunction\(.+?,\s*(.+)\)$")
+
+
+def _clickhouse_type_to_serialized_type(ch_type: str) -> str:
+    """Map a ClickHouse type string to a serialized endpoint column type."""
+    t = ch_type
+    while True:
+        if m := _TRANSPARENT_WRAPPER_RE.match(t):
+            t = m.group(1)
+        elif m := _AGG_FUNC_RE.match(t):
+            t = m.group(1)
+        else:
+            break
+
+    if t.startswith(("UInt", "Int")):
+        return "integer"
+    if t.startswith("Float"):
+        return "float"
+    if t.startswith("Decimal"):
+        return "decimal"
+    if t.startswith(("String", "UUID", "Enum", "FixedString")):
+        return "string"
+    if t.startswith("DateTime"):
+        return "datetime"
+    if t in ("Date", "Date32"):
+        return "date"
+    if t == "Bool":
+        return "boolean"
+    if t.startswith("Array"):
+        return "array"
+    if t.startswith(("Tuple", "Map")):
+        return "json"
+    logger.warning("Unhandled ClickHouse type: %s", ch_type)
+    return "unknown"
+
+
+def validate_endpoint_name(value: str) -> None:
+    """Validate that the endpoint name is URL-safe and follows naming conventions."""
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", value):
+        raise ValidationError(
+            f"{value} is not a valid endpoint name. Endpoint names must start with a letter and contain only letters, numbers, hyphens, and underscores.",
+            params={"value": value},
+        )
+
+    if len(value) > 128:
+        raise ValidationError(
+            f"Endpoint name '{value}' is too long. Maximum length is 128 characters.",
+            params={"value": value},
+        )
+
+
+class EndpointVersion(models.Model):
+    """Immutable snapshot of an endpoint's query at a specific version.
+
+    Each time an endpoint's query is modified, a new version is created.
+    This allows users to execute specific versions or track query evolution over time.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    endpoint = models.ForeignKey("Endpoint", on_delete=models.CASCADE, related_name="versions")
+    version = models.IntegerField()
+    query = models.JSONField(help_text="Immutable query snapshot")
+    description = models.TextField(blank=True, default="", help_text="Optional description for this endpoint version")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="endpoint_versions_created",
+    )
+
+    cache_age_seconds = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Cache age in seconds. If null, uses default interval-based caching.",
+    )
+    is_materialized = models.BooleanField(
+        default=False,
+        help_text="Whether this version's query results are materialized",
+    )
+    saved_query = models.ForeignKey(
+        "data_warehouse.DataWarehouseSavedQuery",
+        null=True,
+        blank=True,
+        db_index=False,
+        on_delete=models.SET_NULL,
+        related_name="endpoint_versions",
+        help_text="The underlying materialized view for this version",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this version is available for execution. Inactive versions cannot be run.",
+    )
+    columns = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="SELECT column names and types. Null means not yet computed; empty list means no columns found.",
+    )
+
+    class Meta:
+        db_table = "endpoints_endpointversion"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["endpoint", "version"],
+                name="unique_endpoint_version",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["endpoint", "version"], name="endpoint_version_idx"),
+            models.Index(fields=["endpoint", "-version"], name="endpoint_version_desc_idx"),
+            models.Index(fields=["created_at"], name="endpoint_version_created_idx"),
+            models.Index(fields=["saved_query"], name="endpointvers_saved_q_0dc3_idx"),
+        ]
+        ordering = ["-version"]
+
+    def __str__(self) -> str:
+        return f"{self.endpoint.name} v{self.version}"
+
+    def get_columns(self) -> list[dict]:
+        """Return columns, lazily populating from ClickHouse if not yet computed."""
+        if self.columns is None:
+            columns = EndpointVersion.extract_columns(self.query, self.endpoint.team_id)
+            # Refresh from DB to check if another request already populated it
+            self.refresh_from_db(fields=["columns"])
+            if self.columns is None:
+                self.columns = columns
+                self.save(update_fields=["columns"])
+        return self.columns
+
+    def can_materialize(self) -> tuple[bool, str]:
+        """Check if this version can be materialized.
+
+        Returns: (can_materialize: bool, reason: str)
+        """
+        query_kind = self.query.get("kind") if self.query else None
+
+        MATERIALIZABLE_QUERY_TYPES = {
+            "InsightsQLQuery",
+            "TrendsQuery",
+            "FunnelsQuery",
+            "LifecycleQuery",
+            "RetentionQuery",
+            "PathsQuery",
+            "StickinessQuery",
+        }
+
+        if query_kind not in MATERIALIZABLE_QUERY_TYPES:
+            supported = ", ".join(sorted(MATERIALIZABLE_QUERY_TYPES))
+            return (
+                False,
+                f"Query type '{query_kind}' cannot be materialized. Supported types: {supported}",
+            )
+
+        # Check for multiple breakdowns in insight queries
+        if query_kind != "InsightsQLQuery":
+            breakdown_filter = self.query.get("breakdownFilter") or {}
+            breakdowns = breakdown_filter.get("breakdowns") or []
+            if len(breakdowns) > 1:
+                return False, "Multiple breakdowns not supported for materialization"
+
+        if self.query.get("variables"):
+            from products.endpoints.backend.materialization import analyze_variables_for_materialization
+
+            can_materialize, reason, _ = analyze_variables_for_materialization(self.query)
+
+            if not can_materialize:
+                return False, f"Variables not supported: {reason}"
+
+        if query_kind == "InsightsQLQuery":
+            insightsql_query = self.query.get("query")
+            if not insightsql_query or not isinstance(insightsql_query, str):
+                return False, "Query is empty or invalid."
+
+        return True, ""
+
+    @staticmethod
+    def extract_columns(query: dict, team_id: int) -> list[dict]:
+        """Extract SELECT column names and types by describing the query against ClickHouse."""
+        if query.get("kind") != "InsightsQLQuery":
+            return []
+        insightsql_string = query.get("query", "")
+        if not insightsql_string:
+            return []
+        try:
+            from insights.insightsql.query import InsightsQLQueryExecutor
+
+            from insights.clickhouse.client import sync_execute
+
+            parsed = parse_select(insightsql_string)
+            cleaned = _PLACEHOLDER_REPLACER.visit(parsed)
+
+            team = Team.objects.get(pk=team_id)
+            executor = InsightsQLQueryExecutor(query=cleaned, team=team, limit_context=None)
+            clickhouse_sql, clickhouse_context = executor.generate_clickhouse_sql()
+
+            if not clickhouse_sql:
+                return []
+
+            # nosemgrep: clickhouse-fstring-param-audit (clickhouse_sql is compiler output from InsightsQLQueryExecutor, not user input)
+            rows = sync_execute(
+                f"DESCRIBE TABLE ({clickhouse_sql})",
+                clickhouse_context.values,
+                team_id=team_id,
+                readonly=True,
+            )
+
+            return [{"name": row[0], "type": _clickhouse_type_to_serialized_type(row[1])} for row in rows]
+        except Exception as e:
+            capture_exception(e)
+            return []
+
+
+class Endpoint(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
+    """Model for storing endpoints that can be accessed via API endpoints.
+
+    Endpoints allow creating reusable query endpoints like:
+    /api/environments/{team_id}/endpoints/{endpoint_name}/run
+
+    Query, description, cache_age_seconds, and materialization settings are stored
+    in EndpointVersion, allowing per-version configuration.
+    """
+
+    name = models.CharField(
+        max_length=128,
+        validators=[validate_endpoint_name],
+        help_text="URL-safe name for the endpoint",
+    )
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    derived_from_insight = models.CharField(
+        max_length=12,
+        null=True,
+        blank=True,
+        help_text="Short ID of the insight this endpoint was created from",
+    )
+
+    is_active = models.BooleanField(default=True, help_text="Whether this endpoint is available via the API")
+
+    current_version = models.IntegerField(default=1, help_text="Current version number of the endpoint query")
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_executed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When this endpoint was last executed via the run API. Updated with hour granularity.",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["team", "name"],
+                name="unique_team_endpoint_name",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["team", "is_active"]),
+            models.Index(fields=["team", "name"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.team.name}: {self.name}"
+
+    @property
+    def endpoint_path(self) -> str:
+        """Return the API endpoint path for this endpoint."""
+        return f"/api/environments/{self.team.id}/endpoints/{self.name}/run"
+
+    def has_query_changed(self, new_query: dict[str, Any]) -> bool:
+        """Deep comparison to check if query has actually changed.
+
+        We normalize JSON before comparison to handle key ordering differences.
+        Compares against the current version's query.
+        """
+        current_version = self.get_version()
+        current_query = current_version.query
+        current_normalized = json.loads(json.dumps(current_query, sort_keys=True))
+        new_normalized = json.loads(json.dumps(new_query, sort_keys=True))
+        return current_normalized != new_normalized
+
+    def create_new_version(self, query: dict[str, Any], user: User) -> "EndpointVersion":
+        """Create a new version with the given query.
+
+        This increments current_version and creates an EndpointVersion record.
+        Should be called when the query changes during an update.
+        Snapshots current configuration values from previous version.
+        """
+        # Get previous version's settings before incrementing
+        previous_version = self.get_version()
+        previous_cache_age = previous_version.cache_age_seconds if previous_version else None
+        previous_description = previous_version.description if previous_version else ""
+
+        self.current_version += 1
+        self.save(update_fields=["current_version", "updated_at"])
+
+        # Create new version, inheriting settings from previous version
+        columns = EndpointVersion.extract_columns(query, team_id=self.team_id)
+        version = EndpointVersion.objects.create(
+            endpoint=self,
+            version=self.current_version,
+            query=query,
+            created_by=user,
+            cache_age_seconds=previous_cache_age,
+            description=previous_description,
+            is_materialized=False,
+            columns=columns,
+        )
+
+        return version
+
+    def get_version(self, version: int | None = None) -> EndpointVersion:
+        """Get a specific version, or the latest (highest version number) if version is None.
+
+        Raises EndpointVersion.DoesNotExist if the requested version doesn't exist.
+        """
+        if version is not None:
+            return self.versions.get(version=version)
+
+        latest = self.versions.first()  # Model ordering is -version
+        if latest is None:
+            raise EndpointVersion.DoesNotExist("Endpoint has no versions")
+        return latest

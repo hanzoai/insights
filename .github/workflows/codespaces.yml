@@ -1,17 +1,17 @@
 name: GitHub Codespaces image build
 
-# Run only on master branch. We could also build on branch but this seems like
+# Run only on main branch. We could also build on branch but this seems like
 # an optimization that can be done as and when desired. The main use case we're
-# handling is creating and working off a branch from master, so it doesn't seem
+# handling is creating and working off a branch from main, so it doesn't seem
 # like an immediate requirement to have branches as well.
 #
 # NOTE: the job is setup to also push branch images as well, and using branch
-# and master as caching, so if we want to add the optimisation for branches we
-# can just remove the master branch restriction.
+# and main as caching, so if we want to add the optimisation for branches we
+# can just remove the main branch restriction.
 on:
     push:
         branches:
-            - master
+            - main
     pull_request:
         types:
             - opened
@@ -22,12 +22,15 @@ jobs:
     build:
         name: Build Codespaces image
         runs-on: ubuntu-24.04
+        permissions:
+            contents: read
+            packages: write
 
-        # Build on master and PRs with the label 'codespaces-build' only
-        if: ${{ github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'codespaces-build')  }}
+        # Build on main and PRs with the label 'codespaces-build' only
+        if: ${{ github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'codespaces-build')  }}
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
               with:
                   fetch-depth: 1
 
@@ -42,33 +45,33 @@ jobs:
             # for more details
             - name: Docker image metadata
               id: meta
-              uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+              uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               with:
                   images: ghcr.io/${{ steps.lowercase.outputs.repository }}/codespaces
                   tags: |
                       type=ref,event=branch
-                      type=raw,value=master
+                      type=raw,value=main
 
             # We also want to use cache-from when building, but we want to also
-            # include the master tag so we get the master branch image as well.
+            # include the main tag so we get the main branch image as well.
             # This creates a scope similar to the github cache action scoping
             - name: Docker cache-from/cache-to metadata
               id: meta-for-cache
-              uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+              uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               with:
                   images: ghcr.io/${{ steps.lowercase.outputs.repository }}/codespaces
                   tags: |
-                      type=raw,value=master
+                      type=raw,value=main
 
             # Install QEMU so we can target x86_64 (github codespaces)
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
+              uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2
+              uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
             - name: Login to GitHub Container Registry
-              uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+              uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
@@ -81,10 +84,10 @@ jobs:
                   file: .devcontainer/Dockerfile
                   push: true
                   platforms: x86_64
-                  # Cache from this branch, or master
+                  # Cache from this branch, or main
                   cache-from: ${{ steps.meta-for-cache.outputs.tags }}
                   # NOTE: we use inline as suggested here:
-                  # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#inline-cache
+                  # https://github.com/docker/build-push-action/blob/main/docs/advanced/cache.md#inline-cache
                   # It notes that it doesn't support mode=max, but we're not
                   # removing any layers, soooo, maybe it's fine.
                   cache-to: type=inline

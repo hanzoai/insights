@@ -11,9 +11,9 @@ import { percentageDistribution } from '~/scenes/experiments/utils'
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
 import { experimentsLogic } from '~/toolbar/experiments/experimentsLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { WebExperiment, WebExperimentDraftType, WebExperimentForm } from '~/toolbar/types'
-import { elementToQuery } from '~/toolbar/utils'
+import { elementToQuery, joinWithUiHost } from '~/toolbar/utils'
 import { Experiment, ExperimentIdType } from '~/types'
 
 import type { experimentsTabLogicType } from './experimentsTabLogicType'
@@ -103,7 +103,8 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
             toolbarConfigLogic,
             [
                 'dataAttributes',
-                'apiURL',
+                'apiHost',
+                'uiHost',
                 'temporaryToken',
                 'buttonVisible',
                 'userIntent',
@@ -191,19 +192,19 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
                 // This property is only used in the editor to undo transforms
                 delete experimentToSave.original_html_state
 
-                const { apiURL, temporaryToken } = values
+                const { apiHost, uiHost, temporaryToken } = values
                 const { selectedExperimentId } = values
 
                 let response: WebExperiment
                 try {
                     if (selectedExperimentId && selectedExperimentId !== 'new') {
                         response = await api.update(
-                            `${apiURL}/api/projects/@current/web_experiments/${selectedExperimentId}/?temporary_token=${temporaryToken}`,
+                            `${apiHost}/api/projects/@current/web_experiments/${selectedExperimentId}/?temporary_token=${temporaryToken}`,
                             experimentToSave
                         )
                     } else {
                         response = await api.create(
-                            `${apiURL}/api/projects/@current/web_experiments/?temporary_token=${temporaryToken}`,
+                            `${apiHost}/api/projects/@current/web_experiments/?temporary_token=${temporaryToken}`,
                             experimentToSave
                         )
                     }
@@ -213,8 +214,8 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
 
                     lemonToast.success('Experiment saved', {
                         button: {
-                            label: 'Open in PostHog',
-                            action: () => window.open(`${apiURL}${urls.experiment(response.id)}`, '_blank'),
+                            label: 'Open in Insights',
+                            action: () => window.open(joinWithUiHost(uiHost, urls.experiment(response.id)), '_blank'),
                         },
                     })
                     breakpoint()
@@ -481,11 +482,11 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
             }
         },
         showButtonExperiments: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: true })
         },
         hideButtonExperiments: () => {
             actions.setShowExperimentsTooltip(false)
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'experiments', enabled: false })
         },
         [experimentsLogic.actionTypes.getExperimentsSuccess]: () => {
             const { userIntent, experimentId } = values

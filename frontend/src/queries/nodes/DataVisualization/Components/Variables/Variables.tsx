@@ -3,7 +3,7 @@ import './Variables.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCopy, IconGear, IconTrash } from '@posthog/icons'
+import { IconCodeInsert, IconCopy, IconGear, IconTrash, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDivider,
@@ -12,7 +12,8 @@ import {
     LemonSelect,
     LemonSwitch,
     Popover,
-} from '@posthog/lemon-ui'
+    lemonToast,
+} from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -92,15 +93,17 @@ interface VariableInputProps {
     onChange: (variableId: string, value: any, isNull: boolean) => void
     onRemove?: (variableId: string) => void
     variableSettingsOnClick?: () => void
+    onInsertAtCursor?: (text: string) => void
 }
 
-const VariableInput = ({
+export const VariableInput = ({
     variable,
     showEditingUI,
     closePopover,
     onChange,
     onRemove,
     variableSettingsOnClick,
+    onInsertAtCursor,
 }: VariableInputProps): JSX.Element => {
     const [localInputValue, setLocalInputValue] = useState<string>(() => {
         const val = variable.value ?? variable.default_value
@@ -128,7 +131,7 @@ const VariableInput = ({
         inputRef.current?.focus()
     }, [inputRef.current])
 
-    const variableAsHogQL = `{variables.${variable.code_name}}`
+    const variableAsInsightsQL = `{variables.${variable.code_name}}`
 
     return (
         <div className="min-w-80">
@@ -231,7 +234,7 @@ const VariableInput = ({
                             }}
                             className="text-xs flex flex-1 items-center mr-2"
                         >
-                            {variableAsHogQL}
+                            {variableAsInsightsQL}
                         </code>
                         <LemonSwitch
                             size="xsmall"
@@ -246,9 +249,20 @@ const VariableInput = ({
                         <LemonButton
                             icon={<IconCopy />}
                             size="xsmall"
-                            onClick={() => void copyToClipboard(variableAsHogQL, 'variable SQL')}
+                            onClick={() => void copyToClipboard(variableAsInsightsQL, 'variable SQL')}
                             tooltip="Copy SQL"
                         />
+                        {onInsertAtCursor && (
+                            <LemonButton
+                                icon={<IconCodeInsert />}
+                                size="xsmall"
+                                onClick={() => {
+                                    onInsertAtCursor(variableAsInsightsQL)
+                                    closePopover()
+                                }}
+                                tooltip="Insert into query"
+                            />
+                        )}
                         {onRemove && (
                             <LemonButton
                                 onClick={() => onRemove(variable.id)}
@@ -295,6 +309,7 @@ interface VariableComponentProps {
     variableOverridesAreSet: boolean
     onRemove?: (variableId: string) => void
     variableSettingsOnClick?: () => void
+    onInsertAtCursor?: (text: string) => void
     insightsUsingVariable?: string[]
     emptyState?: JSX.Element | string
     size?: 'small' | 'medium'
@@ -307,19 +322,23 @@ export const VariableComponent = ({
     variableOverridesAreSet,
     onRemove,
     variableSettingsOnClick,
+    onInsertAtCursor,
     insightsUsingVariable,
     emptyState = '',
     size = 'medium',
 }: VariableComponentProps): JSX.Element => {
     const [isPopoverOpen, setPopoverOpen] = useState(false)
 
-    let tooltip = `Use this variable in your HogQL by referencing {variables.${variable.code_name}}`
+    const variableAsInsightsQL = `{variables.${variable.code_name}}`
 
-    if (insightsUsingVariable && insightsUsingVariable.length) {
-        tooltip += `. Insights using this variable: ${insightsUsingVariable.join(', ')}`
-    }
+    const tooltip =
+        insightsUsingVariable && insightsUsingVariable.length > 0 ? (
+            <div className="flex flex-col gap-1">
+                <span>Insights using this variable: {insightsUsingVariable.join(', ')}</span>
+            </div>
+        ) : undefined
 
-    // Dont show the popover overlay for list variables not in edit mode
+    // Don't show the popover overlay for list variables not in edit mode
     if (!showEditingUI && variable.type === 'List') {
         return (
             <LemonField.Pure label={variable.name} className="gap-0" info={tooltip}>
@@ -343,6 +362,7 @@ export const VariableComponent = ({
                     onChange={onChange}
                     closePopover={() => setPopoverOpen(false)}
                     onRemove={onRemove}
+                    onInsertAtCursor={onInsertAtCursor}
                     variableSettingsOnClick={() => {
                         if (variableSettingsOnClick) {
                             setPopoverOpen(false)
@@ -357,20 +377,70 @@ export const VariableComponent = ({
             className="DataVizVariable_Popover"
         >
             <div>
-                <LemonField.Pure label={variable.name} className="gap-0" info={tooltip}>
-                    <LemonButton
-                        type="secondary"
-                        className="min-w-32 DataVizVariable_Button"
-                        onClick={() => setPopoverOpen(!isPopoverOpen)}
-                        disabledReason={variableOverridesAreSet && 'Discard dashboard variables to change'}
-                        size={size}
-                    >
-                        {variable.isNull
-                            ? 'Set to null'
-                            : (variable.value?.toString() || variable.default_value?.toString() || '') === ''
-                              ? emptyState
-                              : (variable.value?.toString() ?? variable.default_value?.toString())}
-                    </LemonButton>
+                <LemonField.Pure label={variable.name} className="gap-0">
+                    <div className="flex gap-x-2">
+                        <LemonButton
+                            type="secondary"
+                            className="min-w-32 DataVizVariable_Button"
+                            onClick={() => setPopoverOpen(!isPopoverOpen)}
+                            disabledReason={variableOverridesAreSet && 'Discard dashboard variables to change'}
+                            size={size}
+                        >
+                            {variable.isNull
+                                ? 'Set to null'
+                                : (variable.value?.toString() || variable.default_value?.toString() || '') === ''
+                                  ? emptyState
+                                  : (variable.value?.toString() ?? variable.default_value?.toString())}
+                        </LemonButton>
+                        {showEditingUI && (
+                            <LemonButton
+                                icon={<IconCopy />}
+                                onClick={() => {
+                                    navigator.clipboard.writeText(variableAsInsightsQL)
+                                    lemonToast.success(
+                                        <span>
+                                            <code className="text-sm">{variableAsInsightsQL}</code> copied to clipboard. Use
+                                            it anywhere in InsightsQL.
+                                        </span>
+                                    )
+                                }}
+                                type="secondary"
+                                tooltip="Copy variable code name"
+                                noPadding
+                                size="small"
+                            />
+                        )}
+                        {showEditingUI && onInsertAtCursor && (
+                            <LemonButton
+                                icon={<IconCodeInsert />}
+                                onClick={() => {
+                                    onInsertAtCursor(variableAsInsightsQL)
+                                    lemonToast.success(
+                                        <span>
+                                            <code className="text-sm">{variableAsInsightsQL}</code> inserted into query.
+                                        </span>
+                                    )
+                                }}
+                                type="secondary"
+                                tooltip="Insert into query at cursor"
+                                noPadding
+                                size="small"
+                            />
+                        )}
+                        {onRemove && showEditingUI && (
+                            <LemonButton
+                                icon={<IconX className="h-4 w-4" />}
+                                onClick={() => {
+                                    onRemove(variable.id)
+                                }}
+                                type="secondary"
+                                status="danger"
+                                tooltip="Remove from this query"
+                                noPadding
+                                size="small"
+                            />
+                        )}
+                    </div>
                 </LemonField.Pure>
             </div>
         </Popover>

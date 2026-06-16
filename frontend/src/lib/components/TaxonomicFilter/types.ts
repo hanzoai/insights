@@ -12,9 +12,12 @@ import {
     ActionType,
     CohortType,
     EventDefinition,
+    EventPropertyFilter,
     PersonProperty,
+    PersonPropertyFilter,
     PropertyDefinition,
     PropertyFilterType,
+    PropertyOperator,
 } from '~/types'
 
 export interface SimpleOption {
@@ -22,7 +25,37 @@ export interface SimpleOption {
     propertyFilterType?: PropertyFilterType
 }
 
-export type ExcludedProperties = { [key in TaxonomicFilterGroupType]?: TaxonomicFilterValue[] }
+export interface QuickFilterItem {
+    _type: 'quick_filter'
+    name: string
+    filterValue: string
+    operator: PropertyOperator
+    propertyKey: string
+    propertyFilterType: PropertyFilterType.Event | PropertyFilterType.Person
+    eventName?: string
+    extraProperties?: (EventPropertyFilter | PersonPropertyFilter)[]
+}
+
+export function isQuickFilterItem(item: unknown): item is QuickFilterItem {
+    return item != null && typeof item === 'object' && '_type' in item && item._type === 'quick_filter'
+}
+
+export function quickFilterToPropertyFilter(item: QuickFilterItem): EventPropertyFilter | PersonPropertyFilter {
+    const base = { key: item.propertyKey, value: item.filterValue, operator: item.operator }
+    if (item.propertyFilterType === PropertyFilterType.Event) {
+        return { ...base, type: PropertyFilterType.Event }
+    }
+    return { ...base, type: PropertyFilterType.Person }
+}
+
+export function quickFilterToPropertyFilters(item: QuickFilterItem): (EventPropertyFilter | PersonPropertyFilter)[] {
+    return [quickFilterToPropertyFilter(item), ...(item.extraProperties ?? [])]
+}
+
+export type TaxonomicFilterGroupValueMap = { [key in TaxonomicFilterGroupType]?: (PropertyKey | null)[] }
+export type ExcludedProperties = TaxonomicFilterGroupValueMap
+export type SelectedProperties = TaxonomicFilterGroupValueMap
+export type AllowedProperties = TaxonomicFilterGroupValueMap
 
 export interface TaxonomicFilterProps {
     groupType?: TaxonomicFilterGroupType
@@ -38,6 +71,7 @@ export interface TaxonomicFilterProps {
     optionsFromProp?: Partial<Record<TaxonomicFilterGroupType, SimpleOption[]>>
     eventNames?: string[]
     schemaColumns?: DatabaseSchemaField[]
+    endpointFilters?: Record<string, any>
     height?: number
     width?: number | string
     popoverEnabled?: boolean
@@ -45,7 +79,9 @@ export interface TaxonomicFilterProps {
     autoSelectItem?: boolean
     /** use to filter results in a group by name, currently only working for EventProperties */
     excludedProperties?: ExcludedProperties
-    propertyAllowList?: { [key in TaxonomicFilterGroupType]?: string[] } // only return properties in this list, currently only working for EventProperties and PersonProperties
+    /** use to indicate if a result in a group is selected */
+    selectedProperties?: SelectedProperties
+    propertyAllowList?: AllowedProperties // only return properties in this list, currently only working for EventProperties and PersonProperties
     metadataSource?: AnyDataNode
     hideBehavioralCohorts?: boolean
     showNumericalPropsOnly?: boolean
@@ -60,14 +96,15 @@ export interface TaxonomicFilterProps {
     initialSearchQuery?: string
     /** Allow users to select events that haven't been captured yet (default: false) */
     allowNonCapturedEvents?: boolean
+    insightsQLGlobals?: Record<string, any>
 }
 
 export interface DataWarehousePopoverField {
     key: string
     label: string
     description?: string
-    allowHogQL?: boolean
-    hogQLOnly?: boolean
+    allowInsightsQL?: boolean
+    insightsQLOnly?: boolean
     optional?: boolean
     tableName?: string
     type?: DatabaseSerializedFieldType
@@ -88,7 +125,7 @@ export type TaxonomicFilterRender = (props: TaxonomicFilterRenderProps) => JSX.E
 
 export interface TaxonomicFilterGroup {
     name: string
-    /** Null means this group is not searchable (like HogQL expressions). */
+    /** Null means this group is not searchable (like InsightsQL expressions). */
     searchPlaceholder: string | null
     /**
      * Overrides the label in the category pill list
@@ -115,12 +152,16 @@ export interface TaxonomicFilterGroup {
     getValue?: (instance: any) => TaxonomicFilterValue
     getPopoverHeader: (instance: any) => string
     getIcon?: (instance: any) => JSX.Element
+    /** Determines if an item should be disabled (unselectable) */
+    getIsDisabled?: (instance: any) => boolean
     groupTypeIndex?: number
     getFullDetailUrl?: (instance: any) => string
     excludedProperties?: string[]
     propertyAllowList?: string[]
     /** Passed to the component specified via the `render` key */
     componentProps?: Record<string, any>
+    /** Minimum number of characters before a remote search is issued. */
+    minSearchQueryLength?: number
 }
 
 export enum TaxonomicFilterGroupType {
@@ -134,13 +175,19 @@ export enum TaxonomicFilterGroupType {
     DataWarehousePersonProperties = 'data_warehouse_person_properties',
     Elements = 'elements',
     Events = 'events',
+    InternalEvents = 'internal_events',
+    InternalEventProperties = 'internal_event_properties',
     EventProperties = 'event_properties',
     EventFeatureFlags = 'event_feature_flags',
     EventMetadata = 'event_metadata',
     NumericalEventProperties = 'numerical_event_properties',
     PersonProperties = 'person_properties',
     PageviewUrls = 'pageview_urls',
+    PageviewEvents = 'pageview_events',
     Screens = 'screens',
+    ScreenEvents = 'screen_events',
+    EmailAddresses = 'email_addresses',
+    AutocaptureEvents = 'autocapture_events',
     CustomEvents = 'custom_events',
     Wildcards = 'wildcard',
     GroupsPrefix = 'groups',
@@ -153,18 +200,25 @@ export enum TaxonomicFilterGroupType {
     Dashboards = 'dashboards',
     GroupNamesPrefix = 'name_groups',
     SessionProperties = 'session_properties',
-    HogQLExpression = 'hogql_expression',
+    InsightsQLExpression = 'insightsql_expression',
     Notebooks = 'notebooks',
     LogEntries = 'log_entries',
     ErrorTrackingIssues = 'error_tracking_issues',
+    Logs = 'logs',
     LogAttributes = 'log_attributes',
+    LogResourceAttributes = 'log_resource_attributes',
     // Misc
     Replay = 'replay',
     RevenueAnalyticsProperties = 'revenue_analytics_properties',
     Resources = 'resources',
     ErrorTrackingProperties = 'error_tracking_properties',
-    // Max AI Context
+    ActivityLogProperties = 'activity_log_properties',
+    // AI Assistant Context
     MaxAIContext = 'max_ai_context',
+    // Workflows execution variables
+    WorkflowVariables = 'workflow_variables',
+    SuggestedFilters = 'suggested_filters',
+    Empty = 'empty',
 }
 
 export interface InfiniteListLogicProps extends TaxonomicFilterLogicProps {
@@ -203,3 +257,4 @@ export type TaxonomicDefinitionTypes =
     | DataWarehouseTableForInsight
     | MaxContextTaxonomicFilterOption
     | ReplayTaxonomicFilterProperty
+    | QuickFilterItem

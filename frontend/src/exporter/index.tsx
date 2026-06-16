@@ -8,16 +8,16 @@ import { createRoot } from 'react-dom/client'
 import { Exporter } from '~/exporter/Exporter'
 import { ExportedData } from '~/exporter/types'
 import { initKea } from '~/initKea'
-import { loadPostHogJS } from '~/loadPostHogJS'
+import { loadInsightsJS } from '~/loadInsightsJS'
 
 import { ErrorBoundary } from '../layout/ErrorBoundary'
 
 // Disable tracking for all exports and embeds.
 // This is explicitly set as to not track our customers' customers data.
-// Without it, embeds of self-hosted iframes will log metrics to app.posthog.com.
-window.JS_POSTHOG_API_KEY = undefined
+// Without it, embeds of self-hosted iframes will log metrics to insights.hanzo.ai.
+window.JS_INSIGHTS_API_KEY = undefined
 
-loadPostHogJS()
+loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })
 
 // On Chrome + Windows, the country flag emojis don't render correctly. This is a polyfill for that.
@@ -27,7 +27,7 @@ initKea({ replaceInitialPathInWindow: false })
 // Make sure to update the font family in the CSS if you change this.
 polyfillCountryFlagEmojis('Emoji Flags Polyfill')
 
-const exportedData: ExportedData = window.POSTHOG_EXPORTED_DATA
+const exportedData: ExportedData = window.INSIGHTS_EXPORTED_DATA
 
 function renderApp(): void {
     const root = document.getElementById('root')
@@ -38,7 +38,7 @@ function renderApp(): void {
             </ErrorBoundary>
         )
     } else {
-        console.error('Attempted, but could not render PostHog app because <div id="root" /> is not found.')
+        console.error('Attempted, but could not render Insights app because <div id="root" /> is not found.')
     }
 }
 

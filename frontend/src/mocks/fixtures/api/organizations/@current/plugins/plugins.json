@@ -7,20 +7,20 @@
             "id": 4,
             "plugin_type": "custom",
             "name": "Replicator",
-            "description": "Replicate PostHog event stream in another PostHog instance",
-            "url": "https://github.com/PostHog/posthog-plugin-replicator",
+            "description": "Replicate Insights event stream in another Insights instance",
+            "url": "https://github.com/hanzoai/insights-plugin-replicator",
             "icon": null,
             "config_schema": [
                 {
                     "key": "host",
-                    "hint": "E.g. posthog.yourcompany.com",
+                    "hint": "E.g. insights.yourcompany.com",
                     "name": "Host",
                     "type": "string",
                     "required": true
                 },
                 {
                     "key": "project_api_key",
-                    "hint": "Grab it from e.g. https://posthog.yourcompany.com/project/settings",
+                    "hint": "Grab it from e.g. https://insights.yourcompany.com/project/settings",
                     "name": "Project API Key",
                     "type": "string",
                     "required": true
@@ -43,7 +43,7 @@
                 },
                 {
                     "key": "disable_geoip",
-                    "hint": "Add $disable_geoip so that the receiving PostHog instance doesn't try to resolve the IP address.",
+                    "hint": "Add $disable_geoip so that the receiving Insights instance doesn't try to resolve the IP address.",
                     "name": "Disable Geo IP?",
                     "type": "choice",
                     "choices": ["Yes", "No"],
@@ -64,8 +64,8 @@
             "id": 3,
             "plugin_type": "custom",
             "name": "GeoIP",
-            "description": "Enrich PostHog events and persons with IP location data",
-            "url": "https://github.com/PostHog/posthog-plugin-geoip",
+            "description": "Enrich Insights events and persons with IP location data",
+            "url": "https://github.com/hanzoai/insights-plugin-geoip",
             "icon": null,
             "config_schema": [],
             "tag": "2dd67e1dec9c8b5febd7a6d9235c51072950cd37",
@@ -82,7 +82,7 @@
             "plugin_type": "custom",
             "name": "Customer.io",
             "description": "Send event data and emails into Customer.io.",
-            "url": "https://github.com/PostHog/customerio-plugin",
+            "url": "https://github.com/hanzoai/customerio-plugin",
             "icon": null,
             "config_schema": [
                 {
@@ -134,7 +134,7 @@
                 {
                     "key": "eventsToSend",
                     "hint": "If this is set, only the specified events (comma-separated) will be sent to Customer.io.",
-                    "name": "PostHog Event Allowlist",
+                    "name": "Insights Event Allowlist",
                     "type": "string"
                 }
             ],
@@ -152,7 +152,7 @@
             "plugin_type": "custom",
             "name": "BigQuery Export",
             "description": "Sends events to a BigQuery database on ingestion.",
-            "url": "https://github.com/PostHog/bigquery-plugin",
+            "url": "https://github.com/hanzoai/bigquery-plugin",
             "icon": null,
             "config_schema": [
                 {

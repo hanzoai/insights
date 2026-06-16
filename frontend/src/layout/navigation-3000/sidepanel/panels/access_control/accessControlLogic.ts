@@ -1,8 +1,8 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSelectOption } from '@posthog/lemon-ui'
+import { LemonSelectOption } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
@@ -102,7 +102,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         access_level: level,
                     })
 
-                    posthog.capture('access control default access level changed', {
+                    insights.capture('access control default access level changed', {
                         resource: values.resource,
                         access_level: level,
                         old_access_level: values.accessControlDefault?.access_level,
@@ -119,7 +119,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         })
 
                         const oldAccessControl = values.accessControlRoles.find((ac) => ac.role === role)
-                        posthog.capture('access control role access level changed', {
+                        insights.capture('access control role access level changed', {
                             resource: values.resource,
                             action: oldAccessControl ? (level === null ? 'removed' : 'changed') : 'added',
                             role: role,
@@ -141,7 +141,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         const oldAccessControl = values.accessControlMembers.find(
                             (ac) => ac.organization_member === member
                         )
-                        posthog.capture('access control member access level changed', {
+                        insights.capture('access control member access level changed', {
                             resource: values.resource,
                             action: oldAccessControl ? (level === null ? 'removed' : 'changed') : 'added',
                             member: member,
@@ -176,6 +176,13 @@ export const accessControlLogic = kea<accessControlLogicType>([
 
         humanReadableResource: [(_, p) => [p.resource], (resource) => resource.replace(/_/g, ' ')],
 
+        minimumAccessLevel: [
+            (s) => [s.accessControls],
+            (accessControls): AccessControlLevel | null => {
+                return accessControls?.minimum_access_level ?? null
+            },
+        ],
+
         availableLevelsWithNone: [
             (s) => [s.accessControls],
             (accessControls): AccessControlLevel[] => {
@@ -205,13 +212,19 @@ export const accessControlLogic = kea<accessControlLogicType>([
         ],
 
         accessControlDefaultOptions: [
-            (s) => [s.availableLevelsWithNone, (_, props) => props.resource],
-            (availableLevelsWithNone): LemonSelectOption<string>[] => {
-                const options = availableLevelsWithNone.map((level) => ({
-                    value: level,
-                    // TODO: Correct "a" and "an"
-                    label: level === 'none' ? 'No access' : toSentenceCase(level),
-                }))
+            (s) => [s.availableLevelsWithNone, s.minimumAccessLevel, (_, props) => props.resource],
+            (availableLevelsWithNone, minimumAccessLevel): LemonSelectOption<string>[] => {
+                const options = availableLevelsWithNone.map((level) => {
+                    const isDisabled = minimumAccessLevel
+                        ? availableLevelsWithNone.indexOf(level) < availableLevelsWithNone.indexOf(minimumAccessLevel)
+                        : false
+                    return {
+                        value: level,
+                        // TODO: Correct "a" and "an"
+                        label: level === 'none' ? 'No access' : toSentenceCase(level),
+                        disabledReason: isDisabled ? 'Not available for this resource type' : undefined,
+                    }
+                })
 
                 return options
             },

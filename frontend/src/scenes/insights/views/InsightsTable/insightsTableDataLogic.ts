@@ -19,30 +19,53 @@ export const insightsTableDataLogic = kea<insightsTableDataLogicType>([
     path((key) => ['scenes', 'insights', 'InsightsTable', 'insightsTableDataLogic', key]),
 
     connect((props: InsightLogicProps) => ({
-        values: [insightVizDataLogic(props), ['isTrends', 'display', 'series']],
+        values: [
+            insightVizDataLogic(props),
+            ['isTrends', 'display', 'series', 'detailedResultsAggregationType as persistedAggregationType'],
+        ],
+        actions: [insightVizDataLogic(props), ['setDetailedResultsAggregationType']],
     })),
 
     actions({
-        setAggregationType: (type: AggregationType) => ({ type }),
+        toggleColumnPin: (columnKey: string) => ({ columnKey }),
     }),
 
     reducers({
-        aggregationType: [
-            null as AggregationType | null,
+        pinnedBreakdownColumns: [
+            [] as string[],
+            { persist: true },
             {
-                setAggregationType: (_, { type }) => type,
+                toggleColumnPin: (state, { columnKey }) => {
+                    if (state.includes(columnKey)) {
+                        return state.filter((k) => k !== columnKey)
+                    }
+                    return [...state, columnKey]
+                },
             },
         ],
     }),
 
     selectors({
+        pinnedColumns: [
+            (s) => [s.pinnedBreakdownColumns],
+            (pinnedBreakdownColumns): string[] => {
+                return ['label', ...pinnedBreakdownColumns]
+            },
+        ],
+        isColumnPinned: [
+            (s) => [s.pinnedBreakdownColumns],
+            (pinnedBreakdownColumns) =>
+                (columnKey: string): boolean => {
+                    return pinnedBreakdownColumns.includes(columnKey)
+                },
+        ],
         /** Only allow table aggregation options when the math is total volume
          * otherwise double counting will happen when the math is set to unique.
-         * Except when view type is Table */
+         * Except when view type is Table or WorldMap */
         allowAggregation: [
             (s) => [s.isTrends, s.display, s.series],
             (isTrends, display, series) => {
-                if (isTrends && display === ChartDisplayType.ActionsTable) {
+                if (isTrends && (display === ChartDisplayType.ActionsTable || display === ChartDisplayType.WorldMap)) {
                     return true
                 }
 
@@ -50,14 +73,14 @@ export const insightsTableDataLogic = kea<insightsTableDataLogicType>([
             },
         ],
         aggregation: [
-            (s) => [s.series, s.aggregationType],
-            (series, aggregationType) => {
-                if (aggregationType === null) {
-                    const hasMathUniqueFilter = !!series?.find(({ math }) => math === 'dau')
-                    return hasMathUniqueFilter ? AggregationType.Average : AggregationType.Total
+            (s) => [s.series, s.persistedAggregationType],
+            (series, persistedAggregationType) => {
+                if (persistedAggregationType) {
+                    return persistedAggregationType
                 }
 
-                return aggregationType
+                const hasMathUniqueFilter = !!series?.find(({ math }) => math === 'dau')
+                return hasMathUniqueFilter ? AggregationType.Average : AggregationType.Total
             },
         ],
     }),

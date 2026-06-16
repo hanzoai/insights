@@ -2,18 +2,19 @@ import os
 import json
 import datetime as dt
 import operator
+import collections.abc
 
 import pytest
 
 from google.cloud import bigquery
 
-from posthog.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from posthog.temporal.common.clickhouse import ClickHouseClient
+from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
+from insights.temporal.common.clickhouse import ClickHouseClient
 
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import bigquery_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
 from products.batch_exports.backend.temporal.spmc import Producer, RecordBatchQueue
-from products.batch_exports.backend.tests.temporal.utils import get_record_batch_from_queue
+from products.batch_exports.backend.tests.temporal.utils.records import get_record_batch_from_queue
 
 SKIP_IF_MISSING_GOOGLE_APPLICATION_CREDENTIALS = pytest.mark.skipif(
     "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ,
@@ -28,11 +29,11 @@ TEST_MODELS: list[BatchExportModel | BatchExportSchema | None] = [
         schema={
             "fields": [
                 {"expression": "event", "alias": "event"},
-                {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_0)s), '')", "alias": "browser"},
-                {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_1)s), '')", "alias": "os"},
+                {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_0)s), '')", "alias": "browser"},
+                {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_1)s), '')", "alias": "os"},
                 {"expression": "nullIf(properties, '')", "alias": "all_properties"},
             ],
-            "values": {"hogql_val_0": "$browser", "hogql_val_1": "$os"},
+            "values": {"insightsql_val_0": "$browser", "insightsql_val_1": "$os"},
         },
     ),
     BatchExportModel(name="events", schema=None),
@@ -40,11 +41,11 @@ TEST_MODELS: list[BatchExportModel | BatchExportSchema | None] = [
     {
         "fields": [
             {"expression": "event", "alias": "event"},
-            {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_0)s), '')", "alias": "browser"},
-            {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_1)s), '')", "alias": "os"},
+            {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_0)s), '')", "alias": "browser"},
+            {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_1)s), '')", "alias": "os"},
             {"expression": "nullIf(properties, '')", "alias": "all_properties"},
         ],
-        "values": {"hogql_val_0": "$browser", "hogql_val_1": "$os"},
+        "values": {"insightsql_val_0": "$browser", "insightsql_val_1": "$os"},
     },
     None,
 ]
@@ -66,23 +67,28 @@ async def assert_clickhouse_records_in_bigquery(
     backfill_details: BackfillDetails | None = None,
     expect_duplicates: bool = False,
     expected_fields: list[str] | None = None,
+    timestamp_columns: collections.abc.Sequence[str] = (),
 ) -> None:
     """Assert ClickHouse records are written to a given BigQuery table.
 
     Arguments:
         bigquery_client: A BigQuery client used to read inserted records.
-        clickhouse_client: A ClickHouseClient used to read records that are expected to be exported.
+        clickhouse_client: A ClickHouseClient used to read records that are expected to
+            be exported.
         team_id: The ID of the team that we are testing for.
         table_id: BigQuery table id where records are exported to.
         dataset_id: BigQuery dataset containing the table where records are exported to.
         date_ranges: Ranges of records we should expect to have been exported.
-        min_ingested_timestamp: A datetime used to assert a minimum bound for 'bq_ingested_timestamp'.
+        min_ingested_timestamp: A datetime used to assert a minimum bound for
+            'bq_ingested_timestamp'.
         exclude_events: Event names to be excluded from the export.
         include_events: Event names to be included in the export.
         batch_export_model: Model used in the batch export.
         use_json_type: Whether to use JSON type for known fields.
         expect_duplicates: Whether duplicates are expected (e.g. when testing retrying logic).
         expected_fields: The expected fields to be exported.
+        timestamp_columns: Columns that are exported as UNIX timestamp, and should be
+            interpreted as datetime
     """
     if use_json_type is True:
         json_columns = ["properties", "set", "set_once", "person_properties"]
@@ -103,10 +109,14 @@ async def assert_clickhouse_records_in_bigquery(
                 inserted_bq_ingested_timestamp.append(v)
                 continue
 
-            if k in json_columns:
-                assert (
-                    isinstance(v, dict) or v is None
-                ), f"Expected '{k}' to be JSON, but it was not deserialized to dict"
+            elif isinstance(v, int) and k in timestamp_columns:
+                inserted_record[k] = dt.datetime.fromtimestamp(v, tz=dt.UTC)
+                continue
+
+            elif k in json_columns:
+                assert isinstance(v, dict) or v is None, (
+                    f"Expected '{k}' to be JSON, but it was not deserialized to dict"
+                )
 
             inserted_record[k] = v
 
@@ -219,7 +229,7 @@ async def assert_clickhouse_records_in_bigquery(
     assert inserted_records == expected_records
 
     if len(inserted_bq_ingested_timestamp) > 0:
-        assert (
-            min_ingested_timestamp is not None
-        ), "Must set `min_ingested_timestamp` for comparison with exported value"
+        assert min_ingested_timestamp is not None, (
+            "Must set `min_ingested_timestamp` for comparison with exported value"
+        )
         assert all(ts >= min_ingested_timestamp for ts in inserted_bq_ingested_timestamp)

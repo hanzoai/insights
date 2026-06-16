@@ -2,9 +2,9 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { FieldNamePath, capitalizeFirstLetter, forms } from 'kea-forms'
 import { lazyLoaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, Link, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, Link, lemonToast } from '@hanzo/lemon-ui'
 
 import api, { getJSONOrNull } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -19,17 +19,19 @@ import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
+import { ProductKey } from '~/queries/schema/schema-general'
 import {
     BillingPeriod,
     BillingPlan,
     BillingPlanType,
+    BillingProductV2AddonType,
     BillingProductV2Type,
     BillingType,
-    ProductKey,
     StartupProgramLabel,
 } from '~/types'
 
 import { DEFAULT_ESTIMATED_MONTHLY_CREDIT_AMOUNT_USD } from './CreditCTAHero'
+import { buildUsageLimitApproachingMessage, buildUsageLimitExceededMessage } from './billing-utils'
 import type { billingLogicType } from './billingLogicType'
 
 export const ALLOCATION_THRESHOLD_ALERT = 0.85 // Threshold to show warning of event usage near limit
@@ -64,6 +66,13 @@ export interface BillingError {
     status: 'info' | 'warning' | 'error'
     message: string
     action: LemonButtonPropsBase
+}
+
+export type SwitchPlanPayload = {
+    from_product_key: string
+    from_plan_key: string
+    to_product_key: string
+    to_plan_key: string
 }
 
 const parseBillingResponse = (data: Partial<BillingType>): BillingType => {
@@ -162,8 +171,9 @@ export const billingLogic = kea<billingLogicType>([
         setComputedDiscount: (discount: number) => ({ discount }),
         setCreditBrackets: (creditBrackets: any[]) => ({ creditBrackets }),
         scrollToProduct: (productType: string) => ({ productType }),
+        setSwitchPlanLoading: (productKey: string | null) => ({ productKey }),
     }),
-    connect({
+    connect(() => ({
         values: [
             featureFlagLogic,
             ['featureFlags'],
@@ -184,7 +194,7 @@ export const billingLogic = kea<billingLogicType>([
             lemonBannerLogic({ dismissKey: 'usage-limit-approaching' }),
             ['resetDismissKey as resetUsageLimitApproachingKey'],
         ],
-    }),
+    })),
     reducers({
         billingAlert: [
             null as BillingAlertConfig | null,
@@ -280,6 +290,12 @@ export const billingLogic = kea<billingLogicType>([
                 setCreditBrackets: (_, { creditBrackets }) => creditBrackets || [],
             },
         ],
+        switchPlanLoading: [
+            null as string | null,
+            {
+                setSwitchPlanLoading: (_, { productKey }) => productKey,
+            },
+        ],
     }),
     lazyLoaders(({ actions, values }) => ({
         billing: [
@@ -321,11 +337,11 @@ export const billingLogic = kea<billingLogicType>([
 
                     actions.resetUnsubscribeError()
                     try {
-                        const response = await api.getResponse('api/billing/deactivate?products=' + key)
+                        const response = await api.createResponse('api/billing/deactivate', { products: key })
                         const jsonRes = await getJSONOrNull(response)
 
                         lemonToast.success(
-                            "You have been unsubscribed. We're sad to see you go. May the hedgehogs be ever in your favor."
+                            "You have been unsubscribed. We're sad to see you go."
                         )
                         actions.reportProductUnsubscribed(key)
 
@@ -372,6 +388,32 @@ export const billingLogic = kea<billingLogicType>([
                         console.error(error)
                         // This is a bit of a hack to prevent the page from re-rendering.
                         return values.billing
+                    }
+                },
+                switchFlatrateSubscriptionPlan: async (data: SwitchPlanPayload, breakpoint) => {
+                    try {
+                        await api.create('api/billing/subscription/switch-plan', data)
+
+                        const productDisplayName = capitalizeFirstLetter(data.to_product_key)
+                        lemonToast.success(`You're now on ${productDisplayName}`)
+                        actions.setSwitchPlanLoading(null)
+
+                        // Reload billing, user, and organization to get the updated available features
+                        actions.loadBilling()
+                        await breakpoint(2000)
+                        actions.loadUser()
+                        actions.loadCurrentOrganization()
+
+                        return values.billing as BillingType
+                    } catch (error: any) {
+                        insights.captureException(error)
+                        lemonToast.error(
+                            (error && error.detail) ||
+                                'There was an error switching your plan. Please try again or contact support.'
+                        )
+                        actions.setSwitchPlanLoading(null)
+                        // Keep the current billing state on failure
+                        return values.billing as BillingType
                     }
                 },
             },
@@ -500,6 +542,40 @@ export const billingLogic = kea<billingLogicType>([
                     ?.addons.find((addon) => addon.plans.find((plan) => plan.current_plan))
             },
         ],
+        platformAddons: [
+            (s) => [s.billing],
+            (billing: BillingType): BillingProductV2AddonType[] => {
+                const platformProduct = billing?.products?.find(
+                    (product: BillingProductV2Type) => product.type === ProductKey.PLATFORM_AND_SUPPORT
+                )
+                return platformProduct?.addons ?? []
+            },
+        ],
+        currentPlatformAddon: [
+            (s) => [s.billing],
+            (billing: BillingType): BillingProductV2AddonType | null => {
+                const platformProduct = billing?.products?.find(
+                    (product: BillingProductV2Type) => product.type === ProductKey.PLATFORM_AND_SUPPORT
+                )
+                return platformProduct?.addons?.find((addon: BillingProductV2AddonType) => !!addon.subscribed) || null
+            },
+        ],
+        unusedPlatformAddonAmount: [
+            (s) => [s.currentPlatformAddon, s.timeRemainingInSeconds, s.timeTotalInSeconds],
+            (
+                currentPlatformAddon: BillingProductV2AddonType | null,
+                timeRemainingInSeconds: number,
+                timeTotalInSeconds: number
+            ): number => {
+                if (!currentPlatformAddon || !timeTotalInSeconds) {
+                    return 0
+                }
+                const unitAmount = parseFloat(currentPlatformAddon.current_amount_usd || '0')
+                const ratio = Math.max(0, Math.min(1, timeRemainingInSeconds / timeTotalInSeconds))
+                const amount = unitAmount * ratio
+                return Math.round(amount * 100) / 100
+            },
+        ],
         creditDiscount: [(s) => [s.computedDiscount], (computedDiscount) => computedDiscount || 0],
         billingPlan: [
             (s) => [s.billing],
@@ -611,8 +687,7 @@ export const billingLogic = kea<billingLogicType>([
             },
             submit: async ({ creditInput, collectionMethod }) => {
                 await api.create('api/billing/credits/purchase', {
-                    annual_amount_usd: +Math.round(+creditInput - +creditInput * values.creditDiscount),
-                    discount_percent: values.computedDiscount! * 100,
+                    annual_credit_amount_usd: +creditInput,
                     collection_method: collectionMethod,
                 })
 
@@ -662,28 +737,28 @@ export const billingLogic = kea<billingLogicType>([
     })),
     listeners(({ actions, values }) => ({
         reportBillingShown: () => {
-            posthog.capture('billing v2 shown')
+            insights.capture('billing v2 shown')
         },
         reportBillingAlertShown: ({ alertConfig }) => {
-            posthog.capture('billing alert shown', {
+            insights.capture('billing alert shown', {
                 ...alertConfig,
             })
         },
         reportBillingAlertActionClicked: ({ alertConfig }) => {
-            posthog.capture('billing alert action clicked', {
+            insights.capture('billing alert action clicked', {
                 ...alertConfig,
             })
         },
         reportCreditsModalShown: () => {
-            posthog.capture('credits modal shown')
+            insights.capture('credits modal shown')
         },
         reportCreditsFormSubmitted: ({ creditInput }) => {
-            posthog.capture('credits modal credit form submitted', {
+            insights.capture('credits modal credit form submitted', {
                 credit_amount_usd: creditInput,
             })
         },
         reportCreditsCTAShown: ({ creditOverview }) => {
-            posthog.capture('credits cta shown', {
+            insights.capture('credits cta shown', {
                 eligible: creditOverview.eligible,
                 status: creditOverview.status,
                 estimated_monthly_credit_amount_usd: creditOverview.estimated_monthly_credit_amount_usd,
@@ -691,8 +766,11 @@ export const billingLogic = kea<billingLogicType>([
         },
         toggleCreditCTAHeroDismissed: ({ isDismissed }) => {
             if (isDismissed) {
-                posthog.capture('credits cta hero dismissed')
+                insights.capture('credits cta hero dismissed')
             }
+        },
+        switchFlatrateSubscriptionPlan: async (payload) => {
+            actions.setSwitchPlanLoading(payload.to_product_key)
         },
         loadBillingSuccess: async (_, breakpoint) => {
             actions.registerInstrumentationProps()
@@ -744,14 +822,15 @@ export const billingLogic = kea<billingLogicType>([
                     return
                 }
 
-                const contactEmail = values.billing.account_owner?.email || 'sales@posthog.com'
+                const contactEmail = values.billing.account_owner?.email || 'sales@hanzo.ai'
                 const contactName = values.billing.account_owner?.name || 'sales'
+                const timeRemaining =
+                    remainingHours < 24 ? pluralize(remainingHours, 'hour') : pluralize(remainingDays, 'day')
+                const planName = capitalizeFirstLetter(trial.target)
                 actions.setBillingAlert({
                     status: 'info',
-                    title: `Your free trial for the ${capitalizeFirstLetter(trial.target)} plan will end in ${
-                        remainingHours < 24 ? pluralize(remainingHours, 'hour') : pluralize(remainingDays, 'day')
-                    }.`,
-                    message: `If you have any questions, please reach out to ${contactName} at ${contactEmail}.`,
+                    title: `Your free trial for the ${planName} plan ends in ${timeRemaining}. Your service will continue without interruption, and you'll be charged for the ${planName} plan.`,
+                    message: `Questions? Reach out to ${contactName} at ${contactEmail}.`,
                 })
                 return
             }
@@ -766,45 +845,39 @@ export const billingLogic = kea<billingLogicType>([
                 return
             }
 
-            const productOverLimit = values.billing.products?.find((x: BillingProductV2Type) => {
-                return x.percentage_usage > 1 && x.usage_key
-            })
+            const billingPeriodEnd = values.billing.billing_period?.current_period_end?.format('YYYY-MM-DD')
 
-            if (productOverLimit) {
-                const hideProductFlag = `billing_hide_product_${productOverLimit?.type}`
-                const isHidden = values.featureFlags[hideProductFlag] === true
-                if (isHidden) {
-                    return
-                }
+            // Find ALL products over limit, filtering out hidden and dismissed ones
+            const productsOverLimit =
+                values.billing.products?.filter((x: BillingProductV2Type) => {
+                    if (x.percentage_usage <= 1 || !x.usage_key) {
+                        return false
+                    }
+                    const hideProductFlag = `billing_hide_product_${x.type}`
+                    if (values.featureFlags[hideProductFlag] === true) {
+                        return false
+                    }
+                    if (isBillingAlertDismissed(values.currentOrganization?.id, x.type, billingPeriodEnd)) {
+                        return false
+                    }
+                    return true
+                }) || []
 
-                // Check if this alert was dismissed for the current billing period
-                const billingPeriodEnd = values.billing.billing_period?.current_period_end?.format('YYYY-MM-DD')
-                if (isBillingAlertDismissed(values.currentOrganization?.id, productOverLimit.type, billingPeriodEnd)) {
-                    return
-                }
+            if (productsOverLimit.length > 0) {
+                const { title, message } = buildUsageLimitExceededMessage(productsOverLimit)
 
                 actions.setBillingAlert({
                     status: 'error',
-                    title: 'Usage limit exceeded',
-                    message: `You have exceeded the usage limit for ${productOverLimit.name}. Please 
-                        ${productOverLimit.subscribed ? 'increase your billing limit' : 'upgrade your plan'}
-                        or ${
-                            productOverLimit.name === 'Data warehouse'
-                                ? 'data will not be synced'
-                                : productOverLimit.name === 'Feature flags & Experiments'
-                                  ? 'feature flags will not evaluate'
-                                  : 'data loss may occur'
-                        }.`,
+                    title,
+                    message,
                     dismissKey: 'usage-limit-exceeded',
                     onClose: () => {
-                        // Store dismissal in localStorage
+                        // Store dismissal for all affected products in localStorage
                         const billingPeriodEnd =
                             values.billing?.billing_period?.current_period_end?.format('YYYY-MM-DD')
-                        storeBillingAlertDismissal(
-                            values.currentOrganization?.id,
-                            productOverLimit.type,
-                            billingPeriodEnd
-                        )
+                        for (const product of productsOverLimit) {
+                            storeBillingAlertDismissal(values.currentOrganization?.id, product.type, billingPeriodEnd)
+                        }
                         actions.setBillingAlert(null)
                     },
                 })
@@ -813,49 +886,50 @@ export const billingLogic = kea<billingLogicType>([
 
             actions.resetUsageLimitExceededKey()
 
-            const productApproachingLimit = values.billing.products?.find(
-                (x) => x.percentage_usage > ALLOCATION_THRESHOLD_ALERT
-            )
-
-            if (productApproachingLimit) {
-                const hideProductFlag = `billing_hide_product_${productApproachingLimit?.type}`
-                const isHidden = values.featureFlags[hideProductFlag] === true
-                if (isHidden) {
-                    return
-                }
-
-                // Check if this alert was dismissed for the current billing period
-                const billingPeriodEnd = values.billing?.billing_period?.current_period_end?.format('YYYY-MM-DD')
-                if (
-                    isBillingAlertDismissed(
-                        values.currentOrganization?.id,
-                        productApproachingLimit.type,
-                        billingPeriodEnd,
-                        '-approaching'
-                    )
-                ) {
-                    return
-                }
-
-                actions.setBillingAlert({
-                    status: 'info',
-                    title: 'You will soon hit your usage limit',
-                    message: `You have currently used ${parseFloat(
-                        (productApproachingLimit.percentage_usage * 100).toFixed(2)
-                    )}% of your ${
-                        productApproachingLimit.usage_key && productApproachingLimit.usage_key.toLowerCase()
-                    } allocation.`,
-                    dismissKey: 'usage-limit-approaching',
-                    onClose: () => {
-                        // Store dismissal in localStorage
-                        const billingPeriodEnd =
-                            values.billing?.billing_period?.current_period_end?.format('YYYY-MM-DD')
-                        storeBillingAlertDismissal(
+            // Find ALL products approaching limit (but not yet over), filtering out hidden and dismissed ones
+            const productsApproachingLimit =
+                values.billing.products?.filter((x: BillingProductV2Type) => {
+                    // Only include products approaching but not over the limit
+                    if (x.percentage_usage <= ALLOCATION_THRESHOLD_ALERT || x.percentage_usage > 1) {
+                        return false
+                    }
+                    const hideProductFlag = `billing_hide_product_${x.type}`
+                    if (values.featureFlags[hideProductFlag] === true) {
+                        return false
+                    }
+                    if (
+                        isBillingAlertDismissed(
                             values.currentOrganization?.id,
-                            productApproachingLimit.type,
+                            x.type,
                             billingPeriodEnd,
                             '-approaching'
                         )
+                    ) {
+                        return false
+                    }
+                    return true
+                }) || []
+
+            if (productsApproachingLimit.length > 0) {
+                const { title, message } = buildUsageLimitApproachingMessage(productsApproachingLimit)
+
+                actions.setBillingAlert({
+                    status: 'info',
+                    title,
+                    message,
+                    dismissKey: 'usage-limit-approaching',
+                    onClose: () => {
+                        // Store dismissal for all affected products
+                        const billingPeriodEnd =
+                            values.billing?.billing_period?.current_period_end?.format('YYYY-MM-DD')
+                        for (const product of productsApproachingLimit) {
+                            storeBillingAlertDismissal(
+                                values.currentOrganization?.id,
+                                product.type,
+                                billingPeriodEnd,
+                                '-approaching'
+                            )
+                        }
                         actions.setBillingAlert(null)
                     },
                 })
@@ -883,7 +957,7 @@ export const billingLogic = kea<billingLogicType>([
         },
         registerInstrumentationProps: async (_, breakpoint) => {
             await breakpoint(100)
-            if (posthog && values.billing) {
+            if (insights && values.billing) {
                 const payload: { [key: string]: any } = {
                     has_billing_plan: !!values.billing.has_active_subscription,
                     free_trial_until: values.billing.free_trial_until?.toISOString(),
@@ -911,7 +985,7 @@ export const billingLogic = kea<billingLogicType>([
                     payload['billing_period_start'] = values.billing.billing_period.current_period_start
                     payload['billing_period_end'] = values.billing.billing_period.current_period_end
                 }
-                posthog.register(payload)
+                insights.register(payload)
             }
         },
         showPurchaseCreditsModal: ({ isOpen }) => {
@@ -920,7 +994,10 @@ export const billingLogic = kea<billingLogicType>([
             }
         },
         scrollToProduct: ({ productType }) => {
-            const element = document.querySelector(`[data-attr="billing-product-addon-${productType}"]`)
+            let element = document.querySelector(`[data-attr="billing-product-addon-${productType}"]`)
+            if (element == null) {
+                element = document.querySelector(`[data-attr="billing-product-${productType}"]`)
+            }
             element?.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',

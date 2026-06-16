@@ -10,7 +10,7 @@ import {
     CalendarHeatmapMathType,
     CountPerActorMathType,
     FunnelMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     PropertyMathType,
 } from '~/types'
 
@@ -22,7 +22,7 @@ export enum MathCategory {
     ActorCount,
     EventCountPerActor,
     PropertyValue,
-    HogQLExpression,
+    InsightsQLExpression,
 }
 
 export interface MathDefinition {
@@ -51,8 +51,8 @@ export const FUNNEL_MATH_DEFINITIONS: Record<FunnelMathType, MathDefinition> = {
                 <br />
                 <br />
                 <i>
-                    Example: If you're filtering for pageview events to posthog.com/about, but the user's first pageview
-                    was to posthog.com, it will not match (even if they went to posthog.com/about later).
+                    Example: If you're filtering for pageview events to hanzo.ai/about, but the user's first pageview
+                    was to hanzo.ai, it will not match (even if they went to hanzo.ai/about later).
                 </i>
             </>
         ),
@@ -69,8 +69,8 @@ export const FUNNEL_MATH_DEFINITIONS: Record<FunnelMathType, MathDefinition> = {
                 <br />
                 <br />
                 <i>
-                    Example: If you're filtering for pageview events to posthog.com/about, and the user first viewed
-                    posthog.com then later posthog.com/about, it will match the posthog.com/about pageview.
+                    Example: If you're filtering for pageview events to hanzo.ai/about, and the user first viewed
+                    hanzo.ai then later hanzo.ai/about, it will match the hanzo.ai/about pageview.
                 </i>
             </>
         ),
@@ -199,8 +199,8 @@ export const BASE_MATH_DEFINITIONS: Record<BaseMathType, MathDefinition> = {
                 <br />
                 <br />
                 <i>
-                    Example: If you're filtering for pageview events to posthog.com/about, but the user's first pageview
-                    was to posthog.com, it will not match (even if they went to posthog.com/about later).
+                    Example: If you're filtering for pageview events to hanzo.ai/about, but the user's first pageview
+                    was to hanzo.ai, it will not match (even if they went to hanzo.ai/about later).
                 </i>
             </>
         ),
@@ -217,8 +217,8 @@ export const BASE_MATH_DEFINITIONS: Record<BaseMathType, MathDefinition> = {
                 <br />
                 <br />
                 <i>
-                    Example: If you're filtering for pageview events to posthog.com/about, and the user first viewed
-                    posthog.com then later posthog.com/about, it will match the posthog.com/about pageview.
+                    Example: If you're filtering for pageview events to hanzo.ai/about, and the user first viewed
+                    hanzo.ai then later hanzo.ai/about, it will match the hanzo.ai/about pageview.
                 </i>
             </>
         ),
@@ -345,12 +345,12 @@ export const PROPERTY_MATH_DEFINITIONS: Record<PropertyMathType, MathDefinition>
         category: MathCategory.PropertyValue,
     },
 }
-export const HOGQL_MATH_DEFINITIONS: Record<HogQLMathType, MathDefinition> = {
-    [HogQLMathType.HogQL]: {
+export const INSIGHTSQL_MATH_DEFINITIONS: Record<InsightsQLMathType, MathDefinition> = {
+    [InsightsQLMathType.InsightsQL]: {
         name: 'SQL expression',
         shortName: 'SQL expression',
         description: <>Aggregate with a custom SQL expression.</>,
-        category: MathCategory.HogQLExpression,
+        category: MathCategory.InsightsQLExpression,
     },
 }
 
@@ -446,7 +446,7 @@ export const mathsLogic = kea<mathsLogicType>([
                     ...groupsMathDefinitions,
                     ...PROPERTY_MATH_DEFINITIONS,
                     ...COUNT_PER_ACTOR_MATH_DEFINITIONS,
-                    ...HOGQL_MATH_DEFINITIONS,
+                    ...INSIGHTSQL_MATH_DEFINITIONS,
                 }
                 return allMathDefinitions
             },

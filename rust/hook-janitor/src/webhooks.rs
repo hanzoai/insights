@@ -60,7 +60,7 @@ pub struct WebhookCleaner {
     kafka_producer: FutureProducer<KafkaContext>,
     app_metrics_topic: String,
     app_metrics2_topic: String,
-    hog_mode: bool,
+    iql_mode: bool,
 }
 
 #[derive(sqlx::FromRow, Debug)]
@@ -134,7 +134,7 @@ impl From<FailedRow> for AppMetric {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-struct HoghookCompletedRow {
+struct InsightsHookCompletedRow {
     // App Metrics truncates/aggregates rows on the hour, so we take advantage of that to GROUP BY
     // and aggregate to select fewer rows.
     hour: DateTime<Utc>,
@@ -148,12 +148,12 @@ struct HoghookCompletedRow {
     count: u32,
 }
 
-impl From<HoghookCompletedRow> for AppMetric2 {
-    fn from(row: HoghookCompletedRow) -> Self {
+impl From<InsightsHookCompletedRow> for AppMetric2 {
+    fn from(row: InsightsHookCompletedRow) -> Self {
         AppMetric2 {
             team_id: row.team_id,
             timestamp: row.hour,
-            app_source: app_metrics2::Source::Hoghooks,
+            app_source: app_metrics2::Source::InsightsHooks,
             app_source_id: row.app_source_id,
             instance_id: None,
             metric_kind: app_metrics2::Kind::Success,
@@ -164,7 +164,7 @@ impl From<HoghookCompletedRow> for AppMetric2 {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-struct HoghookFailedRow {
+struct InsightsHookFailedRow {
     // App Metrics truncates/aggregates rows on the hour, so we take advantage of that to GROUP BY
     // and aggregate to select fewer rows.
     hour: DateTime<Utc>,
@@ -180,12 +180,12 @@ struct HoghookFailedRow {
     count: u32,
 }
 
-impl From<HoghookFailedRow> for AppMetric2 {
-    fn from(row: HoghookFailedRow) -> Self {
+impl From<InsightsHookFailedRow> for AppMetric2 {
+    fn from(row: InsightsHookFailedRow) -> Self {
         AppMetric2 {
             team_id: row.team_id,
             timestamp: row.hour,
-            app_source: app_metrics2::Source::Hoghooks,
+            app_source: app_metrics2::Source::InsightsHooks,
             app_source_id: row.app_source_id,
             instance_id: None,
             metric_kind: app_metrics2::Kind::Failure,
@@ -247,7 +247,7 @@ impl WebhookCleaner {
         kafka_producer: FutureProducer<KafkaContext>,
         app_metrics_topic: String,
         app_metrics2_topic: String,
-        hog_mode: bool,
+        iql_mode: bool,
     ) -> Result<Self> {
         let options = PgConnectOptions::from_str(database_url)
             .map_err(|error| WebhookCleanerError::PoolCreationError { error })?
@@ -261,7 +261,7 @@ impl WebhookCleaner {
             kafka_producer,
             app_metrics_topic,
             app_metrics2_topic,
-            hog_mode,
+            iql_mode,
         })
     }
 
@@ -271,14 +271,14 @@ impl WebhookCleaner {
         kafka_producer: FutureProducer<KafkaContext>,
         app_metrics_topic: String,
         app_metrics2_topic: String,
-        hog_mode: bool,
+        iql_mode: bool,
     ) -> Result<Self> {
         Ok(Self {
             pg_pool,
             kafka_producer,
             app_metrics_topic,
             app_metrics2_topic,
-            hog_mode,
+            iql_mode,
         })
     }
 
@@ -307,7 +307,7 @@ impl WebhookCleaner {
         Ok(row)
     }
 
-    async fn start_serializable_txn(&self) -> Result<SerializableTxn> {
+    async fn start_serializable_txn(&self) -> Result<SerializableTxn<'_>> {
         let mut tx = self
             .pg_pool
             .begin()
@@ -371,14 +371,14 @@ impl WebhookCleaner {
         Ok(rows)
     }
 
-    async fn get_completed_agg_rows_for_hoghooks(
+    async fn get_completed_agg_rows_for_insightshooks(
         &self,
         tx: &mut SerializableTxn<'_>,
-    ) -> Result<Vec<HoghookCompletedRow>> {
+    ) -> Result<Vec<InsightsHookCompletedRow>> {
         let base_query = r#"
             SELECT DATE_TRUNC('hour', last_attempt_finished_at) AS hour,
                 (metadata->>'teamId')::bigint AS team_id,
-                (metadata->>'hogFunctionId') AS app_source_id,
+                (metadata->>'insightsFunctionId') AS app_source_id,
                 count(*) as count
             FROM job_queue
             WHERE status = 'completed'
@@ -386,7 +386,7 @@ impl WebhookCleaner {
             ORDER BY hour, team_id, app_source_id;
         "#;
 
-        let rows = sqlx::query_as::<_, HoghookCompletedRow>(base_query)
+        let rows = sqlx::query_as::<_, InsightsHookCompletedRow>(base_query)
             .fetch_all(&mut *tx.0)
             .await
             .map_err(|e| WebhookCleanerError::GetCompletedRowsError { error: e })?;
@@ -415,14 +415,14 @@ impl WebhookCleaner {
         Ok(rows)
     }
 
-    async fn get_failed_agg_rows_for_hoghooks(
+    async fn get_failed_agg_rows_for_insightshooks(
         &self,
         tx: &mut SerializableTxn<'_>,
-    ) -> Result<Vec<HoghookFailedRow>> {
+    ) -> Result<Vec<InsightsHookFailedRow>> {
         let base_query = r#"
             SELECT DATE_TRUNC('hour', last_attempt_finished_at) AS hour,
                 (metadata->>'teamId')::bigint AS team_id,
-                (metadata->>'hogFunctionId') AS app_source_id,
+                (metadata->>'insightsFunctionId') AS app_source_id,
                 errors[array_upper(errors, 1)] AS last_error,
                 count(*) as count
             FROM job_queue
@@ -431,7 +431,7 @@ impl WebhookCleaner {
             ORDER BY hour, team_id, app_source_id, last_error;
         "#;
 
-        let rows = sqlx::query_as::<_, HoghookFailedRow>(base_query)
+        let rows = sqlx::query_as::<_, InsightsHookFailedRow>(base_query)
             .fetch_all(&mut *tx.0)
             .await
             .map_err(|e| WebhookCleanerError::GetFailedRowsError { error: e })?;
@@ -496,8 +496,8 @@ impl WebhookCleaner {
         let mut tx = self.start_serializable_txn().await?;
 
         let completed_row_count = self.get_row_count_for_status(&mut tx, "completed").await?;
-        let completed_agg_row_count = if self.hog_mode {
-            let completed_agg_rows = self.get_completed_agg_rows_for_hoghooks(&mut tx).await?;
+        let completed_agg_row_count = if self.iql_mode {
+            let completed_agg_rows = self.get_completed_agg_rows_for_insightshooks(&mut tx).await?;
             let completed_agg_row_count = completed_agg_rows.len() as u64;
             let completed_app_metrics: Vec<AppMetric2> =
                 completed_agg_rows.into_iter().map(Into::into).collect();
@@ -523,8 +523,8 @@ impl WebhookCleaner {
         };
 
         let failed_row_count = self.get_row_count_for_status(&mut tx, "failed").await?;
-        let failed_agg_row_count = if self.hog_mode {
-            let failed_agg_rows = self.get_failed_agg_rows_for_hoghooks(&mut tx).await?;
+        let failed_agg_row_count = if self.iql_mode {
+            let failed_agg_rows = self.get_failed_agg_rows_for_insightshooks(&mut tx).await?;
             let failed_agg_row_count = failed_agg_rows.len() as u64;
             let failed_app_metrics: Vec<AppMetric2> =
                 failed_agg_rows.into_iter().map(Into::into).collect();
@@ -675,13 +675,13 @@ mod tests {
             .expect("failed to create mock consumer");
         consumer.subscribe(&[APP_METRICS_TOPIC]).unwrap();
 
-        let hog_mode = false;
+        let iql_mode = false;
         let webhook_cleaner = WebhookCleaner::new_from_pool(
             db,
             mock_producer,
             APP_METRICS_TOPIC.to_owned(),
             APP_METRICS2_TOPIC.to_owned(),
-            hog_mode,
+            iql_mode,
         )
         .expect("unable to create webhook cleaner");
 
@@ -854,8 +854,8 @@ mod tests {
         check_app_metric_vector_equality(&expected_app_metrics, &received_app_metrics);
     }
 
-    #[sqlx::test(migrations = "../migrations", fixtures("hoghook_cleanup"))]
-    async fn test_cleanup_impl_hoghooks(db: PgPool) {
+    #[sqlx::test(migrations = "../migrations", fixtures("insightshook_cleanup"))]
+    async fn test_cleanup_impl_insightshooks(db: PgPool) {
         let (mock_cluster, mock_producer) = create_mock_kafka().await;
         mock_cluster
             .create_topic(APP_METRICS2_TOPIC, 1, 1)
@@ -869,17 +869,17 @@ mod tests {
             .expect("failed to create mock consumer");
         consumer.subscribe(&[APP_METRICS2_TOPIC]).unwrap();
 
-        let hog_mode = true;
-        let hoghook_cleaner = WebhookCleaner::new_from_pool(
+        let iql_mode = true;
+        let insightshook_cleaner = WebhookCleaner::new_from_pool(
             db,
             mock_producer,
             APP_METRICS_TOPIC.to_owned(),
             APP_METRICS2_TOPIC.to_owned(),
-            hog_mode,
+            iql_mode,
         )
-        .expect("unable to create hoghook cleaner");
+        .expect("unable to create insightshook cleaner");
 
-        let cleanup_stats = hoghook_cleaner
+        let cleanup_stats = insightshook_cleaner
             .cleanup_impl()
             .await
             .expect("webbook cleanup_impl failed");
@@ -899,7 +899,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "2".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Success,
@@ -909,7 +909,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "3".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Success,
@@ -919,7 +919,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 2,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "4".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Success,
@@ -929,7 +929,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T21:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "2".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Success,
@@ -939,7 +939,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "2".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Failure,
@@ -949,7 +949,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "2".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Failure,
@@ -959,7 +959,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "3".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Failure,
@@ -969,7 +969,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T20:00:00Z").unwrap(),
                 team_id: 2,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "4".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Failure,
@@ -979,7 +979,7 @@ mod tests {
             AppMetric2 {
                 timestamp: DateTime::<Utc>::from_str("2023-12-19T21:00:00Z").unwrap(),
                 team_id: 1,
-                app_source: app_metrics2::Source::Hoghooks,
+                app_source: app_metrics2::Source::InsightsHooks,
                 app_source_id: "2".to_owned(),
                 instance_id: None,
                 metric_kind: app_metrics2::Kind::Failure,
@@ -1011,13 +1011,13 @@ mod tests {
             .expect("failed to create mock consumer");
         consumer.subscribe(&[APP_METRICS_TOPIC]).unwrap();
 
-        let hog_mode = false;
+        let iql_mode = false;
         let webhook_cleaner = WebhookCleaner::new_from_pool(
             db,
             mock_producer,
             APP_METRICS_TOPIC.to_owned(),
             APP_METRICS2_TOPIC.to_owned(),
-            hog_mode,
+            iql_mode,
         )
         .expect("unable to create webhook cleaner");
 
@@ -1037,13 +1037,13 @@ mod tests {
     #[sqlx::test(migrations = "../migrations", fixtures("webhook_cleanup"))]
     async fn test_serializable_isolation(db: PgPool) {
         let (_, mock_producer) = create_mock_kafka().await;
-        let hog_mode = false;
+        let iql_mode = false;
         let webhook_cleaner = WebhookCleaner::new_from_pool(
             db.clone(),
             mock_producer,
             APP_METRICS_TOPIC.to_owned(),
             APP_METRICS2_TOPIC.to_owned(),
-            hog_mode,
+            iql_mode,
         )
         .expect("unable to create webhook cleaner");
 

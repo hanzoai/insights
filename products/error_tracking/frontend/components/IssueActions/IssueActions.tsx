@@ -1,9 +1,13 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonSelect } from '@posthog/lemon-ui'
+import { LemonButton, LemonDialog, LemonSelect } from '@hanzo/lemon-ui'
+
+import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { sceneLogic } from 'scenes/sceneLogic'
+import { urls } from 'scenes/urls'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
-import { FilterLogicalOperator, HogQLPropertyFilter, PropertyFilterType, UniversalFiltersGroup } from '~/types'
+import { FilterLogicalOperator, InsightsQLPropertyFilter, PropertyFilterType, UniversalFiltersGroup } from '~/types'
 
 import { bulkSelectLogic } from '../../logics/bulkSelectLogic'
 import { AssigneeLabelDisplay } from '../Assignee/AssigneeDisplay'
@@ -22,14 +26,25 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
     const { filterGroup } = useValues(issueFiltersLogic)
     const { setFilterGroup } = useActions(issueFiltersLogic)
     const { setSelectedIssueIds } = useActions(bulkSelectLogic)
+    const { newTab } = useActions(sceneLogic)
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
 
     const hasAtLeastTwoIssues = selectedIds.length >= 2
 
+    const openInNewTabs = (): void => {
+        selectedIds.forEach((id) => {
+            const issue = issues.find((issue) => issue.id === id)
+            if (issue) {
+                newTab(urls.errorTrackingIssue(id, { timestamp: issue.last_seen }))
+            }
+        })
+    }
+
     const excludeSelectedIssues = (): void => {
         const quotedIds = selectedIds.map((id) => `'${id}'`).join(', ')
-        const newFilter: HogQLPropertyFilter = {
+        const newFilter: InsightsQLPropertyFilter = {
             key: `issue_id NOT IN (${quotedIds})`,
-            type: PropertyFilterType.HogQL,
+            type: PropertyFilterType.InsightsQL,
             value: null,
         }
 
@@ -62,7 +77,11 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
 
     return (
         <div className="flex gap-x-2 justify-between">
+            <ConfettiComponent />
             <div className="flex gap-x-2">
+                <LemonButton type="secondary" size="small" onClick={openInNewTabs}>
+                    Open all
+                </LemonButton>
                 <LemonButton
                     disabledReason={!hasAtLeastTwoIssues ? 'Select at least two issues to merge' : null}
                     type="secondary"
@@ -91,6 +110,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                         switch (value) {
                             case 'resolved':
                                 resolveIssues(selectedIds)
+                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerConfetti, delay))
                                 break
                             case 'suppressed':
                                 suppressIssues(selectedIds)
@@ -106,7 +126,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                     placeholder="Mark as"
                     options={options.map((key) => ({
                         value: key,
-                        label: <StatusIndicator status={key} size="small" className="w-full" withTooltip={true} />,
+                        label: <StatusIndicator status={key} size="small" className="w-full" withTooltip="right" />,
                     }))}
                     size="small"
                 />

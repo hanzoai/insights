@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 
-from posthog.models.team.team import Team
+from insights.models.team.team import Team
 
 from products.tasks.backend.models import Task
 
@@ -106,5 +106,5 @@ class Command(BaseCommand):
         )
 
         for task in created_tasks:
-            status = task.current_stage.key if task.current_stage else "backlog"
+            status = task.latest_run.stage if task.latest_run else "backlog"
             self.stdout.write(f"  - {task.title} ({status})")

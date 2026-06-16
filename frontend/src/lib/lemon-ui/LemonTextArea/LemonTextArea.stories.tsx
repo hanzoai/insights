@@ -1,11 +1,11 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
-import { IconTrash } from '@posthog/icons'
+import { IconTrash } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 
-import { LemonTextArea, LemonTextAreaProps } from './LemonTextArea'
+import { LemonTextArea } from './LemonTextArea'
 
 type Story = StoryObj<typeof LemonTextArea>
 const meta: Meta<typeof LemonTextArea> = {
@@ -18,7 +18,7 @@ const meta: Meta<typeof LemonTextArea> = {
 }
 export default meta
 
-const Template: StoryFn<typeof LemonTextArea> = (props: LemonTextAreaProps) => {
+const Template: StoryFn<typeof LemonTextArea> = (props) => {
     const [value, setValue] = useState(props.value)
     return <LemonTextArea {...props} value={value} onChange={(newValue) => setValue(newValue)} />
 }

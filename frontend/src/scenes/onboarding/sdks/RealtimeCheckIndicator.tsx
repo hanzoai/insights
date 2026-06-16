@@ -1,4 +1,4 @@
-import { IconCheck } from '@posthog/icons'
+import { IconCheck } from '@hanzo/icons'
 
 import { OnboardingLiveEvents } from './OnboardingLiveEvents'
 import { useInstallationComplete } from './hooks/useInstallationComplete'

@@ -14,7 +14,7 @@ import (
 func TestNewFilter(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -27,9 +27,9 @@ func TestNewFilter(t *testing.T) {
 
 func TestRemoveSubscription(t *testing.T) {
 	subs := []Subscription{
-		{SubID: 1},
-		{SubID: 2},
-		{SubID: 3},
+		{SubID: 1, DroppedEvents: &atomic.Uint64{}},
+		{SubID: 2, DroppedEvents: &atomic.Uint64{}},
+		{SubID: 3, DroppedEvents: &atomic.Uint64{}},
 	}
 
 	result := removeSubscription(2, subs)
@@ -52,21 +52,23 @@ func TestUuidFromDistinctId(t *testing.T) {
 }
 
 func TestConvertToResponseGeoEvent(t *testing.T) {
-	event := PostHogEvent{
-		Lat: 40.7128,
-		Lng: -74.0060,
+	event := InsightsEvent{
+		Lat:        40.7128,
+		Lng:        -74.0060,
+		DistinctId: "user1",
 	}
 
 	result := convertToResponseGeoEvent(event)
 
 	assert.Equal(t, 40.7128, result.Lat)
 	assert.Equal(t, -74.0060, result.Lng)
+	assert.Equal(t, "user1", result.DistinctId)
 	assert.Equal(t, uint(1), result.Count)
 }
 
-func TestConvertToResponsePostHogEvent(t *testing.T) {
+func TestConvertToResponseInsightsEvent(t *testing.T) {
 	timestamp := "2023-01-01T00:00:00Z"
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  timestamp,
 		DistinctId: "user1",
@@ -74,7 +76,7 @@ func TestConvertToResponsePostHogEvent(t *testing.T) {
 		Properties: map[string]interface{}{"url": "https://example.com"},
 	}
 
-	result := convertToResponsePostHogEvent(event, 1)
+	result := convertToResponseInsightsEvent(event, 1, nil)
 
 	assert.Equal(t, "123", result.Uuid)
 	assert.Equal(t, "2023-01-01T00:00:00Z", result.Timestamp)
@@ -87,7 +89,7 @@ func TestConvertToResponsePostHogEvent(t *testing.T) {
 func TestFilterRun(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -96,13 +98,14 @@ func TestFilterRun(t *testing.T) {
 	// Test subscription
 	eventChan := make(chan interface{}, 1)
 	sub := Subscription{
-		SubID:       1,
-		TeamId:      1,
-		Token:       "token1",
-		DistinctId:  "user1",
-		EventTypes:  []string{"pageview"},
-		EventChan:   eventChan,
-		ShouldClose: &atomic.Bool{},
+		SubID:         1,
+		TeamId:        1,
+		Token:         "token1",
+		DistinctId:    "user1",
+		EventTypes:    []string{"pageview"},
+		EventChan:     eventChan,
+		ShouldClose:   &atomic.Bool{},
+		DroppedEvents: &atomic.Uint64{},
 	}
 	subChan <- sub
 
@@ -111,7 +114,7 @@ func TestFilterRun(t *testing.T) {
 
 	// Test event filtering
 	timestamp := "2023-01-01T00:00:00Z"
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  timestamp,
 		DistinctId: "user1",
@@ -124,7 +127,7 @@ func TestFilterRun(t *testing.T) {
 	// Wait for event to be processed
 	select {
 	case receivedEvent := <-eventChan:
-		responseEvent, ok := receivedEvent.(ResponsePostHogEvent)
+		responseEvent, ok := receivedEvent.(ResponseInsightsEvent)
 		require.True(t, ok)
 		assert.Equal(t, "123", responseEvent.Uuid)
 		assert.Equal(t, "user1", responseEvent.DistinctId)
@@ -145,7 +148,7 @@ func TestFilterRun(t *testing.T) {
 func TestFilterRunWithGeoEvent(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -154,11 +157,12 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 	// Test subscription with Geo enabled
 	eventChan := make(chan interface{}, 1)
 	sub := Subscription{
-		SubID:       1,
-		TeamId:      1,
-		Geo:         true,
-		EventChan:   eventChan,
-		ShouldClose: &atomic.Bool{},
+		SubID:         1,
+		TeamId:        1,
+		Geo:           true,
+		EventChan:     eventChan,
+		ShouldClose:   &atomic.Bool{},
+		DroppedEvents: &atomic.Uint64{},
 	}
 	subChan <- sub
 
@@ -166,9 +170,10 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	// Test geo event filtering
-	event := PostHogEvent{
-		Lat: 40.7128,
-		Lng: -74.0060,
+	event := InsightsEvent{
+		Lat:        40.7128,
+		Lng:        -74.0060,
+		DistinctId: "user1",
 	}
 	inboundChan <- event
 
@@ -179,14 +184,118 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 		require.True(t, ok)
 		assert.Equal(t, 40.7128, geoEvent.Lat)
 		assert.Equal(t, -74.0060, geoEvent.Lng)
+		assert.Equal(t, "user1", geoEvent.DistinctId)
 		assert.Equal(t, uint(1), geoEvent.Count)
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timed out waiting for geo event")
 	}
 }
 
-func TestResponsePostHogEvent_MarshalJSON(t *testing.T) {
-	event := ResponsePostHogEvent{
+func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
+	subChan := make(chan Subscription)
+	unSubChan := make(chan Subscription)
+	inboundChan := make(chan InsightsEvent)
+
+	filter := NewFilter(subChan, unSubChan, inboundChan)
+
+	go filter.Run()
+
+	eventChan1 := make(chan interface{}, 1)
+	sub1 := Subscription{
+		SubID:         1,
+		TeamId:        1,
+		Token:         "token1",
+		EventChan:     eventChan1,
+		ShouldClose:   &atomic.Bool{},
+		DroppedEvents: &atomic.Uint64{},
+		Columns:    []string{"url"},
+	}
+
+	eventChan2 := make(chan interface{}, 1)
+	sub2 := Subscription{
+		SubID:         2,
+		TeamId:        1,
+		Token:         "token1",
+		EventChan:     eventChan2,
+		ShouldClose:   &atomic.Bool{},
+		DroppedEvents: &atomic.Uint64{},
+		Columns:    []string{"url", "$browser"},
+	}
+
+	eventChan3 := make(chan interface{}, 1)
+	sub3 := Subscription{
+		SubID:         3,
+		TeamId:        1,
+		Token:         "token1",
+		EventChan:     eventChan3,
+		ShouldClose:   &atomic.Bool{},
+		DroppedEvents: &atomic.Uint64{},
+		Columns:    nil,
+	}
+
+	subChan <- sub1
+	subChan <- sub2
+	subChan <- sub3
+
+	time.Sleep(10 * time.Millisecond)
+
+	event := InsightsEvent{
+		Uuid:       "123",
+		Timestamp:  "2026-01-01T00:00:00Z",
+		DistinctId: "user1",
+		Token:      "token1",
+		Event:      "pageview",
+		Properties: map[string]interface{}{
+			"url":          "https://example.com",
+			"$browser":     "Chrome",
+			"$device_type": "Desktop",
+		},
+	}
+	inboundChan <- event
+
+	select {
+	case received := <-eventChan1:
+		responseEvent, ok := received.(ResponseInsightsEvent)
+		require.True(t, ok)
+		assert.Equal(t, map[string]interface{}{"url": "https://example.com"}, responseEvent.Properties)
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Timed out waiting for event on subscriber 1")
+	}
+
+	select {
+	case received := <-eventChan2:
+		responseEvent, ok := received.(ResponseInsightsEvent)
+		require.True(t, ok)
+		assert.Equal(t, map[string]interface{}{
+			"url":      "https://example.com",
+			"$browser": "Chrome",
+		}, responseEvent.Properties)
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Timed out waiting for event on subscriber 2")
+	}
+
+	select {
+	case received := <-eventChan3:
+		responseEvent, ok := received.(ResponseInsightsEvent)
+		require.True(t, ok)
+		assert.Equal(t, map[string]interface{}{
+			"url":          "https://example.com",
+			"$browser":     "Chrome",
+			"$device_type": "Desktop",
+		}, responseEvent.Properties)
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Timed out waiting for event on subscriber 3")
+	}
+
+	unSubChan <- sub1
+	unSubChan <- sub2
+	unSubChan <- sub3
+	time.Sleep(10 * time.Millisecond)
+	assert.Empty(t, filter.subs)
+}
+
+func TestResponseInsightsEvent_MarshalJSON(t *testing.T) {
+	event := ResponseInsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2023-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -198,4 +307,80 @@ func TestResponsePostHogEvent_MarshalJSON(t *testing.T) {
 	json, err := json.Marshal(event)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{"uuid":"123","timestamp":"2023-01-01T00:00:00Z","distinct_id":"user1","person_id":"person1","event":"pageview","properties":{"url":"https://example.com"}}`, string(json))
+}
+
+func TestIncludeProperties_NilIncludesAllProperties(t *testing.T) {
+	properties := map[string]interface{}{
+		"url":          "https://example.com",
+		"$device_type": "Desktop",
+		"$browser":     "Chrome",
+	}
+
+	event := InsightsEvent{
+		Uuid:       "123",
+		Timestamp:  "2026-01-01T00:00:00Z",
+		DistinctId: "user1",
+		Event:      "pageview",
+		Properties: properties,
+	}
+
+	result := convertToResponseInsightsEvent(event, 1, nil)
+
+	assert.Equal(t, properties, result.Properties)
+}
+
+func TestIncludeProperties_EmptySliceIncludesNoProperties(t *testing.T) {
+	event := InsightsEvent{
+		Uuid:       "123",
+		Timestamp:  "2026-01-01T00:00:00Z",
+		DistinctId: "user1",
+		Event:      "pageview",
+		Properties: map[string]interface{}{
+			"url":          "https://example.com",
+			"$device_type": "Desktop",
+		},
+	}
+
+	result := convertToResponseInsightsEvent(event, 1, []string{})
+
+	assert.Equal(t, map[string]interface{}{}, result.Properties)
+}
+
+func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
+	event := InsightsEvent{
+		Uuid:       "123",
+		Timestamp:  "2026-01-01T00:00:00Z",
+		DistinctId: "user1",
+		Event:      "pageview",
+		Properties: map[string]interface{}{
+			"url":          "https://example.com",
+			"$device_type": "Desktop",
+			"$browser":     "Chrome",
+		},
+	}
+
+	result := convertToResponseInsightsEvent(event, 1, []string{"url", "$device_type"})
+
+	assert.Equal(t, map[string]interface{}{
+		"url":          "https://example.com",
+		"$device_type": "Desktop",
+	}, result.Properties)
+}
+
+func TestIncludeProperties_NonExistentPropertiesAreIgnored(t *testing.T) {
+	event := InsightsEvent{
+		Uuid:       "123",
+		Timestamp:  "2026-01-01T00:00:00Z",
+		DistinctId: "user1",
+		Event:      "pageview",
+		Properties: map[string]interface{}{
+			"url": "https://example.com",
+		},
+	}
+
+	result := convertToResponseInsightsEvent(event, 1, []string{"url", "nonexistent"})
+
+	assert.Equal(t, map[string]interface{}{
+		"url": "https://example.com",
+	}, result.Properties)
 }

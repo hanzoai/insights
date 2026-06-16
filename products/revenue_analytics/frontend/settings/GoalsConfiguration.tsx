@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonSwitch, LemonTag } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { dayjs } from 'lib/dayjs'
@@ -12,12 +12,13 @@ import { LemonInput } from 'lib/lemon-ui/LemonInput'
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { humanFriendlyNumber, inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
+import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { getCurrencySymbol } from 'lib/utils/geography/currency'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { CurrencyCode, RevenueAnalyticsGoal } from '~/queries/schema/schema-general'
-import { AccessControlResourceType } from '~/types'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { revenueAnalyticsSettingsLogic } from './revenueAnalyticsSettingsLogic'
 
@@ -103,7 +104,10 @@ function ActionsColumn({
     if (mode === 'edit') {
         return (
             <div className="my-2 flex gap-2 justify-end">
-                <AccessControlAction resourceType={AccessControlResourceType.RevenueAnalytics} minAccessLevel="editor">
+                <AccessControlAction
+                    resourceType={AccessControlResourceType.RevenueAnalytics}
+                    minAccessLevel={AccessControlLevel.Editor}
+                >
                     <LemonButton
                         type="primary"
                         size="small"
@@ -123,7 +127,10 @@ function ActionsColumn({
 
     return (
         <div className="my-2 flex gap-2 justify-end">
-            <AccessControlAction resourceType={AccessControlResourceType.RevenueAnalytics} minAccessLevel="editor">
+            <AccessControlAction
+                resourceType={AccessControlResourceType.RevenueAnalytics}
+                minAccessLevel={AccessControlLevel.Editor}
+            >
                 <LemonButton
                     type="secondary"
                     size="small"
@@ -134,7 +141,10 @@ function ActionsColumn({
                 </LemonButton>
             </AccessControlAction>
 
-            <AccessControlAction resourceType={AccessControlResourceType.RevenueAnalytics} minAccessLevel="editor">
+            <AccessControlAction
+                resourceType={AccessControlResourceType.RevenueAnalytics}
+                minAccessLevel={AccessControlLevel.Editor}
+            >
                 <LemonButton
                     type="secondary"
                     size="small"
@@ -167,6 +177,7 @@ export function GoalsConfiguration(): JSX.Element {
     const { baseCurrency } = useValues(teamLogic)
     const { revenueAnalyticsConfig, goals } = useValues(revenueAnalyticsSettingsLogic)
     const { addGoal, updateGoal, deleteGoal } = useActions(revenueAnalyticsSettingsLogic)
+    const { reportRevenueAnalyticsGoalConfigured } = useActions(eventUsageLogic)
 
     // It's not adding by default, but we want to show the form in storybook and test runner
     // so that they show up in the snapshots
@@ -176,6 +187,7 @@ export function GoalsConfiguration(): JSX.Element {
     const handleAddGoal = (): void => {
         if (temporaryGoal.name && temporaryGoal.due_date && temporaryGoal.goal) {
             addGoal(temporaryGoal)
+            reportRevenueAnalyticsGoalConfigured()
             setTemporaryGoal(EMPTY_GOAL)
             setIsAdding(false)
         }
@@ -190,6 +202,7 @@ export function GoalsConfiguration(): JSX.Element {
     const handleSaveEdit = (): void => {
         if (editingIndex !== null && temporaryGoal.name && temporaryGoal.due_date && temporaryGoal.goal) {
             updateGoal(editingIndex, temporaryGoal)
+            reportRevenueAnalyticsGoalConfigured()
             setEditingIndex(null)
             setTemporaryGoal(EMPTY_GOAL)
         }
@@ -201,7 +214,10 @@ export function GoalsConfiguration(): JSX.Element {
     }
 
     const handleDeleteGoal = (index: number): void => {
-        deleteGoal(index)
+        const goal = goals[index]
+        if (window.confirm(`Are you sure you want to delete the goal "${goal.name}"?`)) {
+            deleteGoal(index)
+        }
     }
 
     const handleCancelAdd = (): void => {
@@ -358,7 +374,10 @@ export function GoalsConfiguration(): JSX.Element {
             description="Set revenue targets for specific dates to track your progress. You can track goals based on your monthly/quarterly/yearly targets. These can be displayed either on your MRR/ARR or gross revenue charts on the revenue analytics dashboard!"
         >
             <div className={cn('flex flex-col items-end w-full')}>
-                <AccessControlAction resourceType={AccessControlResourceType.RevenueAnalytics} minAccessLevel="editor">
+                <AccessControlAction
+                    resourceType={AccessControlResourceType.RevenueAnalytics}
+                    minAccessLevel={AccessControlLevel.Editor}
+                >
                     <LemonButton
                         type="primary"
                         icon={<IconPlus />}
@@ -371,6 +390,7 @@ export function GoalsConfiguration(): JSX.Element {
                                   ? 'Finish editing current goal first'
                                   : undefined
                         }
+                        data-attr="revenue-analytics-add-goal-button"
                     >
                         Add Goal
                     </LemonButton>

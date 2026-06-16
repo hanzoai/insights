@@ -1,52 +1,292 @@
 interfaces = []
-exclude = [".*__pycache__", ".*egg-info", "docs", "tests"]
-source_roots = ["."]
-
-[[modules]]
-path = "<root>"
-depends_on = ["posthog"]
-
-[[modules]]
-path = "ee"
-depends_on = ["common.hogvm.python", "posthog"]
-
-[[modules]]
-path = "common.hogql_parser"
-depends_on = []
-
-[[modules]]
-path = "common.hogvm.python"
-depends_on = ["posthog"]
-
-[[modules]]
-path = "posthog"
-depends_on = [
-    "<root>",
-    "ee",
-    "common.hogql_parser",
-    "common.hogvm.python",
-
-    # NOTE: Add new product dependencies here and in settings/web.py PRODUCTS_APPS
-    "products.early_access_features",
-    "products.tasks",
-    "products.links",
-    "products.revenue_analytics",
-    "products.user_interviews",
-    "products.llm_analytics",
+layers = [
+    "products",
+    "non_isolated",
+]
+exclude = [
+    ".*__pycache__",
+    ".*egg-info",
+    "docs",
+    "tests",
+]
+source_roots = [
+    ".",
 ]
 
 [[modules]]
-path = "products.early_access_features"
-depends_on = ["posthog"]
+path = "<root>"
+depends_on = [
+
+    "insights",
+    "products.error_tracking",
+    "products.llm_analytics",
+    "products.logs",
+]
 
 [[modules]]
-path = "products.tasks"
-depends_on = ["posthog"]
+path = "common.insightsql_parser"
+depends_on = []
+utility = true
+
+[[modules]]
+path = "common.scriptvm.python"
+depends_on = [
+    "insights",
+]
+utility = true
+
+[[modules]]
+path = "insights"
+depends_on = [
+    "<root>",
+
+    "products.batch_exports",
+    "products.customer_analytics",
+    "products.data_modeling",
+    "products.data_warehouse",
+    "products.desktop_recordings",
+    "products.early_access_features",
+    "products.endpoints",
+    "products.error_tracking",
+    "products.experiments",
+    "products.links",
+    "products.live_debugger",
+    "products.llm_analytics",
+    "products.logs",
+    "products.marketing_analytics",
+    "products.notebooks",
+    "products.revenue_analytics",
+    "products.signals",
+    "products.slack_app",
+    "products.surveys",
+    "products.tasks",
+    "products.user_interviews",
+    "products.web_analytics",
+    "products.workflows",
+]
+
+[[modules]]
+path = "products.batch_exports"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.cdp"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.customer_analytics"
+depends_on = [
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.dashboards"
+depends_on = []
+layer = "non_isolated"
+
+[[modules]]
+path = "products.data_modeling"
+depends_on = [
+    "insights",
+    "products.data_warehouse",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.data_warehouse"
+depends_on = [
+
+    "insights",
+    "products.data_modeling",
+    "products.revenue_analytics",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.desktop_recordings"
+depends_on = [
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.early_access_features"
+depends_on = [
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.endpoints"
+depends_on = [
+    "insights",
+    "products.data_warehouse",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.error_tracking"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.experiments"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.feature_flags"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
 
 [[modules]]
 path = "products.links"
-depends_on = ["posthog"]
+depends_on = [
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.live_debugger"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.llm_analytics"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.logs"
+depends_on = [
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.managed_migrations"
+depends_on = []
+layer = "non_isolated"
+
+[[modules]]
+path = "products.marketing_analytics"
+depends_on = [
+    "insights",
+    "products.data_warehouse",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.notebooks"
+depends_on = [
+
+    "insights",
+    "products.tasks",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.product_analytics"
+depends_on = []
+layer = "non_isolated"
+
+[[modules]]
+path = "products.replay"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
 
 [[modules]]
 path = "products.revenue_analytics"
-depends_on = ["posthog"]
+depends_on = [
+
+    "insights",
+    "products.data_warehouse",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.signals"
+depends_on = [
+    "insights",
+    "products.error_tracking",
+    "products.tasks",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.slack_app"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.surveys"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.tasks"
+depends_on = [
+
+    "insights",
+    "products.error_tracking",
+    "products.llm_analytics",
+    "products.slack_app",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.user_interviews"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.web_analytics"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"
+
+[[modules]]
+path = "products.workflows"
+depends_on = [
+
+    "insights",
+]
+layer = "non_isolated"

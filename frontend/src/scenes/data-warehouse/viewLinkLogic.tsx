@@ -1,14 +1,15 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import { DatabaseSchemaField } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { DataWarehouseViewLink } from '~/types'
 
 import { ViewLinkKeyLabel } from './ViewLinkModal'
@@ -68,7 +69,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
         setSourceTablePreviewData: (data: Record<string, any>[]) => ({ data }),
         setJoiningTablePreviewData: (data: Record<string, any>[]) => ({ data }),
         setIsJoinValid: (isValid: boolean) => ({ isValid }),
-        setValidationError: (errorMessage: string) => ({ errorMessage }),
+        setValidationError: (errorMessage: string | null) => ({ errorMessage }),
         setValidationWarning: (validationWarning: string | null) => ({ validationWarning }),
         validateJoin: () => {},
         checkKeyTypeMismatch: () => {},
@@ -272,7 +273,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
 
                         actions.loadDatabase()
 
-                        posthog.capture('join updated')
+                        insights.capture('join updated')
                     } catch (error: any) {
                         actions.setError(error.detail)
                     }
@@ -296,7 +297,8 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
 
                         actions.loadDatabase()
 
-                        posthog.capture('join created')
+                        insights.capture('join created')
+                        globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.JoinExternalData)
                     } catch (error: any) {
                         actions.setError(error.detail)
                     }
@@ -307,9 +309,21 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
     listeners(({ actions, values }) => ({
         toggleNewJoinModal: ({ join }) => {
             actions.setViewLinkValues(join ?? NEW_VIEW_LINK)
+            if (join?.source_table_name) {
+                actions.loadSourceTablePreview(join.source_table_name)
+            }
+            if (join?.joining_table_name) {
+                actions.loadJoiningTablePreview(join.joining_table_name)
+            }
         },
         toggleEditJoinModal: ({ join }) => {
             actions.setViewLinkValues(join)
+            if (join.source_table_name) {
+                actions.loadSourceTablePreview(join.source_table_name)
+            }
+            if (join.joining_table_name) {
+                actions.loadJoiningTablePreview(join.joining_table_name)
+            }
         },
         setExperimentsOptimized: ({ experimentsOptimized }) => {
             if (!experimentsOptimized) {
@@ -319,6 +333,14 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
         selectExperimentsTimestampKey: ({ experimentsTimestampKey }) => {
             if (experimentsTimestampKey) {
                 actions.setExperimentsOptimized(true)
+            }
+        },
+        setViewLinkValue: ({ name }) => {
+            const fieldName = Array.isArray(name) ? name[0] : name
+            if (fieldName === 'joining_table_key' || fieldName === 'source_table_key') {
+                actions.setIsJoinValid(false)
+                actions.setValidationError(null)
+                actions.setValidationWarning(null)
             }
         },
         selectSourceTable: async ({ selectedTableName }) => {
@@ -363,33 +385,28 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
             await loadTablePreviewData(tableName, actions.setJoiningTablePreviewData)
         },
         validateJoin: async () => {
+            const sourceTableKey = values.viewLink.source_table_key
+            const joiningTableKey = values.viewLink.joining_table_key
+
             if (
                 !values.selectedSourceTableName ||
                 !values.selectedJoiningTableName ||
-                !values.selectedSourceKey ||
-                !values.selectedJoiningKey
+                !sourceTableKey ||
+                !joiningTableKey
             ) {
                 actions.setIsJoinValid(false)
                 return
             }
             try {
-                const sourceTable = hogql.identifier(values.selectedSourceTableName)
-                const sourceKey = hogql.identifier(values.selectedSourceKey)
-                const joiningTable = hogql.identifier(values.selectedJoiningTableName)
-                const joiningKey = hogql.identifier(values.selectedJoiningKey)
-                const response = await hogqlQuery(
-                    hogql`
-                    SELECT ${sourceTable}.${sourceKey}, ${joiningTable}.${joiningKey}
-                    FROM ${sourceTable}
-                    JOIN ${joiningTable}
-                    ON ${sourceTable}.${sourceKey} = ${joiningTable}.${joiningKey}
-                    LIMIT 10`
-                )
-                if (response.results.length === 0) {
-                    actions.setValidationWarning('No matching data found between source and joining tables.')
-                    actions.setIsJoinValid(false)
-                } else {
-                    actions.setIsJoinValid(true)
+                const response = await api.dataWarehouseViewLinks.validate({
+                    source_table_name: values.selectedSourceTableName,
+                    source_table_key: sourceTableKey,
+                    joining_table_name: values.selectedJoiningTableName,
+                    joining_table_key: joiningTableKey,
+                })
+                actions.setIsJoinValid(response.is_valid)
+                if (response.msg) {
+                    actions.setValidationWarning(response.msg)
                 }
             } catch (error: any) {
                 actions.setValidationError(error.detail)
@@ -406,7 +423,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
             (s) => [s.selectedJoiningTableName, s.allTables],
             (selectedJoiningTableName, tables) => tables.find((row) => row.name === selectedJoiningTableName),
         ],
-        sourceIsUsingHogQLExpression: [
+        sourceIsUsingInsightsQLExpression: [
             (s) => [s.selectedSourceKey, s.selectedSourceTable],
             (sourceKey, sourceTable) => {
                 if (sourceKey === null) {
@@ -416,7 +433,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
                 return !column
             },
         ],
-        joiningIsUsingHogQLExpression: [
+        joiningIsUsingInsightsQLExpression: [
             (s) => [s.selectedJoiningKey, s.selectedJoiningTable],
             (joiningKey, joiningTable) => {
                 if (joiningKey === null) {
@@ -491,13 +508,13 @@ async function loadTablePreviewData(
     setDataAction: (data: Record<string, any>[]) => void
 ): Promise<void> {
     try {
-        const response = await hogqlQuery(hogql`SELECT * FROM ${hogql.identifier(tableName)} LIMIT 10`)
+        const response = await insightsqlQuery(insightsql`SELECT * FROM ${insightsql.identifier(tableName)} LIMIT 10`)
         const transformedData = (response.results || []).map((row: any[]) =>
             Object.fromEntries((response.columns || []).map((column: string, index: number) => [column, row[index]]))
         )
         setDataAction(transformedData)
     } catch (error) {
-        posthog.captureException(error)
+        insights.captureException(error)
         setDataAction([])
     }
 }

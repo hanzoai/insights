@@ -1,16 +1,20 @@
+use common_continuous_profiling::ContinuousProfilingConfig;
 use envconfig::Envconfig;
 
 use common_kafka::config::KafkaConfig;
 
 #[derive(Envconfig)]
 pub struct Config {
+    #[envconfig(nested = true)]
+    pub continuous_profiling: ContinuousProfilingConfig,
+
     #[envconfig(from = "BIND_HOST", default = "::")]
     pub host: String,
 
     #[envconfig(from = "BIND_PORT", default = "3302")]
     pub port: u16,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:15432/test_database")]
+    #[envconfig(default = "postgres://insights:insights@localhost:15432/test_database")]
     pub database_url: String,
 
     #[envconfig(default = "30")]
@@ -23,7 +27,7 @@ pub struct Config {
     pub mode: String,
 
     #[envconfig(default = "false")]
-    pub hog_mode: bool,
+    pub iql_mode: bool,
 
     #[envconfig(default = "clickhouse_app_metrics")]
     pub app_metrics_topic: String,

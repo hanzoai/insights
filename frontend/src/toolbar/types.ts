@@ -1,5 +1,7 @@
 import { ActionStepType, ActionType, ElementType, Experiment } from '~/types'
 
+import { FragileSelectorResult } from './utils/selectorQuality'
+
 export type ElementsEventType = {
     count: number
     elements: ElementType[]
@@ -67,6 +69,9 @@ export interface ElementWithMetadata {
     position?: number
     apparentZIndex?: number
     visible?: boolean
+    actionStep?: ActionStepType
+    selectorQuality?: FragileSelectorResult | null
+    actions?: ActionElementWithMetadata[]
 }
 
 export interface ActionElementWithMetadata extends ElementWithMetadata {
@@ -92,6 +97,7 @@ export type WebExperimentDraftType = Omit<
     | 'parameters'
     | 'secondary_metrics'
     | 'updated_at'
+    | 'user_access_level'
 >
 
 export interface WebExperimentForm extends WebExperimentDraftType {

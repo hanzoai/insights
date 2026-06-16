@@ -2,18 +2,26 @@ import './LemonLabel.scss'
 
 import clsx from 'clsx'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
+
+import { PayGateIcon } from 'lib/components/PayGateMini/PayGateButton'
+
+import { AvailableFeature } from '~/types'
 
 import { Link, LinkProps } from '../Link'
 import { Tooltip } from '../Tooltip'
 
 export interface LemonLabelProps
-    extends Pick<React.LabelHTMLAttributes<HTMLLabelElement>, 'id' | 'htmlFor' | 'form' | 'children' | 'className'> {
+    extends Pick<
+        React.LabelHTMLAttributes<HTMLLabelElement>,
+        'id' | 'htmlFor' | 'form' | 'children' | 'className' | 'onClick'
+    > {
     info?: React.ReactNode
     infoLink?: LinkProps['to']
     showOptional?: boolean
     onExplanationClick?: () => void
     htmlFor?: string
+    premiumFeature?: AvailableFeature
 }
 
 export function LemonLabel({
@@ -24,6 +32,7 @@ export function LemonLabel({
     onExplanationClick,
     infoLink,
     htmlFor,
+    premiumFeature,
     ...props
 }: LemonLabelProps): JSX.Element {
     return (
@@ -39,7 +48,7 @@ export function LemonLabel({
             ) : null}
 
             {info ? (
-                <Tooltip title={info}>
+                <Tooltip title={info} interactive>
                     {infoLink ? (
                         <Link to={infoLink} target="_blank" className="inline-flex">
                             <IconInfo className="text-xl text-secondary shrink-0" />
@@ -49,6 +58,8 @@ export function LemonLabel({
                     )}
                 </Tooltip>
             ) : null}
+
+            {premiumFeature && <PayGateIcon feature={premiumFeature} />}
         </label>
     )
 }

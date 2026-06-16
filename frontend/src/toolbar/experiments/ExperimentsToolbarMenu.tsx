@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
@@ -16,15 +16,16 @@ import { ExperimentsListView } from '~/toolbar/experiments/ExperimentsListView'
 import { experimentsLogic } from '~/toolbar/experiments/experimentsLogic'
 import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
+import { joinWithUiHost } from '~/toolbar/utils'
 
 const ExperimentsListToolbarMenu = (): JSX.Element => {
     const { searchTerm } = useValues(experimentsLogic)
     const { newExperiment } = useActions(experimentsTabLogic)
     const { setSearchTerm } = useActions(experimentsLogic)
     const { allExperiments, sortedExperiments, allExperimentsLoading } = useValues(experimentsLogic)
-    const { apiURL } = useValues(toolbarConfigLogic)
+    const { uiHost } = useValues(toolbarConfigLogic)
 
-    const isWebExperimentsDisabled = Boolean(window?.parent?.posthog?.config?.disable_web_experiments)
+    const isWebExperimentsDisabled = Boolean(window?.parent?.insights?.config?.disable_web_experiments)
 
     return (
         <ToolbarMenu>
@@ -45,12 +46,12 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
                     {isWebExperimentsDisabled && (
                         <div className="pb-2">
                             <LemonBanner type="warning">
-                                Web experiments are disabled in your PostHog web snippet configuration. To run
+                                Web experiments are disabled in your Insights web snippet configuration. To run
                                 experiments, add <code>disable_web_experiments: false</code> to your configuration.{' '}
                                 <Link
                                     target="_blank"
                                     targetBlankIcon
-                                    to="https://posthog.com/docs/experiments/no-code-web-experiments"
+                                    to="https://hanzo.ai/docs/experiments/no-code-web-experiments"
                                 >
                                     Learn more
                                 </Link>
@@ -68,7 +69,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
             </ToolbarMenu.Body>
             <ToolbarMenu.Footer>
                 <div className="flex items-center justify-between flex-1">
-                    <Link to={`${apiURL}${urls.experiments()}`} target="_blank">
+                    <Link to={joinWithUiHost(uiHost, urls.experiments())} target="_blank">
                         View &amp; edit all experiments <IconOpenInNew />
                     </Link>
                     <LemonButton type="primary" size="small" onClick={() => newExperiment()} icon={<IconPlus />}>

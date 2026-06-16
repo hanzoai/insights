@@ -6,7 +6,8 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from './constants'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
+
 import { JSInstallSnippet } from './js-web'
 
 function RemixExternalImportSnippet(): JSX.Element {
@@ -29,7 +30,7 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   ssr: {
-    noExternal: ["posthog-js", "posthog-js/react"],
+    noExternal: ["insights-js", "insights-js/react"],
   },
 });`}
         </CodeSnippet>
@@ -43,14 +44,14 @@ function RemixPHProviderSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {`import { useEffect, useState } from "react";
-import posthog from "posthog-js";
-import { PostHogProvider } from "posthog-js/react";
+import insights from "insights-js";
+import { InsightsProvider } from "insights-js/react";
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    posthog.init("${currentTeam?.api_token}", {
+    insights.init("${currentTeam?.api_token}", {
       api_host: "${apiHostOrigin()}",
       defaults: "${SDK_DEFAULTS_DATE}",
       ${
@@ -64,7 +65,7 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!hydrated) return <>{children}</>;
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+  return <InsightsProvider client={insights}>{children}</InsightsProvider>;
 }`}
         </CodeSnippet>
     )
@@ -109,16 +110,16 @@ export default function App() {
 export function SDKInstallRemixJSInstructions(): JSX.Element {
     return (
         <>
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
-            <h3>Add PostHog to your app</h3>
+            <h3>Add Insights to your app</h3>
             <p>
-                Start by setting <code>posthog-js</code> and <code>posthog-js/react</code> as external packages in your{' '}
+                Start by setting <code>insights-js</code> and <code>insights-js/react</code> as external packages in your{' '}
                 <code>vite.config.ts</code> file.
             </p>
             <RemixExternalImportSnippet />
             <p>
-                Next, create a <code>provider.tsx</code> file in the app folder. In it, set up the PostHog provider to
+                Next, create a <code>provider.tsx</code> file in the app folder. In it, set up the Insights provider to
                 initialize after hydration.
             </p>
             <RemixPHProviderSnippet />

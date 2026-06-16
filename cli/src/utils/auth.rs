@@ -1,4 +1,4 @@
-use super::homedir::{ensure_homedir_exists, posthog_home_dir};
+use super::homedir::{ensure_homedir_exists, insights_home_dir};
 use anyhow::{Context, Error};
 use inquire::{validator::Validation, CustomUserError};
 use reqwest::Url;
@@ -14,14 +14,10 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn get_host(&self, host: Option<&str>) -> String {
-        host.map(str::to_string)
-            .unwrap_or_else(|| {
-                self.host
-                    .clone()
-                    .unwrap_or("https://us.posthog.com".to_string())
-            })
-            .to_string()
+    pub fn get_host(&self) -> String {
+        self.host
+            .clone()
+            .unwrap_or("https://us.insights.hanzo.ai".to_string())
     }
 }
 
@@ -35,7 +31,7 @@ pub struct HomeDirProvider;
 
 impl CredentialProvider for HomeDirProvider {
     fn get_credentials(&self) -> Result<Token, Error> {
-        let home = posthog_home_dir();
+        let home = insights_home_dir();
         let file = home.join("credentials.json");
         let token = std::fs::read_to_string(file.clone()).context(format!(
             "While trying to read credentials from file {file:?}"
@@ -45,7 +41,7 @@ impl CredentialProvider for HomeDirProvider {
     }
 
     fn store_credentials(&self, token: Token) -> Result<(), Error> {
-        let home = posthog_home_dir();
+        let home = insights_home_dir();
         ensure_homedir_exists()?;
         let file = home.join("credentials.json");
         let token = serde_json::to_string(&token).context("While trying to serialize token")?;
@@ -56,21 +52,27 @@ impl CredentialProvider for HomeDirProvider {
     }
 
     fn report_location(&self) -> String {
-        posthog_home_dir()
+        insights_home_dir()
             .join("credentials.json")
             .to_string_lossy()
             .to_string()
     }
 }
 
-/// Tries to read the token from the env var `POSTHOG_CLI_TOKEN`
+/// Tries to read the token from the env var `INSIGHTS_CLI_API_KEY`
 pub struct EnvVarProvider;
 
 impl CredentialProvider for EnvVarProvider {
     fn get_credentials(&self) -> Result<Token, Error> {
-        let host = std::env::var("POSTHOG_CLI_HOST").ok();
-        let token = std::env::var("POSTHOG_CLI_TOKEN").context("While trying to read env var")?;
-        let env_id = std::env::var("POSTHOG_CLI_ENV_ID").context("While trying to read env var")?;
+        let host = std::env::var("INSIGHTS_CLI_HOST").ok();
+        // Try INSIGHTS_CLI_API_KEY first, fall back to INSIGHTS_CLI_TOKEN for backward compatibility
+        let token = std::env::var("INSIGHTS_CLI_API_KEY")
+            .or_else(|_| std::env::var("INSIGHTS_CLI_TOKEN"))
+            .context("While trying to read env var INSIGHTS_CLI_API_KEY")?;
+        // Try INSIGHTS_CLI_PROJECT_ID first, fall back to INSIGHTS_CLI_ENV_ID for backward compatibility
+        let env_id = std::env::var("INSIGHTS_CLI_PROJECT_ID")
+            .or_else(|_| std::env::var("INSIGHTS_CLI_ENV_ID"))
+            .context("While trying to read env var INSIGHTS_CLI_PROJECT_ID")?;
         Ok(Token {
             host,
             token,
@@ -109,7 +111,23 @@ pub fn token_validator(token: &str) -> Result<Validation, CustomUserError> {
     Ok(Validation::Valid)
 }
 
-pub fn load_token() -> Result<Token, Error> {
+pub fn env_id_validator(env_id: &str) -> Result<Validation, CustomUserError> {
+    // Must be a number
+    if env_id.is_empty() {
+        return Ok(Validation::Invalid("Environment ID cannot be empty".into()));
+    }
+
+    // Must be a number
+    if env_id.parse::<u32>().is_err() {
+        return Ok(Validation::Invalid(
+            "Environment ID must be a number".into(),
+        ));
+    }
+
+    Ok(Validation::Valid)
+}
+
+pub fn get_token() -> Result<Token, Error> {
     let env = EnvVarProvider;
     let env_err = match env.get_credentials() {
         Ok(token) => {

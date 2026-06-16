@@ -1,6 +1,6 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonButton, LemonInput } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
 
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 import { pluralize } from 'lib/utils'
@@ -53,6 +53,7 @@ export function NewDashboardModal(): JSX.Element {
                                 onChange={setTemplateFilter}
                                 value={templateFilter}
                                 fullWidth={true}
+                                autoFocus
                             />
                         </div>
                     </div>

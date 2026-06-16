@@ -3,29 +3,28 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { FeatureFlagsSet, featureFlagLogic as enabledFlagLogic } from 'lib/logic/featureFlagLogic'
-import { ProductIntentContext } from 'lib/utils/product-intents'
+import { featureFlagLogic as enabledFlagLogic } from 'lib/logic/featureFlagLogic'
+import { pluralize } from 'lib/utils'
 import { Scene } from 'scenes/sceneTypes'
-import {
-    SURVEY_CREATED_SOURCE,
-    SURVEY_EMPTY_STATE_EXPERIMENT_VARIANT,
-    SURVEY_PAGE_SIZE,
-    SurveyTemplate,
-} from 'scenes/surveys/constants'
-import { sanitizeSurvey } from 'scenes/surveys/utils'
+import { sceneConfigurations } from 'scenes/scenes'
+import { SURVEY_CREATED_SOURCE, SURVEY_PAGE_SIZE, SurveyTemplate } from 'scenes/surveys/constants'
+import { duplicateExistingSurvey, sanitizeSurvey } from 'scenes/surveys/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { ActivationTask, activationLogic } from '~/layout/navigation-3000/sidepanel/panels/activation/activationLogic'
+import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { deleteFromTree } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
-import { AvailableFeature, Breadcrumb, ProductKey, ProgressStatus, Survey } from '~/types'
+import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
+import { ActivityScope, AvailableFeature, Breadcrumb, ProgressStatus, Survey, SurveyType } from '~/types'
 
 import type { surveysLogicType } from './surveysLogicType'
+import { surveysSdkLogic } from './surveysSdkLogic'
 
 export enum SurveysTabs {
     Active = 'active',
@@ -51,6 +50,7 @@ function hasMorePages(surveys: any[], count: number): boolean {
 
 export interface SurveysFilters {
     status: string
+    type: SurveyType | 'any'
     created_by: null | number
     archived: boolean
 }
@@ -117,6 +117,8 @@ export const surveysLogic = kea<surveysLogicType>([
             ['currentTeam', 'currentTeamLoading'],
             enabledFlagLogic,
             ['featureFlags as enabledFlags'],
+            surveysSdkLogic,
+            ['teamSdkVersions'],
         ],
         actions: [teamLogic, ['loadCurrentTeam', 'addProductIntent']],
     })),
@@ -127,6 +129,7 @@ export const surveysLogic = kea<surveysLogicType>([
         setTab: (tab: SurveysTabs) => ({ tab }),
         loadNextPage: true,
         loadNextSearchPage: true,
+        setSurveyToDuplicate: (survey: Survey | null) => ({ survey }),
     }),
     loaders(({ values, actions }) => ({
         data: {
@@ -241,9 +244,57 @@ export const surveysLogic = kea<surveysLogicType>([
         },
         surveysResponsesCount: {
             __default: {} as { [key: string]: number },
-            loadResponsesCount: async () => {
-                const surveysResponsesCount = await api.surveys.getResponsesCount()
+            loadResponsesCount: async (surveyIds: string) => {
+                const surveysResponsesCount = await api.surveys.getResponsesCount(surveyIds)
                 return surveysResponsesCount
+            },
+        },
+        duplicatedSurvey: {
+            __default: null as Survey | null,
+            duplicateSurvey: async (survey: Survey) => {
+                const payload = duplicateExistingSurvey(survey)
+                const createdSurvey = await api.surveys.create(sanitizeSurvey(payload))
+
+                lemonToast.success('Survey duplicated', {
+                    toastId: `survey-duplicated-${createdSurvey.id}`,
+                    button: {
+                        label: 'View survey',
+                        action: () => {
+                            router.actions.push(urls.survey(createdSurvey.id))
+                        },
+                    },
+                })
+
+                actions.setSurveyToDuplicate(null)
+                actions.addProductIntent({
+                    product_type: ProductKey.SURVEYS,
+                    intent_context: ProductIntentContext.SURVEY_DUPLICATED,
+                    metadata: {
+                        survey_id: createdSurvey.id,
+                    },
+                })
+
+                return createdSurvey
+            },
+            duplicateToProjects: async ({ survey, targetTeamIds }: { survey: Survey; targetTeamIds: number[] }) => {
+                const response = await api.surveys.duplicateToProjects(survey.id, targetTeamIds)
+
+                lemonToast.success(`Survey duplicated to ${pluralize(response.count, 'project')}`, {
+                    toastId: `survey-bulk-duplicated-${survey.id}`,
+                })
+
+                actions.addProductIntent({
+                    product_type: ProductKey.SURVEYS,
+                    intent_context: ProductIntentContext.SURVEY_BULK_DUPLICATED,
+                    metadata: {
+                        survey_id: survey.id,
+                        target_team_ids: targetTeamIds,
+                        bulk_operation: true,
+                    },
+                })
+
+                actions.setSurveyToDuplicate(null)
+                return survey
             },
         },
     })),
@@ -266,6 +317,7 @@ export const surveysLogic = kea<surveysLogicType>([
         filters: [
             {
                 archived: false,
+                type: 'any',
                 status: 'any',
                 created_by: null,
             } as Partial<SurveysFilters>,
@@ -289,6 +341,12 @@ export const surveysLogic = kea<surveysLogicType>([
                 loadNextSearchPageSuccess: (_, { data }) => hasMorePages(data.searchSurveys, data.searchSurveysCount),
             },
         ],
+        surveyToDuplicate: [
+            null as Survey | null,
+            {
+                setSurveyToDuplicate: (_, { survey }) => survey,
+            },
+        ],
     }),
     listeners(({ actions, values }) => ({
         deleteSurveySuccess: (_, __, action) => {
@@ -306,28 +364,26 @@ export const surveysLogic = kea<surveysLogicType>([
             lemonToast.success('Survey updated')
             actions.loadCurrentTeam()
         },
+        duplicateSurveySuccess: () => {
+            actions.loadSurveys()
+        },
+        duplicateToProjectsSuccess: () => {
+            actions.loadSurveys()
+        },
         setSurveysFilters: () => {
             actions.loadSurveys()
-            actions.loadResponsesCount()
         },
         loadSurveysSuccess: () => {
             actions.loadCurrentTeam()
 
-            actions.addProductIntent({
-                product_type: ProductKey.SURVEYS,
-                intent_context: ProductIntentContext.SURVEYS_VIEWED,
-                metadata: {
-                    surveys_count: values.data.surveysCount,
-                },
-            })
-
-            if (values.data.surveys.some((survey) => survey.start_date)) {
-                activationLogic.findMounted()?.actions.markTaskAsCompleted(ActivationTask.LaunchSurvey)
+            if (values.data.surveys.length > 0) {
+                const surveyIds = values.data.surveys.map((s) => s.id).join(',')
+                actions.loadResponsesCount(surveyIds)
             }
         },
         loadResponsesCountSuccess: () => {
             if (Object.values(values.surveysResponsesCount).some((count) => count > 0)) {
-                activationLogic.findMounted()?.actions.markTaskAsCompleted(ActivationTask.CollectSurveyResponses)
+                globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CollectSurveyResponses)
             }
         },
         setTab: ({ tab }) => {
@@ -341,12 +397,6 @@ export const surveysLogic = kea<surveysLogicType>([
         },
     })),
     selectors({
-        isOnNewEmptyStateExperiment: [
-            (s) => [s.enabledFlags],
-            (enabledFlags: FeatureFlagsSet): boolean => {
-                return enabledFlags[FEATURE_FLAGS.SURVEY_EMPTY_STATE_V2] === SURVEY_EMPTY_STATE_EXPERIMENT_VARIANT.TEST
-            },
-        ],
         searchedSurveys: [
             (selectors) => [selectors.data, selectors.searchTerm, selectors.filters],
             (data, searchTerm, filters) => {
@@ -373,9 +423,12 @@ export const surveysLogic = kea<surveysLogicType>([
                     }
                 }
 
-                const { status, created_by, archived } = filters
+                const { status, type, created_by, archived } = filters
                 if (status !== 'any') {
                     searchedSurveys = searchedSurveys.filter((survey: Survey) => getSurveyStatus(survey) === status)
+                }
+                if (type !== 'any') {
+                    searchedSurveys = searchedSurveys.filter((survey: Survey) => survey.type === type)
                 }
                 if (created_by) {
                     searchedSurveys = searchedSurveys.filter((survey: Survey) => survey.created_by?.id === created_by)
@@ -395,14 +448,19 @@ export const surveysLogic = kea<surveysLogicType>([
             (): Breadcrumb[] => [
                 {
                     key: Scene.Surveys,
-                    name: 'Surveys',
+                    name: sceneConfigurations[Scene.Surveys].name || 'Surveys',
                     path: urls.surveys(),
+                    iconType: sceneConfigurations[Scene.Surveys].iconType || 'default_icon_type',
                 },
             ],
         ],
         surveysStylingAvailable: [
             (s) => [s.hasAvailableFeature],
             (hasAvailableFeature) => hasAvailableFeature(AvailableFeature.SURVEYS_STYLING),
+        ],
+        guidedEditorEnabled: [
+            (s) => [s.enabledFlags],
+            (enabledFlags) => !!(enabledFlags[FEATURE_FLAGS.SURVEYS_GUIDED_EDITOR] === 'test'),
         ],
         globalSurveyAppearanceConfigAvailable: [
             (s) => [s.hasAvailableFeature],
@@ -413,6 +471,12 @@ export const surveysLogic = kea<surveysLogicType>([
             (currentTeam) => {
                 return !currentTeam?.surveys_opt_in
             },
+        ],
+        [SIDE_PANEL_CONTEXT_KEY]: [
+            () => [],
+            (): SidePanelSceneContext => ({
+                activity_scope: ActivityScope.SURVEY,
+            }),
         ],
     }),
     actionToUrl(({ values }) => ({
@@ -425,10 +489,13 @@ export const surveysLogic = kea<surveysLogicType>([
             if (tab) {
                 actions.setTab(tab)
             }
+            actions.addProductIntent({
+                product_type: ProductKey.SURVEYS,
+                intent_context: ProductIntentContext.SURVEYS_VIEWED,
+            })
         },
     })),
     afterMount(({ actions }) => {
         actions.loadSurveys()
-        actions.loadResponsesCount()
     }),
 ])

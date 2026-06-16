@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { HEATMAP_COLOR_PALETTE_OPTIONS } from 'lib/components/heatmaps/heatmapDataLogic'
 import { HeatmapFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
@@ -14,26 +14,26 @@ import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 import { heatmapToolbarMenuLogic } from '~/toolbar/elements/heatmapToolbarMenuLogic'
 
 const ScrollDepthJSWarning = (): JSX.Element | null => {
-    const { scrollDepthPosthogJsError } = useValues(heatmapToolbarMenuLogic)
+    const { scrollDepthInsightsJsError } = useValues(heatmapToolbarMenuLogic)
 
-    if (!scrollDepthPosthogJsError) {
+    if (!scrollDepthInsightsJsError) {
         return null
     }
 
     return (
         <p className="my-2 bg-danger-highlight border border-danger rounded p-2">
-            {scrollDepthPosthogJsError === 'version' ? (
-                <>This feature requires a newer version of posthog-js</>
-            ) : scrollDepthPosthogJsError === 'disabled' ? (
+            {scrollDepthInsightsJsError === 'version' ? (
+                <>This feature requires a newer version of insights-js</>
+            ) : scrollDepthInsightsJsError === 'disabled' ? (
                 <>
-                    Your posthog-js config has <i>disable_scroll_properties</i> set - these properties are required for
+                    Your insights-js config has <i>disable_scroll_properties</i> set - these properties are required for
                     scroll depth calculations to work.
                 </>
             ) : null}
         </p>
     )
 }
-const SectionSetting = ({
+export const SectionSetting = ({
     children,
     title,
     info,
@@ -208,7 +208,7 @@ export const HeatmapsSettings = ({
                     title="Fixed positioning calculation"
                     info={
                         <>
-                            PostHog JS will attempt to detect fixed elements such as headers or modals and will
+                            Insights JS will attempt to detect fixed elements such as headers or modals and will
                             therefore show those heatmap areas, ignoring the scroll value.
                             <br />
                             You can choose to show these areas as fixed, include them with scrolled data or hide them

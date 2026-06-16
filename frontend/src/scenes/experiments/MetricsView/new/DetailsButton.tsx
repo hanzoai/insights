@@ -1,5 +1,5 @@
-import { IconGraph } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconGraph } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 

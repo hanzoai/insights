@@ -1,0 +1,62 @@
+from insights.cdp.templates.attio.template_attio import template as template_attio
+from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
+
+
+def create_inputs(**kwargs):
+    inputs = {
+        "apiKey": "apikey12345",
+        "email": "max@hanzo.ai",
+        "personAttributes": {"name": "Max", "job_title": "Mascot"},
+    }
+    inputs.update(kwargs)
+
+    return inputs
+
+
+class TestTemplateAttio(BaseInsightsFunctionTemplateTest):
+    template = template_attio
+
+    def test_function_works(self):
+        self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": True}}  # type: ignore
+        self.run_function(inputs=create_inputs())
+        assert self.get_mock_fetch_calls()[0] == (
+            "https://api.attio.com/v2/objects/people/records?matching_attribute=email_addresses",
+            {
+                "body": {
+                    "data": {
+                        "values": {
+                            "email_addresses": [{"email_address": "max@hanzo.ai"}],
+                            "name": "Max",
+                            "job_title": "Mascot",
+                        }
+                    }
+                },
+                "method": "PUT",
+                "headers": {
+                    "Authorization": "Bearer apikey12345",
+                    "Content-Type": "application/json",
+                },
+            },
+        )
+
+    def test_ignores_empty_values(self):
+        self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": True}}  # type: ignore
+        self.run_function(inputs=create_inputs(personAttributes={"name": "Max", "job_title": ""}))
+        assert self.get_mock_fetch_calls()[0] == (
+            "https://api.attio.com/v2/objects/people/records?matching_attribute=email_addresses",
+            {
+                "body": {
+                    "data": {
+                        "values": {
+                            "email_addresses": [{"email_address": "max@hanzo.ai"}],
+                            "name": "Max",
+                        }
+                    }
+                },
+                "method": "PUT",
+                "headers": {
+                    "Authorization": "Bearer apikey12345",
+                    "Content-Type": "application/json",
+                },
+            },
+        )

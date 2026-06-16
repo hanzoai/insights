@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
@@ -24,7 +24,7 @@ export const UnsubscribeCard = ({ product }: { product: BillingProductV2Type }):
                 <p className="">
                     Need to control your costs? Learn about ways to{' '}
                     <Link
-                        to="https://posthog.com/docs/billing/estimating-usage-costs#how-to-reduce-your-posthog-costs?utm_source=app-unsubscribe"
+                        to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs?utm_source=app-unsubscribe"
                         target="_blank"
                     >
                         reduce your bill
@@ -34,7 +34,7 @@ export const UnsubscribeCard = ({ product }: { product: BillingProductV2Type }):
                         chat with support.
                     </Link>{' '}
                     Check out more about our pricing on our{' '}
-                    <Link to="https://posthog.com/pricing" target="_blank">
+                    <Link to="https://hanzo.ai/pricing" target="_blank">
                         pricing page
                     </Link>
                     .

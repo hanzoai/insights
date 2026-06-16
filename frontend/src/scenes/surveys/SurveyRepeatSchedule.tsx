@@ -2,8 +2,8 @@ import './EditSurvey.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonInput, LemonSnack, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonInput, LemonSnack, Link } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
@@ -95,7 +95,7 @@ function SurveyIterationOptions(): JSX.Element {
     return (
         <>
             <LemonField.Pure
-                info="Showing a survey every time the display conditions are met requires at least version 1.234.11 of posthog-js"
+                info="Showing a survey every time the display conditions are met requires at least version 1.234.11 of insights-js"
                 label={<h3 className="mb-0">How often should we show this survey to a person?</h3>}
             >
                 <LemonRadio
@@ -121,54 +121,63 @@ function SurveyIterationOptions(): JSX.Element {
                             label: 'Repeat on a schedule',
                             'data-attr': 'survey-iteration-frequency-days',
                             description: showSurveyRepeatSchedule ? (
-                                <div className="flex flex-row gap-2 items-center text-secondary">
-                                    Repeat this survey{' '}
-                                    <LemonField name="iteration_count">
-                                        {({ onChange, value }) => {
-                                            return (
-                                                <LemonInput
-                                                    type="number"
-                                                    data-attr="survey-iteration-count"
-                                                    size="small"
-                                                    min={1}
-                                                    // NB this is enforced in the API too
-                                                    max={500}
-                                                    value={value || 2}
-                                                    onChange={(newValue) => {
-                                                        if (newValue && newValue > 0) {
-                                                            onChange(newValue)
-                                                        } else {
-                                                            onChange(null)
-                                                        }
-                                                    }}
-                                                    className="w-16"
-                                                />
-                                            )
-                                        }}
-                                    </LemonField>{' '}
-                                    times, once every
-                                    <LemonField name="iteration_frequency_days">
-                                        {({ onChange, value }) => {
-                                            return (
-                                                <LemonInput
-                                                    type="number"
-                                                    data-attr="survey-iteration-frequency-days"
-                                                    size="small"
-                                                    min={1}
-                                                    value={value || 90}
-                                                    onChange={(newValue) => {
-                                                        if (newValue && newValue > 0) {
-                                                            onChange(newValue)
-                                                        } else {
-                                                            onChange(null)
-                                                        }
-                                                    }}
-                                                    className="w-16"
-                                                />
-                                            )
-                                        }}
-                                    </LemonField>{' '}
-                                    days
+                                <div className="flex flex-col gap-1">
+                                    <div className="flex flex-row gap-2 items-center text-secondary">
+                                        Show up to{' '}
+                                        <LemonField name="iteration_count">
+                                            {({ onChange, value }) => {
+                                                return (
+                                                    <LemonInput
+                                                        type="number"
+                                                        data-attr="survey-iteration-count"
+                                                        size="small"
+                                                        min={1}
+                                                        // NB this is enforced in the API too
+                                                        max={500}
+                                                        value={value || 2}
+                                                        onChange={(newValue) => {
+                                                            if (newValue && newValue > 0) {
+                                                                onChange(newValue)
+                                                            } else {
+                                                                onChange(null)
+                                                            }
+                                                        }}
+                                                        className="w-16"
+                                                    />
+                                                )
+                                            }}
+                                        </LemonField>{' '}
+                                        times total, once every
+                                        <LemonField name="iteration_frequency_days">
+                                            {({ onChange, value }) => {
+                                                return (
+                                                    <LemonInput
+                                                        type="number"
+                                                        data-attr="survey-iteration-frequency-days"
+                                                        size="small"
+                                                        min={1}
+                                                        value={value || 90}
+                                                        onChange={(newValue) => {
+                                                            if (newValue && newValue > 0) {
+                                                                onChange(newValue)
+                                                            } else {
+                                                                onChange(null)
+                                                            }
+                                                        }}
+                                                        className="w-16"
+                                                    />
+                                                )
+                                            }}
+                                        </LemonField>{' '}
+                                        days
+                                    </div>
+                                    {survey.iteration_count && survey.iteration_frequency_days && (
+                                        <div className="text-xs text-muted">
+                                            {survey.iteration_count === 1
+                                                ? 'This survey will only be shown once (no repeats).'
+                                                : `This survey will be shown now, then ${survey.iteration_count - 1} more ${pluralize(survey.iteration_count - 1, 'time', 'times', false)} with ${pluralize(survey.iteration_frequency_days, 'day')} between each.`}
+                                        </div>
+                                    )}
                                 </div>
                             ) : undefined,
                         },

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGraph } from '@posthog/icons'
-import { LemonButton, LemonDropdown, LemonInput } from '@posthog/lemon-ui'
+import { IconGraph } from '@hanzo/icons'
+import { LemonButton, LemonDropdown, LemonInput } from '@hanzo/lemon-ui'
 
 import { BIN_COUNT_AUTO } from 'lib/constants'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

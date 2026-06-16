@@ -1,3 +1,5 @@
+import { humanFriendlyLargeNumber } from 'lib/utils'
+
 import type {
     ActionsNode,
     EventsNode,
@@ -7,10 +9,12 @@ import type {
     ExperimentTrendsQuery,
     ExperimentVariantResultBayesian,
     ExperimentVariantResultFrequentist,
+    NewExperimentQueryResponse,
 } from '~/queries/schema/schema-general'
 import {
     ExperimentDataWarehouseNode,
     ExperimentMetricType,
+    ExperimentStatsValidationFailure,
     NodeKind,
     isExperimentMeanMetric,
     isExperimentRatioMetric,
@@ -51,6 +55,10 @@ export const getDefaultMetricTitle = (metric: ExperimentMetric): string => {
             const numeratorName = getDefaultName(metric.numerator)
             const denominatorName = getDefaultName(metric.denominator)
             return `${numeratorName || 'Numerator'} / ${denominatorName || 'Denominator'}`
+        case ExperimentMetricType.RETENTION:
+            const startEventName = getDefaultName(metric.start_event)
+            const completionEventName = getDefaultName(metric.completion_event)
+            return `${startEventName || 'Start event'} / ${completionEventName || 'Completion event'}`
         default:
             return 'Untitled metric'
     }
@@ -141,7 +149,9 @@ export function getNiceTickValues(maxAbsValue: number, tickRangeFactor: number =
 }
 
 export function formatPValue(pValue: number | null | undefined): string {
-    if (!pValue) {
+    // Use explicit null check instead of falsy check
+    // This prevents treating 0 or very small numbers as invalid
+    if (pValue == null) {
         return '—'
     }
 
@@ -257,7 +267,9 @@ export function formatMetricValue(data: any, metric: ExperimentMetric): string {
     if (isNaN(primaryValue)) {
         return '—'
     }
-    return isExperimentMeanMetric(metric) ? primaryValue.toFixed(2) : `${(primaryValue * 100).toFixed(2)}%`
+    return isExperimentMeanMetric(metric)
+        ? humanFriendlyLargeNumber(primaryValue)
+        : `${(primaryValue * 100).toFixed(2)}%`
 }
 
 export function getMetricSubtitleValues(
@@ -341,4 +353,29 @@ export function getMetricColors(
         positive: colors.BAR_POSITIVE,
         negative: colors.BAR_NEGATIVE,
     }
+}
+
+export function hasValidationFailures(result: NewExperimentQueryResponse | null): boolean {
+    if (!result) {
+        return false
+    }
+    return !!(
+        result.baseline?.validation_failures?.length ||
+        result.variant_results?.some((v) => v.validation_failures?.length)
+    )
+}
+
+export function getValidationFailureType(variant: ExperimentStatsBaseValidated): 'not-enough-data' | 'error' | null {
+    if (!variant.validation_failures || variant.validation_failures.length === 0) {
+        return null
+    }
+
+    if (
+        variant.validation_failures.includes(ExperimentStatsValidationFailure.NotEnoughExposures) ||
+        variant.validation_failures.includes(ExperimentStatsValidationFailure.NotEnoughMetricData)
+    ) {
+        return 'not-enough-data'
+    }
+
+    return 'error'
 }

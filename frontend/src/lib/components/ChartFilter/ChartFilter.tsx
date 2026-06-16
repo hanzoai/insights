@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGlobe, IconGraph, IconPieChart, IconRetentionHeatmap, IconTrends } from '@posthog/icons'
-import { LemonSelect, LemonSelectOptions } from '@posthog/lemon-ui'
+import { IconGlobe, IconGraph, IconPieChart, IconRetentionHeatmap, IconTrends } from '@hanzo/icons'
+import { LemonSelect, LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Icon123, IconAreaChart, IconCumulativeChart, IconTableChart } from 'lib/lemon-ui/icons'
@@ -26,10 +26,10 @@ export function ChartFilter(): JSX.Element {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const { isTrends, isSingleSeries, formula, breakdownFilter } = useValues(insightVizDataLogic(insightProps))
+    const { isTrends, isSingleSeriesOutput, formula, breakdownFilter } = useValues(insightVizDataLogic(insightProps))
 
     const trendsOnlyDisabledReason = !isTrends ? 'This type is only available in Trends.' : undefined
-    const singleSeriesOnlyDisabledReason = !isSingleSeries
+    const singleSeriesOnlyDisabledReason = !isSingleSeriesOutput
         ? 'This type currently only supports insights with one series, and this insight has multiple series.'
         : undefined
 
@@ -60,11 +60,25 @@ export function ChartFilter(): JSX.Element {
                     ),
                 },
                 {
-                    value: ChartDisplayType.ActionsBar,
+                    value: ChartDisplayType.ActionsUnstackedBar,
                     icon: <IconGraph />,
                     label: 'Bar chart',
                     labelInMenu: (
-                        <ChartFilterOptionLabel label="Bar chart" description="Trends over time as vertical bars." />
+                        <ChartFilterOptionLabel
+                            label="Bar chart"
+                            description="Trends over time as vertical bars side-by-side."
+                        />
+                    ),
+                },
+                {
+                    value: ChartDisplayType.ActionsBar,
+                    icon: <IconGraph />,
+                    label: 'Stacked bar chart',
+                    labelInMenu: (
+                        <ChartFilterOptionLabel
+                            label="Stacked bar chart"
+                            description="Trends over time as vertical bars."
+                        />
                     ),
                 },
             ],

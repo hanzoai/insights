@@ -1,7 +1,5 @@
 import { PropertyOperator } from '~/types'
-import { PropertyFilterType } from '~/types'
-
-import { SavedSessionRecordingPlaylistsResult } from '../saved-playlists/savedSessionRecordingPlaylistsLogic'
+import { PropertyFilterType, SavedSessionRecordingPlaylistsResult } from '~/types'
 
 export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
     count: 5,
@@ -22,7 +20,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             deleted: false,
             filters: {
@@ -43,7 +41,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             recordings_counts: {
                 saved_filters: {
@@ -72,7 +70,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             deleted: false,
             filters: {
@@ -93,7 +91,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             recordings_counts: {
                 saved_filters: {
@@ -120,7 +118,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             deleted: false,
             filters: {
@@ -141,7 +139,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
         },
         {
@@ -158,7 +156,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             deleted: false,
             filters: {
@@ -179,7 +177,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
         },
         {
@@ -196,7 +194,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
             deleted: false,
             filters: {
@@ -224,7 +222,7 @@ export const recordingPlaylists: SavedSessionRecordingPlaylistsResult = {
                 uuid: '01848677-afb6-0000-31a7-0ea1d72223c0',
                 distinct_id: '1abnMLh1NOnisQgUh0Ou5ZKIAT8nt4UNtnRXUDsGq9G',
                 first_name: 'Alex',
-                email: 'alex@posthog.com',
+                email: 'alex@hanzo.ai',
             },
         },
     ],

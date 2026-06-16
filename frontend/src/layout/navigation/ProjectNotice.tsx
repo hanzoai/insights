@@ -1,11 +1,7 @@
 import { useActions, useValues } from 'kea'
-import { useEffect, useState } from 'react'
 
-import { IconGear, IconPlus } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconGear, IconPlus } from '@hanzo/icons'
 
-import { dayjs } from 'lib/dayjs'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonBannerAction } from 'lib/lemon-ui/LemonBanner/LemonBanner'
 import { Link } from 'lib/lemon-ui/Link'
@@ -17,7 +13,8 @@ import { inviteLogic } from 'scenes/settings/organization/inviteLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { OnboardingStepKey, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { OnboardingStepKey } from '~/types'
 
 import { ProjectNoticeVariant, navigationLogic } from './navigationLogic'
 
@@ -28,42 +25,14 @@ interface ProjectNoticeBlueprint {
     closeable?: boolean
 }
 
-function CountDown({ datetime, callback }: { datetime: dayjs.Dayjs; callback?: () => void }): JSX.Element {
-    const [now, setNow] = useState(dayjs())
-
-    // Format the time difference as 00:00:00
-    const duration = dayjs.duration(datetime.diff(now))
-    const pastCountdown = duration.seconds() < 0
-
-    const countdown = pastCountdown
-        ? 'Expired'
-        : duration.hours() > 0
-          ? duration.format('HH:mm:ss')
-          : duration.format('mm:ss')
-
-    useOnMountEffect(() => {
-        const interval = setInterval(() => setNow(dayjs()), 1000)
-        return () => clearInterval(interval)
-    })
-
-    useEffect(() => {
-        if (pastCountdown) {
-            callback?.() // oxlint-disable-line react-hooks/exhaustive-deps
-        }
-    }, [pastCountdown])
-
-    return <>{countdown}</>
-}
-
 export function ProjectNotice({ className }: { className?: string }): JSX.Element | null {
     const { projectNoticeVariant } = useValues(navigationLogic)
     const { currentOrganization } = useValues(organizationLogic)
-    const { logout, loadUser } = useActions(userLogic)
-    const { user, userLoading } = useValues(userLogic)
+    const { user } = useValues(userLogic)
     const { closeProjectNotice } = useActions(navigationLogic)
     const { showInviteModal } = useActions(inviteLogic)
     const { requestVerificationLink } = useActions(verifyEmailLogic)
-    const { sceneConfig, productFromUrl } = useValues(sceneLogic)
+    const { sceneConfig, activeSceneProductKey } = useValues(sceneLogic)
 
     if (!projectNoticeVariant) {
         return null
@@ -81,7 +50,7 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
                             {' '}
                             When you're ready, head on over to the{' '}
                             <Link
-                                to={urls.project(altTeamForIngestion.id, urls.products())}
+                                to={urls.project(altTeamForIngestion.id, urls.onboarding())}
                                 data-attr="demo-project-alt-team-ingestion_link"
                             >
                                 onboarding wizard
@@ -98,7 +67,10 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
                 <>
                     This project has no events yet. Go to the{' '}
                     <Link
-                        to={urls.onboarding(productFromUrl ?? ProductKey.PRODUCT_ANALYTICS, OnboardingStepKey.INSTALL)}
+                        to={urls.onboarding({
+                            productKey: activeSceneProductKey ?? ProductKey.PRODUCT_ANALYTICS,
+                            stepKey: OnboardingStepKey.INSTALL,
+                        })}
                         data-attr="real_project_with_no_events-ingestion_link"
                     >
                         onboarding wizard
@@ -111,7 +83,10 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
                 </>
             ),
             action: {
-                to: urls.onboarding(productFromUrl ?? ProductKey.PRODUCT_ANALYTICS, OnboardingStepKey.INSTALL),
+                to: urls.onboarding({
+                    productKey: activeSceneProductKey ?? ProductKey.PRODUCT_ANALYTICS,
+                    stepKey: OnboardingStepKey.INSTALL,
+                }),
                 'data-attr': 'demo-warning-cta',
                 icon: <IconGear />,
                 children: 'Go to wizard',
@@ -119,7 +94,7 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
             closeable: true,
         },
         invite_teammates: {
-            message: 'Get more out of PostHog by inviting your team for free',
+            message: 'Get more out of Insights by inviting your team for free',
             action: {
                 'data-attr': 'invite-warning-cta',
                 onClick: showInviteModal,
@@ -137,33 +112,8 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
             },
             type: 'warning',
         },
-        is_impersonated: {
-            message: (
-                <>
-                    You are currently logged in as a customer.{' '}
-                    {user?.is_impersonated_until && (
-                        <>
-                            Expires in <CountDown datetime={dayjs(user.is_impersonated_until)} callback={loadUser} />
-                            {userLoading ? (
-                                <Spinner />
-                            ) : (
-                                <Link className="ml-2" onClick={() => loadUser()}>
-                                    Refresh
-                                </Link>
-                            )}
-                        </>
-                    )}
-                </>
-            ),
-            type: 'warning',
-            action: {
-                'data-attr': 'stop-impersonation-cta',
-                onClick: () => logout(),
-                children: 'Log out',
-            },
-        },
         internet_connection_issue: {
-            message: 'PostHog is having trouble connecting to the server. Please check your connection.',
+            message: 'Insights is having trouble connecting to the server. Please check your connection.',
             type: 'warning',
             action: {
                 'data-attr': 'reload-page',

@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { Group } from 'kea-forms'
 import { Field as KeaField } from 'kea-forms/lib/components'
 
-import { IconCopy, IconPlusSmall, IconTrash } from '@posthog/icons'
+import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -19,9 +19,8 @@ import { criteriaToBehavioralFilterType, isCohortCriteriaGroup } from 'scenes/co
 import { AndOrFilterSelect } from '~/queries/nodes/InsightViz/PropertyGroupFilters/AndOrFilterSelect'
 
 export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element {
-    const logic = cohortEditLogic(logicProps)
-    const { cohort } = useValues(logic)
-    const { setInnerGroupType, duplicateFilter, removeFilter, addFilter } = useActions(logic)
+    const { cohort } = useValues(cohortEditLogic)
+    const { setInnerGroupType, duplicateFilter, removeFilter, addFilter } = useActions(cohortEditLogic)
 
     return (
         <>
@@ -69,7 +68,7 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                                                 {error}
                                             </LemonBanner>
                                         )}
-                                        {kids}
+                                        {kids as React.ReactNode}
                                     </div>
                                 )
                             }}

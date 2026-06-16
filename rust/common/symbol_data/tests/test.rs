@@ -1,4 +1,4 @@
-use posthog_symbol_data::{read_symbol_data, write_symbol_data, SourceAndMap};
+use insights_symbol_data::{read_symbol_data, write_symbol_data, SourceAndMap};
 
 #[test]
 fn test_source_and_map_reading() {

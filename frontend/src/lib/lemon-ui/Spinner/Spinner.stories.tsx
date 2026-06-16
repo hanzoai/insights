@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { Spinner, SpinnerOverlay } from './Spinner'
 

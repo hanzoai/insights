@@ -4,9 +4,9 @@ use common_database::{PostgresReader, PostgresWriter};
 ///
 /// When persons tables are in a separate database, this router ensures queries
 /// go to the correct database:
-/// - Persons tables (posthog_persondistinctid, posthog_person, posthog_featureflaghashkeyoverride, etc.)
+/// - Persons tables (insights_persondistinctid, insights_person, insights_featureflaghashkeyoverride, etc.)
 ///   go to the persons database
-/// - Non-persons tables (posthog_featureflag, posthog_team, posthog_grouptypemapping, etc.)
+/// - Non-persons tables (insights_featureflag, insights_team, insights_grouptypemapping, etc.)
 ///   go to the main database
 #[derive(Clone)]
 pub struct PostgresRouter {

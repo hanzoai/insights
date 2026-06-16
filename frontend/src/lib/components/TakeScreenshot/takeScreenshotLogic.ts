@@ -1,7 +1,7 @@
 import { actions, kea, key, listeners, path, props, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import type { takeScreenshotLogicType } from './takeScreenshotLogicType'
 
@@ -169,7 +169,7 @@ export const takeScreenshotLogic = kea<takeScreenshotLogicType>([
         setBlob: async ({ blob }) => {
             if (!blob) {
                 lemonToast.error('Cannot take screenshot. Please try again.')
-                posthog.capture('screenshot_failed', {
+                insights.capture('screenshot_failed', {
                     screenshot_key: props.screenshotKey,
                 })
                 return
@@ -181,7 +181,7 @@ export const takeScreenshotLogic = kea<takeScreenshotLogicType>([
             actions.setImageFile(image)
             actions.setIsLoading(false)
 
-            posthog.capture('screenshot_taken', {
+            insights.capture('screenshot_taken', {
                 screenshot_key: props.screenshotKey,
             })
         },

@@ -1,4 +1,4 @@
-CREATE TABLE posthog_errortrackingsymbolset (
+CREATE TABLE insights_errortrackingsymbolset (
     id UUID PRIMARY KEY,
     ref TEXT NOT NULL,
     team_id INTEGER NOT NULL,
@@ -12,9 +12,9 @@ CREATE TABLE posthog_errortrackingsymbolset (
 );
 
 -- Create index for team_id and ref combination
-CREATE INDEX idx_error_tracking_symbol_sets_team_ref ON posthog_errortrackingsymbolset(team_id, ref);
+CREATE INDEX idx_error_tracking_symbol_sets_team_ref ON insights_errortrackingsymbolset(team_id, ref);
 
-CREATE TABLE IF NOT EXISTS posthog_errortrackingstackframe (
+CREATE TABLE IF NOT EXISTS insights_errortrackingstackframe (
     id UUID PRIMARY KEY,
     raw_id TEXT NOT NULL,
     team_id INTEGER NOT NULL,
@@ -23,17 +23,18 @@ CREATE TABLE IF NOT EXISTS posthog_errortrackingstackframe (
     contents JSONB NOT NULL,
     resolved BOOLEAN NOT NULL,
     context JSONB,
-    UNIQUE(raw_id, team_id)
+    part INTEGER NOT NULL,
+    UNIQUE(raw_id, team_id, part)
 );
 
-CREATE TABLE IF NOT EXISTS posthog_errortrackingissue (
+CREATE TABLE IF NOT EXISTS insights_errortrackingissue (
     id UUID PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     status TEXT,
     team_id INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS posthog_errortrackingissuefingerprintv2 (
+CREATE TABLE IF NOT EXISTS insights_errortrackingissuefingerprintv2 (
     id UUID PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     fingerprint TEXT NOT NULL,

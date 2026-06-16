@@ -1,4 +1,4 @@
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 

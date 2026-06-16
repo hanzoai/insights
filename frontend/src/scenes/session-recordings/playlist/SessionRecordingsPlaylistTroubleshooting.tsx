@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDivider, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider, Link } from '@hanzo/lemon-ui'
 
 import { playerSettingsLogic } from '../player/playerSettingsLogic'
 import { sessionRecordingsPlaylistLogic } from './sessionRecordingsPlaylistLogic'
@@ -44,14 +44,14 @@ export const SessionRecordingsPlaylistTroubleshooting = (): JSX.Element => {
                     </li>
                     <LemonDivider dashed={true} />
                     <li>
-                        <Link to="https://posthog.com/docs/session-replay/data-retention" target="_blank">
+                        <Link to="https://hanzo.ai/docs/session-replay/data-retention" target="_blank">
                             Recordings might be outside the retention period
                         </Link>
                     </li>
                     <LemonDivider dashed={true} />
                     <li>
                         <Link
-                            to="https://posthog.com/docs/session-replay/troubleshooting#4-adtracking-blockers"
+                            to="https://hanzo.ai/docs/session-replay/troubleshooting#4-adtracking-blockers"
                             target="_blank"
                         >
                             An ad blocker might be preventing recordings

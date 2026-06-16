@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { toast } from 'react-toastify'
 
-import { LemonInput, Tooltip } from '@posthog/lemon-ui'
+import { LemonInput, Tooltip } from '@hanzo/lemon-ui'
 
 import { retentionLogic } from 'scenes/retention/retentionLogic'
 

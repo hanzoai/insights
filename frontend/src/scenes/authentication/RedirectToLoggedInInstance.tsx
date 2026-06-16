@@ -10,20 +10,20 @@
  * To test this locally, you can edit your /etc/hosts to add a subdomain redirect
  *
  * Add the following line to your host file:
- * 127.0.0.1 us.posthogtest.com
+ * 127.0.0.1 us.insightstest.com
  *
  * Then set the following cookies locally:
- * document.cookie = 'ph_current_instance="https://eu.posthog.com"';
+ * document.cookie = 'ph_current_instance="https://insights.hanzo.ai"';
  * document.cookie = "is-logged-in=1";
  *
- * Then go to http://us.posthogtest.com:8000/login?next=/apps
+ * Then go to http://us.insightstest.com:8000/login?next=/apps
  * And it will update the subdomain, taking you to the following link
- * http://eu.posthogtest.com:8000/login?next=/apps
+ * http://eu.insightstest.com:8000/login?next=/apps
  */
-import { posthog } from 'posthog-js'
+import { insights } from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { getCookie } from 'lib/api'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -37,7 +37,7 @@ type Subdomain = 'eu' | 'us'
 
 export function cleanedCookieSubdomain(loggedInInstance: string | null): Subdomain | null {
     try {
-        // replace '"' as for some reason the cookie value is wrapped in quotes e.g. "https://eu.posthog.com"
+        // replace '"' as for some reason the cookie value is wrapped in quotes e.g. "https://insights.hanzo.ai"
         const url = loggedInInstance?.replace(/"/g, '')
         if (!url) {
             return null
@@ -45,16 +45,16 @@ export function cleanedCookieSubdomain(loggedInInstance: string | null): Subdoma
         // convert to URL, so that we can be sure we're dealing with a valid URL
         const hostname = new URL(url).hostname
         switch (hostname) {
-            case 'eu.posthog.com':
+            case 'insights.hanzo.ai':
                 return 'eu'
-            case 'us.posthog.com':
+            case 'insights.hanzo.ai':
                 return 'us'
             default:
                 return null
         }
     } catch (e) {
         // let's not allow errors in this code break the log-in page 🤞
-        posthog.captureException(e, { loggedInInstance })
+        insights.captureException(e, { loggedInInstance })
         return null
     }
 }
@@ -99,7 +99,7 @@ export function RedirectIfLoggedInOtherInstance(): JSX.Element | null {
         setLoggedInSubdomainValue(loggedInSubdomain)
         setIsOpen(true)
 
-        posthog.capture('Redirect to logged-in instance modal shown', {
+        insights.capture('Redirect to logged-in instance modal shown', {
             current_subdomain: currentSubdomain,
             logged_in_subdomain: loggedInSubdomain,
             redirect_url: newUrl.href,
@@ -160,7 +160,7 @@ export function RedirectIfLoggedInOtherInstance(): JSX.Element | null {
         >
             <div className="space-y-4">
                 <p className="mb-2">
-                    You're already logged into PostHog Cloud in the {regionFromSubdomain(loggedInSubdomainValue)}{' '}
+                    You're already logged into Insights Cloud in the {regionFromSubdomain(loggedInSubdomainValue)}{' '}
                     region.
                 </p>
                 <p className="mb-2">

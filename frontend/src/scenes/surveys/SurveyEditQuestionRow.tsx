@@ -5,13 +5,14 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { Group } from 'kea-forms'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonInput, LemonSelect, LemonTag } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonDialog, LemonInput, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { QuestionBranchingInput } from 'scenes/surveys/components/question-branching/QuestionBranchingInput'
 
 import {
+    BasicSurveyQuestion,
     MultipleSurveyQuestion,
     RatingSurveyQuestion,
     Survey,
@@ -22,8 +23,10 @@ import {
 
 import { HTMLEditor } from './SurveyAppearanceUtils'
 import { SurveyDragHandle } from './SurveyDragHandle'
+import { ValidationRulesEditor } from './components/ValidationRulesEditor'
 import { NewSurvey, SCALE_OPTIONS, SURVEY_RATING_SCALE, SurveyQuestionLabel } from './constants'
 import { surveyLogic } from './surveyLogic'
+import { isThumbQuestion } from './utils'
 
 type SurveyQuestionHeaderProps = {
     index: number
@@ -146,6 +149,8 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
     }
 
     const canSkipSubmitButton = canQuestionSkipSubmitButton(question)
+    const shouldShowNpsCheckbox =
+        question.type === SurveyQuestionType.Rating && question.scale === SURVEY_RATING_SCALE.NPS_10_POINT
 
     const confirmQuestionTypeChange = (
         index: number,
@@ -247,13 +252,23 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                     )}
                 </LemonField>
                 {survey.questions.length > 1 && (
-                    <LemonField name="optional" className="my-2">
+                    <LemonField name="optional">
                         <LemonCheckbox label="Optional" checked={!!question.optional} />
+                    </LemonField>
+                )}
+                {question.type === SurveyQuestionType.Open && (
+                    <LemonField name="validation">
+                        {({ value, onChange }) => (
+                            <ValidationRulesEditor
+                                value={(question as BasicSurveyQuestion).validation ?? value}
+                                onChange={onChange}
+                            />
+                        )}
                     </LemonField>
                 )}
                 {question.type === SurveyQuestionType.Link && (
                     <LemonField name="link" label="Link" info="Only https:// or mailto: links are supported.">
-                        <LemonInput value={question.link || ''} placeholder="https://posthog.com" />
+                        <LemonInput value={question.link || ''} placeholder="https://hanzo.ai" />
                     </LemonField>
                 )}
                 {question.type === SurveyQuestionType.Rating && (
@@ -295,14 +310,28 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                 />
                             </LemonField>
                         </div>
-                        <div className="flex flex-row gap-4">
-                            <LemonField name="lowerBoundLabel" label="Lower bound label" className="w-1/2">
-                                <LemonInput value={question.lowerBoundLabel || ''} />
+                        {!isThumbQuestion(question) && (
+                            <div className="flex flex-row gap-4">
+                                <LemonField name="lowerBoundLabel" label="Lower bound label" className="w-1/2">
+                                    <LemonInput value={question.lowerBoundLabel || ''} />
+                                </LemonField>
+                                <LemonField name="upperBoundLabel" label="Upper bound label" className="w-1/2">
+                                    <LemonInput value={question.upperBoundLabel || ''} />
+                                </LemonField>
+                            </div>
+                        )}
+                        {shouldShowNpsCheckbox && (
+                            <LemonField name="isNpsQuestion">
+                                {({ value: isNpsQuestion, onChange: toggleIsNpsQuestion }) => (
+                                    <LemonCheckbox
+                                        label="This is an NPS question"
+                                        info="If checked, we'll calculate and display NPS on the survey results page."
+                                        checked={isNpsQuestion !== false}
+                                        onChange={toggleIsNpsQuestion}
+                                    />
+                                )}
                             </LemonField>
-                            <LemonField name="upperBoundLabel" label="Upper bound label" className="w-1/2">
-                                <LemonInput value={question.upperBoundLabel || ''} />
-                            </LemonField>
-                        </div>
+                        )}
                     </div>
                 )}
                 {(question.type === SurveyQuestionType.SingleChoice ||
@@ -417,7 +446,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                     className="flex-1 flex gap-1 justify-center"
                     info={
                         canSkipSubmitButton
-                            ? "When the 'Automatically submit on selection' option is enabled, users won't need to click a submit button - their response will be submitted immediately after selecting an option. The submit button will be hidden. Requires at least version 1.244.0 of posthog-js. Not available for the mobile SDKs at the moment."
+                            ? "When the 'Automatically submit on selection' option is enabled, users won't need to click a submit button - their response will be submitted immediately after selecting an option. The submit button will be hidden. Requires at least version 1.244.0 of insights-js. Not available for the mobile SDKs at the moment."
                             : undefined
                     }
                 >

@@ -1,18 +1,18 @@
 from datetime import datetime
 
 ERROR_TRACKING_SYSTEM_PROMPT = """
-PostHog (posthog.com) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
+Insights (hanzo.ai) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
 
 ## Key Concepts
 
-Error tracking in PostHog works with these core concepts:
+Error tracking in Insights works with these core concepts:
 
 1. **Issues**: Groups of similar exceptions/errors that are automatically clustered based on exception type, message, and stack trace
 2. **Exceptions**: Individual `$exception` events that get grouped into issues
 3. **Properties**: Both issue-level properties and exception-level properties that can be filtered on
 4. **Search Types**:
    - Freeform text search (matches against exception type, message, function names, file paths in stack traces)
-   - Property-based filtering (exact property matching like elsewhere in PostHog) - far more powerful
+   - Property-based filtering (exact property matching like elsewhere in Insights) - far more powerful
 
 """
 
@@ -25,8 +25,8 @@ following the format below:
 Your output schema looks like this:
 ```ts
 export interface ErrorTrackingSceneToolOutput {
-    // REPLACES the existing order key
-    orderBy?: 'last_seen' | 'first_seen' | 'occurrences' | 'users' | 'sessions'
+    // REQUIRED: REPLACES the existing order key
+    orderBy: 'last_seen' | 'first_seen' | 'occurrences' | 'users' | 'sessions' | 'revenue'
     // REPLACES the existing order direction
     orderDirection?: 'ASC' | 'DESC'
     // REPLACE the existing status filter
@@ -89,7 +89,9 @@ export enum PropertyOperator {
 }
 ```
 
-Remember, all items marked optional are optional - only include a new value if:
+**Important**: `orderBy` is REQUIRED and must always be included in your response. If the user doesn't specify a sort order, use the current value from the existing filters.
+
+All other items marked optional are optional - only include a new value if:
 - It's relevant to the user's query.
 - It's not already present in the existing filterGroup
 
@@ -190,17 +192,17 @@ and the set of common library names is:
 ```ts
 export const COMMON_LIB_VALUES = new Set([
     'web', // This is the js frontend library
-    'posthog-python',
-    'posthog-node',
-    'posthog-react-native',
-    'posthog-ruby',
-    'posthog-ios',
-    'posthog-rs',
-    'posthog-android',
-    'posthog-go',
-    'posthog-php',
-    'posthog-flutter',
-    'posthog-java',
+    'hanzo-insights',
+    'insights-node',
+    'insights-react-native',
+    'insights-ruby',
+    'insights-ios',
+    'insights-rs',
+    'insights-android',
+    'insights-go',
+    'insights-php',
+    'insights-flutter',
+    'insights-java',
 ])
 ```
 
@@ -243,11 +245,11 @@ Again, always, always strongly prefer filterGroup over searchQuery.
 
 
 ERROR_TRACKING_ISSUE_IMPACT_DESCRIPTION_PROMPT = """
-PostHog (posthog.com) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
+Insights (hanzo.ai) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
 
 ## Key Concepts
 
-Error tracking in PostHog works with these core concepts:
+Error tracking in Insights works with these core concepts:
 
 1. **Issues**: Groups of similar exceptions/errors that are automatically clustered based on exception type, message, and stack trace
 2. **Exceptions**: Individual `$exception` events that get grouped into issues

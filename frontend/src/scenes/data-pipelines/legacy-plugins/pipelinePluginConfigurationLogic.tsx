@@ -106,13 +106,13 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                     return res
                 },
 
-                migrateToHogFunction: async () => {
+                migrateToInsightsFunction: async () => {
                     if (!props.pluginConfigId) {
                         return null
                     }
-                    const hogFunction = await api.pluginConfigs.migrate(props.pluginConfigId)
+                    const insightsFunction = await api.pluginConfigs.migrate(props.pluginConfigId)
 
-                    router.actions.replace(urls.hogFunction(hogFunction.id))
+                    router.actions.replace(urls.insightsFunction(insightsFunction.id))
 
                     return values.pluginConfig
                 },

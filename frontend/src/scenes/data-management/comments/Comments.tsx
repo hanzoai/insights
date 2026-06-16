@@ -1,25 +1,28 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneHog } from 'lib/components/hedgehogs'
+import { MicrophoneMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
 import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { getText } from 'scenes/comments/Comment'
+import { Scene } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { userLogic } from 'scenes/userLogic'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { CommentType, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { CommentType } from '~/types'
 
 import { SCOPE_OPTIONS, commentsLogic, openURLFor } from './commentsLogic'
 
@@ -41,8 +44,9 @@ export function Comments(): JSX.Element {
             key: 'content',
             width: '30%',
             render: function RenderComment(_, comment: CommentType): JSX.Element {
-                let renderedContent = <>{comment.content ?? ''}</>
-                if ((comment.content || '').trim().length > 50) {
+                const textContent = getText(comment)
+                let renderedContent = <>{textContent}</>
+                if (textContent.length > 50) {
                     renderedContent = (
                         <Tooltip
                             title={
@@ -50,11 +54,11 @@ export function Comments(): JSX.Element {
                                     className="whitespace-pre-wrap break-words"
                                     data-attr="comment-scene-comment-title-rendered-content"
                                 >
-                                    {comment.content ?? ''}
+                                    {textContent}
                                 </div>
                             }
                         >
-                            {(comment.content ?? '').slice(0, 47) + '...'}
+                            {textContent.slice(0, 47) + '...'}
                         </Tooltip>
                     )
                 }
@@ -128,13 +132,12 @@ export function Comments(): JSX.Element {
     return (
         <SceneContent data-attr="comments-management-scene">
             <SceneTitleSection
-                name="Comments"
-                description="Comments allow you to provide context and discussions on various elements in PostHog."
+                name={sceneConfigurations[Scene.Comments].name}
+                description={sceneConfigurations[Scene.Comments].description}
                 resourceType={{
-                    type: 'comment',
+                    type: sceneConfigurations[Scene.Comments].iconType || 'default_icon_type',
                 }}
             />
-            <SceneDivider />
             <div className="flex flex-row gap-4 justify-between">
                 <div className="flex flex-row items-center gap-2">
                     <LemonInput
@@ -172,9 +175,9 @@ export function Comments(): JSX.Element {
                         productName="Comments"
                         productKey={ProductKey.COMMENTS}
                         thingName="comment"
-                        description="Comments allow you to provide context and discussions on various elements in PostHog."
+                        description="Comments allow you to provide context and discussions on various elements in Insights."
                         isEmpty={shouldShowEmptyState}
-                        customHog={MicrophoneHog}
+                        customInsights={MicrophoneMascot}
                     />
                 </div>
                 {!shouldShowEmptyState && (

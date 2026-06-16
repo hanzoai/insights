@@ -1,0 +1,152 @@
+import { IconCopy, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonTable, Link, Tooltip } from '@hanzo/lemon-ui'
+
+import { copyToClipboard } from 'lib/utils/copyToClipboard'
+
+export type PropertiesTableProps = {
+    entries: [string, unknown][]
+    alternatingColors?: boolean
+}
+
+export function PropertiesTable({ entries, alternatingColors = true }: PropertiesTableProps): JSX.Element {
+    return (
+        <LemonTable
+            embedded
+            size="small"
+            dataSource={entries.filter(([, value]) => value !== undefined).map(([key, value]) => ({ key, value }))}
+            showHeader={false}
+            columns={[
+                {
+                    title: 'Key',
+                    key: 'key',
+                    dataIndex: 'key',
+                    width: 0,
+                    className: 'font-medium bg-inherit',
+                    render: (dataValue, record) => (
+                        <div className="flex gap-x-2 justify-between items-center">
+                            <div>{String(dataValue)}</div>
+                            <LemonButton
+                                size="xsmall"
+                                tooltip="Copy value"
+                                className="invisible group-hover:visible"
+                                onClick={() =>
+                                    copyToClipboard(copyValue(record.value)).catch((error) => {
+                                        console.error('Failed to copy to clipboard:', error)
+                                    })
+                                }
+                            >
+                                <IconCopy />
+                            </LemonButton>
+                        </div>
+                    ),
+                },
+                {
+                    title: 'Value',
+                    key: 'value',
+                    dataIndex: 'value',
+                    className: 'whitespace-nowrap',
+                    render: (value) => {
+                        return <div className="whitespace-nowrap">{renderValue(value)}</div>
+                    },
+                },
+            ]}
+            rowClassName={
+                alternatingColors ? 'even:bg-fill-tertiary odd:bg-surface-primary group' : 'bg-fill-secondary group'
+            }
+            firstColumnSticky
+        />
+    )
+}
+
+const SENTINELS = {
+    Redacted: '$$_insights_redacted_based_on_masking_rules_$$',
+    ValueTooLong: '$$_insights_value_too_long_$$',
+}
+
+const SENTINEL_REPLACEMENTS: Record<string, string> = {
+    [SENTINELS.Redacted]: '***',
+    [SENTINELS.ValueTooLong]: '<value too long>',
+}
+
+function normalizeSentinels(str: string): string {
+    let result = str
+    for (const [sentinel, replacement] of Object.entries(SENTINEL_REPLACEMENTS)) {
+        result = result.replaceAll(sentinel, replacement)
+    }
+    return result
+}
+
+function copyValue(value: unknown): string {
+    // oxlint-disable-next-line
+    if (value && typeof value === 'object') {
+        return normalizeSentinels(JSON.stringify(value))
+    }
+    return normalizeSentinels(String(value))
+}
+
+function renderValue(value: unknown): React.ReactNode {
+    if (Array.isArray(value)) {
+        return '[' + value.map(renderValue).join(', ') + ']'
+    } else if (value && typeof value === 'object') {
+        return (
+            '{' +
+            Object.entries(value)
+                .map(([k, v]) => `${k}: ${renderValue(v)}`)
+                .join(', ') +
+            '}'
+        )
+    } else if (typeof value === 'string') {
+        if (value === SENTINELS.Redacted) {
+            return (
+                <MaskedValue
+                    value="***"
+                    tooltip="This value got redacted by SDK code variables masking configuration"
+                />
+            )
+        }
+        if (value.includes(SENTINELS.Redacted)) {
+            return (
+                <MaskedValue
+                    value={normalizeSentinels(value)}
+                    tooltip="Some values inside got redacted by SDK code variables masking configuration"
+                />
+            )
+        }
+        if (value === SENTINELS.ValueTooLong) {
+            return (
+                <MaskedValue
+                    value="<value too long>"
+                    tooltip="This value was truncated because it exceeded the maximum allowed length"
+                />
+            )
+        }
+        if (value.includes(SENTINELS.ValueTooLong)) {
+            return (
+                <MaskedValue
+                    value={normalizeSentinels(value)}
+                    tooltip="Some values inside were truncated because they exceeded the maximum allowed length"
+                />
+            )
+        }
+        if (/^https?:\/\/.+/.test(value)) {
+            return (
+                <Link to={value as string} target="_blank">
+                    {value}
+                </Link>
+            )
+        }
+        return value // no quotes
+    }
+    return String(value)
+}
+
+export function MaskedValue({ value, tooltip }: { value: string; tooltip: string }): JSX.Element {
+    return (
+        <span className="inline-flex items-center gap-1">
+            <Tooltip title={tooltip}>
+                <IconInfo className="text-muted text-sm" />
+            </Tooltip>
+            {value}
+        </span>
+    )
+}

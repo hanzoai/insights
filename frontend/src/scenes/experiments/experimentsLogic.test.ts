@@ -6,7 +6,7 @@ import { expectLogic } from 'kea-test-utils'
 import { NEW_FLAG } from 'scenes/feature-flags/featureFlagLogic'
 
 import { initKeaTests } from '~/test/init'
-import { Experiment, ExperimentsTabs, FeatureFlagType, ProgressStatus } from '~/types'
+import { Experiment, ExperimentProgressStatus, FeatureFlagType } from '~/types'
 
 import { experimentsLogic, getExperimentStatus, getExperimentStatusColor } from './experimentsLogic'
 
@@ -55,12 +55,6 @@ describe('experimentsLogic', () => {
     })
 
     describe('feature flag modal filters', () => {
-        it('loads feature flags on mount', async () => {
-            await expectLogic(logic).toFinishAllListeners()
-
-            expect(api.get).toHaveBeenCalledWith(expect.stringMatching(/api\/projects\/\d+\/feature_flags\/\?/))
-        })
-
         it('updates filters and triggers new API call', async () => {
             api.get.mockClear()
 
@@ -87,7 +81,6 @@ describe('experimentsLogic', () => {
                 featureFlagModalFilters: {
                     active: undefined,
                     created_by_id: undefined,
-                    type: undefined,
                     search: undefined,
                     order: undefined,
                     page: 1,
@@ -114,7 +107,6 @@ describe('experimentsLogic', () => {
                     featureFlagModalFilters: {
                         active: undefined,
                         created_by_id: undefined,
-                        type: undefined,
                         search: undefined,
                         order: undefined,
                         page: 1,
@@ -123,7 +115,9 @@ describe('experimentsLogic', () => {
                 })
                 .toFinishAllListeners()
 
-            expect(api.get).toHaveBeenCalledWith(expect.stringMatching(/api\/projects\/\d+\/feature_flags\/\?/))
+            expect(api.get).toHaveBeenCalledWith(
+                expect.stringMatching(/api\/projects\/\d+\/experiments\/eligible_feature_flags\/\?/)
+            )
         })
 
         it('hides pagination when insufficient results', () => {
@@ -190,43 +184,29 @@ describe('experimentsLogic', () => {
             expect(logic.values.featureFlagModalFilters.search).toBe('test')
         })
 
-        it('resets page to 1 when type filter is applied from page 2', () => {
-            // User navigates to page 2
-            logic.actions.setFeatureFlagModalFilters({ page: 2 })
-            expect(logic.values.featureFlagModalFilters.page).toBe(2)
-
-            // User applies a type filter (simulating what FeatureFlagFiltersSection does)
-            logic.actions.setFeatureFlagModalFilters({ type: 'boolean', page: 1 })
-
-            // Should reset to page 1
-            expect(logic.values.featureFlagModalFilters.page).toBe(1)
-            expect(logic.values.featureFlagModalFilters.type).toBe('boolean')
-        })
-
         it('removes ff_page URL parameter when page is reset to 1 via filters', () => {
-            // Mock router to capture URL changes
-            const mockPush = jest.fn()
-            router.actions.push = mockPush
+            // Mock router to capture URL changes (uses replace, not push, to avoid polluting browser history)
+            const mockReplace = jest.fn()
+            router.actions.replace = mockReplace
 
             // User navigates to page 2 first
             logic.actions.setFeatureFlagModalFilters({ page: 2 })
 
             // This should add ff_page=2 to URL
-            expect(mockPush).toHaveBeenLastCalledWith(expect.stringContaining('ff_page=2'))
+            expect(mockReplace).toHaveBeenLastCalledWith(expect.stringContaining('ff_page=2'))
 
-            mockPush.mockClear()
+            mockReplace.mockClear()
 
             // User applies a search filter which includes page: 1
             logic.actions.setFeatureFlagModalFilters({ search: 'test', page: 1 })
 
             // This should remove ff_page from URL (since page is 1)
-            expect(mockPush).toHaveBeenLastCalledWith(expect.not.stringContaining('ff_page'))
+            expect(mockReplace).toHaveBeenLastCalledWith(expect.not.stringContaining('ff_page'))
         })
 
         it('constructs API params correctly', async () => {
             logic.actions.setFeatureFlagModalFilters({
                 search: 'test',
-                type: 'boolean',
                 active: 'true',
                 page: 2,
             })
@@ -234,7 +214,6 @@ describe('experimentsLogic', () => {
             await expectLogic(logic).toMatchValues({
                 featureFlagModalParamsFromFilters: {
                     search: 'test',
-                    type: 'boolean',
                     active: 'true',
                     page: 2,
                     limit: 100,
@@ -271,16 +250,13 @@ describe('experimentsLogic', () => {
             expect(api.get).toHaveBeenCalledWith(expect.stringContaining('search=test%20experiment'))
         })
 
-        it('handles tab switching', async () => {
+        it('filters archived experiments', async () => {
             api.get.mockClear()
 
             await expectLogic(logic, () => {
-                logic.actions.setExperimentsTab(ExperimentsTabs.Archived)
-                logic.actions.loadExperiments()
+                logic.actions.setExperimentsFilters({ archived: true })
             })
-                .toMatchValues({
-                    tab: ExperimentsTabs.Archived,
-                })
+                .delay(350)
                 .toFinishAllListeners()
 
             expect(api.get).toHaveBeenCalledWith(expect.stringContaining('archived=true'))
@@ -289,13 +265,13 @@ describe('experimentsLogic', () => {
         it('constructs correct params from filters', () => {
             logic.actions.setExperimentsFilters({
                 search: 'test',
-                status: ProgressStatus.Running,
+                status: ExperimentProgressStatus.Running,
                 page: 2,
             })
 
             expect(logic.values.paramsFromFilters).toEqual({
                 search: 'test',
-                status: ProgressStatus.Running,
+                status: ExperimentProgressStatus.Running,
                 page: 2,
                 limit: 100,
                 offset: 100,
@@ -412,23 +388,42 @@ describe('experimentsLogic', () => {
 describe('utility functions', () => {
     describe('getExperimentStatus', () => {
         it('returns Draft for experiments without start date', () => {
-            expect(getExperimentStatus(mockDraftExperiment)).toBe(ProgressStatus.Draft)
+            expect(getExperimentStatus(mockDraftExperiment)).toBe(ExperimentProgressStatus.Draft)
         })
 
         it('returns Running for experiments with start date but no end date', () => {
-            expect(getExperimentStatus(mockRunningExperiment)).toBe(ProgressStatus.Running)
+            expect(getExperimentStatus(mockRunningExperiment)).toBe(ExperimentProgressStatus.Running)
         })
 
         it('returns Complete for experiments with both start and end dates', () => {
-            expect(getExperimentStatus(mockExperiment)).toBe(ProgressStatus.Complete)
+            expect(getExperimentStatus(mockExperiment)).toBe(ExperimentProgressStatus.Complete)
+        })
+
+        it('returns Paused when feature flag is inactive', () => {
+            const pausedExperiment = createMockExperiment({
+                start_date: '2024-01-01',
+                end_date: null,
+                feature_flag: { active: false },
+            })
+            expect(getExperimentStatus(pausedExperiment)).toBe(ExperimentProgressStatus.Paused)
+        })
+
+        it('returns Running when feature flag is active', () => {
+            const runningExperiment = createMockExperiment({
+                start_date: '2024-01-01',
+                end_date: null,
+                feature_flag: { active: true },
+            })
+            expect(getExperimentStatus(runningExperiment)).toBe(ExperimentProgressStatus.Running)
         })
     })
 
     describe('getExperimentStatusColor', () => {
         it('returns correct colors for each status', () => {
-            expect(getExperimentStatusColor(ProgressStatus.Draft)).toBe('default')
-            expect(getExperimentStatusColor(ProgressStatus.Running)).toBe('success')
-            expect(getExperimentStatusColor(ProgressStatus.Complete)).toBe('completion')
+            expect(getExperimentStatusColor(ExperimentProgressStatus.Draft)).toBe('default')
+            expect(getExperimentStatusColor(ExperimentProgressStatus.Running)).toBe('success')
+            expect(getExperimentStatusColor(ExperimentProgressStatus.Paused)).toBe('warning')
+            expect(getExperimentStatusColor(ExperimentProgressStatus.Complete)).toBe('completion')
         })
     })
 })

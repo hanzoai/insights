@@ -1,0 +1,11 @@
+# serializer version: 1
+# name: TestFeatureFlagAnalytics.test_efficient_querying_of_team_decide_usage_data
+  '''
+  SELECT "insights_team"."id",
+         "insights_team"."uuid"
+  FROM "insights_team"
+  INNER JOIN "insights_organization" ON ("insights_team"."organization_id" = "insights_organization"."id")
+  WHERE NOT (("insights_organization"."for_internal_metrics"
+              OR "insights_team"."is_demo"))
+  '''
+# ---

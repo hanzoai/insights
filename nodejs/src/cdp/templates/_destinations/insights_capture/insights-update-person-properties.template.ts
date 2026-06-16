@@ -1,0 +1,59 @@
+import { InsightsFunctionTemplate } from '~/cdp/types'
+
+export const template: InsightsFunctionTemplate = {
+    free: true,
+    status: 'hidden',
+    type: 'destination',
+    id: 'template-insights-update-person-properties',
+    name: 'Update person properties',
+    description: 'Updates properties of a Insights person',
+    icon_url: '/static/insights-icon.svg',
+    category: ['Custom', 'Analytics'],
+    code_language: 'fn',
+    code: `
+if (empty(inputs.distinct_id)) {
+  throw Error('Distinct ID is required')
+}
+
+insightsCapture({
+  'event': '$set',
+  'distinct_id': inputs.distinct_id,
+  'properties': {
+    '$set': inputs.set_properties,
+    '$set_once': inputs.set_once_properties
+  }
+})
+`,
+    inputs_schema: [
+        {
+            type: 'string',
+            key: 'distinct_id',
+            label: 'Distinct ID',
+            required: true,
+            secret: false,
+            hidden: false,
+            default: '{event.distinct_id}',
+            description: 'The distinct ID associated with the Person.',
+        },
+        {
+            type: 'dictionary',
+            key: 'set_properties',
+            label: 'Properties to set',
+            required: false,
+            default: {},
+            secret: false,
+            hidden: false,
+            description: 'The properties to update on the person.',
+        },
+        {
+            type: 'dictionary',
+            key: 'set_once_properties',
+            label: 'Properties to set once',
+            required: false,
+            default: {},
+            secret: false,
+            hidden: false,
+            description: 'The properties to set if they do not already exist on the person.',
+        },
+    ],
+}

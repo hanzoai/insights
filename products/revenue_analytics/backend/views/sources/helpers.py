@@ -1,10 +1,14 @@
-from posthog.schema import CurrencyCode
+from datetime import datetime
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_expr
+from django.conf import settings
 
-from posthog.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
-from posthog.models.team.team import Team
+from insights.schema import CurrencyCode
+
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_expr
+
+from insights.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
+from insights.models.team.team import Team
 
 # Stripe represents most currencies with integer amounts multiplied by 100,
 # since most currencies have its smallest unit as 1/100 of their base unit
@@ -71,7 +75,7 @@ def currency_aware_amount() -> ast.Alias:
 
 
 def events_expr_for_team(team: Team) -> ast.Expr:
-    from posthog.hogql.property import property_to_expr
+    from insights.insightsql.property import property_to_expr
 
     exprs = []
     if (
@@ -111,3 +115,25 @@ def extract_json_uint(field: str, *path: str) -> ast.Call:
             *[ast.Constant(value=p) for p in path],
         ],
     )
+
+
+# How many days to look back to calculate MRR, needs to be at least 30 to get all
+# of the subscriptions from the previous period. Erring on the side of caution here.
+MRR_LOOKBACK_PERIOD_DAYS: int = 60
+
+
+def generate_mrr_start_and_end_date_expr() -> tuple[ast.Expr, ast.Expr]:
+    # We wanna be able to have stable dates on tests, so we generate based on `datetime.now`
+    # which can be easily mocked
+    #
+    # The actual view, however, needs to take the current time when doing the calculations
+    # since it will be stored in the database and needs to keep udpating as time goes by
+    now_expr = ast.Call(name="now", args=[]) if not settings.TEST else ast.Constant(value=datetime.now())
+
+    start_date_expr = ast.Call(
+        name="toStartOfMonth",
+        args=[ast.Call(name="addDays", args=[now_expr, ast.Constant(value=-MRR_LOOKBACK_PERIOD_DAYS)])],
+    )
+    end_date_expr = now_expr
+
+    return start_date_expr, end_date_expr

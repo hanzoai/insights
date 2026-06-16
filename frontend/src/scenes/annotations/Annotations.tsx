@@ -1,12 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import { IconNotification, IconPencil } from '@posthog/icons'
-import { LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconPencil } from '@hanzo/icons'
+import { LemonSelect, Link } from '@hanzo/lemon-ui'
 
+import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
+import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneHog } from 'lib/components/hedgehogs'
+import { MicrophoneMascot } from 'lib/components/mascots'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
@@ -15,18 +17,26 @@ import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { organizationLogic } from 'scenes/organizationLogic'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { sceneConfigurations } from 'scenes/scenes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { annotationsModel } from '~/models/annotationsModel'
-import { AnnotationScope, AnnotationType, InsightShortId, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { AnnotationScope, AnnotationType, InsightShortId } from '~/types'
 
 import { AnnotationModal } from './AnnotationModal'
 import { annotationModalLogic, annotationScopeToLevel, annotationScopeToName } from './annotationModalLogic'
 import { annotationScopesMenuOptions, annotationsLogic } from './annotationsLogic'
+
+export const scene: SceneExport = {
+    component: Annotations,
+    logic: annotationsLogic,
+    productKey: ProductKey.ANNOTATIONS,
+}
 
 export function Annotations(): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
@@ -147,14 +157,30 @@ export function Annotations(): JSX.Element {
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Annotations"
-                description="Annotations allow you to mark when certain changes happened so you can easily see how they impacted your metrics."
+                name={sceneConfigurations[Scene.Annotations].name}
+                description={sceneConfigurations[Scene.Annotations].description}
                 resourceType={{
-                    type: 'annotation',
-                    forceIcon: <IconNotification />,
+                    type: sceneConfigurations[Scene.Annotations].iconType || 'default_icon_type',
                 }}
+                actions={
+                    <AppShortcut
+                        name="NewAnnotation"
+                        keybind={[keyBinds.new]}
+                        intent="New annotation"
+                        interaction="click"
+                        scope={Scene.Annotations}
+                    >
+                        <LemonButton
+                            type="primary"
+                            onClick={() => openModalToCreateAnnotation()}
+                            size="small"
+                            tooltip="New annotation"
+                        >
+                            New annotation
+                        </LemonButton>
+                    </AppShortcut>
+                }
             />
-            <SceneDivider />
             <div className="flex flex-row items-center gap-2 justify-end">
                 <div>Scope:</div>
                 <LemonSelect options={annotationScopesMenuOptions()} value={scope} onSelect={setScope} />
@@ -166,10 +192,10 @@ export function Annotations(): JSX.Element {
                         productKey={ProductKey.ANNOTATIONS}
                         thingName="annotation"
                         description="Annotations allow you to mark when certain changes happened so you can easily see how they impacted your metrics."
-                        docsURL="https://posthog.com/docs/data/annotations"
+                        docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customHog={MicrophoneHog}
+                        customInsights={MicrophoneMascot}
                     />
                 </div>
                 {!shouldShowEmptyState && (

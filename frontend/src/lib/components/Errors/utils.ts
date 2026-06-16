@@ -1,60 +1,58 @@
-import { isPostHogProperty } from '~/taxonomy/taxonomy'
+import { P, match } from 'ts-pattern'
+
+import { isInsightsProperty } from '~/taxonomy/taxonomy'
 
 import {
     ErrorEventProperties,
     ErrorTrackingException,
     ErrorTrackingRuntime,
+    ErrorTrackingStackFrame,
     ExceptionAttributes,
     FingerprintRecordPart,
 } from './types'
 
-export function hasStacktrace(exceptionList: ErrorTrackingException[]): boolean {
-    return exceptionList.length > 0 && exceptionList.some((e) => !!e.stacktrace)
-}
-
-export function hasInAppFrames(exceptionList: ErrorTrackingException[]): boolean {
-    return exceptionList.some(({ stacktrace }) => stacktraceHasInAppFrames(stacktrace))
-}
-
 export function stacktraceHasInAppFrames(stacktrace: ErrorTrackingException['stacktrace']): boolean {
-    return stacktrace?.frames?.some(({ in_app }) => in_app) ?? false
+    if (!stacktrace?.frames || !Array.isArray(stacktrace.frames)) {
+        return false
+    }
+    return stacktrace.frames.some(({ in_app }) => in_app)
 }
 
 export function getRuntimeFromLib(lib?: string | null): ErrorTrackingRuntime {
     switch (lib?.toLowerCase()) {
-        case 'posthog-python':
+        case 'insights-python':
             return 'python'
-        case 'posthog-node':
+        case 'insights-node':
         case 'analytics-node':
-        case 'posthog-edge':
+        case 'insights-edge':
             return 'node'
-        case 'posthog-js':
+        case 'insights-js':
         case 'web':
         case 'js':
             return 'web'
-        case 'posthog-go':
+        case 'insights-go':
         case 'analytics-go':
             return 'go'
-        case 'posthog-php':
+        case 'insights-php':
             return 'php'
-        case 'posthog-rs':
+        case 'insights-rs':
             return 'rust'
-        case 'posthog-dotnet':
+        case 'insights-dotnet':
             return 'dotnet'
-        case 'posthog-android':
+        case 'insights-android':
             return 'android'
-        case 'posthog-ios':
+        case 'insights-ios':
         case 'ios-widget':
             return 'ios'
-        case 'posthog-react-native':
+        case 'insights-react-native':
             return 'react-native'
-        case 'posthog-dart':
+        case 'insights-dart':
             return 'dart'
-        case 'posthog-flutter':
+        case 'insights-flutter':
             return 'flutter'
-        case 'posthog-elixir':
+        case 'insights-elixir':
             return 'elixir'
-        case 'posthog-java':
+        case 'insights-java':
         case 'analytics-java':
             return 'java'
         default:
@@ -98,13 +96,13 @@ export function getExceptionAttributes(properties: Record<string, any>): Excepti
         // we have seen in production that we managed to get `value = {}`
         // so even though this is typed as a string
         // it might not be!
-        type = exceptionList?.[0]?.type ? String(exceptionList?.[0]?.type) : undefined
+        type = exceptionList?.[0]?.type ? stringify(exceptionList?.[0]?.type) : undefined
     }
     if (!value) {
         // we have seen in production that we managed to get `value = {}`
         // so even though this is typed as a string
         // it might not be!
-        value = exceptionList?.[0]?.value ? String(exceptionList?.[0]?.value) : undefined
+        value = exceptionList?.[0]?.value ? stringify(exceptionList?.[0]?.value) : undefined
     }
     if (synthetic == undefined) {
         synthetic = exceptionList?.[0]?.mechanism?.synthetic
@@ -112,6 +110,8 @@ export function getExceptionAttributes(properties: Record<string, any>): Excepti
 
     const handled = exceptionList?.[0]?.mechanism?.handled ?? false
     const runtime: ErrorTrackingRuntime = getRuntimeFromLib(lib)
+    const appNamespace = properties.$app_namespace
+    const appVersion = properties.$app_version
 
     return {
         type,
@@ -129,12 +129,16 @@ export function getExceptionAttributes(properties: Record<string, any>): Excepti
         handled,
         level,
         ingestionErrors,
+        appNamespace,
+        appVersion,
     }
 }
 
 export function getExceptionList(properties: ErrorEventProperties): ErrorTrackingException[] {
     const { $sentry_exception } = properties
-    let exceptionList: ErrorTrackingException[] | undefined = properties.$exception_list
+
+    let exceptionList: ErrorTrackingException[] = processExceptionList(properties.$exception_list)
+
     // exception autocapture sets $exception_list for all exceptions.
     // If it's not present, then this is probably a sentry exception. Get this list from the sentry_exception
     if (!exceptionList?.length && $sentry_exception) {
@@ -142,7 +146,32 @@ export function getExceptionList(properties: ErrorEventProperties): ErrorTrackin
             exceptionList = $sentry_exception.values
         }
     }
-    return exceptionList || []
+
+    return exceptionList
+}
+
+function processExceptionList(exceptionList: ErrorTrackingException[] = []): ErrorTrackingException[] {
+    exceptionList = ensureStringExceptionValues(exceptionList)
+    exceptionList = ensureFrameIdFormat(exceptionList)
+    return exceptionList
+}
+
+function ensureFrameIdFormat(exceptionList: ErrorTrackingException[]): ErrorTrackingException[] {
+    exceptionList = exceptionList.map((exception) => {
+        if (!exception.stacktrace || !exception.stacktrace.frames || !Array.isArray(exception.stacktrace.frames)) {
+            return exception
+        }
+        exception.stacktrace.frames = exception.stacktrace.frames.map((frame) => {
+            frame.raw_id = frame.raw_id ? coerceLegacyRawId(frame.raw_id) : frame.raw_id
+            return frame
+        })
+        return exception
+    })
+    return exceptionList
+}
+
+function coerceLegacyRawId(rawId: string): string {
+    return rawId.includes('/') ? rawId : `${rawId}/0`
 }
 
 export function getFingerprintRecords(properties: ErrorEventProperties): FingerprintRecordPart[] {
@@ -156,7 +185,7 @@ export function getAdditionalProperties(
 ): Record<string, unknown> {
     return Object.fromEntries(
         Object.entries(properties).filter(([key]) => {
-            return !isPostHogProperty(key, isCloudOrDev)
+            return key === 'version' || !isInsightsProperty(key, isCloudOrDev)
         })
     )
 }
@@ -167,4 +196,72 @@ export function getSessionId(properties: ErrorEventProperties): string | undefin
 
 export function getRecordingStatus(properties: ErrorEventProperties): string | undefined {
     return properties['$recording_status'] as string | undefined
+}
+
+// we had a bug where SDK was sending non-string values for exception value
+function ensureStringExceptionValues(exceptionList: ErrorTrackingException[]): ErrorTrackingException[] {
+    if (!Array.isArray(exceptionList)) {
+        return []
+    }
+
+    return exceptionList.map((exception) => ({
+        ...exception,
+        value: stringify(exception.value),
+    }))
+}
+
+export function stringify(value: any): string {
+    if (typeof value === 'string') {
+        return value
+    }
+
+    try {
+        return JSON.stringify(value)
+    } catch {}
+
+    try {
+        return value.toString()
+    } catch {}
+
+    return ''
+}
+
+export function formatFunctionName(
+    frame: Pick<ErrorTrackingStackFrame, 'module' | 'resolved_name' | 'lang' | 'mangled_name'>
+): string | undefined {
+    const functionName: string | undefined = frame.resolved_name ?? frame.mangled_name ?? undefined
+    return match([frame.lang, frame.module, functionName])
+        .with(['java', P.string, P.string], ([_, module, functionName]) => `${module}.${functionName}`)
+        .with(['java', P.string, P.nullish], ([_, module]) => `${module}`)
+        .otherwise(() => functionName)
+}
+
+export function formatResolvedName(
+    frame: Pick<ErrorTrackingStackFrame, 'module' | 'resolved_name' | 'lang'>
+): string | null {
+    if (!frame.resolved_name || frame.resolved_name === '?') {
+        return null
+    }
+    return frame.module && frame.lang === 'java' ? `${frame.module}.${frame.resolved_name}` : frame.resolved_name
+}
+
+export function formatType(exception: Pick<ErrorTrackingException, 'module' | 'type' | 'stacktrace'>): string {
+    const frames = exception.stacktrace?.frames
+    const hasJavaFrames = Array.isArray(frames) && frames.some((frame) => frame.lang === 'java')
+    return exception.module && hasJavaFrames ? `${exception.module}.${exception.type}` : exception.type
+}
+
+export function formatExceptionDisplay(
+    exception: Pick<ErrorTrackingException, 'module' | 'type' | 'stacktrace' | 'value'>
+): string {
+    return `${formatType(exception)}${exception.value ? `: ${exception.value}` : ''}`
+}
+
+export function createFrameFilter(showAllFrames: boolean) {
+    return (frame: ErrorTrackingStackFrame) => {
+        if (showAllFrames) {
+            return true
+        }
+        return frame.in_app
+    }
 }

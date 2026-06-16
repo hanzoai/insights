@@ -37,16 +37,16 @@ const meta: Meta<typeof LemonInputSelect> = {
                     <ProfilePicture
                         user={{
                             first_name: x,
-                            email: `${x}@posthog.com`,
+                            email: `${x}@hanzo.ai`,
                         }}
                         size="sm"
                     />
                     <span>
-                        {capitalizeFirstLetter(x)} <b>{`<${x}@posthog.com>`}</b>
+                        {capitalizeFirstLetter(x)} <b>{`<${x}@hanzo.ai>`}</b>
                     </span>
                 </span>
             ),
-            label: `${capitalizeFirstLetter(x)} <${x}@posthog.com>`,
+            label: `${capitalizeFirstLetter(x)} <${x}@hanzo.ai>`,
         })),
     },
     tags: ['autodocs'],
@@ -74,17 +74,64 @@ export const MultipleSelectWithCustom: Story = {
         allowCustomValues: true,
         options: [
             {
-                key: 'http://posthog.com/docs',
-                label: 'http://posthog.com/docs',
+                key: 'http://hanzo.ai/docs',
+                label: 'http://hanzo.ai/docs',
             },
             {
-                key: 'http://posthog.com/pricing',
-                label: 'http://posthog.com/pricing',
+                key: 'http://hanzo.ai/pricing',
+                label: 'http://hanzo.ai/pricing',
             },
 
             {
-                key: 'http://posthog.com/products',
-                label: 'http://posthog.com/products',
+                key: 'http://hanzo.ai/products',
+                label: 'http://hanzo.ai/products',
+            },
+        ],
+    },
+}
+
+export const Autocomplete: Story = {
+    args: {
+        placeholder: 'Enter a new URL or select existing (Single Select With Custom)',
+        mode: 'single',
+        allowCustomValues: true,
+        formatCreateLabel: (input) => (
+            <>
+                {input} <i>(new entry)</i>
+            </>
+        ),
+        options: [
+            {
+                key: 'http://hanzo.ai/docs',
+                label: 'http://hanzo.ai/docs',
+            },
+            {
+                key: 'http://hanzo.ai/pricing',
+                label: 'http://hanzo.ai/pricing',
+            },
+            {
+                key: 'http://hanzo.ai/products',
+                label: 'http://hanzo.ai/products',
+            },
+        ],
+    },
+}
+
+export const WithInputNormalization: Story = {
+    args: {
+        placeholder: 'Enter a URL (spaces to dashes, lowercase)',
+        mode: 'single',
+        allowCustomValues: true,
+        inputTransform: (input) => input.toLowerCase().replace(/\s+/g, '-'),
+        formatCreateLabel: (input) => (
+            <>
+                {input} <i>(new entry)</i>
+            </>
+        ),
+        options: [
+            {
+                key: 'http://hanzo.ai/docs',
+                label: 'http://hanzo.ai/docs',
             },
         ],
     },
@@ -194,6 +241,34 @@ export const CountModeWithSelectClear: Story = {
         displayMode: 'count',
         bulkActions: 'select-and-clear-all',
         value: names.slice(0, 5).map((_, i) => `user-${i}`),
+    },
+}
+
+export const SnacksModeWithSortable: Story = {
+    args: {
+        mode: 'multiple',
+        displayMode: 'snacks',
+        value: names.slice(0, 5).map((_, i) => `user-${i}`),
+        sortable: true,
+    },
+}
+
+export const PrefilledSingleValue: Story = {
+    args: {
+        mode: 'single',
+        allowCustomValues: true,
+        placeholder: 'Pick one email',
+        value: ['user-0'],
+    },
+}
+
+export const PrefilledSingleValueAsSnack: Story = {
+    args: {
+        mode: 'single',
+        singleValueAsSnack: true,
+        allowCustomValues: true,
+        placeholder: 'Pick one email',
+        value: ['user-0'],
     },
 }
 

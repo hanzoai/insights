@@ -3,7 +3,7 @@ import { BindLogic } from 'kea'
 
 import { mswDecorator } from '~/mocks/browser'
 
-import { sessionRecordingDataLogic } from '../sessionRecordingDataLogic'
+import { sessionRecordingDataCoordinatorLogic } from '../sessionRecordingDataCoordinatorLogic'
 import { sessionRecordingPlayerLogic } from '../sessionRecordingPlayerLogic'
 import { PlayerSidebarOverviewOtherWatchers } from './PlayerSidebarOverviewOtherWatchers'
 
@@ -23,7 +23,7 @@ export default meta
 function MockedPlayerSidebarOverviewOtherWatchers({ startExpanded = false }: { startExpanded?: boolean }): JSX.Element {
     return (
         <BindLogic
-            logic={sessionRecordingDataLogic}
+            logic={sessionRecordingDataCoordinatorLogic}
             props={{
                 sessionRecordingId: 'test-session-id',
                 playerKey: 'story-template',
@@ -65,13 +65,13 @@ Default.decorators = [
                 events_count: 20,
                 recording_duration: 60,
                 view_count: 1,
-                viewers: ['alice@posthog.com', 'bob@posthog.com', 'charlie@posthog.com', 'diana@posthog.com'],
+                viewers: ['alice@hanzo.ai', 'bob@hanzo.ai', 'charlie@hanzo.ai', 'diana@hanzo.ai'],
                 person: {
                     id: 1,
                     uuid: 'test-uuid',
                     distinct_id: 'test-user',
                     properties: {
-                        email: 'current@posthog.com',
+                        email: 'current@hanzo.ai',
                     },
                 },
             },
@@ -102,13 +102,13 @@ Expanded.decorators = [
                 events_count: 20,
                 recording_duration: 60,
                 view_count: 1,
-                viewers: ['alice@posthog.com', 'bob@posthog.com', 'charlie@posthog.com', 'diana@posthog.com'],
+                viewers: ['alice@hanzo.ai', 'bob@hanzo.ai', 'charlie@hanzo.ai', 'diana@hanzo.ai'],
                 person: {
                     id: 1,
                     uuid: 'test-uuid',
                     distinct_id: 'test-user',
                     properties: {
-                        email: 'current@posthog.com',
+                        email: 'current@hanzo.ai',
                     },
                 },
             },
@@ -140,19 +140,19 @@ WithMultipleViewers.decorators = [
                 recording_duration: 60,
                 view_count: 1,
                 viewers: [
-                    'alice@posthog.com',
-                    'bob@posthog.com',
-                    'charlie@posthog.com',
-                    'diana@posthog.com',
-                    'eve@posthog.com',
-                    'frank@posthog.com',
+                    'alice@hanzo.ai',
+                    'bob@hanzo.ai',
+                    'charlie@hanzo.ai',
+                    'diana@hanzo.ai',
+                    'eve@hanzo.ai',
+                    'frank@hanzo.ai',
                 ],
                 person: {
                     id: 1,
                     uuid: 'test-uuid',
                     distinct_id: 'test-user',
                     properties: {
-                        email: 'current@posthog.com',
+                        email: 'current@hanzo.ai',
                     },
                 },
             },
@@ -189,7 +189,7 @@ NoOtherWatchers.decorators = [
                     uuid: 'test-uuid',
                     distinct_id: 'test-user',
                     properties: {
-                        email: 'current@posthog.com',
+                        email: 'current@hanzo.ai',
                     },
                 },
             },

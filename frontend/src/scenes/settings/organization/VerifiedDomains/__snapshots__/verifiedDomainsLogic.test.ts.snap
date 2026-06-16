@@ -4,6 +4,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
 {
   "addModalShown": false,
   "configureSAMLModalId": null,
+  "configureSCIMModalId": null,
   "currentOrganization": {
     "allow_publicly_shared_resources": true,
     "available_product_features": [
@@ -21,32 +22,34 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
     "default_experiment_stats_method": "bayesian",
     "enforce_2fa": false,
     "id": "ABCD",
+    "is_active": true,
     "is_member_join_email_enabled": true,
+    "is_not_active_reason": null,
     "logo_media_id": null,
     "member_count": 2,
     "members_can_use_personal_api_keys": true,
     "membership_level": 8,
     "metadata": {},
-    "name": "MockHog",
+    "name": "MockInsights",
     "plugins_access_level": 9,
     "projects": [
       {
         "created_at": "2020-06-30T09:53:35.932534Z",
         "id": 997,
-        "name": "MockHog App + Marketing",
+        "name": "MockInsights App + Marketing",
         "organization_id": "ABCD",
       },
     ],
-    "slug": "mockhog-fstn",
+    "slug": "mockinsights-fstn",
     "teams": [
       {
-        "access_control": true,
         "anonymize_ips": false,
         "api_token": "default-team-api-token",
         "app_urls": [
-          "https://posthog.com/",
-          "https://app.posthog.com",
+          "https://insights.com/",
+          "https://app.insights.com",
           "https://example.com",
+          "http://127.0.0.1:*",
         ],
         "autocapture_exceptions_errors_to_ignore": [],
         "autocapture_exceptions_opt_in": false,
@@ -57,6 +60,9 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "capture_dead_clicks": false,
         "capture_performance_opt_in": true,
         "completed_snippet_onboarding": true,
+        "core_events_config": {
+          "core_events": [],
+        },
         "correlation_config": {
           "excluded_event_names": [
             "$autocapture",
@@ -73,9 +79,21 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
           ],
         },
         "created_at": "2020-06-30T09:53:35.932534Z",
+        "customer_analytics_config": {
+          "activity_event": {
+            "event": "$pageview",
+            "kind": "EventsNode",
+            "name": "$pageview",
+          },
+          "payment_event": {},
+          "signup_event": {},
+          "signup_pageview_event": {},
+          "subscription_event": {},
+        },
         "data_attributes": [
           "data-attr",
         ],
+        "default_evaluation_contexts_enabled": false,
         "effective_membership_level": 8,
         "feature_flag_confirmation_enabled": false,
         "feature_flag_confirmation_message": "",
@@ -111,10 +129,16 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "is_demo": false,
         "live_events_columns": null,
         "live_events_token": "123",
+        "logs_settings": {
+          "capture_console_logs": false,
+        },
+        "managed_viewsets": {
+          "revenue_analytics": true,
+        },
         "marketing_analytics_config": {
           "sources_map": {},
         },
-        "name": "MockHog App + Marketing",
+        "name": "MockInsights App + Marketing",
         "onboarding_tasks": {
           "ingest_first_event": "completed",
           "setup_session_recordings": "completed",
@@ -129,9 +153,11 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "person_on_events_querying_enabled": true,
         "primary_dashboard": 1,
         "project_id": 997,
+        "receive_org_level_activity_logs": false,
         "recording_domains": [
-          "https://recordings.posthog.com/",
+          "https://recordings.insights.com/",
         ],
+        "require_evaluation_contexts": false,
         "revenue_analytics_config": {
           "events": [
             {
@@ -204,7 +230,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
             "key": "email",
             "operator": "not_icontains",
             "type": "person",
-            "value": "posthog.com",
+            "value": "insights.com",
           },
         ],
         "test_account_filters_default_checked": false,
@@ -218,6 +244,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
   },
   "domainBeingVerified": null,
   "isSAMLAvailable": true,
+  "isSCIMAvailable": false,
   "isSSOEnforcementAvailable": true,
   "isSamlConfigSubmitting": false,
   "isSamlConfigValid": true,
@@ -234,12 +261,14 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
   "samlConfigValidationErrors": {
     "saml_acs_url": undefined,
   },
+  "scimConfig": {},
+  "scimConfigLoading": false,
   "showSamlConfigErrors": false,
   "updatingDomain": false,
   "updatingDomainLoading": false,
   "verifiedDomains": [
     {
-      "domain": "my.posthog.com",
+      "domain": "my.insights.com",
       "id": "8db3b0c2-a0ab-490a-9037-14f3358a81bc",
       "is_verified": true,
       "jit_provisioning_enabled": true,
@@ -247,7 +276,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
       "verified_at": "2022-01-01T23:59:59",
     },
     {
-      "domain": "temp.posthog.com",
+      "domain": "temp.insights.com",
       "id": "id_will_be_deleted",
       "is_verified": false,
       "jit_provisioning_enabled": false,

@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react'
-import { CapturedNetworkRequest } from 'posthog-js'
+import { CapturedNetworkRequest } from '@hanzo/insights'
 
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 import { mapRRWebNetworkRequest } from 'scenes/session-recordings/apm/performance-event-utils'
@@ -57,7 +57,7 @@ const exampleWithPerformanceObserverValues = mapRRWebNetworkRequest(
         firstInterimResponseStart: 0,
         initiatorType: 'fetch',
         method: 'GET',
-        name: 'https://posthog.com/api/signup-count',
+        name: 'https://hanzo.ai/api/signup-count',
         nextHopProtocol: 'h2',
         redirectEnd: 0,
         redirectStart: 0,
@@ -104,7 +104,7 @@ const exampleWithoutPerformanceObserverValues = {
         'Authorization-CS': 'false',
         'Authorization-CS-debug': 'false',
         'GA-Client': '12345',
-        'X-Posthog-Session-ID': '0191ff59-4b70-73ca-889f-87bbafc17c31',
+        'X-Insights-Session-ID': '0191ff59-4b70-73ca-889f-87bbafc17c31',
         baggage:
             'sentry-environment=production,sentry-release=12345,sentry-public_key=12345,sentry-trace_id=12345,sentry-sample_rate=0.01,sentry-transaction=%2Fdashboard%2F,sentry-sampled=false',
         'sentry-trace': '12345-12345-0',
@@ -143,7 +143,7 @@ export function InitialBodyDisplay(): JSX.Element {
         <BodyDisplay
             content={undefined}
             headers={undefined}
-            emptyMessage="Response captured before PostHog was initialized"
+            emptyMessage="Response captured before Insights was initialized"
         />
     )
 }

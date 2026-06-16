@@ -8,14 +8,42 @@ import {
     LemonInputSelectOption,
     Link,
     ProfilePicture,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
+import api from 'lib/api'
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { IconSlackExternal } from 'lib/lemon-ui/icons'
 
 import { IntegrationType, SlackChannelType } from '~/types'
 
 import { slackIntegrationLogic } from './slackIntegrationLogic'
+
+export function SlackNotConfiguredBanner(): JSX.Element {
+    return (
+        <LemonBanner type="info">
+            <div className="flex justify-between gap-2 items-center">
+                <span>
+                    Slack is not yet configured for this project. Add Insights to your Slack workspace to continue.
+                </span>
+                <Link
+                    to={api.integrations.authorizeUrl({
+                        kind: 'slack',
+                        next: window.location.pathname + '?target_type=slack',
+                    })}
+                    disableClientSideRouting
+                >
+                    <img
+                        alt="Add to Slack"
+                        height="40"
+                        width="139"
+                        src="https://platform.slack-edge.com/img/add_to_slack.png"
+                        srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"
+                    />
+                </Link>
+            </div>
+        </LemonBanner>
+    )
+}
 
 const getSlackChannelOptions = (slackChannels?: SlackChannelType[] | null): LemonInputSelectOption[] | null => {
     return slackChannels
@@ -113,8 +141,8 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                 }}
                 emptyStateComponent={
                     <p className="text-secondary italic p-1">
-                        No channels found. Make sure the PostHog Slack App is installed in the channel.{' '}
-                        <Link to="https://posthog.com/docs/cdp/destinations/slack" target="_blank">
+                        No channels found. Make sure the Insights Slack App is installed in the channel.{' '}
+                        <Link to="https://hanzo.ai/docs/cdp/destinations/slack" target="_blank">
                             See the docs for more information.
                         </Link>
                     </p>
@@ -137,9 +165,9 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                 <LemonBanner type="info">
                     <div className="flex gap-2 items-center">
                         <span>
-                            The PostHog Slack App is not in this channel. Please add it to the channel otherwise
+                            The Insights Slack App is not in this channel. Please add it to the channel otherwise
                             Subscriptions will fail to be delivered.{' '}
-                            <Link to="https://posthog.com/docs/webhooks/slack" target="_blank">
+                            <Link to="https://hanzo.ai/docs/webhooks/slack" target="_blank">
                                 See the Docs for more information
                             </Link>
                         </span>

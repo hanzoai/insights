@@ -14,13 +14,16 @@ import {
 
 import { ResponseComposition, RestContext, RestRequest } from 'msw'
 
+import { INCIDENT_IO_STATUS_PAGE_BASE } from '~/layout/navigation-3000/sidepanel/panels/sidePanelStatusIncidentIoLogic'
+import sdkVersions from '~/mocks/fixtures/api/sdk_versions.json'
+import teamSdkVersions from '~/mocks/fixtures/api/team_sdk_versions.json'
 import { SharingConfigurationType } from '~/types'
 
 import { getAvailableProductFeatures } from './features'
 import { billingJson } from './fixtures/_billing'
-import _hogFunctionTemplatesDestinations from './fixtures/_hogFunctionTemplatesDestinations.json'
-import _hogFunctionTemplatesTransformations from './fixtures/_hogFunctionTemplatesTransformations.json'
-import * as statusPageAllOK from './fixtures/_status_page_all_ok.json'
+import _insightsFunctionTemplatesDestinations from './fixtures/_insightsFunctionTemplatesDestinations.json'
+import _insightsFunctionTemplatesTransformations from './fixtures/_insightsFunctionTemplatesTransformations.json'
+import * as incidentIoStatusPageAllOK from './fixtures/_incident_io_status_page_all_ok.json'
 import { MockSignature, Mocks, mocksToHandlers } from './utils'
 
 export const EMPTY_PAGINATED_RESPONSE = { count: 0, results: [] as any[], next: null, previous: null }
@@ -31,21 +34,21 @@ export const toPaginatedResponse = (results: any[]): typeof EMPTY_PAGINATED_RESP
     previous: null,
 })
 
-const hogFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
-    const hogFunctionTemplate =
-        _hogFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
-        _hogFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
-    if (!hogFunctionTemplate) {
+const insightsFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
+    const insightsFunctionTemplate =
+        _insightsFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
+        _insightsFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
+    if (!insightsFunctionTemplate) {
         return res(ctx.status(404))
     }
-    return res(ctx.json({ ...hogFunctionTemplate }))
+    return res(ctx.json({ ...insightsFunctionTemplate }))
 }
 
-const hogFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
+const insightsFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
     const results = req.url.searchParams.get('types')?.includes('transformation')
-        ? _hogFunctionTemplatesTransformations
+        ? _insightsFunctionTemplatesTransformations
         : req.url.searchParams.get('types')?.includes('destination')
-          ? _hogFunctionTemplatesDestinations
+          ? _insightsFunctionTemplatesDestinations
           : []
 
     return res(ctx.json(results))
@@ -53,11 +56,11 @@ const hogFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
 
 // this really returns MaybePromise<ResponseFunction<any>>
 // but MSW doesn't export MaybePromise 🤷
-function posthogCORSResponse(req: RestRequest, res: ResponseComposition, ctx: RestContext): any {
+function insightsCORSResponse(req: RestRequest, res: ResponseComposition, ctx: RestContext): any {
     return res(
         ctx.status(200),
         ctx.json('ok'),
-        // some of our tests try to make requests via posthog-js e.g. userLogic calls identify
+        // some of our tests try to make requests via insights-js e.g. userLogic calls identify
         // they have to have CORS allowed, or they pass but print noise to the console
         ctx.set('Access-Control-Allow-Origin', req.referrer.length ? req.referrer : 'http://localhost'),
         ctx.set('Access-Control-Allow-Credentials', 'true'),
@@ -67,14 +70,15 @@ function posthogCORSResponse(req: RestRequest, res: ResponseComposition, ctx: Re
 
 export const defaultMocks: Mocks = {
     get: {
-        '/api/projects/:team_id/important_changes/': EMPTY_PAGINATED_RESPONSE,
+        '/api/projects/:team_id/my_notifications/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/actions/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/annotations/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/event_definitions/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/cohorts/': toPaginatedResponse([MOCK_DEFAULT_COHORT]),
         '/api/environments/:team_id/dashboards/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/alerts/': EMPTY_PAGINATED_RESPONSE,
-        '/api/environments/:team_id/hog_functions/': EMPTY_PAGINATED_RESPONSE,
+        '/api/environments/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
+        '/api/environments/:team_id/user_product_list/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates/repository/': [],
         '/api/environments/:team_id/external_data_sources/': EMPTY_PAGINATED_RESPONSE,
@@ -107,7 +111,6 @@ export const defaultMocks: Mocks = {
         '/api/projects/:team_id/feature_flags/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/feature_flags/:feature_flag_id/role_access': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/experiments/': EMPTY_PAGINATED_RESPONSE,
-        '/api/environments/:team_id/explicit_members/': [],
         '/api/environments/:team_id/warehouse_view_link/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/warehouse_saved_queries/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/warehouse_tables/': EMPTY_PAGINATED_RESPONSE,
@@ -143,8 +146,6 @@ export const defaultMocks: Mocks = {
             },
         ],
         '/api/users/@me/two_factor_status/': () => [200, { is_enabled: true, backup_codes: [], method: 'TOTP' }],
-        '/api/users/@me/hedgehog_config/': {
-            skin: 'spiderhog',
             color: null,
             enabled: false,
             accessories: ['tophat', 'sunglasses'],
@@ -167,9 +168,9 @@ export const defaultMocks: Mocks = {
             exception: "[ErrorDetail(string='Sentry integration not configured', code='invalid')]",
         },
         // We don't want to show the "new version available" banner in tests
-        'https://api.github.com/repos/posthog/posthog-js/tags': () => [200, []],
+        'https://api.github.com/repos/insights/insights-js/tags': () => [200, []],
         'https://www.gravatar.com/avatar/:gravatar_id': () => [404, ''],
-        'https://us.i.posthog.com/api/early_access_features': {
+        'https://us.i.hanzo.ai/api/early_access_features': {
             earlyAccessFeatures: [],
         },
         '/api/billing/': {
@@ -183,10 +184,13 @@ export const defaultMocks: Mocks = {
             status: 'None',
             eligible: false,
         },
-        'https://status.posthog.com/api/v2/summary.json': statusPageAllOK,
-        '/api/projects/:team_id/hog_function_templates': hogFunctionTemplatesMock,
-        '/api/projects/:team_id/hog_function_templates/:id': hogFunctionTemplateRetrieveMock,
-        '/api/projects/:team_id/hog_functions': EMPTY_PAGINATED_RESPONSE,
+
+        '/api/billing/spend/': { results: [] },
+        '/api/billing/usage/': { results: [] },
+        [`${INCIDENT_IO_STATUS_PAGE_BASE}/api/v1/summary`]: incidentIoStatusPageAllOK,
+        '/api/projects/:team_id/insights_function_templates': insightsFunctionTemplatesMock,
+        '/api/projects/:team_id/insights_function_templates/:id': insightsFunctionTemplateRetrieveMock,
+        '/api/projects/:team_id/insights_functions': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/data_color_themes': MOCK_DATA_COLOR_THEMES,
         '/api/projects/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,
@@ -199,7 +203,9 @@ export const defaultMocks: Mocks = {
         '/api/organizations/:organization_id/proxy_records/': [],
         '/api/projects/:team_id/dashboard_templates/json_schema/': EMPTY_PAGINATED_RESPONSE,
         '/api/organizations/:organization_id/domains/': EMPTY_PAGINATED_RESPONSE,
+        '/api/environments/:team_id/default_evaluation_tags/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/file_system/unfiled/': { count: 0 },
+        '/api/environments/:team_id/file_system/log_view': {},
         '/api/environments/:team_id/file_system': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/file_system_shortcut/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/insight_variables/': EMPTY_PAGINATED_RESPONSE,
@@ -215,24 +221,29 @@ export const defaultMocks: Mocks = {
         'api/projects/@current/resource_access_controls': EMPTY_PAGINATED_RESPONSE,
         'api/projects/@current/access_controls': EMPTY_PAGINATED_RESPONSE,
         'api/projects/:team_id/notebooks/recording_comments': EMPTY_PAGINATED_RESPONSE,
+        '/api/sdk_versions/': sdkVersions,
+        '/api/team_sdk_versions/': teamSdkVersions,
+        '/api/environments/:team_id/endpoints/': EMPTY_PAGINATED_RESPONSE,
     },
     post: {
-        'https://us.i.posthog.com/e/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/e/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/flags/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/flags/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        'https://us.i.posthog.com/engage/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
-        '/api/environments/:team_id/insights/:insight_id/viewed/': (): MockSignature => [201, null],
+        'https://us.i.hanzo.ai/e/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/e/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/flags/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/flags/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/engage/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
+        '/api/environments/:team_id/insights/viewed/': (): MockSignature => [201, null],
         'api/environments/:team_id/query': [200, { results: [] }],
+        '/api/environments/:team_id/file_system/log_view/': {},
     },
     patch: {
         '/api/projects/:team_id/session_recording_playlists/:playlist_id/': {},
+        '/api/environments/@current/add_product_intent/': MOCK_DEFAULT_TEAM,
         '/api/environments/:team_id/': MOCK_DEFAULT_TEAM,
     },
     options: {
-        'https://us.i.posthog.com/decide/': (req, res, ctx): MockSignature => posthogCORSResponse(req, res, ctx),
+        'https://us.i.hanzo.ai/decide/': (req, res, ctx): MockSignature => insightsCORSResponse(req, res, ctx),
     },
 }
 export const handlers = mocksToHandlers(defaultMocks)

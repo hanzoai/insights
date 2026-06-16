@@ -7,7 +7,8 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from './constants'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
+
 import { JSInstallSnippet } from './js-web'
 
 function VueCreateComposableFileSnippet(): JSX.Element {
@@ -17,10 +18,10 @@ function VueCreateComposableFileSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import posthog from 'posthog-js'
+            {`import insights from '@hanzo/insights'
 
-export function usePostHog() {
-  posthog.init('${currentTeam?.api_token}', {
+export function useInsights() {
+  insights.init('${currentTeam?.api_token}', {
     api_host: '${apiHostOrigin()}',
     defaults: '${SDK_DEFAULTS_DATE}',
     ${
@@ -30,7 +31,7 @@ export function usePostHog() {
     }
   })
 
-  return { posthog }
+  return { insights }
 }`}
         </CodeSnippet>
     )
@@ -41,7 +42,7 @@ function VueComposableCodeSnippet(): JSX.Element {
         <CodeSnippet language={Language.JavaScript}>
             {`import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { usePostHog } from '@/composables/usePostHog'
+import { useInsights } from '@/composables/useInsights'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,7 +60,7 @@ const router = createRouter({
   ],
 })
 
-const { posthog } = usePostHog()
+const { insights } = useInsights()
 
 export default router`}
         </CodeSnippet>
@@ -70,19 +71,19 @@ export function SDKInstallVueInstructions(): JSX.Element {
     return (
         <>
             <p>
-                The below guide is for integrating using plugins in Vue versions 3 and above. For integrating PostHog
+                The below guide is for integrating using plugins in Vue versions 3 and above. For integrating Insights
                 using Provide/inject, Vue.prototype, or versions 2.7 and below, see our{' '}
-                <Link to="https://posthog.com/docs/libraries/vue-js">Vue docs</Link>
+                <Link to="https://hanzo.ai/docs/libraries/vue-js">Vue docs</Link>
             </p>
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
-            <h3>Add Posthog to your app</h3>
+            <h3>Add Insights to your app</h3>
             <p>
-                Create a new file <code>src/composables/usePostHog.js</code>:
+                Create a new file <code>src/composables/useInsights SDK</code>:
             </p>
             <VueCreateComposableFileSnippet />
             <br />
-            Next, in <code>router/index.js</code>, import the <code>usePostHog</code> composable and call it:
+            Next, in <code>router/index.js</code>, import the <code>useInsights</code> composable and call it:
             <VueComposableCodeSnippet />
         </>
     )

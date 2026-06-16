@@ -2,13 +2,13 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconPeople, IconPerson, IconTrends } from '@posthog/icons'
-import { LemonDivider, LemonTag } from '@posthog/lemon-ui'
+import { IconPeople, IconPerson, IconTrends } from '@hanzo/icons'
+import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'
@@ -17,7 +17,7 @@ import { PropertyFilterType } from '~/types'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { INTEGER_REGEX_MATCH_GROUPS } from './utils'
+import { INTEGER_REGEX_MATCH_GROUPS, OPTIONAL_PROJECT_NON_CAPTURE_GROUP } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeCohortAttributes>): JSX.Element => {
     const { id } = attributes
@@ -158,7 +158,7 @@ type NotebookNodeCohortAttributes = {
     id: number
 }
 
-export const NotebookNodeCohort = createPostHogWidgetNode<NotebookNodeCohortAttributes>({
+export const NotebookNodeCohort = createInsightsWidgetNode<NotebookNodeCohortAttributes>({
     nodeType: NotebookNodeType.Cohort,
     titlePlaceholder: 'Cohort',
     Component,
@@ -169,7 +169,7 @@ export const NotebookNodeCohort = createPostHogWidgetNode<NotebookNodeCohortAttr
         id: {},
     },
     pasteOptions: {
-        find: urls.cohort(INTEGER_REGEX_MATCH_GROUPS),
+        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.cohort(INTEGER_REGEX_MATCH_GROUPS),
         getAttributes: async (match) => {
             return { id: parseInt(match[1]) }
         },

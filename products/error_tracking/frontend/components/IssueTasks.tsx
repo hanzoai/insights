@@ -1,16 +1,16 @@
 import { useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonDialog, LemonInput, LemonTextArea } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonDialog, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ErrorEventType, ErrorTrackingException } from 'lib/components/Errors/types'
+import { formatExceptionDisplay, formatResolvedName } from 'lib/components/Errors/utils'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
-import { ScenePanelLabel } from '~/layout/scenes/SceneLayout'
 import { ErrorTrackingRelationalIssue } from '~/queries/schema/schema-general'
 import { IntegrationType } from '~/types'
 
@@ -29,12 +29,10 @@ export const IssueTasks = (): JSX.Element => {
         }
     }
     return (
-        <ScenePanelLabel title="Tasks">
-            <ButtonPrimitive fullWidth onClick={onClickCreateTask} disabled={issueLoading}>
-                <IconPlus />
-                Create task in PostHog
-            </ButtonPrimitive>
-        </ScenePanelLabel>
+        <ButtonPrimitive fullWidth onClick={onClickCreateTask} disabled={issueLoading}>
+            <IconPlus />
+            Create task in Insights
+        </ButtonPrimitive>
     )
 }
 
@@ -43,7 +41,7 @@ const createTaskForm = (
     selectedEvent: ErrorEventType | null,
     githubIntegrations: IntegrationType[]
 ): void => {
-    const posthogUrl = window.location.origin + window.location.pathname
+    const insightsUrl = window.location.origin + window.location.pathname
 
     let description = ''
 
@@ -54,7 +52,7 @@ const createTaskForm = (
         if (props.$exception_list && Array.isArray(props.$exception_list) && props.$exception_list.length > 0) {
             const exception = props.$exception_list[0] as ErrorTrackingException
 
-            description += `## ${exception.type}: ${exception.value}\n\n`
+            description += `## ${formatExceptionDisplay(exception)}\n\n`
 
             if (exception.mechanism) {
                 description += `**Handled:** ${exception.mechanism.handled ? 'Yes' : 'No'}\n\n`
@@ -67,8 +65,9 @@ const createTaskForm = (
                 const frames = exception.stacktrace.frames.slice().reverse() // Reverse to show call order
                 frames.forEach((frame, index) => {
                     description += `**${index + 1}.** `
-                    if (frame.resolved_name && frame.resolved_name !== '?') {
-                        description += `\`${frame.resolved_name}\``
+                    const resolvedName = formatResolvedName(frame)
+                    if (resolvedName) {
+                        description += `\`${resolvedName}\``
                     } else {
                         description += 'Anonymous function'
                     }
@@ -138,13 +137,13 @@ const createTaskForm = (
     }
 
     description += `---\n\n`
-    description += `**PostHog Error Tracking:** ${posthogUrl}\n`
+    description += `**Insights Error Tracking:** ${insightsUrl}\n`
     description += `**First Seen:** ${new Date(issue.first_seen).toLocaleString()}\n`
 
     const defaultIntegration = githubIntegrations[0]
 
     LemonDialog.openForm({
-        title: 'Create PostHog task',
+        title: 'Create Insights task',
         initialValues: {
             title: issue.name ?? '',
             description: description ?? '',
@@ -193,14 +192,12 @@ const createTaskForm = (
                                 defaultIntegration.config?.account?.name ||
                                 defaultIntegration.config?.account?.login ||
                                 'GitHub'
-                            repository = repoName
+                            repository = `${organization}/${repoName}`
                         }
 
                         taskData.github_integration = defaultIntegration.id
-                        taskData.repository_config = {
-                            organization,
-                            repository,
-                        }
+
+                        taskData.repository = repository
                     }
                 }
 

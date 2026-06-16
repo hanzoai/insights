@@ -45,7 +45,7 @@ test.describe('Billing', () => {
         // Confirm unsubscribing
         await page.locator('.LemonModal .LemonButton', { hasText: 'Unsubscribe' }).click()
 
-        // TODO need to be able to read posthog events
+        // TODO need to be able to read insights events
 
         // For now, we'll just check that the modal disappears and the request was made
         await expect(page.locator('.LemonModal')).not.toBeVisible()

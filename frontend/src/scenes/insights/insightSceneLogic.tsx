@@ -22,7 +22,7 @@ import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { getDefaultQuery } from '~/queries/nodes/InsightViz/utils'
-import { DashboardFilter, HogQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
+import { DashboardFilter, FileSystemIconType, InsightsQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
 import { checkLatestVersionsOnQuery } from '~/queries/utils'
 import {
     ActivityScope,
@@ -40,7 +40,7 @@ import {
 import { insightDataLogic } from './insightDataLogic'
 import { insightDataLogicType } from './insightDataLogicType'
 import type { insightSceneLogicType } from './insightSceneLogicType'
-import { parseDraftQueryFromURL } from './utils'
+import { getInsightIconTypeFromQuery, parseDraftQueryFromURL } from './utils'
 
 const NEW_INSIGHT = 'new' as const
 export type InsightId = InsightShortId | typeof NEW_INSIGHT | null
@@ -86,7 +86,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             itemId: string | undefined,
             alertId: AlertType['id'] | undefined,
             filtersOverride: DashboardFilter | undefined,
-            variablesOverride: Record<string, HogQLVariable> | undefined,
+            variablesOverride: Record<string, InsightsQLVariable> | undefined,
             tileFiltersOverride: TileFilters | undefined,
             dashboardId: DashboardType['id'] | undefined,
             dashboardName: DashboardType['name'] | undefined,
@@ -171,7 +171,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             },
         ],
         variablesOverride: [
-            null as null | Record<string, HogQLVariable>,
+            null as null | Record<string, InsightsQLVariable>,
             {
                 setSceneState: (_, { variablesOverride }) =>
                     variablesOverride !== undefined ? variablesOverride : null,
@@ -206,6 +206,22 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
     }),
     selectors({
         tabId: [() => [(_, props: InsightSceneLogicProps) => props.tabId], (tabId) => tabId],
+        insightQuerySelector: [
+            (s) => [s.insightDataLogicRef],
+            (insightDataLogicRef) => insightDataLogicRef?.logic.selectors.query,
+        ],
+        insightQuery: [
+            (s) => [
+                (state, props) => {
+                    try {
+                        return s.insightQuerySelector?.(state, props)?.(state, props)
+                    } catch {
+                        return null
+                    }
+                },
+            ],
+            (insightQuery) => insightQuery,
+        ],
         insightSelector: [(s) => [s.insightLogicRef], (insightLogicRef) => insightLogicRef?.logic.selectors.insight],
         insight: [
             (s) => [
@@ -224,49 +240,57 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             (s) => [
                 s.insightLogicRef,
                 s.insight,
+                s.insightQuery,
                 s.dashboardId,
                 s.dashboardName,
                 (_, props: InsightSceneLogicProps) => props.tabId,
                 s.sceneSource,
             ],
-            (insightLogicRef, insight, dashboardId, dashboardName, tabId, sceneSource): Breadcrumb[] => {
+            (insightLogicRef, insight, insightQuery, dashboardId, dashboardName, tabId, sceneSource): Breadcrumb[] => {
+                const dashboardLabel = dashboardName ?? 'Dashboard'
                 return [
-                    ...(dashboardId !== null && dashboardName
+                    ...(dashboardId !== null
                         ? [
                               {
                                   key: Scene.Dashboards,
                                   name: 'Dashboards',
                                   path: urls.dashboards(),
+                                  iconType: 'dashboard' as FileSystemIconType,
                               },
                               {
                                   key: Scene.Dashboard,
-                                  name: dashboardName,
+                                  name: dashboardLabel,
                                   path: urls.dashboard(dashboardId),
+                                  iconType: 'dashboard' as FileSystemIconType,
                               },
                           ]
                         : [
                               sceneSource === 'web-analytics'
                                   ? {
                                         key: Scene.WebAnalytics,
-                                        name: 'Web analytics',
+                                        name: 'Web Analytics',
                                         path: urls.webAnalytics(),
+                                        iconType: 'web_analytics' as FileSystemIconType,
                                     }
                                   : sceneSource === 'llm-analytics'
                                     ? {
                                           key: 'LLMAnalytics',
-                                          name: 'LLM analytics',
+                                          name: 'LLM Analytics',
                                           path: urls.llmAnalyticsDashboard(),
+                                          iconType: 'llm_analytics' as FileSystemIconType,
                                       }
                                     : {
                                           key: Scene.SavedInsights,
                                           name: 'Product analytics',
                                           path: urls.savedInsights(),
+                                          iconType: 'product_analytics' as FileSystemIconType,
                                       },
                           ]),
                     {
                         key: [Scene.Insight, insight?.short_id || `new-${tabId}`],
                         name: insightLogicRef?.logic.values.insightName,
                         forceEditMode: insightLogicRef?.logic.values.canEditInsight,
+                        iconType: getInsightIconTypeFromQuery(insightQuery),
                     },
                 ]
             },
@@ -303,11 +327,10 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
                     return []
                 }
                 return [
-                    createMaxContextHelpers.insight(
-                        insight,
-                        filtersOverride ?? undefined,
-                        variablesOverride ?? undefined
-                    ),
+                    createMaxContextHelpers.insight(insight, {
+                        filtersOverride: filtersOverride ?? undefined,
+                        variablesOverride: variablesOverride ?? undefined,
+                    }),
                 ]
             },
         ],
@@ -330,6 +353,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
                 if (insightId) {
                     const insightProps: InsightLogicProps = {
                         dashboardItemId: insightId,
+                        dashboardId: values.dashboardId ?? undefined,
                         filtersOverride: values.filtersOverride,
                         variablesOverride: values.variablesOverride,
                         tileFiltersOverride: values.tileFiltersOverride,
@@ -375,17 +399,21 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
                 upgradedQuery = query
             }
 
-            values.insightLogicRef?.logic.actions.setInsight(
-                {
-                    ...createEmptyInsight(`new-${values.tabId}`),
-                    ...(values.dashboardId ? { dashboards: [values.dashboardId] } : {}),
-                    query: upgradedQuery,
-                },
-                {
-                    fromPersistentApi: false,
-                    overrideQuery: true,
-                }
-            )
+            if (values.insightId === 'new' || values.insightId?.startsWith('new-')) {
+                values.insightLogicRef?.logic.actions.setInsight(
+                    {
+                        ...createEmptyInsight(`new-${values.tabId}`),
+                        ...(values.dashboardId ? { dashboards: [values.dashboardId] } : {}),
+                        query: upgradedQuery,
+                    },
+                    {
+                        fromPersistentApi: false,
+                        overrideQuery: true,
+                    }
+                )
+            } else {
+                values.insightDataLogicRef?.logic.actions.setQuery(upgradedQuery)
+            }
         },
     })),
     tabAwareUrlToAction(({ actions, values }) => ({
@@ -413,7 +441,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
 
             const currentScene = sceneLogic.findMounted()?.values
 
-            const alertChanged = alert_id !== values.alertId
+            const alertChanged = (alert_id ?? null) !== values.alertId
 
             if (
                 currentScene?.activeSceneId === Scene.Insight &&
@@ -440,14 +468,14 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             if (
                 insightId !== values.insightId ||
                 insightMode !== values.insightMode ||
-                itemId !== values.itemId ||
+                (itemId ?? null) !== values.itemId ||
                 (sceneSource ?? null) !== values.sceneSource ||
                 alertChanged ||
-                !objectsEqual(variablesOverride, values.variablesOverride) ||
-                !objectsEqual(filtersOverride, values.filtersOverride) ||
-                !objectsEqual(tileFiltersOverride, values.tileFiltersOverride) ||
-                dashboard !== values.dashboardId ||
-                dashboardName !== values.dashboardName
+                !objectsEqual(variablesOverride ?? null, values.variablesOverride) ||
+                !objectsEqual(filtersOverride ?? null, values.filtersOverride) ||
+                !objectsEqual(tileFiltersOverride ?? null, values.tileFiltersOverride) ||
+                (dashboard ?? null) !== values.dashboardId ||
+                (dashboardName ?? null) !== values.dashboardName
             ) {
                 actions.setSceneState(
                     insightId,
@@ -471,9 +499,11 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             if (q) {
                 const validQuery = typeof q === 'string' ? parseDraftQueryFromURL(q) : q
                 if (validQuery) {
-                    validatingQuery = true
                     if (initial) {
+                        validatingQuery = true
                         actions.upgradeQuery(validQuery)
+                    } else if (method !== 'REPLACE') {
+                        queryFromUrl = validQuery
                     }
                 } else {
                     console.error('Invalid query', q)

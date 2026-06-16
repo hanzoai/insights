@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React, { useState } from 'react'
-import { AutoSizer } from 'react-virtualized/dist/es/AutoSizer'
 
-import { IconLock, IconPencil } from '@posthog/icons'
+import { IconLock, IconPencil } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,11 +14,11 @@ import {
     LemonTextArea,
     SpinnerOverlay,
     Tooltip,
-} from '@posthog/lemon-ui'
-import { PluginConfigSchema } from '@posthog/plugin-scaffold/src/types'
+} from '@hanzo/lemon-ui'
+import { PluginConfigSchema } from '@hanzo/plugin-scaffold/src/types'
 
+import { AutoSizer } from 'lib/components/AutoSizer'
 import { NotFound } from 'lib/components/NotFound'
-import { PageHeader } from 'lib/components/PageHeader'
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
@@ -52,7 +51,7 @@ export function PipelinePluginConfiguration({
         loading,
         configurationChanged,
     } = useValues(logic)
-    const { submitConfiguration, resetConfiguration, migrateToHogFunction } = useActions(logic)
+    const { submitConfiguration, resetConfiguration, migrateToInsightsFunction } = useActions(logic)
 
     if (loading && !plugin) {
         return <SpinnerOverlay />
@@ -129,9 +128,11 @@ export function PipelinePluginConfiguration({
 
     return (
         <div className="deprecated-space-y-3">
-            <PageHeader buttons={buttons} />
+            <div className="flex justify-end w-full">
+                <div className="shrink-0">{buttons}</div>
+            </div>
 
-            {plugin?.hog_function_migration_available && (
+            {plugin?.insights_function_migration_available && (
                 <LemonBanner
                     type="error"
                     action={{
@@ -148,7 +149,7 @@ export function PipelinePluginConfiguration({
                                 },
                                 primaryButton: {
                                     type: 'primary',
-                                    onClick: () => migrateToHogFunction(),
+                                    onClick: () => migrateToInsightsFunction(),
                                     children: 'Upgrade',
                                 },
                             }),
@@ -175,7 +176,7 @@ export function PipelinePluginConfiguration({
                                         {plugin.name}
                                     </div>
                                     {plugin.description ? (
-                                        <div className="mt-1 text-xs text-text-3000 text-tertiary">
+                                        <div className="mt-1 text-xs text-tertiary">
                                             <LemonMarkdown className="max-w-[30rem]" lowKeyHeadings>
                                                 {plugin.description}
                                             </LemonMarkdown>
@@ -301,7 +302,7 @@ function PluginField({
         <strong className="text-danger">
             Unknown field type "<code>{fieldConfig.type}</code>".
             <br />
-            You may need to upgrade PostHog!
+            You may need to upgrade Insights!
         </strong>
     )
 }
@@ -313,21 +314,25 @@ function JsonConfigField(props: {
     value: any
 }): JSX.Element {
     return (
-        <AutoSizer disableWidth className="min-h-60">
-            {({ height }) => (
-                <CodeEditor
-                    className="border"
-                    language="json"
-                    value={props.value}
-                    onChange={(v) => props.onChange?.(v ?? '')}
-                    height={height}
-                    options={{
-                        minimap: {
-                            enabled: false,
-                        },
-                    }}
-                />
-            )}
-        </AutoSizer>
+        <AutoSizer
+            disableWidth={true}
+            className="min-h-60"
+            renderProp={({ height }) =>
+                height ? (
+                    <CodeEditor
+                        className="border"
+                        language="json"
+                        value={props.value}
+                        onChange={(v) => props.onChange?.(v ?? '')}
+                        height={height}
+                        options={{
+                            minimap: {
+                                enabled: false,
+                            },
+                        }}
+                    />
+                ) : null
+            }
+        />
     )
 }

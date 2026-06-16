@@ -269,14 +269,14 @@ const meta: Meta = {
             post: {
                 'api/environments/:team_id/query': {
                     clickhouse:
-                        "SELECT nullIf(nullIf(events.`$session_id`, ''), 'null') AS session_id, any(events.properties) AS properties FROM events WHERE and(equals(events.team_id, 1), in(events.event, [%(hogql_val_0)s, %(hogql_val_1)s]), ifNull(in(session_id, [%(hogql_val_2)s]), 0), ifNull(greaterOrEquals(toTimeZone(events.timestamp, %(hogql_val_3)s), %(hogql_val_4)s), 0), ifNull(lessOrEquals(toTimeZone(events.timestamp, %(hogql_val_5)s), %(hogql_val_6)s), 0)) GROUP BY session_id LIMIT 100 SETTINGS readonly=2, max_execution_time=60, allow_experimental_object_type=True",
+                        "SELECT nullIf(nullIf(events.`$session_id`, ''), 'null') AS session_id, any(events.properties) AS properties FROM events WHERE and(equals(events.team_id, 1), in(events.event, [%(insightsql_val_0)s, %(insightsql_val_1)s]), ifNull(in(session_id, [%(insightsql_val_2)s]), 0), ifNull(greaterOrEquals(toTimeZone(events.timestamp, %(insightsql_val_3)s), %(insightsql_val_4)s), 0), ifNull(lessOrEquals(toTimeZone(events.timestamp, %(insightsql_val_5)s), %(insightsql_val_6)s), 0)) GROUP BY session_id LIMIT 100 SETTINGS readonly=2, max_execution_time=60, allow_experimental_object_type=True",
                     columns: ['session_id', 'properties'],
-                    hogql: "SELECT properties.$session_id AS session_id, any(properties) AS properties FROM events WHERE and(in(event, ['$pageview', '$autocapture']), in(session_id, ['018a8a51-a39d-7b18-897f-94054eec5f61']), greaterOrEquals(timestamp, '2023-09-11 16:55:36'), lessOrEquals(timestamp, '2023-09-13 18:07:40')) GROUP BY session_id LIMIT 100",
+                    insightsql: "SELECT properties.$session_id AS session_id, any(properties) AS properties FROM events WHERE and(in(event, ['$pageview', '$autocapture']), in(session_id, ['018a8a51-a39d-7b18-897f-94054eec5f61']), greaterOrEquals(timestamp, '2023-09-11 16:55:36'), lessOrEquals(timestamp, '2023-09-13 18:07:40')) GROUP BY session_id LIMIT 100",
                     query: "SELECT properties.$session_id as session_id, any(properties) as properties\n                                FROM events\n                                WHERE event IN ['$pageview', '$autocapture']\n                                AND session_id IN ['018a8a51-a39d-7b18-897f-94054eec5f61']\n                                -- the timestamp range here is only to avoid querying too much of the events table\n                                -- we don't really care about the absolute value, \n                                -- but we do care about whether timezones have an odd impact\n                                -- so, we extend the range by a day on each side so that timezones don't cause issues\n                                AND timestamp >= '2023-09-11 16:55:36'\n                                AND timestamp <= '2023-09-13 18:07:40'\n                                GROUP BY session_id",
                     results: [
                         [
                             '018a8a51-a39d-7b18-897f-94054eec5f61',
-                            '{"$os":"Mac OS X","$os_version":"10.15.7","$browser":"Chrome","$device_type":"Desktop","$current_url":"http://localhost:8000/ingestion/platform","$host":"localhost:8000","$pathname":"/ingestion/platform","$browser_version":116,"$browser_language":"en-GB","$screen_height":982,"$screen_width":1512,"$viewport_height":827,"$viewport_width":1498,"$lib":"web","$lib_version":"1.78.2","$insert_id":"249xj40dkv7x9knp","$time":1694537723.201,"distinct_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","$device_id":"018a8a51-a39c-78f9-a4e4-1183f059f7cc","$user_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","is_demo_project":false,"$groups":{"project":"018a8a51-9ee3-0000-0369-ff1924dcba89","organization":"018a8a51-988e-0000-d3e6-477c7cc111f1","instance":"http://localhost:8000"},"$autocapture_disabled_server_side":false,"$active_feature_flags":[],"$feature_flag_payloads":{},"realm":"hosted-clickhouse","email_service_available":false,"slack_service_available":false,"$referrer":"http://localhost:8000/signup","$referring_domain":"localhost:8000","$event_type":"click","$ce_version":1,"token":"phc_awewGgfgakHbaSbprHllKajqoa6iP2nz7OAUou763ie","$session_id":"018a8a51-a39d-7b18-897f-94054eec5f61","$window_id":"018a8a51-a39d-7b18-897f-940673bea28c","$set_once":{"$initial_os":"Mac OS X","$initial_browser":"Chrome","$initial_device_type":"Desktop","$initial_current_url":"http://localhost:8000/ingestion/platform","$initial_pathname":"/ingestion/platform","$initial_browser_version":116,"$initial_referrer":"http://localhost:8000/signup","$initial_referring_domain":"localhost:8000"},"$sent_at":"2023-09-12T16:55:23.743000+00:00","$ip":"127.0.0.1","$group_0":"018a8a51-9ee3-0000-0369-ff1924dcba89","$group_1":"018a8a51-988e-0000-d3e6-477c7cc111f1","$group_2":"http://localhost:8000"}',
+                            '{"$os":"Mac OS X","$os_version":"10.15.7","$browser":"Chrome","$device_type":"Desktop","$current_url":"http://localhost:8000/ingestion/platform","$host":"localhost:8000","$pathname":"/ingestion/platform","$browser_version":116,"$browser_language":"en-GB","$screen_height":982,"$screen_width":1512,"$viewport_height":827,"$viewport_width":1498,"$lib":"web","$lib_version":"1.78.2","$insert_id":"249xj40dkv7x9knp","$time":1694537723.201,"distinct_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","$device_id":"018a8a51-a39c-78f9-a4e4-1183f059f7cc","$user_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","is_demo_project":false,"$groups":{"project":"018a8a51-9ee3-0000-0369-ff1924dcba89","organization":"018a8a51-988e-0000-d3e6-477c7cc111f1","instance":"http://localhost:8000"},"$autocapture_disabled_server_side":false,"$active_feature_flags":[],"$feature_flag_payloads":{},"realm":"hosted-clickhouse","email_service_available":false,"slack_service_available":false,"$referrer":"http://localhost:8000/signup","$referring_domain":"localhost:8000","$event_type":"click","$ce_version":1,"token":"hi_awewGgfgakHbaSbprHllKajqoa6iP2nz7OAUou763ie","$session_id":"018a8a51-a39d-7b18-897f-94054eec5f61","$window_id":"018a8a51-a39d-7b18-897f-940673bea28c","$set_once":{"$initial_os":"Mac OS X","$initial_browser":"Chrome","$initial_device_type":"Desktop","$initial_current_url":"http://localhost:8000/ingestion/platform","$initial_pathname":"/ingestion/platform","$initial_browser_version":116,"$initial_referrer":"http://localhost:8000/signup","$initial_referring_domain":"localhost:8000"},"$sent_at":"2023-09-12T16:55:23.743000+00:00","$ip":"127.0.0.1","$group_0":"018a8a51-9ee3-0000-0369-ff1924dcba89","$group_1":"018a8a51-988e-0000-d3e6-477c7cc111f1","$group_2":"http://localhost:8000"}',
                         ],
                     ],
                     types: [
@@ -320,7 +320,7 @@ const meta: Meta = {
                                 uuid: '0188ea22-05ae-0000-6d0b-d47602552d2c',
                                 distinct_id: 'wnATPtp3kGKinrPUTgGGuR80MmuzrJLRwzGgtoJCt4V',
                                 first_name: 'Paul',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
                             },
                             last_modified_at: '2023-07-03T17:03:51.166530Z',
@@ -329,7 +329,7 @@ const meta: Meta = {
                                 uuid: '0188ea22-05ae-0000-6d0b-d47602552d2c',
                                 distinct_id: 'wnATPtp3kGKinrPUTgGGuR80MmuzrJLRwzGgtoJCt4V',
                                 first_name: 'Paul',
-                                email: 'paul@posthog.com',
+                                email: 'paul@hanzo.ai',
                                 is_email_verified: false,
                             },
                         },
@@ -356,13 +356,13 @@ const meta: Meta = {
                             start_url: 'http://localhost:8000/replay/recent',
                             person: {
                                 id: 1,
-                                name: 'paul@posthog.com',
+                                name: 'paul@hanzo.ai',
                                 distinct_ids: [
                                     'uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr',
                                     '018a8a51-a39c-78f9-a4e4-1183f059f7cc',
                                 ],
                                 properties: {
-                                    email: 'paul@posthog.com',
+                                    email: 'paul@hanzo.ai',
                                     $initial_os: 'Mac OS X',
                                     $geoip_latitude: -33.8715,
                                     $geoip_city_name: 'Sydney',

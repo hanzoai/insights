@@ -2,7 +2,7 @@ import './ConditionalFormattingTab.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCollapse,
@@ -11,7 +11,7 @@ import {
     LemonInput,
     LemonSelect,
     LemonTag,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ConditionalFormattingRule } from '~/queries/schema/schema-general'
 

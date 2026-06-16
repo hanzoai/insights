@@ -3,6 +3,7 @@ import { useActions, useValues } from 'kea'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { SINGLE_SERIES_DISPLAY_TYPES } from 'lib/constants'
 import { alphabet } from 'lib/utils'
+import { getProjectEventExistence } from 'lib/utils/getAppContext'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import { AggregationSelect } from 'scenes/insights/filters/AggregationSelect'
@@ -30,16 +31,21 @@ export function TrendsSeries(): JSX.Element | null {
     // Disable groups for calendar heatmap
     const showGroupsOptions = display === ChartDisplayType.CalendarHeatmap ? false : showGroupsOptionsFromModel
 
+    const { hasPageview, hasScreen } = getProjectEventExistence()
+
     const propertiesTaxonomicGroupTypes = [
         TaxonomicFilterGroupType.EventProperties,
         TaxonomicFilterGroupType.PersonProperties,
         TaxonomicFilterGroupType.EventFeatureFlags,
         TaxonomicFilterGroupType.EventMetadata,
+        ...(hasPageview ? [TaxonomicFilterGroupType.PageviewUrls] : []),
+        ...(hasScreen ? [TaxonomicFilterGroupType.Screens] : []),
+        TaxonomicFilterGroupType.EmailAddresses,
         ...groupsTaxonomicTypes,
         TaxonomicFilterGroupType.Cohorts,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.SessionProperties,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
         TaxonomicFilterGroupType.DataWarehouseProperties,
         TaxonomicFilterGroupType.DataWarehousePersonProperties,
     ]
@@ -64,7 +70,7 @@ export function TrendsSeries(): JSX.Element | null {
                     <div className="flex items-center">
                         Showing
                         {showGroupsOptions ? (
-                            <AggregationSelect className="mx-2" insightProps={insightProps} hogqlAvailable={false} />
+                            <AggregationSelect className="mx-2" insightProps={insightProps} insightsqlAvailable={false} />
                         ) : (
                             <b> Unique users </b>
                         )}
@@ -95,12 +101,15 @@ export function TrendsSeries(): JSX.Element | null {
                 actionsTaxonomicGroupTypes={[
                     TaxonomicFilterGroupType.Events,
                     TaxonomicFilterGroupType.Actions,
+                    ...(hasPageview ? [TaxonomicFilterGroupType.PageviewEvents] : []),
+                    ...(hasScreen ? [TaxonomicFilterGroupType.ScreenEvents] : []),
+                    TaxonomicFilterGroupType.AutocaptureEvents,
                     ...(isTrends && display !== ChartDisplayType.CalendarHeatmap
                         ? [TaxonomicFilterGroupType.DataWarehouse]
                         : []),
                 ]}
                 hideDeleteBtn={series?.length === 1}
-                addFilterDocLink="https://posthog.com/docs/product-analytics/trends/filters"
+                addFilterDocLink="https://hanzo.ai/docs/product-analytics/trends/filters"
             />
         </>
     )

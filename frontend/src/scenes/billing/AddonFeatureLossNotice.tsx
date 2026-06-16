@@ -1,12 +1,13 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 
-import { BillingProductV2AddonType, BillingProductV2Type, ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
 import { BillingAddonFeaturesList } from './BillingAddonFeaturesList'
 import { billingLogic } from './billingLogic'
@@ -48,7 +49,7 @@ export const AddonFeatureLossNotice = ({ product }: AddonFeatureLossNoticeProps)
         setIsExpanded(newExpandedState)
 
         if (newExpandedState) {
-            posthog.capture('billing_unsubscribe_feature_list_expanded', {
+            insights.capture('billing_unsubscribe_feature_list_expanded', {
                 product_type: product.type,
                 feature_count: featuresToLose.length,
             })

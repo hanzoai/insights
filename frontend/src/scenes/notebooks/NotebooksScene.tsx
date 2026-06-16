@@ -1,33 +1,39 @@
-import './NotebookScene.scss'
-
 import { router } from 'kea-router'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, Tooltip, lemonToast } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Tooltip, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { PageHeader } from 'lib/components/PageHeader'
+import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
+import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { base64Encode } from 'lib/utils'
 import { getTextFromFile, selectFiles } from 'lib/utils/file-utils'
-import { SceneExport } from 'scenes/sceneTypes'
+import { notebooksTableLogic } from 'scenes/notebooks/NotebooksTable/notebooksTableLogic'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { NotebooksTable } from './NotebooksTable/NotebooksTable'
 
 export const scene: SceneExport = {
     component: NotebooksScene,
+    logic: notebooksTableLogic,
+    productKey: ProductKey.NOTEBOOKS,
 }
 
 export function NotebooksScene(): JSX.Element {
     return (
         <SceneContent>
-            <PageHeader
-                buttons={
+            <SceneTitleSection
+                name="Notebooks"
+                resourceType={{
+                    type: 'notebook',
+                }}
+                actions={
                     <>
                         <LemonMenu
                             items={[
@@ -64,7 +70,7 @@ export function NotebooksScene(): JSX.Element {
                             <LemonButton icon={<IconEllipsis />} size="small" />
                         </LemonMenu>
                         <Tooltip title="Like a Notebook but all your exploration is persisted to the URL for easy sharing.">
-                            <LemonButton data-attr="new-canvas" to={urls.canvas()} type="secondary">
+                            <LemonButton size="small" data-attr="new-canvas" to={urls.canvas()} type="secondary">
                                 New canvas
                             </LemonButton>
                         </Tooltip>
@@ -72,22 +78,27 @@ export function NotebooksScene(): JSX.Element {
                             resourceType={AccessControlResourceType.Notebook}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <LemonButton data-attr="new-notebook" to={urls.notebook('new')} type="primary">
-                                New notebook
-                            </LemonButton>
+                            <AppShortcut
+                                name="NewNotebook"
+                                keybind={[keyBinds.new]}
+                                intent="New notebook"
+                                interaction="click"
+                                scope={Scene.Notebooks}
+                            >
+                                <LemonButton
+                                    size="small"
+                                    data-attr="new-notebook"
+                                    to={urls.notebook('new')}
+                                    type="primary"
+                                    tooltip="New notebook"
+                                >
+                                    New notebook
+                                </LemonButton>
+                            </AppShortcut>
                         </AccessControlAction>
                     </>
                 }
             />
-
-            <SceneTitleSection
-                name="Notebooks"
-                description="Notebooks are a way to organize your work and share it with others."
-                resourceType={{
-                    type: 'notebook',
-                }}
-            />
-            <SceneDivider />
 
             <NotebooksTable />
         </SceneContent>

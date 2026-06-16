@@ -1,28 +1,28 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { ApiError, PaginatedResponse } from 'lib/api'
 
-import { HogQLQuery } from '~/queries/schema/schema-general'
+import { InsightsQLQuery } from '~/queries/schema/schema-general'
 import { DataWarehouseSavedQueryDraft } from '~/types'
 
 import type { draftsLogicType } from './draftsLogicType'
-import { QueryTab } from './multitabEditorLogic'
+import { QueryTab } from './sqlEditorLogic'
 
 export const draftsLogic = kea<draftsLogicType>([
     path(['scenes', 'data-warehouse', 'editor', 'draftsLogic']),
 
     actions({
-        saveAsDraft: (query: HogQLQuery, viewId: string, tab: QueryTab) => ({
+        saveAsDraft: (query: InsightsQLQuery, viewId: string, tab: QueryTab) => ({
             query,
             viewId,
             tab,
         }),
         updateDraft: (draft: DataWarehouseSavedQueryDraft) => ({ draft }),
-        saveOrUpdateDraft: (query: HogQLQuery, viewId?: string, draftId?: string, activeTab?: QueryTab) => ({
+        saveOrUpdateDraft: (query: InsightsQLQuery, viewId?: string, draftId?: string, activeTab?: QueryTab) => ({
             query,
             viewId,
             draftId,
@@ -96,7 +96,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft save failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         updateDraft: async ({ draft }) => {
@@ -110,7 +110,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft update failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         deleteDraft: async ({ draftId, viewName }) => {
@@ -126,7 +126,7 @@ export const draftsLogic = kea<draftsLogicType>([
                 if (apiError) {
                     lemonToast.error(`Draft delete failed: ${apiError.message}`)
                 }
-                posthog.captureException(e)
+                insights.captureException(e)
             }
         },
         renameDraft: async ({ draftId, name }) => {
@@ -147,7 +147,7 @@ export const draftsLogic = kea<draftsLogicType>([
                     if (apiError) {
                         lemonToast.error(`Draft update failed: ${apiError.message}`)
                     }
-                    posthog.captureException(e)
+                    insights.captureException(e)
                 }
             } else {
                 const existingDrafts = await api.dataWarehouseSavedQueryDrafts.list()

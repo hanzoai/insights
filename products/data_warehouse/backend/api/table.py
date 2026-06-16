@@ -1,0 +1,417 @@
+import re
+from typing import Any
+
+from django.conf import settings
+
+import boto3
+import hanzo_insights
+from rest_framework import filters, parsers, request, response, serializers, status, viewsets
+
+from insights.schema import DatabaseSerializedFieldType
+
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database, SerializedField, serialize_fields
+
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import action
+from insights.exceptions_capture import capture_exception
+from insights.models import Team
+from insights.tasks.warehouse import validate_data_warehouse_table_columns
+
+from products.data_warehouse.backend.api.external_data_source import SimpleExternalDataSourceSerializers
+from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
+from products.data_warehouse.backend.models.table import (
+    CLICKHOUSE_INSIGHTSQL_MAPPING,
+    SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING,
+)
+from products.data_warehouse.backend.models.util import validate_warehouse_table_url_pattern
+
+
+class CredentialSerializer(serializers.ModelSerializer):
+    created_by = UserBasicSerializer(read_only=True)
+
+    class Meta:
+        model = DataWarehouseCredential
+        fields = ["id", "created_by", "created_at", "access_key", "access_secret"]
+        read_only_fields = [
+            "id",
+            "created_by",
+            "created_at",
+        ]
+        extra_kwargs = {"access_key": {"write_only": "True"}, "access_secret": {"write_only": "True"}}
+
+
+class TableSerializer(serializers.ModelSerializer):
+    created_by = UserBasicSerializer(read_only=True)
+    credential = CredentialSerializer()
+    columns = serializers.SerializerMethodField(read_only=True)
+    external_data_source = SimpleExternalDataSourceSerializers(read_only=True)
+    external_schema = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = DataWarehouseTable
+        fields = [
+            "id",
+            "deleted",
+            "name",
+            "format",
+            "created_by",
+            "created_at",
+            "url_pattern",
+            "credential",
+            "columns",
+            "external_data_source",
+            "external_schema",
+        ]
+        read_only_fields = ["id", "created_by", "created_at", "columns", "external_data_source", "external_schema"]
+
+    def get_columns(self, table: DataWarehouseTable) -> list[SerializedField]:
+        database = self.context.get("database", None)
+        if not database:
+            database = Database.create_for(team_id=self.context["team_id"])
+
+        if database.has_table(table.name):
+            fields = database.get_table(table.name).fields
+        else:
+            fields = table.insightsql_definition().fields
+
+        serializes_fields = serialize_fields(
+            fields,
+            InsightsQLContext(database=database, team_id=self.context["team_id"]),
+            table.name_chain,
+            table.columns,
+            table_type="external",
+        )
+
+        return [
+            SerializedField(
+                key=field.name,
+                name=field.name,
+                type=field.type,
+                schema_valid=field.schema_valid,
+                fields=field.fields,
+                table=field.table,
+                chain=field.chain,
+            )
+            for field in serializes_fields
+        ]
+
+    def get_external_schema(self, instance: DataWarehouseTable):
+        from products.data_warehouse.backend.api.external_data_schema import SimpleExternalDataSchemaSerializer
+
+        return SimpleExternalDataSchemaSerializer(instance.externaldataschema_set.first(), read_only=True).data or None
+
+    def create(self, validated_data):
+        team_id = self.context["team_id"]
+
+        validated_data["team_id"] = team_id
+        validated_data["created_by"] = self.context["request"].user
+        credential = validated_data.get("credential")
+
+        if not credential:
+            raise serializers.ValidationError("Credentials are required")
+
+        access_key: str | None = credential.get("access_key")
+        access_secret: str | None = credential.get("access_secret")
+
+        if not access_key or not access_secret:
+            raise serializers.ValidationError("Access key and secret are required")
+
+        if len(access_key.strip()) == 0 or len(access_secret.strip()) == 0:
+            raise serializers.ValidationError("Access key and secret can't be blank")
+
+        validated_data["credential"] = DataWarehouseCredential.objects.create(
+            team_id=team_id,
+            access_key=access_key,
+            access_secret=access_secret,
+        )
+        table = DataWarehouseTable(**validated_data)
+        try:
+            table.columns = table.get_columns()
+        except Exception as err:
+            raise serializers.ValidationError(str(err))
+        table.save()
+
+        validate_data_warehouse_table_columns.delay(self.context["team_id"], str(table.id))
+
+        return table
+
+    def validate_url_pattern(self, url_pattern):
+        s3_domain = settings.DATAWAREHOUSE_BUCKET_DOMAIN
+        if s3_domain in url_pattern:
+            raise serializers.ValidationError("Cant use this bucket")
+
+        is_valid, error_message = validate_warehouse_table_url_pattern(url_pattern)
+        if not is_valid:
+            raise serializers.ValidationError(error_message)
+
+        return url_pattern
+
+    def validate_name(self, name):
+        if not self.instance or self.instance.name != name:
+            name_exists_in_insightsql_database = self.context["database"].has_table(name)
+            if name_exists_in_insightsql_database:
+                raise serializers.ValidationError("A table with this name already exists.")
+
+        return name
+
+
+class SimpleTableSerializer(serializers.ModelSerializer):
+    columns = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = DataWarehouseTable
+        fields = ["id", "name", "columns", "row_count"]
+        read_only_fields = ["id", "name", "columns", "row_count"]
+
+    def get_columns(self, table: DataWarehouseTable) -> list[SerializedField]:
+        database = self.context.get("database", None)
+        team_id = self.context.get("team_id", None)
+
+        if not database:
+            database = Database.create_for(team_id=self.context["team_id"])
+
+        fields = serialize_fields(
+            table.insightsql_definition().fields,
+            InsightsQLContext(database=database, team_id=team_id),
+            table.name_chain,
+            table_type="external",
+        )
+        return [
+            SerializedField(
+                key=field.name,
+                name=field.name,
+                type=field.type,
+                schema_valid=field.schema_valid,
+                fields=field.fields,
+                table=field.table,
+                chain=field.chain,
+            )
+            for field in fields
+        ]
+
+
+class TableViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
+    """
+    Create, Read, Update and Delete Warehouse Tables.
+    """
+
+    scope_object = "warehouse_table"
+    queryset = DataWarehouseTable.objects.all()
+    serializer_class = TableSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["name"]
+    ordering = "-created_at"
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        context = super().get_serializer_context()
+        context["database"] = Database.create_for(team_id=self.team_id)
+        context["team_id"] = self.team_id
+        return context
+
+    def safely_get_queryset(self, queryset):
+        return (
+            queryset.filter(team_id=self.team_id)
+            .exclude(deleted=True)
+            .prefetch_related("created_by", "externaldataschema_set")
+            .order_by(self.ordering)
+        )
+
+    def destroy(self, request: request.Request, *args: Any, **kwargs: Any) -> response.Response:
+        instance: DataWarehouseTable = self.get_object()
+
+        if instance.external_data_source is not None:
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST, data={"message": "Can't delete a sourced table"}
+            )
+
+        instance.soft_delete()
+
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        validated_data = serializer.validated_data
+
+        credential_data = validated_data.pop("credential", None)
+        if credential_data:
+            access_key = credential_data.get("access_key")
+            access_secret = credential_data.get("access_secret")
+
+            if access_key is not None and len(access_key.strip()) == 0:
+                raise serializers.ValidationError("Access key can't be blank")
+            if access_secret is not None and len(access_secret.strip()) == 0:
+                raise serializers.ValidationError("Access secret can't be blank")
+
+            credential = instance.credential
+            if access_key is not None:
+                credential.access_key = access_key
+            if access_secret is not None:
+                credential.access_secret = access_secret
+            credential.save()
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+    @action(methods=["POST"], detail=True)
+    def update_schema(self, request: request.Request, *args: Any, **kwargs: Any) -> response.Response:
+        updates = request.data.get("updates", None)
+        if updates is None:
+            return response.Response(status=status.HTTP_200_OK)
+
+        table: DataWarehouseTable = self.get_object()
+        if table.external_data_source is not None:
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST, data={"message": "The table must be a manually linked table"}
+            )
+
+        columns = table.columns
+        column_keys: list[str] = columns.keys()
+        for key in updates.keys():
+            if key not in column_keys:
+                return response.Response(
+                    status=status.HTTP_400_BAD_REQUEST, data={"message": f"Column {key} does not exist on table"}
+                )
+
+        for key, value in updates.items():
+            try:
+                DatabaseSerializedFieldType[value.upper()]
+            except:
+                return response.Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"message": f"Can not parse type {value} for column {key} - type does not exist"},
+                )
+
+            current_value = columns[key]
+            # If the column is in the "old" style, convert it to the new
+            if isinstance(current_value, str):
+                columns[key] = {}
+
+            columns[key]["clickhouse"] = f"Nullable({SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]})"
+            columns[key]["insightsql"] = CLICKHOUSE_INSIGHTSQL_MAPPING[SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]].__name__
+
+        table.columns = columns
+        table.save()
+
+        # Have to update the `valid` value separately to the `columns` value as the columns are required in the `ast.S3Table` class when querying ClickHouse
+        for key in updates.keys():
+            columns[key]["valid"] = table.validate_column_type(key)
+
+        table.columns = columns
+        table.save()
+
+        return response.Response(status=status.HTTP_200_OK)
+
+    @action(methods=["POST"], detail=True)
+    def refresh_schema(self, request: request.Request, *args: Any, **kwargs: Any) -> response.Response:
+        table: DataWarehouseTable = self.get_object()
+
+        table.columns = table.get_columns()
+        table.save()
+
+        return response.Response(status=status.HTTP_200_OK)
+
+    @action(
+        methods=["POST"],
+        detail=False,
+        required_scopes=["warehouse_table:write"],
+        parser_classes=[parsers.MultiPartParser, parsers.FormParser],
+    )
+    def file(self, request: request.Request, *args: Any, **kwargs: Any) -> response.Response:
+        team = Team.objects.get(id=self.team_id)
+        is_warehouse_api_enabled = hanzo_insights.feature_enabled(
+            "warehouse-api",
+            str(team.organization_id),
+            groups={"organization": str(team.organization_id)},
+            group_properties={"organization": {"id": str(team.organization_id)}},
+        )
+
+        if not is_warehouse_api_enabled:
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"message": "Warehouse API is not enabled for this organization"},
+            )
+
+        if "file" not in request.FILES:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "No file provided"})
+
+        file = request.FILES["file"]
+        table_name = request.data.get("name", file.name)
+        file_format = request.data.get("format", "CSVWithNames")
+
+        # Validate table name format
+        if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", table_name):
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={
+                    "message": "Table names must start with a letter or underscore and contain only alphanumeric characters or underscores."
+                },
+            )
+
+        # Validate table name
+        team_id = self.team_id
+        table = None
+        table_query = DataWarehouseTable.objects.exclude(deleted=True).filter(team_id=team_id, name=table_name)
+        if table_query.exists():
+            table = table_query.first()
+
+        if file.size > 52428800:  # 50MB in bytes
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"message": f"File size exceeds maximum allowed size of 50MB"},
+            )
+
+        # Create the table record
+        try:
+            # Create the table if it doesn't exist, otherwise use existing one
+            if table is None:
+                table = DataWarehouseTable.objects.create(
+                    team_id=team_id,
+                    name=table_name,
+                    format=file_format,
+                    created_by=request.user,
+                )
+
+            # Generate URL pattern and store file in object storage
+            if settings.DATAWAREHOUSE_BUCKET:
+                if settings.USE_LOCAL_SETUP:
+                    s3 = boto3.client(
+                        "s3",
+                        aws_access_key_id=settings.DATAWAREHOUSE_LOCAL_ACCESS_KEY,
+                        aws_secret_access_key=settings.DATAWAREHOUSE_LOCAL_ACCESS_SECRET,
+                        endpoint_url=settings.OBJECT_STORAGE_ENDPOINT,
+                    )
+                else:
+                    s3 = boto3.client("s3")
+
+                s3.upload_fileobj(file, settings.DATAWAREHOUSE_BUCKET, f"managed/team_{team_id}/{file.name}")
+
+                # Set the URL pattern for the table
+                table.url_pattern = f"https://{settings.DATAWAREHOUSE_BUCKET_DOMAIN}/managed/team_{team_id}/{file.name}"
+                table.format = file_format
+
+                # Try to determine columns from the file
+                table.columns = table.get_columns()
+                table.save()
+
+                # Validate columns in background
+                from insights.tasks.warehouse import validate_data_warehouse_table_columns
+
+                validate_data_warehouse_table_columns.delay(team_id, str(table.id))
+
+                return response.Response(
+                    status=status.HTTP_201_CREATED,
+                    data=TableSerializer(table, context=self.get_serializer_context()).data,
+                )
+            else:
+                if table is not None and table.credential is None:
+                    table.delete()
+                return response.Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"message": "Object storage must be available to upload files."},
+                )
+        except Exception as e:
+            capture_exception(e)
+            return response.Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Failed to upload file"})

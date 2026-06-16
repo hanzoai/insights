@@ -1,7 +1,7 @@
--- These mimic the posthog main-db property, event, hostdefinition, and event-property tables, and are only used
+-- These mimic the insights main-db property, event, hostdefinition, and event-property tables, and are only used
 -- for testing (so we can use `sqlx::test`)
 
-CREATE TABLE IF NOT EXISTS posthog_eventdefinition (
+CREATE TABLE IF NOT EXISTS insights_eventdefinition (
     id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     volume_30_day INTEGER,
@@ -9,12 +9,13 @@ CREATE TABLE IF NOT EXISTS posthog_eventdefinition (
     team_id INTEGER NOT NULL,
     project_id BIGINT NULL,
     last_seen_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    enforcement_mode VARCHAR(10) NOT NULL DEFAULT 'allow'
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS event_definition_proj_uniq ON posthog_eventdefinition (coalesce(project_id, team_id), name);
+CREATE UNIQUE INDEX IF NOT EXISTS event_definition_proj_uniq ON insights_eventdefinition (coalesce(project_id, team_id), name);
 
-CREATE TABLE IF NOT EXISTS posthog_propertydefinition (
+CREATE TABLE IF NOT EXISTS insights_propertydefinition (
     id UUID PRIMARY KEY,
     name VARCHAR(400) NOT NULL,
     is_numerical BOOLEAN NOT NULL,
@@ -28,10 +29,10 @@ CREATE TABLE IF NOT EXISTS posthog_propertydefinition (
     type SMALLINT NOT NULL DEFAULT 1
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS posthog_propdef_proj_uniq ON posthog_propertydefinition (coalesce(project_id, team_id), name, type, coalesce(group_type_index, -1));
+CREATE UNIQUE INDEX IF NOT EXISTS insights_propdef_proj_uniq ON insights_propertydefinition (coalesce(project_id, team_id), name, type, coalesce(group_type_index, -1));
 
 
-CREATE TABLE IF NOT EXISTS posthog_eventproperty (
+CREATE TABLE IF NOT EXISTS insights_eventproperty (
     id SERIAL PRIMARY KEY,
     event VARCHAR(400)NOT NULL,
     property VARCHAR(400) NOT NULL,
@@ -39,9 +40,9 @@ CREATE TABLE IF NOT EXISTS posthog_eventproperty (
     project_id BIGINT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS posthog_event_property_unique_proj_event_property ON posthog_eventproperty (coalesce(project_id, team_id), event, property);
+CREATE UNIQUE INDEX IF NOT EXISTS insights_event_property_unique_proj_event_property ON insights_eventproperty (coalesce(project_id, team_id), event, property);
 
-CREATE TABLE IF NOT EXISTS posthog_grouptypemapping (
+CREATE TABLE IF NOT EXISTS insights_grouptypemapping (
     id integer PRIMARY KEY,
     group_type VARCHAR(400) NOT NULL,
     group_type_index INTEGER NOT NULL,
@@ -51,9 +52,9 @@ CREATE TABLE IF NOT EXISTS posthog_grouptypemapping (
     name_singular VARCHAR(400) NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS posthog_grouptypemapping_pkey ON posthog_grouptypemapping (id);
-CREATE UNIQUE INDEX IF NOT EXISTS "unique group types for project" ON posthog_grouptypemapping USING btree (project_id, group_type);
-CREATE UNIQUE INDEX IF NOT EXISTS "unique event column indexes for project" ON posthog_grouptypemapping USING btree (project_id, group_type_index);
+CREATE UNIQUE INDEX IF NOT EXISTS insights_grouptypemapping_pkey ON insights_grouptypemapping (id);
+CREATE UNIQUE INDEX IF NOT EXISTS "unique group types for project" ON insights_grouptypemapping USING btree (project_id, group_type);
+CREATE UNIQUE INDEX IF NOT EXISTS "unique event column indexes for project" ON insights_grouptypemapping USING btree (project_id, group_type_index);
 
 CREATE TABLE ee_enterprisepropertydefinition (
     propertydefinition_ptr_id UUID PRIMARY KEY,

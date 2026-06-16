@@ -1,13 +1,11 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
-import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonDivider, LemonTag, Link, lemonToast } from '@posthog/lemon-ui'
+import { LemonDivider, LemonTag, Link, lemonToast } from '@hanzo/lemon-ui'
 
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { NotFound } from 'lib/components/NotFound'
-import { PageHeader } from 'lib/components/PageHeader'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
@@ -25,7 +23,6 @@ export const scene: SceneExport<SurveyLogicProps> = {
     component: SurveyComponent,
     logic: surveyLogic,
     paramsToProps: ({ params: { id } }) => ({ id }),
-    settingSectionId: 'environment-surveys',
 }
 
 export function SurveyComponent({ id }: SurveyLogicProps): JSX.Element {
@@ -48,31 +45,19 @@ export function SurveyComponent({ id }: SurveyLogicProps): JSX.Element {
         return <NotFound object="survey" />
     }
 
+    if (!id) {
+        return <LemonSkeleton />
+    }
+
     return (
-        <div>
-            {!id ? (
-                <LemonSkeleton />
-            ) : (
-                <BindLogic logic={surveyLogic} props={{ id }}>
-                    {isEditingSurvey ? <SurveyForm id={id} /> : <SurveyView id={id} />}
-                </BindLogic>
-            )}
-        </div>
+        <BindLogic logic={surveyLogic} props={{ id }}>
+            {isEditingSurvey ? <SurveyForm id={id} /> : <SurveyView id={id} />}
+        </BindLogic>
     )
 }
 
 export function SurveyForm({ id }: { id: string }): JSX.Element {
-    const { survey, surveyLoading, targetingFlagFilters } = useValues(surveyLogic)
-    const { loadSurvey, editingSurvey } = useActions(surveyLogic)
-
-    const handleCancelClick = (): void => {
-        editingSurvey(false)
-        if (id === 'new') {
-            router.actions.push(urls.surveys())
-        } else {
-            loadSurvey()
-        }
-    }
+    const { survey, targetingFlagFilters } = useValues(surveyLogic)
 
     return (
         <Form
@@ -83,30 +68,7 @@ export function SurveyForm({ id }: { id: string }): JSX.Element {
             className="deprecated-space-y-4"
             enableFormOnSubmit
         >
-            <PageHeader
-                buttons={
-                    <div className="flex items-center gap-2">
-                        <LemonButton
-                            data-attr="cancel-survey"
-                            type="secondary"
-                            loading={surveyLoading}
-                            onClick={handleCancelClick}
-                        >
-                            Cancel
-                        </LemonButton>
-                        <LemonButton
-                            type="primary"
-                            data-attr="save-survey"
-                            htmlType="submit"
-                            loading={surveyLoading}
-                            form="survey"
-                        >
-                            {id === 'new' ? 'Save as draft' : 'Save'}
-                        </LemonButton>
-                    </div>
-                }
-            />
-            <SurveyEdit />
+            <SurveyEdit id={id} />
             <LemonDivider />
             <SurveyDisplaySummary id={id} survey={survey} targetingFlagFilters={targetingFlagFilters} />
             <LemonDivider />
@@ -225,8 +187,39 @@ export function SurveyDisplaySummary({
                                     : 'once per user'}
                             </span>
                             ):
-                        </span>
+                        </span>{' '}
                         {survey.conditions?.events?.values.map((event) => (
+                            <LemonTag key={event.name}>{event.name}</LemonTag>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {(survey.conditions?.actions?.values?.length ?? 0) > 0 && (
+                <div className="flex flex-col font-medium gap-1">
+                    <div className="flex-row">
+                        <span>When the user sends the following actions:</span>{' '}
+                        {survey.conditions?.actions?.values.map((action) => (
+                            <LemonTag key={action.name}>{action.name}</LemonTag>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {survey.appearance?.surveyPopupDelaySeconds && (
+                <div className="flex flex-col font-medium gap-1">
+                    <div className="flex-row">
+                        <span>Delay before showing:</span>{' '}
+                        <LemonTag>
+                            {survey.appearance.surveyPopupDelaySeconds}{' '}
+                            {survey.appearance.surveyPopupDelaySeconds === 1 ? 'second' : 'seconds'}
+                        </LemonTag>
+                    </div>
+                </div>
+            )}
+            {(survey.conditions?.cancelEvents?.values?.length ?? 0) > 0 && (
+                <div className="flex flex-col font-medium gap-1">
+                    <div className="flex-row">
+                        <span>Cancel survey if user sends:</span>
+                        {survey.conditions?.cancelEvents?.values?.map((event) => (
                             <LemonTag key={event.name}>{event.name}</LemonTag>
                         ))}
                     </div>

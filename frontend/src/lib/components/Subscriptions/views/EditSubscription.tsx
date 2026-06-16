@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonInput, LemonTextArea, Link } from '@posthog/lemon-ui'
+import { IconChevronLeft } from '@hanzo/icons'
+import { LemonInput, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
-import api from 'lib/api'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
 import { dayjs } from 'lib/dayjs'
-import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
+import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -17,7 +17,6 @@ import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { IconChevronLeft } from 'lib/lemon-ui/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 
@@ -137,10 +136,10 @@ export function EditSubscription({
                                         <code>{window.location.origin}</code>
                                     </b>
                                     . <br />
-                                    If this value is not configured correctly PostHog may be unable to correctly send
+                                    If this value is not configured correctly Insights may be unable to correctly send
                                     Subscriptions.{' '}
                                     <Link
-                                        to="https://posthog.com/docs/configuring-posthog/environment-variables?utm_medium=in-product&utm_campaign=subcriptions-system-status-site-url-misconfig"
+                                        to="https://hanzo.ai/docs/configuring-insights/environment-variables?utm_medium=in-product&utm_campaign=subcriptions-system-status-site-url-misconfig"
                                         target="_blank"
                                         targetBlankIcon
                                     >
@@ -163,10 +162,10 @@ export function EditSubscription({
                                 {emailDisabled && (
                                     <LemonBanner type="error">
                                         <>
-                                            Email subscriptions are not currently possible as this PostHog instance
+                                            Email subscriptions are not currently possible as this Insights instance
                                             isn't{' '}
                                             <Link
-                                                to="https://posthog.com/docs/self-host/configure/email"
+                                                to="https://hanzo.ai/docs/self-host/configure/email"
                                                 target="_blank"
                                                 targetBlankIcon
                                             >
@@ -206,31 +205,7 @@ export function EditSubscription({
                         {subscription.target_type === 'slack' ? (
                             <>
                                 {!firstSlackIntegration ? (
-                                    <>
-                                        <LemonBanner type="info">
-                                            <div className="flex justify-between gap-2">
-                                                <span>
-                                                    Slack is not yet configured for this project. Add PostHog to your
-                                                    Slack workspace to continue.
-                                                </span>
-                                                <Link
-                                                    to={api.integrations.authorizeUrl({
-                                                        kind: 'slack',
-                                                        next: window.location.pathname + '?target_type=slack',
-                                                    })}
-                                                    disableClientSideRouting
-                                                >
-                                                    <img
-                                                        alt="Add to Slack"
-                                                        height="40"
-                                                        width="139"
-                                                        src="https://platform.slack-edge.com/img/add_to_slack.png"
-                                                        srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </LemonBanner>
-                                    </>
+                                    <SlackNotConfiguredBanner />
                                 ) : (
                                     <>
                                         <LemonField
@@ -239,8 +214,8 @@ export function EditSubscription({
                                             help={
                                                 <>
                                                     Private channels are only shown if you have{' '}
-                                                    <Link to="https://posthog.com/docs/webhooks/slack" target="_blank">
-                                                        added the PostHog Slack App
+                                                    <Link to="https://hanzo.ai/docs/webhooks/slack" target="_blank">
+                                                        added the Insights Slack App
                                                     </Link>{' '}
                                                     to them. You can also paste the channel ID (e.g.{' '}
                                                     <code>C1234567890</code>) to search for channels.

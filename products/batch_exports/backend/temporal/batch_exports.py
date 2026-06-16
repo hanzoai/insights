@@ -16,8 +16,8 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, exceptions, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.models import BatchExportBackfill, BatchExportRun
-from posthog.batch_exports.service import (
+from insights.batch_exports.models import BatchExportBackfill, BatchExportRun
+from insights.batch_exports.service import (
     BackfillDetails,
     BatchExportField,
     BatchExportInsertInputs,
@@ -30,13 +30,13 @@ from posthog.batch_exports.service import (
     update_batch_export_backfill_status,
     update_batch_export_run,
 )
-from posthog.kafka_client.topics import KAFKA_APP_METRICS2
-from posthog.models.team.team import Team
-from posthog.settings.base_variables import TEST
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.clickhouse import ClickHouseClient
-from posthog.temporal.common.client import connect
-from posthog.temporal.common.logger import get_produce_only_logger, get_write_only_logger
+from insights.kafka_client.topics import KAFKA_APP_METRICS2
+from insights.models.team.team import Team
+from insights.settings.base_variables import TEST
+from insights.sync import database_sync_to_async
+from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.client import connect
+from insights.temporal.common.logger import get_logger, get_write_only_logger
 
 from products.batch_exports.backend.temporal.metrics import get_export_finished_metric, get_export_started_metric
 from products.batch_exports.backend.temporal.pipeline.types import BatchExportResult
@@ -49,10 +49,9 @@ from products.batch_exports.backend.temporal.sql import (
     SELECT_FROM_EVENTS_VIEW_UNBOUNDED,
 )
 
-from ee.billing.quota_limiting import QuotaLimitingCaches, QuotaResource, list_limited_team_attributes
 
 LOGGER = get_write_only_logger(__name__)
-EXTERNAL_LOGGER = get_produce_only_logger("EXTERNAL")
+EXTERNAL_LOGGER = get_logger("EXTERNAL")
 
 BytesGenerator = collections.abc.Generator[bytes, None, None]
 RecordsGenerator = collections.abc.Generator[pa.RecordBatch, None, None]
@@ -77,6 +76,23 @@ def default_fields() -> list[BatchExportField]:
             expression="set_once",
             alias="set_once",
         ),
+    ]
+
+
+def events_model_default_fields() -> list[BatchExportField]:
+    """Return list of default batch export Fields for the events model.
+
+    This set of fields can be used for new events batch exports that do not need to support legacy fields (such as `set`
+    and `set_once`).
+    """
+    return [
+        BatchExportField(expression="uuid", alias="uuid"),
+        BatchExportField(expression="team_id", alias="team_id"),
+        BatchExportField(expression="timestamp", alias="timestamp"),
+        BatchExportField(expression="_inserted_at", alias="_inserted_at"),
+        BatchExportField(expression="event", alias="event"),
+        BatchExportField(expression="properties", alias="properties"),
+        BatchExportField(expression="distinct_id", alias="distinct_id"),
     ]
 
 
@@ -172,7 +188,7 @@ def iter_records(
 ) -> RecordsGenerator:
     """Iterate over Arrow batch records for a batch export.
 
-    TODO: this can be removed once HTTP batch exports are migrated to SPMC
+    TODO: this can be removed once HTTP batch exports are migrated to new pipeline.
 
     Args:
         client: The ClickHouse client used to query for the batch records.
@@ -253,6 +269,9 @@ def iter_records(
         lookback_days = settings.OVERRIDE_TIMESTAMP_TEAM_IDS.get(team_id, settings.DEFAULT_TIMESTAMP_LOOKBACK_DAYS)
         base_query_parameters["lookback_days"] = lookback_days
 
+    if filters_str:
+        filters_str = f"AND {filters_str}"
+
     query_str = query.safe_substitute(
         fields=query_fields, filters=filters_str or "", order="ORDER BY _inserted_at, event"
     )
@@ -316,6 +335,8 @@ def get_data_interval(interval: str, data_interval_end: str | None) -> tuple[dt.
         data_interval_start_dt = data_interval_end_dt - dt.timedelta(hours=1)
     elif interval == "day":
         data_interval_start_dt = data_interval_end_dt - dt.timedelta(days=1)
+    elif interval == "week":
+        data_interval_start_dt = data_interval_end_dt - dt.timedelta(weeks=1)
     elif interval.startswith("every"):
         _, value, unit = interval.split(" ")
         kwargs = {unit: int(value)}
@@ -426,17 +447,8 @@ async def start_batch_export_run(inputs: StartBatchExportRunInputs) -> BatchExpo
 async def check_is_over_limit(team_id: int) -> bool:
     """Check if team has exceeded billing limits.
 
-    If so, the batch export should not run.
+    Billing limits removed. Always returns False.
     """
-    team: Team = await Team.objects.aget(id=team_id)
-
-    limited_team_tokens_rows_synced = await asyncio.to_thread(
-        list_limited_team_attributes, QuotaResource.ROWS_EXPORTED, QuotaLimitingCaches.QUOTA_LIMITER_CACHE_KEY
-    )
-
-    if team.api_token in limited_team_tokens_rows_synced:
-        return True
-
     return False
 
 
@@ -532,7 +544,7 @@ async def finish_batch_export_run(inputs: FinishBatchExportRunInputs) -> None:
             batch_export_run.latest_error,
         )
 
-        from posthog.tasks.email import send_batch_export_run_failure
+        from insights.tasks.email import send_batch_export_run_failure
 
         try:
             await database_sync_to_async(send_batch_export_run_failure)(inputs.id)
@@ -883,7 +895,8 @@ async def execute_batch_export_insert_activity(
         initial_retry_interval_seconds: When retrying, seconds until the first retry.
         maximum_retry_interval_seconds: Maximum interval in seconds between retries.
     """
-    get_export_started_metric().add(1)
+    model_name = inputs.batch_export_model.name if inputs.batch_export_model else "events"
+    get_export_started_metric(model=model_name).add(1)
 
     if TEST:
         maximum_attempts = 1
@@ -895,6 +908,8 @@ async def execute_batch_export_insert_activity(
         start_to_close_timeout = dt.timedelta(hours=2)
     elif interval == "day":
         start_to_close_timeout = dt.timedelta(days=1)
+    elif interval == "week":
+        start_to_close_timeout = dt.timedelta(days=3)
     elif interval.startswith("every"):
         _, value, unit = interval.split(" ")
         kwargs = {unit: int(value)}
@@ -938,7 +953,7 @@ async def execute_batch_export_insert_activity(
         raise
 
     finally:
-        get_export_finished_metric(status=finish_inputs.status.lower()).add(1)
+        get_export_finished_metric(status=finish_inputs.status.lower(), model=model_name).add(1)
 
         await workflow.execute_activity(
             finish_batch_export_run,

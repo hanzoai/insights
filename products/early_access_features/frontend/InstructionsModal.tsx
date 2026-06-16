@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCollapse, LemonModal, Link } from '@posthog/lemon-ui'
+import { LemonCollapse, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -30,7 +30,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
                     content: (
                         <div>
                             Give your users a{' '}
-                            <Link to={urls.hogFunctionNew('template-early-access-features')}>prebuilt widget</Link> to
+                            <Link to={urls.insightsFunctionNew('template-early-access-features')}>prebuilt widget</Link> to
                             opt-in to features
                             <img className="max-h-full max-w-full mt-2.5" src={EarlyAccessFeatureImage} />
                         </div>
@@ -99,7 +99,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
 function FeatureEnrollInstructions({ flag }: { flag: string }): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript} wrap>
-            {`posthog.updateEarlyAccessFeatureEnrollment("${flag}", true)
+            {`insights.updateEarlyAccessFeatureEnrollment("${flag}", true)
 `}
         </CodeSnippet>
     )
@@ -108,7 +108,7 @@ function FeatureEnrollInstructions({ flag }: { flag: string }): JSX.Element {
 function FeatureUnenrollInstructions({ flag }: { flag: string }): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript} wrap>
-            {`posthog.updateEarlyAccessFeatureEnrollment("${flag}", false)
+            {`insights.updateEarlyAccessFeatureEnrollment("${flag}", false)
 `}
         </CodeSnippet>
     )
@@ -117,7 +117,7 @@ function FeatureUnenrollInstructions({ flag }: { flag: string }): JSX.Element {
 function RetrievePreviewsInstructions(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript} wrap>
-            {`posthog.getEarlyAccessFeatures((previewItemData) => {
+            {`insights.getEarlyAccessFeatures((previewItemData) => {
     // do something with early access feature
 })
 `}
