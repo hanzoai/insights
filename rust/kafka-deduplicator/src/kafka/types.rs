@@ -1,8 +1,9 @@
 use std::fmt::{Display, Formatter, Result};
 
 use rdkafka::topic_partition_list::TopicPartitionListElem;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Partition {
     topic: String,
     partition_number: i32,
@@ -54,6 +55,10 @@ impl PartitionOffset {
 
     pub fn partition_number(&self) -> i32 {
         self.partition.partition_number()
+    }
+
+    pub fn partition(&self) -> &Partition {
+        &self.partition
     }
 
     pub fn offset(&self) -> i64 {

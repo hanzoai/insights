@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconKeyboard } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconKeyboard } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import {
     TaxonomicFilterGroupType,
@@ -37,6 +37,7 @@ export function TaxonomicFilter({
     height,
     width,
     excludedProperties,
+    selectedProperties,
     popoverEnabled = true,
     selectFirstItem = true,
     propertyAllowList,
@@ -46,6 +47,7 @@ export function TaxonomicFilter({
     maxContextOptions,
     useVerticalLayout,
     allowNonCapturedEvents = false,
+    insightsQLGlobals,
 }: TaxonomicFilterProps): JSX.Element {
     // Generate a unique key for each unique TaxonomicFilter that's rendered
     const taxonomicFilterLogicKey = useMemo(
@@ -69,6 +71,7 @@ export function TaxonomicFilter({
         popoverEnabled,
         selectFirstItem,
         excludedProperties,
+        selectedProperties,
         metadataSource,
         propertyAllowList,
         hideBehavioralCohorts,
@@ -78,6 +81,7 @@ export function TaxonomicFilter({
         autoSelectItem: true,
         allowNonCapturedEvents,
         maxContextOptions,
+        insightsQLGlobals,
     }
 
     const logic = taxonomicFilterLogic(taxonomicFilterLogicProps)
@@ -85,7 +89,7 @@ export function TaxonomicFilter({
     const [refReady, setRefReady] = useState(false)
 
     useEffect(() => {
-        if (groupType !== TaxonomicFilterGroupType.HogQLExpression) {
+        if (groupType !== TaxonomicFilterGroupType.InsightsQLExpression) {
             window.setTimeout(() => focusInput(), 1)
         }
     }, [groupType])
@@ -115,7 +119,7 @@ export function TaxonomicFilter({
                 // eslint-disable-next-line react/forbid-dom-props
                 style={style}
             >
-                {activeTab !== TaxonomicFilterGroupType.HogQLExpression || taxonomicGroupTypes.length > 1 ? (
+                {activeTab !== TaxonomicFilterGroupType.InsightsQLExpression || taxonomicGroupTypes.length > 1 ? (
                     <div className="relative">
                         <TaxonomicFilterSearchInput searchInputRef={searchInputRef} onClose={onClose} />
                     </div>
@@ -138,9 +142,12 @@ export const TaxonomicFilterSearchInput = forwardRef<
     {
         searchInputRef: React.Ref<HTMLInputElement> | null
         onClose: TaxonomicFilterProps['onClose']
-    } & Pick<LemonInputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange'> &
+    } & Pick<LemonInputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus'> &
         Pick<TooltipProps, 'docLink'>
->(function UniversalSearchInput({ searchInputRef, onClose, onChange, docLink, ...props }, ref): JSX.Element {
+>(function UniversalSearchInput(
+    { searchInputRef, onClose, onChange, docLink, autoFocus = true, ...props },
+    ref
+): JSX.Element {
     const { searchQuery, searchPlaceholder, showNumericalPropsOnly } = useValues(taxonomicFilterLogic)
     const {
         setSearchQuery: setTaxonomicSearchQuery,
@@ -224,6 +231,7 @@ export const TaxonomicFilterSearchInput = forwardRef<
             }}
             inputRef={searchInputRef}
             onChange={_onChange}
+            autoFocus={autoFocus}
         />
     )
 })

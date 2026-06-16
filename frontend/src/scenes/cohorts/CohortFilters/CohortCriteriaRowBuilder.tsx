@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useActions } from 'kea'
 import { Field as KeaField } from 'kea-forms'
 
-import { IconCopy, IconTrash } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconCopy, IconTrash } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -28,7 +28,6 @@ export interface CohortCriteriaRowBuilderProps {
 }
 
 export function CohortCriteriaRowBuilder({
-    id,
     type,
     groupIndex,
     index,
@@ -37,7 +36,7 @@ export function CohortCriteriaRowBuilder({
     hideDeleteIcon = false,
     onChangeType,
 }: CohortCriteriaRowBuilderProps): JSX.Element {
-    const { setCriteria, duplicateFilter, removeFilter } = useActions(cohortEditLogic({ id }))
+    const { setCriteria, duplicateFilter, removeFilter } = useActions(cohortEditLogic)
     const rowShape = ROWS[type]
 
     const renderFieldComponent = (_field: Field, i: number): JSX.Element => {
@@ -70,7 +69,7 @@ export function CohortCriteriaRowBuilder({
                                     error && `CohortCriteriaRow__Criteria--error`
                                 )}
                             >
-                                {kids}
+                                {kids as React.ReactNode}
                                 {error && (
                                     <LemonBanner className="my-2" type="error">
                                         {error}
@@ -94,7 +93,7 @@ export function CohortCriteriaRowBuilder({
                                                 error && `CohortCriteriaRow__Criteria__Field--error`
                                             )}
                                         >
-                                            {kids}
+                                            {kids as React.ReactNode}
                                         </div>
                                     </>
                                 )
@@ -138,7 +137,7 @@ export function CohortCriteriaRowBuilder({
                                                                 error && `CohortCriteriaRow__Criteria__Field--error`
                                                             )}
                                                         >
-                                                            {kids}
+                                                            {kids as React.ReactNode}
                                                         </div>
                                                     </>
                                                 )

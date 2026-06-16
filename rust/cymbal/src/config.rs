@@ -3,24 +3,30 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
+use aws_config::{BehaviorVersion, Region};
+use common_continuous_profiling::ContinuousProfilingConfig;
 use common_kafka::config::{ConsumerConfig, KafkaConfig};
 use envconfig::Envconfig;
+use tracing::{info, warn};
 
 // TODO - I'm just too lazy to pipe this all the way through the resolve call stack
 pub static FRAME_CONTEXT_LINES: AtomicUsize = AtomicUsize::new(15);
 
 #[derive(Envconfig, Clone)]
 pub struct Config {
+    #[envconfig(nested = true)]
+    pub continuous_profiling: ContinuousProfilingConfig,
+
     #[envconfig(from = "BIND_HOST", default = "::")]
     pub host: String,
 
     #[envconfig(from = "BIND_PORT", default = "3305")]
     pub port: u16,
 
-    pub posthog_api_key: Option<String>,
+    pub insights_api_key: Option<String>,
 
-    #[envconfig(default = "https://us.i.posthog.com/capture")]
-    pub posthog_endpoint: String,
+    #[envconfig(default = "https://us.i.insights.hanzo.ai/capture")]
+    pub insights_endpoint: String,
 
     #[envconfig(nested = true)]
     pub kafka: KafkaConfig,
@@ -37,11 +43,17 @@ pub struct Config {
     #[envconfig(default = "clickhouse_ingestion_warnings")]
     pub ingestion_warnings_topic: String,
 
+    #[envconfig(default = "document_embeddings_input")]
+    pub embedding_worker_topic: String,
+
     #[envconfig(nested = true)]
     pub consumer: ConsumerConfig,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
+
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
+    pub persons_url: String,
 
     // Rust service connect directly to postgres, not via pgbouncer, so we keep this low
     #[envconfig(default = "4")]
@@ -131,6 +143,15 @@ pub struct Config {
     #[envconfig(default = "redis://localhost:6379/")]
     pub redis_url: String,
 
+    #[envconfig(from = "ISSUE_BUCKETS_REDIS_URL", default = "redis://localhost:6379/")]
+    pub issue_buckets_redis_url: String,
+
+    #[envconfig(default = "100")]
+    pub redis_response_timeout_ms: u64,
+
+    #[envconfig(default = "5000")]
+    pub redis_connection_timeout_ms: u64,
+
     #[envconfig(default = "")]
     pub filtered_teams: String, // Comma seperated list of teams to either filter in (process) or filter out (ignore)
 
@@ -139,6 +160,11 @@ pub struct Config {
 
     #[envconfig(default = "false")]
     pub auto_assignment_enabled: bool, // Comma seperated list of users to either filter in (process) or filter out (ignore)
+
+    // Comma separated list of team IDs that can receive spike alerts.
+    // If empty, all teams can receive alerts
+    #[envconfig(default = "")]
+    pub spike_alert_enabled_team_ids: String,
 }
 
 impl Config {
@@ -171,4 +197,35 @@ fn default_maxmind_db_path() -> PathBuf {
         .unwrap()
         .join("share")
         .join("GeoLite2-City.mmdb")
+}
+
+pub async fn get_aws_config(config: &Config) -> aws_sdk_s3::Config {
+    // If we have a role ARN and token file, which are added to the container due to the SA annotation we use in prod
+    if std::env::var("AWS_ROLE_ARN").is_ok() && std::env::var("AWS_WEB_IDENTITY_TOKEN_FILE").is_ok()
+    {
+        info!("AWS role and token file detected, config loaded from environment variables");
+        // Use default aws config loading behaviour, which should pick up the role-based credentials. We
+        // assume region and endpoint will be properly set due to SA annotation. Behaviour version will
+        // be latest due to config crate feature flag
+        aws_sdk_s3::config::Builder::from(&aws_config::load_from_env().await)
+            .force_path_style(config.object_storage_force_path_style)
+            .build()
+    } else {
+        warn!("Falling back to building config from explicit environment variables");
+        // Fall back to building our config from the explicit environment variables we use in local dev
+        let env_credentials = aws_sdk_s3::config::Credentials::new(
+            &config.object_storage_access_key_id,
+            &config.object_storage_secret_access_key,
+            None,
+            None,
+            "environment",
+        );
+        aws_sdk_s3::config::Builder::new()
+            .region(Region::new(config.object_storage_region.clone()))
+            .endpoint_url(&config.object_storage_endpoint)
+            .credentials_provider(env_credentials)
+            .behavior_version(BehaviorVersion::latest())
+            .force_path_style(config.object_storage_force_path_style)
+            .build()
+    }
 }

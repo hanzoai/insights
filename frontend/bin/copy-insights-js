@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -e
+
+# This script copies built dist files from @hanzo/insights so they can be served on the CDN.
+PKG_DIR=$(node -e "console.log(require('path').dirname(require.resolve('@hanzo/insights/package.json')))")
+
+if [ ! -d "$PKG_DIR/dist" ]; then
+    echo "ERROR: Cannot find @hanzo/insights dist at $PKG_DIR/dist" >&2
+    exit 1
+fi
+
+DIST="$PKG_DIR/dist"
+
+cp "$DIST"/array.js* dist/
+cp "$DIST"/array.full.js* dist/
+cp "$DIST"/array.full.es5.js* dist/
+cp "$DIST"/surveys.js* dist/
+cp "$DIST"/logs.js* dist/
+cp "$DIST"/exception-autocapture.js* dist/
+cp "$DIST"/web-vitals.js* dist/
+cp "$DIST"/tracing-headers.js* dist/
+cp "$DIST"/dead-clicks-autocapture.js* dist/
+cp "$DIST"/customizations.full.js* dist/
+# Copy all external integration bundles
+cp "$DIST"/*integration.js* dist/ 2>/dev/null || true
+# Copy all recorder bundles
+cp "$DIST"/*recorder*.js* dist/ 2>/dev/null || true
+cp "$DIST"/product-tours.js* dist/
+cp "$DIST"/conversations.js* dist/

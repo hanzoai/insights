@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonCheckbox, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonCheckbox, Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { domainFor, proxyLogic } from 'scenes/settings/environment/proxyLogic'
@@ -28,11 +28,11 @@ export function CSPReportingSettings(): JSX.Element {
                 configure.
             </p>
             <p>
-                CSP Reporting lets you track your CSP by sending reports to PostHog when a CSP violation occurs. This
+                CSP Reporting lets you track your CSP by sending reports to Insights when a CSP violation occurs. This
                 helps you see when CSP misconfiguration, web site changes, or security flaws are causing problems.
             </p>
             <p>
-                PostHog supports both the{' '}
+                Insights supports both the{' '}
                 <Link
                     to="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/report-uri"
                     target="_blank"
@@ -56,7 +56,7 @@ export function CSPReportingSettings(): JSX.Element {
                         <div>
                             We accept some additional parameters on the report URL. These require that you add
                             information when adding the URL to your pages.{' '}
-                            <Link to="https://posthog.com/docs/csp-tracking">See our docs for some examples.</Link>
+                            <Link to="https://hanzo.ai/docs/csp-tracking">See our docs for some examples.</Link>
                         </div>
                     </div>
                 </LemonBanner>
@@ -67,7 +67,7 @@ export function CSPReportingSettings(): JSX.Element {
                         onChange={setIncludeVersion}
                     />
                     <LemonCheckbox
-                        label="session_id: the PostHog UUIDv7 session id. Helps you link CSP violations to session replay."
+                        label="session_id: the Insights UUIDv7 session id. Helps you link CSP violations to session replay."
                         checked={includeSessionId}
                         onChange={setIncludeSessionId}
                     />

@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconRocket } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconFlag, IconRocket } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
@@ -11,7 +11,7 @@ import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { IconRecording, IconSurveys } from 'lib/lemon-ui/icons'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
@@ -21,7 +21,7 @@ import { notebookNodeFlagLogic } from './NotebookNodeFlagLogic'
 import { buildPlaylistContent } from './NotebookNodePlaylist'
 import { buildSurveyContent } from './NotebookNodeSurvey'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { INTEGER_REGEX_MATCH_GROUPS } from './utils'
+import { INTEGER_REGEX_MATCH_GROUPS, OPTIONAL_PROJECT_NON_CAPTURE_GROUP } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeFlagAttributes>): JSX.Element => {
     const { id } = attributes
@@ -144,7 +144,7 @@ type NotebookNodeFlagAttributes = {
     id: FeatureFlagLogicProps['id']
 }
 
-export const NotebookNodeFlag = createPostHogWidgetNode<NotebookNodeFlagAttributes>({
+export const NotebookNodeFlag = createInsightsWidgetNode<NotebookNodeFlagAttributes>({
     nodeType: NotebookNodeType.FeatureFlag,
     titlePlaceholder: 'Feature flag',
     Component,
@@ -155,7 +155,7 @@ export const NotebookNodeFlag = createPostHogWidgetNode<NotebookNodeFlagAttribut
         id: {},
     },
     pasteOptions: {
-        find: urls.featureFlag(INTEGER_REGEX_MATCH_GROUPS),
+        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.featureFlag(INTEGER_REGEX_MATCH_GROUPS),
         getAttributes: async (match) => {
             return { id: match[1] as FeatureFlagLogicProps['id'] }
         },

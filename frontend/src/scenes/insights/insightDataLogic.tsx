@@ -1,6 +1,9 @@
 import { actions, connect, kea, key, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
-import { router } from 'kea-router'
+import { loaders } from 'kea-loaders'
+import { actionToUrl, router } from 'kea-router'
 
+import api from 'lib/api'
+import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { objectsEqual } from 'lib/utils'
 import { DATAWAREHOUSE_EDITOR_ITEM_ID } from 'scenes/data-warehouse/utils'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -14,8 +17,15 @@ import { nodeKindToInsightType } from '~/queries/nodes/InsightQuery/utils/queryN
 import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import { getDefaultQuery, queryFromKind } from '~/queries/nodes/InsightViz/utils'
 import { queryExportContext } from '~/queries/query'
-import { DataVisualizationNode, HogQLVariable, InsightVizNode, Node, NodeKind } from '~/queries/schema/schema-general'
-import { isDataTableNode, isDataVisualizationNode, isHogQLQuery, isHogQuery, isInsightVizNode } from '~/queries/utils'
+import { DataVisualizationNode, InsightsQLVariable, InsightVizNode, Node, NodeKind } from '~/queries/schema/schema-general'
+import {
+    isDataTableNode,
+    isDataVisualizationNode,
+    isInsightsQLQuery,
+    isScriptQuery,
+    isInsightVizNode,
+    isWebAnalyticsInsightQuery,
+} from '~/queries/utils'
 import { ExportContext, InsightLogicProps, InsightType } from '~/types'
 
 import { teamLogic } from '../teamLogic'
@@ -59,7 +69,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
         ],
         actions: [
             insightLogic,
-            ['setInsight'],
+            ['setInsight', 'setInsightMetadata'],
             dataNodeLogic({ key: insightVizDataNodeKey(props) } as DataNodeLogicProps),
             ['loadData', 'loadDataSuccess', 'loadDataFailure', 'setResponse as setInsightData'],
         ],
@@ -93,6 +103,30 @@ export const insightDataLogic = kea<insightDataLogicType>([
             },
         ],
     }),
+
+    loaders(({ values }) => ({
+        generatedInsightName: [
+            null as string | null,
+            {
+                generateInsightName: async () => {
+                    const insightQuery = values.insightQuery
+                    if (!insightQuery) {
+                        return null
+                    }
+                    try {
+                        const response = await api.insights.generateName({
+                            kind: NodeKind.InsightVizNode,
+                            source: insightQuery,
+                        })
+                        return response.name
+                    } catch (e) {
+                        lemonToast.error('Failed to generate name')
+                        throw e
+                    }
+                },
+            },
+        ],
+    })),
 
     selectors({
         query: [
@@ -145,16 +179,19 @@ export const insightDataLogic = kea<insightDataLogicType>([
                 if (savedInsight.query) {
                     savedOrDefaultQuery = savedInsight.query as InsightVizNode | DataVisualizationNode
                 } else if (isInsightVizNode(query)) {
-                    savedOrDefaultQuery = getDefaultQuery(
-                        nodeKindToInsightType[query.source.kind],
-                        filterTestAccountsDefault
-                    )
+                    // Web Analytics insights don't have traditional defaults, they come from tiles
+                    // and should always be considered "changed" for URL hash purposes
+                    if (isWebAnalyticsInsightQuery(query.source)) {
+                        return true
+                    }
+                    const insightType = nodeKindToInsightType[query.source.kind]
+                    savedOrDefaultQuery = getDefaultQuery(insightType, filterTestAccountsDefault)
                 } else if (isDataVisualizationNode(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.SQL, filterTestAccountsDefault)
                 } else if (isDataTableNode(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.JSON, filterTestAccountsDefault)
-                } else if (isHogQuery(query)) {
-                    savedOrDefaultQuery = getDefaultQuery(InsightType.HOG, filterTestAccountsDefault)
+                } else if (isScriptQuery(query)) {
+                    savedOrDefaultQuery = getDefaultQuery(InsightType.SCRIPT, filterTestAccountsDefault)
                 } else {
                     return false
                 }
@@ -174,30 +211,30 @@ export const insightDataLogic = kea<insightDataLogicType>([
             },
         ],
 
-        hogQL: [
+        insightsQL: [
             (s) => [s.insightData, s.query],
             (insightData, query): string | null => {
                 // Try to get it from the query itself, so we don't have to wait for the response
-                if (isDataVisualizationNode(query) && isHogQLQuery(query.source)) {
+                if (isDataVisualizationNode(query) && isInsightsQLQuery(query.source)) {
                     return query.source.query
                 }
-                if (isHogQLQuery(query)) {
+                if (isInsightsQLQuery(query)) {
                     return query.query
                 }
                 // Otherwise, get it from the response
-                if (insightData && 'hogql' in insightData && insightData.hogql !== '') {
-                    return insightData.hogql
+                if (insightData && 'insightsql' in insightData && insightData.insightsql !== '') {
+                    return insightData.insightsql
                 }
                 return null
             },
         ],
-        hogQLVariables: [
+        insightsQLVariables: [
             (s) => [s.query],
-            (query): Record<string, HogQLVariable> | undefined => {
-                if (isDataVisualizationNode(query) && isHogQLQuery(query.source)) {
+            (query): Record<string, InsightsQLVariable> | undefined => {
+                if (isDataVisualizationNode(query) && isInsightsQLQuery(query.source)) {
                     return query.source.variables
                 }
-                if (isHogQLQuery(query)) {
+                if (isInsightsQLQuery(query)) {
                     return query.variables
                 }
                 return undefined
@@ -206,6 +243,11 @@ export const insightDataLogic = kea<insightDataLogicType>([
     }),
 
     listeners(({ actions, values, props }) => ({
+        generateInsightNameSuccess: ({ generatedInsightName }) => {
+            if (generatedInsightName) {
+                actions.setInsightMetadata({ name: generatedInsightName })
+            }
+        },
         setInsight: ({ insight: { query, result }, options: { overrideQuery } }) => {
             // we don't want to override the query for example when updating the insight's name
             if (!overrideQuery) {
@@ -276,4 +318,13 @@ export const insightDataLogic = kea<insightDataLogicType>([
             actions.setQuery(props.cachedInsight.query)
         }
     }),
+    actionToUrl(({ props }) => ({
+        cancelChanges: () => {
+            if (props.tabId && sceneLogic.values.activeTabId === props.tabId) {
+                const { pathname, searchParams, hashParams } = router.values.currentLocation
+                const { q: _, ...hash } = hashParams
+                return [pathname, searchParams, hash]
+            }
+        },
+    })),
 ])

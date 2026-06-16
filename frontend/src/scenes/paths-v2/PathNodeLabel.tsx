@@ -1,9 +1,10 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, Tooltip } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Tooltip } from '@hanzo/lemon-ui'
 
+import { IconOpenInNew } from 'lib/lemon-ui/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 
@@ -37,7 +38,7 @@ export function PathNodeLabel({ insightProps, node }: PathNodeLabelProps): JSX.E
         viewPathToFunnel(node)
     }
     const copyName = (): void => {
-        void copyToClipboard(nodeName).catch((e) => posthog.captureException(e))
+        void copyToClipboard(nodeName).catch((e) => insights.captureException(e))
     }
     const openModal = (): void => openPersonsModal({ path_end_key: node.name })
 
@@ -68,7 +69,15 @@ export function PathNodeLabel({ insightProps, node }: PathNodeLabelProps): JSX.E
                                 ? [
                                       { label: 'Set as path end', onClick: setAsPathEnd },
                                       { label: 'Exclude path item', onClick: excludePathItem },
-                                      { label: 'View funnel', onClick: viewFunnel },
+                                      {
+                                          label: (
+                                              <div className="flex justify-between items-center w-full">
+                                                  <span>View funnel</span>
+                                                  <IconOpenInNew />
+                                              </div>
+                                          ),
+                                          onClick: viewFunnel,
+                                      },
                                   ]
                                 : []),
                             { label: 'Copy path item name', onClick: copyName },

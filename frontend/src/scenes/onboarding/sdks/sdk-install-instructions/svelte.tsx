@@ -1,16 +1,16 @@
 import { useValues } from 'kea'
 
-import { LemonDivider, Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
+
 import SetupWizardBanner from './components/SetupWizardBanner'
-import { SDK_DEFAULTS_DATE } from './constants'
 import { JSInstallSnippet } from './js-web'
 
 function SvelteAppClientCodeSnippet(): JSX.Element {
@@ -28,13 +28,13 @@ function SvelteAppClientCodeSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import posthog from 'posthog-js'
+            {`import insights from '@hanzo/insights'
 import { browser } from '$app/environment';
 import { onMount } from 'svelte';
 
 export const load = async () => {
   if (browser) {
-    posthog.init(
+    insights.init(
       '${currentTeam?.api_token}',
       {
         ${options.join(',\n        ')}
@@ -49,19 +49,10 @@ export const load = async () => {
 }
 
 export function SDKInstallSvelteJSInstructions({ hideWizard }: { hideWizard?: boolean }): JSX.Element {
-    const { isCloudOrDev } = useValues(preflightLogic)
-    const showSetupWizard = !hideWizard && isCloudOrDev
     return (
         <>
-            {showSetupWizard && (
-                <>
-                    <h2>Automated Installation</h2>
-                    <SetupWizardBanner integrationName="Svelte" />
-                    <LemonDivider label="OR" />
-                    <h2>Manual Installation</h2>
-                </>
-            )}
-            <h3>Install posthog-js using your package manager</h3>
+            <SetupWizardBanner integrationName="Svelte" hide={hideWizard} />
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
 
             <h3>Initialize</h3>
@@ -71,7 +62,7 @@ export function SDKInstallSvelteJSInstructions({ hideWizard }: { hideWizard?: bo
                     layout
                 </Link>{' '}
                 already, create a new file called <code>+layout.js</code> in your <code>src/routes</code> folder. In
-                this file, check the environment is the browser, and initialize PostHog if so:
+                this file, check the environment is the browser, and initialize Insights if so:
             </p>
             <SvelteAppClientCodeSnippet />
         </>

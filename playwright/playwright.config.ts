@@ -22,6 +22,9 @@ export default defineConfig({
          * For example in `await expect(locator).toHaveText();`
          */
         timeout: process.env.CI ? 40 * 1000 : 10 * 1000,
+        toHaveScreenshot: {
+            maxDiffPixelRatio: 0.01, // 1% threshold for full-page screenshots
+        },
     },
     /* Run tests in files in parallel */
     fullyParallel: true,
@@ -36,7 +39,11 @@ export default defineConfig({
     */
     workers: process.env.CI ? 3 : 6,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: [['html', { open: 'never' }]],
+    reporter: [
+        ['html', { open: 'never' }],
+        ...(process.env.CI ? [['junit', { outputFile: 'junit-results.xml' }] as const] : []),
+        ...(process.env.CI ? [['json', { outputFile: 'results.json' }] as const] : []),
+    ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
@@ -52,6 +59,9 @@ export default defineConfig({
 
         screenshot: 'only-on-failure',
     },
+
+    /* Configure centralized screenshot directory */
+    snapshotDir: './__snapshots__',
 
     /* Configure projects for major browsers */
     projects: [

@@ -11,19 +11,20 @@ use tracing::error;
 use crate::{
     error::{FrameError, UnhandledError},
     metric_consts::{CHUNK_ID_FAILURE_FETCHED, CHUNK_ID_NOT_FOUND},
+    symbol_store::BlobClient,
 };
 
-use super::{saving::SymbolSetRecord, Fetcher, Parser, S3Client};
+use super::{saving::SymbolSetRecord, Fetcher, Parser};
 
 pub struct ChunkIdFetcher<Parser> {
     pub inner: Parser,
-    pub client: Arc<S3Client>,
+    pub client: Arc<dyn BlobClient>,
     pub pool: PgPool,
     pub bucket: String,
 }
 
 impl<P> ChunkIdFetcher<P> {
-    pub fn new(inner: P, client: Arc<S3Client>, pool: PgPool, bucket: String) -> Self {
+    pub fn new(inner: P, client: Arc<dyn BlobClient>, pool: PgPool, bucket: String) -> Self {
         Self {
             inner,
             client,
@@ -39,12 +40,17 @@ pub enum OrChunkId<R> {
     Both { inner: R, id: String },
 }
 
-// The chunk id handling layer is a little odd. In cases where users have uploaded the symbol set
-// with a chunk it, it'll never be hit, because the "saving" layer will fetch the data first, and in
-// cases where the user has injected the chunk ID but not uploaded the symbol set, it'll never resolve
-// the chunk, instead just fetching the data from the inner layer. This means, in normal practice, all
-// it does is strip off the chunk id and pass the inner request to the inner layer. We only make it able
-// to hit PG/S3 at all for testing cases.
+// This is more-or-less a read-only version of the saving layer - it never writes symbol sets, although
+// it will modify records to indicate an error if the underlying parser fails. For symbol sets we dynamically
+// fetch (like js sourcemaps), it's main function is to strip the `OrChunkId` from the ref and pass the
+// underlying identifier to the inner fetcher. In those cases, it should be wrapped in a saving layer, so
+// that the data the inner fetcher returns will be saved to s3 and re-used - and due to this, it's own loading
+// of saved symbol sets will never run, because the saving layer takes care of thet.
+//
+// For symbol sets we never fetch dynamically (hermes, node, java etc), it's used stand-alone, and the underlying
+// fetcher unconditionally returns an error indicating the chunk ID was not found. Often, these inner fetchers
+// use a 0 variant enum to indicate their data is only available in the presence of a chunk ID, and the underlying
+// fetcher simply asserts `unreachable!()`.
 //
 // Most of the "cleverness" of this layer is actually that the `Display` implementation of `OrChunkId`
 // which returns the chunk ID if it's set, rather than the inner T's display implementation, which means
@@ -99,14 +105,17 @@ where
             panic!("No storage pointer found for chunk id {id}");
         };
 
-        let Ok(data) = self.client.get(&self.bucket, storage_ptr).await else {
-            let mut record = record;
-            record.delete(&self.pool).await?;
-            // This is kind-of false - the actual problem is missing data in s3, with a record that exists, rather than no record being found for
-            // a given chunk id - but it's close enough that it's fine for a temporary fix.
-            return Err(FrameError::MissingChunkIdData(record.set_ref).into());
-        };
-        Ok(data)
+        match self.client.get(&self.bucket, storage_ptr).await {
+            Ok(Some(data)) => Ok(data),
+            Ok(None) => {
+                // If the chunk ID points to a record that doesn't exist, delete the record and treat it as a frame error
+                let mut record = record;
+                record.delete(&self.pool).await?;
+                return Err(FrameError::MissingChunkIdData(record.set_ref).into());
+            }
+            // Otherwise, if we just failed to talk to s3 for some reason, treat it as an unhandled error and die
+            Err(err) => Err(err.into()),
+        }
     }
 }
 
@@ -197,7 +206,7 @@ mod test {
     use chrono::Utc;
     use common_types::ClickHouseEvent;
     use mockall::predicate;
-    use posthog_symbol_data::write_symbol_data;
+    use insights_symbol_data::write_symbol_data;
     use reqwest::Url;
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -210,9 +219,10 @@ mod test {
         symbol_store::{
             chunk_id::{ChunkIdFetcher, OrChunkId},
             hermesmap::HermesMapProvider,
+            proguard::ProguardProvider,
             saving::SymbolSetRecord,
             sourcemap::{OwnedSourceMapCache, SourcemapProvider},
-            Catalog, Provider, S3Client,
+            Catalog, MockS3Client, Provider,
         },
         types::{RawErrProps, Stacktrace},
     };
@@ -222,6 +232,7 @@ mod test {
     const MAP: &[u8] = include_bytes!("../../tests/static/chunk-PGUQKT6S.js.map");
 
     // Used to construct a Catalog with only the chunk id based provider implemented
+    #[allow(dead_code)]
     struct UnimplementedProvider;
     #[async_trait]
     impl Provider for UnimplementedProvider {
@@ -235,7 +246,7 @@ mod test {
     }
 
     fn get_symbol_data_bytes() -> Vec<u8> {
-        write_symbol_data(posthog_symbol_data::SourceAndMap {
+        write_symbol_data(insights_symbol_data::SourceAndMap {
             minified_source: String::from_utf8(MINIFIED.to_vec()).unwrap(),
             sourcemap: String::from_utf8(MAP.to_vec()).unwrap(),
         })
@@ -278,7 +289,7 @@ mod test {
 
         record.save(&db).await.unwrap();
 
-        let mut client = S3Client::default();
+        let mut client = MockS3Client::default();
 
         client
             .expect_get()
@@ -286,7 +297,7 @@ mod test {
                 predicate::eq(config.object_storage_bucket.clone()),
                 predicate::eq(chunk_id.clone()), // We set the chunk id as the storage ptr above, in production it will be a different value with a prefix
             )
-            .returning(|_, _| Ok(get_symbol_data_bytes()));
+            .returning(|_, _| Ok(Some(get_symbol_data_bytes())));
 
         let client = Arc::new(client);
 
@@ -319,7 +330,7 @@ mod test {
 
         record.save(&db).await.unwrap();
 
-        let mut client = S3Client::default();
+        let mut client = MockS3Client::default();
 
         client
             .expect_get()
@@ -327,7 +338,7 @@ mod test {
                 predicate::eq(config.object_storage_bucket.clone()),
                 predicate::eq(chunk_id.clone()), // We set the chunk id as the storage ptr above, in production it will be a different value with a prefix
             )
-            .returning(|_, _| Ok(get_symbol_data_bytes()));
+            .returning(|_, _| Ok(Some(get_symbol_data_bytes())));
 
         let client = Arc::new(client);
 
@@ -343,10 +354,17 @@ mod test {
             HermesMapProvider {},
             client.clone(),
             db.clone(),
-            config.object_storage_bucket,
+            config.object_storage_bucket.clone(),
         );
 
-        let catalog = Catalog::new(chunk_id_fetcher, hermes_map_fetcher);
+        let pgp = ChunkIdFetcher::new(
+            ProguardProvider {},
+            client.clone(),
+            db.clone(),
+            config.object_storage_bucket.clone(),
+        );
+
+        let catalog = Catalog::new(chunk_id_fetcher, hermes_map_fetcher, pgp);
 
         let mut frame = get_example_frame();
         frame.chunk_id = Some(chunk_id.clone());

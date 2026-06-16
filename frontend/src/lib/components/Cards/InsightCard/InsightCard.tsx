@@ -8,11 +8,12 @@ import { Layout } from 'react-grid-layout'
 import { useInView } from 'react-intersection-observer'
 
 import { ApiError } from 'lib/api'
-import { accessLevelSatisfied, getAccessControlDisabledReason } from 'lib/components/AccessControlAction'
 import { Resizeable } from 'lib/components/Cards/CardMeta'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils'
+import { accessLevelSatisfied, getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { BreakdownColorConfig } from 'scenes/dashboard/DashboardInsightColorsModal'
 import {
     InsightErrorState,
@@ -27,8 +28,9 @@ import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { Query } from '~/queries/Query/Query'
 import { extractValidationError } from '~/queries/nodes/InsightViz/utils'
-import { DashboardFilter, HogQLVariable } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable } from '~/queries/schema/schema-general'
 import {
+    AccessControlLevel,
     AccessControlResourceType,
     DashboardBasicType,
     DashboardPlacement,
@@ -84,7 +86,7 @@ export interface InsightCardProps extends Resizeable {
     /** Dashboard filters to override the ones in the insight */
     filtersOverride?: DashboardFilter
     /** Dashboard variables to override the ones in the insight */
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
     /** Dashboard breakdown colors to override the ones in the insight */
     breakdownColorOverride?: BreakdownColorConfig[]
     /** Dashboard color theme to override the ones in the insight */
@@ -93,6 +95,8 @@ export interface InsightCardProps extends Resizeable {
     style?: React.CSSProperties
     children?: React.ReactNode
     tile?: DashboardTile<QueryBasedInsightModel>
+    /** survey opportunity for this insight */
+    surveyOpportunity?: boolean
 }
 
 function InsightCardInternal(
@@ -130,19 +134,24 @@ function InsightCardInternal(
         children,
         breakdownColorOverride: _breakdownColorOverride,
         dataColorThemeId: _dataColorThemeId,
+        surveyOpportunity,
         ...divProps
     }: InsightCardProps,
     ref: React.Ref<HTMLDivElement>
 ): JSX.Element | null {
     const { featureFlags } = useValues(featureFlagLogic)
-
     const { ref: inViewRef, inView } = useInView()
     const { isVisible: isPageVisible } = usePageVisibility()
+
     /** Wether the page is active and the line graph is currently in view. Used to free resources, by not rendering
      * insight cards that aren't visible. See also https://wiki.whatwg.org/wiki/Canvas_Context_Loss_and_Restoration.
+     *
+     * We add an extra check to make sure all insights are visible in Storybook.
      */
     const isVisible =
-        featureFlags[FEATURE_FLAGS.EXPERIMENTAL_DASHBOARD_ITEM_RENDERING] === true ? inView && isPageVisible : true
+        featureFlags[FEATURE_FLAGS.EXPERIMENTAL_DASHBOARD_ITEM_RENDERING] === true
+            ? (inView && isPageVisible) || inStorybook() || inStorybookTestRunner()
+            : true
 
     const mergedRefs = useMergeRefs([ref, inViewRef])
 
@@ -169,14 +178,18 @@ function InsightCardInternal(
     const BlockingEmptyState = (() => {
         // Check for access denied - use the same logic as other components
         const canViewInsight = insight?.user_access_level
-            ? accessLevelSatisfied(AccessControlResourceType.Insight, insight.user_access_level, 'viewer')
+            ? accessLevelSatisfied(
+                  AccessControlResourceType.Insight,
+                  insight.user_access_level,
+                  AccessControlLevel.Viewer
+              )
             : true
 
         if (!canViewInsight) {
             const errorMessage = getAccessControlDisabledReason(
                 AccessControlResourceType.Insight,
                 insight.user_access_level,
-                'viewer',
+                AccessControlLevel.Viewer,
                 false
             )
 
@@ -212,41 +225,47 @@ function InsightCardInternal(
 
     return (
         <div
-            className={clsx('InsightCard border', highlighted && 'InsightCard--highlighted', className)}
+            className={clsx(
+                'InsightCard border',
+                highlighted && 'InsightCard--highlighted',
+                areDetailsShown && 'InsightCard--details-shown',
+                className
+            )}
             data-attr="insight-card"
             {...divProps}
             // eslint-disable-next-line react/forbid-dom-props
             style={{ ...divProps?.style, ...theme?.boxStyle }}
             ref={mergedRefs}
         >
-            {isVisible ? (
-                <ErrorBoundary exceptionProps={{ feature: 'insight' }}>
-                    <BindLogic logic={insightLogic} props={insightLogicProps}>
-                        <InsightMeta
-                            tile={tile}
-                            insight={insight}
-                            ribbonColor={ribbonColor}
-                            dashboardId={dashboardId}
-                            updateColor={updateColor}
-                            removeFromDashboard={removeFromDashboard}
-                            deleteWithUndo={deleteWithUndo}
-                            refresh={refresh}
-                            refreshEnabled={refreshEnabled}
-                            loadingQueued={loadingQueued}
-                            loading={loading}
-                            rename={rename}
-                            duplicate={duplicate}
-                            setOverride={setOverride}
-                            moveToDashboard={moveToDashboard}
-                            areDetailsShown={areDetailsShown}
-                            setAreDetailsShown={setAreDetailsShown}
-                            showEditingControls={showEditingControls}
-                            showDetailsControls={showDetailsControls}
-                            moreButtons={moreButtons}
-                            filtersOverride={filtersOverride}
-                            variablesOverride={variablesOverride}
-                            placement={placement}
-                        />
+            <ErrorBoundary exceptionProps={{ feature: 'insight' }}>
+                <BindLogic logic={insightLogic} props={insightLogicProps}>
+                    <InsightMeta
+                        tile={tile}
+                        insight={insight}
+                        ribbonColor={ribbonColor}
+                        dashboardId={dashboardId}
+                        updateColor={updateColor}
+                        removeFromDashboard={removeFromDashboard}
+                        deleteWithUndo={deleteWithUndo}
+                        refresh={refresh}
+                        refreshEnabled={refreshEnabled}
+                        loadingQueued={loadingQueued}
+                        loading={loading}
+                        rename={rename}
+                        duplicate={duplicate}
+                        setOverride={setOverride}
+                        moveToDashboard={moveToDashboard}
+                        areDetailsShown={areDetailsShown}
+                        setAreDetailsShown={setAreDetailsShown}
+                        showEditingControls={showEditingControls}
+                        showDetailsControls={showDetailsControls}
+                        moreButtons={moreButtons}
+                        filtersOverride={filtersOverride}
+                        variablesOverride={variablesOverride}
+                        placement={placement}
+                        surveyOpportunity={surveyOpportunity}
+                    />
+                    {isVisible ? (
                         <div className="InsightCard__viz">
                             {BlockingEmptyState ? (
                                 BlockingEmptyState
@@ -265,17 +284,17 @@ function InsightCardInternal(
                                 />
                             )}
                         </div>
-                    </BindLogic>
-                    {showResizeHandles && (
-                        <>
-                            {canResizeWidth ? <ResizeHandle1D orientation="vertical" /> : null}
-                            <ResizeHandle1D orientation="horizontal" />
-                            {canResizeWidth ? <ResizeHandle2D /> : null}
-                        </>
-                    )}
-                    {children /* Extras, specifically resize handles injected by ReactGridLayout */}
-                </ErrorBoundary>
-            ) : null}
+                    ) : null}
+                </BindLogic>
+                {showResizeHandles && (
+                    <>
+                        {canResizeWidth ? <ResizeHandle1D orientation="vertical" /> : null}
+                        <ResizeHandle1D orientation="horizontal" />
+                        {canResizeWidth ? <ResizeHandle2D /> : null}
+                    </>
+                )}
+                {children /* Extras, specifically resize handles injected by ReactGridLayout */}
+            </ErrorBoundary>
         </div>
     )
 }

@@ -1,6 +1,6 @@
 import { urls } from 'scenes/urls'
 
-import { FileSystemIconType } from '~/queries/schema/schema-general'
+import { FileSystemIconType, ProductKey } from '~/queries/schema/schema-general'
 
 import { FileSystemIconColor, ProductManifest } from '../../frontend/src/types'
 
@@ -12,14 +12,14 @@ export const manifest: ProductManifest = {
             import: () => import('./frontend/EarlyAccessFeatures'),
             projectBased: true,
             defaultDocsPath: '/docs/feature-flags/early-access-feature-management',
-            activityScope: 'EarlyAccessFeature',
+            description: 'Allow your users to individually enable or disable features that are in public beta.',
+            iconType: 'early_access_feature',
         },
         EarlyAccessFeature: {
             name: 'Early access feature',
             import: () => import('./frontend/EarlyAccessFeature'),
             projectBased: true,
             defaultDocsPath: '/docs/feature-flags/early-access-feature-management',
-            activityScope: 'EarlyAccessFeature',
         },
     },
     routes: {
@@ -60,6 +60,7 @@ export const manifest: ProductManifest = {
     treeItemsProducts: [
         {
             path: 'Early access features',
+            intents: [ProductKey.EARLY_ACCESS_FEATURES],
             category: 'Features',
             type: 'early_access_feature',
             href: urls.earlyAccessFeatures(),
@@ -68,6 +69,7 @@ export const manifest: ProductManifest = {
                 'var(--color-product-early-access-features-light)',
                 'var(--color-product-early-access-features-dark)',
             ] as FileSystemIconColor,
+            sceneKey: 'EarlyAccessFeatures',
         },
     ],
 }

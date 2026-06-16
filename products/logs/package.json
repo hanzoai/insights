@@ -1,15 +1,23 @@
 {
-    "name": "@posthog/products-logs",
-    "scripts": {},
+    "name": "@hanzo/products-logs",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
     "dependencies": {
-        "kea": "^3.1.7",
-        "kea-loaders": "^3.1.1",
-        "kea-router": "^3.4.1"
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "@hanzo/insights": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
-        "@posthog/products-error-tracking": "workspace:*",
+        "@hanzo/icons": "*",
+        "@hanzo/products-error-tracking": "workspace:*",
         "@storybook/react": "*",
+        "@testing-library/jest-dom": "*",
+        "@testing-library/react": "*",
+        "@testing-library/user-event": "*",
+        "@types/papaparse": "*",
         "@types/react": "*",
         "ansi-colors": "*",
         "classnames": "*",
@@ -17,10 +25,15 @@
         "eslint": "*",
         "fast-deep-equal": "*",
         "jest": "*",
+        "papaparse": "*",
         "prettier": "*",
         "react": "*",
+        "react-window": "*",
         "stylelint": "*",
         "typescript": "*",
         "use-debounce": "*"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
     }
 }

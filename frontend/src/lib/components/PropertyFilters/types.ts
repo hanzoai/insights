@@ -1,5 +1,6 @@
 import { OperatorValueSelectProps } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import {
+    AllowedProperties,
     ExcludedProperties,
     TaxonomicFilterGroup,
     TaxonomicFilterGroupType,
@@ -32,7 +33,8 @@ export interface TaxonomicPropertyFilterLogicProps extends PropertyFilterBasePro
     filterIndex: number
     eventNames?: string[]
     excludedProperties?: ExcludedProperties
-    propertyAllowList?: { [key in TaxonomicFilterGroupType]?: string[] }
+    propertyAllowList?: AllowedProperties
+    endpointFilters?: Record<string, any>
 }
 
 export interface PropertyFilterInternalProps {
@@ -46,9 +48,10 @@ export interface PropertyFilterInternalProps {
     operatorAllowlist?: OperatorValueSelectProps['operatorAllowlist']
     taxonomicGroupTypes?: TaxonomicFilterGroupType[]
     taxonomicFilterOptionsFromProp?: TaxonomicFilterProps['optionsFromProp']
-    propertyAllowList?: { [key in TaxonomicFilterGroupType]?: string[] }
+    propertyAllowList?: AllowedProperties
     eventNames?: string[]
     schemaColumns?: DatabaseSchemaField[]
+    dataWarehouseTableName?: string
     propertyGroupType?: FilterLogicalOperator | null
     orFiltering?: boolean
     addText?: string | null
@@ -60,4 +63,6 @@ export interface PropertyFilterInternalProps {
     exactMatchFeatureFlagCohortOperators?: boolean
     hideBehavioralCohorts?: boolean
     addFilterDocLink?: string
+    endpointFilters?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
 }

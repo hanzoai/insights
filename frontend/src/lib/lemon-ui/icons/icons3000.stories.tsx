@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react'
 
-import * as packageIcons from '@posthog/icons'
+import * as packageIcons from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -9,7 +9,7 @@ import { Tooltip } from '../Tooltip'
 import { ELEMENTS, OBJECTS, TEAMS_AND_COMPANIES, TECHNOLOGY } from './categories'
 
 const meta: Meta = {
-    title: 'PostHog 3000/Icons',
+    title: 'Insights 3000/Icons',
     tags: ['test-skip'],
     parameters: {
         previewTabs: {
@@ -21,7 +21,7 @@ const meta: Meta = {
 }
 export default meta
 
-const posthogIcons = Object.entries(packageIcons)
+const insightsIcons = Object.entries(packageIcons)
     .filter(([key]) => key !== 'BaseIcon')
     .map(([key, Icon]) => ({ name: key, icon: Icon }))
 
@@ -49,7 +49,7 @@ const IconTemplate = ({ icons }: { icons: { name: string; icon: any }[] }): JSX.
 }
 
 export function Alphabetical(): JSX.Element {
-    return <IconTemplate icons={posthogIcons} />
+    return <IconTemplate icons={insightsIcons} />
 }
 
 const GroupBase = ({ group }: { group: Record<string, string[]> }): JSX.Element => {

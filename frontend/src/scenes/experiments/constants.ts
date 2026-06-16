@@ -1,4 +1,12 @@
-import { BaseMathType, ExperimentConclusion, GroupMathType, HogQLMathType, PropertyMathType } from '~/types'
+import {
+    AccessControlLevel,
+    BaseMathType,
+    ExperimentConclusion,
+    GroupMathType,
+    InsightsQLMathType,
+    PropertyMathType,
+} from '~/types'
+import type { Experiment } from '~/types'
 
 export enum MetricInsightId {
     Trends = 'new-experiment-trends-metric',
@@ -17,13 +25,24 @@ export const LEGACY_EXPERIMENT_ALLOWED_MATH_TYPES = [
     BaseMathType.FirstTimeForUser,
     GroupMathType.UniqueGroup,
     PropertyMathType.Sum,
-    HogQLMathType.HogQL,
+    InsightsQLMathType.InsightsQL,
 ] as const
 
 export const EXPERIMENT_VARIANT_MULTIPLE = '$multiple'
 
+export const CONFIDENCE_LEVEL_OPTIONS = [
+    { value: 0.9, label: '90%' },
+    { value: 0.95, label: '95%' },
+    { value: 0.99, label: '99%' },
+]
+
 export const EXPERIMENT_MIN_EXPOSURES_FOR_RESULTS = 50
 export const EXPERIMENT_MIN_METRIC_VALUE_FOR_RESULTS = 10
+
+// Autorefresh constants
+export const EXPERIMENT_MIN_REFRESH_INTERVAL_MINUTES = 5
+export const EXPERIMENT_AUTO_REFRESH_INITIAL_INTERVAL_SECONDS = 1800 // 30 min
+
 export const CONCLUSION_DISPLAY_CONFIG: Record<
     ExperimentConclusion,
     { title: string; description: string; color: string }
@@ -54,4 +73,35 @@ export const CONCLUSION_DISPLAY_CONFIG: Record<
             'The experiment data is unreliable due to issues like tracking errors, incorrect setup, or external disruptions.',
         color: 'bg-muted-alt',
     },
+}
+
+export const NEW_EXPERIMENT: Experiment = {
+    id: 'new',
+    name: '',
+    description: '',
+    type: 'product',
+    feature_flag_key: '',
+    filters: {},
+    metrics: [] as any[],
+    metrics_secondary: [] as any[],
+    secondary_metrics: [] as any[],
+    primary_metrics_ordered_uuids: null,
+    secondary_metrics_ordered_uuids: null,
+    saved_metrics_ids: [] as any[],
+    saved_metrics: [] as any[],
+    parameters: {
+        feature_flag_variants: [
+            { key: 'control', rollout_percentage: 50 },
+            { key: 'test', rollout_percentage: 50 },
+        ] as any[],
+        rollout_percentage: 100,
+    },
+    created_at: null,
+    created_by: null,
+    updated_at: null,
+    holdout_id: null,
+    exposure_criteria: {
+        filterTestAccounts: true,
+    },
+    user_access_level: AccessControlLevel.Editor,
 }

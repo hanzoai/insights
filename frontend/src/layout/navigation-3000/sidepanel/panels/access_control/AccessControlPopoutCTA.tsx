@@ -1,11 +1,11 @@
 import { useActions } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconOpenSidebar } from '@posthog/icons'
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { IconOpenSidebar } from '@hanzo/icons'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
-import { resourceTypeToString } from 'lib/components/AccessControlAction'
 import { toSentenceCase } from 'lib/utils'
+import { resourceTypeToString } from 'lib/utils/accessControlUtils'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { AccessControlResourceType, SidePanelTab } from '~/types'
@@ -29,7 +29,7 @@ export const AccessControlPopoutCTA = ({ callback, resourceType }: AccessControl
                 type="primary"
                 icon={<IconOpenSidebar />}
                 onClick={() => {
-                    posthog.capture('access control popout cta clicked', { resourceType })
+                    insights.capture('access control popout cta clicked', { resourceType })
                     openSidePanel(SidePanelTab.AccessControl)
                     callback?.()
                 }}

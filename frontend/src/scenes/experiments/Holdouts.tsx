@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -12,7 +12,7 @@ import {
     LemonModal,
     LemonTable,
     LemonTableColumns,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 
@@ -48,8 +48,14 @@ export function Holdouts(): JSX.Element {
         if (!holdout.name) {
             return 'Name is required'
         }
-        if (holdout.filters?.[0]?.rollout_percentage === undefined) {
+        if (
+            holdout.filters?.[0]?.rollout_percentage === undefined ||
+            holdout.filters?.[0]?.rollout_percentage === null
+        ) {
             return 'Rollout percentage is required'
+        }
+        if (holdout.filters[0].rollout_percentage < 0 || holdout.filters[0].rollout_percentage > 100) {
+            return 'Rollout percentage should be between 0 and 100'
         }
     }
 
@@ -216,6 +222,11 @@ export function Holdouts(): JSX.Element {
                     </div>
                 </div>
             </LemonBanner>
+            <div className="flex justify-end">
+                <LemonButton type="primary" onClick={openCreateModal} data-attr="add-holdout">
+                    New holdout
+                </LemonButton>
+            </div>
 
             <LemonTable
                 emptyState={
@@ -227,9 +238,6 @@ export function Holdouts(): JSX.Element {
                 dataSource={holdouts}
                 columns={columns as LemonTableColumns<ExperimentHoldoutType>}
             />
-            <LemonButton type="primary" onClick={openCreateModal} data-attr="add-holdout">
-                New holdout
-            </LemonButton>
         </div>
     )
 }

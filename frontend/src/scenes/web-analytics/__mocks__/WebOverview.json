@@ -5,7 +5,7 @@
     "dateFrom": "2025-01-06 00:00:00",
     "dateTo": "2025-01-20 23:59:59",
     "error": null,
-    "hogql": null,
+    "insightsql": null,
     "is_cached": true,
     "last_refresh": "2025-01-20T21:41:25.930048Z",
     "modifiers": {
@@ -67,14 +67,6 @@
             "kind": "percentage",
             "previous": 10,
             "value": 9.921511959952788
-        },
-        {
-            "changeFromPreviousPct": 23.4,
-            "isIncreaseBad": true,
-            "key": "revenue",
-            "kind": "currency",
-            "previous": 10000,
-            "value": 12345.67
         }
     ],
     "samplingRate": {

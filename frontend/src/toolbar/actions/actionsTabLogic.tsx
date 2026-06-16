@@ -9,10 +9,15 @@ import { urls } from 'scenes/urls'
 import { actionsLogic } from '~/toolbar/actions/actionsLogic'
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ActionDraftType, ActionForm } from '~/toolbar/types'
-import { actionStepToActionStepFormItem, elementToActionStep, stepToDatabaseFormat } from '~/toolbar/utils'
-import { ActionType, ElementType } from '~/types'
+import {
+    actionStepToActionStepFormItem,
+    elementToActionStep,
+    joinWithUiHost,
+    stepToDatabaseFormat,
+} from '~/toolbar/utils'
+import { AccessControlLevel, ActionType, ElementType } from '~/types'
 
 import { ActionStepPropertyKey } from './ActionStep'
 import type { actionsTabLogicType } from './actionsTabLogicType'
@@ -35,6 +40,7 @@ function newAction(
                 : {},
         ],
         pinned_at: null,
+        user_access_level: AccessControlLevel.Editor,
     }
 }
 
@@ -96,7 +102,7 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
     connect(() => ({
         values: [
             toolbarConfigLogic,
-            ['dataAttributes', 'apiURL', 'temporaryToken', 'buttonVisible', 'userIntent', 'actionId', 'dataAttributes'],
+            ['dataAttributes', 'apiHost', 'uiHost', 'temporaryToken', 'buttonVisible', 'userIntent', 'actionId'],
             actionsLogic,
             ['allActions'],
         ],
@@ -204,7 +210,7 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                     steps: formValues.steps?.map(stepToDatabaseFormat) || [],
                     creation_context: values.automaticActionCreationEnabled ? 'onboarding' : null,
                 }
-                const { apiURL, temporaryToken } = values
+                const { temporaryToken, apiHost } = values
                 const { selectedActionId } = values
 
                 const findUniqueActionName = (baseName: string, index = 0): string => {
@@ -223,12 +229,12 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                 let response: ActionType
                 if (selectedActionId && selectedActionId !== 'new') {
                     response = await api.update(
-                        `${apiURL}/api/projects/@current/actions/${selectedActionId}/?temporary_token=${temporaryToken}`,
+                        `${apiHost}/api/projects/@current/actions/${selectedActionId}/?temporary_token=${temporaryToken}`,
                         actionToSave
                     )
                 } else {
                     response = await api.create(
-                        `${apiURL}/api/projects/@current/actions/?temporary_token=${temporaryToken}`,
+                        `${apiHost}/api/projects/@current/actions/?temporary_token=${temporaryToken}`,
                         actionToSave
                     )
                 }
@@ -240,8 +246,9 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                 if (!values.automaticActionCreationEnabled) {
                     lemonToast.success('Action saved', {
                         button: {
-                            label: 'Open in PostHog',
-                            action: () => window.open(`${apiURL}${urls.action(response.id)}`, '_blank'),
+                            label: 'Open in Insights',
+                            action: () =>
+                                window.open(joinWithUiHost(values.uiHost, urls.action(response.id)), '_blank'),
                         },
                     })
                 }
@@ -374,11 +381,11 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
             }
         },
         showButtonActions: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'actions', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'actions', enabled: true })
         },
         hideButtonActions: () => {
             actions.setShowActionsTooltip(false)
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'actions', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'actions', enabled: false })
         },
         [actionsLogic.actionTypes.getActionsSuccess]: () => {
             const { userIntent, actionId } = values

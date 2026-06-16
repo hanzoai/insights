@@ -10,9 +10,9 @@
         "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
         "first_name": "Employee 427",
         "last_name": "",
-        "email": "test@posthog.com",
+        "email": "test@hanzo.ai",
         "is_email_verified": null,
-        "hedgehog_config": null
+        "mascot_config": null
     },
     "is_shared": false,
     "deleted": false,
@@ -134,7 +134,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -196,7 +196,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -258,7 +258,7 @@
                             "custom_name": "Custom name",
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -272,9 +272,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:37:46.634311Z",
@@ -287,17 +287,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
+                "insightsql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
                 "tags": [],
                 "filters_hash": "cache_bae60b6f07f4c80944d20aac84a3496f"
             },
@@ -422,7 +420,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -484,7 +482,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -546,7 +544,7 @@
                             "custom_name": "Custom name",
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -560,9 +558,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:37:39.771073Z",
@@ -575,17 +573,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
+                "insightsql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
                 "tags": [],
                 "filters_hash": "cache_bae60b6f07f4c80944d20aac84a3496f"
             },
@@ -710,7 +706,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -772,7 +768,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -834,7 +830,7 @@
                             "custom_name": "Custom name",
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -848,9 +844,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:37:33.262208Z",
@@ -863,17 +859,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
+                "insightsql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total\nFROM\n    (SELECT\n        sum(total) AS count,\n        day_start\n    FROM\n        (SELECT\n            count() AS total,\n            toStartOfDay(timestamp) AS day_start\n        FROM\n            events AS e SAMPLE 1\n        WHERE\n            and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                        person_id\n                    FROM\n                        raw_cohort_people\n                    WHERE\n                        and(equals(cohort_id, 2), equals(version, 251)))))\n        GROUP BY\n            day_start)\n    GROUP BY\n        day_start\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
                 "tags": [],
                 "filters_hash": "cache_bae60b6f07f4c80944d20aac84a3496f"
             },
@@ -998,7 +992,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1060,7 +1054,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1122,7 +1116,7 @@
                             "custom_name": "Custom name",
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1136,9 +1130,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:37:26.401750Z",
@@ -1151,17 +1145,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
+                "insightsql": "SELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    arrayMap(number -> plus(toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00'))), toStartOfDay(assumeNotNull(toDateTime('2024-07-18 23:59:59'))))), 1))) AS date,\n    arrayFill(x -> greater(x, 0), arrayMap(_match_date -> arraySum(arraySlice(groupArray(count), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date)) AS total\nFROM\n    (SELECT\n        day_start,\n        sum(count) OVER (ORDER BY day_start ASC) AS count\n    FROM\n        (SELECT\n            sum(total) AS count,\n            day_start\n        FROM\n            (SELECT\n                count() AS total,\n                toStartOfDay(timestamp) AS day_start\n            FROM\n                events AS e SAMPLE 1\n            WHERE\n                and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                            person_id\n                        FROM\n                            raw_cohort_people\n                        WHERE\n                            and(equals(cohort_id, 2), equals(version, 251)))))\n            GROUP BY\n                day_start)\n        GROUP BY\n            day_start\n        ORDER BY\n            day_start ASC)\n    ORDER BY\n        day_start ASC)\nORDER BY\n    arraySum(total) DESC\nLIMIT 50000",
                 "tags": [],
                 "filters_hash": "cache_dd6693d85d1a89368c92626a2aef808e"
             },
@@ -1268,7 +1260,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1312,7 +1304,7 @@
                             "custom_name": null,
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1356,7 +1348,7 @@
                             "custom_name": "Custom name",
                             "math": "total",
                             "math_property": null,
-                            "math_hogql": null,
+                            "math_insightsql": null,
                             "math_group_type_index": null,
                             "properties": {}
                         }
@@ -1370,9 +1362,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:38:38.729348Z",
@@ -1385,17 +1377,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": "SELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))))\nORDER BY\n    1 DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\nORDER BY\n    1 DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))))\nORDER BY\n    1 DESC\nLIMIT 50000",
+                "insightsql": "SELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))))\nORDER BY\n    1 DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))), or(equals(event, 'uploaded_file'), equals(event, 'downloaded_file'), equals(event, 'deleted_file'), equals(event, 'shared_file_link')))\nORDER BY\n    1 DESC\nLIMIT 50000\nUNION ALL\nSELECT\n    count() AS total\nFROM\n    events AS e SAMPLE 1\nWHERE\n    and(greaterOrEquals(timestamp, toStartOfDay(assumeNotNull(toDateTime('2024-07-11 00:00:00')))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2024-07-18 23:59:59'))), equals(event, '$pageview'), in(person_id, (SELECT\n                person_id\n            FROM\n                raw_cohort_people\n            WHERE\n                and(equals(cohort_id, 2), equals(version, 251)))))\nORDER BY\n    1 DESC\nLIMIT 50000",
                 "tags": [],
                 "filters_hash": "cache_d39ee6b334cb054176bcbd9f38b5e5d5"
             },
@@ -1493,9 +1483,9 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T19:36:25.882154Z",
@@ -1508,17 +1498,15 @@
                     "distinct_id": "6yd4X1lQcm4uWP0qdoxl2IJrBU8uxwVd2di0LSIJfg2",
                     "first_name": "Employee 427",
                     "last_name": "",
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": "America/Aruba",
                 "is_cached": true,
                 "query_status": null,
-                "hogql": null,
+                "insightsql": null,
                 "tags": [],
                 "filters_hash": "cache_b3bb0a085129f46b8ad135269a13d28e"
             },
@@ -1529,8 +1517,5 @@
             "is_cached": true
         }
     ],
-    "restriction_level": 21,
-    "effective_restriction_level": 21,
-    "effective_privilege_level": 37,
     "tags": []
 }

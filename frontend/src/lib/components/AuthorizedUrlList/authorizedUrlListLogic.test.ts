@@ -39,6 +39,7 @@ describe('the authorized urls list logic', () => {
             type: AuthorizedUrlListType.TOOLBAR_URLS,
             actionId: null,
             experimentId: null,
+            productTourId: null,
             query: null,
         })
         logic.mount()
@@ -139,13 +140,14 @@ describe('the authorized urls list logic', () => {
                 type: AuthorizedUrlListType.RECORDING_DOMAINS,
                 actionId: null,
                 experimentId: null,
+                productTourId: null,
                 query: null,
             })
             logic.mount()
         })
         it('gets initial domains from recording_domains on the current team', () => {
             expectLogic(logic).toMatchValues({
-                authorizedUrls: ['https://recordings.posthog.com/'],
+                authorizedUrls: ['https://recordings.hanzo.ai/'],
             })
         })
         it('addUrl the recording_domains on the team', () => {
@@ -154,7 +156,7 @@ describe('the authorized urls list logic', () => {
             expectLogic(logic, () => logic.actions.addUrl('http://*.example.com')).toFinishAllListeners()
 
             expect(api.update).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}`, {
-                recording_domains: ['https://recordings.posthog.com/', 'http://*.example.com'],
+                recording_domains: ['https://recordings.hanzo.ai/', 'http://*.example.com'],
             })
         })
 
@@ -214,6 +216,19 @@ describe('the authorized urls list logic', () => {
                 { url: 'https://a.single.io', count: 1 },
                 { url: 'https://a.not.b.multi-wildcard.com', count: 1 },
                 { url: 'https://not.valid.io', count: 1 },
+            ])
+        })
+
+        it('filters out invalid URLs like paths without domains', () => {
+            const urlsWithInvalidPaths: SuggestedDomain[] = [
+                { url: '/', count: 10 },
+                { url: '/billing', count: 5 },
+                { url: '/settings/project', count: 3 },
+                { url: 'https://valid.example.com', count: 2 },
+                { url: 'not-a-url', count: 1 },
+            ]
+            expect(filterNotAuthorizedUrls(urlsWithInvalidPaths, [])).toEqual([
+                { url: 'https://valid.example.com', count: 2 },
             ])
         })
     })

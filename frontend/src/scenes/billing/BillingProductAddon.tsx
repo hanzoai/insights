@@ -2,17 +2,19 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef } from 'react'
 
-import { IconCheckCircle, IconInfo } from '@posthog/icons'
-import { LemonSelectOptions, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconInfo } from '@hanzo/icons'
+import { LemonSelectOptions, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { TRIAL_CANCELLATION_SURVEY_ID, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { humanFriendlyCurrency } from 'lib/utils'
-import { getProductIcon } from 'scenes/products/Products'
+import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
 
 import { BillingProductV2AddonType } from '~/types'
 
 import { BillingAddonFeaturesList } from './BillingAddonFeaturesList'
 import { BillingProductAddonActions } from './BillingProductAddonActions'
+import { ConfirmDowngradeModal } from './ConfirmDowngradeModal'
+import { ConfirmUpgradeModal } from './ConfirmUpgradeModal'
 import { ProductPricingModal } from './ProductPricingModal'
 import { TrialCancellationSurveyModal } from './TrialCancellationSurveyModal'
 import { UnsubscribeSurveyModal } from './UnsubscribeSurveyModal'
@@ -70,7 +72,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
             <div className="sm:flex justify-between gap-x-4">
                 {/* Header */}
                 <div className="flex gap-x-4">
-                    <div>{getProductIcon(addon.name, addon.icon_key, 'text-2xl shrink-0')}</div>
+                    <div>{getProductIcon(addon.icon_key, { className: 'text-2xl shrink-0' })}</div>
                     <div>
                         <div className="flex gap-x-2 items-center mt-0 mb-2 ">
                             <h4 className="leading-5 mb-1 font-bold">{addon.name}</h4>
@@ -79,7 +81,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                                     <Tooltip
                                         title={`Automatically included with your plan.${
                                             addon.type === 'enhanced_persons'
-                                                ? ' Used based on whether you capture person profiles with your events.'
+                                                ? ' Used based on whether you capture user profiles with your events.'
                                                 : ''
                                         }`}
                                     >
@@ -118,7 +120,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                         {is_enhanced_persons_og_customer && (
                             <p className="mt-2 mb-0">
                                 <Link
-                                    to="https://posthog.com/changelog/2024#person-profiles-launched-posthog-now-up-to-80percent-cheaper"
+                                    to="https://hanzo.ai/changelog/2024#person-profiles-launched-insights-now-up-to-80percent-cheaper"
                                     className="italic"
                                     target="_blank"
                                     targetBlankIcon
@@ -165,6 +167,10 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
             {surveyID === UNSUBSCRIBE_SURVEY_ID && <UnsubscribeSurveyModal product={addon} />}
             {/* Trial cancellation survey modal */}
             {surveyID === TRIAL_CANCELLATION_SURVEY_ID && <TrialCancellationSurveyModal product={addon} />}
+            {/* Confirm platform addon subscription upgrade */}
+            <ConfirmUpgradeModal product={addon} />
+            {/* Confirm platform addon subscription downgrade */}
+            <ConfirmDowngradeModal product={addon} />
         </div>
     )
 }

@@ -3,37 +3,14 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use anyhow::{Context, Result};
-use common_types::RawEvent;
-use rocksdb::{ColumnFamilyDescriptor, Options};
+use rocksdb::{ColumnFamilyDescriptor, Options, SliceTransform};
 use tracing::info;
 
 use crate::metrics::MetricsHelper;
-use crate::metrics_const::*;
-use crate::rocksdb::store::RocksDbStore;
+use crate::rocksdb::store::{block_based_table_factory, RocksDbStore};
 
-use super::keys::{TimestampKey, UuidIndexKey, UuidKey};
-use super::metadata::{TimestampMetadata, UuidMetadata};
-
-const UNKNOWN_STR: &str = "unknown";
-
-/// Extract library name and version from RawEvent properties
-fn extract_library_info(event: &RawEvent) -> (String, String) {
-    let lib_name = event
-        .properties
-        .get("$lib")
-        .and_then(|v| v.as_str())
-        .unwrap_or(UNKNOWN_STR)
-        .to_string();
-
-    let lib_version = event
-        .properties
-        .get("$lib_version")
-        .and_then(|v| v.as_str())
-        .unwrap_or(UNKNOWN_STR)
-        .to_string();
-
-    (lib_name, lib_version)
-}
+use super::keys::TimestampKey;
+use crate::pipelines::ingestion_events::TimestampMetadata;
 
 #[derive(Debug, Clone)]
 pub struct DeduplicationStoreConfig {
@@ -43,41 +20,80 @@ pub struct DeduplicationStoreConfig {
     pub max_capacity: u64,
 }
 
+/// Entry for batch writing timestamp records
+pub struct TimestampBatchEntry<'a> {
+    pub key: &'a [u8],
+    pub value: &'a [u8],
+}
+
 #[derive(Debug, Clone)]
 pub struct DeduplicationStore {
     store: Arc<RocksDbStore>,
     topic: String,
     partition: i32,
-    metrics: MetricsHelper,
 }
 
 impl DeduplicationStore {
-    // Column families for different tracking patterns
+    // Column family for timestamp-based deduplication
     const TIMESTAMP_CF: &'static str = "timestamp_records";
-    const UUID_CF: &'static str = "uuid_records";
-    const UUID_TIMESTAMP_INDEX_CF: &'static str = "uuid_timestamp_index"; // For cleanup
 
     pub fn new(config: DeduplicationStoreConfig, topic: String, partition: i32) -> Result<Self> {
-        let metrics = MetricsHelper::with_partition(&topic, partition)
-            .with_label("service", "kafka-deduplicator");
+        // Create metrics helper for the RocksDB store
+        let metrics = MetricsHelper::with_partition(&topic, partition);
 
-        // Create all three column families
-        let store = RocksDbStore::new(
-            &config.path,
-            vec![
-                ColumnFamilyDescriptor::new(Self::TIMESTAMP_CF, Options::default()),
-                ColumnFamilyDescriptor::new(Self::UUID_CF, Options::default()),
-                ColumnFamilyDescriptor::new(Self::UUID_TIMESTAMP_INDEX_CF, Options::default()),
-            ],
-            metrics.clone(),
-        )?;
+        let cf_descriptors = Self::get_cf_descriptors();
+        let store = RocksDbStore::new(&config.path, cf_descriptors, metrics)?;
 
         Ok(Self {
             store: Arc::new(store),
             topic,
             partition,
-            metrics,
         })
+    }
+
+    fn get_cf_descriptors() -> Vec<ColumnFamilyDescriptor> {
+        let block_opts = block_based_table_factory();
+
+        // ----- CF: TimestampKey (prefix = 8-byte BE timestamp)
+        let mut ts_cf_opts = Options::default();
+        ts_cf_opts.set_block_based_table_factory(&block_opts);
+        ts_cf_opts.set_prefix_extractor(SliceTransform::create_fixed_prefix(8)); // <- per-CF
+        ts_cf_opts.set_write_buffer_size(8 * 1024 * 1024);
+        ts_cf_opts.set_max_write_buffer_number(3);
+        // IMPORTANT: CF options don't inherit from DB options, must set compression explicitly
+        // LZ4 is ~2x faster than Snappy for both compression and decompression
+        ts_cf_opts.set_compression_type(rocksdb::DBCompressionType::Lz4);
+
+        vec![ColumnFamilyDescriptor::new(Self::TIMESTAMP_CF, ts_cf_opts)]
+    }
+
+    // Storage operations for each column family
+
+    /// Get a timestamp record from the store
+    pub fn get_timestamp_record(&self, key: &TimestampKey) -> Result<Option<TimestampMetadata>> {
+        let key_bytes: Vec<u8> = key.into();
+        match self.store.get(Self::TIMESTAMP_CF, &key_bytes)? {
+            Some(bytes) => {
+                let metadata =
+                    bincode::serde::decode_from_slice(&bytes, bincode::config::standard())
+                        .map(|(m, _)| m)
+                        .context("Failed to deserialize timestamp metadata")?;
+                Ok(Some(metadata))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Put a timestamp record in the store
+    pub fn put_timestamp_record(
+        &self,
+        key: &TimestampKey,
+        metadata: &TimestampMetadata,
+    ) -> Result<()> {
+        let key_bytes: Vec<u8> = key.into();
+        let value = bincode::serde::encode_to_vec(metadata, bincode::config::standard())
+            .context("Failed to serialize timestamp metadata")?;
+        self.store.put(Self::TIMESTAMP_CF, &key_bytes, &value)
     }
 
     /// Get non-duplicated keys based on timestamp pattern (for batch processing)
@@ -105,238 +121,15 @@ impl DeduplicationStore {
         Ok(non_duplicated)
     }
 
-    /// Handle an event, tracking both timestamp and UUID patterns
-    pub fn handle_event_with_raw(&self, raw_event: &RawEvent) -> Result<bool> {
-        let _start_time = Instant::now();
-
-        // Track timestamp-based deduplication
-        let is_new_timestamp = self.handle_timestamp_dedup(raw_event)?;
-
-        // Track UUID-based deduplication (only if UUID exists)
-        if raw_event.uuid.is_some() {
-            let _is_new_uuid = self.handle_uuid_dedup(raw_event)?;
-        }
-
-        Ok(is_new_timestamp)
+    /// Batch get timestamp records
+    pub fn multi_get_timestamp_records(&self, keys: Vec<&[u8]>) -> Result<Vec<Option<Vec<u8>>>> {
+        self.store.multi_get(Self::TIMESTAMP_CF, keys)
     }
 
-    /// Handle timestamp-based deduplication
-    fn handle_timestamp_dedup(&self, raw_event: &RawEvent) -> Result<bool> {
-        let key = TimestampKey::from(raw_event);
-        let key_bytes: Vec<u8> = (&key).into();
-
-        // Check if this is a duplicate
-        let existing_metadata = self.store.get(Self::TIMESTAMP_CF, &key_bytes)?;
-
-        if let Some(existing_bytes) = existing_metadata {
-            // Key exists - it's a duplicate
-            let mut metadata: TimestampMetadata =
-                bincode::serde::decode_from_slice(&existing_bytes, bincode::config::standard())
-                    .map(|(m, _)| m)
-                    .context("Failed to deserialize timestamp metadata")?;
-
-            // Calculate similarity
-            let similarity = metadata.calculate_similarity(raw_event)?;
-
-            // Update metadata
-            metadata.update_duplicate(raw_event);
-
-            // Log the duplicate
-            info!(
-                "Timestamp duplicate: {} for key {:?}, Similarity: {:.2}",
-                metadata.get_metrics_summary(),
-                key,
-                similarity.overall_score
-            );
-
-            // Emit metrics
-            let (lib_name, _lib_version) = extract_library_info(raw_event);
-            self.metrics
-                .counter(DUPLICATE_EVENTS_TOTAL_COUNTER)
-                .with_label("lib", &lib_name)
-                .with_label("dedup_type", "timestamp")
-                .increment(1);
-
-            self.metrics
-                .histogram(TIMESTAMP_DEDUP_UNIQUE_UUIDS_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(metadata.seen_uuids.len() as f64);
-
-            self.metrics
-                .histogram(TIMESTAMP_DEDUP_SIMILARITY_SCORE_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.overall_score);
-
-            self.metrics
-                .histogram(TIMESTAMP_DEDUP_DIFFERENT_FIELDS_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.different_field_count as f64);
-
-            self.metrics
-                .histogram(TIMESTAMP_DEDUP_DIFFERENT_PROPERTIES_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.different_property_count as f64);
-
-            self.metrics
-                .histogram(TIMESTAMP_DEDUP_PROPERTIES_SIMILARITY_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.properties_similarity);
-
-            // Emit counters for specific fields that differ
-            for (field_name, _, _) in &similarity.different_fields {
-                self.metrics
-                    .counter(TIMESTAMP_DEDUP_FIELD_DIFFERENCES_COUNTER)
-                    .with_label("lib", &lib_name)
-                    .with_label("field", field_name)
-                    .increment(1);
-            }
-
-            // Store updated metadata
-            let serialized = bincode::serde::encode_to_vec(&metadata, bincode::config::standard())
-                .context("Failed to serialize timestamp metadata")?;
-            self.store
-                .put(Self::TIMESTAMP_CF, &key_bytes, &serialized)?;
-
-            return Ok(false); // It's a duplicate
-        }
-
-        // Key doesn't exist - store it with initial metadata
-        let metadata = TimestampMetadata::new(raw_event);
-        let serialized = bincode::serde::encode_to_vec(&metadata, bincode::config::standard())
-            .context("Failed to serialize timestamp metadata")?;
-
-        self.store
-            .put_batch(Self::TIMESTAMP_CF, vec![(&key_bytes, &serialized)])?;
-
-        // Track unique event
-        let (lib_name, _lib_version) = extract_library_info(raw_event);
-        self.metrics
-            .counter(UNIQUE_EVENTS_TOTAL_COUNTER)
-            .with_label("lib", &lib_name)
-            .with_label("dedup_type", "timestamp")
-            .increment(1);
-
-        Ok(true) // New event
-    }
-
-    /// Handle UUID-based deduplication
-    fn handle_uuid_dedup(&self, raw_event: &RawEvent) -> Result<bool> {
-        let key = UuidKey::from(raw_event);
-        let key_bytes: Vec<u8> = (&key).into();
-
-        // Extract timestamp for indexing
-        let timestamp = raw_event
-            .timestamp
-            .as_ref()
-            .and_then(|t| crate::utils::timestamp::parse_timestamp(t))
-            .unwrap_or_else(|| chrono::Utc::now().timestamp_millis() as u64);
-
-        // Check if this UUID combination exists
-        let existing_metadata = self.store.get(Self::UUID_CF, &key_bytes)?;
-
-        if let Some(existing_bytes) = existing_metadata {
-            // UUID combination exists - it's a duplicate
-            let mut metadata: UuidMetadata =
-                bincode::serde::decode_from_slice(&existing_bytes, bincode::config::standard())
-                    .map(|(m, _)| m)
-                    .context("Failed to deserialize UUID metadata")?;
-
-            // Calculate similarity
-            let similarity = metadata.calculate_similarity(raw_event)?;
-
-            // Update metadata
-            metadata.update_duplicate(raw_event);
-
-            // Log the duplicate
-            info!(
-                "UUID duplicate: {} for key {:?}",
-                metadata.get_metrics_summary(),
-                key
-            );
-
-            // Emit metrics
-            let (lib_name, _) = extract_library_info(raw_event);
-
-            self.metrics
-                .counter(DUPLICATE_EVENTS_TOTAL_COUNTER)
-                .with_label("lib", &lib_name)
-                .with_label("dedup_type", "uuid")
-                .increment(1);
-
-            self.metrics
-                .histogram(UUID_DEDUP_TIMESTAMP_VARIANCE_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(metadata.get_timestamp_variance() as f64);
-
-            self.metrics
-                .histogram(UUID_DEDUP_UNIQUE_TIMESTAMPS_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(metadata.seen_timestamps.len() as f64);
-
-            self.metrics
-                .histogram(UUID_DEDUP_SIMILARITY_SCORE_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.overall_score);
-
-            self.metrics
-                .histogram(UUID_DEDUP_DIFFERENT_FIELDS_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.different_field_count as f64);
-
-            self.metrics
-                .histogram(UUID_DEDUP_DIFFERENT_PROPERTIES_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.different_property_count as f64);
-
-            self.metrics
-                .histogram(UUID_DEDUP_PROPERTIES_SIMILARITY_HISTOGRAM)
-                .with_label("lib", &lib_name)
-                .record(similarity.properties_similarity);
-
-            // Emit counters for specific fields that differ
-            for (field_name, _, _) in &similarity.different_fields {
-                self.metrics
-                    .counter(UUID_DEDUP_FIELD_DIFFERENCES_COUNTER)
-                    .with_label("lib", &lib_name)
-                    .with_label("field", field_name)
-                    .increment(1);
-            }
-
-            // Store updated metadata
-            let serialized = bincode::serde::encode_to_vec(&metadata, bincode::config::standard())
-                .context("Failed to serialize UUID metadata")?;
-            self.store.put(Self::UUID_CF, &key_bytes, &serialized)?;
-
-            return Ok(false); // It's a duplicate
-        }
-
-        // New UUID combination - store it
-        let metadata = UuidMetadata::new(raw_event);
-        let serialized = bincode::serde::encode_to_vec(&metadata, bincode::config::standard())
-            .context("Failed to serialize UUID metadata")?;
-
-        // Store in UUID CF
-        self.store
-            .put_batch(Self::UUID_CF, vec![(&key_bytes, &serialized)])?;
-
-        // Also store in timestamp index for cleanup
-        let index_key = UuidIndexKey::new(timestamp, key_bytes.clone());
-        let index_key_bytes: Vec<u8> = index_key.into();
-        // Value is just the UUID key bytes for reference
-        self.store.put_batch(
-            Self::UUID_TIMESTAMP_INDEX_CF,
-            vec![(&index_key_bytes, &key_bytes)],
-        )?;
-
-        // Track new UUID combination
-        let (lib_name, _lib_version) = extract_library_info(raw_event);
-        self.metrics
-            .counter(UNIQUE_EVENTS_TOTAL_COUNTER)
-            .with_label("lib", &lib_name)
-            .with_label("dedup_type", "uuid")
-            .increment(1);
-
-        Ok(true) // New UUID combination
+    /// Batch put timestamp records
+    pub fn put_timestamp_records_batch(&self, entries: Vec<TimestampBatchEntry>) -> Result<()> {
+        let raw_entries: Vec<(&[u8], &[u8])> = entries.iter().map(|e| (e.key, e.value)).collect();
+        self.store.put_batch(Self::TIMESTAMP_CF, raw_entries)
     }
 
     pub fn cleanup_old_entries(&self) -> Result<u64> {
@@ -428,72 +221,44 @@ impl DeduplicationStore {
             last_key_bytes.as_ref(),
         )?;
 
-        // Collect UUID keys to delete first (minimize iterator lifetime)
-        let index_cf = self.store.get_cf_handle(Self::UUID_TIMESTAMP_INDEX_CF)?;
-        let mut uuid_keys_to_delete = Vec::new();
-        let mut kept_count = 0;
+        // Spawn compaction on a background thread to avoid blocking cleanup.
+        // RocksDB's compact_range is synchronous and can block for extended periods.
+        // delete_range creates tombstones but doesn't immediately free disk space -
+        // compaction merges/removes tombstoned data to reclaim space.
+        let store = self.store.clone();
+        let topic = self.topic.clone();
+        let partition = self.partition;
+        std::thread::spawn(move || {
+            info!(
+                "Store {}:{} - Starting background compaction after cleanup",
+                topic, partition
+            );
+            let compaction_start = Instant::now();
 
-        {
-            // Scope the iterator to release lock quickly
-            let mut index_iter = self
-                .store
-                .db
-                .iterator_cf(&index_cf, rocksdb::IteratorMode::Start);
+            store.compact_range(
+                Self::TIMESTAMP_CF,
+                Some(first_key_bytes.as_ref()),
+                Some(last_key_bytes.as_ref()),
+            );
 
-            while let Some(Ok((index_key, uuid_key_bytes))) = index_iter.next() {
-                // Check if this key is within our cleanup range
-                if let Some(timestamp) = UuidIndexKey::parse_timestamp(&index_key) {
-                    if timestamp >= cleanup_timestamp {
-                        kept_count += 1;
-                        break; // We've reached keys that shouldn't be deleted
-                    }
-                    // Collect UUID key for batch deletion
-                    uuid_keys_to_delete.push(uuid_key_bytes.to_vec());
-                }
-            }
-        } // Iterator dropped here, releasing read lock
+            info!(
+                "Store {}:{} - Background compaction completed in {:?}",
+                topic,
+                partition,
+                compaction_start.elapsed()
+            );
+        });
 
-        // Now delete UUID keys in batches
-        let deleted_count = uuid_keys_to_delete.len();
-        if !uuid_keys_to_delete.is_empty() {
-            const BATCH_SIZE: usize = 1000;
-            for chunk in uuid_keys_to_delete.chunks(BATCH_SIZE) {
-                let mut batch = rocksdb::WriteBatch::default();
-                for key in chunk {
-                    batch.delete_cf(&self.store.get_cf_handle(Self::UUID_CF)?, key);
-                }
-                self.store.db.write(batch)?;
-            }
-        }
-
-        info!(
-            "Store {}:{} - UUID cleanup: deleted {} records, keeping {} records",
-            self.topic, self.partition, deleted_count, kept_count
-        );
-
-        // Now delete the index entries themselves using range delete (this is efficient as it's timestamp-prefixed)
-        let index_start = UuidIndexKey::range_start();
-        let index_end = UuidIndexKey::range_end(cleanup_timestamp);
-        self.store.delete_range(
-            Self::UUID_TIMESTAMP_INDEX_CF,
-            index_start.as_ref(),
-            index_end.as_ref(),
-        )?;
-
-        // Calculate bytes freed
+        // Calculate bytes freed (will likely be 0 since compaction is now async)
         let final_size = self.get_total_size()?;
         let bytes_freed = initial_size.saturating_sub(final_size);
 
-        // Log cleanup results for this store
-        if bytes_freed > 0 {
-            info!(
-                "Store {}:{} cleanup freed {} bytes in {:?}",
-                self.topic,
-                self.partition,
-                bytes_freed,
-                start_time.elapsed()
-            );
-        }
+        info!(
+            "Store {}:{} cleanup completed in {:?} (compaction spawned in background)",
+            self.topic,
+            self.partition,
+            start_time.elapsed()
+        );
 
         Ok(bytes_freed)
     }
@@ -514,13 +279,7 @@ impl DeduplicationStore {
 
     /// Get current SST file names for tracking incremental checkpoint changes
     pub fn get_sst_file_names(&self) -> Result<Vec<String>> {
-        // Get SST files from both column families
-        let mut sst_files = self.store.get_sst_file_names(Self::TIMESTAMP_CF)?;
-        let uuid_sst_files = self.store.get_sst_file_names(Self::UUID_CF)?;
-        sst_files.extend(uuid_sst_files);
-        sst_files.sort();
-        sst_files.dedup();
-        Ok(sst_files)
+        self.store.get_sst_file_names(Self::TIMESTAMP_CF)
     }
 
     /// Get the topic this store is responsible for
@@ -533,492 +292,183 @@ impl DeduplicationStore {
         self.partition
     }
 
-    /// Get the total size of all column families in this store
+    /// Get the total size of the store
     pub fn get_total_size(&self) -> Result<u64> {
-        let timestamp_size = self.store.get_db_size(Self::TIMESTAMP_CF)?;
-        let uuid_size = self.store.get_db_size(Self::UUID_CF)?;
-        let index_size = self.store.get_db_size(Self::UUID_TIMESTAMP_INDEX_CF)?;
-        Ok(timestamp_size + uuid_size + index_size)
+        self.store.get_db_size(Self::TIMESTAMP_CF)
+    }
+
+    /// Get the age of the oldest data in seconds (current time - oldest timestamp)
+    /// Returns None if the store is empty
+    pub fn get_oldest_data_age_seconds(&self) -> Result<Option<u64>> {
+        let cf = self.store.get_cf_handle(Self::TIMESTAMP_CF)?;
+
+        // Get first (oldest) key
+        let mut first_iter = self.store.db.iterator_cf(&cf, rocksdb::IteratorMode::Start);
+        let oldest_timestamp = if let Some(Ok((first_key, _))) = first_iter.next() {
+            let first_key_parsed: TimestampKey = first_key.as_ref().try_into()?;
+            first_key_parsed.timestamp
+        } else {
+            return Ok(None); // Empty store
+        };
+        drop(first_iter);
+
+        // Calculate age using wall clock
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+
+        Ok(Some(now.saturating_sub(oldest_timestamp)))
     }
 
     /// Flush the store to disk
     pub fn flush(&self) -> Result<()> {
-        self.store.flush_cf(Self::TIMESTAMP_CF)?;
-        self.store.flush_cf(Self::UUID_CF)?;
-        Ok(())
+        self.store.flush_all_cf()
     }
 
     /// Update metrics for this store (including database size)
     pub fn update_metrics(&self) -> Result<()> {
-        self.store.update_db_metrics(Self::TIMESTAMP_CF)?;
-        self.store.update_db_metrics(Self::UUID_CF)?;
-        self.store
-            .update_db_metrics(Self::UUID_TIMESTAMP_INDEX_CF)?;
-        Ok(())
+        self.store.update_db_metrics(Self::TIMESTAMP_CF)
     }
 
-    /// Create a checkpoint and return the SST files at the time of checkpoint
+    /// Create a checkpoint and return metadata about the checkpoint
+    /// This ensures consistency by:
+    /// 1. Flushing WAL to disk
+    /// 2. Flushing all column families
+    /// 3. Capturing sequence number for consistency verification
+    /// 4. Creating the checkpoint with hard links
     pub fn create_checkpoint_with_metadata<P: AsRef<std::path::Path>>(
         &self,
         checkpoint_path: P,
-    ) -> Result<Vec<String>> {
-        // Flush before checkpoint to ensure all data is in SST files
+    ) -> Result<LocalCheckpointInfo> {
+        // Step 1: Flush WAL to ensure durability
+        self.store.flush_wal(true)?;
+
+        // Step 2: Flush all column families to ensure data is in SST files
         self.flush()?;
 
-        // Get SST files before checkpoint
+        // Step 3: Get sequence number for consistency tracking
+        let sequence = self.store.latest_sequence_number();
+
+        // Step 4: Get SST files after flush
         let sst_files = self.get_sst_file_names()?;
 
-        // Create the checkpoint
+        // Step 5: Create the checkpoint (RocksDB internally handles file deletion safety)
         self.store.create_checkpoint(checkpoint_path)?;
 
-        Ok(sst_files)
+        Ok(LocalCheckpointInfo {
+            sst_files,
+            sequence,
+        })
     }
+}
+
+/// Information about a local RocksDB checkpoint
+#[derive(Debug, Clone)]
+pub struct LocalCheckpointInfo {
+    /// SST files included in the checkpoint
+    pub sst_files: Vec<String>,
+    /// RocksDB sequence number at checkpoint time
+    pub sequence: u64,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::store::keys::{UuidIndexKey, UuidKey};
+    use common_types::RawEvent;
     use tempfile::TempDir;
 
-    fn create_test_store(max_capacity: Option<u64>) -> (DeduplicationStore, TempDir) {
+    fn create_test_store() -> (DeduplicationStore, TempDir) {
         let temp_dir = TempDir::new().unwrap();
-        let max_capacity = max_capacity.unwrap_or(1_000_000);
         let config = DeduplicationStoreConfig {
             path: temp_dir.path().to_path_buf(),
-            max_capacity,
+            max_capacity: 1_000_000,
         };
         let store = DeduplicationStore::new(config, "test_topic".to_string(), 0).unwrap();
         (store, temp_dir)
     }
 
-    fn create_test_raw_event_with_timestamp(
-        distinct_id: &str,
-        token: &str,
-        event_name: &str,
-        timestamp: Option<String>,
-    ) -> RawEvent {
+    fn create_test_raw_event() -> RawEvent {
         RawEvent {
             uuid: Some(uuid::Uuid::new_v4()),
-            event: event_name.to_string(),
-            distinct_id: Some(serde_json::Value::String(distinct_id.to_string())),
-            token: Some(token.to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: timestamp.or_else(|| Some(chrono::Utc::now().to_rfc3339())),
-            ..Default::default()
-        }
-    }
-
-    #[test]
-    fn test_handle_event_new() {
-        let (store, _temp_dir) = create_test_store(None);
-        let event = create_test_raw_event_with_timestamp(
-            "user1",
-            "token1",
-            "event1",
-            Some("2021-01-01T00:00:00Z".to_string()),
-        );
-
-        let result = store.handle_event_with_raw(&event).unwrap();
-        assert!(result); // Should be new
-    }
-
-    #[test]
-    fn test_handle_event_duplicate() {
-        let (store, _temp_dir) = create_test_store(None);
-        let timestamp = Some("2021-01-01T00:00:00Z".to_string());
-        let event1 =
-            create_test_raw_event_with_timestamp("user1", "token1", "event1", timestamp.clone());
-        let event2 =
-            create_test_raw_event_with_timestamp("user1", "token1", "event1", timestamp.clone());
-
-        assert!(store.handle_event_with_raw(&event1).unwrap()); // First is new
-        assert!(!store.handle_event_with_raw(&event2).unwrap()); // Second is duplicate
-    }
-
-    #[test]
-    fn test_dual_tracking() {
-        let (store, _temp_dir) = create_test_store(None);
-        let uuid1 = uuid::Uuid::new_v4();
-        let uuid2 = uuid::Uuid::new_v4();
-
-        // Create events with same timestamp but different UUIDs
-        let event1 = RawEvent {
-            uuid: Some(uuid1),
-            event: "page_view".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:00Z".to_string()),
-            ..Default::default()
-        };
-
-        let event2 = RawEvent {
-            uuid: Some(uuid2),
-            event: "page_view".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:00Z".to_string()),
-            ..Default::default()
-        };
-
-        assert!(store.handle_event_with_raw(&event1).unwrap()); // First is new
-        assert!(!store.handle_event_with_raw(&event2).unwrap()); // Second is duplicate by timestamp
-
-        // Now test with same UUID but different timestamp
-        let event3 = RawEvent {
-            uuid: Some(uuid1),
-            event: "page_view".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:10Z".to_string()), // Different timestamp
-            ..Default::default()
-        };
-
-        assert!(store.handle_event_with_raw(&event3).unwrap()); // New by timestamp, but duplicate by UUID
-    }
-
-    #[test]
-    fn test_uuid_timestamp_index_creation() {
-        let (store, _temp_dir) = create_test_store(None);
-        let uuid = uuid::Uuid::new_v4();
-        let timestamp = "2021-01-01T00:00:00Z";
-
-        let event = RawEvent {
-            uuid: Some(uuid),
-            event: "test_event".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some(timestamp.to_string()),
-            ..Default::default()
-        };
-
-        // Process the event
-        assert!(store.handle_event_with_raw(&event).unwrap());
-
-        // Verify that the timestamp index was created
-        let timestamp_ms = crate::utils::timestamp::parse_timestamp(timestamp).unwrap();
-
-        // Create the UuidKey to match the format used in the code
-        let uuid_key = UuidKey::from(&event);
-        let uuid_key_bytes: Vec<u8> = (&uuid_key).into();
-
-        // Create the index key using the UuidIndexKey struct
-        let index_key_struct = UuidIndexKey::new(timestamp_ms, uuid_key_bytes.clone());
-        let index_key: Vec<u8> = index_key_struct.into();
-
-        // Check that the index entry exists
-        let index_value = store
-            .store
-            .get(DeduplicationStore::UUID_TIMESTAMP_INDEX_CF, &index_key)
-            .unwrap();
-        assert!(index_value.is_some());
-
-        // Verify the index value points to the UUID key bytes
-        let stored_uuid_key = index_value.unwrap();
-        assert_eq!(stored_uuid_key, uuid_key_bytes);
-    }
-
-    #[test]
-    fn test_uuid_tracking_with_multiple_timestamps() {
-        let (store, _temp_dir) = create_test_store(None);
-        let uuid = uuid::Uuid::new_v4();
-
-        // Same UUID, different timestamps
-        let event1 = RawEvent {
-            uuid: Some(uuid),
             event: "test_event".to_string(),
             distinct_id: Some(serde_json::Value::String("user1".to_string())),
             token: Some("token1".to_string()),
             properties: std::collections::HashMap::new(),
             timestamp: Some("2021-01-01T00:00:00Z".to_string()),
             ..Default::default()
-        };
-
-        let event2 = RawEvent {
-            uuid: Some(uuid),
-            event: "test_event".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:10Z".to_string()),
-            ..Default::default()
-        };
-
-        let event3 = RawEvent {
-            uuid: Some(uuid),
-            event: "test_event".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:05Z".to_string()),
-            ..Default::default()
-        };
-
-        // First event is new
-        assert!(store.handle_event_with_raw(&event1).unwrap());
-
-        // Second and third are duplicates by UUID (but different timestamps)
-        assert!(store.handle_event_with_raw(&event2).unwrap()); // New timestamp
-        assert!(store.handle_event_with_raw(&event3).unwrap()); // New timestamp
-
-        // Verify UUID metadata tracks all timestamps
-        let uuid_key = UuidKey::from(&event1);
-        let uuid_key_bytes: Vec<u8> = (&uuid_key).into();
-        let metadata_bytes = store
-            .store
-            .get(DeduplicationStore::UUID_CF, &uuid_key_bytes)
-            .unwrap()
-            .unwrap();
-        let metadata: UuidMetadata =
-            bincode::serde::decode_from_slice(&metadata_bytes, bincode::config::standard())
-                .map(|(m, _)| m)
-                .unwrap();
-
-        // Should have 3 unique timestamps
-        assert_eq!(metadata.seen_timestamps.len(), 3);
-        assert_eq!(metadata.duplicate_count, 2); // Two duplicates after the first
-        assert_eq!(metadata.get_timestamp_variance(), 10000); // 10 seconds in ms
+        }
     }
 
     #[test]
-    fn test_cleanup_with_uuid_records() {
-        let (store, _temp_dir) = create_test_store(Some(1000)); // Small capacity to force cleanup
+    fn test_timestamp_record_storage() {
+        let (store, _temp_dir) = create_test_store();
 
-        // Use timestamps relative to now for predictable cleanup behavior
-        let now = chrono::Utc::now();
-        let old_timestamp = (now - chrono::Duration::days(10)).to_rfc3339();
-        let new_timestamp = (now - chrono::Duration::days(5)).to_rfc3339();
+        // Create a test key and metadata
+        let event = create_test_raw_event();
+        let key = TimestampKey::from(&event);
+        let metadata = TimestampMetadata::new(&event);
 
-        // Add many old events to ensure database has measurable size
-        let old_uuids: Vec<uuid::Uuid> = (0..1000).map(|_| uuid::Uuid::new_v4()).collect();
-        for (i, uuid) in old_uuids.iter().enumerate() {
-            let event = RawEvent {
-                uuid: Some(*uuid),
-                event: format!("old_event_{i}"),
-                distinct_id: Some(serde_json::Value::String(format!("old_user_{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::from([
-                    ("key1".to_string(), serde_json::json!("value1")),
-                    ("key2".to_string(), serde_json::json!("value2")),
-                ]),
-                timestamp: Some(old_timestamp.clone()),
-                ..Default::default()
-            };
-            store.handle_event_with_raw(&event).unwrap();
+        // Should not exist initially
+        assert!(store.get_timestamp_record(&key).unwrap().is_none());
+
+        // Store the metadata
+        store.put_timestamp_record(&key, &metadata).unwrap();
+
+        // Should exist now
+        let retrieved = store.get_timestamp_record(&key).unwrap();
+        assert!(retrieved.is_some());
+
+        // Verify the metadata was stored correctly
+        let retrieved_metadata = retrieved.unwrap();
+        assert_eq!(retrieved_metadata.duplicate_count, 0);
+        // Verify the original event was stored correctly by converting back
+        let stored_event = retrieved_metadata.get_original_event().unwrap();
+        assert_eq!(stored_event.event, event.event);
+        assert_eq!(stored_event.uuid, event.uuid);
+        assert_eq!(stored_event.distinct_id, event.distinct_id);
+        assert_eq!(stored_event.token, event.token);
+        assert_eq!(retrieved_metadata.seen_uuids.len(), 1);
+        if let Some(uuid) = event.uuid {
+            assert!(retrieved_metadata.seen_uuids.contains(&uuid.to_string()));
         }
+    }
 
-        // Add new events (should be kept)
-        let new_uuids: Vec<uuid::Uuid> = (0..100).map(|_| uuid::Uuid::new_v4()).collect();
-        for (i, uuid) in new_uuids.iter().enumerate() {
-            let event = RawEvent {
-                uuid: Some(*uuid),
-                event: format!("new_event_{i}"),
-                distinct_id: Some(serde_json::Value::String(format!("new_user_{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::from([
-                    ("key1".to_string(), serde_json::json!("value1")),
-                    ("key2".to_string(), serde_json::json!("value2")),
-                ]),
-                timestamp: Some(new_timestamp.clone()),
-                ..Default::default()
-            };
-            store.handle_event_with_raw(&event).unwrap();
-        }
+    #[test]
+    fn test_batch_deduplication() {
+        let (store, _temp_dir) = create_test_store();
 
-        // Compact and flush to ensure data is written to SST files
+        // Create test keys as raw bytes (since get_non_duplicated_keys still uses raw bytes)
+        let keys: Vec<&[u8]> = vec![b"key1", b"key2", b"key3"];
+
+        // All should be non-duplicated initially
+        let non_dup = store.get_non_duplicated_keys(keys.clone()).unwrap();
+        assert_eq!(non_dup.len(), 3);
+
+        // Add one key to timestamp CF directly (using raw store access for this test)
         store
             .store
-            .compact_cf(DeduplicationStore::TIMESTAMP_CF)
+            .put(DeduplicationStore::TIMESTAMP_CF, b"key2", b"value2")
             .unwrap();
-        store.store.compact_cf(DeduplicationStore::UUID_CF).unwrap();
-        store
-            .store
-            .compact_cf(DeduplicationStore::UUID_TIMESTAMP_INDEX_CF)
-            .unwrap();
+
+        // Now only 2 should be non-duplicated
+        let non_dup = store.get_non_duplicated_keys(keys).unwrap();
+        assert_eq!(non_dup.len(), 2);
+        assert!(!non_dup.contains(&b"key2".as_ref()));
+    }
+
+    #[test]
+    fn test_store_creation_and_basic_operations() {
+        let (store, _temp_dir) = create_test_store();
+
+        // Test that store was created successfully
+        assert_eq!(store.get_topic(), "test_topic");
+        assert_eq!(store.get_partition(), 0);
+
+        // Test flush doesn't error
         store.flush().unwrap();
 
-        // Force cleanup with 40% to clean up events older than 6 days
-        // With 10 days of data, 40% means we clean up to 6 days ago
-        // Since new events are 5 days old, they should be kept
-        store.cleanup_old_entries_with_percentage(0.40).unwrap();
-
-        // Verify some old UUID records can be added again (were cleaned)
-        for i in 0..5 {
-            let test_uuid = uuid::Uuid::new_v4();
-            let old_event = RawEvent {
-                uuid: Some(test_uuid),
-                event: format!("old_event_{i}"),
-                distinct_id: Some(serde_json::Value::String(format!("old_user_{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::new(),
-                timestamp: Some(old_timestamp.clone()),
-                ..Default::default()
-            };
-
-            // These should be new again after cleanup (timestamp records were deleted)
-            assert!(store.handle_event_with_raw(&old_event).unwrap());
-        }
-
-        // Verify new records are still detected as duplicates
-        for (i, &uuid) in new_uuids.iter().take(5).enumerate() {
-            let test_event = RawEvent {
-                uuid: Some(uuid),
-                event: format!("new_event_{i}"),
-                distinct_id: Some(serde_json::Value::String(format!("new_user_{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::new(),
-                timestamp: Some(new_timestamp.clone()),
-                ..Default::default()
-            };
-
-            // These should still be duplicates (not cleaned up)
-            assert!(!store.handle_event_with_raw(&test_event).unwrap());
-        }
-    }
-
-    #[test]
-    fn test_batch_deletion_boundaries() {
-        let (store, _temp_dir) = create_test_store(Some(1000)); // Small capacity to force cleanup
-
-        // Use timestamps relative to now for predictable cleanup behavior
-        let now = chrono::Utc::now();
-        let base_timestamp = now - chrono::Duration::days(10);
-        let base_ms = base_timestamp.timestamp_millis() as u64;
-
-        // Create 2500 events (more than BATCH_SIZE of 1000) with sequential timestamps
-        for i in 0..2500 {
-            let timestamp_ms = base_ms + i;
-            let timestamp = chrono::DateTime::from_timestamp_millis(timestamp_ms as i64)
-                .unwrap()
-                .to_rfc3339();
-
-            let event = RawEvent {
-                uuid: Some(uuid::Uuid::new_v4()),
-                event: "batch_test".to_string(),
-                distinct_id: Some(serde_json::Value::String(format!("user{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::from([(
-                    "data".to_string(),
-                    serde_json::json!(format!("value_{}", i)),
-                )]),
-                timestamp: Some(timestamp),
-                ..Default::default()
-            };
-            store.handle_event_with_raw(&event).unwrap();
-        }
-
-        // Add some newer events that shouldn't be cleaned
-        let new_base_timestamp = now - chrono::Duration::days(5); // 5 days ago
-        let new_base_ms = new_base_timestamp.timestamp_millis() as u64;
-        for i in 0..100 {
-            let timestamp_ms = new_base_ms + i;
-            let timestamp = chrono::DateTime::from_timestamp_millis(timestamp_ms as i64)
-                .unwrap()
-                .to_rfc3339();
-
-            let event = RawEvent {
-                uuid: Some(uuid::Uuid::new_v4()),
-                event: "new_batch_test".to_string(),
-                distinct_id: Some(serde_json::Value::String(format!("new_user{i}"))),
-                token: Some("token1".to_string()),
-                properties: std::collections::HashMap::new(),
-                timestamp: Some(timestamp),
-                ..Default::default()
-            };
-            store.handle_event_with_raw(&event).unwrap();
-        }
-
-        // Compact and flush to ensure proper size reporting
-        store
-            .store
-            .compact_cf(DeduplicationStore::TIMESTAMP_CF)
-            .unwrap();
-        store.store.compact_cf(DeduplicationStore::UUID_CF).unwrap();
-        store
-            .store
-            .compact_cf(DeduplicationStore::UUID_TIMESTAMP_INDEX_CF)
-            .unwrap();
-        store.flush().unwrap();
-
-        // Count initial UUID records
-        let uuid_cf = store
-            .store
-            .get_cf_handle(DeduplicationStore::UUID_CF)
-            .unwrap();
-        let mut count_before = 0;
-        let mut iter = store
-            .store
-            .db
-            .iterator_cf(&uuid_cf, rocksdb::IteratorMode::Start);
-        while iter.next().is_some() {
-            count_before += 1;
-        }
-        assert_eq!(count_before, 2600); // 2500 old + 100 new
-
-        // Trigger cleanup with 40% to clean up events older than 6 days
-        // With 10 days of data, 40% means we clean up to 6 days ago
-        // This should remove the 10-day-old events but keep the 5-day-old events
-        store.cleanup_old_entries_with_percentage(0.40).unwrap();
-
-        // Count remaining UUID records
-        let mut count_after = 0;
-        let mut iter_after = store
-            .store
-            .db
-            .iterator_cf(&uuid_cf, rocksdb::IteratorMode::Start);
-        while iter_after.next().is_some() {
-            count_after += 1;
-        }
-
-        // Should have cleaned up old records
-        // With percentage-based cleanup, we expect approximately the new 100 to remain
-        assert!(count_after < count_before);
-        assert!(count_after <= 200); // Should have at most the new 100 + some boundary cases
-    }
-
-    #[test]
-    fn test_no_uuid_event_handling() {
-        let (store, _temp_dir) = create_test_store(None);
-
-        // Event without UUID
-        let event = RawEvent {
-            uuid: None, // No UUID
-            event: "no_uuid_event".to_string(),
-            distinct_id: Some(serde_json::Value::String("user1".to_string())),
-            token: Some("token1".to_string()),
-            properties: std::collections::HashMap::new(),
-            timestamp: Some("2021-01-01T00:00:00Z".to_string()),
-            ..Default::default()
-        };
-
-        // Should be tracked only in timestamp CF, not UUID CF
-        assert!(store.handle_event_with_raw(&event).unwrap());
-
-        // Duplicate by timestamp
-        assert!(!store.handle_event_with_raw(&event).unwrap());
-
-        // Verify no UUID tracking occurred
-        let uuid_cf = store
-            .store
-            .get_cf_handle(DeduplicationStore::UUID_CF)
-            .unwrap();
-        let mut iter = store
-            .store
-            .db
-            .iterator_cf(&uuid_cf, rocksdb::IteratorMode::Start);
-        assert!(iter.next().is_none()); // UUID CF should be empty
-
-        // Verify timestamp tracking worked
-        let timestamp_key = TimestampKey::from(&event);
-        let timestamp_key_bytes: Vec<u8> = (&timestamp_key).into();
-        let timestamp_metadata = store
-            .store
-            .get(DeduplicationStore::TIMESTAMP_CF, &timestamp_key_bytes)
-            .unwrap();
-        assert!(timestamp_metadata.is_some());
+        // Test getting total size (should not error)
+        let _size = store.get_total_size().unwrap();
     }
 }

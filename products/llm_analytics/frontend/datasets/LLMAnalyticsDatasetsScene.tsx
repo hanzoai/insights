@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
+import { combineUrl, router } from 'kea-router'
 
-import { PageHeader } from 'lib/components/PageHeader'
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { Link } from 'lib/lemon-ui/Link'
@@ -8,22 +9,28 @@ import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { LemonInput } from '~/lib/lemon-ui/LemonInput'
 import { LemonTable, LemonTableColumn, LemonTableColumns } from '~/lib/lemon-ui/LemonTable'
 import { createdAtColumn, updatedAtColumn } from '~/lib/lemon-ui/LemonTable/columnUtils'
-import { Dataset } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType, Dataset } from '~/types'
 
 import { DATASETS_PER_PAGE, llmAnalyticsDatasetsLogic } from './llmAnalyticsDatasetsLogic'
 
 export const scene: SceneExport = {
     component: LLMAnalyticsDatasetsScene,
     logic: llmAnalyticsDatasetsLogic,
+    productKey: ProductKey.LLM_ANALYTICS,
 }
 
 export function LLMAnalyticsDatasetsScene(): JSX.Element {
     const { setFilters, deleteDataset } = useActions(llmAnalyticsDatasetsLogic)
     const { datasets, datasetsLoading, sorting, pagination, filters, datasetCountLabel } =
         useValues(llmAnalyticsDatasetsLogic)
+    const { searchParams } = useValues(router)
+    const datasetUrl = (id: string): string => combineUrl(urls.llmAnalyticsDataset(id), searchParams).url
 
     const columns: LemonTableColumns<Dataset> = [
         {
@@ -33,7 +40,7 @@ export function LLMAnalyticsDatasetsScene(): JSX.Element {
             width: '20%',
             render: function renderName(_, dataset) {
                 return (
-                    <Link to={urls.llmAnalyticsDataset(dataset.id)} data-testid="dataset-link">
+                    <Link to={datasetUrl(dataset.id)} data-testid="dataset-link">
                         {dataset.name}
                     </Link>
                 )
@@ -45,7 +52,7 @@ export function LLMAnalyticsDatasetsScene(): JSX.Element {
             key: 'description',
             width: '50%',
             render: function renderDescription(description) {
-                return <span className="text-muted">{description || <i>–</i>}</span>
+                return <span className="text-muted">{String(description) || <i>–</i>}</span>
             },
         },
         {
@@ -70,21 +77,26 @@ export function LLMAnalyticsDatasetsScene(): JSX.Element {
                         overlay={
                             <>
                                 <LemonButton
-                                    to={urls.llmAnalyticsDataset(dataset.id)}
+                                    to={datasetUrl(dataset.id)}
                                     data-attr={`dataset-item-${dataset.id}-dropdown-view`}
                                     fullWidth
                                 >
                                     View
                                 </LemonButton>
 
-                                <LemonButton
-                                    status="danger"
-                                    onClick={() => deleteDataset(dataset.id)}
-                                    data-attr={`dataset-item-${dataset.id}-dropdown-delete`}
-                                    fullWidth
+                                <AccessControlAction
+                                    resourceType={AccessControlResourceType.LlmAnalytics}
+                                    minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    Delete
-                                </LemonButton>
+                                    <LemonButton
+                                        status="danger"
+                                        onClick={() => deleteDataset(dataset.id)}
+                                        data-attr={`dataset-item-${dataset.id}-dropdown-delete`}
+                                        fullWidth
+                                    >
+                                        Delete
+                                    </LemonButton>
+                                </AccessControlAction>
                             </>
                         }
                     />
@@ -94,50 +106,59 @@ export function LLMAnalyticsDatasetsScene(): JSX.Element {
     ]
 
     return (
-        <>
-            <PageHeader
-                buttons={
-                    <LemonButton
-                        type="primary"
-                        to={urls.llmAnalyticsDataset('new')}
-                        data-testid="create-dataset-button"
+        <SceneContent>
+            <SceneTitleSection
+                name="Datasets"
+                description="Manage datasets for testing and evaluation."
+                resourceType={{ type: 'llm_datasets' }}
+                actions={
+                    <AccessControlAction
+                        resourceType={AccessControlResourceType.LlmAnalytics}
+                        minAccessLevel={AccessControlLevel.Editor}
                     >
-                        New dataset
-                    </LemonButton>
+                        <LemonButton
+                            type="primary"
+                            to={datasetUrl('new')}
+                            data-testid="create-dataset-button"
+                            data-attr="create-dataset-button"
+                            size="small"
+                        >
+                            New dataset
+                        </LemonButton>
+                    </AccessControlAction>
                 }
             />
-            <div className="space-y-4">
-                <div className="flex gap-x-4 gap-y-2 items-center flex-wrap py-4 -mt-4 mb-4 border-b justify-between">
-                    <LemonInput
-                        type="search"
-                        placeholder="Search datasets..."
-                        value={filters.search}
-                        onChange={(value) => setFilters({ search: value })}
-                        className="max-w-md"
-                        data-testid="search-datasets-input"
-                    />
-                    <div className="text-muted-alt">{datasetCountLabel}</div>
-                </div>
-
-                <LemonTable
-                    loading={datasetsLoading}
-                    columns={columns}
-                    dataSource={datasets.results}
-                    pagination={pagination}
-                    noSortingCancellation
-                    sorting={sorting}
-                    onSort={(newSorting) =>
-                        setFilters({
-                            order_by: newSorting
-                                ? `${newSorting.order === -1 ? '-' : ''}${newSorting.columnKey}`
-                                : undefined,
-                        })
-                    }
-                    rowKey="id"
-                    loadingSkeletonRows={DATASETS_PER_PAGE}
-                    nouns={['dataset', 'datasets']}
+            <div className="flex gap-x-4 gap-y-2 items-center flex-wrap py-4 -mt-4 mb-4 border-b justify-between">
+                <LemonInput
+                    type="search"
+                    placeholder="Search datasets..."
+                    value={filters.search}
+                    data-attr="datasets-search-input"
+                    onChange={(value) => setFilters({ search: value })}
+                    className="max-w-md"
+                    data-testid="search-datasets-input"
                 />
+                <div className="text-muted-alt">{datasetCountLabel}</div>
             </div>
-        </>
+
+            <LemonTable
+                loading={datasetsLoading}
+                columns={columns}
+                dataSource={datasets.results}
+                pagination={pagination}
+                noSortingCancellation
+                sorting={sorting}
+                onSort={(newSorting) =>
+                    setFilters({
+                        order_by: newSorting
+                            ? `${newSorting.order === -1 ? '-' : ''}${newSorting.columnKey}`
+                            : undefined,
+                    })
+                }
+                rowKey="id"
+                loadingSkeletonRows={DATASETS_PER_PAGE}
+                nouns={['dataset', 'datasets']}
+            />
+        </SceneContent>
     )
 }

@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import React, { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconPerson } from '@posthog/icons'
-import { ProfilePicture } from '@posthog/lemon-ui'
+import { IconPerson } from '@hanzo/icons'
+import { ProfilePicture } from '@hanzo/lemon-ui'
 
 import { UnexpectedNeverError, fullName } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
@@ -93,7 +93,7 @@ export const AssigneeLabelDisplay = ({
         >
             {match(assignee)
                 .with({ type: 'role' }, ({ role }) => role.name)
-                .with({ type: 'user' }, ({ user }) => fullName(user))
+                .with({ type: 'user' }, ({ user }) => <span className="ph-no-capture">{fullName(user)}</span>)
                 .otherwise(() => placeholder || 'Unassigned')}
         </span>
     )

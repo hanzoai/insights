@@ -2,9 +2,9 @@ import './BillingUsage.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonCheckbox } from '@posthog/lemon-ui'
-import { LemonSelect } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox } from '@hanzo/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -70,7 +70,7 @@ export function BillingSpendView(): JSX.Element {
             hiddenSeries: finalHiddenSeries,
             options: { decimals: 2 },
         })
-        const filename = `posthog_spend_${dateFrom}_${dateTo}_${filters.interval || 'day'}.csv`
+        const filename = `insights_spend_${dateFrom}_${dateTo}_${filters.interval || 'day'}.csv`
         startExport({
             export_format: ExporterFormat.CSV,
             export_context: {

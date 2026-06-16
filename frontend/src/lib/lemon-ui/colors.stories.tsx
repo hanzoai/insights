@@ -86,13 +86,13 @@ const threeThousand = [
     ['bg-border-bold', 'bg-red-500'],
     ['bg-transparent', 'bg-red-500'],
     ['bg-link', 'bg-red-500'],
-    // Colors of the PostHog logo
+    // Colors of the Insights logo
     ['bg-brand-blue', 'bg-red-500'],
     ['bg-brand-red', 'bg-red-500'],
     ['bg-brand-yellow', 'bg-red-500'],
     ['bg-brand-key', 'bg-red-500'],
 
-    // PostHog 3000
+    // Insights 3000
     ['bg-text-3000-light', 'bg-red-500'],
     ['bg-text-secondary-3000-light', 'bg-red-500'],
     ['bg-muted-3000-light', 'bg-red-500'],
@@ -112,7 +112,6 @@ const threeThousand = [
 
     ['bg-link-3000-light', 'bg-red-500'],
     ['bg-primary-3000-frame-bg-light', 'bg-red-500'],
-    ['bg-primary-3000-button-bg-light', 'bg-red-500'],
     ['bg-primary-3000-button-border-light', 'bg-red-500'],
     ['bg-primary-3000-button-border-hover-light', 'bg-red-500'],
 

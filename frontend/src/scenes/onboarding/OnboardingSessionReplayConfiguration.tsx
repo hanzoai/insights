@@ -1,26 +1,24 @@
 import { useActions } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
-import { FilmCameraHog } from 'lib/components/hedgehogs'
+import { FilmCameraMascot } from 'lib/components/mascots'
 
 import { OnboardingStepKey } from '~/types'
 
 import { OnboardingStep } from './OnboardingStep'
-import { onboardingLogic } from './onboardingLogic'
+import { OnboardingStepComponentType, onboardingLogic } from './onboardingLogic'
 
-export function OnboardingSessionReplayConfiguration({ stepKey }: { stepKey: OnboardingStepKey }): JSX.Element {
+export const OnboardingSessionReplayConfiguration: OnboardingStepComponentType = () => {
     const { goToNextStep, updateCurrentTeam } = useActions(onboardingLogic)
 
     const handleNext = (enabled: boolean): void => {
-        updateCurrentTeam({
-            session_recording_opt_in: enabled,
-        })
+        updateCurrentTeam({ session_recording_opt_in: enabled })
         goToNextStep()
     }
 
     return (
-        <OnboardingStep title="Record user sessions" stepKey={stepKey} continueOverride={<></>}>
+        <OnboardingStep title="Record user sessions" stepKey={OnboardingStepKey.SESSION_REPLAY} showContinue={false}>
             <div className="mb-4">
                 <p className="text-secondary">
                     Session Replay records user sessions to help you understand their actions and uncover opportunities
@@ -30,7 +28,7 @@ export function OnboardingSessionReplayConfiguration({ stepKey }: { stepKey: Onb
 
             <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="hidden md:block flex-shrink-0">
-                    <FilmCameraHog className="w-36 h-auto" />
+                    <FilmCameraMascot className="w-36 h-auto" />
                 </div>
                 <div className="flex-1 border border-gray-200 rounded-lg bg-bg-light dark:bg-bg-depth p-4">
                     <h4 className="text-lg font-semibold mb-2">Why enable Session Replay?</h4>
@@ -60,3 +58,5 @@ export function OnboardingSessionReplayConfiguration({ stepKey }: { stepKey: Onb
         </OnboardingStep>
     )
 }
+
+OnboardingSessionReplayConfiguration.stepKey = OnboardingStepKey.SESSION_REPLAY

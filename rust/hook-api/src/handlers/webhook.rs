@@ -79,7 +79,7 @@ pub async fn post_webhook(
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct HoghookFetchParameters {
+pub struct InsightsHookFetchParameters {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
 
@@ -91,18 +91,18 @@ pub struct HoghookFetchParameters {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct HoghookArgs(
+struct InsightsHookArgs(
     String,
-    #[serde(default, skip_serializing_if = "Option::is_none")] Option<HoghookFetchParameters>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] Option<InsightsHookFetchParameters>,
 );
 
 #[derive(Debug, Serialize, Deserialize)]
-struct HoghookAsyncFunctionRequest {
+struct InsightsHookAsyncFunctionRequest {
     name: String,
-    args: HoghookArgs,
+    args: InsightsHookArgs,
 }
 
-pub async fn post_hoghook(
+pub async fn post_insightshook(
     State(pg_queue): State<PgQueue>,
     body: Bytes,
 ) -> Result<Json<WebhookPostResponse>, (StatusCode, Json<WebhookPostResponse>)> {
@@ -129,10 +129,10 @@ pub async fn post_hoghook(
         .as_number()
         .ok_or_else(|| bad_request("'teamId' is not a number".to_owned()))?;
     payload
-        .get("hogFunctionId")
-        .ok_or_else(|| bad_request("missing required field 'hogFunctionId'".to_owned()))?
+        .get("insightsFunctionId")
+        .ok_or_else(|| bad_request("missing required field 'insightsFunctionId'".to_owned()))?
         .as_str()
-        .ok_or_else(|| bad_request("'hogFunctionId' is not a string".to_owned()))?;
+        .ok_or_else(|| bad_request("'insightsFunctionId' is not a string".to_owned()))?;
 
     // We deserialize a copy of the `asyncFunctionRequest` field here because we want to leave
     // the original payload unmodified so that it can be passed through exactly as it came to us.
@@ -140,7 +140,7 @@ pub async fn post_hoghook(
         .get("asyncFunctionRequest")
         .ok_or_else(|| bad_request("missing required field 'asyncFunctionRequest'".to_owned()))?
         .clone();
-    let async_function_request: HoghookAsyncFunctionRequest =
+    let async_function_request: InsightsHookAsyncFunctionRequest =
         serde_json::from_value(async_function_request).map_err(|err| {
             bad_request(format!(
                 "unable to deserialize 'asyncFunctionRequest': {err}"
@@ -217,7 +217,7 @@ fn get_hostname(url_str: &str) -> Result<String, (StatusCode, Json<WebhookPostRe
     }
 }
 
-// TypeScript equivalent: https://github.com/PostHog/posthog/blob/ab059c4f05cbf9736390fc9386234dcade7aea40/plugin-server/src/utils/db/utils.ts#L185
+// TypeScript equivalent: https://github.com/hanzoai/insights/blob/ab059c4f05cbf9736390fc9386234dcade7aea40/plugin-server/src/utils/db/utils.ts#L185
 fn replace_null_characters_in_stringified_json(s: &str) -> String {
     s.replace("\\u0000", "\\uFFFD")
 }
@@ -246,12 +246,12 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn webhook_success(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db).await;
-        let hog_mode = false;
+        let iql_mode = false;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
@@ -295,12 +295,12 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn webhook_bad_url(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db).await;
-        let hog_mode = false;
+        let iql_mode = false;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
@@ -339,12 +339,12 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn webhook_payload_missing_fields(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db).await;
-        let hog_mode = false;
+        let iql_mode = false;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
@@ -367,12 +367,12 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn webhook_payload_not_json(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db).await;
-        let hog_mode = false;
+        let iql_mode = false;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
@@ -395,12 +395,12 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn webhook_payload_body_too_large(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db).await;
-        let hog_mode = false;
+        let iql_mode = false;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
@@ -447,42 +447,42 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn hoghook_success(db: PgPool) {
+    async fn insightshook_success(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db.clone()).await;
-        let hog_mode = true;
+        let iql_mode = true;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
 
         let valid_payloads = vec![
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "", "headers": {}, "method": "POST", "url": "http://example.com"}"#,
             ),
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "GET"}]}, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "GET"}]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "", "headers": {}, "method": "GET", "url": "http://example.com"}"#,
             ),
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"body": "hello, world"}]}, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"body": "hello, world"}]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "hello, world", "headers": {}, "method": "POST", "url": "http://example.com"}"#,
             ),
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"headers": {"k": "v"}}]}, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"headers": {"k": "v"}}]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "", "headers": {"k": "v"}, "method": "POST", "url": "http://example.com"}"#,
             ),
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "GET", "body": "hello, world", "headers": {"k": "v"}}]}, "otherField": true, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "GET", "body": "hello, world", "headers": {"k": "v"}}]}, "otherField": true, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "hello, world", "headers": {"k": "v"}, "method": "GET", "url": "http://example.com"}"#,
             ),
             // Test that null unicode code points are replaced, since they aren't allowed in Postgres.
             (
-                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com/\\u0000", {"method": "GET", "body": "\\u0000", "headers": {"k": "v"}}]}, "otherField": true, "teamId": 1, "hogFunctionId": "abc"}"#,
+                r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com/\\u0000", {"method": "GET", "body": "\\u0000", "headers": {"k": "v"}}]}, "otherField": true, "teamId": 1, "insightsFunctionId": "abc"}"#,
                 r#"{"body": "\\uFFFD", "headers": {"k": "v"}, "method": "GET", "url": "http://example.com/\\uFFFD"}"#,
             ),
         ];
@@ -495,7 +495,7 @@ mod tests {
                 .oneshot(
                     Request::builder()
                         .method(http::Method::POST)
-                        .uri("/hoghook")
+                        .uri("/insightshook")
                         .header(http::header::CONTENT_TYPE, "application/json")
                         .body(Body::from(payload.to_owned()))
                         .unwrap(),
@@ -538,31 +538,31 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn hoghook_bad_requests(db: PgPool) {
+    async fn insightshook_bad_requests(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db.clone()).await;
-        let hog_mode = true;
+        let iql_mode = true;
 
         let app = add_routes(
             Router::new(),
             pg_queue,
-            hog_mode,
+            iql_mode,
             MAX_BODY_SIZE,
             CONCURRENCY_LIMIT,
         );
 
         let invalid_payloads = vec![
             r#"{}"#,
-            r#"{"asyncFunctionRequest":{"teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"not-fetch","args":[]}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch"}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":{}}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":[]}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":["not-url"]}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "not-method"}]}, "teamId": 1, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "hogFunctionId": "abc"}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": "string", "hogFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"not-fetch","args":[]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch"}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":{}}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":[]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":["not-url"]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com", {"method": "not-method"}]}, "teamId": 1, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "insightsFunctionId": "abc"}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": "string", "insightsFunctionId": "abc"}"#,
             r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": 1}"#,
-            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": 1, "hogFunctionId": 1}"#,
+            r#"{"asyncFunctionRequest":{"name":"fetch","args":["http://example.com"]}, "teamId": 1, "insightsFunctionId": 1}"#,
         ];
 
         for payload in invalid_payloads {
@@ -573,7 +573,7 @@ mod tests {
                 .oneshot(
                     Request::builder()
                         .method(http::Method::POST)
-                        .uri("/hoghook")
+                        .uri("/insightshook")
                         .header(http::header::CONTENT_TYPE, "application/json")
                         .body(Body::from(payload.to_owned()))
                         .unwrap(),

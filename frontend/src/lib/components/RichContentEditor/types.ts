@@ -21,6 +21,7 @@ export enum RichContentNodeType {
 }
 
 export interface RichContentEditorType {
+    isEmpty: () => boolean
     getJSON: () => JSONContent
     getEndPosition: () => number
     getSelectedNode: () => RichContentNode | null
@@ -39,6 +40,7 @@ export interface RichContentEditorType {
     isActive: (name: string, attributes?: {}) => boolean
     deleteRange: (range: EditorRange) => EditorCommands
     insertContent: (content: JSONContent) => void
+    insertContentAt: (position: number, content: JSONContent) => void
     insertContentAfterNode: (position: number, content: JSONContent) => void
     pasteContent: (position: number, text: string) => void
     findNode: (position: number) => RichContentNode | null

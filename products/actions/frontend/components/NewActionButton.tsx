@@ -1,84 +1,87 @@
-import { router } from 'kea-router'
-import { useState } from 'react'
+import { IconCursorClick, IconPencil } from '@hanzo/icons'
 
-import { IconPencil, IconSearch } from '@posthog/icons'
-import { LemonModal } from '@posthog/lemon-ui'
-
-import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
-import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
+import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
+import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Link } from 'lib/lemon-ui/Link'
+import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
-export function NewActionButton({ onSelectOption }: { onSelectOption?: () => void }): JSX.Element {
-    const [visible, setVisible] = useState(false)
-    const [appUrlsVisible, setAppUrlsVisible] = useState(false)
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
+export function NewActionButton({ onSelectOption }: { onSelectOption?: () => void }): JSX.Element {
     return (
-        <>
-            <LemonButton type="primary" onClick={() => setVisible(true)} data-attr="create-action">
-                New action
-            </LemonButton>
-            <LemonModal
-                isOpen={visible}
-                onClose={() => {
-                    setVisible(false)
-                    setAppUrlsVisible(false)
-                }}
-                title="Create new action"
-                footer={
-                    <>
-                        {appUrlsVisible && (
-                            <LemonButton key="back-button" type="secondary" onClick={() => setAppUrlsVisible(false)}>
-                                Back
-                            </LemonButton>
-                        )}
-                        <LemonButton
-                            key="cancel-button"
-                            type="secondary"
-                            onClick={() => {
-                                setVisible(false)
-                                setAppUrlsVisible(false)
-                            }}
-                        >
-                            Cancel
-                        </LemonButton>
-                    </>
-                }
+        <AccessControlAction resourceType={AccessControlResourceType.Action} minAccessLevel={AccessControlLevel.Editor}>
+            <AppShortcut
+                name="NewAction"
+                keybind={[keyBinds.new]}
+                intent="New action"
+                interaction="click"
+                scope={Scene.Actions}
             >
-                {!appUrlsVisible ? (
-                    <div className="deprecated-space-y-2">
-                        <LemonButton
-                            type="secondary"
-                            icon={<IconSearch />}
-                            onClick={() => setAppUrlsVisible(true)}
-                            size="large"
-                            fullWidth
-                            center
-                            data-attr="new-action-inspect"
-                        >
-                            Inspect element on your site
-                        </LemonButton>
-                        <LemonButton
-                            type="secondary"
-                            icon={<IconPencil />}
-                            onClick={() => {
-                                onSelectOption?.()
-                                router.actions.push(urls.createAction())
-                            }}
-                            size="large"
-                            fullWidth
-                            center
-                            data-attr="new-action-pageview"
-                        >
-                            From event or pageview
-                        </LemonButton>
-                    </div>
-                ) : (
-                    <div className="max-w-160">
-                        <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} />
-                    </div>
-                )}
-            </LemonModal>
-        </>
+                <LemonButton
+                    type="primary"
+                    size="small"
+                    to={urls.createAction()}
+                    onClick={onSelectOption}
+                    data-attr="create-action"
+                    tooltip="New action"
+                    sideAction={{
+                        dropdown: {
+                            placement: 'bottom-end',
+                            className: 'w-80',
+                            overlay: (
+                                <div className="space-y-1 p-1">
+                                    <LemonButton
+                                        fullWidth
+                                        icon={<IconPencil />}
+                                        to={urls.createAction()}
+                                        onClick={onSelectOption}
+                                        data-attr="new-action-pageview"
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span>From event or pageview</span>
+                                            <span className="text-xs text-secondary font-normal">
+                                                Match events by name, URL patterns, or custom properties.{' '}
+                                                <Link
+                                                    to="https://hanzo.ai/docs/data/actions"
+                                                    target="_blank"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    Learn more
+                                                </Link>
+                                            </span>
+                                        </div>
+                                    </LemonButton>
+                                    <LemonButton
+                                        fullWidth
+                                        icon={<IconCursorClick />}
+                                        to={urls.toolbarLaunch()}
+                                        data-attr="new-action-inspect"
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span>Inspect element on site</span>
+                                            <span className="text-xs text-secondary font-normal">
+                                                Use the toolbar to visually select elements on your site.{' '}
+                                                <Link
+                                                    to="https://hanzo.ai/docs/toolbar/create-toolbar-actions"
+                                                    target="_blank"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    Learn more
+                                                </Link>
+                                            </span>
+                                        </div>
+                                    </LemonButton>
+                                </div>
+                            ),
+                        },
+                    }}
+                >
+                    New action
+                </LemonButton>
+            </AppShortcut>
+        </AccessControlAction>
     )
 }

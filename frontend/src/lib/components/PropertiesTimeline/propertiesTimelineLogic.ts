@@ -1,8 +1,8 @@
 import { actions, afterMount, connect, kea, key, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { Dayjs, dayjsUtcToTimezone } from 'lib/dayjs'
 import { apiGetWithTimeToSeeDataTracking } from 'lib/internalMetrics'
@@ -85,7 +85,7 @@ export const propertiesTimelineLogic = kea<propertiesTimelineLogicType>([
                         if (response.points.length === 0) {
                             // It should not be possible for a properties timeline to have zero points, as all actors
                             // shown in the actors modal must have at least one relevant event in the period
-                            posthog.captureException(new Error('Properties Timeline returned no points'), {
+                            insights.captureException(new Error('Properties Timeline returned no points'), {
                                 tags: { 'team.id': values.currentTeamId },
                                 extra: {
                                     params: props.filter,

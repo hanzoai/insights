@@ -17,14 +17,18 @@ import { encodeParams, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { isDomain, isURL } from 'lib/utils'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { addProductIntent } from 'lib/utils/product-intents'
+import { sceneLogic } from 'scenes/sceneLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { hogql } from '~/queries/utils'
+import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
+import { insightsql } from '~/queries/utils'
 import { ExperimentIdType, ToolbarParams, ToolbarUserIntent } from '~/types'
 
 import type { authorizedUrlListLogicType } from './authorizedUrlListLogicType'
@@ -99,22 +103,44 @@ export const validateProposedUrl = (
     return
 }
 
-function buildToolbarParams(options?: {
+interface BuildToolbarParamsOptions {
     actionId?: number | null
     experimentId?: ExperimentIdType
+    productTourId?: string | null
     userIntent?: ToolbarUserIntent
-}): ToolbarParams {
+    toolbarFlagsKey?: string
+}
+
+const _buildToolbarUserIntent = (options?: BuildToolbarParamsOptions): ToolbarUserIntent => {
+    if (options?.userIntent) {
+        return options.userIntent
+    }
+    if (options?.actionId) {
+        return 'edit-action'
+    }
+    if (options?.experimentId) {
+        return 'edit-experiment'
+    }
+    if (options?.productTourId) {
+        if (options.productTourId !== 'new') {
+            return 'edit-product-tour'
+        }
+        return 'add-product-tour'
+    }
+
+    return 'add-action'
+}
+
+function buildToolbarParams(options?: BuildToolbarParamsOptions): ToolbarParams {
     return {
-        userIntent:
-            options?.userIntent ??
-            (options?.actionId ? 'edit-action' : options?.experimentId ? 'edit-experiment' : 'add-action'),
-        // Make sure to pass the app url, otherwise the api_host will be used by
-        // the toolbar, which isn't correct when used behind a reverse proxy as
-        // we require e.g. SSO login to the app, which will not work when placed
-        // behind a proxy unless we register each domain with the OAuth2 client.
+        userIntent: _buildToolbarUserIntent(options),
+        // Keeping this as backward compatibility, but we don't use it anymore in the toolbar
+        // and instead depend on the `insights`'s instance configuration
         apiURL: apiHostOrigin(),
         ...(options?.actionId ? { actionId: options.actionId } : {}),
         ...(options?.experimentId ? { experimentId: options.experimentId } : {}),
+        ...(options?.productTourId && options.productTourId !== 'new' ? { productTourId: options.productTourId } : {}),
+        ...(options?.toolbarFlagsKey ? { toolbarFlagsKey: options.toolbarFlagsKey } : {}),
     }
 }
 
@@ -124,12 +150,14 @@ export function appEditorUrl(
     options?: {
         actionId?: number | null
         experimentId?: ExperimentIdType
+        productTourId?: string | null
         userIntent?: ToolbarUserIntent
         generateOnly?: boolean
+        toolbarFlagsKey?: string
     }
 ): string {
     const params = buildToolbarParams(options) as Record<string, unknown>
-    // See https://github.com/PostHog/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
+    // See https://github.com/hanzoai/insights-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly
@@ -176,14 +204,20 @@ export const filterNotAuthorizedUrls = (
     const suggestedDomains: SuggestedDomain[] = []
 
     suggestions.forEach(({ url, count }) => {
-        const parsedUrl = sanitizePossibleWildCardedURL(url)
-        const urlWithoutPath = parsedUrl.protocol + '//' + parsedUrl.host
+        let urlWithoutPath: string
+        try {
+            const parsedUrl = sanitizePossibleWildCardedURL(url)
+            urlWithoutPath = parsedUrl.protocol + '//' + parsedUrl.host
+        } catch {
+            // Skip invalid URLs (e.g., "/" or "/billing" paths without a domain)
+            return
+        }
         // Have we already added this domain?
         if (suggestedDomains.some((sd) => sd.url === urlWithoutPath)) {
             return
         }
 
-        if (!checkUrlIsAuthorized(parsedUrl, authorizedUrls)) {
+        if (!checkUrlIsAuthorized(urlWithoutPath, authorizedUrls)) {
             suggestedDomains.push({ url: urlWithoutPath, count })
         }
     })
@@ -204,6 +238,8 @@ export interface KeyedAppUrl {
 export interface AuthorizedUrlListLogicProps {
     actionId: number | null
     experimentId: ExperimentIdType | null
+    productTourId: string | null
+    userIntent?: ToolbarUserIntent
     type: AuthorizedUrlListType
     allowWildCards?: boolean
 }
@@ -211,12 +247,14 @@ export interface AuthorizedUrlListLogicProps {
 export const defaultAuthorizedUrlProperties = {
     actionId: null,
     experimentId: null,
+    productTourId: null,
+    userIntent: undefined,
 }
 
 export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
     path((key) => ['lib', 'components', 'AuthorizedUrlList', 'authorizedUrlListLogic', key]),
-    key((props) => `${props.type}-${props.experimentId}-${props.actionId}`), // Some will be undefined but that's ok, this avoids experiment/action with same ID sharing same store
-    props({} as AuthorizedUrlListLogicProps),
+    key((props) => `${props.type}-${props.experimentId}-${props.actionId}-${props.productTourId}`), // Some will be undefined but that's ok, this avoids experiment/action with same ID sharing same store
+    props({ ...defaultAuthorizedUrlProperties } as AuthorizedUrlListLogicProps),
     connect(() => ({
         values: [teamLogic, ['currentTeam', 'currentTeamId']],
         actions: [teamLogic, ['updateCurrentTeam']],
@@ -236,18 +274,22 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         suggestions: {
             __default: [] as SuggestedDomain[],
             loadSuggestions: async () => {
-                const query = hogql`
+                const query = insightsql`
                     select properties.$current_url, count()
                     from events
                         where event = '$pageview'
-                        and timestamp >= now() - interval 3 day 
+                        and timestamp >= now() - interval 3 day
                         and timestamp <= now()
                         and properties.$current_url is not null
                         group by properties.$current_url
                         order by count() desc
                     limit 25`
 
-                const response = await api.queryHogQL(query)
+                const currentScene = sceneLogic.findMounted()?.values.activeSceneId ?? 'Settings'
+                const response = await api.queryInsightsQL(query, {
+                    scene: currentScene,
+                    productKey: 'platform_and_support',
+                })
                 const result = response.results as [string, number][]
 
                 if (result && result.length === 0) {
@@ -384,11 +426,16 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
                 if (launch) {
                     actions.launchAtUrl(url)
                 }
+                globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.AddAuthorizedDomain)
             },
         ],
         removeUrl: sharedListeners.saveUrls,
         updateUrl: sharedListeners.saveUrls,
         launchAtUrl: ({ url }) => {
+            void addProductIntent({
+                product_type: ProductKey.TOOLBAR,
+                intent_context: ProductIntentContext.TOOLBAR_LAUNCHED,
+            })
             window.location.href = values.launchUrl(url)
         },
         cancelProposingUrl: () => {
@@ -404,10 +451,10 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         loadManualLaunchParamsSuccess: async ({ manualLaunchParams }) => {
             if (manualLaunchParams) {
                 const templateScript = `
-                if (!window?.posthog) {
-                    console.warn('PostHog must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your posthog init code.')
+                if (!window?.insights) {
+                    console.warn('Insights must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your insights init code.')
                 } else {
-                    window.posthog.loadToolbar(${manualLaunchParams})
+                    window.insights.loadToolbar(${manualLaunchParams})
                 }
                 `
                 await copyToClipboard(templateScript, 'code to paste into the console')
@@ -446,12 +493,16 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
             },
         ],
         launchUrl: [
-            (_, p) => [p.actionId, p.experimentId],
-            (actionId, experimentId) => (url: string) => {
+            (_, p) => [p.actionId, p.experimentId, p.productTourId, p.userIntent ?? (() => undefined)],
+            (actionId, experimentId, productTourId, userIntent) => (url: string) => {
                 if (experimentId) {
                     return appEditorUrl(url, {
                         experimentId,
                     })
+                }
+
+                if (productTourId) {
+                    return appEditorUrl(url, { productTourId, userIntent })
                 }
 
                 return appEditorUrl(url, {

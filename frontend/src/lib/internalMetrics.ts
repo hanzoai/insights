@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { getJSONOrNull } from 'lib/api'
 import { getResponseBytes } from 'scenes/insights/utils'
@@ -26,7 +26,7 @@ export interface TimeToSeeDataPayload {
 }
 
 export function currentSessionId(): string | undefined {
-    const sessionDetails = posthog.sessionManager?.checkAndGetSessionAndWindowId?.(true)
+    const sessionDetails = insights.sessionManager?.checkAndGetSessionAndWindowId?.(true)
     return sessionDetails?.sessionId
 }
 
@@ -46,7 +46,7 @@ export async function captureTimeToSeeData(teamId: number | null, payload: TimeT
         } catch (e) {
             // NOTE: As this is only telemetry, we don't want to block the user if it fails
             console.warn('Failed to capture time to see data', e)
-            posthog.captureException(e)
+            insights.captureException(e)
         }
     }
 }

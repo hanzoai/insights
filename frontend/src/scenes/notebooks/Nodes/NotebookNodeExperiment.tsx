@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconFlask } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconFlag, IconFlask } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
@@ -11,13 +11,13 @@ import { SummaryTable } from 'scenes/experiments/ExperimentView/SummaryTable'
 import { LegacyResultsQuery, ResultsTag, StatusTag } from 'scenes/experiments/ExperimentView/components'
 import { experimentLogic } from 'scenes/experiments/experimentLogic'
 import { getExperimentStatus } from 'scenes/experiments/experimentsLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
 import { buildFlagContent } from './NotebookNodeFlag'
 import { notebookNodeLogic } from './notebookNodeLogic'
-import { INTEGER_REGEX_MATCH_GROUPS } from './utils'
+import { INTEGER_REGEX_MATCH_GROUPS, OPTIONAL_PROJECT_NON_CAPTURE_GROUP } from './utils'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeExperimentAttributes>): JSX.Element => {
     const { id } = attributes
@@ -109,7 +109,7 @@ type NotebookNodeExperimentAttributes = {
     id: number
 }
 
-export const NotebookNodeExperiment = createPostHogWidgetNode<NotebookNodeExperimentAttributes>({
+export const NotebookNodeExperiment = createInsightsWidgetNode<NotebookNodeExperimentAttributes>({
     nodeType: NotebookNodeType.Experiment,
     titlePlaceholder: 'Experiment',
     Component,
@@ -120,7 +120,7 @@ export const NotebookNodeExperiment = createPostHogWidgetNode<NotebookNodeExperi
         id: {},
     },
     pasteOptions: {
-        find: urls.experiment(INTEGER_REGEX_MATCH_GROUPS),
+        find: OPTIONAL_PROJECT_NON_CAPTURE_GROUP + urls.experiment(INTEGER_REGEX_MATCH_GROUPS),
         getAttributes: async (match) => {
             return { id: parseInt(match[1]) }
         },

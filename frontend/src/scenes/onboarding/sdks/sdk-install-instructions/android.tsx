@@ -12,7 +12,7 @@ function AndroidInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Kotlin}>
             {`dependencies {
-    implementation("com.posthog:posthog-android:3.+")
+    implementation("com.insights:insights-android:3.+")
 }`}
         </CodeSnippet>
     )
@@ -26,22 +26,22 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
             {`class SampleApp : Application() {
 
     companion object {
-        const val POSTHOG_API_KEY = "${currentTeam?.api_token}"
-        const val POSTHOG_HOST = "${apiHostOrigin()}"
+        const val INSIGHTS_API_KEY = "${currentTeam?.api_token}"
+        const val INSIGHTS_HOST = "${apiHostOrigin()}"
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        // Create a PostHog Config with the given API key and host
-        val config = PostHogAndroidConfig(
-            apiKey = POSTHOG_API_KEY,
-            host = POSTHOG_HOST
+        // Create an Insights Config with the given API key and host
+        val config = InsightsAndroidConfig(
+            apiKey = INSIGHTS_API_KEY,
+            host = INSIGHTS_HOST
         )
         ${
             includeReplay
                 ? `
-        // check https://posthog.com/docs/session-replay/installation?tab=Android
+        // check https://hanzo.ai/docs/session-replay/installation?tab=Android
         // for more config and to learn about how we capture sessions on mobile
         // and what to expect
         config.sessionReplay = true
@@ -54,8 +54,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
                 : ''
         }
 
-        // Setup PostHog with the given Context and Config
-        PostHogAndroid.setup(this, config)
+        // Setup Insights with the given Context and Config
+        InsightsAndroid.setup(this, config)
     }
 }`}
         </CodeSnippet>
@@ -77,19 +77,19 @@ export function SDKInstallAndroidTrackScreenInstructions(): JSX.Element {
     return (
         <>
             <p>
-                With <code>captureScreenViews = true</code>, PostHog will try to record all screen changes
+                With <code>captureScreenViews = true</code>, Insights will try to record all screen changes
                 automatically.
             </p>
             <p>
                 If you want to manually send a new screen capture event, use the <code>screen</code> function.
             </p>
-            <CodeSnippet language={Language.Kotlin}>{`import com.posthog.PostHog
+            <CodeSnippet language={Language.Kotlin}>{`import com.insights.Insights
 
-PostHog.screen(
+Insights.screen(
     screenTitle = "Dashboard",
     properties = mapOf(
         "background" to "blue",
-        "hero" to "superhog"
+        "hero" to "supermascot"
     )
 )`}</CodeSnippet>
         </>

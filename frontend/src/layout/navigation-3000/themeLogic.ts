@@ -13,13 +13,16 @@ export const themeLogic = kea<themeLogicType>([
     connect(() => ({
         logic: [sceneLogic],
         values: [userLogic, ['themeMode'], featureFlagLogic, ['featureFlags']],
+        actions: [userLogic, ['updateUser']],
     })),
+
     actions({
         syncDarkModePreference: (darkModePreference: boolean) => ({ darkModePreference }),
         setTheme: (theme: string | null) => ({ theme }),
         saveCustomCss: true,
         setPersistedCustomCss: (css: string | null) => ({ css }),
         setPreviewingCustomCss: (css: string | null) => ({ css }),
+        toggleTheme: true,
     }),
     reducers({
         darkModeSystemPreference: [
@@ -54,7 +57,7 @@ export const themeLogic = kea<themeLogicType>([
         theme: [
             (s) => [s.selectedTheme, s.featureFlags],
             (selectedTheme, featureFlags): Theme | null => {
-                const flagVariant = featureFlags[FEATURE_FLAGS.THEME]
+                const flagVariant = featureFlags[FEATURE_FLAGS.THEME_OVERRIDE]
                 return (
                     (selectedTheme ? themes.find((theme) => theme.id === selectedTheme) : null) ??
                     (typeof flagVariant === 'string' ? themes.find((theme) => theme.id === flagVariant) : null) ??
@@ -84,9 +87,9 @@ export const themeLogic = kea<themeLogicType>([
                 if (theme) {
                     return !!theme?.dark
                 }
-                // NOTE: Unauthenticated users always get the light mode until we have full support for dark mode there
+                // Default to dark mode for unauthenticated users (Hanzo brand)
                 if (sceneConfig?.allowUnauthenticated || sceneConfig?.onlyUnauthenticated) {
-                    return false
+                    return true
                 }
 
                 return themeMode === 'system' ? darkModeSystemPreference : themeMode === 'dark'
@@ -98,15 +101,19 @@ export const themeLogic = kea<themeLogicType>([
             actions.setPersistedCustomCss(values.previewingCustomCss)
             actions.setPreviewingCustomCss(null)
         },
+        toggleTheme() {
+            actions.updateUser({ theme_mode: values.isDarkModeOn ? 'light' : 'dark' })
+        },
     })),
     events(({ cache, actions }) => ({
         afterMount() {
-            cache.prefersColorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
-            cache.onPrefersColorSchemeChange = (e: MediaQueryListEvent) => actions.syncDarkModePreference(e.matches)
-            cache.prefersColorSchemeMedia.addEventListener('change', cache.onPrefersColorSchemeChange)
-        },
-        beforeUnmount() {
-            cache.prefersColorSchemeMedia.removeEventListener('change', cache.onPrefersColorSchemeChange)
+            cache.disposables.add(() => {
+                const prefersColorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+                const onPrefersColorSchemeChange = (e: MediaQueryListEvent): void =>
+                    actions.syncDarkModePreference(e.matches)
+                prefersColorSchemeMedia.addEventListener('change', onPrefersColorSchemeChange)
+                return () => prefersColorSchemeMedia.removeEventListener('change', onPrefersColorSchemeChange)
+            }, 'prefersColorSchemeListener')
         },
     })),
 ])

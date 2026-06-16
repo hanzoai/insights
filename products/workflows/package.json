@@ -1,0 +1,29 @@
+{
+    "name": "@hanzo/products-workflows",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-forms": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "use-debounce": "catalog:",
+        "@hanzo/insights": "catalog:"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/icons": "*",
+        "@types/react": "*",
+        "@xyflow/react": "*",
+        "clsx": "*",
+        "elkjs": "*",
+        "fast-deep-equal": "*",
+        "fuse.js": "*",
+        "react": "*",
+        "zod": "*"
+    }
+}

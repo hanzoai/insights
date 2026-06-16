@@ -3,11 +3,28 @@ const path = require('path')
 
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
+const fs = require('fs-extra')
 
 const webpackDevServerHost = process.env.WEBPACK_HOT_RELOAD_HOST || '127.0.0.1'
 const webpackDevServerFrontendAddr = webpackDevServerHost === '0.0.0.0' ? '127.0.0.1' : webpackDevServerHost
 
 function createEntry(entry) {
+    // Copy mascot-mode assets to dist
+    const mascotModeSrc = path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'frontend',
+        'node_modules',
+        '@insights',
+        'mascot-mode',
+        'assets'
+    )
+    const mascotModeDest = path.resolve(__dirname, 'dist', 'mascot-mode')
+    if (fs.existsSync(mascotModeSrc)) {
+        fs.copySync(mascotModeSrc, mascotModeDest, { overwrite: true })
+    }
+
     const commonLoadersForSassAndLess = [
         {
             loader: 'style-loader',
@@ -48,20 +65,46 @@ function createEntry(entry) {
         },
         resolve: {
             extensions: ['.js', '.jsx', '.ts', '.tsx'],
+            modules: [
+                path.resolve(__dirname, '..', '..', 'frontend', 'node_modules'),
+                path.resolve(__dirname, '..', '..', 'node_modules'),
+                'node_modules',
+            ],
             alias: {
                 '~': path.resolve(__dirname, '..', '..', 'frontend', 'src'),
                 lib: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'lib'),
                 scenes: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'scenes'),
-                '@posthog/lemon-ui': path.resolve(__dirname, '..', '..', 'frontend', '@posthog', 'lemon-ui', 'src'),
-                '@posthog/ee/exports': [
-                    path.resolve(__dirname, '..', '..', 'ee', 'frontend', 'exports'),
-                    path.resolve(__dirname, '..', '..', 'frontend', '@posthog', 'ee', 'exports'),
-                ],
+                '@hanzo/lemon-ui': path.resolve(__dirname, '..', '..', 'frontend', '@insights', 'lemon-ui', 'src'),
+                '@hanzo/shared-onboarding': path.resolve(__dirname, '..', '..', 'docs', 'onboarding'),
                 storybook: path.resolve(__dirname, '..', '..', 'frontend', '.storybook'),
                 types: path.resolve(__dirname, '..', '..', 'frontend', 'types'),
                 public: path.resolve(__dirname, '..', '..', 'frontend', 'public'),
                 process: 'process/browser',
                 products: path.resolve(__dirname, '..', '..', 'products'),
+                react: path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'react'),
+                'react-dom': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'react-dom'),
+                kea: path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea'),
+                'kea-router': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea-router'),
+                'kea-forms': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea-forms'),
+                'kea-loaders': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea-loaders'),
+                'kea-localstorage': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea-localstorage'),
+                'kea-subscriptions': path.resolve(
+                    __dirname,
+                    '..',
+                    '..',
+                    'frontend',
+                    'node_modules',
+                    'kea-subscriptions'
+                ),
+                'kea-waitfor': path.resolve(__dirname, '..', '..', 'frontend', 'node_modules', 'kea-waitfor'),
+                'kea-window-values': path.resolve(
+                    __dirname,
+                    '..',
+                    '..',
+                    'frontend',
+                    'node_modules',
+                    'kea-window-values'
+                ),
             },
             fallback: {
                 crypto: require.resolve('crypto-browserify'),
@@ -162,6 +205,11 @@ function createEntry(entry) {
                     test: /monaco-editor\/.*\.m?js/,
                     loader: 'babel-loader',
                 },
+                {
+                    // Apply rule for .sql files
+                    test: /\.sql$/,
+                    type: 'asset/source',
+                },
             ],
         },
         // add devServer config only to 'main' entry
@@ -192,13 +240,13 @@ function createEntry(entry) {
                       // we need these only once per build
                       new HtmlWebpackPlugin({
                           alwaysWriteToDisk: true,
-                          title: 'PostHog',
+                          title: 'Insights',
                           template: path.join(__dirname, 'src', 'index.html'),
                       }),
 
                       new HtmlWebpackPlugin({
                           alwaysWriteToDisk: true,
-                          title: 'PostHog',
+                          title: 'Insights',
                           filename: 'layout.html',
                           inject: false,
                           template: path.join(__dirname, 'src', 'layout.ejs'),

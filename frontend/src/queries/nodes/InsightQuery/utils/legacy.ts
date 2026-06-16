@@ -37,7 +37,7 @@ export const isLegacyFunnelsFilter = (filters: Record<string, any> | undefined):
         'funnel_window_interval',
         'funnel_order_type',
         'hidden_legend_keys',
-        'funnel_aggregate_by_hogql',
+        'funnel_aggregate_by_insightsql',
     ]
     return legacyKeys.some((key) => key in filters)
 }
@@ -66,7 +66,7 @@ export const isLegacyPathsFilter = (filters: Record<string, any> | undefined): b
     }
 
     const legacyKeys = [
-        'paths_hogql_expression',
+        'paths_insightsql_expression',
         'include_event_types',
         'start_point',
         'end_point',

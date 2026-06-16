@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
@@ -13,9 +13,9 @@ import { userLogic } from 'scenes/userLogic'
 // Modified version of https://app.slack.com/app-settings/TSS5W8YQZ/A03KWE2FJJ2/app-manifest to match current instance
 const getSlackAppManifest = (): any => ({
     display_information: {
-        name: 'PostHog',
-        description: 'Product Insights right where you need them',
-        background_color: '#f54e00',
+        name: 'Insights',
+        description: 'Product insights right where you need them',
+        background_color: '#111111',
     },
     features: {
         app_home: {
@@ -24,7 +24,7 @@ const getSlackAppManifest = (): any => ({
             messages_tab_read_only_enabled: true,
         },
         bot_user: {
-            display_name: 'PostHog',
+            display_name: 'Insights',
             always_online: false,
         },
         unfurl_domains: [window.location.hostname],
@@ -53,16 +53,6 @@ export function SlackIntegration(): JSX.Element {
 
     return (
         <div>
-            <p>
-                Integrate with Slack directly to get more advanced options such as{' '}
-                <b>subscribing to an Insight or Dashboard</b> for regular reports to Slack channels of your choice.
-                Guidance on integrating with Slack available{' '}
-                <Link to="https://posthog.com/docs/product-analytics/subscriptions#slack-subscriptions">
-                    in our docs
-                </Link>
-                .
-            </p>
-
             <div className="deprecated-space-y-2">
                 {slackIntegrations?.map((integration) => (
                     <IntegrationView key={integration.id} integration={integration} />
@@ -114,7 +104,7 @@ export function SlackIntegration(): JSX.Element {
                         )
                     ) : (
                         <p className="text-secondary">
-                            This PostHog instance is not configured for Slack. Please contact the instance owner to
+                            This Insights instance is not configured for Slack. Please contact the instance owner to
                             configure it.
                         </p>
                     )}

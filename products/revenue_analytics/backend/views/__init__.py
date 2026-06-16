@@ -1,20 +1,20 @@
 from abc import ABC
 from typing import ClassVar, Optional
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.database.models import SavedQuery
+from insights.insightsql.database.models import SavedQuery
 
 
 class RevenueAnalyticsBaseView(SavedQuery, ABC):
     prefix: str
     source_id: Optional[str] = None
-    union_all: bool = False
+    event_name: Optional[str] = None
 
     DATABASE_SCHEMA_TABLE_KIND: ClassVar[DatabaseSchemaManagedViewTableKind]
 
     def is_event_view(self) -> bool:
-        return self.source_id is None
+        return self.event_name is not None
 
     @classmethod
     def get_generic_view_alias(cls) -> str:
@@ -41,10 +41,15 @@ class RevenueAnalyticsSubscriptionView(RevenueAnalyticsBaseView):
     DATABASE_SCHEMA_TABLE_KIND = DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_SUBSCRIPTION
 
 
+class RevenueAnalyticsMRRView(RevenueAnalyticsBaseView):
+    DATABASE_SCHEMA_TABLE_KIND = DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_MRR
+
+
 KIND_TO_CLASS: dict[DatabaseSchemaManagedViewTableKind, type[RevenueAnalyticsBaseView]] = {
     DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_SUBSCRIPTION: RevenueAnalyticsSubscriptionView,
     DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_REVENUE_ITEM: RevenueAnalyticsRevenueItemView,
     DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_CHARGE: RevenueAnalyticsChargeView,
     DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_CUSTOMER: RevenueAnalyticsCustomerView,
     DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_PRODUCT: RevenueAnalyticsProductView,
+    DatabaseSchemaManagedViewTableKind.REVENUE_ANALYTICS_MRR: RevenueAnalyticsMRRView,
 }

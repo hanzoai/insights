@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconCursor, IconKeyboard, IconWarning } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconCursor, IconKeyboard, IconWarning } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { pluralize } from 'lib/utils'
 
@@ -28,7 +28,7 @@ export function ItemSummary({ item }: { item: InspectorListItemSummary }): JSX.E
                 )}
             >
                 <Tooltip
-                    title={`A count of $exception events in this recording. Captured by PostHog's error tracking.`}
+                    title={`A count of $exception events in this recording. Captured by Insights's error tracking.`}
                 >
                     <IconWarning className="mr-1" />
                     <span>{pluralize(item.errorCount || 0, 'error')}</span>

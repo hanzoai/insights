@@ -3,13 +3,13 @@ import datetime as dt
 import dataclasses
 import collections.abc
 
-from posthog.temporal.common.heartbeat import (
+from insights.temporal.common.heartbeat import (
     EmptyHeartbeatError,
     HeartbeatDetails,
     HeartbeatParseError,
     NotEnoughHeartbeatValuesError,
 )
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.logger import get_write_only_logger
 
 DateRange = tuple[dt.datetime, dt.datetime]
 

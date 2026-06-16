@@ -8,7 +8,7 @@ import {
     InspectorListItemEvent,
 } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
 
-const PostHogMobileEvents = [
+const InsightsMobileEvents = [
     'Deep Link Opened',
     'Application Opened',
     'Application Backgrounded',
@@ -17,12 +17,12 @@ const PostHogMobileEvents = [
     'Application Became Active',
 ]
 
-function isPostHogMobileEvent(item: InspectorListItem): boolean {
-    return isEvent(item) && PostHogMobileEvents.includes(item.data.event)
+function isInsightsMobileEvent(item: InspectorListItem): boolean {
+    return isEvent(item) && InsightsMobileEvents.includes(item.data.event)
 }
 
-function isPostHogEvent(item: InspectorListItem): boolean {
-    return (isEvent(item) && item.data.event.startsWith('$')) || isPostHogMobileEvent(item)
+function isInsightsEvent(item: InspectorListItem): boolean {
+    return (isEvent(item) && item.data.event.startsWith('$')) || isInsightsMobileEvent(item)
 }
 
 function isNetworkEvent(item: InspectorListItem): item is InspectorListItemPerformance {
@@ -66,7 +66,9 @@ function isDoctorEvent(item: InspectorListItem): item is InspectorListItemDoctor
 }
 
 function isContextItem(item: InspectorListItem): boolean {
-    return ['browser-visibility', 'offline-status', 'inspector-summary', 'inactivity'].includes(item.type)
+    return ['browser-visibility', 'offline-status', 'inspector-summary', 'inactivity', 'session-change'].includes(
+        item.type
+    )
 }
 
 const eventsMatch = (
@@ -79,9 +81,9 @@ const eventsMatch = (
         return miniFiltersByKey['events-autocapture']
     } else if (isPageviewOrScreen(item)) {
         return miniFiltersByKey['events-pageview']
-    } else if (isPostHogEvent(item)) {
-        return miniFiltersByKey['events-posthog']
-    } else if (!isPostHogEvent(item)) {
+    } else if (isInsightsEvent(item)) {
+        return miniFiltersByKey['events-insights']
+    } else if (!isInsightsEvent(item)) {
         return miniFiltersByKey['events-custom']
     }
     return null
@@ -109,32 +111,25 @@ function networkMatch(
 ): SharedListMiniFilter | null {
     if (isNavigationEvent(item)) {
         return miniFiltersByKey['performance-document']
-    } else if (
-        item.data.entry_type === 'resource' &&
-        ['fetch', 'xmlhttprequest'].includes(item.data.initiator_type || '')
-    ) {
+    } else if (['fetch', 'xmlhttprequest'].includes(item.data.initiator_type || '')) {
         return miniFiltersByKey['performance-fetch']
     } else if (
-        item.data.entry_type === 'resource' &&
-        (item.data.initiator_type === 'script' ||
-            (['link', 'other'].includes(item.data.initiator_type || '') && item.data.name?.includes('.js')))
+        item.data.initiator_type === 'script' ||
+        (['link', 'other'].includes(item.data.initiator_type || '') && item.data.name?.includes('.js'))
     ) {
         return miniFiltersByKey['performance-assets-js']
     } else if (
-        item.data.entry_type === 'resource' &&
-        (item.data.initiator_type === 'css' ||
-            (['link', 'other'].includes(item.data.initiator_type || '') && item.data.name?.includes('.css')))
+        item.data.initiator_type === 'css' ||
+        (['link', 'other'].includes(item.data.initiator_type || '') && item.data.name?.includes('.css'))
     ) {
         return miniFiltersByKey['performance-assets-css']
     } else if (
-        item.data.entry_type === 'resource' &&
-        (item.data.initiator_type === 'img' ||
-            (['link', 'other'].includes(item.data.initiator_type || '') &&
-                !!IMAGE_WEB_EXTENSIONS.some((ext) => item.data.name?.includes(`.${ext}`))))
+        item.data.initiator_type === 'img' ||
+        (['link', 'other'].includes(item.data.initiator_type || '') &&
+            !!IMAGE_WEB_EXTENSIONS.some((ext) => item.data.name?.includes(`.${ext}`)))
     ) {
         return miniFiltersByKey['performance-assets-img']
     } else if (
-        item.data.entry_type === 'resource' &&
         ['other'].includes(item.data.initiator_type || '') &&
         ![...IMAGE_WEB_EXTENSIONS, 'css', 'js'].some((ext) => item.data.name?.includes(`.${ext}`))
     ) {
@@ -183,7 +178,7 @@ export function filterInspectorListItems({
         | undefined
     allowMatchingEventsFilter: boolean
     showOnlyMatching: boolean
-    trackedWindow: string | null
+    trackedWindow: number | null
     hasEventsToDisplay: boolean
 }): InspectorListItem[] {
     const items: InspectorListItem[] = []

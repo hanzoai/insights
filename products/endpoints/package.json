@@ -1,0 +1,19 @@
+{
+    "name": "@hanzo/products-endpoints",
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-forms": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/icons": "*",
+        "@types/react": "*",
+        "clsx": "*",
+        "fuse.js": "*",
+        "react": "*"
+    },
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short"
+    }
+}

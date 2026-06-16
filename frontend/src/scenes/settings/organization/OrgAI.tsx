@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -15,7 +15,7 @@ export function OrganizationAI(): JSX.Element {
     return (
         <div className="max-w-160">
             <LemonSwitch
-                label="Enable PostHog AI data analysis features"
+                label="Enable Hanzo AI data analysis features"
                 data-attr="organization-ai-enabled"
                 onChange={(checked) => {
                     updateOrganization({ is_ai_data_processing_approved: checked })

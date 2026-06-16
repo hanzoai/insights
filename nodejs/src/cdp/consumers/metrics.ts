@@ -1,0 +1,19 @@
+import { Counter } from 'prom-client'
+
+export const counterParseError = new Counter({
+    name: 'cdp_function_parse_error',
+    help: 'A function invocation was parsed with an error',
+    labelNames: ['error'],
+})
+
+export const counterRateLimited = new Counter({
+    name: 'cdp_function_rate_limited',
+    help: 'A function invocation was rate limited',
+    labelNames: ['kind'],
+})
+
+export const counterInsightsFunctionStateOnEvent = new Counter({
+    name: 'cdp_insights_function_state_on_event',
+    help: 'Metric the state of a custom function that matched an event',
+    labelNames: ['state', 'kind'],
+})

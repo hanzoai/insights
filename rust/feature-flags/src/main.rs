@@ -34,7 +34,12 @@ async fn shutdown() {
     tracing::info!("Shutting down gracefully...");
 }
 
-fn init_tracer(sink_url: &str, sampling_rate: f64, service_name: &str) -> Tracer {
+fn init_tracer(
+    sink_url: &str,
+    sampling_rate: f64,
+    service_name: &str,
+    export_timeout_secs: u64,
+) -> Tracer {
     opentelemetry_otlp::new_pipeline()
         .tracing()
         .with_trace_config(
@@ -53,7 +58,7 @@ fn init_tracer(sink_url: &str, sampling_rate: f64, service_name: &str) -> Tracer
             opentelemetry_otlp::new_exporter()
                 .tonic()
                 .with_endpoint(sink_url)
-                .with_timeout(Duration::from_secs(3)),
+                .with_timeout(Duration::from_secs(export_timeout_secs)),
         )
         .install_batch(runtime::Tokio)
         .expect("Failed to initialize OpenTelemetry tracer")
@@ -61,7 +66,8 @@ fn init_tracer(sink_url: &str, sampling_rate: f64, service_name: &str) -> Tracer
 
 #[tokio::main]
 async fn main() {
-    let config = Config::init_from_env().expect("Invalid configuration:");
+    let mut config = Config::init_from_env().expect("Invalid configuration:");
+    config.validate_and_fix_timeouts();
 
     // Instantiate tracing outputs following Django's DEBUG-based approach:
     //   - stdout with a level configured by the RUST_LOG envvar
@@ -71,9 +77,6 @@ async fn main() {
 
     let log_layer = {
         let base_layer = fmt::layer()
-            .with_span_events(
-                FmtSpan::NEW | FmtSpan::CLOSE | FmtSpan::ENTER | FmtSpan::EXIT | FmtSpan::ACTIVE,
-            )
             .with_target(true)
             .with_thread_ids(true)
             .with_level(true);
@@ -81,14 +84,32 @@ async fn main() {
         if debug {
             // Development: Pretty colored output (like Django's ConsoleRenderer(colors=DEBUG))
             base_layer
+                .with_span_events(
+                    FmtSpan::NEW
+                        | FmtSpan::CLOSE
+                        | FmtSpan::ENTER
+                        | FmtSpan::EXIT
+                        | FmtSpan::ACTIVE,
+                )
                 .with_ansi(true)
-                .with_filter(EnvFilter::from_default_env())
+                .with_filter(
+                    EnvFilter::builder()
+                        .with_default_directive(LevelFilter::INFO.into())
+                        .from_env_lossy()
+                        .add_directive("pyroscope=warn".parse().unwrap()),
+                )
                 .boxed()
         } else {
             // Production: JSON format (like Django's JSONRenderer())
             base_layer
                 .json()
-                .with_filter(EnvFilter::from_default_env())
+                .with_span_list(false)
+                .with_filter(
+                    EnvFilter::builder()
+                        .with_default_directive(LevelFilter::INFO.into())
+                        .from_env_lossy()
+                        .add_directive("pyroscope=warn".parse().unwrap()),
+                )
                 .boxed()
         }
     };
@@ -99,6 +120,7 @@ async fn main() {
                 otel_url,
                 config.otel_sampling_rate,
                 &config.otel_service_name,
+                config.otel_export_timeout_secs,
             ))
             .with_filter(LevelFilter::from_level(config.otel_log_level)),
         )
@@ -110,6 +132,16 @@ async fn main() {
         .with(log_layer)
         .with(otel_layer)
         .init();
+
+    // Start continuous profiling if enabled (keep _agent alive for the duration of the program)
+    // NOTE: Must be after tracing is initialized so logs are visible
+    let _profiling_agent = match config.continuous_profiling.start_agent() {
+        Ok(agent) => agent,
+        Err(e) => {
+            tracing::warn!("Failed to start continuous profiling agent: {e}");
+            None
+        }
+    };
 
     // Open the TCP port and start the server
     let listener = tokio::net::TcpListener::bind(config.address)

@@ -3,17 +3,20 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import PasswordStrength from 'lib/components/PasswordStrength'
 import SignupRoleSelect from 'lib/components/SignupRoleSelect'
 import { SSOEnforcedLoginButton, SocialLoginButtons } from 'lib/components/SocialLoginButton/SocialLoginButton'
+import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
+import { supportLogic } from 'lib/components/Support/supportLogic'
+import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { Link } from 'lib/lemon-ui/Link'
 import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
 import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconChevronLeft, IconChevronRight } from 'lib/lemon-ui/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -43,15 +46,15 @@ function HelperLinks(): JSX.Element {
         <div className="font-bold text-center">
             <Link to="/">App Home</Link>
             <span className="mx-2">|</span>
-            <Link to={`https://posthog.com?${UTM_TAGS}&utm_message=invalid-invite`}>PostHog Website</Link>
+            <Link to={`https://hanzo.ai?${UTM_TAGS}&utm_message=invalid-invite`}>Hanzo Website</Link>
         </div>
     )
 }
 
-function BackToPostHog(): JSX.Element {
+function BackToHanzo(): JSX.Element {
     return (
         <LemonButton type="secondary" icon={<IconChevronLeft />} center fullWidth to={urls.default()}>
-            Go back to PostHog
+            Go back to Hanzo
         </LemonButton>
     )
 }
@@ -69,7 +72,7 @@ function ErrorView(): JSX.Element | null {
                     <b>ask them for a new invite</b>.
                 </>
             ),
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
         [ErrorCodes.InvalidRecipient]: {
             title: "Oops! This invite link can't be used",
@@ -100,14 +103,14 @@ function ErrorView(): JSX.Element | null {
                     </div>
                 </>
             ),
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
         [ErrorCodes.Unknown]: {
             title: 'Oops! We could not validate this invite link',
             detail: `${
                 error?.detail || ''
             } There was an issue with your invite link, please try again in a few seconds. If the problem persists, contact us.`,
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
     }
 
@@ -116,7 +119,7 @@ function ErrorView(): JSX.Element | null {
     }
 
     return (
-        <BridgePage view="signup-error" hedgehog message="Oops!" footer={<SupportModalButton />}>
+        <BridgePage view="signup-error" mascot message="Oops!" footer={<SupportModalButton />}>
             <h2>{ErrorMessages[error.code].title}</h2>
             <div className="error-message">{ErrorMessages[error.code].detail}</div>
             <LemonDivider dashed className="my-4" />
@@ -133,14 +136,14 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
     return (
         <BridgePage
             view="accept-invite"
-            hedgehog
+            mascot
             message={user?.first_name ? `Hey ${user?.first_name}!` : 'Hello!'}
             footer={<SupportModalButton name={user?.first_name} email={user?.email} />}
         >
             <div className="deprecated-space-y-2">
                 <h2>You have been invited to join {invite.organization_name}</h2>
                 <div>
-                    You will accept the invite under your <b>existing PostHog account</b> ({user?.email})
+                    You will accept the invite under your <b>existing Insights account</b> ({user?.email})
                 </div>
                 {user && (
                     <div
@@ -155,8 +158,8 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                     </div>
                 )}
                 <div>
-                    You can change organizations at any time by clicking on the dropdown at the top right corner of the
-                    navigation bar.
+                    You can change organizations at any time by clicking on the organization selector at the top left
+                    corner of the navigation bar.
                 </div>
                 <div>
                     {!acceptedInvite ? (
@@ -165,14 +168,14 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                                 type="primary"
                                 center
                                 fullWidth
-                                onClick={() => acceptInvite()}
+                                onClick={acceptInvite}
                                 loading={acceptedInviteLoading}
                             >
                                 Accept invite
                             </LemonButton>
                             <div className="mt-2">
                                 <LemonButton type="secondary" center fullWidth icon={<IconChevronLeft />} to="/">
-                                    Go back to PostHog
+                                    Go back to Hanzo
                                 </LemonButton>
                             </div>
                         </>
@@ -184,7 +187,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                             sideIcon={<IconChevronRight />}
                             onClick={() => (window.location.href = '/')}
                         >
-                            Go to PostHog
+                            Go to Insights
                         </LemonButton>
                     )}
                 </div>
@@ -194,8 +197,18 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
 }
 
 function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): JSX.Element {
-    const { isSignupSubmitting, validatedPassword } = useValues(inviteSignupLogic)
+    const {
+        isSignupSubmitting,
+        validatedPassword,
+        signupManualErrors,
+        passkeyRegistered,
+        isPasskeyRegistering,
+        passkeyError,
+        passkeySignupEnabled,
+    } = useValues(inviteSignupLogic)
+    const { registerPasskey } = useActions(inviteSignupLogic)
     const { preflight } = useValues(preflightLogic)
+    const { openSupportForm } = useActions(supportLogic)
 
     const { precheck } = useActions(loginLogic)
     const { precheckResponse, precheckResponseLoading } = useValues(loginLogic)
@@ -209,11 +222,11 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
     return (
         <BridgePage
             view="invites-signup"
-            hedgehog
+            mascot
             message={
                 <>
                     Welcome to
-                    <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                    <br /> Insights{preflight?.cloud ? ' Cloud' : ''}!
                 </>
             }
             leftContainerContent={
@@ -223,38 +236,102 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                         <span className="text-4xl font-bold border-b border-dashed pb-2">
                             {invite?.organization_name || 'us'}
                         </span>
-                        <span>on PostHog</span>
+                        <span>on Insights</span>
                     </div>
                 </div>
             }
             footer={<SupportModalButton name={invite.first_name} email={invite.target_email} />}
         >
-            <h2 className="text-center">Create your PostHog account</h2>
+            <h2 className="text-center">Create your Insights account</h2>
+            {signupManualErrors?.generic && (
+                <LemonBanner type="error" className="mb-4">
+                    {signupManualErrors.generic.detail || 'Could not complete your signup.'}{' '}
+                    {preflight?.cloud && (
+                        <Link
+                            data-attr="invite-signup-error-contact-support"
+                            onClick={(e) => {
+                                e.preventDefault()
+                                openSupportForm({
+                                    kind: 'support',
+                                    target_area: 'login',
+                                    email: invite.target_email,
+                                })
+                            }}
+                        >
+                            Need help?
+                        </Link>
+                    )}
+                </LemonBanner>
+            )}
+            {passkeyError && (
+                <LemonBanner type="error" className="mb-4">
+                    {passkeyError}
+                </LemonBanner>
+            )}
             <Form logic={inviteSignupLogic} formKey="signup" className="deprecated-space-y-4" enableFormOnSubmit>
                 <LemonField.Pure label="Email">
                     <LemonInput type="email" disabled value={invite?.target_email} />
                 </LemonField.Pure>
                 {!areExtraFieldsHidden && (
                     <>
-                        <LemonField
-                            name="password"
-                            label={
-                                <div className="flex flex-1 items-center justify-between">
-                                    <span>Password</span>
-                                    <PasswordStrength validatedPassword={validatedPassword} />
-                                </div>
-                            }
-                        >
-                            <LemonInput
-                                type="password"
-                                className="ph-ignore-input"
-                                data-attr="password"
-                                placeholder="••••••••••"
-                                autoComplete="new-password"
-                                autoFocus={window.screen.width >= 768} // do not autofocus on small-width screens
-                                disabled={isSignupSubmitting}
-                            />
-                        </LemonField>
+                        {passkeySignupEnabled && (
+                            <>
+                                {passkeyRegistered ? (
+                                    <div className="bg-surface-secondary rounded-lg p-4 text-center">
+                                        <img src={passkeyLogo} alt="Passkey" className="w-8 h-8 mx-auto mb-2" />
+                                        <p className="font-semibold mb-1">Passkey registered successfully!</p>
+                                        <p className="text-sm text-muted">
+                                            Complete the form below and press "Continue" to create your account.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <LemonButton
+                                        fullWidth
+                                        type="secondary"
+                                        center
+                                        size="large"
+                                        icon={
+                                            <img src={passkeyLogo} alt="Passkey" className="object-contain w-7 h-7" />
+                                        }
+                                        onClick={registerPasskey}
+                                        loading={isPasskeyRegistering}
+                                        disabled={isPasskeyRegistering}
+                                        data-attr="invite-signup-passkey"
+                                    >
+                                        Sign up with passkey
+                                    </LemonButton>
+                                )}
+
+                                {!passkeyRegistered && (
+                                    <div className="flex items-center gap-3 my-4">
+                                        <div className="flex-1 border-t border-border" />
+                                        <span className="text-secondary text-sm">or use a password</span>
+                                        <div className="flex-1 border-t border-border" />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                        {!passkeyRegistered && (
+                            <LemonField
+                                name="password"
+                                label={
+                                    <div className="flex flex-1 items-center justify-between">
+                                        <span>Password</span>
+                                        <PasswordStrength validatedPassword={validatedPassword} />
+                                    </div>
+                                }
+                            >
+                                <LemonInput
+                                    type="password"
+                                    className="ph-ignore-input"
+                                    data-attr="password"
+                                    placeholder="••••••••••"
+                                    autoComplete="new-password"
+                                    autoFocus={window.screen.width >= 768} // do not autofocus on small-width screens
+                                    disabled={isSignupSubmitting || passkeyRegistered}
+                                />
+                            </LemonField>
+                        )}
 
                         <LemonField
                             name="first_name"
@@ -313,11 +390,11 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
             </div>
             <div className="mt-4 text-center text-secondary">
                 By clicking continue you agree to our{' '}
-                <Link to="https://posthog.com/terms" target="_blank">
+                <Link to="https://hanzo.ai/terms" target="_blank">
                     Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="https://posthog.com/privacy" target="_blank">
+                <Link to="https://hanzo.ai/privacy" target="_blank">
                     Privacy Policy
                 </Link>
                 .

@@ -3,7 +3,7 @@
     "cache_target_age": "2025-04-18T00:07:50.354028Z",
     "calculation_trigger": null,
     "error": null,
-    "hogql": null,
+    "insightsql": null,
     "is_cached": true,
     "last_refresh": "2025-04-17T22:07:50.354028Z",
     "modifiers": {

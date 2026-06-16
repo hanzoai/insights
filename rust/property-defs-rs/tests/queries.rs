@@ -147,7 +147,7 @@ async fn query_type_event_excluded_props_filter(qmgr: &Manager, project_id: i32)
 }
 
 // fetch all PropertyParentType::Event records (properties) matching the "event_names"
-// (particular event) filter. This is determined by a JOIN on the posthog_eventproperty table
+// (particular event) filter. This is determined by a JOIN on the insights_eventproperty table
 async fn query_type_event_names_filter(qmgr: &Manager, project_id: i32) {
     let mut qb = sqlx::QueryBuilder::new("");
 
@@ -395,7 +395,7 @@ async fn query_type_person_simple_search_filter(qmgr: &Manager, project_id: i32)
 // the property names of all PropertyParentType::Event rows
 fn expected_person_props_all() -> [&'static str; 8] {
     [
-        "$feature_enrollment/artificial-hog",
+        "$feature_enrollment/my-flag",
         "$survey_dismissed/abc123",
         "company_type",
         "$os_version",
@@ -606,7 +606,7 @@ async fn query_with_illegal_group_type_index_fails() {
 }
 
 async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
-    // posthog_propertydefinition: (id, name, project_id, team_id, is_numerical, type, property_type, group_type_index)
+    // insights_propertydefinition: (id, name, project_id, team_id, is_numerical, type, property_type, group_type_index)
     let pd_rows = [
         // PropertyParentType::Event
         (Uuid::now_v7(), "user_email", 1, 1, false, 1, "String", -1),
@@ -667,7 +667,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
         // PropertyParentType::Person
         (
             Uuid::now_v7(),
-            "$feature_enrollment/artificial-hog",
+            "$feature_enrollment/my-flag",
             1,
             1,
             false,
@@ -866,7 +866,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
 
         sqlx::query_with(
             r#"
-            INSERT INTO posthog_propertydefinition
+            INSERT INTO insights_propertydefinition
                 (id, name, project_id, team_id, is_numerical, "type", property_type, group_type_index)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         "#,
@@ -876,7 +876,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
         .await?;
     }
 
-    // tie back event props "property" field to posthog_userdefinition rows
+    // tie back event props "property" field to insights_userdefinition rows
     // of type PropertyParentType::Event defined above
     let ep_rows = [
         // id, event, property, team_id, project_id
@@ -901,7 +901,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
 
         sqlx::query_with(
             r#"
-            INSERT INTO posthog_eventproperty
+            INSERT INTO insights_eventproperty
                 (id, event, property, team_id, project_id)
                 VALUES ($1, $2, $3, $4, $5)
         "#,
@@ -912,7 +912,7 @@ async fn bootstrap_seed_data(test_pool: PgPool) -> Result<(), sqlx::Error> {
     }
 
     // enterprise prop defs rows are a bit different - these mostly serve to join in metadata
-    // on popsthog_propertydefinition rows we defined above, so we seed using those rows
+    // on insights_propertydefinition rows we defined above, so we seed using those rows
     for (ndx, row) in pd_rows.iter().enumerate() {
         // for now, only assign joinable enterprise prop rows for
         // PropertyParentType(s) of Event and Person

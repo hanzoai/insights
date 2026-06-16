@@ -3,9 +3,9 @@ import { TextSerializer, getText } from '@tiptap/core'
 
 import { JSONContent, RichContentNode, TTEditor } from 'lib/components/RichContentEditor/types'
 
-import { CreatePostHogWidgetNodeOptions, NotebookNodeType } from './types'
+import { CreateInsightsWidgetNodeOptions, NotebookNodeType } from './types'
 
-export const KNOWN_NODES: Record<string, CreatePostHogWidgetNodeOptions<any>> = {}
+export const KNOWN_NODES: Record<string, CreateInsightsWidgetNodeOptions<any>> = {}
 
 // Loosely based on https://github.com/ueberdosis/tiptap/blob/develop/packages/extension-floating-menu/src/floating-menu-plugin.ts#LL38C3-L55C4
 export const isCurrentNodeEmpty = (editor: TTEditor): boolean => {
@@ -47,19 +47,28 @@ export const textContent = (node: RichContentNode): string => {
         [NotebookNodeType.Image]: customOrTitleSerializer,
         [NotebookNodeType.Person]: customOrTitleSerializer,
         [NotebookNodeType.Query]: customOrTitleSerializer,
+        [NotebookNodeType.Python]: customOrTitleSerializer,
+        [NotebookNodeType.DuckSQL]: customOrTitleSerializer,
+        [NotebookNodeType.InsightsQLSQL]: customOrTitleSerializer,
         [NotebookNodeType.Recording]: customOrTitleSerializer,
+        [NotebookNodeType.LLMTrace]: customOrTitleSerializer,
+        [NotebookNodeType.Issues]: customOrTitleSerializer,
         [NotebookNodeType.RecordingPlaylist]: customOrTitleSerializer,
         [NotebookNodeType.ReplayTimestamp]: customOrTitleSerializer,
         [NotebookNodeType.Survey]: customOrTitleSerializer,
         [NotebookNodeType.Group]: customOrTitleSerializer,
         [NotebookNodeType.Cohort]: customOrTitleSerializer,
         [NotebookNodeType.PersonFeed]: customOrTitleSerializer,
-        [NotebookNodeType.Properties]: customOrTitleSerializer,
+        [NotebookNodeType.PersonProperties]: customOrTitleSerializer,
+        [NotebookNodeType.GroupProperties]: customOrTitleSerializer,
         [NotebookNodeType.Map]: customOrTitleSerializer,
         [NotebookNodeType.Mention]: customOrTitleSerializer,
         [NotebookNodeType.Embed]: customOrTitleSerializer,
         [NotebookNodeType.Latex]: customOrTitleSerializer,
         [NotebookNodeType.TaskCreate]: customOrTitleSerializer,
+        [NotebookNodeType.UsageMetrics]: customOrTitleSerializer,
+        [NotebookNodeType.ZendeskTickets]: customOrTitleSerializer,
+        [NotebookNodeType.RelatedGroups]: customOrTitleSerializer,
     }
 
     return getText(node, {
@@ -82,4 +91,23 @@ export function defaultNotebookContent(title?: string, content?: JSONContent[]):
     }
 
     return { type: 'doc', content: initialContent }
+}
+
+export function updateContentHeading(content: JSONContent, newTitle: string): JSONContent {
+    const firstNode = content?.content?.[0]
+    const firstTextNode = firstNode?.content?.[0]
+    if (!firstNode || !firstTextNode?.text) {
+        return content
+    }
+
+    return {
+        ...content,
+        content: [
+            {
+                ...firstNode,
+                content: [{ ...firstTextNode, text: newTitle }, ...(firstNode.content?.slice(1) ?? [])],
+            },
+            ...(content.content?.slice(1) ?? []),
+        ],
+    }
 }

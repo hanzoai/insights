@@ -1,0 +1,33 @@
+import { processEvent } from '.'
+
+import { LegacyTransformationPlugin } from '../../types'
+
+// NOTE: This is a deprecated plugin and should never be shown to new users
+export const insightsAppUnduplicator: LegacyTransformationPlugin = {
+    processEvent,
+    template: {
+        free: true,
+        status: 'deprecated',
+        type: 'transformation',
+        id: 'plugin-insights-app-unduplicator',
+        name: 'Insights App Unduplicator',
+        description: 'Prevent duplicates in your data when ingesting.',
+        icon_url: '',
+        category: ['Custom'],
+        code_language: 'javascript',
+        code: `return event`,
+        inputs_schema: [
+            {
+                key: 'dedupMode',
+                templating: false,
+                label: 'Dedup Mode',
+                type: 'choice',
+                required: true,
+                choices: [
+                    { value: 'Event and Timestamp', label: 'Event and Timestamp' },
+                    { value: 'All Properties', label: 'All Properties' },
+                ],
+            },
+        ],
+    },
+}

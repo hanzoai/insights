@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import { SurveyQuestionType } from 'posthog-js'
+import { SurveyQuestionType } from '@hanzo/insights'
 
-import { LemonButton, LemonDivider, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider, LemonModal } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
@@ -11,7 +11,11 @@ import { urls } from 'scenes/urls'
 
 import { Survey, SurveyEventName, SurveyEventProperties, SurveyQuestion } from '~/types'
 
-import { buildPartialResponsesFilter, createAnswerFilterHogQLExpression } from './utils'
+import { buildPartialResponsesFilter, createAnswerFilterInsightsQLExpression } from './utils'
+
+function escapeSqlIdentifier(value: string): string {
+    return value.replace(/"/g, '""')
+}
 
 interface SurveySQLHelperProps {
     isOpen: boolean
@@ -21,14 +25,14 @@ interface SurveySQLHelperProps {
 export function SurveySQLHelper({ isOpen, onClose }: SurveySQLHelperProps): JSX.Element {
     const { survey, answerFilters } = useValues(surveyLogic)
 
-    const filterConditions = createAnswerFilterHogQLExpression(answerFilters, survey as Survey)
+    const filterConditions = createAnswerFilterInsightsQLExpression(answerFilters, survey as Survey)
 
     const generateSingleQuestionQuery = (question: SurveyQuestion, index: number): string => {
         return `SELECT
     distinct_id,
     getSurveyResponse(${index}, '${question.id}'${
         question.type === SurveyQuestionType.MultipleChoice ? ', true' : ''
-    }) AS "${question.question}",
+    }) AS "${escapeSqlIdentifier(question.question)}",
     timestamp
 FROM
     events
@@ -48,7 +52,7 @@ LIMIT
             .map((question: SurveyQuestion, index: number) => {
                 return `    getSurveyResponse(${index}, '${question.id}'${
                     question.type === SurveyQuestionType.MultipleChoice ? ', true' : ''
-                }) AS "${question.question}"`
+                }) AS "${escapeSqlIdentifier(question.question)}"`
             })
             .join(',\n')
 
@@ -71,7 +75,7 @@ LIMIT
 
     // Function to open query in a new insight
     const openInInsight = (query: string): void => {
-        router.actions.push(urls.sqlEditor(query))
+        router.actions.push(urls.sqlEditor({ query: query }))
     }
 
     return (

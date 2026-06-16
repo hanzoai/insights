@@ -1,0 +1,8 @@
+{
+    "extends": "./tsconfig.json",
+    "exclude": ["node_modules", "dist", "bin", "tests", "**/*.test.ts", "**/*.test.tsx", "src/cdp/_tests"],
+    "compilerOptions": {
+        "strict": false,
+        "noImplicitAny": false
+    }
+}

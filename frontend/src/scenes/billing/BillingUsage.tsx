@@ -2,8 +2,8 @@ import './BillingUsage.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonSelect } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonSelect } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -68,7 +68,7 @@ export function BillingUsage(): JSX.Element {
             dates,
             hiddenSeries: finalHiddenSeries,
         })
-        const filename = `posthog_usage_${dateFrom}_${dateTo}_${filters.interval || 'day'}.csv`
+        const filename = `insights_usage_${dateFrom}_${dateTo}_${filters.interval || 'day'}.csv`
         startExport({
             export_format: ExporterFormat.CSV,
             export_context: {

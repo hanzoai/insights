@@ -6,16 +6,14 @@ import { AuthorizedUrlListType, authorizedUrlListLogic } from 'lib/components/Au
 import { OnboardingStepKey } from '~/types'
 
 import { OnboardingStep } from '../OnboardingStep'
+import { OnboardingStepComponentType } from '../onboardingLogic'
 
-export function OnboardingWebAnalyticsAuthorizedDomainsStep({
-    stepKey = OnboardingStepKey.AUTHORIZED_DOMAINS,
-}: {
-    stepKey?: OnboardingStepKey
-}): JSX.Element {
+export const OnboardingWebAnalyticsAuthorizedDomainsStep: OnboardingStepComponentType = () => {
     const { authorizedUrls } = useValues(
         authorizedUrlListLogic({
             actionId: null,
             experimentId: null,
+            productTourId: null,
             type: AuthorizedUrlListType.WEB_ANALYTICS,
             allowWildCards: false,
         })
@@ -24,17 +22,17 @@ export function OnboardingWebAnalyticsAuthorizedDomainsStep({
     return (
         <OnboardingStep
             title="Authorized Domains"
-            stepKey={stepKey}
+            stepKey={OnboardingStepKey.AUTHORIZED_DOMAINS}
             showSkip
             continueDisabledReason={authorizedUrls.length === 0 ? 'Add at least one authorized domain' : undefined}
         >
             <p>
                 These are the domains we'll use as breakdown when looking at <b>Web Analytics</b>. Make sure you add all
-                the domains you'll install PostHog at. These are also the URLs where our toolbar will be enabled.
+                the domains you'll install Insights at. These are also the URLs where our toolbar will be enabled.
             </p>
             <p>
-                <b>Wildcards are not allowed</b> (example: <code>https://*.posthog.com</code>). The domain needs to be
-                something concrete that can be launched (example: <code>https://app.posthog.com</code>).
+                <b>Wildcards are not allowed</b> (example: <code>https://*.hanzo.ai</code>). The domain needs to be
+                something concrete that can be launched (example: <code>https://insights.hanzo.ai</code>).
             </p>
 
             <AuthorizedUrlList
@@ -45,3 +43,5 @@ export function OnboardingWebAnalyticsAuthorizedDomainsStep({
         </OnboardingStep>
     )
 }
+
+OnboardingWebAnalyticsAuthorizedDomainsStep.stepKey = OnboardingStepKey.AUTHORIZED_DOMAINS

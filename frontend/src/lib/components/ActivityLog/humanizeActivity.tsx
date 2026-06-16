@@ -44,10 +44,12 @@ export type ActivityLogItem = {
     detail: ActivityLogDetail
     /** Present if the log is used as a notification. Whether the notification is unread. */
     unread?: boolean
-    /** Whether the activity was initiated by a PostHog staff member impersonating a user. */
+    /** Whether the activity was initiated by an Insights staff member impersonating a user. */
     is_staff?: boolean
-    /** Whether the activity was initiated by the PostHog backend. Example: an exported image when sharing an insight. */
+    /** Whether the activity was initiated by the Insights backend. Example: an exported image when sharing an insight. */
     is_system?: boolean
+    /** Whether an Insights team member was impersonating the user when this activity was logged. */
+    was_impersonated?: boolean
 }
 
 // the description of a single activity log is a sentence describing one or more changes that makes up the entry
@@ -65,6 +67,7 @@ export type HumanizedActivityLogItem = {
     email?: string | null
     name?: string
     isSystem?: boolean
+    wasImpersonated?: boolean
     description: Description
     extendedDescription?: ExtendedDescription // e.g. an insight's filters summary
     created_at: dayjs.Dayjs
@@ -103,10 +106,14 @@ export function humanize(
         const { description, extendedDescription } = describer(logItem, asNotification)
 
         if (description !== null) {
+            const impersonatedUserName = logItem.user ? fullName(logItem.user) : undefined
             logLines.push({
-                email: logItem.user?.email,
-                name: logItem.user ? fullName(logItem.user) : undefined,
+                email: logItem.was_impersonated ? undefined : logItem.user?.email,
+                name: logItem.was_impersonated
+                    ? `Insights Support${impersonatedUserName ? ` (as ${impersonatedUserName})` : ''}`
+                    : impersonatedUserName,
                 isSystem: logItem.is_system,
+                wasImpersonated: logItem.was_impersonated,
                 description,
                 extendedDescription,
                 created_at: dayjs(logItem.created_at),
@@ -120,21 +127,25 @@ export function humanize(
 
 export function userNameForLogItem(logItem: ActivityLogItem): string {
     if (logItem.is_system) {
-        return 'PostHog'
+        return 'Insights'
+    }
+    if (logItem.was_impersonated) {
+        const impersonatedUserName = logItem.user ? fullName(logItem.user) : 'a user'
+        return `Insights Support (as ${impersonatedUserName})`
     }
     return logItem.user ? fullName(logItem.user) : 'A user'
 }
 
-const NO_PLURAL_SCOPES: ActivityScope[] = [
-    ActivityScope.DATA_MANAGEMENT,
-    ActivityScope.EVENT_DEFINITION,
-    ActivityScope.PROPERTY_DEFINITION,
-]
+const NO_PLURAL_SCOPES: ActivityScope[] = [ActivityScope.DATA_MANAGEMENT]
 
+// Scope display names for activity log humanization
 const SCOPE_DISPLAY_NAMES: Partial<Record<ActivityScope, { singular: string; plural: string }>> = {
     [ActivityScope.ALERT_CONFIGURATION]: { singular: 'Alert', plural: 'Alerts' },
     [ActivityScope.BATCH_EXPORT]: { singular: 'Destination', plural: 'Destinations' },
     [ActivityScope.EXTERNAL_DATA_SOURCE]: { singular: 'Source', plural: 'Sources' },
+    [ActivityScope.INSIGHTS_FUNCTION]: { singular: 'Data pipeline', plural: 'Data pipelines' },
+    [ActivityScope.PERSONAL_API_KEY]: { singular: 'Personal API Key', plural: 'Personal API Keys' },
+    [ActivityScope.LLM_TRACE]: { singular: 'LLM trace', plural: 'LLM traces' },
 }
 
 export function humanizeScope(scope: ActivityScope | string, singular = false): string {
@@ -154,7 +165,7 @@ export function humanizeScope(scope: ActivityScope | string, singular = false): 
 }
 
 export function humanizeActivity(activity: string): string {
-    activity = activity.replace('_', ' ')
+    activity = activity.replace(/_/g, ' ')
 
     return activity.charAt(0).toUpperCase() + activity.slice(1)
 }
@@ -170,7 +181,7 @@ export function defaultDescriber(
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> deleted <b>{resource}</b>
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> deleted <b>{resource}</b>
                 </>
             ),
         }
@@ -180,7 +191,17 @@ export function defaultDescriber(
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> created <b>{resource}</b>
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> created <b>{resource}</b>
+                </>
+            ),
+        }
+    }
+
+    if (logItem.activity == 'restored') {
+        return {
+            description: (
+                <>
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> restored <b>{resource}</b>
                 </>
             ),
         }
@@ -190,7 +211,7 @@ export function defaultDescriber(
         return {
             description: (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> updated <b>{resource}</b>
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> updated <b>{resource}</b>
                 </>
             ),
         }
@@ -202,13 +223,14 @@ export function defaultDescriber(
         if (logItem.scope === 'Comment') {
             description = (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> replied to a {humanizeScope(logItem.scope, true)}
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> replied to a{' '}
+                    {humanizeScope(logItem.scope, true)}
                 </>
             )
         } else {
             description = (
                 <>
-                    <strong>{userNameForLogItem(logItem)}</strong> commented
+                    <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong> commented
                     {asNotification ? <> on a {humanizeScope(logItem.scope, true)}</> : null}
                 </>
             )

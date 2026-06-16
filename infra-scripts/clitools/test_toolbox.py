@@ -29,29 +29,29 @@ class TestToolbox(unittest.TestCase):
 
     def test_sanitize_label_truncation(self):
         long_arn = (
-            "arn:aws:sts::169684386827:assumed-role/custom-role-name/" + "averyveryveryveryverylongemail@posthog.com"
+            "arn:aws:sts::169684386827:assumed-role/custom-role-name/" + "averyveryveryveryverylongemail@hanzo.ai"
         )
         sanitized = sanitize_label(long_arn)
         self.assertTrue(sanitized.startswith("arn_aws_sts__169684386827_assu"))
-        self.assertIn("longemail_at_posthog.com", sanitized)
+        self.assertIn("longemail_at_hanzo.ai", sanitized)
         self.assertLessEqual(len(sanitized), 63)
 
     def test_parse_arn_valid(self):
         """Test parsing valid AWS STS ARN."""
-        arn = "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@posthog.com"
-        expected = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        arn = "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@hanzo.ai"
+        expected = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         self.assertEqual(parse_arn(arn), expected)
 
     def test_parse_arn_different_role(self):
         """Test parsing ARN with different role."""
-        arn = "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_admins_0847e649a00cc5e7/michael.k@posthog.com"
-        expected = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "admins", "assumed-role": "true"}
+        arn = "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_admins_0847e649a00cc5e7/michael.k@hanzo.ai"
+        expected = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "admins", "assumed-role": "true"}
         self.assertEqual(parse_arn(arn), expected)
 
     def test_parse_arn_unexpected_format(self):
         """Test parsing ARN with unexpected role format."""
-        arn = "arn:aws:sts::169684386827:assumed-role/custom-role-name/michael.k@posthog.com"
-        expected = {"toolbox-claimed": "arn_aws_sts__169684386827_assum_e-name_michael.k_at_posthog.com"}
+        arn = "arn:aws:sts::169684386827:assumed-role/custom-role-name/michael.k@hanzo.ai"
+        expected = {"toolbox-claimed": "arn_aws_sts__169684386827_assum_e-name_michael.k_at_hanzo.ai"}
         self.assertEqual(parse_arn(arn), expected)
 
     @patch("subprocess.run")
@@ -66,9 +66,9 @@ class TestToolbox(unittest.TestCase):
                         "username": "sso-developers",
                         "extra": {
                             "arn": [
-                                "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@posthog.com"
+                                "arn:aws:sts::169684386827:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@hanzo.ai"
                             ],
-                            "sessionName": ["michael.k@posthog.com"],
+                            "sessionName": ["michael.k@hanzo.ai"],
                         },
                     }
                 }
@@ -77,11 +77,34 @@ class TestToolbox(unittest.TestCase):
         mock_run.return_value = mock_response
 
         user_labels = get_current_user()
-        expected = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        expected = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         self.assertEqual(user_labels, expected)
         mock_run.assert_called_once_with(
             ["kubectl", "auth", "whoami", "-o", "json"], capture_output=True, text=True, check=True
         )
+
+    @patch("sys.exit")
+    @patch("builtins.print")
+    @patch("subprocess.run")
+    def test_get_current_user_token_expired(self, mock_run, mock_print, mock_exit):
+        """Test getting current user when token has expired and refresh failed."""
+        # Mock kubectl auth whoami to raise error with token expiration message
+        error = subprocess.CalledProcessError(
+            returncode=1,
+            cmd=["kubectl", "auth", "whoami", "-o", "json"],
+            stderr="Token has expired and refresh failed",
+        )
+        mock_run.side_effect = error
+
+        get_current_user()
+
+        mock_run.assert_called_once_with(
+            ["kubectl", "auth", "whoami", "-o", "json"], capture_output=True, text=True, check=True
+        )
+        mock_print.assert_any_call(
+            "Token has expired and refresh failed, please reauthenticate with `aws sso login --profile=<your-profile>`"
+        )
+        mock_exit.assert_called_once_with(1)
 
     @patch("subprocess.run")
     def test_get_toolbox_pod(self, mock_run):
@@ -95,10 +118,10 @@ class TestToolbox(unittest.TestCase):
                         "metadata": {
                             "name": "toolbox-pod-1",
                             "labels": {
-                                "app.kubernetes.io/name": "posthog-toolbox-django",
+                                "app.kubernetes.io/name": "insights-toolbox-django",
                                 "pod-template-hash": "749c5d8db",
-                                "posthog.com/image": "posthog",
-                                "posthog.com/team": "infra",
+                                "insights.com/image": "insights",
+                                "insights.com/team": "infra",
                                 "role": "toolbox",
                             },
                             "deletionTimestamp": None,
@@ -110,7 +133,7 @@ class TestToolbox(unittest.TestCase):
         )
         mock_run.return_value = mock_response
 
-        pod_name, is_claimed = get_toolbox_pod("michael.k_at_posthog.com")
+        pod_name, is_claimed = get_toolbox_pod("michael.k_at_hanzo.ai")
         self.assertEqual(pod_name, "toolbox-pod-1")
         self.assertFalse(is_claimed)
         mock_run.assert_called_once_with(
@@ -119,9 +142,9 @@ class TestToolbox(unittest.TestCase):
                 "get",
                 "pods",
                 "-n",
-                "posthog",
+                "insights",
                 "-l",
-                "app.kubernetes.io/name=posthog-toolbox-django",
+                "app.kubernetes.io/name=insights-toolbox-django",
                 "-o",
                 "json",
             ],
@@ -135,7 +158,7 @@ class TestToolbox(unittest.TestCase):
         """Test claiming a pod."""
         # Mock kubectl get pod response
         mock_get_response = MagicMock()
-        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "posthog-toolbox-django"})
+        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "insights-toolbox-django"})
 
         # Mock kubectl label and annotate responses
         mock_label_response = MagicMock()
@@ -149,7 +172,7 @@ class TestToolbox(unittest.TestCase):
             mock_label_response,  # wait for pod
         ]
 
-        user_labels = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        user_labels = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         claim_pod("toolbox-pod-1", user_labels, 1234567890)
 
         # Verify kubectl commands were called correctly
@@ -161,7 +184,7 @@ class TestToolbox(unittest.TestCase):
         # Verify the first call to get pod labels
         self.assertEqual(
             calls[0][0][0],
-            ["kubectl", "get", "pod", "-n", "posthog", "toolbox-pod-1", "-o", "jsonpath={.metadata.labels}"],
+            ["kubectl", "get", "pod", "-n", "insights", "toolbox-pod-1", "-o", "jsonpath={.metadata.labels}"],
         )
 
         # Verify the annotation call
@@ -172,7 +195,7 @@ class TestToolbox(unittest.TestCase):
                 "annotate",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 "toolbox-pod-1",
                 "karpenter.sh/do-not-disrupt=true",
                 "--overwrite=true",
@@ -187,9 +210,9 @@ class TestToolbox(unittest.TestCase):
                 "label",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 "toolbox-pod-1",
-                "toolbox-claimed=michael.k_at_posthog.com",
+                "toolbox-claimed=michael.k_at_hanzo.ai",
                 "role-name=developers",
                 "assumed-role=true",
                 "terminate-after=1234567890",
@@ -199,7 +222,7 @@ class TestToolbox(unittest.TestCase):
         # Verify the wait call
         self.assertEqual(
             calls[3][0][0],
-            ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "posthog", "pod", "toolbox-pod-1"],
+            ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "insights", "pod", "toolbox-pod-1"],
         )
 
     @patch("subprocess.run")
@@ -207,7 +230,7 @@ class TestToolbox(unittest.TestCase):
         """Test claiming a pod with custom duration."""
         # Mock kubectl get pod response
         mock_get_response = MagicMock()
-        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "posthog-toolbox-django"})
+        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "insights-toolbox-django"})
 
         # Mock kubectl label and annotate responses
         mock_label_response = MagicMock()
@@ -224,7 +247,7 @@ class TestToolbox(unittest.TestCase):
         # Calculate timestamp 4 hours from now
         future_timestamp = int(time.time()) + (4 * 60 * 60)
 
-        user_labels = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        user_labels = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         claim_pod("toolbox-pod-1", user_labels, future_timestamp)
 
         # Verify kubectl commands were called correctly
@@ -241,9 +264,9 @@ class TestToolbox(unittest.TestCase):
                 "label",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 "toolbox-pod-1",
-                "toolbox-claimed=michael.k_at_posthog.com",
+                "toolbox-claimed=michael.k_at_hanzo.ai",
                 "role-name=developers",
                 "assumed-role=true",
                 f"terminate-after={future_timestamp}",
@@ -257,8 +280,8 @@ class TestToolbox(unittest.TestCase):
         mock_get_response = MagicMock()
         mock_get_response.stdout = json.dumps(
             {
-                "app.kubernetes.io/name": "posthog-toolbox-django",
-                "toolbox-claimed": "michael.k_at_posthog.com",
+                "app.kubernetes.io/name": "insights-toolbox-django",
+                "toolbox-claimed": "michael.k_at_hanzo.ai",
                 "role-name": "developers",
                 "assumed-role": "true",
                 "terminate-after": "1234567890",
@@ -284,7 +307,7 @@ class TestToolbox(unittest.TestCase):
         # Calculate new timestamp 24 hours from now
         future_timestamp = int(time.time()) + (24 * 60 * 60)
 
-        user_labels = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        user_labels = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         claim_pod("toolbox-pod-1", user_labels, future_timestamp)
 
         # Verify kubectl commands were called correctly
@@ -296,17 +319,17 @@ class TestToolbox(unittest.TestCase):
         # Verify the first call to get pod labels
         self.assertEqual(
             calls[0][0][0],
-            ["kubectl", "get", "pod", "-n", "posthog", "toolbox-pod-1", "-o", "jsonpath={.metadata.labels}"],
+            ["kubectl", "get", "pod", "-n", "insights", "toolbox-pod-1", "-o", "jsonpath={.metadata.labels}"],
         )
 
         # Verify the label removal calls
         self.assertEqual(
-            calls[1][0][0], ["kubectl", "label", "pod", "-n", "posthog", "toolbox-pod-1", "toolbox-claimed-"]
+            calls[1][0][0], ["kubectl", "label", "pod", "-n", "insights", "toolbox-pod-1", "toolbox-claimed-"]
         )
-        self.assertEqual(calls[2][0][0], ["kubectl", "label", "pod", "-n", "posthog", "toolbox-pod-1", "role-name-"])
-        self.assertEqual(calls[3][0][0], ["kubectl", "label", "pod", "-n", "posthog", "toolbox-pod-1", "assumed-role-"])
+        self.assertEqual(calls[2][0][0], ["kubectl", "label", "pod", "-n", "insights", "toolbox-pod-1", "role-name-"])
+        self.assertEqual(calls[3][0][0], ["kubectl", "label", "pod", "-n", "insights", "toolbox-pod-1", "assumed-role-"])
         self.assertEqual(
-            calls[4][0][0], ["kubectl", "label", "pod", "-n", "posthog", "toolbox-pod-1", "terminate-after-"]
+            calls[4][0][0], ["kubectl", "label", "pod", "-n", "insights", "toolbox-pod-1", "terminate-after-"]
         )
 
         # Verify the annotation call
@@ -317,7 +340,7 @@ class TestToolbox(unittest.TestCase):
                 "annotate",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 "toolbox-pod-1",
                 "karpenter.sh/do-not-disrupt=true",
                 "--overwrite=true",
@@ -332,9 +355,9 @@ class TestToolbox(unittest.TestCase):
                 "label",
                 "pod",
                 "-n",
-                "posthog",
+                "insights",
                 "toolbox-pod-1",
-                "toolbox-claimed=michael.k_at_posthog.com",
+                "toolbox-claimed=michael.k_at_hanzo.ai",
                 "role-name=developers",
                 "assumed-role=true",
                 f"terminate-after={future_timestamp}",
@@ -344,7 +367,7 @@ class TestToolbox(unittest.TestCase):
         # Verify the wait call
         self.assertEqual(
             calls[7][0][0],
-            ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "posthog", "pod", "toolbox-pod-1"],
+            ["kubectl", "wait", "--for=condition=Ready", "--timeout=5m", "-n", "insights", "pod", "toolbox-pod-1"],
         )
 
     # New tests for Kubernetes context functions
@@ -460,7 +483,7 @@ class TestToolbox(unittest.TestCase):
     def test_claim_pod_wait_timeout(self, mock_run):
         """Test claim_pod exits if pod does not become ready within 5 minutes."""
         mock_get_response = MagicMock()
-        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "posthog-toolbox-django"})
+        mock_get_response.stdout = json.dumps({"app.kubernetes.io/name": "insights-toolbox-django"})
         mock_annotate_response = MagicMock()
         mock_label_response = MagicMock()
         call_count = {"n": 0}
@@ -479,7 +502,7 @@ class TestToolbox(unittest.TestCase):
                 return mock_label_response
 
         mock_run.side_effect = side_effect
-        user_labels = {"toolbox-claimed": "michael.k_at_posthog.com", "role-name": "developers", "assumed-role": "true"}
+        user_labels = {"toolbox-claimed": "michael.k_at_hanzo.ai", "role-name": "developers", "assumed-role": "true"}
         with self.assertRaises(SystemExit):
             claim_pod("toolbox-pod-1", user_labels, 1234567890)
 

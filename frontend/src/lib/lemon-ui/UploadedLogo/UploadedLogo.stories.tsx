@@ -30,17 +30,17 @@ const LettermarkTemplate: StoryFn<typeof UploadedLogo> = (props: UploadedLogoPro
     )
 }
 
-const POSTHOG_LOGO_32 =
+const INSIGHTS_LOGO_32 =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABOklEQVR4AazPw182URQH8Hn1X7xax13e1SbbNjfZdrvMdXabuMm2bdetQa7TM+fJ1uD6fs/nRxGyablLNsku2YB3/nM0vWlJ8QNc+NhPeAA+838NIG15BsNTW0CmuoF1EwOyMgVkYwC4Ps+3AX9UAJGRtl7gNChE9uaa4LhBFJFXAb9kDhEly22gE4yEiKckcEMhiLCC/tUIrnGHIKM6B6zNHyFi9gsOWzUROegwhdjYyNcjxMSP8dURYTLM+eqI0PMl8PfvHzAxMXwaSMqjH0dw/g9cvwciXI8DAhRFIfJkhOgc9lGEoyZFRAQREEhNS0JEQUEOKqvKbgEdz2PwS+KgrnIAGB95oFMcgS4OwIvsaALsL9WAqqqK4OLlrGEYyPeEGTDwKRGRE8nJkcDs/DyBnBwJsvgNUC8A9bVkZEv0zlAAAAAASUVORK5CYII='
 
 export const Base: Story = MediaTemplate.bind({})
-Base.args = { name: 'Athena', mediaId: POSTHOG_LOGO_32 }
+Base.args = { name: 'Athena', mediaId: INSIGHTS_LOGO_32 }
 
 export const ExtraSmall: Story = MediaTemplate.bind({})
-ExtraSmall.args = { name: 'Xtra', mediaId: POSTHOG_LOGO_32, size: 'xsmall' }
+ExtraSmall.args = { name: 'Xtra', mediaId: INSIGHTS_LOGO_32, size: 'xsmall' }
 
 export const ExtraLarge: Story = MediaTemplate.bind({})
-ExtraLarge.args = { name: 'Xtra', mediaId: POSTHOG_LOGO_32, size: 'xlarge' }
+ExtraLarge.args = { name: 'Xtra', mediaId: INSIGHTS_LOGO_32, size: 'xlarge' }
 
 export const BaseWithoutMedia: Story = LettermarkTemplate.bind({})
 BaseWithoutMedia.args = { name: 'Athena' }

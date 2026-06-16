@@ -1,52 +1,36 @@
 import { useValues } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
-import { PageHeader } from 'lib/components/PageHeader'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { DataWarehouseManagedSourcesTable } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 import { DataWarehouseSelfManagedSourcesTable } from 'scenes/data-warehouse/settings/DataWarehouseSelfManagedSourcesTable'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
-import { HogFunctionList } from 'scenes/hog-functions/list/HogFunctionsList'
-import { urls } from 'scenes/urls'
+import { InsightsFunctionList } from 'scenes/insights-functions/list/InsightsFunctionsList'
 
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
-import { ProductKey } from '~/types'
+import { ProductKey } from '~/queries/schema/schema-general'
 
-export function DataPipelinesSources({ newUrl }: { newUrl?: string }): JSX.Element {
+export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.Element {
     const { dataWarehouseSources, dataWarehouseSourcesLoading } = useValues(dataWarehouseSettingsLogic)
-
-    const newButton = (
-        <LemonButton
-            to={newUrl ?? urls.dataPipelinesNew('source')}
-            type="primary"
-            icon={<IconPlusSmall />}
-            size="small"
-        >
-            New source
-        </LemonButton>
-    )
 
     return (
         <div className="flex flex-col gap-4">
-            <PageHeader buttons={newButton} />
-
             {!dataWarehouseSourcesLoading && dataWarehouseSources?.results.length === 0 ? (
                 <ProductIntroduction
                     productName="Data Warehouse Source"
                     productKey={ProductKey.DATA_WAREHOUSE}
                     thingName="data source"
-                    description="Use data warehouse sources to import data from your external data into PostHog."
+                    description="Use data warehouse sources to import data from your external data into Insights."
                     isEmpty={dataWarehouseSources.results.length === 0 && !dataWarehouseSourcesLoading}
-                    docsURL="https://posthog.com/docs/data-warehouse"
-                    actionElementOverride={newButton}
+                    docsURL="https://hanzo.ai/docs/data-warehouse"
+                    actionElementOverride={action}
                 />
             ) : null}
 
-            <FlaggedFeature flag="cdp-hog-sources">
+            <FlaggedFeature flag="cdp-script-sources">
                 <>
                     <SceneSection
                         title={
@@ -57,9 +41,9 @@ export function DataPipelinesSources({ newUrl }: { newUrl?: string }): JSX.Eleme
                                 </LemonTag>
                             </span>
                         }
-                        description="PostHog can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"
+                        description="Insights can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"
                     >
-                        <HogFunctionList logicKey="data-pipelines-hog-functions-source-webhook" type="source_webhook" />
+                        <InsightsFunctionList logicKey="data-pipelines-insights-functions-source-webhook" type="source_webhook" />
                     </SceneSection>
                     <SceneDivider />
                 </>
@@ -67,19 +51,15 @@ export function DataPipelinesSources({ newUrl }: { newUrl?: string }): JSX.Eleme
 
             <SceneSection
                 title="Managed data warehouse sources"
-                description="PostHog can connect to external sources and automatically import data from them into the PostHog data warehouse"
+                description="Insights can connect to external sources and automatically import data from them into the Insights data warehouse"
             >
                 <DataWarehouseManagedSourcesTable />
             </SceneSection>
             <SceneDivider />
             <SceneSection
                 title="Self-managed data warehouse sources"
-                description="Connect to your own data sources, making them queryable in PostHog"
+                description="Connect to your own data sources, making them queryable in Insights"
             >
-                <div>
-                    <h2>Self-managed data warehouse sources</h2>
-                    <p className="m-0">Connect to your own data sources, making them queryable in PostHog</p>
-                </div>
                 <DataWarehouseSelfManagedSourcesTable />
             </SceneSection>
         </div>

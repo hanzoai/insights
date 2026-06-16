@@ -76,7 +76,7 @@ export const BillingError: Story = {
             {
                 type: 'error',
                 message:
-                    'Load experiment failed: This feature is part of the premium PostHog offering. To use it, subscribe to PostHog Cloud with a generous free tier: https://app.posthog.com/organization/billing',
+                    'Load experiment failed: This feature is part of the premium Insights offering. To use it, subscribe to Insights Cloud with a generous free tier: https://insights.hanzo.ai/organization/billing',
             },
         ],
     },

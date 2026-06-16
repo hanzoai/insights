@@ -104,7 +104,7 @@ describe('funnelPropertyCorrelationLogic', () => {
             },
         })
         initKeaTests(false)
-        window.POSTHOG_APP_CONTEXT = undefined // to force API request to /api/environments/@current
+        window.INSIGHTS_APP_CONTEXT = undefined // to force API request to /api/environments/@current
     })
 
     const defaultProps: InsightLogicProps = {

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonDivider, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonDivider, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconAreaChart } from 'lib/lemon-ui/icons'
 

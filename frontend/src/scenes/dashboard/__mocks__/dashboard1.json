@@ -207,11 +207,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -781,11 +779,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -955,11 +951,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -1387,11 +1381,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -1498,11 +1490,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -4636,11 +4626,9 @@
                     "uuid": "0184bdce-e55b-0000-7a1f-cff0c8a9fbdd",
                     "distinct_id": "66DmhJ27SbenLic9Zb17i508LEmgSq6fQTJ0t5btBhw",
                     "first_name": "Employee 427",
-                    "email": "test@posthog.com"
+                    "email": "test@hanzo.ai"
                 },
                 "is_sample": false,
-                "effective_restriction_level": 21,
-                "effective_privilege_level": 37,
                 "timezone": null,
                 "tags": []
             },
@@ -4657,8 +4645,5 @@
             "refresh_attempt": 0
         }
     ],
-    "restriction_level": 21,
-    "effective_restriction_level": 21,
-    "effective_privilege_level": 37,
     "tags": []
 }

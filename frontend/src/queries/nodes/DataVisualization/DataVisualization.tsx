@@ -3,23 +3,23 @@ import { BindLogic, BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useCallback, useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { InsightErrorState, StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'
 import { insightDataLogic } from 'scenes/insights/insightDataLogic'
-import { HogQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
+import { InsightsQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
 import { urls } from 'scenes/urls'
 
 import { insightVizDataCollectionId, insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import {
     AnyResponseType,
     DataVisualizationNode,
-    HogQLQuery,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
@@ -32,6 +32,7 @@ import { Reload } from '../DataNode/Reload'
 import { DataNodeLogicProps, dataNodeLogic } from '../DataNode/dataNodeLogic'
 import { QueryFeature } from '../DataTable/queryFeatures'
 import { LineGraph } from './Components/Charts/LineGraph'
+import { TwoDimensionalHeatmap } from './Components/Heatmap/TwoDimensionalHeatmap'
 import { Table } from './Components/Table'
 import { TableDisplay } from './Components/TableDisplay'
 import { AddVariableButton } from './Components/Variables/AddVariableButton'
@@ -54,7 +55,7 @@ export interface DataTableVisualizationProps {
     readOnly?: boolean
     exportContext?: ExportContext
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Attach ourselves to another logic, such as the scene logic */
     attachTo?: BuiltLogic | LogicWrapper
 }
@@ -89,9 +90,12 @@ export function DataTableVisualization({
         dataNodeCollectionId,
         loadPriority: insightProps.loadPriority,
         editMode,
-        setQuery,
+        setQuery: (setter) => {
+            setQuery(setter(query))
+        },
         cachedResults,
         variablesOverride,
+        limitContext: context?.limitContext,
     }
 
     const dataNodeLogicProps: DataNodeLogicProps = {
@@ -101,6 +105,7 @@ export function DataTableVisualization({
         loadPriority: insightProps.loadPriority,
         dataNodeCollectionId,
         variablesOverride,
+        limitContext: context?.limitContext,
     }
 
     // The `as unknown as InsightLogicProps` below is smelly, but it's required because Kea logics can't be generic
@@ -177,14 +182,30 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
     const { queryId, pollResponse } = useValues(dataNodeLogic)
 
     const setQuerySource = useCallback(
-        (source: HogQLQuery) => props.setQuery?.({ ...props.query, source }),
+        (source: InsightsQLQuery) => props.setQuery?.({ ...props.query, source }),
         [props.setQuery, props.query] // oxlint-disable-line react-hooks/exhaustive-deps
     )
 
     let component: JSX.Element | null = null
 
-    // TODO(@Gilbert09): Better loading support for all components - e.g. using the `loading` param of `Table`
-    if (!response || responseLoading) {
+    if (responseError) {
+        component = (
+            <div className="rounded bg-surface-primary relative flex flex-1 flex-col p-2">
+                <InsightErrorState
+                    query={props.query}
+                    excludeDetail
+                    title={
+                        queryCancelled
+                            ? 'The query was cancelled'
+                            : response && 'error' in response
+                              ? (response as any).error
+                              : responseError
+                    }
+                />
+            </div>
+        )
+    } else if (!response || responseLoading) {
+        // TODO(@Gilbert09): Better loading support for all components - e.g. using the `loading` param of `Table`
         component = (
             <div className="flex flex-col flex-1 justify-center items-center bg-surface-primary h-full">
                 <StatelessInsightLoadingState queryId={queryId} pollResponse={pollResponse} />
@@ -196,7 +217,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                 uniqueKey={props.uniqueKey}
                 query={query}
                 context={props.context}
-                cachedResults={props.cachedResults as HogQLQueryResponse | undefined}
+                cachedResults={props.cachedResults as InsightsQLQueryResponse | undefined}
             />
         )
     } else if (
@@ -219,8 +240,10 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                 presetChartHeight={presetChartHeight}
             />
         )
+    } else if (visualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
+        component = <TwoDimensionalHeatmap />
     } else if (visualizationType === ChartDisplayType.BoldNumber) {
-        component = <HogQLBoldNumber />
+        component = <InsightsQLBoldNumber />
     }
 
     return (
@@ -248,7 +271,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                                                 key="date-range"
                                                 query={query.source}
                                                 setQuery={(query) => {
-                                                    if (query.kind === NodeKind.HogQLQuery) {
+                                                    if (query.kind === NodeKind.InsightsQLQuery) {
                                                         setQuerySource(query)
                                                     }
                                                 }}
@@ -292,25 +315,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                 <VariablesForInsight />
 
                 <div className="flex flex-1 flex-row gap-4">
-                    <div className={clsx('w-full h-full flex-1 overflow-auto')}>
-                        {visualizationType !== ChartDisplayType.ActionsTable && responseError ? (
-                            <div className="rounded bg-surface-primary relative flex flex-1 flex-col p-2">
-                                <InsightErrorState
-                                    query={props.query}
-                                    excludeDetail
-                                    title={
-                                        queryCancelled
-                                            ? 'The query was cancelled'
-                                            : response && 'error' in response
-                                              ? (response as any).error
-                                              : responseError
-                                    }
-                                />
-                            </div>
-                        ) : (
-                            component
-                        )}
-                    </div>
+                    <div className="w-full h-full flex-1 overflow-auto">{component}</div>
                 </div>
             </div>
         </div>

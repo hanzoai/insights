@@ -6,7 +6,7 @@
     },
     "listeners": {
         "*:8000": {
-            "pass": "applications/posthog"
+            "pass": "applications/insights"
         },
         "*:8001": {
             "pass": "routes/metrics"
@@ -38,20 +38,20 @@
         ]
     },
     "applications": {
-        "posthog": {
-            "type": "python 3.11",
+        "insights": {
+            "type": "python 3.12",
             "processes": $NGINX_UNIT_APP_PROCESSES,
             "working_directory": "/code",
             "path": ".",
-            "module": "posthog.$NGINX_UNIT_PYTHON_PROTOCOL",
+            "module": "insights.$NGINX_UNIT_PYTHON_PROTOCOL",
             "protocol": "$NGINX_UNIT_PYTHON_PROTOCOL",
             "user": "nobody",
             "limits": {
-                "requests": 7500
+                "requests": $NGINX_UNIT_REQUEST_LIMIT
             }
         },
         "metrics": {
-            "type": "python 3.11",
+            "type": "python 3.12",
             "processes": 1,
             "working_directory": "/code/bin",
             "path": ".",

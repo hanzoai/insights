@@ -1,10 +1,11 @@
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { PaginatedResponse } from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -58,6 +59,7 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
     actions({
         runDataWarehouseSavedQuery: (viewId: string) => ({ viewId }),
         cancelDataWarehouseSavedQuery: (viewId: string) => ({ viewId }),
+        materializeDataWarehouseSavedQuery: (viewId: string) => ({ viewId }),
         revertMaterialization: (viewId: string) => ({ viewId }),
         loadOlderDataModelingJobs: () => {},
         resetDataModelingJobs: () => {},
@@ -77,6 +79,7 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
                     const newView = await api.dataWarehouseSavedQueries.create(view)
 
                     lemonToast.success(`${newView.name ?? 'View'} successfully created`)
+                    globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateSavedView)
 
                     return [...values.dataWarehouseSavedQueries, newView]
                 },
@@ -137,19 +140,20 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
             actions.loadDatabase()
         },
         loadDataModelingJobsSuccess: ({ payload }) => {
-            clearTimeout(cache.dataModelingJobsRefreshTimeout)
-
-            cache.dataModelingJobsRefreshTimeout = setTimeout(() => {
-                if (payload) {
-                    actions.loadDataModelingJobs(payload)
-                }
-            }, REFRESH_INTERVAL)
+            cache.disposables.add(() => {
+                const timeoutId = setTimeout(() => {
+                    if (payload) {
+                        actions.loadDataModelingJobs(payload)
+                    }
+                }, REFRESH_INTERVAL)
+                return () => clearTimeout(timeoutId)
+            }, 'dataModelingJobsRefreshTimeout')
         },
         updateDataWarehouseSavedQuerySuccess: ({ payload }) => {
             // in the case where we are scheduling a materialized view, send an event
             if (payload && payload.lifecycle && payload.sync_frequency) {
                 // this function exists as an upsert, so we need to check if the view was created or updated
-                posthog.capture(`materialized view ${payload.lifecycle === 'update' ? 'updated' : 'created'}`, {
+                insights.capture(`materialized view ${payload.lifecycle === 'update' ? 'updated' : 'created'}`, {
                     sync_frequency: payload.sync_frequency,
                 })
             }
@@ -159,9 +163,14 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
             }
 
             actions.loadDatabase()
+
+            // Toast is handled by dataWarehouseSettingsSceneLogic when needed
         },
         updateDataWarehouseSavedQueryError: () => {
             lemonToast.error('Failed to update view')
+        },
+        deleteDataWarehouseSavedQuerySuccess: () => {
+            lemonToast.success('View deleted')
         },
         runDataWarehouseSavedQuery: async ({ viewId }) => {
             try {
@@ -179,6 +188,19 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
                 actions.loadDataWarehouseSavedQueries()
             } catch {
                 lemonToast.error(`Failed to cancel materialization`)
+            }
+        },
+        materializeDataWarehouseSavedQuery: async ({ viewId }) => {
+            try {
+                await api.dataWarehouseSavedQueries.materialize(viewId)
+                lemonToast.success('View materialized successfully')
+                insights.capture('materialized view created', {
+                    sync_frequency: '24hour',
+                })
+                actions.loadDataWarehouseSavedQueries()
+                actions.loadDatabase()
+            } catch {
+                lemonToast.error(`Failed to materialize view`)
             }
         },
         revertMaterialization: async ({ viewId }) => {
@@ -244,12 +266,9 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
         ],
         hasMoreJobsToLoad: [(s) => [s.dataModelingJobs], (dataModelingJobs) => !!dataModelingJobs?.next],
     }),
-    events(({ actions, cache }) => ({
+    events(({ actions }) => ({
         afterMount: () => {
             actions.loadDataWarehouseSavedQueries()
-        },
-        beforeUnmount: () => {
-            clearTimeout(cache.savedQueriesRefreshTimeout)
         },
     })),
 ])

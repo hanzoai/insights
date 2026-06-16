@@ -167,7 +167,7 @@ describe('CyclotronJobInputsValidation', () => {
 
                 expect(result.valid).toBe(false)
                 expect(result.errors.email).toBe(
-                    'HTML is required, Subject is required, From is required, To is required'
+                    'HTML or plain text is required, Subject is required, From is required, To is required'
                 )
             })
 
@@ -215,7 +215,7 @@ describe('CyclotronJobInputsValidation', () => {
             })
 
             it('should not validate templating for non-liquid languages', () => {
-                const inputs = { template: { value: '{{ invalid }}', templating: 'hog' as const } }
+                const inputs = { template: { value: '{{ invalid }}', templating: 'fn' as const } }
                 const schema: CyclotronJobInputSchemaType[] = [{ key: 'template', type: 'string', label: 'Template' }]
 
                 const result = CyclotronJobInputsValidation.validate(inputs, schema)
@@ -303,7 +303,7 @@ describe('CyclotronJobInputsValidation', () => {
                 expect(Object.keys(result.errors)).toHaveLength(3)
                 expect(result.errors.name).toBe('This field is required')
                 expect(result.errors.age).toBe('Value must be a number')
-                expect(result.errors.email).toContain('HTML is required')
+                expect(result.errors.email).toContain('HTML or plain text is required')
             })
 
             it('should handle mixed valid and invalid inputs', () => {

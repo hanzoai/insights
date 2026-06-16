@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            html {
+                background: black;
+            }
+        </style>
+    </head>
+    <body></body>
+    <script type="module">
+        import createInsightsQLParser from './dist/insightsql_parser_wasm.js'
+
+        createInsightsQLParser()
+            .then((parser) => {
+                console.log('WASM InsightsQL Parser loaded')
+
+                const input = 'select * from users'
+                const result = parser.parseSelect(input, false)
+                console.log('Parse result:', JSON.parse(result))
+            })
+            .catch((e) => {
+                console.log(e)
+            })
+    </script>
+</html>

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from posthog.models.link import Link
+from insights.models.link import Link
 
 
 class LinkAdmin(admin.ModelAdmin):
@@ -23,6 +23,6 @@ class LinkAdmin(admin.ModelAdmin):
     def team_link(self, obj: Link):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[obj.team.pk]),
+            reverse("admin:insights_team_change", args=[obj.team.pk]),
             obj.team.name,
         )

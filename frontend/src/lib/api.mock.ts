@@ -1,7 +1,7 @@
 import apiReal from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 
-import { CurrencyCode } from '~/queries/schema/schema-general'
+import { CurrencyCode, CustomerAnalyticsConfig, NodeKind } from '~/queries/schema/schema-general'
 import {
     AccessControlLevel,
     ActivationTaskStatus,
@@ -37,6 +37,8 @@ type APIMockReturnType = {
         typeof apiReal,
         'create' | 'createResponse' | 'get' | 'getResponse' | 'update' | 'delete'
     >]: jest.Mock<ReturnType<(typeof apiReal)[K]>, Parameters<(typeof apiReal)[K]>>
+} & {
+    cohorts: typeof apiReal.cohorts
 }
 
 export const api = apiReal as any as APIMockReturnType
@@ -47,11 +49,11 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     uuid: MOCK_TEAM_UUID,
     organization: MOCK_ORGANIZATION_ID,
     api_token: 'default-team-api-token',
-    secret_api_token: 'phs_default-team-secret-api-token',
-    secret_api_token_backup: 'phs_default-team-secret-api-token-backup',
-    app_urls: ['https://posthog.com/', 'https://app.posthog.com', 'https://example.com'],
-    recording_domains: ['https://recordings.posthog.com/'],
-    name: 'MockHog App + Marketing',
+    secret_api_token: 'his_default-team-secret-api-token',
+    secret_api_token_backup: 'his_default-team-secret-api-token-backup',
+    app_urls: ['https://hanzo.ai/', 'https://insights.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
+    recording_domains: ['https://recordings.hanzo.ai/'],
+    name: 'MockInsights App + Marketing',
     slack_incoming_webhook: '',
     created_at: '2020-06-30T09:53:35.932534Z',
     updated_at: '2022-03-17T16:09:21.566253Z',
@@ -62,7 +64,7 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
         {
             key: 'email',
             type: PropertyFilterType.Person,
-            value: 'posthog.com',
+            value: 'hanzo.ai',
             operator: PropertyOperator.NotIContains,
         },
     ],
@@ -96,7 +98,6 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     autocapture_exceptions_errors_to_ignore: [],
     effective_membership_level: OrganizationMembershipLevel.Admin,
     user_access_level: AccessControlLevel.Admin,
-    access_control: true,
     group_types: [
         {
             group_type: 'organization',
@@ -194,12 +195,29 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     marketing_analytics_config: {
         sources_map: {},
     },
+    core_events_config: {
+        core_events: [],
+    },
+    customer_analytics_config: {
+        activity_event: { kind: NodeKind.EventsNode, name: '$pageview', event: '$pageview' },
+        signup_pageview_event: {},
+        signup_event: {},
+        subscription_event: {},
+        payment_event: {},
+    } as CustomerAnalyticsConfig,
     base_currency: CurrencyCode.USD,
+    default_evaluation_contexts_enabled: false,
+    managed_viewsets: { revenue_analytics: true },
+    receive_org_level_activity_logs: false,
+    require_evaluation_contexts: false,
+    logs_settings: {
+        capture_console_logs: false,
+    },
 }
 
 export const MOCK_DEFAULT_PROJECT: ProjectType = {
     id: MOCK_TEAM_ID,
-    name: 'MockHog App + Marketing',
+    name: 'MockInsights App + Marketing',
     organization_id: MOCK_ORGANIZATION_ID,
     created_at: '2020-06-30T09:53:35.932534Z',
 }
@@ -207,8 +225,8 @@ export const MOCK_DEFAULT_PROJECT: ProjectType = {
 export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     customer_id: null,
     id: MOCK_ORGANIZATION_ID,
-    name: 'MockHog',
-    slug: 'mockhog-fstn',
+    name: 'MockInsights',
+    slug: 'mockinsights-fstn',
     created_at: '2020-09-24T15:05:01.254111Z',
     updated_at: '2022-01-03T13:50:55.369557Z',
     membership_level: OrganizationMembershipLevel.Admin,
@@ -224,6 +242,8 @@ export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     member_count: 2,
     logo_media_id: null,
     default_experiment_stats_method: ExperimentStatsMethod.Bayesian,
+    is_active: true,
+    is_not_active_reason: null,
 }
 
 export const MOCK_DEFAULT_BASIC_USER: UserBasicType = {
@@ -231,7 +251,7 @@ export const MOCK_DEFAULT_BASIC_USER: UserBasicType = {
     uuid: MOCK_USER_UUID,
     distinct_id: 'mock-user-178-distinct-id',
     first_name: 'John',
-    email: 'john.doe@posthog.com',
+    email: 'john.doe@hanzo.ai',
 }
 
 export const MOCK_DEFAULT_USER: UserType = {
@@ -244,8 +264,12 @@ export const MOCK_DEFAULT_USER: UserType = {
         plugin_disabled: false,
         project_weekly_digest_disabled: {},
         all_weekly_digest_disabled: false,
+        error_tracking_issue_assigned: false,
+        error_tracking_weekly_digest: true,
+        discussions_mentioned: false,
     },
     anonymize_data: false,
+    allow_impersonation: true,
     toolbar_mode: 'toolbar',
     has_password: true,
     id: 179,
@@ -255,12 +279,22 @@ export const MOCK_DEFAULT_USER: UserType = {
     is_2fa_enabled: false,
     has_social_auth: false,
     has_sso_enforcement: false,
+    shortcut_position: 'above',
     sensitive_session_expires_at: dayjs().add(1, 'hour').toISOString(),
     theme_mode: null,
     team: MOCK_DEFAULT_TEAM,
     organization: MOCK_DEFAULT_ORGANIZATION,
     organizations: [MOCK_DEFAULT_ORGANIZATION].map(
-        ({ id, name, slug, membership_level, members_can_use_personal_api_keys, allow_publicly_shared_resources }) => ({
+        ({
+            id,
+            name,
+            slug,
+            membership_level,
+            members_can_use_personal_api_keys,
+            allow_publicly_shared_resources,
+            is_active,
+            is_not_active_reason,
+        }) => ({
             id,
             name,
             slug,
@@ -268,6 +302,8 @@ export const MOCK_DEFAULT_USER: UserType = {
             members_can_use_personal_api_keys,
             allow_publicly_shared_resources,
             logo_media_id: null,
+            is_active,
+            is_not_active_reason,
         })
     ),
     events_column_config: {
@@ -291,7 +327,7 @@ export const MOCK_SECOND_BASIC_USER: UserBasicType = {
     uuid: 'bf313676-e728-4221-a975-d8e90b9d168c',
     distinct_id: 'mock-user-202-distinct-id',
     first_name: 'Rose',
-    email: 'rose.dawson@posthog.com',
+    email: 'rose.dawson@hanzo.ai',
 }
 
 export const MOCK_SECOND_ORGANIZATION_MEMBER: OrganizationMemberType = {
@@ -307,7 +343,7 @@ export const MOCK_SECOND_ORGANIZATION_MEMBER: OrganizationMemberType = {
 
 export const MOCK_DEFAULT_ORGANIZATION_INVITE: OrganizationInviteType = {
     id: '83666ba4-4740-4ca3-94d9-d2b6b9b8afa6',
-    target_email: 'test@posthog.com',
+    target_email: 'test@hanzo.ai',
     first_name: '',
     emailing_attempt_made: true,
     is_expired: true,
@@ -377,7 +413,7 @@ export const MOCK_DEFAULT_PLUGIN: PluginType = {
     metrics: {},
     public_jobs: {},
     // urls are hard-coded in frontend/src/scenes/pipeline/utils.tsx so it must be one of those URLs for tests to work
-    url: 'https://github.com/PostHog/downsampling-plugin',
+    url: 'https://github.com/hanzoai/downsampling-plugin',
 }
 
 export const MOCK_DEFAULT_PLUGIN_CONFIG: PluginConfigWithPluginInfo = {

@@ -1,0 +1,326 @@
+from typing import Any, Optional
+
+from insights.test.base import BaseTest
+
+from insights.schema import DateRange, EventPropertyFilter, GroupPropertyFilter, InsightsQLFilters, PersonPropertyFilter
+
+from insights.insightsql import ast
+from insights.insightsql.constants import MAX_SELECT_RETURNED_ROWS
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.errors import QueryError
+from insights.insightsql.filters import replace_filters
+from insights.insightsql.parser import parse_expr, parse_select
+from insights.insightsql.printer import prepare_and_print_ast
+from insights.insightsql.visitor import clear_locations
+
+
+class TestFilters(BaseTest):
+    maxDiff = None
+
+    def _parse_expr(self, expr: str, placeholders: Optional[dict[str, Any]] = None):
+        return clear_locations(parse_expr(expr, placeholders=placeholders))
+
+    def _parse_select(self, select: str, placeholders: Optional[dict[str, Any]] = None):
+        return clear_locations(parse_select(select, placeholders=placeholders))
+
+    def _print_ast(self, node: ast.Expr):
+        return prepare_and_print_ast(
+            node,
+            dialect="insightsql",
+            context=InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+        )[0]
+
+    def test_replace_filters_empty(self):
+        select = replace_filters(self._parse_select("SELECT event FROM events"), InsightsQLFilters(), self.team)
+        self.assertEqual(self._print_ast(select), f"SELECT event FROM events LIMIT {MAX_SELECT_RETURNED_ROWS}")
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select), f"SELECT event FROM events WHERE true LIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            None,
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select), f"SELECT event FROM events WHERE true LIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+    def test_raises_when_filters_empty_and_not_events_or_sessions(self):
+        select = self._parse_select("SELECT person FROM persons where {filters}")
+
+        with self.assertRaisesMessage(
+            QueryError,
+            "Cannot use 'filters' placeholder in a SELECT clause that does not select from the events, sessions, logs or groups table.",
+        ):
+            replace_filters(select, None, self.team)
+
+        with self.assertRaisesMessage(
+            QueryError,
+            "Cannot use 'filters' placeholder in a SELECT clause that does not select from the events, sessions, logs or groups table.",
+        ):
+            replace_filters(select, InsightsQLFilters(), self.team)
+
+    def test_raises_when_filters_and_not_events_or_sessions(self):
+        select = self._parse_select("SELECT person FROM persons where {filters}")
+
+        with self.assertRaisesMessage(
+            QueryError,
+            "Cannot use 'filters' placeholder in a SELECT clause that does not select from the events, sessions, logs or groups table.",
+        ):
+            replace_filters(select, InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02")), self.team)
+
+    def test_replace_filters_date_range(self):
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE greaterOrEquals(timestamp, toDateTime('2020-02-02 00:00:00.000000')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_to="2020-02-02")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE less(timestamp, toDateTime('2020-02-02 00:00:00.000000')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02", date_to="2020-02-03 23:59:59")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            "SELECT event FROM events WHERE "
+            "and(less(timestamp, toDateTime('2020-02-03 23:59:59.000000')), "
+            f"greaterOrEquals(timestamp, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        # now with different team timezone
+        self.team.timezone = "America/New_York"
+        self.team.save()
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02", date_to="2020-02-03 23:59:59")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            "SELECT event FROM events WHERE "
+            "and(less(timestamp, toDateTime('2020-02-03 23:59:59.000000')), "
+            f"greaterOrEquals(timestamp, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_date_range_with_timezone(self):
+        # now with different team timezone
+        self.team.timezone = "America/New_York"
+        self.team.save()
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02", date_to="2020-02-03 23:59:59Z")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            "SELECT event FROM events WHERE "
+            "and(less(timestamp, toDateTime('2020-02-03 18:59:59.000000')), "
+            f"greaterOrEquals(timestamp, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_event_property(self):
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(
+                properties=[EventPropertyFilter(key="random_uuid", operator="exact", value="123", type="event")]
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE equals(properties.random_uuid, '123') LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_person_property(self):
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(
+                properties=[PersonPropertyFilter(key="random_uuid", operator="exact", value="123", type="person")]
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE equals(person.properties.random_uuid, '123') LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(
+                properties=[
+                    EventPropertyFilter(key="random_uuid", operator="exact", value="123", type="event"),
+                    PersonPropertyFilter(key="random_uuid", operator="exact", value="123", type="person"),
+                ]
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE and(equals(properties.random_uuid, '123'), equals(person.properties.random_uuid, '123')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_test_accounts(self):
+        self.team.test_account_filters = [
+            {
+                "key": "email",
+                "type": "person",
+                "value": "insights.com",
+                "operator": "not_icontains",
+            }
+        ]
+        self.team.save()
+
+        select = replace_filters(
+            self._parse_select("SELECT event FROM events where {filters}"),
+            InsightsQLFilters(filterTestAccounts=True),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT event FROM events WHERE notILike(toString(person.properties.email), '%hanzo.ai%') LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_groups_empty(self):
+        select = replace_filters(self._parse_select("SELECT group_key FROM groups"), InsightsQLFilters(), self.team)
+        self.assertEqual(self._print_ast(select), f"SELECT group_key FROM groups LIMIT {MAX_SELECT_RETURNED_ROWS}")
+
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select), f"SELECT group_key FROM groups WHERE true LIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            None,
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select), f"SELECT group_key FROM groups WHERE true LIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+    def test_replace_filters_groups_date_range(self):
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT group_key FROM groups WHERE greaterOrEquals(created_at, toDateTime('2020-02-02 00:00:00.000000')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_to="2020-02-02")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT group_key FROM groups WHERE less(created_at, toDateTime('2020-02-02 00:00:00.000000')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02", date_to="2020-02-03 23:59:59")),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            "SELECT group_key FROM groups WHERE "
+            "and(less(created_at, toDateTime('2020-02-03 23:59:59.000000')), "
+            f"greaterOrEquals(created_at, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_groups_property(self):
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(
+                properties=[
+                    GroupPropertyFilter(
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
+                    )
+                ]
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT group_key FROM groups WHERE equals(properties.company_name, 'Insights') LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_groups_multiple_properties(self):
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(
+                properties=[
+                    GroupPropertyFilter(
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
+                    ),
+                    GroupPropertyFilter(
+                        key="industry", operator="exact", value="Software", type="group", group_type_index=0
+                    ),
+                ]
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            f"SELECT group_key FROM groups WHERE and(equals(properties.company_name, 'Insights'), equals(properties.industry, 'Software')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_replace_filters_groups_date_and_properties(self):
+        select = replace_filters(
+            self._parse_select("SELECT group_key FROM groups where {filters}"),
+            InsightsQLFilters(
+                dateRange=DateRange(date_from="2020-02-02"),
+                properties=[
+                    GroupPropertyFilter(
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
+                    )
+                ],
+            ),
+            self.team,
+        )
+        self.assertEqual(
+            self._print_ast(select),
+            "SELECT group_key FROM groups WHERE "
+            "and(equals(properties.company_name, 'Insights'), "
+            f"greaterOrEquals(created_at, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+        )
+
+    def test_raises_when_filters_and_not_supported_table_includes_groups(self):
+        select = self._parse_select("SELECT person FROM persons where {filters}")
+
+        with self.assertRaisesMessage(
+            QueryError,
+            "Cannot use 'filters' placeholder in a SELECT clause that does not select from the events, sessions, logs or groups table.",
+        ):
+            replace_filters(select, InsightsQLFilters(dateRange=DateRange(date_from="2020-02-02")), self.team)

@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { SurveyEditSection, surveyLogic } from 'scenes/surveys/surveyLogic'
 

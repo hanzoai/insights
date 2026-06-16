@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
 import { Spinner } from 'lib/lemon-ui/Spinner'
@@ -16,7 +16,7 @@ import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 
 import { DashboardTemplateType, TemplateAvailabilityContext } from '~/types'
 
-import BlankDashboardHog from 'public/blank-dashboard-hog.png'
+import BlankDashboardMascot from 'public/blank-dashboard-mascot.png'
 
 export function DashboardTemplateChooser({
     scope = 'default',
@@ -44,7 +44,7 @@ export function DashboardTemplateChooser({
                         template={{
                             template_name: 'Blank dashboard',
                             dashboard_description: 'Create a blank dashboard',
-                            image_url: BlankDashboardHog,
+                            image_url: BlankDashboardMascot,
                         }}
                         onClick={() => {
                             if (isLoading) {

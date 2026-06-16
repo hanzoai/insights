@@ -6,8 +6,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { useEffect } from 'react'
 import React from 'react'
 
-import { IconTrending } from '@posthog/icons'
-import { LemonRow, Link } from '@posthog/lemon-ui'
+import { IconTrending } from '@hanzo/icons'
+import { LemonRow, Link } from '@hanzo/lemon-ui'
 
 import { IconFlare, IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
 import { percentage } from 'lib/utils'
@@ -71,7 +71,7 @@ function useBoldNumberTooltip({
                 renderSeries={(value: React.ReactNode) => <span className="font-semibold">{value}</span>}
                 hideColorCol
                 hideInspectActorsSection={!showPersonsModal}
-                groupTypeLabel={groupTypeLabel || aggregationLabel(series?.[0].math_group_type_index).plural}
+                groupTypeLabel={groupTypeLabel || aggregationLabel(series?.[0]?.math_group_type_index).plural}
             />
         )
     }, [isTooltipShown]) // oxlint-disable-line react-hooks/exhaustive-deps
@@ -166,19 +166,19 @@ function BoldNumberComparison({
             ? null
             : (currentValue - previousValue) / Math.abs(previousValue)
 
-    const percentageDiffDisplay =
-        percentageDiff === null
-            ? 'No data for comparison in the'
-            : percentageDiff > 0
-              ? `Up ${percentage(percentageDiff)} from`
-              : percentageDiff < 0
-                ? `Down ${percentage(-percentageDiff)} from`
-                : 'No change from'
+    const hasComparableDiff = percentageDiff !== null && Number.isFinite(percentageDiff)
+    const percentageDiffDisplay = !hasComparableDiff
+        ? 'No data in the'
+        : percentageDiff > 0
+          ? `Up ${percentage(percentageDiff)} from`
+          : percentageDiff < 0
+            ? `Down ${percentage(-percentageDiff)} from`
+            : 'No change from'
 
     return (
         <LemonRow
             icon={
-                percentageDiff === null ? (
+                !hasComparableDiff ? (
                     <IconFlare />
                 ) : percentageDiff > 0 ? (
                     <IconTrending />
@@ -196,7 +196,7 @@ function BoldNumberComparison({
                 {percentageDiffDisplay}{' '}
                 {currentValue === null ? (
                     'current period'
-                ) : previousValue === null || !showPersonsModal ? (
+                ) : previousValue === null || !showPersonsModal || !hasComparableDiff ? (
                     'previous period'
                 ) : (
                     <Link
@@ -228,12 +228,12 @@ function BoldNumberComparison({
     )
 }
 
-export function HogQLBoldNumber(): JSX.Element {
+export function InsightsQLBoldNumber(): JSX.Element {
     const { response, responseLoading, tabularData } = useValues(dataVisualizationLogic)
 
     if (!response || responseLoading) {
         return (
-            <div className="BoldNumber LemonTable HogQL">
+            <div className="BoldNumber LemonTable InsightsQL">
                 <div className="BoldNumber__value">
                     <Textfit min={32} max={120}>
                         Loading...
@@ -251,7 +251,7 @@ export function HogQLBoldNumber(): JSX.Element {
     // If any of the values is null, show empty state
     if (formattedValue === null || directValue === null || resultsValue === null || resultValue === null) {
         return (
-            <div className="LemonTable HogQL">
+            <div className="LemonTable InsightsQL">
                 <InsightEmptyState />
             </div>
         )
@@ -260,7 +260,7 @@ export function HogQLBoldNumber(): JSX.Element {
     const value = formattedValue ?? directValue ?? resultsValue ?? resultValue
 
     return (
-        <div className="BoldNumber LemonTable HogQL">
+        <div className="BoldNumber LemonTable InsightsQL">
             <div className="BoldNumber__value">
                 <Textfit min={32} max={120}>
                     {String(value ?? 'Error')}

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
 import { IconTableChart } from 'lib/lemon-ui/icons'
@@ -24,15 +24,15 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
             icon={<IconTableChart />}
             to={urls.insightNew({ query })}
             sideAction={
-                response && 'hogql' in response && response.hogql
+                response && 'insightsql' in response && response.insightsql
                     ? {
                           dropdown: {
                               overlay: (
                                   <LemonMenuOverlay
                                       items={[
                                           {
-                                              label: 'Open as direct SQL insight',
-                                              to: urls.sqlEditor(response.hogql),
+                                              label: 'Open in SQL editor',
+                                              to: urls.sqlEditor({ query: response.insightsql }),
                                               'data-attr': 'open-sql-editor-button',
                                           },
                                       ]}
@@ -43,6 +43,7 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
                     : undefined
             }
             data-attr="open-json-editor-button"
+            size="small"
         >
             Open as new insight
         </LemonButton>

@@ -1,10 +1,13 @@
 import isEqual from 'lodash.isequal'
 import { ReactNode } from 'react'
 
+import { IconWarning } from '@hanzo/icons'
+import { LemonButtonProps } from '@hanzo/lemon-ui'
+
 import api from 'lib/api'
 import { DataColorTheme, DataColorToken } from 'lib/colors'
 import { dayjs } from 'lib/dayjs'
-import { ensureStringIsNotBlank, humanFriendlyNumber, objectsEqual } from 'lib/utils'
+import { ensureStringIsNotBlank, humanFriendlyNumber, isEmptyObject, isObject, objectsEqual } from 'lib/utils'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { IndexedTrendResult } from 'scenes/trends/types'
 import { urls } from 'scenes/urls'
@@ -16,10 +19,13 @@ import { examples } from '~/queries/examples'
 import {
     ActionsNode,
     BreakdownFilter,
+    DashboardFilter,
     DataWarehouseNode,
     EventsNode,
     FileSystemIconType,
-    HogQLQuery,
+    GroupNode,
+    InsightsQLQuery,
+    InsightsQLVariable,
     InsightVizNode,
     Node,
     NodeKind,
@@ -30,10 +36,11 @@ import {
     ResultCustomizationByValue,
 } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     isDataTableNode,
     isDataWarehouseNode,
     isEventsNode,
+    isGroupNode,
     isInsightVizNode,
 } from '~/queries/utils'
 import { cleanInsightQuery } from '~/scenes/insights/utils/queryUtils'
@@ -68,6 +75,25 @@ export const isAllEventsEntityFilter = (filter: EntityFilter | ActionFilter | nu
     )
 }
 
+export const formatEventName = (name: string | undefined | null): string | undefined => {
+    if (!name) {
+        return
+    }
+
+    // Handle comma-separated event keys (e.g., "$pageview, $exception" from GroupNode)
+    if (name.includes(',')) {
+        return name
+            .split(',')
+            .map((eventName) => {
+                const trimmed = eventName.trim()
+                return CORE_FILTER_DEFINITIONS_BY_GROUP.events?.[trimmed]?.label || trimmed
+            })
+            .join(', ')
+    }
+
+    return CORE_FILTER_DEFINITIONS_BY_GROUP.events?.[name]?.label || name
+}
+
 export const getDisplayNameFromEntityFilter = (
     filter: EntityFilter | ActionFilter | null,
     isCustom = true
@@ -87,20 +113,35 @@ export const getDisplayNameFromEntityFilter = (
 }
 
 export const getDisplayNameFromEntityNode = (
-    node: EventsNode | ActionsNode | DataWarehouseNode,
+    node: EventsNode | ActionsNode | DataWarehouseNode | GroupNode,
     isCustom = true
 ): string | null => {
     // Make sure names aren't blank strings
     const customName = ensureStringIsNotBlank(node?.custom_name)
     let name = ensureStringIsNotBlank(node?.name)
-    if (name && name in CORE_FILTER_DEFINITIONS_BY_GROUP.events) {
+
+    // Handle GroupNode: format comma-separated event names
+    if (isGroupNode(node) && name) {
+        const eventNames = name.split(',').map((eventName) => {
+            const trimmedName = eventName.trim()
+            return CORE_FILTER_DEFINITIONS_BY_GROUP.events?.[trimmedName]?.label || trimmedName
+        })
+        name = eventNames.join(', ')
+    } else if (name && name in CORE_FILTER_DEFINITIONS_BY_GROUP.events) {
         name = CORE_FILTER_DEFINITIONS_BY_GROUP.events[name].label
     }
+
     if (isEventsNode(node) && node.event === null) {
         name = 'All events'
     }
 
-    const id = isDataWarehouseNode(node) ? node.table_name : isEventsNode(node) ? node.event : node.id
+    const id = isDataWarehouseNode(node)
+        ? node.table_name
+        : isEventsNode(node)
+          ? node.event
+          : isGroupNode(node)
+            ? undefined
+            : node.id
 
     // Return custom name. If that doesn't exist then the name, then the id, then just null.
     return (isCustom ? customName : null) ?? name ?? (id ? `${id}` : null)
@@ -169,12 +210,12 @@ export function humanizePathsEventTypes(includeEventTypes: PathsFilter['includeE
             humanEventTypes.push('custom events')
         }
         if (
-            (humanEventTypes.length === 0 && !includeEventTypes.includes(PathType.HogQL)) ||
+            (humanEventTypes.length === 0 && !includeEventTypes.includes(PathType.InsightsQL)) ||
             humanEventTypes.length === 3
         ) {
             humanEventTypes = ['all events']
         }
-        if (includeEventTypes.includes(PathType.HogQL)) {
+        if (includeEventTypes.includes(PathType.InsightsQL)) {
             humanEventTypes.push('SQL expression')
         }
     }
@@ -195,7 +236,7 @@ export function formatAggregationValue(
     if (property && formatPropertyValueForDisplay) {
         formattedValue = formatPropertyValueForDisplay(property, propertyValue)
         // yes, double equals not triple equals  ¯\_(ツ)_/¯ let JS compare strings and numbers however it wants
-        if (formattedValue == propertyValue) {
+        if (String(formattedValue) == String(propertyValue)) {
             // formatPropertyValueForDisplay didn't change the value...
             formattedValue = renderCount(propertyValue)
         }
@@ -209,14 +250,14 @@ export function formatAggregationValue(
 }
 
 // NB! Sync this with breakdown_values.py
-export const BREAKDOWN_OTHER_STRING_LABEL = '$$_posthog_breakdown_other_$$'
+export const BREAKDOWN_OTHER_STRING_LABEL = '$$_insights_breakdown_other_$$'
 export const BREAKDOWN_OTHER_NUMERIC_LABEL = 9007199254740991 // pow(2, 53) - 1
 export const BREAKDOWN_OTHER_DISPLAY = 'Other (i.e. all remaining values)'
-export const BREAKDOWN_NULL_STRING_LABEL = '$$_posthog_breakdown_null_$$'
+export const BREAKDOWN_NULL_STRING_LABEL = '$$_insights_breakdown_null_$$'
 export const BREAKDOWN_NULL_NUMERIC_LABEL = 9007199254740990 // pow(2, 53) - 2
 export const BREAKDOWN_NULL_DISPLAY = 'None (i.e. no value)'
 
-export function isOtherBreakdown(breakdown_value: string | number | null | undefined | ReactNode): boolean {
+export function isOtherBreakdown(breakdown_value: string | number | bigint | null | undefined | ReactNode): boolean {
     return (
         breakdown_value === BREAKDOWN_OTHER_STRING_LABEL ||
         breakdown_value === BREAKDOWN_OTHER_NUMERIC_LABEL ||
@@ -332,7 +373,10 @@ export function formatBreakdownLabel(
         return `${formattedBucketStart} – ${formattedBucketEnd}`
     }
 
-    if (breakdownFilter?.breakdown_type === 'cohort') {
+    const breakdownType =
+        multipleBreakdownIndex != null ? breakdownFilter?.breakdowns?.[multipleBreakdownIndex]?.type : null
+
+    if (breakdownFilter?.breakdown_type === 'cohort' || breakdownType === 'cohort') {
         if (breakdown_value === 'all' || breakdown_value === 0) {
             return 'All Users'
         }
@@ -368,11 +412,17 @@ export function formatBreakdownLabel(
     }
 
     if (typeof breakdown_value == 'string') {
-        return isOtherBreakdown(breakdown_value) || breakdown_value === 'nan'
-            ? BREAKDOWN_OTHER_DISPLAY
-            : isNullBreakdown(breakdown_value) || breakdown_value === ''
-              ? BREAKDOWN_NULL_DISPLAY
-              : breakdown_value
+        const label =
+            isOtherBreakdown(breakdown_value) || breakdown_value === 'nan'
+                ? BREAKDOWN_OTHER_DISPLAY
+                : isNullBreakdown(breakdown_value) || breakdown_value === ''
+                  ? BREAKDOWN_NULL_DISPLAY
+                  : breakdown_value
+
+        if (label.length > 200) {
+            return label.slice(0, 200) + '…'
+        }
+        return label
     }
 
     return ''
@@ -408,16 +458,17 @@ export function getResponseBytes(apiResponse: Response): number {
     return parseInt(apiResponse.headers.get('Content-Length') ?? '0')
 }
 
-export const INSIGHT_TYPE_URLS = {
-    TRENDS: urls.insightNew({ type: InsightType.TRENDS }),
-    STICKINESS: urls.insightNew({ type: InsightType.STICKINESS }),
-    LIFECYCLE: urls.insightNew({ type: InsightType.LIFECYCLE }),
-    FUNNELS: urls.insightNew({ type: InsightType.FUNNELS }),
-    RETENTION: urls.insightNew({ type: InsightType.RETENTION }),
-    PATHS: urls.insightNew({ type: InsightType.PATHS }),
+export const INSIGHT_TYPE_URLS: Record<InsightType | string, string> = {
+    [InsightType.TRENDS]: urls.insightNew({ type: InsightType.TRENDS }),
+    [InsightType.STICKINESS]: urls.insightNew({ type: InsightType.STICKINESS }),
+    [InsightType.LIFECYCLE]: urls.insightNew({ type: InsightType.LIFECYCLE }),
+    [InsightType.FUNNELS]: urls.insightNew({ type: InsightType.FUNNELS }),
+    [InsightType.RETENTION]: urls.insightNew({ type: InsightType.RETENTION }),
+    [InsightType.PATHS]: urls.insightNew({ type: InsightType.PATHS }),
+    [InsightType.WEB_ANALYTICS]: urls.insightNew({ type: InsightType.WEB_ANALYTICS }),
     JSON: urls.insightNew({ query: examples.EventsTableFull }),
-    HOG: urls.insightNew({ query: examples.Hoggonacci }),
-    SQL: urls.sqlEditor((examples.HogQLForDataVisualization as HogQLQuery)['query']),
+    SCRIPT: urls.insightNew({ query: examples.FibonacciScript }),
+    SQL: urls.sqlEditor({ query: (examples.InsightsQLForDataVisualization as InsightsQLQuery)['query'] }),
 }
 
 /** Combines a list of words, separating with the correct punctuation. For example: [a, b, c, d] -> "a, b, c, and d"  */
@@ -714,7 +765,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
     }
 
     let nodeKind: NodeKind
-    if ((isDataTableNode(query) && containsHogQLQuery(query)) || isInsightVizNode(query)) {
+    if ((isDataTableNode(query) && containsInsightsQLQuery(query)) || isInsightVizNode(query)) {
         nodeKind = query.source.kind
     } else {
         nodeKind = query.kind
@@ -728,13 +779,33 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
         [NodeKind.PathsQuery]: 'insight/paths',
         [NodeKind.StickinessQuery]: 'insight/stickiness',
         [NodeKind.LifecycleQuery]: 'insight/lifecycle',
-        [NodeKind.HogQuery]: 'insight/hog',
-        [NodeKind.HogQLQuery]: 'insight/hog',
-        [NodeKind.DataVisualizationNode]: 'insight/hog',
-        [NodeKind.DataTableNode]: 'insight/hog',
+        [NodeKind.ScriptQuery]: 'insight/sql',
+        [NodeKind.InsightsQLQuery]: 'insight/sql',
+        [NodeKind.DataVisualizationNode]: 'insight/sql',
+        [NodeKind.DataTableNode]: 'insight/sql',
     }
 
     const mappedIconType: FileSystemIconType = nodeKindToColor[nodeKind] || 'product_analytics'
 
     return mappedIconType
+}
+
+export const getOverrideWarningPropsForButton = (
+    filtersOverride: DashboardFilter | null | undefined,
+    variablesOverride: Record<string, InsightsQLVariable> | null | undefined
+): Pick<LemonButtonProps, 'icon' | 'tooltip'> => {
+    const filterOverridesExist =
+        isObject(filtersOverride) &&
+        Object.values(filtersOverride).some((value) => value !== null && (!Array.isArray(value) || value.length > 0))
+    const variableOverridesExist = isObject(variablesOverride) && !isEmptyObject(variablesOverride)
+
+    const overrideType =
+        filterOverridesExist && variableOverridesExist ? 'overrides' : filterOverridesExist ? 'filters' : 'variables'
+
+    return filterOverridesExist || variableOverridesExist
+        ? {
+              icon: <IconWarning />,
+              tooltip: `This insight is being viewed with dashboard ${overrideType}. These will be discarded on edit.`,
+          }
+        : {}
 }

@@ -1,0 +1,79 @@
+{
+    "name": "Hubspot",
+    "url": "https://github.com/hanzoai/hubspot-plugin",
+    "description": "Send contact data to Hubspot on Insights identify events.",
+    "main": "index.ts",
+    "config": [
+        {
+            "key": "hubspotAccessToken",
+            "hint": "Can be acquired under Profile Preferences -> Integrations -> Private Apps",
+            "name": "Hubspot Access Token",
+            "type": "string",
+            "default": "",
+            "required": true,
+            "secret": true
+        },
+        {
+            "key": "triggeringEvents",
+            "hint": "A comma-separated list of Insights events you want to trigger Contact creation in HubSpot. By default, we recommend using the $identify event.",
+            "name": "Triggering events",
+            "type": "string",
+            "default": "$identify",
+            "required": true
+        },
+        {
+            "key": "additionalPropertyMappings",
+            "hint": "A mapping of additional Insights event or person properties to map to newly created Hubspot Contacts. Provide a comma-separated mapping of: personPropertyName:hubSpotPropertyName",
+            "name": "Additional Insights to HubSpot property mappings",
+            "type": "string",
+            "default": "",
+            "required": false
+        },
+        {
+            "key": "ignoredEmails",
+            "hint": "A comma-separated list of email domains to ignore and not create contacts for in Hubspot.",
+            "name": "Email domains to skip",
+            "type": "string",
+            "default": "",
+            "required": false
+        },
+        {
+            "key": "insightsUrl",
+            "hint": "Deprecated",
+            "name": "Insights Instance",
+            "type": "string",
+            "default": "https://insights.hanzo.ai",
+            "required": false
+        },
+        {
+            "key": "insightsApiKey",
+            "hint": "Deprecated",
+            "name": "Insights API Key",
+            "type": "string",
+            "default": "",
+            "secret": true,
+            "required": false
+        },
+        {
+            "key": "insightsProjectKey",
+            "hint": "Deprecated",
+            "name": "Project API Key",
+            "type": "string",
+            "default": "",
+            "secret": false,
+            "required": false
+        },
+        {
+            "key": "syncMode",
+            "hint": "Deprecated",
+            "name": "Debug Mode",
+            "type": "choice",
+            "default": "production",
+            "required": false,
+            "choices": ["production", "debug"]
+        }
+    ],
+    "publicJobs": {
+        "Clear storage": {}
+    }
+}

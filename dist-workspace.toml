@@ -6,7 +6,7 @@ members = ["cargo:./cli"]
 # Skip checking whether the specified configuration files are up to date
 allow-dirty = ["ci"]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.28.2"
+cargo-dist-version = "0.30.4"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
@@ -22,11 +22,11 @@ targets = [
     "x86_64-pc-windows-msvc",
 ]
 # Path that installers should place binaries in
-install-path = "~/.posthog"
+install-path = "~/.insights"
 # Whether to install an updater program
 install-updater = true
 # A namespace to use when publishing this package to the npm registry
-npm-scope = "@posthog"
+npm-scope = "@insights"
 # Publish jobs to run in CI
 publish-jobs = ["npm"]
 unix-archive = ".tar.gz"

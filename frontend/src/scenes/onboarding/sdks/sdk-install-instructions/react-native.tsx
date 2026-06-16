@@ -1,10 +1,9 @@
 import { useValues } from 'kea'
 
-import { LemonDivider, Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { apiHostOrigin } from 'lib/utils/apiHost'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import SetupWizardBanner from './components/SetupWizardBanner'
@@ -19,17 +18,17 @@ function RNInstallSnippet({ includeReplay, includeSurveys }: RNSetupProps): JSX.
     return (
         <CodeSnippet language={Language.Bash}>
             {`# Expo apps
-npx expo install posthog-react-native expo-file-system expo-application expo-device expo-localization${
-                includeReplay ? ` posthog-react-native-session-replay` : ''
+npx expo install insights-react-native expo-file-system expo-application expo-device expo-localization${
+                includeReplay ? ` insights-react-native-session-replay` : ''
             }${includeSurveys ? ` react-native-safe-area-context react-native-svg` : ''}
 
 # Standard React Native apps
-yarn add posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize${
-                includeReplay ? ` posthog-react-native-session-replay` : ''
+yarn add insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize${
+                includeReplay ? ` insights-react-native-session-replay` : ''
             }${includeSurveys ? ` react-native-safe-area-context react-native-svg` : ''}
 # or
-npm i -s posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize${
-                includeReplay ? ` posthog-react-native-session-replay` : ''
+npm i -s insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize${
+                includeReplay ? ` insights-react-native-session-replay` : ''
             }${includeSurveys ? ` react-native-safe-area-context react-native-svg` : ''}
 
 # for iOS
@@ -46,26 +45,26 @@ function RNSetupSnippet({ includeReplay }: RNSetupProps): JSX.Element {
     return (
         <>
             <p>
-                PostHog is most easily used via the <code>PostHogProvider</code> component but if you need to
+                Insights is most easily used via the <code>InsightsProvider</code> component but if you need to
                 instantiate it directly,{' '}
-                <Link to="https://posthog.com/docs/libraries/react-native#without-the-posthogprovider">
+                <Link to="https://hanzo.ai/docs/libraries/react-native#without-the-insightsprovider">
                     check out the docs
                 </Link>{' '}
                 which explain how to do this correctly.
             </p>
             <CodeSnippet language={Language.JSX}>
                 {`// App.(js|ts)
-import { PostHogProvider } from 'posthog-react-native'
+import { InsightsProvider } from 'insights-react-native'
 ...
 
 export function MyApp() {
     return (
-        <PostHogProvider apiKey="${currentTeam?.api_token}" options={{
+        <InsightsProvider apiKey="${currentTeam?.api_token}" options={{
             host: "${url}",
             ${
                 includeReplay
                     ? `
-            // check https://posthog.com/docs/session-replay/installation?tab=React+Native
+            // check https://hanzo.ai/docs/session-replay/installation?tab=React+Native
             // for more config and to learn about how we capture sessions on mobile
             // and what to expect
             enableSessionReplay: true,
@@ -92,7 +91,7 @@ export function MyApp() {
             }
         }}>
             <RestOfApp />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }`}
             </CodeSnippet>
@@ -104,42 +103,33 @@ function RNSetupSurveysProvider(): JSX.Element {
     return (
         <>
             <p>
-                Add PostHogSurveyProvider to your app anywhere inside PostHogProvider. This component fetches surveys.
+                Add InsightsSurveyProvider to your app anywhere inside InsightsProvider. This component fetches surveys.
                 It also acts as the root for where popover surveys are rendered.
             </p>
             <CodeSnippet language={Language.JSX}>
-                {`<PostHogProvider>
-    <PostHogSurveyProvider>{children}</PostHogSurveyProvider>
-</PostHogProvider>`}
+                {`<InsightsProvider>
+    <InsightsSurveyProvider>{children}</InsightsSurveyProvider>
+</InsightsProvider>`}
             </CodeSnippet>
             <p>
-                If you're not using the PostHogProvider, add PostHogSurveyProvider to your app anywhere inside your app
+                If you're not using the InsightsProvider, add InsightsSurveyProvider to your app anywhere inside your app
                 root component.
             </p>
             <CodeSnippet language={Language.JSX}>
                 {`<YourAppRoot>
-  <PostHogSurveyProvider>{children}</PostHogSurveyProvider>
+  <InsightsSurveyProvider>{children}</InsightsSurveyProvider>
 </YourAppRoot>`}
             </CodeSnippet>
-            <p>You can also pass your client instance to the PostHogSurveyProvider.</p>
-            <CodeSnippet language={Language.JSX}>{`<PostHogSurveyProvider client={posthog}>`}</CodeSnippet>
+            <p>You can also pass your client instance to the InsightsSurveyProvider.</p>
+            <CodeSnippet language={Language.JSX}>{`<InsightsSurveyProvider client={insights}>`}</CodeSnippet>
         </>
     )
 }
 
 export function SDKInstallRNInstructions(props: RNSetupProps): JSX.Element {
-    const { isCloudOrDev } = useValues(preflightLogic)
-    const showSetupWizard = !props.hideWizard && isCloudOrDev
     return (
         <>
-            {showSetupWizard && (
-                <>
-                    <h2>Automated Installation</h2>
-                    <SetupWizardBanner integrationName="React Native" />
-                    <LemonDivider label="OR" />
-                    <h2>Manual Installation</h2>
-                </>
-            )}
+            <SetupWizardBanner integrationName="React Native" hide={props.hideWizard} />
             <h3>Install</h3>
             <RNInstallSnippet includeReplay={props.includeReplay} includeSurveys={props.includeSurveys} />
             <h3>Configure</h3>

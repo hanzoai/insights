@@ -2,7 +2,6 @@ import Fuse from 'fuse.js'
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { combineUrl } from 'kea-router'
-import { RenderedRows } from 'react-virtualized/dist/es/List'
 
 import api from 'lib/api'
 import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterLogic'
@@ -17,14 +16,21 @@ import {
     TaxonomicFilterGroupType,
 } from 'lib/components/TaxonomicFilter/types'
 import { isEmail, isURL } from 'lib/utils'
+import { mapGroupQueryResponse } from 'lib/utils/groups'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
-import { CohortType, EventDefinition } from '~/types'
+import { CohortType, EventDefinition, GroupTypeIndex } from '~/types'
 
 import { teamLogic } from '../../../scenes/teamLogic'
 import { captureTimeToSeeData } from '../../internalMetrics'
 import { getItemGroup } from './InfiniteList'
 import type { infiniteListLogicType } from './infiniteListLogicType'
+
+export interface RowInfo {
+    startIndex: number
+    stopIndex: number
+    overscanStopIndex: number
+}
 
 /*
  by default the pop-up starts open for the first item in the list
@@ -75,10 +81,11 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
     props({ showNumericalPropsOnly: false } as InfiniteListLogicProps),
     key((props) => `${props.taxonomicFilterLogicKey}-${props.listGroupType}`),
     path((key) => ['lib', 'components', 'TaxonomicFilter', 'infiniteListLogic', key]),
+
     connect((props: InfiniteListLogicProps) => ({
         values: [
             taxonomicFilterLogic(props),
-            ['searchQuery', 'value', 'groupType', 'taxonomicGroups'],
+            ['searchQuery', 'value', 'groupType', 'taxonomicGroups', 'topMatchItems'],
             teamLogic,
             ['currentTeamId'],
         ],
@@ -95,11 +102,12 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
         moveDown: true,
         setIndex: (index: number) => ({ index }),
         setLimit: (limit: number) => ({ limit }),
-        onRowsRendered: (rowInfo: RenderedRows) => ({ rowInfo }),
+        onRowsRendered: (rowInfo: RowInfo) => ({ rowInfo }),
         loadRemoteItems: (options: LoaderOptions) => options,
         updateRemoteItem: (item: TaxonomicDefinitionTypes) => ({ item }),
         expand: true,
         abortAnyRunningQuery: true,
+        setHasMore: (hasMore: boolean) => ({ hasMore }),
     }),
     loaders(({ actions, values, cache, props }) => ({
         remoteItems: [
@@ -123,11 +131,16 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                         excludedProperties,
                         listGroupType,
                         propertyAllowList,
+                        minSearchQueryLength,
                     } = values
 
                     if (!remoteEndpoint) {
-                        // should not have been here in the first place!
                         return createEmptyListStorage(swappedInQuery || searchQuery)
+                    }
+
+                    const effectiveQuery = swappedInQuery || searchQuery
+                    if (minSearchQueryLength > 0 && effectiveQuery.length < minSearchQueryLength) {
+                        return createEmptyListStorage(effectiveQuery)
                     }
 
                     const searchParams = {
@@ -148,21 +161,49 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     const start = performance.now()
                     actions.abortAnyRunningQuery()
 
-                    const [response, expandedCountResponse] = await Promise.all([
-                        // get the list of results
-                        fetchCachedListResponse(
-                            scopedRemoteEndpoint && !isExpanded ? scopedRemoteEndpoint : remoteEndpoint,
-                            searchParams
-                        ),
-                        // if this is an unexpanded scoped list, get the count for the full list
-                        scopedRemoteEndpoint && !isExpanded
-                            ? fetchCachedListResponse(remoteEndpoint, {
-                                  ...searchParams,
-                                  limit: 1,
-                                  offset: 0,
-                              })
-                            : null,
-                    ])
+                    let response: any
+                    let expandedCountResponse: any = null
+
+                    // Querying groups from /groups/ endpoint may result in query timeouts. Let's query clickhouse instead
+                    const isGroupNamesFilter = values.listGroupType.startsWith(
+                        TaxonomicFilterGroupType.GroupNamesPrefix
+                    )
+                    if (isGroupNamesFilter && values.group?.groupTypeIndex !== undefined) {
+                        const groupsResponse = await api.groups.listClickhouse({
+                            group_type_index: values.group.groupTypeIndex as GroupTypeIndex,
+                            search: swappedInQuery || searchQuery || '',
+                            limit,
+                        })
+
+                        const transformedGroups = mapGroupQueryResponse(groupsResponse)
+                        response = {
+                            results: transformedGroups,
+                            count: transformedGroups.length,
+                        }
+                        actions.setHasMore(groupsResponse.hasMore || false)
+                        if (scopedRemoteEndpoint && !isExpanded) {
+                            expandedCountResponse = { count: transformedGroups.length }
+                        }
+                    } else {
+                        // Use the original REST API for non-groups endpoints
+                        const [apiResponse, expandedApiResponse] = await Promise.all([
+                            // get the list of results
+                            fetchCachedListResponse(
+                                scopedRemoteEndpoint && !isExpanded ? scopedRemoteEndpoint : remoteEndpoint,
+                                searchParams
+                            ),
+                            // if this is an unexpanded scoped list, get the count for the full list
+                            scopedRemoteEndpoint && !isExpanded
+                                ? fetchCachedListResponse(remoteEndpoint, {
+                                      ...searchParams,
+                                      limit: 1,
+                                      offset: 0,
+                                  })
+                                : null,
+                        ])
+                        response = apiResponse
+                        expandedCountResponse = expandedApiResponse
+                    }
                     breakpoint()
 
                     const queryChanged = values.remoteItems.searchQuery !== (swappedInQuery || searchQuery)
@@ -223,8 +264,6 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     if (props.listGroupType === TaxonomicFilterGroupType.EventProperties && isURL(searchQuery)) {
                         return '$current_url'
                     }
-                    // TODO not everyone will call this email 🤷
-                    // but this is an obvious option to add
                     if (props.listGroupType === TaxonomicFilterGroupType.PersonProperties && isEmail(searchQuery)) {
                         return 'email'
                     }
@@ -250,6 +289,7 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
         startIndex: [0, { onRowsRendered: (_, { rowInfo: { startIndex } }) => startIndex }],
         stopIndex: [0, { onRowsRendered: (_, { rowInfo: { stopIndex } }) => stopIndex }],
         isExpanded: [false, { expand: () => true }],
+        hasMore: [false, { setHasMore: (_, { hasMore }) => hasMore }],
     })),
     selectors({
         listGroupType: [(_, p) => [p.listGroupType], (listGroupType) => listGroupType],
@@ -264,6 +304,7 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                 taxonomicGroups.find((g) => g.type === listGroupType) as TaxonomicFilterGroup,
         ],
         remoteEndpoint: [(s) => [s.group], (group) => group?.endpoint || null],
+        minSearchQueryLength: [(s) => [s.group], (group) => group?.minSearchQueryLength ?? 0],
         excludedProperties: [(s) => [s.group], (group) => group?.excludedProperties],
         propertyAllowList: [(s) => [s.group], (group) => group?.propertyAllowList],
         scopedRemoteEndpoint: [(s) => [s.group], (group) => group?.scopedEndpoint || null],
@@ -315,7 +356,7 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
             (rawLocalItems, taxonomicGroups, group): ListFuse => {
                 // maps e.g. "selector" to its display value "CSS Selector"
                 // so a search of "css" matches something
-                function asPostHogName(
+                function asInsightsName(
                     g: TaxonomicFilterGroup,
                     item: EventDefinition | CohortType
                 ): string | undefined {
@@ -326,13 +367,13 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     const itemGroup = getItemGroup(item, taxonomicGroups, group)
                     return {
                         name: itemGroup?.getName?.(item) || '',
-                        posthogName: asPostHogName(itemGroup, item),
+                        insightsName: asInsightsName(itemGroup, item),
                         item: item,
                     }
                 })
 
                 return new Fuse(haystack, {
-                    keys: ['name', 'posthogName'],
+                    keys: ['name', 'insightsName'],
                     threshold: 0.3,
                 })
             },
@@ -366,12 +407,24 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                 return createEmptyListStorage()
             },
         ],
+        topMatchesForQuery: [
+            (s) => [s.localItems, s.remoteItems, s.swappedInQuery, s.searchQuery, s.hasRemoteDataSource],
+            (localItems, remoteItems, swappedInQuery, searchQuery, hasRemoteDataSource): TaxonomicDefinitionTypes[] => {
+                if (!searchQuery) {
+                    return []
+                }
+                const remoteIsFresh = remoteItems.searchQuery === (swappedInQuery || searchQuery)
+                const results = hasRemoteDataSource ? (remoteIsFresh ? remoteItems.results : []) : localItems.results
+                return results.slice(0, 3)
+            },
+        ],
         items: [
-            (s) => [s.remoteItems, s.localItems],
-            (remoteItems, localItems) => {
+            (s) => [s.remoteItems, s.localItems, s.listGroupType, s.topMatchItems],
+            (remoteItems, localItems, listGroupType, topMatchItems) => {
+                const topMatches = listGroupType === TaxonomicFilterGroupType.SuggestedFilters ? topMatchItems : []
                 return {
-                    results: [...localItems.results, ...remoteItems.results],
-                    count: localItems.count + remoteItems.count,
+                    results: [...localItems.results, ...remoteItems.results, ...topMatches],
+                    count: localItems.count + remoteItems.count + topMatches.length,
                     searchQuery: remoteItems.searchQuery || localItems.searchQuery,
                     originalQuery: remoteItems.originalQuery || localItems.originalQuery,
                     expandedCount: remoteItems.expandedCount,
@@ -423,8 +476,13 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
         setSearchQuery: async () => {
             if (values.hasRemoteDataSource) {
                 actions.loadRemoteItems({ offset: 0, limit: values.limit })
-            } else if (props.autoSelectItem) {
-                actions.setIndex(0)
+            } else {
+                if (props.autoSelectItem) {
+                    actions.setIndex(0)
+                }
+                if (props.listGroupType !== TaxonomicFilterGroupType.SuggestedFilters) {
+                    actions.infiniteListResultsReceived(props.listGroupType, values.localItems)
+                }
             }
         },
         setEventOrdering: async () => {
@@ -450,12 +508,22 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
             if (values.isExpandableButtonSelected) {
                 actions.expand()
             } else {
-                actions.selectItem(
-                    values.group,
-                    values.selectedItemValue,
-                    values.selectedItem,
-                    values.swappedInQuery ? values.searchQuery : undefined
-                )
+                const selectedItem = values.selectedItem
+                const itemGroup = getItemGroup(selectedItem, values.taxonomicGroups, values.group)
+                const isDisabledItem = selectedItem && itemGroup?.getIsDisabled?.(selectedItem)
+
+                if (!isDisabledItem) {
+                    const itemValue = selectedItem ? itemGroup?.getValue?.(selectedItem) : null
+                    const isTopMatchItem =
+                        values.listGroupType === TaxonomicFilterGroupType.SuggestedFilters &&
+                        itemGroup.type !== values.listGroupType
+                    actions.selectItem(
+                        itemGroup,
+                        itemValue ?? null,
+                        selectedItem,
+                        isTopMatchItem ? undefined : values.swappedInQuery ? values.searchQuery : undefined
+                    )
+                }
             }
         },
         loadRemoteItemsSuccess: ({ remoteItems }) => {
@@ -465,13 +533,19 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
             actions.loadRemoteItems({ offset: values.index, limit: values.limit })
         },
         abortAnyRunningQuery: () => {
-            if (cache.abortController) {
-                cache.abortController.abort()
-            }
-            cache.abortController = new AbortController()
+            // Remove any existing abort controller
+            cache.disposables.dispose('abortController')
+
+            // Add new abort controller
+            cache.disposables.add(() => {
+                const abortController = new AbortController()
+                // Store reference in cache for the fetch operation to use
+                cache.abortController = abortController
+                return () => abortController.abort()
+            }, 'abortController')
         },
     })),
-    events(({ actions, values, props }) => ({
+    events(({ actions, values, props, cache }) => ({
         afterMount: () => {
             if (values.hasRemoteDataSource) {
                 actions.loadRemoteItems({ offset: 0, limit: values.limit })
@@ -479,6 +553,17 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                 const { value, group, results } = values
                 actions.setIndex(results.findIndex((r) => group?.getValue?.(r) === value))
             }
+
+            // Clean up all cache timers to prevent memory leaks
+            cache.disposables.add(() => {
+                return () => {
+                    Object.values(apiCacheTimers).forEach((timerId) => {
+                        window.clearTimeout(timerId)
+                    })
+                }
+            }, 'apiCacheTimersCleanup')
         },
     })),
+
+    // Note: API cache timers are automatically cleaned up by the disposables plugin (configured in afterMount)
 ])

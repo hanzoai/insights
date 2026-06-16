@@ -1,9 +1,14 @@
-import { actions, kea, listeners, path } from 'kea'
-import posthog from 'posthog-js'
+import { actions, kea, listeners, path, reducers } from 'kea'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
+import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { BehavioralFilterKey } from 'scenes/cohorts/CohortFilters/types'
+import { createCohortFormData } from 'scenes/cohorts/cohortUtils'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
+import { BehavioralEventType, CohortType, FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
 import type { issueActionsLogicType } from './issueActionsLogicType'
 
@@ -26,84 +31,147 @@ export const issueActionsLogic = kea<issueActionsLogicType>([
         updateIssueStatus: (id: string, status: ErrorTrackingIssue['status']) => ({ id, status }),
         updateIssueName: (id: string, name: string) => ({ id, name }),
         updateIssueDescription: (id: string, description: string) => ({ id, description }),
+        createIssueCohort: (id: string, name: string, description: string) => ({ id, name, description }),
 
-        mutationSuccess: () => {},
-        mutationFailure: (error: unknown) => ({ error }),
+        mutationSuccess: (mutationName: string) => ({ mutationName }),
+        mutationFailure: (mutationName: string, error: unknown) => ({ mutationName, error }),
+        clearNeedsReload: true,
+    }),
+
+    reducers({
+        needsReload: [
+            false,
+            {
+                mutationSuccess: () => true,
+                clearNeedsReload: () => false,
+            },
+        ],
     }),
 
     listeners(({ actions }) => {
-        async function runMutation(cb: () => Promise<void>): Promise<void> {
+        async function runMutation(mutationName: string, cb: () => Promise<void>): Promise<void> {
             try {
                 await cb()
-                actions.mutationSuccess()
+                actions.mutationSuccess(mutationName)
             } catch (e: unknown) {
-                actions.mutationFailure(e)
+                actions.mutationFailure(mutationName, e)
             }
         }
         return {
             mergeIssues: async ({ ids }) => {
                 const [firstId, ...otherIds] = ids
                 if (firstId && otherIds.length > 0) {
-                    await runMutation(async () => {
-                        posthog.capture('error_tracking_issue_merged', { primary: firstId })
+                    await runMutation('mergeIssues', async () => {
+                        insights.capture('error_tracking_issue_merged', { primary: firstId })
                         await api.errorTracking.mergeInto(firstId, otherIds)
                     })
                 }
             },
             splitIssue: async ({ id, fingerprints, exclusive }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_split', { issueId: id })
+                await runMutation('splitIssues', async () => {
+                    insights.capture('error_tracking_issue_split', { issueId: id })
                     await api.errorTracking.split(id, fingerprints, exclusive)
                 })
             },
             resolveIssues: async ({ ids }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_bulk_resolve')
+                await runMutation('resolveIssues', async () => {
+                    insights.capture('error_tracking_issue_bulk_resolve')
                     await api.errorTracking.bulkMarkStatus(ids, 'resolved')
                 })
+
+                globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.ResolveFirstError)
             },
             suppressIssues: async ({ ids }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_bulk_suppress')
+                await runMutation('suppressIssues', async () => {
+                    insights.capture('error_tracking_issue_bulk_suppress')
                     await api.errorTracking.bulkMarkStatus(ids, 'suppressed')
                 })
             },
             activateIssues: async ({ ids }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_bulk_activate')
+                await runMutation('activateIssues', async () => {
+                    insights.capture('error_tracking_issue_bulk_activate')
                     await api.errorTracking.bulkMarkStatus(ids, 'active')
                 })
             },
             assignIssues: async ({ ids, assignee }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_bulk_assign')
+                await runMutation('assignIssues', async () => {
+                    insights.capture('error_tracking_issue_bulk_assign')
                     await api.errorTracking.bulkAssign(ids, assignee)
                 })
             },
             updateIssueAssignee: async ({ id, assignee }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_update_assignee')
+                await runMutation('updateIssueAssignee', async () => {
+                    insights.capture('error_tracking_issue_update_assignee')
                     await api.errorTracking.assignIssue(id, assignee)
                 })
             },
             updateIssueStatus: async ({ id, status }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_update_status')
+                await runMutation('updateIssueStatus', async () => {
+                    insights.capture('error_tracking_issue_update_status')
                     await api.errorTracking.updateIssue(id, { status })
                 })
             },
             updateIssueName: async ({ id, name }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_update_name')
+                await runMutation('updateIssueName', async () => {
+                    insights.capture('error_tracking_issue_update_name')
                     await api.errorTracking.updateIssue(id, { name })
                 })
             },
             updateIssueDescription: async ({ id, description }) => {
-                await runMutation(async () => {
-                    posthog.capture('error_tracking_issue_update_description')
+                await runMutation('updateIssueDescription', async () => {
+                    insights.capture('error_tracking_issue_update_description')
                     await api.errorTracking.updateIssue(id, { description })
+                })
+            },
+            createIssueCohort: async ({ id, name, description }) => {
+                await runMutation('createIssueCohort', async () => {
+                    let cohortParams = createCohortParams(name, description, id)
+                    let formData = createCohortFormData(cohortParams)
+                    let cohort = await api.cohorts.create(formData as Partial<CohortType>)
+                    insights.capture('error_tracking_issue_create_cohort', {
+                        issueId: id,
+                        cohortId: cohort.id,
+                    })
+                    await api.errorTracking.assignCohort(id, cohort.id)
                 })
             },
         }
     }),
 ])
+
+function createCohortParams(name: string, description: string, issueId: string): CohortType {
+    return {
+        id: 'new',
+        name,
+        description,
+        groups: [],
+        filters: {
+            properties: {
+                type: FilterLogicalOperator.Or,
+                values: [
+                    {
+                        type: FilterLogicalOperator.Or,
+                        values: [
+                            {
+                                key: '$exception',
+                                type: BehavioralFilterKey.Behavioral,
+                                value: BehavioralEventType.PerformEvent,
+                                negation: false,
+                                event_type: TaxonomicFilterGroupType.Events,
+                                event_filters: [
+                                    {
+                                        key: '$exception_issue_id',
+                                        type: PropertyFilterType.Event,
+                                        value: [issueId],
+                                        operator: PropertyOperator.Exact,
+                                    },
+                                ],
+                                explicit_datetime: '-30d',
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    }
+}

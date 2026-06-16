@@ -7,22 +7,31 @@ import {
 
 import { RecordingSnapshot } from '~/types'
 
-import { createSegments } from './segmenter'
+import { createSegments, mapSnapshotsToWindowId } from './segmenter'
 
 describe('segmenter', () => {
     it('matches snapshots', () => {
         const snapshots = convertSnapshotsResponse(sortedRecordingSnapshots().snapshot_data_by_window_id)
+        const snapshotsByWindowId = mapSnapshotsToWindowId(snapshots)
         const segments = createSegments(
             snapshots,
             dayjs(recordingMetaJson.start_time),
-            dayjs(recordingMetaJson.end_time)
+            dayjs(recordingMetaJson.end_time),
+            null,
+            snapshotsByWindowId
         )
 
         expect(segments).toMatchSnapshot()
     })
 
     it('segments a default buffer based on start and end', () => {
-        const segments = createSegments([], dayjs('2023-01-01T00:00:00.000Z'), dayjs('2023-01-01T00:10:00.000Z'))
+        const segments = createSegments(
+            [],
+            dayjs('2023-01-01T00:00:00.000Z'),
+            dayjs('2023-01-01T00:10:00.000Z'),
+            null,
+            {}
+        )
 
         expect(segments).toEqual([
             {
@@ -42,13 +51,14 @@ describe('segmenter', () => {
         const end = dayjs('2023-01-01T00:10:00.000Z')
 
         const snapshots: RecordingSnapshot[] = [
-            { windowId: 'A', timestamp: start.valueOf(), type: 3, data: {} } as any,
-            { windowId: 'A', timestamp: start.valueOf() + 100, type: 3, data: {} } as any,
-            { windowId: 'B', timestamp: end.valueOf() - 100, type: 3, data: {} } as any,
-            { windowId: 'B', timestamp: end.valueOf(), type: 3, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf(), type: 3, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf() + 100, type: 3, data: {} } as any,
+            { windowId: 2, timestamp: end.valueOf() - 100, type: 3, data: {} } as any,
+            { windowId: 2, timestamp: end.valueOf(), type: 3, data: {} } as any,
         ]
 
-        const segments = createSegments(snapshots, start, end)
+        const snapshotsByWindowId = mapSnapshotsToWindowId(snapshots)
+        const segments = createSegments(snapshots, start, end, null, snapshotsByWindowId)
 
         expect(segments).toMatchSnapshot()
     })
@@ -58,14 +68,15 @@ describe('segmenter', () => {
         const end = dayjs('2023-01-01T00:10:00.000Z')
 
         const snapshots: RecordingSnapshot[] = [
-            { windowId: 'A', timestamp: start.valueOf(), type: 3, data: {} } as any,
-            { windowId: 'A', timestamp: start.valueOf() + 100, type: 6, data: {} } as any,
-            { windowId: 'A', timestamp: start.valueOf() + 4000, type: 6, data: {} } as any,
-            { windowId: 'A', timestamp: start.valueOf() + 6000, type: 3, data: {} } as any,
-            { windowId: 'A', timestamp: end.valueOf(), type: 3, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf(), type: 3, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf() + 100, type: 6, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf() + 4000, type: 6, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf() + 6000, type: 3, data: {} } as any,
+            { windowId: 1, timestamp: end.valueOf(), type: 3, data: {} } as any,
         ]
 
-        const segments = createSegments(snapshots, start, end)
+        const snapshotsByWindowId = mapSnapshotsToWindowId(snapshots)
+        const segments = createSegments(snapshots, start, end, null, snapshotsByWindowId)
 
         expect(segments).toMatchSnapshot()
     })
@@ -75,13 +86,14 @@ describe('segmenter', () => {
         const end = start.add(1000, 'milliseconds')
 
         const snapshots: RecordingSnapshot[] = [
-            { windowId: 'A', timestamp: start.valueOf(), type: 2, data: {} } as any,
-            { windowId: 'A', timestamp: start.valueOf() + 100, type: 3, data: {} } as any,
-            { windowId: 'B', timestamp: start.valueOf() + 500, type: 3, data: {} } as any,
-            { windowId: 'B', timestamp: end, type: 3, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf(), type: 2, data: {} } as any,
+            { windowId: 1, timestamp: start.valueOf() + 100, type: 3, data: {} } as any,
+            { windowId: 2, timestamp: start.valueOf() + 500, type: 3, data: {} } as any,
+            { windowId: 2, timestamp: end, type: 3, data: {} } as any,
         ]
 
-        const segments = createSegments(snapshots, start, end)
+        const snapshotsByWindowId = mapSnapshotsToWindowId(snapshots)
+        const segments = createSegments(snapshots, start, end, null, snapshotsByWindowId)
 
         expect(segments).toMatchSnapshot()
     })

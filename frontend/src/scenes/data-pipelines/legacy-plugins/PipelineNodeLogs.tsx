@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSearch } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSnack, LemonTable } from '@posthog/lemon-ui'
+import { IconSearch } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput, LemonSnack, LemonTable } from '@hanzo/lemon-ui'
 
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
 import { pluralize } from 'lib/utils'
@@ -19,7 +19,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
         <div className="flex-1 ph-no-capture deprecated-space-y-2">
             <LemonInput
                 type="search"
-                placeholder="Search for messages containing…"
+                placeholder="Search messages or invocation ID…"
                 fullWidth
                 onChange={setSearchTerm}
                 allowClear

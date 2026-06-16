@@ -3,8 +3,8 @@ import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconArrowCircleRight } from '@posthog/icons'
-import { LemonSnack, Tooltip } from '@posthog/lemon-ui'
+import { IconArrowCircleRight } from '@hanzo/icons'
+import { LemonSnack, Tooltip } from '@hanzo/lemon-ui'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 

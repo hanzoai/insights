@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconCheckCircle } from '@posthog/icons'
-import { LemonModal, LemonSelect } from '@posthog/lemon-ui'
+import { IconCheckCircle } from '@hanzo/icons'
+import { LemonModal, LemonSelect } from '@hanzo/lemon-ui'
 
 import { CLOUD_HOSTNAMES } from 'lib/constants'
 import { LemonField } from 'lib/lemon-ui/LemonField'

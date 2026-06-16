@@ -48,7 +48,7 @@ export const dataThemeLogic = kea<dataThemeLogicType>([
         },
     }),
     selectors({
-        posthogTheme: [
+        insightsTheme: [
             (s) => [s.themes],
             (themes) => {
                 if (!themes) {
@@ -59,15 +59,17 @@ export const dataThemeLogic = kea<dataThemeLogicType>([
             },
         ],
         defaultTheme: [
-            (s) => [s.currentTeam, s.themes, s.posthogTheme],
-            (currentTeam, themes, posthogTheme): DataColorThemeModel | null => {
-                if (!currentTeam || !themes) {
+            (s) => [s.currentTeam, s.themes, s.insightsTheme],
+            (currentTeam, themes, insightsTheme): DataColorThemeModel | null => {
+                if (!themes) {
                     return null
                 }
 
-                // use the posthog theme unless someone set a specfic theme for the team
-                const environmentTheme = themes.find((theme) => theme.id === currentTeam.default_data_theme)
-                return environmentTheme || posthogTheme || null
+                // use the insights theme unless someone set a specific theme for the team
+                const environmentTheme = themes.find(
+                    (theme) => !currentTeam || theme.id === currentTeam.default_data_theme
+                )
+                return environmentTheme || insightsTheme || null
             },
         ],
         getTheme: [
@@ -121,6 +123,10 @@ export const dataThemeLogic = kea<dataThemeLogicType>([
         ],
     }),
     afterMount(({ actions }) => {
-        actions.loadThemes()
+        if (typeof window !== 'undefined' && window.INSIGHTS_RENDER_QUERY_PAYLOAD?.themes) {
+            actions.setThemes(window.INSIGHTS_RENDER_QUERY_PAYLOAD?.themes)
+        } else {
+            actions.loadThemes()
+        }
     }),
 ])

@@ -7,7 +7,7 @@ import { urls } from 'scenes/urls'
 
 import { mswDecorator } from '~/mocks/browser'
 import { toPaginatedResponse } from '~/mocks/handlers'
-import { ActionType } from '~/types'
+import { AccessControlLevel, ActionType } from '~/types'
 
 const MOCK_ACTION: ActionType = {
     id: 1,
@@ -24,7 +24,7 @@ const MOCK_ACTION: ActionType = {
             text_matching: null,
             href: null,
             href_matching: 'contains',
-            url: 'posthog.com/pricing',
+            url: 'hanzo.ai/pricing',
             url_matching: 'contains',
         },
         {
@@ -36,6 +36,24 @@ const MOCK_ACTION: ActionType = {
             href_matching: 'contains',
             url: null,
             url_matching: 'contains',
+        },
+        {
+            event: '$screen',
+            properties: [
+                {
+                    key: '$screen_name',
+                    value: 'HomeScreen',
+                    operator: 'exact',
+                    type: 'event',
+                },
+            ] as any,
+            selector: null,
+            text: null,
+            text_matching: null,
+            href: null,
+            href_matching: 'contains',
+            url: null,
+            url_matching: null,
         },
         {
             event: '$identify',
@@ -62,6 +80,61 @@ const MOCK_ACTION: ActionType = {
     is_calculating: false,
     last_calculated_at: '2024-05-21T12:57:50.894221Z',
     pinned_at: null,
+    user_access_level: AccessControlLevel.Editor,
+}
+
+const MOCK_SCREEN_ACTION: ActionType = {
+    id: 2,
+    name: 'Mobile Screen Views',
+    description: 'Tracks key screen views in the mobile app',
+    tags: ['mobile'],
+    post_to_slack: false,
+    slack_message_format: '',
+    steps: [
+        {
+            event: '$screen',
+            properties: [
+                {
+                    key: '$screen_name',
+                    value: 'HomeScreen',
+                    operator: 'exact',
+                    type: 'event',
+                },
+            ] as any,
+            selector: null,
+            text: null,
+            text_matching: null,
+            href: null,
+            href_matching: 'contains',
+            url: null,
+            url_matching: null,
+        },
+        {
+            event: '$screen',
+            properties: [
+                {
+                    key: '$screen_name',
+                    value: 'Settings',
+                    operator: 'icontains',
+                    type: 'event',
+                },
+            ] as any,
+            selector: null,
+            text: null,
+            text_matching: null,
+            href: null,
+            href_matching: 'contains',
+            url: null,
+            url_matching: null,
+        },
+    ],
+    created_at: '2024-05-21T12:57:50.907581Z',
+    created_by: MOCK_DEFAULT_BASIC_USER,
+    deleted: false,
+    is_calculating: false,
+    last_calculated_at: '2024-05-21T12:57:50.894221Z',
+    pinned_at: null,
+    user_access_level: AccessControlLevel.Editor,
 }
 
 const meta: Meta = {
@@ -76,8 +149,9 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/actions/': toPaginatedResponse([MOCK_ACTION]),
+                '/api/projects/:team_id/actions/': toPaginatedResponse([MOCK_ACTION, MOCK_SCREEN_ACTION]),
                 '/api/projects/:team_id/actions/1/': MOCK_ACTION,
+                '/api/projects/:team_id/actions/2/': MOCK_SCREEN_ACTION,
             },
         }),
     ],
@@ -90,5 +164,17 @@ export const ActionsList: Story = {}
 export const Action: Story = {
     parameters: {
         pageUrl: urls.action(MOCK_ACTION.id),
+    },
+}
+
+export const ScreenAction: Story = {
+    parameters: {
+        pageUrl: urls.action(MOCK_SCREEN_ACTION.id),
+    },
+}
+
+export const NewAction: Story = {
+    parameters: {
+        pageUrl: urls.createAction(),
     },
 }

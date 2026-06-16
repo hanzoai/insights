@@ -36,7 +36,7 @@ describe('toolbar featureFlagsLogic', () => {
 
     beforeEach(() => {
         initKeaTests()
-        toolbarConfigLogic({ apiURL: 'http://localhost' }).mount()
+        toolbarConfigLogic.build({ apiURL: 'http://localhost' }).mount()
         logic = flagsToolbarLogic()
         logic.mount()
         logic.actions.getUserFlags()
@@ -50,14 +50,14 @@ describe('toolbar featureFlagsLogic', () => {
         })
     })
 
-    it('uses posthog client values if present', async () => {
+    it('uses insights client values if present', async () => {
         const flags = {
             'flag 1': false,
             'flag 2': true,
             'flag 3': 'value',
         }
         await expectLogic(logic, () => {
-            logic.actions.setFeatureFlagValueFromPostHogClient(Object.keys(flags), flags)
+            logic.actions.setFeatureFlagValueFromInsightsClient(Object.keys(flags), flags)
         }).toMatchValues({
             userFlags: featureFlags,
             searchTerm: '',

@@ -20,7 +20,7 @@ describe('breadcrumbsLogic', () => {
         sceneLogic({ scenes }).mount()
     })
 
-    it('sets document.title', async () => {
+    it('sets document.title when page is visible', async () => {
         expect(global.document.title).toEqual('')
 
         logic = breadcrumbsLogic()
@@ -28,11 +28,31 @@ describe('breadcrumbsLogic', () => {
 
         // test with .delay because subscriptions happen async
         router.actions.push(urls.savedInsights())
-        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Product analytics • PostHog' })
-        expect(global.document.title).toEqual('Product analytics • PostHog')
+        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Product analytics • Insights' })
+        expect(global.document.title).toEqual('Product analytics • Insights')
 
         router.actions.push(urls.dashboards())
-        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Dashboards • PostHog' })
-        expect(global.document.title).toEqual('Dashboards • PostHog')
+        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Dashboards • Insights' })
+        expect(global.document.title).toEqual('Dashboards • Insights')
+    })
+
+    it('defers document.title update when page is hidden', async () => {
+        logic = breadcrumbsLogic()
+        logic.mount()
+
+        router.actions.push(urls.savedInsights())
+        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Product analytics • Insights' })
+        expect(global.document.title).toEqual('Product analytics • Insights')
+
+        Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true })
+
+        router.actions.push(urls.dashboards())
+        await expectLogic(logic).delay(1).toMatchValues({ documentTitle: 'Dashboards • Insights' })
+        expect(global.document.title).toEqual('Product analytics • Insights')
+
+        Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true })
+        document.dispatchEvent(new Event('visibilitychange'))
+
+        expect(global.document.title).toEqual('Dashboards • Insights')
     })
 })

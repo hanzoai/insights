@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { PageHeader } from 'lib/components/PageHeader'
+import { IconDatabaseBolt } from '@hanzo/icons'
+
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
@@ -9,6 +10,8 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { DebugSceneQuery } from 'scenes/debug/DebugSceneQuery'
 import { SceneExport } from 'scenes/sceneTypes'
 
+import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { stringifiedExamples } from '~/queries/examples'
 
 import { debugSceneLogic } from './debugSceneLogic'
@@ -19,34 +22,44 @@ export function DebugScene(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
 
     return (
-        <div className="QueryScene">
-            <PageHeader
-                buttons={
+        <SceneContent className="QueryScene">
+            <SceneTitleSection
+                name="Debug"
+                resourceType={{ type: 'debug', forceIcon: <IconDatabaseBolt /> }}
+                actions={
                     <>
-                        <LemonButton active={!!query2} onClick={() => (query2 ? setQuery2('') : setQuery2(query1))}>
+                        <LemonButton
+                            size="small"
+                            active={!!query2}
+                            onClick={() => (query2 ? setQuery2('') : setQuery2(query1))}
+                        >
                             Split
                         </LemonButton>
                         <LemonButton
-                            active={query1 === stringifiedExamples.HogQLRaw}
-                            onClick={() => setQuery1(stringifiedExamples.HogQLRaw)}
+                            size="small"
+                            active={query1 === stringifiedExamples.InsightsQLRaw}
+                            onClick={() => setQuery1(stringifiedExamples.InsightsQLRaw)}
                         >
                             SQL Debug
                         </LemonButton>
-                        {featureFlags[FEATURE_FLAGS.HOG] ? (
+                        {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
                             <LemonButton
-                                active={query1 === stringifiedExamples.Hoggonacci}
-                                onClick={() => setQuery1(stringifiedExamples.Hoggonacci)}
+                                size="small"
+                                active={query1 === stringifiedExamples.FibonacciScript}
+                                onClick={() => setQuery1(stringifiedExamples.FibonacciScript)}
                             >
-                                Hog
+                                Script
                             </LemonButton>
                         ) : null}
                         <LemonButton
-                            active={query1 === stringifiedExamples.HogQLTable}
-                            onClick={() => setQuery1(stringifiedExamples.HogQLTable)}
+                            size="small"
+                            active={query1 === stringifiedExamples.InsightsQLTable}
+                            onClick={() => setQuery1(stringifiedExamples.InsightsQLTable)}
                         >
                             SQL Table
                         </LemonButton>
                         <LemonButton
+                            size="small"
                             active={query1 === stringifiedExamples.Events}
                             onClick={() => setQuery1(stringifiedExamples.Events)}
                         >
@@ -54,9 +67,10 @@ export function DebugScene(): JSX.Element {
                         </LemonButton>
                         <LemonLabel>
                             <LemonSelect
+                                size="small"
                                 placeholder="More sample queries"
                                 options={Object.entries(stringifiedExamples)
-                                    .filter(([k]) => k !== 'HogQLTable' && k !== 'HogQLRaw')
+                                    .filter(([k]) => k !== 'InsightsQLTable' && k !== 'InsightsQLRaw')
                                     .map(([k, v]) => {
                                         return { label: k, value: v }
                                     })}
@@ -70,17 +84,18 @@ export function DebugScene(): JSX.Element {
                     </>
                 }
             />
+
             <div className="flex gap-2">
                 <div className="flex-1 w-1/2">
-                    <DebugSceneQuery query={query1} setQuery={setQuery1} queryKey="new-hogql-debug-1" />
+                    <DebugSceneQuery query={query1} setQuery={setQuery1} queryKey="new-insightsql-debug-1" />
                 </div>
                 {query2 ? (
                     <div className="flex-1 w-1/2">
-                        <DebugSceneQuery query={query2} setQuery={setQuery2} queryKey="new-hogql-debug-2" />
+                        <DebugSceneQuery query={query2} setQuery={setQuery2} queryKey="new-insightsql-debug-2" />
                     </div>
                 ) : null}
             </div>
-        </div>
+        </SceneContent>
     )
 }
 

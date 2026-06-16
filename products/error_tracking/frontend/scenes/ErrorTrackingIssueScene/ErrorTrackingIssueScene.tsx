@@ -1,32 +1,59 @@
-import './ErrorTrackingIssueScene.scss'
+import '../ErrorTrackingIssueScene/ErrorTrackingIssueScene.scss'
 
-import { useActions, useValues } from 'kea'
-import { router } from 'kea-router'
+import { BindLogic, useActions, useValues } from 'kea'
+import insights from '@hanzo/insights'
+import { useEffect } from 'react'
+import { useRef } from 'react'
 
-import { IconEllipsis } from '@posthog/icons'
+import { IconFilter, IconList, IconSearch } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
-import { PageHeader } from 'lib/components/PageHeader'
+import { Resizer } from 'lib/components/Resizer/Resizer'
+import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
+import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
+import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
+import { IconRobot } from 'lib/lemon-ui/icons'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from 'lib/ui/DropdownMenu/DropdownMenu'
+    TabsPrimitive,
+    TabsPrimitiveContent,
+    TabsPrimitiveList,
+    TabsPrimitiveTrigger,
+} from 'lib/ui/TabsPrimitive/TabsPrimitive'
 import { SceneExport } from 'scenes/sceneTypes'
-import { urls } from 'scenes/urls'
 
-import { SceneBreadcrumbBackButton } from '~/layout/scenes/components/SceneBreadcrumbs'
+import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
+import { InsightsSDKIssueBanner } from '../../components/Banners/InsightsSDKIssueBanner'
+import { BreakdownsChart } from '../../components/Breakdowns/BreakdownsChart'
+import { BreakdownsSearchBar } from '../../components/Breakdowns/BreakdownsSearchBar'
+import { MiniBreakdowns } from '../../components/Breakdowns/MiniBreakdowns'
+import { miniBreakdownsLogic } from '../../components/Breakdowns/miniBreakdownsLogic'
 import { EventsTable } from '../../components/EventsTable/EventsTable'
 import { ExceptionCard } from '../../components/ExceptionCard'
+import { StackTraceActions } from '../../components/ExceptionCard/Tabs/StackTraceTab/StackTraceActions'
+import { StatusIndicator } from '../../components/Indicators'
 import { ErrorFilters } from '../../components/IssueFilters'
+import { issueFiltersLogic } from '../../components/IssueFilters/issueFiltersLogic'
 import { Metadata } from '../../components/IssueMetadata'
+import { IssueStatusButton } from '../../components/IssueStatusButton'
+import { IssueTasks } from '../../components/IssueTasks'
 import { ErrorTrackingSetupPrompt } from '../../components/SetupPrompt/SetupPrompt'
+import { StyleVariables } from '../../components/StyleVariables'
 import { useErrorTagRenderer } from '../../hooks/use-error-tag-renderer'
 import { ErrorTrackingIssueScenePanel } from './ScenePanel'
-import { ErrorTrackingIssueSceneLogicProps, errorTrackingIssueSceneLogic } from './errorTrackingIssueSceneLogic'
+import { IssueAssigneeSelect } from './ScenePanel/IssueAssigneeSelect'
+import { SimilarIssuesList } from './ScenePanel/SimilarIssuesList'
+import {
+    ErrorTrackingIssueSceneCategory,
+    errorTrackingIssueSceneConfigurationLogic,
+} from './errorTrackingIssueSceneConfigurationLogic'
+import {
+    ERROR_TRACKING_ISSUE_SCENE_LOGIC_KEY,
+    ErrorTrackingIssueSceneLogicProps,
+    errorTrackingIssueSceneLogic,
+} from './errorTrackingIssueSceneLogic'
 
 export const scene: SceneExport<ErrorTrackingIssueSceneLogicProps> = {
     component: ErrorTrackingIssueScene,
@@ -35,69 +62,225 @@ export const scene: SceneExport<ErrorTrackingIssueSceneLogicProps> = {
 }
 
 export function ErrorTrackingIssueScene(): JSX.Element {
-    const { issue, issueId, issueLoading, selectedEvent, initialEventLoading } = useValues(errorTrackingIssueSceneLogic)
-    const { selectEvent } = useActions(errorTrackingIssueSceneLogic)
-    const tagRenderer = useErrorTagRenderer()
-    const hasIssueSplitting = useFeatureFlag('ERROR_TRACKING_ISSUE_SPLITTING')
+    const { issue, issueId } = useValues(errorTrackingIssueSceneLogic)
+    const { updateAssignee, updateStatus, updateName } = useActions(errorTrackingIssueSceneLogic)
+
+    useEffect(() => {
+        const utmSource = new URLSearchParams(window.location.search).get('utm_source')
+        insights.capture('error_tracking_issue_viewed', {
+            issue_id: issueId,
+            ...(utmSource ? { utm_source: utmSource } : {}),
+        })
+    }, [issueId])
+
     return (
-        <ErrorTrackingSetupPrompt>
-            {hasIssueSplitting && (
-                <PageHeader
-                    buttons={
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <ButtonPrimitive iconOnly>
-                                    <IconEllipsis />
-                                </ButtonPrimitive>
-                            </DropdownMenuTrigger>
+        <StyleVariables>
+            <ErrorTrackingSetupPrompt>
+                <BindLogic logic={issueFiltersLogic} props={{ logicKey: ERROR_TRACKING_ISSUE_SCENE_LOGIC_KEY }}>
+                    <BindLogic logic={miniBreakdownsLogic} props={{ issueId }}>
+                        {issue && (
+                            <div className="flex flex-col h-[calc(var(--scene-layout-rect-height))]">
+                                <SceneTitleSection
+                                    canEdit
+                                    name={issue.name}
+                                    onNameChange={updateName}
+                                    description={null}
+                                    resourceType={{ type: 'error_tracking' }}
+                                    className="px-2 h-[50px] @2xl/main-content:relative top-[0px] mt-0 mx-0"
+                                    actions={
+                                        <div className="flex items-center gap-1">
+                                            <StatusIndicator status={issue.status} withTooltip />
+                                            <IssueAssigneeSelect
+                                                assignee={issue.assignee}
+                                                onChange={updateAssignee}
+                                                disabled={issue.status != 'active'}
+                                            />
+                                            <ViewRecordingsPlaylistButton
+                                                filters={{
+                                                    filter_group: {
+                                                        type: FilterLogicalOperator.And,
+                                                        values: [
+                                                            {
+                                                                type: FilterLogicalOperator.And,
+                                                                values: [
+                                                                    {
+                                                                        key: '$exception_issue_id',
+                                                                        type: PropertyFilterType.Event,
+                                                                        operator: PropertyOperator.Exact,
+                                                                        value: [issue.id],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                }}
+                                                size="small"
+                                                type="secondary"
+                                                data-attr="error-tracking-issue-view-recordings"
+                                            />
+                                            <IssueStatusButton status={issue.status} onChange={updateStatus} />
+                                        </div>
+                                    }
+                                />
 
-                            <DropdownMenuContent loop>
-                                <DropdownMenuItem asChild>
-                                    <ButtonPrimitive
-                                        size="base"
-                                        menuItem
-                                        onClick={() =>
-                                            router.actions.push(urls.errorTrackingIssueFingerprints(issueId))
-                                        }
-                                    >
-                                        Split issue
-                                    </ButtonPrimitive>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    }
+                                <ErrorTrackingIssueScenePanel issue={issue} />
+
+                                <div className="ErrorTrackingIssue flex flex-grow min-h-0 overflow-hidden">
+                                    <div className="flex flex-1 h-full w-full min-h-0">
+                                        <LeftHandColumn />
+                                        <RightHandColumn />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </BindLogic>
+                </BindLogic>
+            </ErrorTrackingSetupPrompt>
+        </StyleVariables>
+    )
+}
+
+const RightHandColumn = (): JSX.Element => {
+    const { issue, issueLoading, selectedEvent, initialEventLoading } = useValues(errorTrackingIssueSceneLogic)
+    const tagRenderer = useErrorTagRenderer()
+
+    return (
+        <div className="flex flex-col flex-1 gap-1 min-h-0 min-w-[375px]">
+            <InsightsSDKIssueBanner event={selectedEvent} />
+            <div className="flex-1 min-h-0 flex flex-col">
+                <ExceptionCard
+                    issueId={issue?.id ?? 'no-issue'}
+                    issueName={issue?.name ?? null}
+                    loading={issueLoading || initialEventLoading}
+                    event={selectedEvent ?? undefined}
+                    label={tagRenderer(selectedEvent)}
+                    renderStackTraceActions={() => {
+                        return issue ? <StackTraceActions issue={issue} /> : null
+                    }}
                 />
-            )}
-            <div className="mb-2 -ml-[var(--button-padding-x-lg)]">
-                <SceneBreadcrumbBackButton />
             </div>
+        </div>
+    )
+}
 
-            <div className="ErrorTrackingIssue grid grid-cols-4 gap-4">
-                <div className="space-y-2 col-span-3">
-                    <ExceptionCard
-                        issue={issue ?? undefined}
-                        issueLoading={issueLoading}
-                        event={selectedEvent ?? undefined}
-                        eventLoading={initialEventLoading}
-                        label={tagRenderer(selectedEvent)}
-                    />
-                    <ErrorFilters.Root>
-                        <div className="flex gap-2 justify-between">
-                            <ErrorFilters.DateRange />
-                            <ErrorFilters.InternalAccounts />
-                        </div>
-                        <ErrorFilters.FilterGroup />
-                    </ErrorFilters.Root>
-                    <Metadata>
-                        <EventsTable
-                            issueId={issueId}
-                            selectedEvent={selectedEvent}
-                            onEventSelect={(selectedEvent) => (selectedEvent ? selectEvent(selectedEvent) : null)}
-                        />
-                    </Metadata>
+const LeftHandColumn = (): JSX.Element => {
+    const { category } = useValues(errorTrackingIssueSceneConfigurationLogic)
+    const { setCategory } = useActions(errorTrackingIssueSceneConfigurationLogic)
+
+    const ref = useRef<HTMLDivElement>(null)
+    const resizerLogicProps: ResizerLogicProps = {
+        containerRef: ref,
+        logicKey: 'error-tracking-issue',
+        persistent: true,
+        placement: 'right',
+    }
+    const { desiredSize } = useValues(resizerLogic(resizerLogicProps))
+    const hasTasks = useFeatureFlag('TASKS')
+    const hasSimilarIssues = useFeatureFlag('ERROR_TRACKING_RELATED_ISSUES')
+
+    return (
+        <div
+            ref={ref}
+            // eslint-disable-next-line react/forbid-dom-props
+            style={{
+                width: desiredSize ?? '30%',
+                minWidth: 320,
+            }}
+            className="flex flex-col h-full relative bg-surface-primary"
+        >
+            <TabsPrimitive
+                value={category}
+                onValueChange={(value) => setCategory(value as ErrorTrackingIssueSceneCategory)}
+                className="flex flex-col flex-1 min-h-0"
+            >
+                <div>
+                    <ScrollableShadows direction="horizontal" className="border-b" hideScrollbars>
+                        <TabsPrimitiveList className="flex space-x-0.5 gap-2">
+                            <TabsPrimitiveTrigger className="flex items-center px-2 py-1.5" value="exceptions">
+                                <IconList className="mr-1" />
+                                <span className="text-nowrap">Exceptions</span>
+                            </TabsPrimitiveTrigger>
+                            <TabsPrimitiveTrigger className="flex items-center px-2 py-1.5" value="breakdowns">
+                                <IconFilter className="mr-1" />
+                                <span className="text-nowrap">Breakdowns</span>
+                            </TabsPrimitiveTrigger>
+                            {hasTasks && (
+                                <TabsPrimitiveTrigger className="flex items-center px-2 py-1.5" value="autofix">
+                                    <IconRobot className="mr-1" />
+                                    <span className="text-nowrap">Autofix</span>
+                                </TabsPrimitiveTrigger>
+                            )}
+                            {hasSimilarIssues && (
+                                <TabsPrimitiveTrigger className="flex items-center px-2 py-1.5" value="similar_issues">
+                                    <IconSearch className="mr-1" />
+                                    <span className="text-nowrap">Similar issues</span>
+                                </TabsPrimitiveTrigger>
+                            )}
+                        </TabsPrimitiveList>
+                    </ScrollableShadows>
                 </div>
-                <ErrorTrackingIssueScenePanel />
+                <TabsPrimitiveContent value="exceptions" className="h-full min-h-0">
+                    <ExceptionsTab />
+                </TabsPrimitiveContent>
+                <TabsPrimitiveContent value="breakdowns" className="flex-1 min-h-0">
+                    <BreakdownsTab />
+                </TabsPrimitiveContent>
+                {hasTasks && (
+                    <TabsPrimitiveContent value="autofix">
+                        <div className="p-2">
+                            <IssueTasks />
+                        </div>
+                    </TabsPrimitiveContent>
+                )}
+                {hasSimilarIssues && (
+                    <TabsPrimitiveContent value="similar_issues" className="flex-1 min-h-0">
+                        <SimilarIssuesList />
+                    </TabsPrimitiveContent>
+                )}
+            </TabsPrimitive>
+
+            <Resizer {...resizerLogicProps} />
+        </div>
+    )
+}
+
+const ExceptionsTab = (): JSX.Element => {
+    const { eventsQuery, eventsQueryKey, selectedEvent } = useValues(errorTrackingIssueSceneLogic)
+    const { selectEvent } = useActions(errorTrackingIssueSceneLogic)
+
+    return (
+        <div className="flex flex-col h-full min-h-0">
+            <div className="px-2 py-3 shrink-0">
+                <ErrorFilters.Root>
+                    <div className="flex gap-2 justify-between flex-wrap">
+                        <ErrorFilters.DateRange />
+                        <ErrorFilters.InternalAccounts />
+                    </div>
+                    <ErrorFilters.FilterGroup />
+                </ErrorFilters.Root>
             </div>
-        </ErrorTrackingSetupPrompt>
+            <LemonDivider className="my-0 shrink-0" />
+            <Metadata className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+                <EventsTable
+                    query={eventsQuery}
+                    queryKey={eventsQueryKey}
+                    selectedEvent={selectedEvent}
+                    onEventSelect={(selectedEvent) => {
+                        if (selectedEvent) {
+                            selectEvent(selectedEvent)
+                        }
+                    }}
+                />
+            </Metadata>
+        </div>
+    )
+}
+const BreakdownsTab = (): JSX.Element => {
+    return (
+        <div className="flex flex-col h-full">
+            <BreakdownsSearchBar />
+            <MiniBreakdowns />
+            <BreakdownsChart />
+        </div>
     )
 }

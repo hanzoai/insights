@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonSnack, LemonTable, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonInput, LemonSelect, LemonSnack, LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
@@ -38,8 +38,7 @@ const featureFlagMatchMapping = {
 
 export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Props): JSX.Element {
     const relatedFlagsLogic = relatedFeatureFlagsLogic({ distinctId, groupTypeIndex, groups })
-    const { filteredMappedFlags, relatedFeatureFlagsLoading, searchTerm, filters, pagination } =
-        useValues(relatedFlagsLogic)
+    const { filteredMappedFlags, isLoading, searchTerm, filters, pagination } = useValues(relatedFlagsLogic)
     const { setSearchTerm, setFilters } = useActions(relatedFlagsLogic)
 
     const columns: LemonTableColumns<RelatedFeatureFlag> = [
@@ -105,7 +104,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                                     If you are using local flag evaluation, you must ensure that you provide any person
                                     properties, groups, or group properties used to evaluate the release conditions of
                                     the flag. Read more in the{' '}
-                                    <Link to="https://posthog.com/docs/feature-flags/local-evaluation#step-3-evaluate-your-feature-flag">
+                                    <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#step-3-evaluate-your-feature-flag">
                                         documentation.
                                     </Link>
                                 </div>
@@ -236,7 +235,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
             </div>
             <LemonTable
                 columns={columns}
-                loading={relatedFeatureFlagsLoading}
+                loading={isLoading}
                 dataSource={filteredMappedFlags}
                 pagination={pagination}
             />

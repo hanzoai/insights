@@ -15,27 +15,39 @@ from temporalio.worker import (
     WorkflowInterceptorClassInput,
 )
 
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.logger import get_write_only_logger
 
 LOGGER = get_write_only_logger(__name__)
 
 
-def get_rows_exported_metric() -> MetricCounter:
-    return activity.metric_meter().create_counter("batch_export_rows_exported", "Number of rows exported.")
+def get_rows_exported_metric(model: str) -> MetricCounter:
+    return (
+        activity.metric_meter()
+        .with_additional_attributes({"batch_export_model": model})
+        .create_counter("batch_export_rows_exported", "Number of rows exported.")
+    )
 
 
-def get_bytes_exported_metric() -> MetricCounter:
-    return activity.metric_meter().create_counter("batch_export_bytes_exported", "Number of bytes exported.")
+def get_bytes_exported_metric(model: str) -> MetricCounter:
+    return (
+        activity.metric_meter()
+        .with_additional_attributes({"batch_export_model": model})
+        .create_counter("batch_export_bytes_exported", "Number of bytes exported.")
+    )
 
 
-def get_export_started_metric() -> MetricCounter:
-    return workflow.metric_meter().create_counter("batch_export_started", "Number of batch exports started.")
-
-
-def get_export_finished_metric(status: str) -> MetricCounter:
+def get_export_started_metric(model: str) -> MetricCounter:
     return (
         workflow.metric_meter()
-        .with_additional_attributes({"status": status})
+        .with_additional_attributes({"batch_export_model": model})
+        .create_counter("batch_export_started", "Number of batch exports started.")
+    )
+
+
+def get_export_finished_metric(status: str, model: str) -> MetricCounter:
+    return (
+        workflow.metric_meter()
+        .with_additional_attributes({"status": status, "batch_export_model": model})
         .create_counter(
             "batch_export_finished", "Number of batch exports finished, for any reason (including failure)."
         )
@@ -43,13 +55,14 @@ def get_export_finished_metric(status: str) -> MetricCounter:
 
 
 BATCH_EXPORT_ACTIVITY_TYPES = {
-    "insert_into_s3_activity_from_stage",
-    "insert_into_snowflake_activity",
-    "insert_into_snowflake_activity_from_stage",
-    "insert_into_bigquery_activity",
-    "insert_into_redshift_activity",
-    "insert_into_postgres_activity",
     "insert_into_internal_stage_activity",
+    "insert_into_s3_activity_from_stage",
+    "insert_into_snowflake_activity_from_stage",
+    "insert_into_redshift_activity",
+    "insert_into_redshift_activity_from_stage",
+    "copy_into_redshift_activity_from_stage",
+    "insert_into_postgres_activity_from_stage",
+    "insert_into_databricks_activity_from_stage",
 }
 BATCH_EXPORT_WORKFLOW_TYPES = {
     "s3-export",
@@ -57,6 +70,7 @@ BATCH_EXPORT_WORKFLOW_TYPES = {
     "snowflake-export",
     "redshift-export",
     "postgres-export",
+    "databricks-export",
 }
 
 Attributes = dict[str, str | int | float | bool]
@@ -82,12 +96,25 @@ class _BatchExportsMetricsActivityInboundInterceptor(ActivityInboundInterceptor)
         if activity_type not in BATCH_EXPORT_ACTIVITY_TYPES:
             return await super().execute_activity(input)
 
-        interval = get_interval_from_bounds(input.args[0].data_interval_start, input.args[0].data_interval_end)
+        try:
+            data_interval_start = input.args[0].data_interval_start
+            data_interval_end = input.args[0].data_interval_end
+            interval = get_interval_from_bounds(data_interval_start, data_interval_end)
+        except AttributeError:
+            try:
+                data_interval_start = input.args[0].batch_export.data_interval_start
+                data_interval_end = input.args[0].batch_export.data_interval_end
+                interval = get_interval_from_bounds(data_interval_start, data_interval_end)
+            except Exception:
+                data_interval_start = None
+                data_interval_end = None
+                interval = None
+
         if not interval:
             LOGGER.error(
                 "Failed to parse interval bounds ('%s', '%s'), will not record latency for '%s'",
-                input.args[0].data_interval_start,
-                input.args[0].data_interval_end,
+                data_interval_start,
+                data_interval_end,
                 activity_type,
             )
             return await super().execute_activity(input)

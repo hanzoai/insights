@@ -1,5 +1,12 @@
+import { LemonTagType } from '@hanzo/lemon-ui'
+
 import { DataVisualizationNode, DatabaseSchemaField, NodeKind } from '~/queries/schema/schema-general'
-import { DataWarehouseSyncInterval, ExternalDataSourceSyncSchema } from '~/types'
+import {
+    DataWarehouseSyncInterval,
+    ExternalDataJobStatus,
+    ExternalDataSourceSyncSchema,
+    InsightsFunctionTemplateType,
+} from '~/types'
 
 export const DATAWAREHOUSE_EDITOR_ITEM_ID = 'new-SQL'
 
@@ -7,8 +14,8 @@ export const defaultQuery = (table: string, columns: DatabaseSchemaField[]): Dat
     return {
         kind: NodeKind.DataVisualizationNode,
         source: {
-            kind: NodeKind.HogQLQuery,
-            // TODO: Use `hogql` tag?
+            kind: NodeKind.InsightsQLQuery,
+            // TODO: Use `insightsql` tag?
             query: `SELECT ${columns
                 .filter(({ table, fields, chain, schema_valid }) => !table && !fields && !chain && schema_valid)
                 .map(({ name }) => name)} FROM ${table === 'numbers' ? 'numbers(0, 10)' : table} LIMIT 100`,
@@ -98,3 +105,36 @@ export const SyncTypeLabelMap: Record<NonNullable<ExternalDataSourceSyncSchema['
     incremental: 'Incremental',
     append: 'Append only',
 }
+
+export const StatusTagSetting: Record<ExternalDataJobStatus, LemonTagType> = {
+    [ExternalDataJobStatus.Running]: 'primary',
+    [ExternalDataJobStatus.Completed]: 'success',
+    [ExternalDataJobStatus.Failed]: 'danger',
+    [ExternalDataJobStatus.BillingLimits]: 'danger',
+    [ExternalDataJobStatus.BillingLimitTooLow]: 'danger',
+}
+
+/**
+ * Checks if a source ID represents a managed source.
+ * Managed sources have IDs prefixed with 'managed-'.
+ */
+export const isManagedSourceId = (id: string): boolean => id.startsWith('managed-')
+
+/**
+ * Checks if a source ID represents a self-managed source.
+ * Self-managed sources have IDs prefixed with 'self-managed-'.
+ */
+export const isSelfManagedSourceId = (id: string): boolean => id.startsWith('self-managed-')
+
+/**
+ * Removes the 'managed-' or 'self-managed-' prefix from a source ID.
+ */
+export const cleanSourceId = (id: string): string => id.replace('self-managed-', '').replace('managed-', '')
+
+/**
+ * Checks if a template represents a managed data warehouse source.
+ * Managed sources (Stripe, Postgres, etc.) have access control.
+ * Self-managed sources (S3, GCS, Azure, R2) do not have access control.
+ */
+export const isManagedSourceTemplate = (template: InsightsFunctionTemplateType): boolean =>
+    template.type === 'source' && !isSelfManagedSourceId(template.id)

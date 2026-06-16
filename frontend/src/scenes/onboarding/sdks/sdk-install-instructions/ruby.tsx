@@ -5,7 +5,7 @@ import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
 function RubyInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>gem "posthog-ruby"</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>gem "insights-ruby"</CodeSnippet>
 }
 
 function RubySetupSnippet(): JSX.Element {
@@ -13,7 +13,7 @@ function RubySetupSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.Ruby}>
-            {`posthog = PostHog::Client.new({
+            {`insights = Insights::Client.new({
     api_key: "${currentTeam?.api_token}",
     host: "${apiHostOrigin()}",
     on_error: Proc.new { |status, msg| print msg }

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonInput, Tooltip } from '@posthog/lemon-ui'
+import { LemonInput, Tooltip } from '@hanzo/lemon-ui'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -51,7 +51,7 @@ export function MovingAverageIntervalsInput(): JSX.Element {
                     suffix={<span>{`${interval}s`}</span>}
                     step={1}
                     disabledReason={
-                        !showMovingAverage ? 'Moving averages are only available for line graphs' : undefined
+                        !showMovingAverage ? 'Moving averages are only available for line and area graphs' : undefined
                     }
                 />
             </div>

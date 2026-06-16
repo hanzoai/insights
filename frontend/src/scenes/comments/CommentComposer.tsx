@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { LemonRichContentEditor } from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
@@ -33,6 +33,7 @@ export const CommentComposer = (props: CommentsLogicProps): JSX.Element => {
     return (
         <div className="deprecated-space-y-2">
             <LemonRichContentEditor
+                key={key}
                 logicKey="discussions"
                 placeholder={placeholder}
                 onCreate={setRichContentEditor}

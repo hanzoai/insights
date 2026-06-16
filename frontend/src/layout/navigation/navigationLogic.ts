@@ -20,7 +20,6 @@ export type ProjectNoticeVariant =
     | 'real_project_with_no_events'
     | 'invite_teammates'
     | 'unverified_email'
-    | 'is_impersonated'
     | 'internet_connection_issue'
     | 'event_ingestion_restriction'
 
@@ -31,13 +30,7 @@ export const navigationLogic = kea<navigationLogicType>([
         actions: [eventUsageLogic, ['reportProjectNoticeDismissed']],
     })),
     actions({
-        openAccountPopover: true,
-        closeAccountPopover: true,
-        toggleAccountPopover: true,
-        toggleProjectSwitcher: true,
-        hideProjectSwitcher: true,
         closeProjectNotice: (projectNoticeVariant: ProjectNoticeVariant) => ({ projectNoticeVariant }),
-        acknowledgeFeaturePreviewChange: true,
     }),
     loaders({
         navigationStatus: [
@@ -57,34 +50,11 @@ export const navigationLogic = kea<navigationLogicType>([
         mobileLayout: (window: Window) => window.innerWidth < 992, // Sync width threshold with Sass variable $lg!
     })),
     reducers({
-        isAccountPopoverOpen: [
-            false,
-            {
-                openAccountPopover: () => true,
-                closeAccountPopover: () => false,
-                toggleAccountPopover: (state) => !state,
-            },
-        ],
-        isProjectSwitcherShown: [
-            false,
-            {
-                toggleProjectSwitcher: (state) => !state,
-                hideProjectSwitcher: () => false,
-            },
-        ],
         projectNoticesAcknowledged: [
             {} as Record<ProjectNoticeVariant, boolean>,
             { persist: true },
             {
                 closeProjectNotice: (state, { projectNoticeVariant }) => ({ ...state, [projectNoticeVariant]: true }),
-            },
-        ],
-        // TODO: Remove this in a while so all users have acknowledged the change
-        featurePreviewChangeAcknowledged: [
-            false,
-            { persist: true },
-            {
-                acknowledgeFeaturePreviewChange: () => true,
             },
         ],
     }),
@@ -131,11 +101,9 @@ export const navigationLogic = kea<navigationLogicType>([
                 }
                 if (internetConnectionIssue) {
                     return 'internet_connection_issue'
-                } else if (user?.is_impersonated) {
-                    return 'is_impersonated'
                 } else if (currentTeam?.is_demo && !preflight?.demo) {
                     // If the project is a demo one, show a project-level warning
-                    // Don't show this project-level warning in the PostHog demo environemnt though,
+                    // Don't show this project-level warning in the Insights demo environemnt though,
                     // as then Announcement is shown instance-wide
                     return 'demo_project'
                 } else if (!user?.is_email_verified && !user?.has_social_auth && preflight?.email_service_available) {

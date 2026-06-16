@@ -5,7 +5,6 @@ import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
 import { LemonTab } from 'lib/lemon-ui/LemonTabs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
-import { groupsSceneLogic } from 'scenes/groups/groupsSceneLogic'
 import { urls } from 'scenes/urls'
 
 import { groupsModel } from '~/models/groupsModel'
@@ -23,7 +22,6 @@ export type PersonsManagementTab = {
 export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>([
     path(['scenes', 'persons-management', 'personsManagementSceneLogic']),
     connect(() => ({
-        actions: [groupsSceneLogic, ['setGroupTypeIndex']],
         values: [
             groupsModel,
             ['aggregationLabel', 'groupTypes', 'groupTypesLoading', 'groupsAccessStatus'],
@@ -39,14 +37,14 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
                     {
                         key: 'persons',
                         url: urls.persons(),
-                        label: 'People',
-                        tooltipDocLink: 'https://posthog.com/docs/data/persons',
+                        label: 'Users',
+                        tooltipDocLink: 'https://hanzo.ai/docs/data/persons',
                     },
                     {
                         key: 'cohorts',
                         url: urls.cohorts(),
                         label: 'Cohorts',
-                        tooltipDocLink: 'https://posthog.com/docs/data/cohorts',
+                        tooltipDocLink: 'https://hanzo.ai/docs/data/cohorts',
                     },
                     ...groupTabs,
                 ]

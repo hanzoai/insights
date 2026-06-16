@@ -2,16 +2,18 @@ import { EventType, PersonType } from '~/types'
 
 export interface ErrorTrackingException {
     stacktrace?: ErrorTrackingRawStackTrace | ErrorTrackingResolvedStackTrace
-    module: string
+    module?: string
     id: string
     type: string
-    value: string
+    value: string // can be an empty string
     mechanism?: {
         synthetic?: boolean
         handled?: boolean
         type: 'generic'
     }
 }
+
+export type ErrorTrackingExceptionList = ErrorTrackingException[]
 
 export type ErrorTrackingRuntime =
     | 'web'
@@ -32,11 +34,12 @@ export type ErrorTrackingRuntime =
     | 'dotnet'
     | 'unknown'
 
-interface ErrorTrackingRawStackTrace {
+export interface ErrorTrackingRawStackTrace {
     type: 'raw'
     frames: any[] // TODO: type more concretely if we end up needing this (right now we show the $cymbal_errors instead)
 }
-interface ErrorTrackingResolvedStackTrace {
+
+export interface ErrorTrackingResolvedStackTrace {
     type: 'resolved'
     frames: ErrorTrackingStackFrame[]
 }
@@ -70,20 +73,25 @@ export interface ErrorTrackingStackFrame {
     lang: string
     resolved: boolean
     resolve_failure: string | null
+    module: string | null
+    code_variables?: Record<string, unknown>
 }
 
 export interface ErrorTrackingFingerprint {
     fingerprint: string
     issue_id: string
+    created_at: string
 }
 
 export interface ErrorTrackingSymbolSet {
     id: string
     ref: string
     team_id: number
+    last_used: string
     created_at: string
     storage_ptr: string | null
     failure_reason: string | null
+    release: ErrorTrackingRelease | null
 }
 
 interface FingerprintFrame {
@@ -120,20 +128,31 @@ export interface ExceptionAttributes {
     level?: string
     url?: string
     handled?: boolean
+    appNamespace?: string
+    appVersion?: string
+}
+
+export interface ReleaseGitMetadata {
+    commit_id?: string
+    remote_url?: string
+    repo_name?: string
+    branch?: string
 }
 
 export interface ErrorTrackingRelease {
     id: string
     metadata?: {
-        git?: {
-            commit_id?: string
-            remote_url?: string
-            repo_name?: string
-            branch?: string
-        }
+        git?: ReleaseGitMetadata
     }
+    project?: string // Only present in recent releases (10-11-2025)
     version: string
-    timestamp: string
+    created_at: string
+}
+
+export interface ErrorTrackingSpikeDetectionConfig {
+    snooze_duration_minutes: number
+    multiplier: number
+    threshold: number
 }
 
 export type SymbolSetStatus = 'valid' | 'invalid'
@@ -142,8 +161,11 @@ export type ErrorEventProperties = EventType['properties']
 export type ErrorEventId = NonNullable<EventType['uuid']>
 
 export type ErrorEventType = {
+    event: '$exception'
     uuid: ErrorEventId
     timestamp: string
+    distinct_id: string
     properties: ErrorEventProperties
     person: PersonType
+    elements?: never
 }

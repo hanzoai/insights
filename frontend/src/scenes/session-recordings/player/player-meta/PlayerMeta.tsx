@@ -3,8 +3,9 @@ import './PlayerMeta.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOption, Link } from '@posthog/lemon-ui'
+import { LemonSelect, LemonSelectOption, Link } from '@hanzo/lemon-ui'
 
+import { Logo } from 'lib/brand/Logo'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
@@ -13,7 +14,6 @@ import { isObject } from 'lib/utils'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
 import { IconWindow } from 'scenes/session-recordings/player/icons'
 import { PlayerMetaLinks } from 'scenes/session-recordings/player/player-meta/PlayerMetaLinks'
-import { playerSettingsLogic } from 'scenes/session-recordings/player/playerSettingsLogic'
 import {
     SessionRecordingPlayerMode,
     sessionRecordingPlayerLogic,
@@ -21,7 +21,6 @@ import {
 import { urls } from 'scenes/urls'
 
 import { getCurrentExporterData } from '~/exporter/exporterViewLogic'
-import { Logo } from '~/toolbar/assets/Logo'
 
 import { PlayerPersonMeta } from './PlayerPersonMeta'
 import { playerMetaLogic } from './playerMetaLogic'
@@ -89,7 +88,6 @@ function URLOrScreen({ url }: { url: unknown }): JSX.Element | null {
 export type PlayerMetaBreakpoints = 'small' | 'normal'
 
 export function PlayerMeta(): JSX.Element {
-    const { isCinemaMode } = useValues(playerSettingsLogic)
     const { logicProps, isFullScreen } = useValues(sessionRecordingPlayerLogic)
 
     const { windowIds, trackedWindow, lastPageviewEvent, currentURL, currentWindowIndex, loading } = useValues(
@@ -114,8 +112,8 @@ export function PlayerMeta(): JSX.Element {
             <div className="PlayerMeta">
                 <div className="flex justify-between items-center m-2">
                     {!whitelabel ? (
-                        <Tooltip title="Powered by PostHog" placement="right">
-                            <Link to="https://posthog.com" className="flex items-center" target="blank">
+                        <Tooltip title="Powered by Insights" placement="right">
+                            <Link to="https://hanzo.ai" className="flex items-center" target="blank">
                                 <Logo />
                             </Link>
                         </Tooltip>
@@ -125,20 +123,20 @@ export function PlayerMeta(): JSX.Element {
         )
     }
 
-    const windowOptions: LemonSelectOption<string | null>[] = [
+    const windowOptions: LemonSelectOption<number | null>[] = [
         {
             label: <IconWindow value={currentWindowIndex} className="text-secondary" />,
             value: null,
             labelInMenu: <>Follow the user</>,
         },
     ]
-    windowIds.forEach((windowId, index) => {
+    windowIds.forEach((windowId) => {
         windowOptions.push({
-            label: <IconWindow value={index + 1} className="text-secondary" />,
+            label: <IconWindow value={windowId} className="text-secondary" />,
             labelInMenu: (
                 <div className="flex flex-row gap-x-1 space-between items-center">
                     Follow window:&nbsp;
-                    <IconWindow value={index + 1} className="text-secondary" />
+                    <IconWindow value={windowId} className="text-secondary" />
                 </div>
             ),
             value: windowId,
@@ -179,7 +177,7 @@ export function PlayerMeta(): JSX.Element {
                         </>
                     )}
                     <div className={clsx('flex-1', size === 'small' ? 'min-w-[1rem]' : 'min-w-[5rem]')} />
-                    {!isCinemaMode && <PlayerMetaLinks size={size} />}
+                    <PlayerMetaLinks size={size} />
                     <PlayerPersonMeta />
                 </div>
             </div>

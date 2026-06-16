@@ -168,9 +168,9 @@
             }
         ],
         "$exception_issue_id": "2845fb04-dbc7-4945-bb58-48d6f77d2015",
-        "$exception_personURL": "http://localhost:8010/project/phc_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7/person/b071a20d-361d-4378-af15-fddf17badd18",
+        "$exception_personURL": "http://localhost:8010/project/hi_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7/person/b071a20d-361d-4378-af15-fddf17badd18",
         "$geoip_disable": true,
-        "$python_version": "3.11.13",
+        "$python_version": "3.12.11",
         "$os": "Mac OS X",
         "$lib_version": "3.21.0",
         "$exception_type": "Exception",
@@ -179,7 +179,7 @@
         "$process_person_profile": false,
         "$python_runtime": "CPython",
         "$transformations_succeeded": ["GeoIP (0195b934-6d98-0000-4d00-8163a218f25c)"],
-        "$lib": "posthog-python",
+        "$lib": "insights-python",
         "$exception_types": ["Exception"],
         "$exception_values": [
             "('Billing service returned bad status code: 500', 'body:', {'type': 'server_error', 'code': 'error', 'detail': 'Error fetching billing information', 'attr': None})"

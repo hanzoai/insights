@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { capitalizeFirstLetter, percentage } from 'lib/utils'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -95,7 +95,7 @@ export function Bar({
                         aria-valuemax={100}
                         aria-valuenow={conversionPercentage * 100}
                     >
-                        {percentage(conversionPercentage, 1, true)}
+                        {percentage(conversionPercentage, 2, true)}
                     </div>
                 )}
             </div>

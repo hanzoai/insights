@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { objectCleanWithEmpty } from 'lib/utils'
 import { transformLegacyHiddenLegendKeys } from 'scenes/funnels/funnelUtils'
@@ -12,9 +12,11 @@ import {
     isTrendsFilter,
 } from 'scenes/insights/sharedUtils'
 
+import { ProductAnalyticsInsightNodeKind } from '~/queries/nodes/InsightQuery/defaults'
 import {
     ActionsNode,
     AnalyticsQueryResponseBase,
+    AnyEntityNode,
     BreakdownFilter,
     CompareFilter,
     DataWarehouseNode,
@@ -24,7 +26,7 @@ import {
     FunnelPathsFilter,
     FunnelsFilter,
     FunnelsQuery,
-    InsightNodeKind,
+    GroupNode,
     InsightQueryNode,
     InsightsQueryBase,
     LifecycleFilter,
@@ -52,25 +54,27 @@ import {
     BaseMathType,
     CalendarHeatmapMathType,
     DataWarehouseFilter,
+    EntityTypes,
     FilterType,
     FunnelExclusionLegacy,
     FunnelMathType,
     FunnelsFilterType,
     GroupMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightType,
     PathsFilterType,
     RetentionEntity,
     RetentionFilterType,
     TrendsFilterType,
     isDataWarehouseFilter,
+    isGroupFilter,
 } from '~/types'
 
 import { cleanEntityProperties, cleanGlobalProperties } from './cleanProperties'
 
 const insightTypeToNodeKind: Record<
-    Exclude<InsightType, InsightType.JSON | InsightType.SQL | InsightType.HOG>,
-    InsightNodeKind
+    Exclude<InsightType, InsightType.JSON | InsightType.SQL | InsightType.SCRIPT | InsightType.WEB_ANALYTICS>,
+    ProductAnalyticsInsightNodeKind
 > = {
     [InsightType.TRENDS]: NodeKind.TrendsQuery,
     [InsightType.FUNNELS]: NodeKind.FunnelsQuery,
@@ -85,7 +89,7 @@ const actorsOnlyMathTypes = [
     BaseMathType.WeeklyActiveUsers,
     BaseMathType.MonthlyActiveUsers,
     GroupMathType.UniqueGroup,
-    HogQLMathType.HogQL,
+    InsightsQLMathType.InsightsQL,
 ]
 
 const funnelsMathTypes = [FunnelMathType.FirstTimeForUser, FunnelMathType.FirstTimeForUserWithFilters]
@@ -97,14 +101,15 @@ export type FilterTypeActionsAndEvents = {
     actions?: ActionFilter[]
     data_warehouse?: DataWarehouseFilter[]
     new_entity?: ActionFilter[]
+    groups?: ActionFilter[]
 }
 
 export const legacyEntityToNode = (
     entity: ActionFilter | DataWarehouseFilter,
     includeProperties: boolean,
     mathAvailability: MathAvailability
-): EventsNode | ActionsNode | DataWarehouseNode => {
-    let shared: Partial<EventsNode | ActionsNode | DataWarehouseNode> = {
+): AnyEntityNode | GroupNode => {
+    let shared: Partial<EventsNode | ActionsNode | DataWarehouseNode | GroupNode> = {
         name: entity.name || undefined,
         custom_name: entity.custom_name || undefined,
     }
@@ -117,6 +122,16 @@ export const legacyEntityToNode = (
             distinct_id_field: entity.distinct_id_field || undefined,
             table_name: entity.table_name || undefined,
         } as DataWarehouseNode
+    }
+
+    if (isGroupFilter(entity)) {
+        shared = {
+            ...shared,
+            operator: entity.operator || undefined,
+            nodes: (entity.nestedFilters || []).map((v) =>
+                legacyEntityToNode(v as ActionFilter | DataWarehouseFilter, includeProperties, mathAvailability)
+            ),
+        } as GroupNode
     }
 
     if (includeProperties) {
@@ -157,7 +172,7 @@ export const legacyEntityToNode = (
                 math: entity.math || 'total',
                 math_property: entity.math_property,
                 math_property_type: entity.math_property_type,
-                math_hogql: entity.math_hogql,
+                math_insightsql: entity.math_insightsql,
                 math_group_type_index: entity.math_group_type_index,
             } as any
         }
@@ -176,6 +191,13 @@ export const legacyEntityToNode = (
             objectCleanWithEmpty({
                 kind: NodeKind.DataWarehouseNode,
                 id: entity.id,
+                ...shared,
+            })
+        ) as any
+    } else if (entity.type === EntityTypes.GROUPS) {
+        return setLatestVersionsOnQuery(
+            objectCleanWithEmpty({
+                kind: NodeKind.GroupNode,
                 ...shared,
             })
         ) as any
@@ -202,12 +224,31 @@ export const exlusionEntityToNode = (
     }
 }
 
-export const actionsAndEventsToSeries = (
-    { actions, events, data_warehouse, new_entity }: FilterTypeActionsAndEvents,
+type FilterTypeActionsAndEventsWithGroups = FilterTypeActionsAndEvents & { groups: ActionFilter[] }
+type FilterTypeActionsAndEventsWithoutGroups = Omit<FilterTypeActionsAndEvents, 'groups'> & { groups?: undefined }
+
+export function actionsAndEventsToSeries(
+    filters: FilterTypeActionsAndEventsWithGroups,
     includeProperties: boolean,
     includeMath: MathAvailability
-): (EventsNode | ActionsNode | DataWarehouseNode)[] => {
-    const series: any = [...(actions || []), ...(events || []), ...(data_warehouse || []), ...(new_entity || [])]
+): (AnyEntityNode | GroupNode)[]
+export function actionsAndEventsToSeries(
+    filters: FilterTypeActionsAndEventsWithoutGroups,
+    includeProperties: boolean,
+    includeMath: MathAvailability
+): AnyEntityNode[]
+export function actionsAndEventsToSeries(
+    { actions, events, data_warehouse, new_entity, groups }: FilterTypeActionsAndEvents,
+    includeProperties: boolean,
+    includeMath: MathAvailability
+): (AnyEntityNode | GroupNode)[] {
+    const series: (AnyEntityNode | GroupNode)[] = [
+        ...(actions || []),
+        ...(events || []),
+        ...(data_warehouse || []),
+        ...(new_entity || []),
+        ...(groups || []),
+    ]
         .sort((a, b) => (a.order || b.order ? (!a.order ? -1 : !b.order ? 1 : a.order - b.order) : 0))
         .map((f) => legacyEntityToNode(f, includeProperties, includeMath))
 
@@ -285,7 +326,7 @@ const strToBool = (value: any): boolean | undefined => {
 
 export const filtersToQueryNode = (filters: Partial<FilterType>): InsightQueryNode => {
     const captureException = (message: string): void => {
-        posthog.captureException(new Error(message), { filters, DataExploration: true })
+        insights.captureException(new Error(message), { filters, DataExploration: true })
     }
 
     if (!filters.insight) {
@@ -320,9 +361,9 @@ export const filtersToQueryNode = (filters: Partial<FilterType>): InsightQueryNo
             includeMath = MathAvailability.FunnelsOnly
         }
 
-        const { events, actions, data_warehouse } = filters
+        const { events, actions, data_warehouse, groups } = filters
         query.series = actionsAndEventsToSeries(
-            { actions, events, data_warehouse } as any,
+            { actions, events, data_warehouse, groups } as any,
             includeProperties,
             includeMath
         )
@@ -448,7 +489,7 @@ export const funnelsFilterToQuery = (filters: Partial<FunnelsFilterType>): Funne
                 : undefined,
         layout: filters.layout,
         hiddenLegendBreakdowns: hiddenLegendKeysToBreakdowns(filters.hidden_legend_keys),
-        funnelAggregateByHogQL: filters.funnel_aggregate_by_hogql,
+        funnelAggregateByInsightsQL: filters.funnel_aggregate_by_insightsql,
     })
 }
 
@@ -468,7 +509,7 @@ export const retentionFilterToQuery = (filters: Partial<RetentionFilterType>): R
 
 export const pathsFilterToQuery = (filters: Partial<PathsFilterType>): PathsFilter => {
     return objectCleanWithEmpty({
-        pathsHogQLExpression: filters.paths_hogql_expression,
+        pathsInsightsQLExpression: filters.paths_insightsql_expression,
         includeEventTypes: filters.include_event_types,
         startPoint: filters.start_point,
         endPoint: filters.end_point,
@@ -535,4 +576,13 @@ export const compareFilterToQuery = (filters: Record<string, any>): CompareFilte
         compare: filters.compare,
         compare_to: filters.compare_to,
     })
+}
+
+/** Expand GroupNodes into individual EventsNode/ActionsNode for insight types that don't support GroupNode */
+export const expandGroupNodes = (
+    series: (EventsNode | ActionsNode | DataWarehouseNode | GroupNode)[]
+): (EventsNode | ActionsNode | DataWarehouseNode)[] => {
+    return series.flatMap((item) =>
+        item.kind === NodeKind.GroupNode ? (item.nodes as (EventsNode | ActionsNode | DataWarehouseNode)[]) : [item]
+    )
 }

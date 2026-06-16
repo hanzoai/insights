@@ -1,35 +1,41 @@
-import { IconPerson } from '@posthog/icons'
+import { IconPerson } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconExclamation, IconRobot } from 'lib/lemon-ui/icons'
 import { isObject } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 
 import { ConversationMessagesDisplay } from 'products/llm_analytics/frontend/ConversationDisplay/ConversationMessagesDisplay'
 import { LLMInputOutput } from 'products/llm_analytics/frontend/LLMInputOutput'
+import { AIDataLoading } from 'products/llm_analytics/frontend/components/AIDataLoading'
+import { useAIData } from 'products/llm_analytics/frontend/hooks/useAIData'
 import { normalizeMessages } from 'products/llm_analytics/frontend/utils'
 
 export function AIEventExpanded({ event }: { event: Record<string, any> }): JSX.Element {
-    let input = event.properties.$ai_input_state
-    let output = event.properties.$ai_output_state ?? event.properties.$ai_error
-    let raisedError = event.properties.$ai_is_error
-    if (event.event === '$ai_generation') {
-        input = event.properties.$ai_input
-        output = event.properties.$ai_output_choices ?? event.properties.$ai_output
-        raisedError = event.properties.$ai_is_error
+    const { input, output, isLoading } = useAIData({
+        uuid: event.uuid,
+        input: event.properties?.$ai_input,
+        output: event.properties?.$ai_output_choices,
+    })
+
+    const isGeneration = event.event === '$ai_generation'
+    const raisedError = event.properties.$ai_is_error
+
+    if (isLoading) {
+        return <AIDataLoading variant="block" />
     }
+
     return (
         <div>
-            {event.event === '$ai_generation' ? (
+            {isGeneration ? (
                 <ConversationMessagesDisplay
-                    inputNormalized={normalizeMessages(event.properties.$ai_input, 'user', event.properties.$ai_tools)}
-                    outputNormalized={normalizeMessages(
-                        event.properties.$ai_output_choices ?? event.properties.$ai_output,
-                        'assistant'
-                    )}
+                    inputNormalized={normalizeMessages(input, 'user', event.properties.$ai_tools)}
+                    outputNormalized={normalizeMessages(output, 'assistant')}
                     errorData={event.properties.$ai_error}
                     httpStatus={event.properties.$ai_http_status}
-                    raisedError={event.properties.$ai_is_error}
+                    raisedError={raisedError}
+                    traceId={event.properties.$ai_trace_id}
                 />
             ) : (
                 <LLMInputOutput
@@ -81,6 +87,8 @@ const isDisplayableAIMessage = (message: Record<string, any>): boolean => {
 }
 
 export function AIEventSummary({ event }: { event: Record<string, any> }): JSX.Element | null {
+    const showConversation = useFeatureFlag('REPLAY_X_LLM_ANALYTICS_CONVERSATION_VIEW')
+
     if (event.properties.$ai_is_error) {
         return (
             <div className="flex items-center gap-1 text-danger">
@@ -88,6 +96,10 @@ export function AIEventSummary({ event }: { event: Record<string, any> }): JSX.E
                 <span>Error</span>
             </div>
         )
+    }
+
+    if (!showConversation) {
+        return null
     }
 
     const inputMessages = (
@@ -104,6 +116,10 @@ export function AIEventSummary({ event }: { event: Record<string, any> }): JSX.E
     const messageChain: Array<{ id: string; content: string; role: string }> = []
 
     for (const m of [...inputMessages, ...outputMessages]) {
+        if (typeof m.content !== 'string') {
+            continue
+        }
+
         const role = m.role && !m.type ? (m.role === 'user' ? 'human' : 'ai') : m.type
         const key = `${role}:${m.content}`
 

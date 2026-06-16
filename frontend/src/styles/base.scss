@@ -283,36 +283,35 @@
     --color-neutral-900: hsl(0deg 0% 10%);
     --color-neutral-950: hsl(0deg 0% 5%);
 
-    // Posthog 3000 (yellow-greys) colors
-    --color-posthog-3000-25: hsl(75deg 14% 96.5%);
-    --color-posthog-3000-50: hsl(75deg 14% 95%);
-    --color-posthog-3000-100: hsl(70deg 16% 93%);
-    --color-posthog-3000-150: hsl(77deg 13% 89%);
-    --color-posthog-3000-200: hsl(78deg 13% 85%);
-    --color-posthog-3000-250: hsl(67deg 8% 80%);
-    --color-posthog-3000-300: hsl(72deg 8% 76%);
-    --color-posthog-3000-350: hsl(70deg 8% 71%);
-    --color-posthog-3000-400: hsl(69deg 8% 65%);
-    --color-posthog-3000-450: hsl(67deg 8% 60%);
-    --color-posthog-3000-500: hsl(67deg 8% 55%);
+    // Hanzo 3000 (neutral greys) — replaced warm Insights yellows with pure neutral scale
+    --color-insights-3000-25: hsl(0deg 0% 96.5%);
+    --color-insights-3000-50: hsl(0deg 0% 95%);
+    --color-insights-3000-100: hsl(0deg 0% 93%);
+    --color-insights-3000-150: hsl(0deg 0% 89%);
+    --color-insights-3000-200: hsl(0deg 0% 85%);
+    --color-insights-3000-250: hsl(0deg 0% 80%);
+    --color-insights-3000-300: hsl(0deg 0% 76%);
+    --color-insights-3000-350: hsl(0deg 0% 71%);
+    --color-insights-3000-400: hsl(0deg 0% 65%);
+    --color-insights-3000-450: hsl(0deg 0% 60%);
+    --color-insights-3000-500: hsl(0deg 0% 55%);
 
-    // PostHog brand colors
-    // Split into hue, saturation, lightness to make it easier to change the brand colors
+    // Hanzo brand colors (monochrome)
     // //////////////////////////////////////////////////////////
-    --color-posthog-brand-orange-hue: 19;
-    --color-posthog-brand-orange-saturation: 100%;
-    --color-posthog-brand-orange-lightness: 48%;
-    --color-posthog-brand-blue-hue: 228;
-    --color-posthog-brand-blue-saturation: 100%;
-    --color-posthog-brand-blue-lightness: 56%;
-    --color-posthog-brand-yellow-hue: 43;
-    --color-posthog-brand-yellow-saturation: 94%;
-    --color-posthog-brand-yellow-lightness: 57%;
+    --color-insights-brand-orange-hue: 0;
+    --color-insights-brand-orange-saturation: 0%;
+    --color-insights-brand-orange-lightness: 20%;
+    --color-insights-brand-blue-hue: 228;
+    --color-insights-brand-blue-saturation: 100%;
+    --color-insights-brand-blue-lightness: 56%;
+    --color-insights-brand-yellow-hue: 0;
+    --color-insights-brand-yellow-saturation: 0%;
+    --color-insights-brand-yellow-lightness: 80%;
 
     // Product specific colors
     --color-product-data-pipeline-light: rgb(46 162 211);
     --color-product-product-analytics-light: rgb(47 128 250);
-    --color-product-messaging-light: rgb(47 128 250);
+    --color-product-workflows-light: rgb(47 128 250);
     --color-product-web-analytics-light: rgb(52 175 102);
     --color-product-web-analytics-dark: rgb(54 196 111); // original color
     --color-product-embedded-analytics-light: rgb(243 153 109);
@@ -322,6 +321,8 @@
     --color-product-heatmaps-light: rgb(220 152 16);
     --color-product-heatmaps-dark: rgb(247 165 1);
     --color-product-logs-light: rgb(214 37 123);
+    --color-product-marketing-analytics-light: rgb(214 37 123);
+    --color-product-live-debugger-light: rgb(76 14 200);
     --color-product-feature-flags-light: rgb(48 171 198);
     --color-product-experiments-light: rgb(182 42 217);
     --color-product-error-tracking-light: rgb(211 148 24);
@@ -329,6 +330,10 @@
     --color-product-surveys-light: rgb(243 84 84);
     --color-product-data-warehouse-light: rgb(133 103 255);
     --color-product-llm-analytics-light: rgb(182 42 217);
+    --color-product-llm-clusters-light: rgb(147 51 234);
+    --color-product-llm-datasets-light: rgb(124 58 237);
+    --color-product-llm-evaluations-light: rgb(167 139 250);
+    --color-product-llm-prompts-light: rgb(196 181 253);
     --color-product-links-light: rgb(143 7 255);
     --color-product-revenue-analytics-light: rgb(52 175 102);
     --color-product-revenue-analytics-dark: rgb(54 196 111);
@@ -336,6 +341,8 @@
     --color-product-dashboards-light: rgb(255 139 7);
     --color-product-early-access-features-light: rgb(39 171 151);
     --color-product-early-access-features-dark: rgb(53 213 189);
+    --color-product-support-light: rgb(243 84 84);
+    --color-product-support-dark: rgb(247 165 1);
 
     // Insight colors
     --color-insight-funnel-light: rgb(47 128 250);
@@ -352,12 +359,15 @@
     // Generic brand color assignments
     // Change these to change the brand colors
     // //////////////////////////////////////////////////////////
-    --color-brand-primary-hue: var(--color-posthog-brand-orange-hue);
-    --color-brand-primary-saturation: var(--color-posthog-brand-orange-saturation);
-    --color-brand-primary-lightness: var(--color-posthog-brand-orange-lightness);
-    --color-brand-secondary-hue: var(--color-posthog-brand-blue-hue);
-    --color-brand-secondary-saturation: var(--color-posthog-brand-blue-saturation);
-    --color-brand-secondary-lightness: var(--color-posthog-brand-blue-lightness);
+    --color-brand-primary-hue: var(--color-insights-brand-orange-hue);
+    --color-brand-primary-saturation: var(--color-insights-brand-orange-saturation);
+    --color-brand-primary-lightness: var(--color-insights-brand-orange-lightness);
+    --color-brand-secondary-hue: var(--color-insights-brand-blue-hue);
+    --color-brand-secondary-saturation: var(--color-insights-brand-blue-saturation);
+    --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
+
+    // AI
+    --color-ai: oklch(0.67 0.26 359.84deg);
 
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
@@ -368,9 +378,9 @@
         var(--color-brand-primary-lightness)
     );
     --color-accent-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        var(--color-posthog-brand-yellow-lightness)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        var(--color-insights-brand-yellow-lightness)
     );
     --color-accent-hover: hsl(
         var(--color-brand-primary-hue),
@@ -378,9 +388,9 @@
         calc(var(--color-brand-primary-lightness) + 10%)
     );
     --color-accent-hover-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        calc(var(--color-posthog-brand-yellow-lightness) + 10%)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        calc(var(--color-insights-brand-yellow-lightness) + 10%)
     );
     --color-accent-active: hsl(
         var(--color-brand-primary-hue),
@@ -388,9 +398,9 @@
         calc(var(--color-brand-primary-lightness) + 15%)
     );
     --color-accent-active-inverted: hsl(
-        var(--color-posthog-brand-yellow-hue),
-        var(--color-posthog-brand-yellow-saturation),
-        calc(var(--color-posthog-brand-yellow-lightness) + 15%)
+        var(--color-insights-brand-yellow-hue),
+        var(--color-insights-brand-yellow-saturation),
+        calc(var(--color-insights-brand-yellow-lightness) + 15%)
     );
     --color-accent-highlight-primary: hsla(
         var(--color-brand-primary-hue),
@@ -420,16 +430,16 @@
     // Backgrounds
     // Behind surfaces, large areas: app scenes, etc.
     // //////////////////////////////////////////////////////////
-    --color-bg-primary: var(--color-posthog-3000-50);
+    --color-bg-primary: var(--color-insights-3000-50);
 
     /* Most prominent/used background (replaces --color-bg-3000) */
     --color-bg-surface-primary: var(--color-white);
 
     /* Most prominent surface (Cards, tables, etc.) */
-    --color-bg-surface-secondary: var(--color-posthog-3000-100);
+    --color-bg-surface-secondary: var(--color-insights-3000-100);
 
     /* Second most prominent surface (Toolbars) */
-    --color-bg-surface-tertiary: var(--color-posthog-3000-150);
+    --color-bg-surface-tertiary: var(--color-insights-3000-150);
 
     /* Most prominent surface (Cards, tables, etc.) */
     --color-bg-surface-tooltip: var(--color-neutral-cool-850);
@@ -441,8 +451,8 @@
     // Small colourful areas: banners, pills, buttons, etc.
     // //////////////////////////////////////////////////////////
     --color-bg-fill-primary: var(--color-white);
-    --color-bg-fill-secondary: var(--color-posthog-3000-25);
-    --color-bg-fill-tertiary: var(--color-posthog-3000-50);
+    --color-bg-fill-secondary: var(--color-insights-3000-25);
+    --color-bg-fill-tertiary: var(--color-insights-3000-50);
     --color-bg-fill-highlight-25: color-mix(in oklab, var(--color-black) 2.5%, transparent);
     --color-bg-fill-highlight-50: color-mix(in oklab, var(--color-black) 5%, transparent);
     --color-bg-fill-highlight-75: color-mix(in oklab, var(--color-black) 7.5%, transparent);
@@ -492,8 +502,8 @@
 
     // Borders (Useful for single pixel backgrounds to mimic borders)
     // //////////////////////////////////////////////////////////
-    --color-bg-border-primary: var(--color-posthog-3000-200);
-    --color-bg-border-secondary: var(--color-posthog-3000-400);
+    --color-bg-border-primary: var(--color-insights-3000-200);
+    --color-bg-border-secondary: var(--color-insights-3000-400);
 
     // Content (text, icons)
     // //////////////////////////////////////////////////////////
@@ -509,8 +519,8 @@
     // Borders
     // Borders for surfaces/fills (TODO: perhaps we need to do border-fill-primary, border-fill-warning, etc.)
     // //////////////////////////////////////////////////////////
-    --color-border-primary: var(--color-posthog-3000-200);
-    --color-border-secondary: var(--color-posthog-3000-400);
+    --color-border-primary: var(--color-insights-3000-200);
+    --color-border-secondary: var(--color-insights-3000-400);
     --color-border-info: var(--color-blue-400);
     --color-border-warning: var(--color-yellow-400);
     --color-border-error: var(--color-red-400);
@@ -534,13 +544,12 @@
 
     // Skeleton colors
     // //////////////////////////////////////////////////////////
-    --color-skeleton-light: rgb(
-        190 190 190 / 20%
-    ); // Equivalent to --color-neutral-200 but with transparency, improve browser compatibility
 
-    --color-skeleton-dark: rgb(
-        129 129 129 / 24%
-    ); // Equivalent to --color-neutral-400 but with transparency, improve browser compatibility
+    // Equivalent to --color-neutral-200 but with transparency, improve browser compatibility
+    --color-skeleton-light: rgb(190 190 190 / 20%);
+
+    // Equivalent to --color-neutral-400 but with transparency, improve browser compatibility
+    --color-skeleton-dark: rgb(129 129 129 / 24%);
 
     // Breakpoint variables
     // //////////////////////////////////////////////////////////
@@ -550,11 +559,11 @@
     --breakpoint-xl: 1200px;
     --breakpoint-xxl: 1600px;
 
-    // Brand colors
+    // Brand colors (Hanzo monochrome)
     // //////////////////////////////////////////////////////////
     --brand-blue: #1d4aff;
-    --brand-red: #f54e00;
-    --brand-yellow: #f9bd2b;
+    --brand-red: #333333;
+    --brand-yellow: #888888;
     --brand-key: #000;
 
     // Shadows
@@ -572,16 +581,16 @@
     --font-medium: 500;
     --font-semibold: 600;
     --font-sans:
-        'Emoji Flags Polyfill', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
         helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-title:
-        'Emoji Flags Polyfill', 'MatterSQ', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-button:
-        'Emoji Flags Polyfill', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
         helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono:
-        'Emoji Flags Polyfill', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
+        'Emoji Flags Polyfill', 'Geist Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
         monospace;
 
     // Dashboard item colors
@@ -630,7 +639,7 @@
 
     // Z-indexes
     --z-bottom-notice: 1450;
-    --z-command-palette: 1400;
+    --z-shortcut-menu: 1400;
     --z-force-modal-above-popovers: 1350;
     --z-tooltip: 1300;
     --z-definition-popover: 1250;
@@ -644,7 +653,7 @@
     // if we ever need more than 7 modals active at the same time
     --z-top: 9999;
     --z-modal: 1100;
-    --z-hedgehog-buddy: 1050;
+    --z-mascot-buddy: 1050;
     --z-annotation-popover: 800;
     --z-drawer: 900;
     --z-notifications-popover: 800; // below the TZ aware popover but over the main-nav
@@ -666,7 +675,7 @@
     --z-raised: 5;
 
     // Elements
-    --side-panel-bar-width: 3rem;
+    --side-panel-bar-width: 40px;
     --project-navbar-width: 215px;
     --project-navbar-width-collapsed: 45px;
     --project-panel-width: 245px;
@@ -714,6 +723,22 @@
     --lettermark-7-text: #35416b;
     --lettermark-8-bg: #ff906e;
     --lettermark-8-text: #2a3d65;
+    --lettermark-9-bg: #5dd4db;
+    --lettermark-9-text: #1a4a4d;
+    --lettermark-10-bg: #c8e65c;
+    --lettermark-10-text: #3d4a1a;
+    --lettermark-11-bg: #e85da4;
+    --lettermark-11-text: #4a1a35;
+    --lettermark-12-bg: #e85c5c;
+    --lettermark-12-text: #4a1a1a;
+    --lettermark-13-bg: #3d7a5a;
+    --lettermark-13-text: #c8f0dc;
+    --lettermark-14-bg: #6b5bd4;
+    --lettermark-14-text: #e0ddf5;
+    --lettermark-15-bg: #98e8c8;
+    --lettermark-15-text: #1a4a3d;
+    --lettermark-16-bg: #8c3d5a;
+    --lettermark-16-text: #f0d0dc;
 
     // Modals
     --modal-backdrop-blur: 5px; // Half the value in Figma as blur is calculated differently there it seems
@@ -754,41 +779,41 @@
     --color-text-secondary-3000-light: rgb(17 17 17 / 70%);
     --muted-3000-light: rgb(17 17 17 / 60%);
     --trace-3000-light: rgb(17 17 17 / 25%);
-    --primary-3000-light: #f54e01;
-    --primary-highlight-light: rgb(245 78 1 / 10%);
-    --primary-3000-hover-light: #f54e01;
-    --primary-3000-active-light: #f54e01;
-    --secondary-3000-light: rgb(207 209 194 / 60%);
-    --secondary-3000-hover-light: #cfd1c2;
-    --color-accent-3000-light: #eeefe9;
-    --color-bg-3000-light: #f3f4ef;
-    --border-3000-light: #dadbd2;
-    --border-bold-3000-light: #c1c2b9;
-    --glass-bg-3000-light: #e4e5deb3;
-    --glass-border-3000-light: #e4e5de;
-    --link-3000-light: #f54e00;
-    --primary-3000-frame-bg-light: #eb9d2a;
+    --primary-3000-light: #111111;
+    --primary-highlight-light: rgb(17 17 17 / 10%);
+    --primary-3000-hover-light: #333333;
+    --primary-3000-active-light: #000000;
+    --secondary-3000-light: rgb(200 200 200 / 60%);
+    --secondary-3000-hover-light: #cccccc;
+    --color-accent-3000-light: #ebebeb;
+    --color-bg-3000-light: #f5f5f5;
+    --border-3000-light: #e0e0e0;
+    --border-bold-3000-light: #c0c0c0;
+    --glass-bg-3000-light: #e5e5e5b3;
+    --glass-border-3000-light: #e5e5e5;
+    --link-3000-light: #333333;
+    --primary-3000-frame-bg-light: #333333;
     --primary-3000-button-bg-light: #fff;
-    --primary-3000-button-border-light: #b17816;
-    --primary-3000-button-border-hover-light: #8e5b03;
-    --secondary-3000-frame-bg-light: #e1dddd;
-    --secondary-3000-button-bg-light: #f3f4ef;
+    --primary-3000-button-border-light: #888888;
+    --primary-3000-button-border-hover-light: #555555;
+    --secondary-3000-frame-bg-light: #e0e0e0;
+    --secondary-3000-button-bg-light: #f5f5f5;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
-    --danger-3000-frame-bg-light: #f54e0080;
-    --danger-3000-button-border-light: #e96b30;
-    --danger-3000-button-border-hover-light: #f54e00;
+    --danger-3000-frame-bg-light: #33333380;
+    --danger-3000-button-border-light: #cc3333;
+    --danger-3000-button-border-hover-light: #333333;
     --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
     --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
     --text-3000-dark: #fff;
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
     --trace-3000-dark: rgb(255 255 255 / 25%);
-    --primary-3000-dark: #f7a503;
-    --primary-highlight-dark: rgb(247 165 3 / 10%);
-    --primary-3000-hover-dark: #f7a503;
-    --primary-3000-active-dark: #f7a503;
-    --primary-alt-highlight-light: #e5e7e0;
+    --primary-3000-dark: #ffffff;
+    --primary-highlight-dark: rgb(255 255 255 / 10%);
+    --primary-3000-hover-dark: #e0e0e0;
+    --primary-3000-active-dark: #c0c0c0;
+    --primary-alt-highlight-light: #e5e5e5;
     --secondary-3000-dark: #1d1f27;
     --secondary-3000-hover-dark: #575d77;
     --color-accent-3000-dark: #21242b;
@@ -797,19 +822,19 @@
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
-    --link-3000-dark: #f1a82c;
-    --primary-3000-frame-bg-dark: #926826;
-    --primary-3000-button-bg-dark: #e0a045;
-    --primary-3000-button-border-dark: #b17816;
-    --primary-3000-button-border-hover-dark: #8e5b03;
+    --link-3000-dark: #ffffff;
+    --primary-3000-frame-bg-dark: #555555;
+    --primary-3000-button-bg-dark: var(--color-accent);
+    --primary-3000-button-border-dark: #888888;
+    --primary-3000-button-border-hover-dark: #aaaaaa;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
     --secondary-3000-button-bg-dark: #1d1f27;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
-    --danger-3000-frame-bg-dark: #f54e0080;
+    --danger-3000-frame-bg-dark: #33333380;
     --danger-3000-button-border-dark: #c44003;
-    --danger-3000-button-border-hover-dark: #f54e00;
+    --danger-3000-button-border-hover-dark: #333333;
 
     // Light mode
     --text-3000: var(--text-3000-light);
@@ -817,6 +842,7 @@
     --muted-3000: var(--muted-3000-light);
     --trace-3000: var(--trace-3000-light);
     --primary-3000: var(--primary-3000-light);
+    --primary-highlight: var(--primary-highlight-light);
     --primary-3000-hover: var(--primary-3000-hover-light);
     --primary-3000-active: var(--primary-3000-active-light);
     --secondary-3000: var(--secondary-3000-light);
@@ -832,7 +858,7 @@
     --color-bg-table: #f9faf7;
     --link: var(--link-3000-light);
     --primary-3000-frame-bg: var(--primary-3000-frame-bg-light);
-    --primary-3000-button-bg: var(--primary-3000-button-bg-light);
+    --primary-3000-button-bg: var(--color-white);
     --primary-3000-button-border: var(--primary-3000-button-border-light);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-light);
     --primary-alt-highlight: var(--primary-alt-highlight-light);
@@ -851,9 +877,12 @@
 [theme='dark'] {
     // Brand colors (dark mode)
     // //////////////////////////////////////////////////////////
-    --color-brand-primary-hue: var(--color-posthog-brand-yellow-hue);
-    --color-brand-primary-saturation: var(--color-posthog-brand-yellow-saturation);
-    --color-brand-primary-lightness: var(--color-posthog-brand-yellow-lightness);
+    --color-brand-primary-hue: var(--color-insights-brand-yellow-hue);
+    --color-brand-primary-saturation: var(--color-insights-brand-yellow-saturation);
+    --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
+
+    // AI colors (dark mode)
+    --color-ai: oklch(0.69 0.29 341.57deg);
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
@@ -863,9 +892,9 @@
         var(--color-brand-primary-lightness)
     );
     --color-accent-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        var(--color-posthog-brand-orange-lightness)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        var(--color-insights-brand-orange-lightness)
     );
     --color-accent-hover: hsl(
         var(--color-brand-primary-hue),
@@ -873,9 +902,9 @@
         calc(var(--color-brand-primary-lightness) + 10%)
     );
     --color-accent-hover-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        calc(var(--color-posthog-brand-orange-lightness) + 10%)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        calc(var(--color-insights-brand-orange-lightness) + 10%)
     );
     --color-accent-active: hsl(
         var(--color-brand-primary-hue),
@@ -883,9 +912,9 @@
         calc(var(--color-brand-primary-lightness) + 15%)
     );
     --color-accent-active-inverted: hsl(
-        var(--color-posthog-brand-orange-hue),
-        var(--color-posthog-brand-orange-saturation),
-        calc(var(--color-posthog-brand-orange-lightness) + 15%)
+        var(--color-insights-brand-orange-hue),
+        var(--color-insights-brand-orange-saturation),
+        calc(var(--color-insights-brand-orange-lightness) + 15%)
     );
 
     // Used for highlighting search results, and other subtle accent sitations
@@ -967,7 +996,7 @@
     --color-bg-fill-button-panel-hover: var(--color-bg-fill-highlight-150);
     --color-bg-fill-button-panel-active: var(--color-bg-fill-highlight-100);
     --color-bg-fill-input: var(--color-neutral-cool-850);
-    --color-bg-fill-switch: var(--color-neutral-cool-900);
+    --color-bg-fill-switch: var(--color-neutral-cool-600);
     --color-bg-fill-slider-rail: color-mix(in oklab, var(--color-white) 15%, transparent);
     --color-bg-fill-scroll-thumb: color-mix(in oklab, var(--color-white) 20%, transparent);
     --color-bg-border-primary: var(--color-neutral-cool-800);
@@ -1027,11 +1056,11 @@
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
     --color-bg-table: #232429;
-    --brand-key: #fff; // In dark mode the black in PostHog's logo is replaced with white for proper contrast
+    --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
     --primary-3000-frame-bg: var(--primary-3000-frame-bg-dark);
-    --primary-3000-button-bg: var(--primary-3000-button-bg-dark);
+    --primary-3000-button-bg: var(--color-accent);
     --primary-3000-button-border: var(--primary-3000-button-border-dark);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-dark);
     --primary-alt-highlight: var(--primary-alt-highlight-dark);
@@ -1052,10 +1081,12 @@
 }
 
 @layer base {
-    /* stylelint-disable-next-line no-invalid-position-at-import-rule */ // allowing @import to be inside layer
+    // allowing @import to be inside layer
+    /* stylelint-disable-next-line no-invalid-position-at-import-rule */
     @import '../../node_modules/react-toastify/dist/ReactToastify'; // Toastify is in base so that we can override
 
-    /* stylelint-disable-next-line order/order */ // allowing @import to be first
+    // allowing @import to be first
+    /* stylelint-disable-next-line order/order */
     *,
     ::after,
     ::before,
@@ -1082,6 +1113,41 @@
         &::-webkit-search-results-button,
         &::-webkit-search-results-decoration {
             display: none;
+        }
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    [data-highlighted]:not(:hover) {
+        outline: 2px solid var(--color-accent);
+    }
+
+    .input-like {
+        --input-ring-color: var(--color-bg-fill-highlight-75);
+        --input-ring-size: 3px;
+
+        border: 1px solid var(--color-border-primary);
+        border-radius: var(--radius);
+        outline: 0 solid transparent;
+        box-shadow: 0 0 0 0 transparent;
+        transition:
+            box-shadow 0.1s ease-in-out,
+            border-color 0.1s ease-in-out;
+
+        & input,
+        & textarea {
+            box-shadow: none;
+        }
+
+        &:not([disabled]):focus-visible,
+        &:not([disabled]):focus-within {
+            background-color: var(--color-bg-fill-input);
+            border-color: var(--color-border-secondary);
+            box-shadow: 0 0 0 var(--input-ring-size) var(--input-ring-color);
+        }
+
+        &:not([disabled]):hover {
+            border-color: var(--color-border-secondary) !important;
         }
     }
 
@@ -1162,7 +1228,7 @@
         h1,
         h2,
         // Note: .thank-you-message is excluded in h3 below to prevent the survey thank you message to be styled,
-        // as these styles are only for PostHog main app. It's important to use :where() to avoid increased specificity
+        // as these styles are only for Insights main app. It's important to use :where() to avoid increased specificity
         h3:where(:not(.thank-you-message)),
         h4,
         h5 {
@@ -1507,7 +1573,11 @@
 
     .storybook-test-runner {
         &.storybook-test-runner--fullscreen {
-            height: fit-content;
+            height: auto;
+
+            // Ensure minimum viewport height while allowing content to expand beyond
+            // Using min-height instead of height: fit-content to prevent shorter-than-viewport screenshots
+            min-height: 100vh;
         }
 
         &.storybook-test-runner--padded {
@@ -1621,7 +1691,7 @@
         color: var(--color-text-primary);
         background-color: var(--color-bg-surface-primary);
         border: 1px solid var(--color-border-primary);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-lg);
         box-shadow: var(--shadow-elevation-3000);
     }
 
@@ -1629,11 +1699,15 @@
         display: flex;
         flex-direction: column;
         gap: 1px;
-        padding: var(--spacing);
     }
 
     .animate-mark {
         animation: animate-mark 2s ease-in-out forwards;
+        animation-fill-mode: none;
+    }
+
+    .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out forwards;
         animation-fill-mode: none;
     }
 
@@ -1675,6 +1749,32 @@
         }
     }
 
+    // Pass in a different color variable to change the color of the glow
+    // Example: <span className="[--pulse-glow-color:blue] animate-pulse-glow" />
+    /* stylelint-disable-next-line keyframes-name-pattern */
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 0 2px var(--pulse-glow-color, var(--color-accent));
+        }
+
+        100% {
+            box-shadow: 0 0 0 10px transparent;
+        }
+    }
+
+    // Note: Scaling in from 0 is not typically recommended, the smoother alternative is to
+    // scale in from a value between 0.5-0.8 and 0 opacity. But SOME situations call for scaling from 0, like icons
+    /* stylelint-disable-next-line keyframes-name-pattern */
+    @keyframes scale-in {
+        0% {
+            transform: scale(0);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
     // Floating animation
 
     /* stylelint-disable-next-line keyframes-name-pattern */
@@ -1693,12 +1793,12 @@
     }
 
     /* stylelint-disable-next-line order/order */
-    .hogqlx-blink {
-        animation: hogqlx-blink 1s steps(1, end) infinite;
+    .insightsqlx-blink {
+        animation: insightsqlx-blink 1s steps(1, end) infinite;
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
-    @keyframes hogqlx-blink {
+    @keyframes insightsqlx-blink {
         0% {
             opacity: 1;
         }
@@ -1713,7 +1813,7 @@
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
-    @keyframes hogqlx-marquee {
+    @keyframes insightsqlx-marquee {
         0% {
             transform: translateX(0);
         }
@@ -1724,36 +1824,198 @@
     }
 
     /* stylelint-disable-next-line order/order */
-    .hogqlx-marquee {
+    .insightsqlx-marquee {
         position: relative;
         overflow: hidden;
         white-space: nowrap;
     }
 
-    .hogqlx-marquee span {
+    .insightsqlx-marquee span {
         display: inline-block;
         padding-left: 100%;
-        animation: hogqlx-marquee 10s linear infinite;
+        animation: insightsqlx-marquee 10s linear infinite;
     }
 
-    .hogqlx-redacted {
+    .insightsqlx-redacted {
         /* themeable variables */
         position: relative;
         display: inline-block;
-        color: transparent; /* hide glyphs under the cover */
+        color: transparent;
+
+        /* hide glyphs under the cover */
         cursor: pointer;
-        background: var(--color-bg-primary); /* the “black bar” */
+        background: var(--color-bg-primary);
+
+        /* the “black bar” */
         border-radius: var(--radius);
     }
 
-    .hogqlx-redacted:hover,
-    .hogqlx-redacted:focus-visible {
-        color: inherit; /* show the text */
-        background: transparent; /* remove the bar */
+    .insightsqlx-redacted:hover,
+    .insightsqlx-redacted:focus-visible {
+        color: inherit;
+
+        /* show the text */
+        background: transparent;
+
+        /* remove the bar */
     }
 
-    .hogqlx-redacted:focus-visible {
+    .insightsqlx-redacted:focus-visible {
         outline: 2px dashed currentColor;
         outline-offset: 2px;
+    }
+
+    .animate-logomark-jump {
+        --logomark-jump-height-base: 12px;
+        --logomark-jump-magnitude: 1; // Overidden in code when someone wants a bigger jump
+        --logomark-airtime: 0.4s; // Sync with LOGOMARK_AIRTIME_MS in Intro.tsx
+
+        svg {
+            overflow: visible;
+
+            // Animate each child with a staggered delay
+            > * {
+                // Times 25 because the actual animation is 4% of the keyframes (so 1/25)
+                animation: Logomark__jump calc(var(--logomark-airtime) * 25) cubic-bezier(0.6, 0, 0.2, 0.8) infinite;
+            }
+
+            // Delay one after the other to create a nice jump effect
+            // Delay in reverse order because we want the head to jump first (it's last on SVG)
+            @for $i from 1 through 4 {
+                > *:nth-child(#{$i}) {
+                    // Dividing by 15 just because it feels good
+                    animation-delay: calc(
+                        var(--logomark-airtime) / 15 / calc(sqrt(var(--logomark-jump-magnitude))) * (4 - ($i - 1))
+                    );
+                }
+            }
+        }
+
+        @keyframes Logomark__jump {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            2% {
+                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
+            }
+
+            4% {
+                // Only 4% so that this repeats every now and then nicely
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes Logomark__jump-continuous {
+            0%,
+            44%,
+            100% {
+                transform: translateY(0);
+            }
+
+            22% {
+                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
+            }
+        }
+
+        /* stylelint-disable-next-line order/order */
+        &-continuous {
+            @extend .animate-logomark-jump;
+
+            /* stylelint-disable-next-line order/order */
+            svg > * {
+                animation-name: Logomark__jump-continuous;
+                animation-duration: 0.9s;
+            }
+        }
+    }
+
+    /* stylelint-disable-next-line order/order */
+    .animate-fade-in {
+        animation: fade-in 0.4s ease-out forwards;
+    }
+
+    /* Overlay fade in/out transitions */
+    .overlay-fade {
+        opacity: 1;
+        transition: opacity 0.2s ease-out;
+
+        /* Exit animation - opacity controlled by utility class */
+        &.opacity-0 {
+            opacity: 0;
+        }
+
+        /* Entry animation - fade in from 0 */
+        @starting-style {
+            opacity: 0;
+        }
+    }
+
+    /* stylelint-disable-next-line keyframes-name-pattern */
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* stylelint-disable-next-line keyframes-name-pattern */
+    @keyframes shimmer-opacity {
+        0%,
+        100% {
+            opacity: 0.4;
+        }
+
+        25% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.4;
+        }
+
+        75% {
+            opacity: 1;
+        }
+    }
+
+    /* stylelint-disable-next-line keyframes-name-pattern */
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+            transform: translateY(2px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+// Setup highlight animation - used by quick start to draw attention to UI elements
+.setup-highlight-pulse {
+    position: relative !important;
+    border-radius: var(--radius);
+    animation: setup-highlight-pulse 1s ease-in-out 3 !important;
+}
+
+/* stylelint-disable-next-line keyframes-name-pattern */
+@keyframes setup-highlight-pulse {
+    0%,
+    100% {
+        outline: 3px solid transparent;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 0 transparent;
+    }
+
+    50% {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+        box-shadow: 0 0 24px 8px var(--color-accent);
     }
 }

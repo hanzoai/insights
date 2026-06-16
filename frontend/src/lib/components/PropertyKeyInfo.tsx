@@ -3,9 +3,10 @@ import './PropertyKeyInfo.scss'
 import clsx from 'clsx'
 import React, { useState } from 'react'
 
-import { LemonDivider, TooltipProps } from '@posthog/lemon-ui'
+import { LemonDivider, TooltipProps } from '@hanzo/lemon-ui'
 
 import { Popover } from 'lib/lemon-ui/Popover'
+import { pluralize } from 'lib/utils'
 
 import { PropertyKey, getCoreFilterDefinition } from '~/taxonomy/helpers'
 
@@ -43,8 +44,8 @@ export const PropertyKeyInfo = React.forwardRef<HTMLSpanElement, PropertyKeyInfo
     const valueDisplayText = displayText || ((coreDefinition ? coreDefinition.label : value)?.trim() ?? '')
     const valueDisplayElement = valueDisplayText === '' ? <i>(empty string)</i> : valueDisplayText
 
-    const recognizedSource: 'posthog' | 'langfuse' | null =
-        coreDefinition || value.startsWith('$') ? 'posthog' : value.startsWith('langfuse ') ? 'langfuse' : null
+    const recognizedSource: 'insights' | 'langfuse' | null =
+        coreDefinition || value.startsWith('$') ? 'insights' : value.startsWith('langfuse ') ? 'langfuse' : null
 
     const innerContent = (
         <span
@@ -82,7 +83,10 @@ export const PropertyKeyInfo = React.forwardRef<HTMLSpanElement, PropertyKeyInfo
                                 {coreDefinition.description ? <p>{coreDefinition.description}</p> : null}
                                 {coreDefinition.examples ? (
                                     <p>
-                                        <i>Example value{coreDefinition.examples.length === 1 ? '' : 's'}: </i>
+                                        <i>
+                                            Example{' '}
+                                            {pluralize(coreDefinition.examples.length, 'value', 'values', false)}:{' '}
+                                        </i>
                                         {coreDefinition.examples.join(', ')}
                                     </p>
                                 ) : null}

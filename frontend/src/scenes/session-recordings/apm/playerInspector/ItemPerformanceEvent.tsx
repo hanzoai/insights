@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonDivider, LemonTabs, LemonTag, LemonTagType, Link } from '@posthog/lemon-ui'
+import { LemonDivider, LemonTabs, LemonTag, LemonTagType, Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
@@ -87,7 +87,7 @@ function emptyPayloadMessage(
 ): JSX.Element | string {
     return payloadCaptureIsEnabled ? (
         item.is_initial ? (
-            `${label} captured before PostHog was initialized`
+            `${label} captured before Insights was initialized`
         ) : (
             `No ${label.toLowerCase()} body captured`
         )
@@ -175,7 +175,6 @@ export function ItemPerformanceEvent({ item, finalTimestamp }: ItemPerformanceEv
         uuid,
         name,
         session_id,
-        window_id,
         pageview_id,
         distinct_id,
         time_origin,
@@ -239,7 +238,6 @@ export function ItemPerformanceEventDetail({ item }: ItemPerformanceEventProps):
         uuid,
         name,
         session_id,
-        window_id,
         pageview_id,
         distinct_id,
         time_origin,
@@ -394,12 +392,12 @@ export function BodyDisplay({
     return isAutoRedaction ? (
         <>
             <p>
-                This content was redacted by PostHog to protect sensitive data.{' '}
+                This content was redacted by Insights to protect sensitive data.{' '}
                 <Link
-                    to="https://posthog.com/docs/session-replay/network-recording?utm_medium=in-product"
+                    to="https://hanzo.ai/docs/session-replay/network-recording?utm_medium=in-product"
                     target="_blank"
                 >
-                    Learn how to override PostHog's automatic redaction code.
+                    Learn how to override Insights's automatic redaction code.
                 </Link>
             </p>
             <pre>received: {displayContent}</pre>
@@ -424,7 +422,7 @@ export function HeadersDisplay({
     const isHeadersCaptureEnabled =
         currentTeam?.capture_performance_opt_in &&
         currentTeam?.session_recording_network_payload_capture_config?.recordHeaders
-    const emptyMessage = isInitial ? 'captured before PostHog was initialized' : 'No headers captured'
+    const emptyMessage = isInitial ? 'captured before Insights was initialized' : 'No headers captured'
 
     return (
         <div className="flex flex-col w-full">

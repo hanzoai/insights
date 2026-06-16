@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 import { Marker } from 'maplibre-gl'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { personLogic } from 'scenes/persons/personLogic'
 
 import { Map } from '../../../lib/components/Map/Map'
@@ -13,10 +13,10 @@ import { NotebookNodeEmptyState } from './components/NotebookNodeEmptyState'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeMapAttributes>): JSX.Element | null => {
-    const { id } = attributes
+    const { id, distinctId } = attributes
     const { expanded } = useValues(notebookNodeLogic)
 
-    const logic = personLogic({ id })
+    const logic = personLogic({ id, distinctId })
     const { person, personLoading } = useValues(logic)
 
     if (personLoading) {
@@ -49,9 +49,10 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeMapAttributes>)
 
 type NotebookNodeMapAttributes = {
     id: string
+    distinctId: string
 }
 
-export const NotebookNodeMap = createPostHogWidgetNode<NotebookNodeMapAttributes>({
+export const NotebookNodeMap = createInsightsWidgetNode<NotebookNodeMapAttributes>({
     nodeType: NotebookNodeType.Map,
     titlePlaceholder: 'Location',
     Component,
@@ -61,5 +62,6 @@ export const NotebookNodeMap = createPostHogWidgetNode<NotebookNodeMapAttributes
     startExpanded: true,
     attributes: {
         id: {},
+        distinctId: {},
     },
 })

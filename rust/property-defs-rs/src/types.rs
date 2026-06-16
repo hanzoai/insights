@@ -2,13 +2,57 @@ use std::{fmt, hash::Hash, str::FromStr, sync::LazyLock};
 
 use chrono::{DateTime, Duration, DurationRound, RoundingError, Utc};
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value};
 use sqlx::{Executor, Postgres};
 use tracing::warn;
 use uuid::Uuid;
 
 use crate::metrics_consts::{EVENTS_SKIPPED, UPDATES_ISSUED, UPDATES_SKIPPED};
+
+// Custom deserializer that can handle both string and integer values
+fn deserialize_string_or_i32<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde::de;
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum StringOrInt {
+        String(String),
+        Int(i32),
+    }
+
+    match StringOrInt::deserialize(deserializer)? {
+        StringOrInt::String(s) => s
+            .parse::<i32>()
+            .map_err(|e| de::Error::custom(format!("Failed to parse string as i32: {e}"))),
+        StringOrInt::Int(i) => Ok(i),
+    }
+}
+
+// Custom deserializer that can handle both string and integer values for i64
+fn deserialize_string_or_i64<'de, D>(deserializer: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde::de;
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum StringOrInt {
+        String(String),
+        Int(i64),
+    }
+
+    match StringOrInt::deserialize(deserializer)? {
+        StringOrInt::String(s) => s
+            .parse::<i64>()
+            .map_err(|e| de::Error::custom(format!("Failed to parse string as i64: {e}"))),
+        StringOrInt::Int(i) => Ok(i),
+    }
+}
 
 // We skip updates for events we generate
 pub const EVENTS_WITHOUT_PROPERTIES: [&str; 1] = ["$$plugin_metrics"];
@@ -42,15 +86,15 @@ const DATETIME_PROPERTY_NAME_KEYWORDS: [&str; 7] = [
 // it does represent a pretty strong indication of the user's intent, for the purposes of
 // *property definition capture only* especially when a bad decision "locks" the property name
 // to the wrong type. Try it here: https://rustexp.lpil.uk/ and review the unit tests.
-// Also notable: post-capture, PostHog displays timestamps in a variety formats:
-// https://github.com/PostHog/posthog/blob/master/posthog/models/property_definition.py#L18-L30
+// Also notable: post-capture, Insights displays timestamps in a variety formats:
+// https://github.com/hanzoai/insights/blob/main/insights/models/property_definition.py#L18-L30
 static DATETIME_PREFIX_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"^(([0-9]{4}[/-][0-2][0-9][/-][0-3][0-9])|([0-2][0-9][/-][0-3][0-9][/-][0-9]{4}))([ T][0-2][0-9]:[0-6][0-9]:[0-6][0-9].*)?$"#
     ).unwrap()
 });
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord, Deserialize, Serialize)]
 pub enum PropertyParentType {
     Event = 1,
     Person = 2,
@@ -91,7 +135,7 @@ impl fmt::Display for PropertyValueType {
 }
 
 // The grouptypemapping table uses i32's, but we get group types by name, so we have to resolve them before DB writes, sigh
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Deserialize, Serialize)]
 pub enum GroupType {
     Unresolved(String),
     Resolved(String, i32),
@@ -106,9 +150,11 @@ impl GroupType {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Deserialize, Serialize)]
 pub struct PropertyDefinition {
+    #[serde(deserialize_with = "deserialize_string_or_i32")]
     pub team_id: i32,
+    #[serde(deserialize_with = "deserialize_string_or_i64")]
     pub project_id: i64,
     pub name: String,
     pub is_numerical: bool,
@@ -120,18 +166,22 @@ pub struct PropertyDefinition {
     pub query_usage_30_day: Option<i64>,      // Deprecated
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Deserialize, Serialize)]
 pub struct EventDefinition {
     pub name: String,
+    #[serde(deserialize_with = "deserialize_string_or_i32")]
     pub team_id: i32,
+    #[serde(deserialize_with = "deserialize_string_or_i64")]
     pub project_id: i64,
     pub last_seen_at: DateTime<Utc>, // Always floored to our update rate for last_seen, so this Eq derive is safe for deduping
 }
 
 // Derived hash since these are keyed on all fields in the DB
-#[derive(Clone, Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq, PartialOrd, Ord, Deserialize, Serialize)]
 pub struct EventProperty {
+    #[serde(deserialize_with = "deserialize_string_or_i32")]
     pub team_id: i32,
+    #[serde(deserialize_with = "deserialize_string_or_i64")]
     pub project_id: i64,
     pub event: String,
     pub property: String,
@@ -147,7 +197,9 @@ pub enum Update {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Event {
+    #[serde(deserialize_with = "deserialize_string_or_i32")]
     pub team_id: i32,
+    #[serde(deserialize_with = "deserialize_string_or_i64")]
     pub project_id: i64,
     pub event: String,
     pub properties: Option<String>,
@@ -302,11 +354,13 @@ pub fn detect_property_type(key: &str, value: &Value) -> Option<PropertyValueTyp
     let key = key.to_lowercase();
 
     // There are a whole set of special cases here, taken from the TS
-    if key.starts_with("utm_") {
+    if key.starts_with("utm_") || key.starts_with("$initial_utm_") {
         // utm_ prefixed properties should always be detected as strings.
         // Sometimes the first value sent looks like a number, event though
         // subsequent values are not. See
-        // https://github.com/PostHog/posthog/issues/12529 for more context.
+        // https://github.com/hanzoai/insights/issues/12529 for more context.
+        // $initial_utm_* properties are the "initial" variants set by the SDK
+        // and must follow the same rule.
         return Some(PropertyValueType::String);
     }
     if key.starts_with("$feature/") {
@@ -469,7 +523,7 @@ impl EventDefinition {
     {
         let res = sqlx::query!(
             r#"
-            INSERT INTO posthog_eventdefinition (id, name, volume_30_day, query_usage_30_day, team_id, project_id, last_seen_at, created_at)
+            INSERT INTO insights_eventdefinition (id, name, volume_30_day, query_usage_30_day, team_id, project_id, last_seen_at, created_at)
             VALUES ($1, $2, NULL, NULL, $3, $4, $5, NOW())
             ON CONFLICT (coalesce(project_id, team_id::bigint), name)
             DO UPDATE SET last_seen_at = $5

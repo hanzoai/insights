@@ -7,8 +7,7 @@ import { examples } from '~/queries/examples'
 import {
     DataTableNode,
     DataVisualizationNode,
-    HogQuery,
-    InsightNodeKind,
+    ScriptQuery,
     InsightQueryNode,
     InsightVizNode,
     Node,
@@ -25,7 +24,7 @@ import {
     QueryBasedInsightModel,
 } from '~/types'
 
-import { nodeKindToDefaultQuery } from '../InsightQuery/defaults'
+import { ProductAnalyticsInsightNodeKind, getNodeKindToDefaultQuery } from '../InsightQuery/defaults'
 import { filtersToQueryNode } from '../InsightQuery/utils/filtersToQueryNode'
 
 export const getAllEventNames = (query: InsightQueryNode, allActions: ActionType[]): string[] => {
@@ -116,38 +115,50 @@ export const queryFromFilters = (filters: Partial<FilterType>): InsightVizNode =
     source: filtersToQueryNode(filters),
 })
 
-export const queryFromKind = (kind: InsightNodeKind, filterTestAccountsDefault: boolean): InsightVizNode =>
+export const queryFromKind = (
+    kind: ProductAnalyticsInsightNodeKind,
+    filterTestAccountsDefault: boolean
+): InsightVizNode =>
     setLatestVersionsOnQuery({
         kind: NodeKind.InsightVizNode,
-        source: { ...nodeKindToDefaultQuery[kind], ...(filterTestAccountsDefault ? { filterTestAccounts: true } : {}) },
+        source: {
+            ...getNodeKindToDefaultQuery()[kind],
+            ...(filterTestAccountsDefault ? { filterTestAccounts: true } : {}),
+        },
     })
 
 export const getDefaultQuery = (
     insightType: InsightType,
     filterTestAccountsDefault: boolean
-): DataTableNode | DataVisualizationNode | HogQuery | InsightVizNode => {
-    if ([InsightType.SQL, InsightType.JSON, InsightType.HOG].includes(insightType)) {
+): DataTableNode | DataVisualizationNode | ScriptQuery | InsightVizNode => {
+    // Web Analytics insights should always come from Web Analytics tiles with a pre-configured query
+    // This is a fallback that should rarely be used
+    if (insightType === InsightType.WEB_ANALYTICS) {
+        throw new Error('Web Analytics insights must be created from Web Analytics tiles')
+    }
+
+    if ([InsightType.SQL, InsightType.JSON, InsightType.SCRIPT].includes(insightType)) {
         if (insightType === InsightType.JSON) {
             return examples.TotalEventsTable as DataTableNode
         } else if (insightType === InsightType.SQL) {
             return examples.DataVisualization as DataVisualizationNode
-        } else if (insightType === InsightType.HOG) {
-            return examples.Hoggonacci as HogQuery
+        } else if (insightType === InsightType.SCRIPT) {
+            return examples.FibonacciScript as ScriptQuery
         }
-    } else {
-        if (insightType === InsightType.TRENDS) {
-            return queryFromKind(NodeKind.TrendsQuery, filterTestAccountsDefault)
-        } else if (insightType === InsightType.FUNNELS) {
-            return queryFromKind(NodeKind.FunnelsQuery, filterTestAccountsDefault)
-        } else if (insightType === InsightType.RETENTION) {
-            return queryFromKind(NodeKind.RetentionQuery, filterTestAccountsDefault)
-        } else if (insightType === InsightType.PATHS) {
-            return queryFromKind(NodeKind.PathsQuery, filterTestAccountsDefault)
-        } else if (insightType === InsightType.STICKINESS) {
-            return queryFromKind(NodeKind.StickinessQuery, filterTestAccountsDefault)
-        } else if (insightType === InsightType.LIFECYCLE) {
-            return queryFromKind(NodeKind.LifecycleQuery, filterTestAccountsDefault)
-        }
+    }
+
+    if (insightType === InsightType.TRENDS) {
+        return queryFromKind(NodeKind.TrendsQuery, filterTestAccountsDefault)
+    } else if (insightType === InsightType.FUNNELS) {
+        return queryFromKind(NodeKind.FunnelsQuery, filterTestAccountsDefault)
+    } else if (insightType === InsightType.RETENTION) {
+        return queryFromKind(NodeKind.RetentionQuery, filterTestAccountsDefault)
+    } else if (insightType === InsightType.PATHS) {
+        return queryFromKind(NodeKind.PathsQuery, filterTestAccountsDefault)
+    } else if (insightType === InsightType.STICKINESS) {
+        return queryFromKind(NodeKind.StickinessQuery, filterTestAccountsDefault)
+    } else if (insightType === InsightType.LIFECYCLE) {
+        return queryFromKind(NodeKind.LifecycleQuery, filterTestAccountsDefault)
     }
 
     throw new Error('encountered unexpected type for view')

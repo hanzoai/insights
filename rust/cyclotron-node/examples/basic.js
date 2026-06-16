@@ -12,12 +12,12 @@ const JOB_STATES = Object.freeze({
 
 const AVAILABLE_WORKERS = Object.freeze({
     FETCH: 'fetch',
-    HOG: 'hog',
+    HOG: 'iql',
 })
 
 async function main() {
     let poolConfig = {
-        db_url: 'postgresql://posthog:posthog@localhost:5432/cyclotron',
+        db_url: 'postgresql://insights:insights@localhost:5432/cyclotron',
     }
 
     let managerConfig = {

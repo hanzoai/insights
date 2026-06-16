@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -25,10 +25,6 @@ export function PersonDisplayNameProperties(): JSX.Element {
 
     return (
         <>
-            <p>
-                Choose which properties of an identified Person will be used for their <b>Display Name</b>. The first
-                property to be found on the Person will be used. Drag the items to re-order the priority.
-            </p>
             <div className="deprecated-space-y-4">
                 <PropertySelect
                     taxonomicFilterGroup={TaxonomicFilterGroupType.PersonProperties}

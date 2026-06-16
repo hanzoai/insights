@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCheckbox, LemonDialog, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { LemonCheckbox, LemonDialog, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
@@ -73,14 +73,18 @@ export function Customization({
                     <LemonCheckbox
                         label={
                             <div className="flex items-center">
-                                <span>Hide PostHog branding</span>
+                                <span>Hide Insights branding</span>
                             </div>
                         }
-                        onChange={(checked) =>
-                            guardAvailableFeature(AvailableFeature.WHITE_LABELLING, () =>
+                        onChange={(checked) => {
+                            if (checked) {
+                                guardAvailableFeature(AvailableFeature.WHITE_LABELLING, () =>
+                                    onAppearanceChange({ whiteLabel: checked })
+                                )
+                            } else {
                                 onAppearanceChange({ whiteLabel: checked })
-                            )
-                        }
+                            }
+                        }}
                         checked={survey.appearance?.whiteLabel}
                     />
                     <div className="flex flex-col gap-2">

@@ -1,11 +1,11 @@
 use std::fmt::Display;
-use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use common_kafka::kafka_messages::internal_events::{InternalEvent, InternalEventEvent};
 use common_kafka::kafka_producer::{send_iter_to_kafka, KafkaProduceError};
 
 use rdkafka::types::RDKafkaErrorCode;
+use serde::{Deserialize, Serialize};
 use sqlx::{Acquire, PgConnection};
 use uuid::Uuid;
 
@@ -16,7 +16,7 @@ use crate::{
     app_context::AppContext,
     error::UnhandledError,
     metric_consts::{ISSUE_CREATED, ISSUE_REOPENED},
-    posthog_utils::{capture_issue_created, capture_issue_reopened},
+    insights_utils::{capture_issue_created, capture_issue_reopened},
 };
 
 #[derive(Debug, Clone)]
@@ -35,9 +35,11 @@ pub struct Issue {
     pub status: IssueStatus,
     pub name: Option<String>,
     pub description: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IssueStatus {
     Archived,
     Active,
@@ -72,9 +74,9 @@ impl Issue {
             r#"
             -- the "eligible_for_assignment!" forces sqlx to assume not null, which is correct in this case, but
             -- generally a risky override of sqlx's normal type checking
-            SELECT i.id, i.team_id, i.status, i.name, i.description
-            FROM posthog_errortrackingissue i
-            JOIN posthog_errortrackingissuefingerprintv2 f ON i.id = f.issue_id
+            SELECT i.id, i.team_id, i.status, i.name, i.description, i.created_at
+            FROM insights_errortrackingissue i
+            JOIN insights_errortrackingissuefingerprintv2 f ON i.id = f.issue_id
             WHERE f.team_id = $1 AND f.fingerprint = $2
             "#,
             team_id,
@@ -97,7 +99,7 @@ impl Issue {
         let res = sqlx::query_as!(
             Issue,
             r#"
-            SELECT id, team_id, status, name, description FROM posthog_errortrackingissue
+            SELECT id, team_id, status, name, description, created_at FROM insights_errortrackingissue
             WHERE team_id = $1 AND id = $2
             "#,
             team_id,
@@ -126,18 +128,20 @@ impl Issue {
             status: IssueStatus::Active,
             name: Some(name),
             description: Some(description),
+            created_at: Utc::now(),
         };
 
         sqlx::query!(
             r#"
-            INSERT INTO posthog_errortrackingissue (id, team_id, status, name, description, created_at)
-            VALUES ($1, $2, $3, $4, $5, NOW())
+            INSERT INTO insights_errortrackingissue (id, team_id, status, name, description, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
             "#,
             issue.id,
             issue.team_id,
             issue.status.to_string(),
             issue.name,
-            issue.description
+            issue.description,
+            issue.created_at
         )
         .execute(executor)
         .await?;
@@ -156,7 +160,7 @@ impl Issue {
 
         let res = sqlx::query_scalar!(
             r#"
-            UPDATE posthog_errortrackingissue
+            UPDATE insights_errortrackingissue
             SET status = 'active'
             WHERE id = $1 AND status != 'active'
             RETURNING id
@@ -185,7 +189,7 @@ impl Issue {
         let assignments = sqlx::query_as!(
             Assignment,
             r#"
-            SELECT id, issue_id, user_id, role_id, created_at FROM posthog_errortrackingissueassignment
+            SELECT id, issue_id, user_id, role_id, created_at FROM insights_errortrackingissueassignment
             WHERE issue_id = $1
             "#,
             self.id
@@ -209,7 +213,7 @@ impl IssueFingerprintOverride {
         let res = sqlx::query_as!(
             IssueFingerprintOverride,
             r#"
-            SELECT id, team_id, issue_id, fingerprint, version FROM posthog_errortrackingissuefingerprintv2
+            SELECT id, team_id, issue_id, fingerprint, version FROM insights_errortrackingissuefingerprintv2
             WHERE team_id = $1 AND fingerprint = $2
             "#,
             team_id,
@@ -234,7 +238,7 @@ impl IssueFingerprintOverride {
         let res = sqlx::query_as!(
             IssueFingerprintOverride,
             r#"
-            INSERT INTO posthog_errortrackingissuefingerprintv2 (id, team_id, issue_id, fingerprint, version, first_seen, created_at)
+            INSERT INTO insights_errortrackingissuefingerprintv2 (id, team_id, issue_id, fingerprint, version, first_seen, created_at)
             VALUES ($1, $2, $3, $4, 0, $5, NOW())
             ON CONFLICT (team_id, fingerprint) DO UPDATE SET team_id = EXCLUDED.team_id -- a no-op update to force a returned row
             RETURNING id, team_id, issue_id, fingerprint, version
@@ -251,14 +255,14 @@ impl IssueFingerprintOverride {
 }
 
 pub async fn resolve_issue(
-    context: Arc<AppContext>,
+    context: &AppContext,
     team_id: i32,
     name: String,
     description: String,
     event_timestamp: DateTime<Utc>,
     event_properties: FingerprintedErrProps,
 ) -> Result<Issue, UnhandledError> {
-    let mut conn = context.pool.acquire().await?;
+    let mut conn = context.insights_pool.acquire().await?;
     // Fast path - just fetch the issue directly, and then reopen it if needed
     let existing_issue =
         Issue::load_by_fingerprint(&mut *conn, team_id, &event_properties.fingerprint.value)
@@ -273,7 +277,7 @@ pub async fn resolve_issue(
             )
             .await?;
             let output_props: OutputErrProps = event_properties.clone().to_output(issue.id);
-            send_issue_reopened_alert(&context, &issue, assignment, output_props, &event_timestamp)
+            send_issue_reopened_alert(context, &issue, assignment, output_props, &event_timestamp)
                 .await?;
         }
         return Ok(issue);
@@ -326,7 +330,7 @@ pub async fn resolve_issue(
             )
             .await?;
             let output_props: OutputErrProps = event_properties.clone().to_output(issue.id);
-            send_issue_reopened_alert(&context, &issue, assignment, output_props, &event_timestamp)
+            send_issue_reopened_alert(context, &issue, assignment, output_props, &event_timestamp)
                 .await?;
         }
     } else {
@@ -340,10 +344,15 @@ pub async fn resolve_issue(
         .await?;
 
         let output_props = event_properties.clone().to_output(issue.id);
-        send_issue_created_alert(&context, &issue, assignment, output_props, &event_timestamp)
+        send_new_fingerprint_event(context, &issue, &output_props).await?;
+        send_issue_created_alert(context, &issue, assignment, output_props, &event_timestamp)
             .await?;
         txn.commit().await?;
-        capture_issue_created(team_id, issue_override.issue_id);
+        capture_issue_created(
+            team_id,
+            issue_override.issue_id,
+            event_properties.other.contains_key("$sentry_event_id"),
+        );
     };
 
     Ok(issue)
@@ -358,7 +367,13 @@ pub async fn process_assignment(
     let new_assignment = if let Some(new) = props.fingerprint.assignment.clone() {
         Some(new)
     } else {
-        try_assignment_rules(conn, team_manager, issue.clone(), props.to_output(issue.id)).await?
+        try_assignment_rules(
+            conn,
+            team_manager,
+            issue.clone(),
+            &props.to_output(issue.id),
+        )
+        .await?
     };
 
     let assignment = if let Some(new_assignment) = new_assignment {
@@ -370,7 +385,7 @@ pub async fn process_assignment(
     Ok(assignment)
 }
 
-async fn send_issue_created_alert(
+pub async fn send_issue_created_alert(
     context: &AppContext,
     issue: &Issue,
     assignment: Option<Assignment>,
@@ -388,7 +403,28 @@ async fn send_issue_created_alert(
     .await
 }
 
-async fn send_issue_reopened_alert(
+pub async fn send_new_fingerprint_event(
+    context: &AppContext,
+    issue: &Issue,
+    output_props: &OutputErrProps,
+) -> Result<(), UnhandledError> {
+    let request = output_props.to_fingerprint_embedding_request(issue);
+
+    let res = send_iter_to_kafka(
+        &context.immediate_producer,
+        &context.config.embedding_worker_topic,
+        &[request],
+    )
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, _>>();
+    if let Err(err) = res {
+        return Err(UnhandledError::KafkaProduceError(err));
+    }
+    Ok(())
+}
+
+pub async fn send_issue_reopened_alert(
     context: &AppContext,
     issue: &Issue,
     assignment: Option<Assignment>,

@@ -4,15 +4,15 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-type PostHogPythonOptions = {
+type InsightsPythonOptions = {
     enableExceptionAutocapture?: boolean
 }
 
 function PythonInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>pip install posthog</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>pip install insights</CodeSnippet>
 }
 
-export function PythonSetupSnippet({ enableExceptionAutocapture = false }: PostHogPythonOptions): JSX.Element {
+export function PythonSetupSnippet({ enableExceptionAutocapture = false }: InsightsPythonOptions): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
 
     const options = [`host='${apiHostOrigin()}'`]
@@ -23,9 +23,9 @@ export function PythonSetupSnippet({ enableExceptionAutocapture = false }: PostH
 
     return (
         <CodeSnippet language={Language.Python}>
-            {`from posthog import Posthog
+            {`from insights import Insights
 
-posthog = Posthog(
+insights = Insights(
   project_api_key='${currentTeam?.api_token}',
   ${options.join(',\n  ')}
 )`}
@@ -33,7 +33,7 @@ posthog = Posthog(
     )
 }
 
-export function SDKInstallPythonInstructions(props: PostHogPythonOptions): JSX.Element {
+export function SDKInstallPythonInstructions(props: InsightsPythonOptions): JSX.Element {
     return (
         <>
             <h3>Install</h3>

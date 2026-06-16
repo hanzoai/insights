@@ -2,7 +2,8 @@ import { BuiltLogic, LogicWrapper } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { HogDebug } from 'scenes/debug/HogDebug'
+import { ScriptDebug } from 'scenes/debug/ScriptDebug'
+import { MarketingAnalyticsOverview } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsOverview/MarketingAnalyticsOverview'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { QueryEditor } from '~/queries/QueryEditor/QueryEditor'
@@ -16,12 +17,13 @@ import {
     DashboardFilter,
     DataTableNode,
     DataVisualizationNode,
-    HogQLVariable,
+    InsightsQLVariable,
     InsightVizNode,
     Node,
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 
+import { EndpointsUsageOverviewNode, EndpointsUsageTrendsNode } from 'products/endpoints/frontend/nodes'
 import {
     RevenueAnalyticsGrossRevenueNode,
     RevenueAnalyticsMRRNode,
@@ -36,8 +38,11 @@ import { WebVitalsPathBreakdown } from '../nodes/WebVitals/WebVitalsPathBreakdow
 import {
     isDataTableNode,
     isDataVisualizationNode,
-    isHogQuery,
+    isEndpointsUsageOverviewQuery,
+    isEndpointsUsageTrendsQuery,
+    isScriptQuery,
     isInsightVizNode,
+    isMarketingAnalyticsAggregatedQuery,
     isRevenueAnalyticsGrossRevenueQuery,
     isRevenueAnalyticsMRRQuery,
     isRevenueAnalyticsMetricsQuery,
@@ -73,7 +78,7 @@ export interface QueryProps<Q extends Node> {
     /** Dashboard filters to override the ones in the query */
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Passed down if implemented by the query type to e.g. set data attr on a LemonTable in a data table */
     dataAttr?: string
     /** Attach ourselves to another logic, such as the scene logic */
@@ -170,6 +175,7 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 readOnly={readOnly}
                 editMode={!!editMode}
                 uniqueKey={uniqueKey}
+                cachedResults={props.cachedResults}
                 embedded={embedded}
                 inSharedMode={inSharedMode}
                 filtersOverride={filtersOverride}
@@ -221,9 +227,37 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 context={queryContext}
             />
         )
+    } else if (isEndpointsUsageOverviewQuery(query)) {
+        component = (
+            <EndpointsUsageOverviewNode
+                attachTo={props.attachTo}
+                query={query}
+                cachedResults={props.cachedResults}
+                context={queryContext}
+            />
+        )
+    } else if (isEndpointsUsageTrendsQuery(query)) {
+        component = (
+            <EndpointsUsageTrendsNode
+                attachTo={props.attachTo}
+                query={query}
+                cachedResults={props.cachedResults}
+                context={queryContext}
+            />
+        )
     } else if (isWebOverviewQuery(query)) {
         component = (
             <WebOverview
+                attachTo={props.attachTo}
+                query={query}
+                cachedResults={props.cachedResults}
+                context={queryContext}
+                uniqueKey={uniqueKey}
+            />
+        )
+    } else if (isMarketingAnalyticsAggregatedQuery(query)) {
+        component = (
+            <MarketingAnalyticsOverview
                 attachTo={props.attachTo}
                 query={query}
                 cachedResults={props.cachedResults}
@@ -249,9 +283,9 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 context={queryContext}
             />
         )
-    } else if (isHogQuery(query)) {
+    } else if (isScriptQuery(query)) {
         component = (
-            <HogDebug
+            <ScriptDebug
                 attachTo={props.attachTo}
                 query={query}
                 setQuery={setQuery as (query: any) => void}

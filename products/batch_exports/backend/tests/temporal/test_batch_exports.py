@@ -7,7 +7,7 @@ import pytest
 
 from django.test import override_settings
 
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
 from products.batch_exports.backend.temporal.batch_exports import generate_query_ranges, get_data_interval, iter_records
 
@@ -25,9 +25,9 @@ def assert_records_match_events(records, events):
     all_record = sorted(records, key=operator.itemgetter("event"))
 
     assert len(all_expected) == len(all_record)
-    assert len([record["uuid"] for record in all_record]) == len(
-        {record["uuid"] for record in all_record}
-    ), "duplicate records found"
+    assert len([record["uuid"] for record in all_record]) == len({record["uuid"] for record in all_record}), (
+        "duplicate records found"
+    )
 
     for expected, record in zip(all_expected, all_record):
         for key, value in record.items():
@@ -305,9 +305,9 @@ async def test_iter_records_uses_extra_query_parameters(clickhouse_client):
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
             fields=[
-                {"expression": "JSONExtractInt(properties, %(hogql_val_0)s)", "alias": "custom_prop"},
+                {"expression": "JSONExtractInt(properties, %(insightsql_val_0)s)", "alias": "custom_prop"},
             ],
-            extra_query_parameters={"hogql_val_0": "custom"},
+            extra_query_parameters={"insightsql_val_0": "custom"},
         )
         for record in record_batch.to_pylist()
     ]

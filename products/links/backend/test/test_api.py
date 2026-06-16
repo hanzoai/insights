@@ -1,11 +1,11 @@
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
 
 import structlog
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from posthog.models.link import Link
-from posthog.models.team.team import Team
+from insights.models.link import Link
+from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)
 
@@ -14,7 +14,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     def test_create_link_success(self):
         data = {
             "redirect_url": "https://example.com",
-            "short_link_domain": "phog.gg",
+            "short_link_domain": "insights.link",
             "short_code": "test123",
             "description": "Test link",
         }
@@ -41,14 +41,14 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
 
         json_response = str(response.json())
         self.assertIn("short_link_domain", json_response)
-        self.assertIn("Only phog.gg is allowed as a short link domain", json_response)
+        self.assertIn("Only insights.link is allowed as a short link domain", json_response)
 
     def test_list_links(self):
         # Create a link first
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -63,7 +63,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -77,7 +77,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -85,7 +85,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
 
         data = {
             "redirect_url": "https://updated.com",
-            "short_link_domain": "phog.gg",
+            "short_link_domain": "insights.link",
             "short_code": link.short_code,
             "description": "Updated link",
         }
@@ -101,7 +101,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -125,14 +125,14 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link1 = Link.objects.create(
             team=self.team,
             redirect_url="https://example1.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test1",
             created_by=self.user,
         )
         _link2 = Link.objects.create(
             team=team2,
             redirect_url="https://example2.com",
-            short_link_domain="phog.gg",
+            short_link_domain="insights.link",
             short_code="test2",
             created_by=self.user,
         )
@@ -148,7 +148,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             f"/api/projects/{self.team.id}/links",
             data={
                 "redirect_url": "https://example.com",
-                "short_link_domain": "phog.gg",
+                "short_link_domain": "insights.link",
                 "short_code": "test123",
                 "description": "Test link",
                 "_create_in_folder": "Special Folder/Links",
@@ -160,10 +160,10 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link_id = response.json()["id"]
         assert link_id is not None
 
-        from posthog.models.file_system.file_system import FileSystem
+        from insights.models.file_system.file_system import FileSystem
 
         fs_entry = FileSystem.objects.filter(team=self.team, ref=str(link_id), type="link").first()
         assert fs_entry is not None, "A FileSystem entry was not created for this Link."
-        assert (
-            "Special Folder/Links" in fs_entry.path
-        ), f"Expected path to include 'Special Folder/Links', got '{fs_entry.path}'."
+        assert "Special Folder/Links" in fs_entry.path, (
+            f"Expected path to include 'Special Folder/Links', got '{fs_entry.path}'."
+        )

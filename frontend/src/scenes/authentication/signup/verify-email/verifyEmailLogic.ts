@@ -22,7 +22,7 @@ export interface ValidatedTokenResponseType extends ResponseType {
 
 export const verifyEmailLogic = kea<verifyEmailLogicType>([
     path(['scenes', 'authentication', 'verifyEmailLogic']),
-    connect({ values: [userLogic, ['user']] }),
+    connect(() => ({ values: [userLogic, ['user']] })),
     actions({
         setView: (view: 'verify' | 'pending' | 'invalid' | 'success' | null) => ({ view }),
         setUuid: (uuid: string | null) => ({ uuid }),
@@ -40,6 +40,9 @@ export const verifyEmailLogic = kea<verifyEmailLogicType>([
 
                         const nextUrl = getRelativeNextPath(new URLSearchParams(location.search).get('next'), location)
 
+                        // this url is validated in getRelativeNextPath as either being relative or on the same origin
+                        // this url is also secret and so we can trust it's not attacker controlled
+                        // nosemgrep: javascript.browser.security.open-redirect.js-open-redirect
                         location.href = nextUrl || '/'
                         return { success: true, token, uuid }
                     } catch (e: any) {
@@ -53,6 +56,8 @@ export const verifyEmailLogic = kea<verifyEmailLogicType>([
                                 new URLSearchParams(location.search).get('next'),
                                 location
                             )
+                            // this url is validated in getRelativeNextPath as either being relative or on the same origin
+                            // nosemgrep: javascript.browser.security.open-redirect.js-open-redirect
                             location.href = nextUrl || '/'
                             return { success: true, token, uuid }
                         }

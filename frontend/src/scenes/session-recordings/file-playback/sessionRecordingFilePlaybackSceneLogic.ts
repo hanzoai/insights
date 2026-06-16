@@ -2,7 +2,7 @@ import { BuiltLogic, connect, kea, listeners, path, reducers, selectors } from '
 import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { uuid } from 'lib/utils'
@@ -12,8 +12,9 @@ import { urls } from 'scenes/urls'
 import { Breadcrumb } from '~/types'
 
 import { SessionRecordingPlayerProps } from '../player/SessionRecordingPlayer'
-import { sessionRecordingDataLogic } from '../player/sessionRecordingDataLogic'
-import type { sessionRecordingDataLogicType } from '../player/sessionRecordingDataLogicType'
+import { sessionRecordingDataCoordinatorLogic } from '../player/sessionRecordingDataCoordinatorLogic'
+import type { sessionRecordingDataCoordinatorLogicType } from '../player/sessionRecordingDataCoordinatorLogicType'
+import { createWindowIdRegistry } from '../player/snapshot-processing/process-all-snapshots'
 import { sessionRecordingEventUsageLogic } from '../sessionRecordingEventUsageLogic'
 import type { sessionRecordingFilePlaybackSceneLogicType } from './sessionRecordingFilePlaybackSceneLogicType'
 import { ExportedSessionRecordingFileV1, ExportedSessionRecordingFileV2 } from './types'
@@ -28,13 +29,15 @@ export const parseExportedSessionRecording = (fileData: string): ExportedSession
     if (data.version === '2023-04-28') {
         return data
     } else if (data.version === '2022-12-02') {
+        const registerWindowId = createWindowIdRegistry()
         return {
             version: '2023-04-28',
             data: {
-                id: '', // This wasn't available in a previous version
+                id: '',
                 person: data.data.person || undefined,
                 snapshots: Object.entries(data.data.snapshotsByWindowId)
-                    .flatMap(([windowId, snapshots]) => {
+                    .flatMap(([windowIdUuid, snapshots]) => {
+                        const windowId = registerWindowId(windowIdUuid)
                         return snapshots.map((snapshot) => ({
                             ...snapshot,
                             windowId,
@@ -58,13 +61,13 @@ export const parseExportedSessionRecording = (fileData: string): ExportedSession
  */
 const waitForDataLogic = async (
     playerProps: SessionRecordingPlayerProps
-): Promise<BuiltLogic<sessionRecordingDataLogicType>> => {
+): Promise<BuiltLogic<sessionRecordingDataCoordinatorLogicType>> => {
     const maxRetries = 20 // 2 seconds / 100 ms per retry
     let retries = 0
     let dataLogic = null
 
     while (retries < maxRetries) {
-        dataLogic = sessionRecordingDataLogic.findMounted({
+        dataLogic = sessionRecordingDataCoordinatorLogic.findMounted({
             sessionRecordingId: playerProps.sessionRecordingId,
             playerKey: playerProps.playerKey,
         })
@@ -151,13 +154,15 @@ export const sessionRecordingFilePlaybackSceneLogic = kea<sessionRecordingFilePl
             (): Breadcrumb[] => [
                 {
                     key: Scene.Replay,
-                    name: 'Replay',
+                    name: 'Session Replay',
                     path: urls.replay(),
+                    iconType: 'session_replay',
                 },
                 {
                     key: Scene.ReplayFilePlayback,
                     name: 'File playback',
                     path: urls.replayFilePlayback(),
+                    iconType: 'session_replay',
                 },
             ],
         ],

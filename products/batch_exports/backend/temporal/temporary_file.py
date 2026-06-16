@@ -19,7 +19,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from psycopg import sql
 
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.heartbeat import DateRange
 
@@ -597,7 +597,7 @@ class JSONLBatchExportWriter(BatchExportWriter):
                 # Orjson enforces an unmodifiable recursion limit (256), so we can't
                 # dump very nested dicts.
                 if d.get("event", None) == "$web_vitals":
-                    # These are PostHog events that for a while included a bunch of
+                    # These are Insights events that for a while included a bunch of
                     # nested DOM structures. Eventually, this was removed, but these
                     # events could still be present in database.
                     # Let's try to clear the key with nested elements first.
@@ -606,7 +606,7 @@ class JSONLBatchExportWriter(BatchExportWriter):
                     except KeyError:
                         # We tried, fallback to the slower but more permissive stdlib
                         # json.
-                        logger.exception("PostHog $web_vitals event didn't match expected structure")
+                        logger.exception("Insights $web_vitals event didn't match expected structure")
                         dumped = json.dumps(d, default=str).encode("utf-8")
                         n = self.batch_export_file.write(dumped + b"\n")
                     else:
@@ -711,7 +711,7 @@ def ensure_curly_brackets_array(v: list[typing.Any]) -> str:
     """Convert list to str and replace ends with curly braces."""
     # NOTE: This doesn't support nested arrays (i.e. multi-dimensional arrays).
     str_list = str(v)
-    return f"{{{str_list[1:len(str_list)-1]}}}"
+    return f"{{{str_list[1 : len(str_list) - 1]}}}"
 
 
 class ParquetBatchExportWriter(BatchExportWriter):
@@ -799,10 +799,7 @@ def remove_escaped_whitespace_recursive(value):
             return remove_escaped_whitespace_recursive(b.decode("utf-8"))
 
         case [*sequence]:
-            # mypy could be bugged as it's raising a Statement unreachable error.
-            # But we are definitely reaching this statement in tests; hence the ignore comment.
-            # Maybe: https://github.com/python/mypy/issues/16272.
-            return type(value)(remove_escaped_whitespace_recursive(sequence_value) for sequence_value in sequence)  # type: ignore
+            return type(value)(remove_escaped_whitespace_recursive(sequence_value) for sequence_value in sequence)
 
         case set(elements):
             return {remove_escaped_whitespace_recursive(element) for element in elements}

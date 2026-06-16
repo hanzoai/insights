@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton, LemonTable } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonTable } from '@hanzo/lemon-ui'
 
 import { viewLinkLogic } from 'scenes/data-warehouse/viewLinkLogic'
 
