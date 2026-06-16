@@ -1,6 +1,7 @@
 import { createPool } from 'generic-pool'
 import Redis, { RedisOptions } from 'ioredis'
 
+import { BaseRedis, baseScopeFromUrl } from '../../common/redis/base-adapter'
 import { RedisPool } from '../../types'
 import { logger } from '../../utils/logger'
 import { killGracefully } from '../../utils/utils'
@@ -8,6 +9,26 @@ import { captureException } from '../insights'
 
 /** Number of Redis error events until the server is killed gracefully. */
 const REDIS_ERROR_COUNTER_LIMIT = 10
+
+/**
+ * Backend selection — strangle seam.
+ *
+ * The default backend is Base (embedded SQLite via the base-adapter). The
+ * legacy ioredis transport stays reachable ONLY when a `redis://` / `rediss://`
+ * URL is configured AND `INSIGHTS_REDIS_BACKEND` is not `base`. This is the
+ * single place transport is chosen; every call-site is transport-agnostic.
+ */
+function useBaseBackend(url: string): boolean {
+    const backend = (process.env.INSIGHTS_REDIS_BACKEND || 'base').toLowerCase()
+    if (backend === 'redis') {
+        return false
+    }
+    if (backend === 'base') {
+        return true
+    }
+    // 'auto': use Base unless an explicit non-localhost redis URL is given.
+    return !(url.startsWith('redis://') || url.startsWith('rediss://'))
+}
 
 /**
  * Configuration for a Redis connection.
@@ -18,6 +39,12 @@ export interface RedisConnectionConfig {
     url: string
     options?: RedisOptions
     name?: string
+    /**
+     * Force a specific transport for this pool, overriding INSIGHTS_REDIS_BACKEND.
+     * Pub/Sub MUST set `forceBackend: 'redis'` because it is cross-process and
+     * the Base adapter cannot fan messages across worker pods.
+     */
+    forceBackend?: 'base' | 'redis'
 }
 
 /**
@@ -30,6 +57,19 @@ export interface RedisPoolConfig {
 }
 
 export async function createRedisFromConfig(config: RedisConnectionConfig): Promise<Redis.Redis> {
+    if (config.forceBackend === 'redis') {
+        return createRedisClient(config.url, config.options, config.name)
+    }
+    if (config.forceBackend === 'base' || useBaseBackend(config.url)) {
+        const scope = baseScopeFromUrl(config.url)
+        if (process.env.NODE_ENV !== 'test') {
+            logger.info('✅', `[base-adapter] ${config.name ?? 'redis'} backed by Base`, { scope })
+        }
+        // The base-adapter implements the ioredis subset insights uses. This is
+        // the single deliberate cast at the strangle seam; it is removed when
+        // call-sites are inlined onto Base collection calls directly.
+        return new BaseRedis(scope) as unknown as Redis.Redis
+    }
     return createRedisClient(config.url, config.options, config.name)
 }
 

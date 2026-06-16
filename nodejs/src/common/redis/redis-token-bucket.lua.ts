@@ -62,6 +62,13 @@ return {tokensBefore, tokensAfter}
 `
 
 export const defineLuaTokenBucket = (client: Redis) => {
+    // The Base adapter implements checkRateLimit / checkRateLimitV2 natively as
+    // BEGIN IMMEDIATE transactions (see base-adapter.ts), so it has no Lua and
+    // no defineCommand. Only register the Lua script on a real ioredis client.
+    if (typeof (client as { defineCommand?: unknown }).defineCommand !== 'function') {
+        return
+    }
+
     // NOTE: We removed the original command and both checks point at the new one
     // Once deployed, we can follow up to use the non-v2 caller
     client.defineCommand('checkRateLimit', {
