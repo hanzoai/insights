@@ -113,7 +113,16 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     })
     logger.info('👍', `Insights Redis ready`)
 
-    const pubSub = new PubSub(redisPool)
+    // Pub/Sub is cross-process (Django publishes; every worker pod subscribes
+    // to invalidate caches). The Base adapter cannot fan messages across pods,
+    // so the pub/sub pool is pinned to Redis until the Base-realtime migration
+    // lands. Every other pool above uses the default (Base) backend.
+    const pubSubRedisPool = createRedisPoolFromConfig({
+        connection: { url: serverConfig.REDIS_URL, name: 'pubsub-redis', forceBackend: 'redis' },
+        poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
+        poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
+    })
+    const pubSub = new PubSub(pubSubRedisPool)
     await pubSub.start()
 
     const groupRepository = new PostgresGroupRepository(postgres)
