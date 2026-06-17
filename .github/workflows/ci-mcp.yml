@@ -15,7 +15,7 @@ permissions:
 
 jobs:
     changes:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         name: Determine need to run MCP checks
         outputs:
@@ -37,7 +37,7 @@ jobs:
                         - '.github/workflows/mcp-publish.yml'
     build:
         name: Build Package
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: changes
         if: needs.changes.outputs.mcp == 'true'
 
@@ -92,7 +92,7 @@ jobs:
 
     unit-tests:
         name: Unit Tests
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: changes
         if: needs.changes.outputs.mcp == 'true'
         steps:
@@ -119,7 +119,7 @@ jobs:
 
     integration-tests:
         name: Integration Tests
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: changes
         timeout-minutes: 30
         if: needs.changes.outputs.mcp == 'true'
@@ -354,7 +354,7 @@ jobs:
     mcp_tests:
         needs: [changes, build, unit-tests, integration-tests]
         name: MCP Tests Pass
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always()
         steps:
             - name: Check all MCP jobs
