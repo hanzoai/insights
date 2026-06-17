@@ -14,7 +14,7 @@ jobs:
     # Job to decide if we should run rust ci
     # See https://github.com/dorny/paths-filter#conditional-execution for more details
     changes:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         if: github.repository == 'hanzoai/insights'
         name: Determine need to run Rust checks
@@ -123,7 +123,7 @@ jobs:
         name: Build Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: hanzo-build-linux-amd64
 
         defaults:
             run:
@@ -177,7 +177,7 @@ jobs:
             matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 20
 
         defaults:
@@ -308,7 +308,7 @@ jobs:
         name: Lint Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: hanzo-build-linux-amd64
 
         defaults:
             run:
@@ -370,7 +370,7 @@ jobs:
         name: Shear Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: ubuntu-22.04
+        runs-on: hanzo-build-linux-amd64
 
         defaults:
             run:
@@ -401,7 +401,7 @@ jobs:
     rust_tests:
         needs: [changes, build, test, linting, shear]
         name: Rust Tests Pass
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always()
         steps:
             - name: Check all Rust jobs

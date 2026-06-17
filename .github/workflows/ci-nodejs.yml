@@ -24,7 +24,7 @@ jobs:
     # Job to decide if we should run nodejs services ci
     # See https://github.com/dorny/paths-filter#conditional-execution for more details
     changes:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         name: Determine need to run Node.js checks
         permissions:
@@ -58,7 +58,7 @@ jobs:
         if: needs.changes.outputs.nodejs == 'true'
         name: Node.js Code quality
         needs: changes
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         steps:
             - uses: actions/checkout@v6
               with:
@@ -95,7 +95,7 @@ jobs:
         if: needs.changes.outputs.nodejs == 'true'
         name: Node.js Build
         needs: changes
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         steps:
             - uses: actions/checkout@v6
               with:
@@ -140,7 +140,7 @@ jobs:
         if: needs.changes.outputs.nodejs == 'true'
         name: Node.js Tests (${{matrix.shard}}/3)
         needs: changes
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 30 # We know tests don't take this long
 
         strategy:
@@ -318,7 +318,7 @@ jobs:
     node_tests:
         needs: [tests, build, lint]
         name: Node.js Tests Pass
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always()
         steps:
             - run: exit 0

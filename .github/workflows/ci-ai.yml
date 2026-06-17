@@ -16,7 +16,7 @@ jobs:
     eval:
         timeout-minutes: 45
         name: Run AI evals
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         # Skipping on forks as Braintrust credentials are not available there
         if: |
             github.repository == 'hanzoai/insights' && (

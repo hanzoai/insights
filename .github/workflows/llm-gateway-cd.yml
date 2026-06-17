@@ -11,7 +11,7 @@ on:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
 
         permissions:
             contents: read
@@ -59,7 +59,7 @@ jobs:
                   project: 90mkjhdrjz # llm-gateway depot project
 
     deploy:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-deploy-linux-amd64
         needs: build
         permissions: {}
         steps:
