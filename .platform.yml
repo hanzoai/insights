@@ -1,0 +1,16 @@
+# Platform-native CI/CD — hanzoai/insights
+#
+# Build-only for now: insights ships multiple images (Python analytics + Node
+# web). This stanza builds the primary image across the multi-arch matrix to
+# exercise platform's matrix dispatch. Deploy is intentionally omitted until a
+# canonical operator Service CR target is provisioned for insights.
+# See platform docs/PLATFORM_CI.md.
+build:
+  matrix:
+    - { os: linux, arch: amd64 }
+    - { os: linux, arch: arm64 }
+  dockerfile: ./Dockerfile
+  context: .
+  image: ghcr.io/hanzoai/insights
+  tag-pattern: "{{git.sha}}"
+  push: true
