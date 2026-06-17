@@ -1,4 +1,4 @@
-# LLM.md - Hanzo Insights
+# Hanzo Insights
 
 ## Overview
 
