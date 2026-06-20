@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
     changes:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         if: github.repository == 'hanzoai/insights' && github.event_name != 'merge_group'
         name: Determine need to run Docker checks
@@ -35,7 +35,7 @@ jobs:
         needs: changes
         name: Build Docker image
         # run these on 4, if they're RAM constrained the FE build will fail randomly in Docker build
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow at least reading the repo contents, add other permissions if necessary
@@ -87,7 +87,7 @@ jobs:
 
     lint:
         name: Lint changed Dockerfiles
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         steps:
             - name: Check out
               uses: actions/checkout@v6

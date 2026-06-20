@@ -9,7 +9,7 @@ on:
 
 jobs:
     changes:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         if: github.repository == 'hanzoai/insights'
         name: Determine if sandbox image needs to be built
@@ -37,7 +37,7 @@ jobs:
                 github.event_name == 'workflow_dispatch' ||
                 contains(github.event.pull_request.labels.*.name, 'build-tasks-sandbox-image')
             )
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow at least reading the repo contents, add other permissions if necessary
