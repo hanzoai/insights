@@ -58,7 +58,7 @@ jobs:
                     - image: personinsights-router
                       dockerfile: ./rust/Dockerfile
                       project: wqvvpmzgbk
-        runs-on: ubuntu-22.04
+        runs-on: hanzo-build-linux-amd64
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow reading the repo contents
@@ -173,7 +173,7 @@ jobs:
 
     deploy:
         name: deploy ${{ matrix.release }}
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-deploy-linux-amd64
         needs: build
         if: github.ref == 'refs/heads/main'
         strategy:
