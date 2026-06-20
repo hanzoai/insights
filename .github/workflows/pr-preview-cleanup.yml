@@ -8,7 +8,7 @@ on:
 jobs:
     deploy_preview_cleanup:
         name: Deploy Preview Cleanup
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-deploy-linux-amd64
         if: ${{ contains(github.event.pull_request.labels.*.name, 'deploy') }}
 
         permissions:

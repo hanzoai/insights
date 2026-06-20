@@ -15,7 +15,7 @@ env:
 
 jobs:
     ensure-pinned-actions:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
@@ -34,7 +34,7 @@ jobs:
                       inkeep/
 
     semgrep-python:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -59,7 +59,7 @@ jobs:
                     common/ insights/ products/
 
     semgrep-go:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -82,7 +82,7 @@ jobs:
                     livestream/
 
     semgrep-rust:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -107,7 +107,7 @@ jobs:
                     cli/ rust/
 
     semgrep-js:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -130,7 +130,7 @@ jobs:
 
     # scans GitHub Actions and other repo-wide config
     semgrep-general:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -165,7 +165,7 @@ jobs:
                     .
 
     semgrep-test-rules:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         container:
             image: returntocorp/semgrep
 
@@ -180,7 +180,7 @@ jobs:
     semgrep_checks:
         needs: [semgrep-python, semgrep-go, semgrep-rust, semgrep-js, semgrep-general, semgrep-test-rules]
         name: Semgrep Checks Pass
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always()
         steps:
             - name: Check matrix outcome
