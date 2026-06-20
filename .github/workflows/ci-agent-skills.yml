@@ -19,7 +19,7 @@ jobs:
         permissions:
             contents: read
             pull-requests: read
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         name: Determine need to run skill checks
         outputs:
@@ -40,7 +40,7 @@ jobs:
 
     check-skills:
         name: Check agent skills
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: changes
         if: needs.changes.outputs.skills == 'true'
         permissions:
@@ -118,7 +118,7 @@ jobs:
 
     release-skills:
         name: Release agent skills
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: check-skills
         if: github.ref == 'refs/heads/main'
         permissions:

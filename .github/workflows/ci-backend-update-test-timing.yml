@@ -22,7 +22,7 @@ permissions:
 jobs:
     collect-and-merge:
         name: Collect timing data from CI artifacts
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         steps:
             - name: Get app token
               id: app-token

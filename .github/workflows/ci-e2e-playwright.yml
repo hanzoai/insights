@@ -61,7 +61,7 @@ concurrency:
 
 jobs:
     changes:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         # Only run on PRs from the same repo (not forks) or on main push
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
@@ -103,7 +103,7 @@ jobs:
         name: Get ClickHouse versions
         needs: [changes]
         if: needs.changes.outputs.shouldRun == 'true'
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         outputs:
             oldest_supported: ${{ steps.read-versions.outputs.oldest_supported }}
         steps:
@@ -123,7 +123,7 @@ jobs:
 
     detect-snapshot-mode:
         name: Detect snapshot mode
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: [changes]
         if: needs.changes.outputs.shouldRun == 'true'
         outputs:
@@ -168,7 +168,7 @@ jobs:
         needs: [changes, detect-snapshot-mode, get_clickhouse_versions]
         if: needs.changes.outputs.shouldRun == 'true'
         # WARNING: Runner size is tuned to avoid CPU scheduling contention. Talk to #team-devex before changing.
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 30
         steps:
             - uses: actions/checkout@v6
@@ -655,7 +655,7 @@ jobs:
 
     capture-run-time:
         name: Capture run time
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: [changes, playwright]
         if: # Run on pull requests to hanzoai/insights + on hanzoai/insights outside of PRs - but never on forks or Dependabot (no secrets access)
             always() && github.actor != 'dependabot[bot]' &&
@@ -669,7 +669,7 @@ jobs:
     # Aggregate all screenshot artifacts and commit once
     handle-screenshots:
         name: Handle screenshot changes
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         needs: [playwright, detect-snapshot-mode, changes]
         if: always() && needs.detect-snapshot-mode.outputs.mode == 'update' && needs.changes.outputs.shouldRun == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         steps:
@@ -737,7 +737,7 @@ jobs:
     playwright_tests:
         needs: [playwright, handle-screenshots]
         name: Playwright tests pass
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always()
         steps:
             - name: Check matrix outcome

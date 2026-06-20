@@ -31,7 +31,7 @@ permissions:
 jobs:
     cleanup-hobby-preview:
         name: Cleanup hobby preview droplets
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         steps:
             - uses: actions/checkout@v6
 
@@ -160,7 +160,7 @@ jobs:
 
     cleanup-cf-pages-playwright:
         name: Cleanup Cloudflare Pages playwright reports
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         steps:
             - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
               env:
