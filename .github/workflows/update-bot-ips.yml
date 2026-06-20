@@ -11,7 +11,7 @@ permissions:
 
 jobs:
     update-bot-ips:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
 
         steps:
             - name: Get app token

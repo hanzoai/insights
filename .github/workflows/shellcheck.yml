@@ -9,7 +9,7 @@ permissions:
 
 jobs:
     shell_check:
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         name: shellcheck
         steps:
             - uses: actions/checkout@v6

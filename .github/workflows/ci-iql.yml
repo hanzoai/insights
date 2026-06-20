@@ -20,7 +20,7 @@ jobs:
     # Job to decide if we should run backend ci
     # See https://github.com/dorny/paths-filter#conditional-execution for more details
     changes:
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         timeout-minutes: 5
         name: Determine need to run IQL checks
         permissions:
@@ -54,7 +54,7 @@ jobs:
         needs: changes
         timeout-minutes: 30
         name: IQL tests
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         if: needs.changes.outputs.iql == 'true'
 
         steps:
@@ -159,7 +159,7 @@ jobs:
         name: Check ScriptVM TypeScript package version and detect an update
         needs: iql-tests
         if: needs.iql-tests.result == 'success' && needs.changes.outputs.iql == 'true'
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         outputs:
             committed-version: ${{ steps.check-package-version.outputs.committed-version }}
             published-version: ${{ steps.check-package-version.outputs.published-version }}
@@ -175,7 +175,7 @@ jobs:
 
     release-scriptvm:
         name: Release new ScriptVM TypeScript version
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
         needs: check-package-version
         if: needs.changes.outputs.iql == 'true' && needs.check-package-version.outputs.is-new-version == 'true'
         permissions:

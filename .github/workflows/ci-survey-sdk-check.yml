@@ -14,7 +14,7 @@ permissions:
 jobs:
     check-sdk-requirements:
         name: Check for SDK version requirements
-        runs-on: ubuntu-24.04
+        runs-on: hanzo-build-linux-amd64
 
         steps:
             - name: Check for SDK-related changes
