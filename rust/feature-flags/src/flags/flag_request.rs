@@ -339,7 +339,7 @@ mod tests {
     #[test]
     fn numeric_distinct_id_is_returned_correctly() {
         let json = json!({
-            "$distinct_id": 8675309,
+            "$distinct_id": 1234567,
             "token": "my_token1",
         });
         let bytes = Bytes::from(json.to_string());
@@ -347,7 +347,7 @@ mod tests {
         let flag_payload = FlagRequest::from_bytes(bytes).expect("failed to parse request");
 
         match flag_payload.extract_distinct_id() {
-            Ok(id) => assert_eq!(id, "8675309"),
+            Ok(id) => assert_eq!(id, "1234567"),
             _ => panic!("expected distinct id"),
         };
     }
