@@ -137,7 +137,7 @@ services:
         # Note: please keep the default version in sync across
         #       `insights` and the `charts-clickhouse` repos
         #
-        image: ${DATASTORE_SERVER_IMAGE:-ghcr.io/hanzoai/datastore:latest}
+        image: ${DATASTORE_SERVER_IMAGE:-ghcr.io/hanzoai/datastore:26.6.1.1}
         restart: on-failure
         environment:
             CLICKHOUSE_SKIP_USER_SETUP: 1
