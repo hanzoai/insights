@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="insights" width="880"></p>
+
 # Hanzo Insights
 
 Product analytics and feature flags.
