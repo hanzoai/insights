@@ -10,7 +10,7 @@ export function Logo({ style }: React.PropsWithoutRef<JSX.IntrinsicElements['svg
             fill="none"
             width="8.125em"
             height="2em"
-            viewBox="0 0 210 67"
+            viewBox="0 0 272 67"
             xmlns="http://www.w3.org/2000/svg"
         >
             <g fill="var(--brand-key)">
@@ -20,7 +20,7 @@ export function Logo({ style }: React.PropsWithoutRef<JSX.IntrinsicElements['svg
                 <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" />
                 <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" />
             </g>
-            <g fill="var(--brand-key)" transform="translate(88 18.5) scale(1.32)">
+            <g fill="var(--brand-key)" transform="translate(82 4.3) scale(1.535)">
                 <path d="M4 4h4v9h10V4h4v22h-4V17H8v9H4V4z" />
                 <path d="M28 26V4h4l12 14.5V4h4v22h-3.8L32 11.5V26h-4z" />
                 <path d="M52 26l8-22h4l8 22h-4.2l-1.8-5H58l-1.8 5H52zm7.2-8.5h5.6L62 10l-2.8 7.5z" />
