@@ -16,7 +16,7 @@ binary:
 
 LLM telemetry (traces / observations / scores) is written by the **AI gateway**
 (`hanzoai/ai` → `object/observability.go`) into the ClickHouse warehouse
-(`hanzo.traces`, `hanzo.observations`, `hanzo.scores`, Langfuse-shaped) and read
+(`hanzo.traces`, `hanzo.observations`, `hanzo.scores`) and read
 back through `/v1/evals` + `/v1/analytics`.
 
 The Django `manage.py` and every Django serving entrypoint (`bin/docker`,

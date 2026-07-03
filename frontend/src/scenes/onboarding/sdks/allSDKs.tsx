@@ -35,7 +35,6 @@ import honoImage from './logos/hono.svg'
 import htmlImage from './logos/html.svg'
 import javaImage from './logos/java.svg'
 import jsImage from './logos/javascript_web.svg'
-import langfuseImage from './logos/langfuse.svg'
 import laravelImage from './logos/laravel.svg'
 import moengageImage from './logos/moengage.png'
 import n8nImage from './logos/n8n.svg'
@@ -452,13 +451,6 @@ export const ALL_SDKS: SDK[] = [
         tags: [SDKTag.SERVER],
         image: javaImage,
         docsLink: 'https://hanzo.ai/docs/libraries/java',
-    },
-    {
-        name: 'Langfuse',
-        key: SDKKey.LANGFUSE,
-        tags: [SDKTag.LLM],
-        image: langfuseImage,
-        docsLink: 'https://hanzo.ai/docs/llm-analytics/integrations/langfuse-insights',
     },
     {
         name: 'Laravel',
