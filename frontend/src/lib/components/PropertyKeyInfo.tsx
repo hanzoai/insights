@@ -44,8 +44,7 @@ export const PropertyKeyInfo = React.forwardRef<HTMLSpanElement, PropertyKeyInfo
     const valueDisplayText = displayText || ((coreDefinition ? coreDefinition.label : value)?.trim() ?? '')
     const valueDisplayElement = valueDisplayText === '' ? <i>(empty string)</i> : valueDisplayText
 
-    const recognizedSource: 'insights' | 'langfuse' | null =
-        coreDefinition || value.startsWith('$') ? 'insights' : value.startsWith('langfuse ') ? 'langfuse' : null
+    const recognizedSource: 'insights' | null = coreDefinition || value.startsWith('$') ? 'insights' : null
 
     const innerContent = (
         <span

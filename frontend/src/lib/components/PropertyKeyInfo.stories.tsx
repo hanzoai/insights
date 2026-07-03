@@ -22,9 +22,6 @@ const Template: StoryFn<typeof PropertyKeyInfo> = (args) => {
                 <PropertyKeyInfo {...args} value="$feature/some-feature-key" />
             </div>
             <div>
-                <PropertyKeyInfo {...args} value="langfuse trace" />
-            </div>
-            <div>
                 <PropertyKeyInfo {...args} value="$country" />
             </div>
             <div>
