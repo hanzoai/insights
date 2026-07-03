@@ -100,7 +100,6 @@ class UsageReportCounters:
     event_count_in_period: int
     enhanced_persons_event_count_in_period: int
     event_count_with_groups_in_period: int
-    event_count_from_langfuse_in_period: int
     event_count_from_helicone_in_period: int
     event_count_from_keywords_ai_in_period: int
     event_count_from_traceloop_in_period: int
@@ -567,7 +566,6 @@ def get_all_event_metrics_in_period(begin: datetime, end: datetime) -> dict[str,
             team_id,
             multiIf(
                 event LIKE 'helicone%%', 'helicone_events',
-                event LIKE 'langfuse%%', 'langfuse_events',
                 event LIKE 'keywords_ai%%', 'keywords_ai_events',
                 event LIKE 'traceloop%%', 'traceloop_events',
                 {lib_expression} = 'web', 'web_events',
@@ -602,7 +600,6 @@ def get_all_event_metrics_in_period(begin: datetime, end: datetime) -> dict[str,
     ) -> dict[str, list[tuple[int, int]]]:
         metrics: dict[str, dict[int, int]] = {
             "helicone_events": {},
-            "langfuse_events": {},
             "keywords_ai_events": {},
             "traceloop_events": {},
             "web_events": {},
@@ -1760,7 +1757,6 @@ def _get_all_usage_data(period_start: datetime, period_end: datetime) -> dict[st
             period_start, period_end
         ),
         "teams_with_event_count_from_helicone_in_period": all_metrics["helicone_events"],
-        "teams_with_event_count_from_langfuse_in_period": all_metrics["langfuse_events"],
         "teams_with_event_count_from_keywords_ai_in_period": all_metrics["keywords_ai_events"],
         "teams_with_event_count_from_traceloop_in_period": all_metrics["traceloop_events"],
         "teams_with_web_events_count_in_period": all_metrics["web_events"],
@@ -2016,7 +2012,6 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
             team.id, 0
         ),
         event_count_with_groups_in_period=all_data["teams_with_event_count_with_groups_in_period"].get(team.id, 0),
-        event_count_from_langfuse_in_period=all_data["teams_with_event_count_from_langfuse_in_period"].get(team.id, 0),
         event_count_from_traceloop_in_period=all_data["teams_with_event_count_from_traceloop_in_period"].get(
             team.id, 0
         ),
