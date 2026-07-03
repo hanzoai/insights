@@ -16,7 +16,6 @@ import {
     IOSInstallation,
     JSEventCapture,
     JSWebInstallation,
-    LangfuseInstallation,
     LaravelInstallation,
     MoEngageInstallation,
     N8nInstallation,
@@ -198,7 +197,6 @@ const ProductAnalyticsMoEngageInstructionsWrapper = withOnboardingDocsWrapper({ 
 
 // LLM Integrations
 const ProductAnalyticsHeliconeInstructionsWrapper = withOnboardingDocsWrapper({ Installation: HeliconeInstallation })
-const ProductAnalyticsLangfuseInstructionsWrapper = withOnboardingDocsWrapper({ Installation: LangfuseInstallation })
 const ProductAnalyticsTraceloopInstructionsWrapper = withOnboardingDocsWrapper({ Installation: TraceloopInstallation })
 
 export const ProductAnalyticsSDKTagOverrides: SDKTagOverrides = {
@@ -222,7 +220,6 @@ export const ProductAnalyticsSDKInstructions: SDKInstructionsMap = {
     [SDKKey.HELICONE]: ProductAnalyticsHeliconeInstructionsWrapper,
     [SDKKey.HTML_SNIPPET]: ProductAnalyticsHTMLSnippetInstructionsWrapper,
     [SDKKey.IOS]: ProductAnalyticsIOSInstructionsWrapper,
-    [SDKKey.LANGFUSE]: ProductAnalyticsLangfuseInstructionsWrapper,
     [SDKKey.LARAVEL]: ProductAnalyticsLaravelInstructionsWrapper,
     [SDKKey.MOENGAGE]: ProductAnalyticsMoEngageInstructionsWrapper,
     [SDKKey.N8N]: ProductAnalyticsN8nInstructionsWrapper,

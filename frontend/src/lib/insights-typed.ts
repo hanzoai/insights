@@ -1839,9 +1839,6 @@ interface EventSchemas {
     "KvRoDk0x' OR 495=(SELECT 495 FROM PG_SLEEP(15))--": Record<string, any>
     '@@kXXAx': Record<string, any>
     "ky0dAr5c'; waitfor delay '0:0:15' -- ": Record<string, any>
-    'langfuse generation': Record<string, any>
-    'langfuse score': Record<string, any>
-    'langfuse trace': Record<string, any>
     'latency test': Record<string, any>
     lBt47uUb: Record<string, any>
     'legacy insight endpoint called': Record<string, any>
