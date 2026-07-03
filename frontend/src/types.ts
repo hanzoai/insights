@@ -5774,7 +5774,6 @@ export enum SDKKey {
     LARAVEL = 'laravel',
     LANGCHAIN = 'langchain',
     LANGGRAPH = 'langgraph',
-    LANGFUSE = 'langfuse',
     LLM = 'llm',
     LLAMAINDEX = 'llamaindex',
     MANUAL_CAPTURE = 'manual_capture',

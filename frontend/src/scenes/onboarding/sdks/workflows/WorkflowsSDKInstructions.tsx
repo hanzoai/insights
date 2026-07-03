@@ -15,7 +15,6 @@ import {
     HeliconeInstallation,
     IOSInstallation,
     JSWebInstallation,
-    LangfuseInstallation,
     LaravelInstallation,
     MoEngageInstallation,
     N8nInstallation,
@@ -247,10 +246,6 @@ const WorkflowsHeliconeInstructionsWrapper = withOnboardingDocsWrapper({
     Installation: HeliconeInstallation,
     modifySteps: workflowsModifySteps,
 })
-const WorkflowsLangfuseInstructionsWrapper = withOnboardingDocsWrapper({
-    Installation: LangfuseInstallation,
-    modifySteps: workflowsModifySteps,
-})
 const WorkflowsTraceloopInstructionsWrapper = withOnboardingDocsWrapper({
     Installation: TraceloopInstallation,
     modifySteps: workflowsModifySteps,
@@ -277,7 +272,6 @@ export const WorkflowsSDKInstructions: SDKInstructionsMap = {
     [SDKKey.HELICONE]: WorkflowsHeliconeInstructionsWrapper,
     [SDKKey.HTML_SNIPPET]: WorkflowsHTMLSnippetInstructionsWrapper,
     [SDKKey.IOS]: WorkflowsIOSInstructionsWrapper,
-    [SDKKey.LANGFUSE]: WorkflowsLangfuseInstructionsWrapper,
     [SDKKey.LARAVEL]: WorkflowsLaravelInstructionsWrapper,
     [SDKKey.MOENGAGE]: WorkflowsMoEngageInstructionsWrapper,
     [SDKKey.N8N]: WorkflowsN8nInstructionsWrapper,
