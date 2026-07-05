@@ -1,11 +1,11 @@
-import { Client, Connection } from '@temporalio/client'
+import { Client, Connection } from '@hanzoai/tasks'
 
 import { Hub, RawKafkaEvent } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
 import { TemporalService } from './temporal.service'
 
-jest.mock('@temporalio/client')
+jest.mock('@hanzoai/tasks')
 
 const createMockEvent = (overrides: Partial<RawKafkaEvent> = {}): RawKafkaEvent => {
     return {
@@ -50,7 +50,7 @@ describe('TemporalService', () => {
             connection: mockConnection,
         } as any
         ;(Connection.connect as jest.Mock) = jest.fn().mockResolvedValue(mockConnection)
-        ;(Client as unknown as jest.Mock) = jest.fn().mockReturnValue(mockClient)
+        ;(Client.create as jest.Mock) = jest.fn().mockResolvedValue(mockClient)
 
         service = new TemporalService(hub)
     })
@@ -61,36 +61,33 @@ describe('TemporalService', () => {
     })
 
     describe('connection management', () => {
-        it('creates client with correct config', async () => {
+        it('connects to the Hanzo Tasks engine with an IAM bearer', async () => {
             await service.startEvaluationRunWorkflow('test', createMockEvent({ uuid: 'test-uuid' }))
 
             expect(Connection.connect).toHaveBeenCalledWith({
                 address: 'localhost:7233',
-                tls: false,
+                token: expect.any(Function),
+            })
+            expect(Client.create).toHaveBeenCalledWith({
+                connection: mockConnection,
+                namespace: 'test-namespace',
             })
         })
 
-        it('handles TLS config when certificates provided', async () => {
-            hub.TEMPORAL_CLIENT_ROOT_CA = 'root-ca-cert'
-            hub.TEMPORAL_CLIENT_CERT = 'client-cert'
-            hub.TEMPORAL_CLIENT_KEY = 'client-key'
-
+        it('defaults to cloud.hanzo.svc:9999 when host/port are unset', async () => {
+            hub.TEMPORAL_HOST = ''
+            hub.TEMPORAL_PORT = ''
             const newService = new TemporalService(hub)
+
             await newService.startEvaluationRunWorkflow('test', createMockEvent({ uuid: 'test-uuid' }))
 
             expect(Connection.connect).toHaveBeenCalledWith({
-                address: 'localhost:7233',
-                tls: {
-                    serverRootCACertificate: expect.any(Buffer),
-                    clientCertPair: {
-                        crt: expect.any(Buffer),
-                        key: expect.any(Buffer),
-                    },
-                },
+                address: 'cloud.hanzo.svc:9999',
+                token: expect.any(Function),
             })
         })
 
-        it('disconnects client properly', async () => {
+        it('disconnects the connection properly', async () => {
             await service.startEvaluationRunWorkflow('test', createMockEvent({ uuid: 'test-uuid' }))
             await service.disconnect()
 
@@ -156,10 +153,10 @@ describe('TemporalService', () => {
         })
 
         it('throws on workflow start failure', async () => {
-            ;(mockClient.workflow.start as jest.Mock).mockRejectedValue(new Error('Temporal unavailable'))
+            ;(mockClient.workflow.start as jest.Mock).mockRejectedValue(new Error('Hanzo Tasks unavailable'))
 
             await expect(service.startEvaluationRunWorkflow('eval-123', createMockEvent())).rejects.toThrow(
-                'Temporal unavailable'
+                'Hanzo Tasks unavailable'
             )
         })
     })
