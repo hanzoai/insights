@@ -1425,6 +1425,9 @@ importers:
       '@hanzo/siphash':
         specifier: workspace:*
         version: link:../common/siphash
+      '@hanzoai/tasks':
+        specifier: file:vendor/hanzoai-tasks-1.49.1.tgz
+        version: file:nodejs/vendor/hanzoai-tasks-1.49.1.tgz
       '@maxmind/geoip2-node':
         specifier: ^3.4.0
         version: 3.5.0
@@ -1464,9 +1467,6 @@ importers:
       '@segment/action-destinations':
         specifier: ^3.383.0
         version: 3.387.0(ajv@8.12.0)(encoding@0.1.13)
-      '@temporalio/client':
-        specifier: ^1.12.0
-        version: 1.13.1
       '@types/node':
         specifier: 'catalog:'
         version: 22.18.8
@@ -5758,6 +5758,11 @@ packages:
   '@hanzo/lemon-ui@0.0.2':
     resolution: {integrity: sha512-kCdfOzGopmJLKM22L8RIj5LFZrBFx/q6q7ffJMOLw7t0G/U6eGBMoYsPorIqJRONKpqUfB4YAKdJxj0AmbV7vA==}
 
+  '@hanzoai/tasks@file:nodejs/vendor/hanzoai-tasks-1.49.1.tgz':
+    resolution: {integrity: sha512-n4a30nq/lojKzRTH4B/fqucEU6Ke7CLRVKEwYKghbxXYPb9fL5R3WFDe5PnPg7gujKjVhGu0j6dzeJ1Yx/76Qw==, tarball: file:nodejs/vendor/hanzoai-tasks-1.49.1.tgz}
+    version: 1.49.1
+    engines: {node: '>=18'}
+
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
@@ -9928,18 +9933,6 @@ packages:
   '@tailwindcss/oxide@4.0.12':
     resolution: {integrity: sha512-DWb+myvJB9xJwelwT9GHaMc1qJj6MDXRDR0CS+T8IdkejAtu8ctJAgV4r1drQJLPeS7mNwq2UHW2GWrudTf63A==}
     engines: {node: '>= 10'}
-
-  '@temporalio/client@1.13.1':
-    resolution: {integrity: sha512-EW++yWZhMhHOBCJ5hz4EZank9D5NskJO2zq25THXWGWRDNLeZPGT2rblOPz38Yexu7N6JcSLh8OglWRDohMCzg==}
-    engines: {node: '>= 18.0.0'}
-
-  '@temporalio/common@1.13.1':
-    resolution: {integrity: sha512-Z8t+uN33gu0Hw0T6o0J0Lmn2v6KJ2j7rDBjPYJwRTqrzY8On8wCkgkrq0JaqNRoMzkSJCjj+eanuBswiltsZlg==}
-    engines: {node: '>= 18.0.0'}
-
-  '@temporalio/proto@1.13.1':
-    resolution: {integrity: sha512-Lx7ge+XEk9Gk7z5gXX5VreSNLr4GfBxhe4wxmoDI618PilL0hA14nTh48fZxi72gfSFSfZmJCDBEak6lNdbA2A==}
-    engines: {node: '>= 18.0.0'}
 
   '@testing-library/dom@8.19.0':
     resolution: {integrity: sha512-6YWYPPpxG3e/xOo6HIWwB/58HukkwIVTOaZ0VwdMVjhRUX/01E4FtQbck9GazOOj7MXHc5RBzMrU86iBJHbI+A==}
@@ -25535,6 +25528,8 @@ snapshots:
 
   '@hanzo/lemon-ui@0.0.2': {}
 
+  '@hanzoai/tasks@file:nodejs/vendor/hanzoai-tasks-1.49.1.tgz': {}
+
   '@hapi/hoek@9.3.0': {}
 
   '@hapi/topo@5.1.0':
@@ -30962,28 +30957,6 @@ snapshots:
       '@tailwindcss/oxide-linux-x64-musl': 4.0.12
       '@tailwindcss/oxide-win32-arm64-msvc': 4.0.12
       '@tailwindcss/oxide-win32-x64-msvc': 4.0.12
-
-  '@temporalio/client@1.13.1':
-    dependencies:
-      '@grpc/grpc-js': 1.13.4
-      '@temporalio/common': 1.13.1
-      '@temporalio/proto': 1.13.1
-      abort-controller: 3.0.0
-      long: 5.2.4
-      uuid: 9.0.1
-
-  '@temporalio/common@1.13.1':
-    dependencies:
-      '@temporalio/proto': 1.13.1
-      long: 5.3.2
-      ms: 3.0.0-canary.1
-      nexus-rpc: 0.0.1
-      proto3-json-serializer: 2.0.2
-
-  '@temporalio/proto@1.13.1':
-    dependencies:
-      long: 5.3.2
-      protobufjs: 7.5.4
 
   '@testing-library/dom@8.19.0':
     dependencies:
