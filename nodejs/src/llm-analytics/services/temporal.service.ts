@@ -1,21 +1,17 @@
-import { Client, Connection, TLSConfig, WorkflowHandle } from '@temporalio/client'
-import fs from 'fs/promises'
+import { Client, Connection, WorkflowHandle } from '@hanzoai/tasks'
 import { Counter } from 'prom-client'
 
 import { PluginsServerConfig, RawStreamEvent } from '../../types'
 import { isDevEnv } from '../../utils/env-utils'
 import { logger } from '../../utils/logger'
 
-/** Narrowed Hub type for TemporalService */
-export type TemporalServiceHub = Pick<
-    PluginsServerConfig,
-    | 'TEMPORAL_CLIENT_ROOT_CA'
-    | 'TEMPORAL_CLIENT_CERT'
-    | 'TEMPORAL_CLIENT_KEY'
-    | 'TEMPORAL_PORT'
-    | 'TEMPORAL_HOST'
-    | 'TEMPORAL_NAMESPACE'
->
+/**
+ * Narrowed Hub type for TemporalService. Durable execution now runs on the ONE
+ * Hanzo Tasks engine embedded in cloud (identity-gated ZAP), so only the
+ * address + namespace are read from config; mTLS material is no longer used —
+ * the engine authenticates callers with a Hanzo IAM bearer instead.
+ */
+export type TemporalServiceHub = Pick<PluginsServerConfig, 'TEMPORAL_PORT' | 'TEMPORAL_HOST' | 'TEMPORAL_NAMESPACE'>
 
 const EVALUATION_TASK_QUEUE = isDevEnv() ? 'development-task-queue' : 'llm-analytics-evals-task-queue'
 
@@ -25,8 +21,50 @@ const temporalWorkflowsStarted = new Counter({
     labelNames: ['status'],
 })
 
+// The @hanzoai/tasks IAM bearer source shape.
+type TokenProvider = () => string | Promise<string>
+
+// Hanzo IAM client_credentials bearer (cached). The Hanzo Tasks engine embedded
+// in cloud exposes an identity-gated ZAP listener; the token rides every RPC and
+// cloud validates it against IAM JWKS, scoping the request to the token owner's
+// org. Refreshed a minute before expiry.
+let cachedToken = ''
+let cachedExpMs = 0
+
+export const iamTokenSource: TokenProvider = async () => {
+    const now = Date.now()
+    if (cachedToken && now < cachedExpMs - 60_000) {
+        return cachedToken
+    }
+    const iamUrl = process.env.IAM_URL || 'https://hanzo.id'
+    const body = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: process.env.IAM_CLIENT_ID || 'hanzo-insights',
+        client_secret: process.env.IAM_CLIENT_SECRET || '',
+    })
+    const res = await fetch(`${iamUrl}/v1/iam/oauth/access_token`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+        },
+        body: body.toString(),
+    })
+    if (!res.ok) {
+        throw new Error(`Hanzo IAM client_credentials failed: ${res.status} ${res.statusText}`)
+    }
+    const j = (await res.json()) as { access_token?: string; expires_in?: number }
+    if (!j.access_token) {
+        throw new Error('Hanzo IAM returned no access_token')
+    }
+    cachedToken = j.access_token
+    cachedExpMs = now + (j.expires_in ? j.expires_in * 1000 : 3_600_000)
+    return cachedToken
+}
+
 export class TemporalService {
     private client?: Client
+    private connection?: Connection
     private connecting?: Promise<Client>
 
     constructor(private hub: TemporalServiceHub) {}
@@ -47,58 +85,21 @@ export class TemporalService {
         return this.client
     }
 
-    private async buildTLSConfig(): Promise<TLSConfig | false> {
-        const { TEMPORAL_CLIENT_ROOT_CA, TEMPORAL_CLIENT_CERT, TEMPORAL_CLIENT_KEY } = this.hub
-
-        if (!(TEMPORAL_CLIENT_ROOT_CA && TEMPORAL_CLIENT_CERT && TEMPORAL_CLIENT_KEY)) {
-            return false
-        }
-
-        let systemCAs = Buffer.alloc(0)
-        try {
-            const fileBuffer = await fs.readFile('/etc/ssl/certs/ca-certificates.crt')
-            systemCAs = Buffer.from(fileBuffer)
-        } catch (err: any) {
-            if (err.code !== 'ENOENT') {
-                logger.warn('⚠️ Failed to load system CA bundle', { err })
-            } else {
-                logger.debug('ℹ️ System CA bundle not found — using only provided root CA')
-            }
-        }
-
-        const combinedCA = Buffer.concat([systemCAs, Buffer.from(TEMPORAL_CLIENT_ROOT_CA)])
-
-        logger.debug('🔐 TLS configuration built', {
-            systemCABundle: systemCAs.length > 0,
-            combinedCABytes: combinedCA.length,
-        })
-
-        return {
-            serverRootCACertificate: combinedCA,
-            clientCertPair: {
-                crt: Buffer.from(TEMPORAL_CLIENT_CERT),
-                key: Buffer.from(TEMPORAL_CLIENT_KEY),
-            },
-        }
-    }
-
     private async createClient(): Promise<Client> {
-        const tls = await this.buildTLSConfig()
+        const host = this.hub.TEMPORAL_HOST || 'cloud.hanzo.svc'
+        const port = this.hub.TEMPORAL_PORT || '9999'
+        const address = `${host}:${port}`
 
-        const port = this.hub.TEMPORAL_PORT || '7233'
-        const address = `${this.hub.TEMPORAL_HOST}:${port}`
+        this.connection = await Connection.connect({ address, token: iamTokenSource })
 
-        const connection = await Connection.connect({ address, tls })
-
-        const client = new Client({
-            connection,
+        const client = await Client.create({
+            connection: this.connection,
             namespace: this.hub.TEMPORAL_NAMESPACE || 'default',
         })
 
-        logger.info('✅ Connected to Temporal', {
+        logger.info('✅ Connected to Hanzo Tasks', {
             address,
             namespace: this.hub.TEMPORAL_NAMESPACE,
-            tlsEnabled: tls !== false,
         })
 
         return client
@@ -135,8 +136,9 @@ export class TemporalService {
     }
 
     async disconnect(): Promise<void> {
-        if (this.client) {
-            await this.client.connection.close()
+        if (this.connection) {
+            await this.connection.close()
+            this.connection = undefined
             this.client = undefined
         }
     }
