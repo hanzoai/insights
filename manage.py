@@ -9,7 +9,7 @@ explicit: it refuses to run any Django management command.
 import sys
 
 _NOTICE = """============================================================================
- Hanzo Insights' legacy Django/PostHog server is RETIRED. There is now
+ Hanzo Insights' legacy Django server is RETIRED. There is now
  exactly ONE observability way, served natively (Go) by the cloud binary:
 
    /v1/evals/*   datasets, dataset-items, evaluators, score-configs, scores,
