@@ -2,7 +2,7 @@
 
 ## Status
 
-The legacy **Django / PostHog** served surface is **RETIRED**. There is now
+The legacy **Django** served surface is **RETIRED**. There is now
 exactly **ONE observability way**, served natively (Go) by the `hanzoai/cloud`
 binary:
 
@@ -25,7 +25,7 @@ neutered — they refuse to run and point here. No backwards compat.
 
 ## Django → Go retire map (no capability dropped silently)
 
-| Django / PostHog surface | Go replacement | Status |
+| Django surface | Go replacement | Status |
 |---|---|---|
 | LLM analytics (`products/llm_analytics`, `api/llm_proxy`) | `/v1/evals/*` + `/v1/analytics/llm/*` | **evals LIVE**; analytics/llm backend = GAP (below) |
 | Evals / datasets / scores | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`) |
@@ -42,7 +42,7 @@ neutered — they refuse to run and point here. No backwards compat.
    read path is therefore not yet live. This is a **pre-existing** gap (Django
    product-analytics was already `502`), owned by the cloud lane — not created by
    this retirement. Until it lands, only `/v1/evals/*` serves observability reads.
-2. **PostHog product-analytics / flags / replay / surveys / experiments** are
+2. **Legacy product-analytics / flags / replay / surveys / experiments** are
    formally **sunset**, not migrated. If any is still required, it must be
    re-platformed deliberately.
 
