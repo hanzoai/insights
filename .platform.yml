@@ -8,7 +8,7 @@
 #
 # The event-ingest sidecars still built from this repo (Rust capture, Node
 # plugin) have their own build stanzas / workflows and are unaffected. They
-# remain only until the PostHog `hi.init` snippets are repointed to the native
+# remain only until the legacy `hi.init` snippets are repointed to the native
 # hanzoai/analytics collector (analytics.hanzo.ai).
 #
 # No build/deploy stanza: this repo produces no served surface.
