@@ -1,13 +1,23 @@
 use axum::{extract::State, http::HeaderMap};
 use bytes::Bytes;
+use chrono_tz::Tz;
 use serde::Serialize;
 use serde_json::Value;
-use std::{collections::HashMap, fmt, net::IpAddr, sync::Arc};
+use std::{
+    collections::HashMap,
+    fmt,
+    net::IpAddr,
+    sync::{Arc, OnceLock},
+};
 use uuid::Uuid;
 
 use crate::{
-    api::types::FlagsQueryParams, cohorts::cohort_cache_manager::CohortCacheManager,
-    flags::flag_models::FeatureFlagList, router, utils::user_agent::UserAgentInfo,
+    api::types::FlagsQueryParams,
+    cohorts::{cohort_cache_manager::CohortCacheManager, membership::CohortMembershipProvider},
+    flags::{flag_group_type_mapping::GroupTypeCacheManager, flag_models::FeatureFlagList},
+    rayon_dispatcher::RayonDispatcher,
+    router,
+    utils::user_agent::UserAgentInfo,
 };
 
 pub struct RequestContext {
@@ -28,6 +38,16 @@ pub struct RequestContext {
 
     /// Request ID
     pub request_id: Uuid,
+
+    /// Side channel for body logging: when at least one team is opted into
+    /// `BodyLogger`, the endpoint installs an `Arc<OnceLock<Bytes>>` here and
+    /// keeps a clone. The decode step in `parse_and_authenticate` fills it
+    /// with the decoded body (post gzip + post base64). After the handler
+    /// completes, the endpoint reads from its clone and hands the bytes to
+    /// `BodyLogger::log_response`. This avoids decoding the body twice and
+    /// also ensures base64-wrapped bodies are logged as the JSON they
+    /// actually parsed as, not as the base64 string.
+    pub decoded_body_for_logging: Option<Arc<OnceLock<Bytes>>>,
 }
 
 /// Represents the various property overrides that can be passed around
@@ -43,6 +63,9 @@ pub struct RequestPropertyOverrides {
 /// Represents all context required for evaluating a set of feature flags.
 pub struct FeatureFlagEvaluationContext {
     pub team_id: i32,
+    /// Team timezone, used to interpret naive datetime filter values consistently
+    /// with HogQL/ClickHouse cohort evaluation.
+    pub team_timezone: Tz,
     pub distinct_id: String,
     pub device_id: Option<String>,
     pub feature_flags: FeatureFlagList,
@@ -51,6 +74,7 @@ pub struct FeatureFlagEvaluationContext {
     pub non_persons_reader: Arc<dyn common_database::Client + Send + Sync>,
     pub non_persons_writer: Arc<dyn common_database::Client + Send + Sync>,
     pub cohort_cache: Arc<CohortCacheManager>,
+    pub group_type_cache: Arc<GroupTypeCacheManager>,
     pub person_property_overrides: Option<HashMap<String, Value>>,
     pub group_property_overrides: Option<HashMap<String, HashMap<String, Value>>>,
     pub groups: Option<HashMap<String, Value>>,
@@ -62,6 +86,18 @@ pub struct FeatureFlagEvaluationContext {
     pub optimize_experience_continuity_lookups: bool,
     /// Flag count threshold for switching from sequential to parallel evaluation.
     pub parallel_eval_threshold: usize,
+    /// Dispatcher for bounded-concurrency Rayon batch evaluation.
+    pub rayon_dispatcher: RayonDispatcher,
+    /// When true, skip all writes to PostgreSQL and Redis.
+    pub skip_writes: bool,
+    /// Provider for realtime/behavioral cohort membership lookups.
+    pub cohort_membership_provider: Arc<dyn CohortMembershipProvider>,
+    /// Whether to enable realtime cohort evaluation.
+    pub enable_realtime_cohort_evaluation: bool,
+    /// Whether to include detailed condition analysis in flag evaluation results.
+    pub detailed_analysis: bool,
+    /// Whether to only use person properties from request payload, ignoring database properties.
+    pub only_use_override_person_properties: bool,
 }
 
 /// SDK type classification based on user-agent parsing.
@@ -72,34 +108,36 @@ pub struct FeatureFlagEvaluationContext {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Library {
-    /// insights-js (web browsers)
-    InsightsJs,
-    /// insights-node SDK (server-side Node.js)
-    InsightsNode,
-    /// insights-python SDK
-    InsightsPython,
-    /// insights-php SDK
-    InsightsPhp,
-    /// insights-ruby SDK
-    InsightsRuby,
-    /// insights-go SDK
-    InsightsGo,
-    /// insights-java SDK
-    InsightsJava,
-    /// insights-dotnet SDK
-    InsightsDotnet,
-    /// insights-elixir SDK
-    InsightsElixir,
-    /// insights-android SDK
-    InsightsAndroid,
-    /// insights-ios SDK
-    InsightsIos,
-    /// insights-react-native SDK
-    InsightsReactNative,
-    /// insights-flutter SDK
-    InsightsFlutter,
-    /// insights-server SDK (deprecated: users are migrating to insights-java)
-    InsightsServer,
+    /// posthog-js (web browsers)
+    PosthogJs,
+    /// posthog-node SDK (server-side Node.js)
+    PosthogNode,
+    /// posthog-python SDK
+    PosthogPython,
+    /// posthog-php SDK
+    PosthogPhp,
+    /// posthog-ruby SDK
+    PosthogRuby,
+    /// posthog-go SDK
+    PosthogGo,
+    /// posthog-java SDK
+    PosthogJava,
+    /// posthog-dotnet SDK
+    PosthogDotnet,
+    /// posthog-elixir SDK
+    PosthogElixir,
+    /// posthog-rs SDK
+    PosthogRs,
+    /// posthog-android SDK
+    PosthogAndroid,
+    /// posthog-ios SDK
+    PosthogIos,
+    /// posthog-react-native SDK
+    PosthogReactNative,
+    /// posthog-flutter SDK
+    PosthogFlutter,
+    /// posthog-server SDK (deprecated: users are migrating to posthog-java)
+    PosthogServer,
     /// Unknown or unrecognized SDK
     Other,
 }
@@ -111,20 +149,21 @@ impl Library {
     /// `Display` and `from_sdk_name()` to ensure consistency.
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Library::InsightsJs => "insights-js",
-            Library::InsightsNode => "insights-node",
-            Library::InsightsPython => "insights-python",
-            Library::InsightsPhp => "insights-php",
-            Library::InsightsRuby => "insights-ruby",
-            Library::InsightsGo => "insights-go",
-            Library::InsightsJava => "insights-java",
-            Library::InsightsDotnet => "insights-dotnet",
-            Library::InsightsElixir => "insights-elixir",
-            Library::InsightsAndroid => "insights-android",
-            Library::InsightsIos => "insights-ios",
-            Library::InsightsReactNative => "insights-react-native",
-            Library::InsightsFlutter => "insights-flutter",
-            Library::InsightsServer => "insights-server",
+            Library::PosthogJs => "posthog-js",
+            Library::PosthogNode => "posthog-node",
+            Library::PosthogPython => "posthog-python",
+            Library::PosthogPhp => "posthog-php",
+            Library::PosthogRuby => "posthog-ruby",
+            Library::PosthogGo => "posthog-go",
+            Library::PosthogJava => "posthog-java",
+            Library::PosthogDotnet => "posthog-dotnet",
+            Library::PosthogElixir => "posthog-elixir",
+            Library::PosthogRs => "posthog-rs",
+            Library::PosthogAndroid => "posthog-android",
+            Library::PosthogIos => "posthog-ios",
+            Library::PosthogReactNative => "posthog-react-native",
+            Library::PosthogFlutter => "posthog-flutter",
+            Library::PosthogServer => "posthog-server",
             Library::Other => "other",
         }
     }
@@ -133,20 +172,21 @@ impl Library {
     ///
     /// Used by tests to verify that all SDK names from UserAgentInfo are recognized.
     pub const ALL_KNOWN: &'static [Library] = &[
-        Library::InsightsJs,
-        Library::InsightsNode,
-        Library::InsightsPython,
-        Library::InsightsPhp,
-        Library::InsightsRuby,
-        Library::InsightsGo,
-        Library::InsightsJava,
-        Library::InsightsDotnet,
-        Library::InsightsElixir,
-        Library::InsightsAndroid,
-        Library::InsightsIos,
-        Library::InsightsReactNative,
-        Library::InsightsFlutter,
-        Library::InsightsServer,
+        Library::PosthogJs,
+        Library::PosthogNode,
+        Library::PosthogPython,
+        Library::PosthogPhp,
+        Library::PosthogRuby,
+        Library::PosthogGo,
+        Library::PosthogJava,
+        Library::PosthogDotnet,
+        Library::PosthogElixir,
+        Library::PosthogRs,
+        Library::PosthogAndroid,
+        Library::PosthogIos,
+        Library::PosthogReactNative,
+        Library::PosthogFlutter,
+        Library::PosthogServer,
     ];
 }
 
@@ -170,8 +210,8 @@ impl Library {
     /// use feature_flags::handler::types::Library;
     ///
     /// let mut headers = HeaderMap::new();
-    /// headers.insert("user-agent", "insights-node/3.1.0".parse().unwrap());
-    /// assert_eq!(Library::from_headers(&headers), Library::InsightsNode);
+    /// headers.insert("user-agent", "posthog-node/3.1.0".parse().unwrap());
+    /// assert_eq!(Library::from_headers(&headers), Library::PosthogNode);
     /// ```
     pub fn from_headers(headers: &HeaderMap) -> Self {
         let user_agent = headers.get("user-agent").and_then(|v| v.to_str().ok());
@@ -186,20 +226,20 @@ impl Library {
 
         // UserAgentInfo detected a browser via user-agent patterns
         if ua_info.is_browser {
-            return Library::InsightsJs;
+            return Library::PosthogJs;
         }
 
-        // Check for unrecognized insights-* SDKs (must come before sec-fetch check)
-        // This prevents custom SDKs like "insights-custom/1.0" from being
+        // Check for unrecognized posthog-* SDKs (must come before sec-fetch check)
+        // This prevents custom SDKs like "posthog-custom/1.0" from being
         // misclassified as browsers
-        if user_agent.is_some_and(|ua| ua.starts_with("insights-")) {
+        if user_agent.is_some_and(|ua| ua.starts_with("posthog-")) {
             return Library::Other;
         }
 
         // Additional browser detection via sec-fetch headers
         // These headers are browser-only and cannot be spoofed by server-side code
         if headers.get("sec-fetch-mode").is_some() || headers.get("sec-fetch-site").is_some() {
-            return Library::InsightsJs;
+            return Library::PosthogJs;
         }
 
         Library::Other
@@ -234,31 +274,33 @@ mod tests {
 
     #[rstest]
     // Server-side SDKs
-    #[case("insights-node/3.1.0", Library::InsightsNode)]
-    #[case("insights-python/2.5.0", Library::InsightsPython)]
-    #[case("insights-php/3.0.0", Library::InsightsPhp)]
-    #[case("insights-ruby/2.3.0", Library::InsightsRuby)]
-    #[case("insights-go/1.0.0", Library::InsightsGo)]
-    #[case("insights-java/1.2.0", Library::InsightsJava)]
-    #[case("insights-dotnet/1.0.0", Library::InsightsDotnet)]
-    #[case("insights-elixir/0.2.0", Library::InsightsElixir)]
-    #[case("insights-server/1.0.0", Library::InsightsServer)]
-    #[case("insights-server/3.2.1 (Android SDK)", Library::InsightsServer)]
+    #[case("posthog-node/3.1.0", Library::PosthogNode)]
+    #[case("posthog-python/2.5.0", Library::PosthogPython)]
+    #[case("posthog-php/3.0.0", Library::PosthogPhp)]
+    #[case("posthog-ruby/2.3.0", Library::PosthogRuby)]
+    #[case("posthog-ruby2.3.0", Library::PosthogRuby)]
+    #[case("posthog-go/1.0.0", Library::PosthogGo)]
+    #[case("posthog-java/1.2.0", Library::PosthogJava)]
+    #[case("posthog-dotnet/1.0.0", Library::PosthogDotnet)]
+    #[case("posthog-elixir/0.2.0", Library::PosthogElixir)]
+    #[case("posthog-rs/0.10.0", Library::PosthogRs)]
+    #[case("posthog-server/1.0.0", Library::PosthogServer)]
+    #[case("posthog-server/3.2.1 (Android SDK)", Library::PosthogServer)]
     // Client-side SDKs
-    #[case("insights-js/1.88.0", Library::InsightsJs)]
-    #[case("insights-android/3.0.0", Library::InsightsAndroid)]
-    #[case("insights-ios/3.1.0", Library::InsightsIos)]
-    #[case("insights-react-native/2.0.0", Library::InsightsReactNative)]
-    #[case("insights-flutter/2.0.0", Library::InsightsFlutter)]
-    // Browser user-agents (detected as insights-js)
-    #[case("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36", Library::InsightsJs)]
+    #[case("posthog-js/1.88.0", Library::PosthogJs)]
+    #[case("posthog-android/3.0.0", Library::PosthogAndroid)]
+    #[case("posthog-ios/3.1.0", Library::PosthogIos)]
+    #[case("posthog-react-native/2.0.0", Library::PosthogReactNative)]
+    #[case("posthog-flutter/2.0.0", Library::PosthogFlutter)]
+    // Browser user-agents (detected as posthog-js)
+    #[case("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36", Library::PosthogJs)]
     #[case(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
-        Library::InsightsJs
+        Library::PosthogJs
     )]
-    #[case("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15", Library::InsightsJs)]
-    // Unrecognized insights SDKs → Other (not misclassified as browsers)
-    #[case("insights-custom/1.0 Chrome/91.0 Safari/537.36", Library::Other)]
+    #[case("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15", Library::PosthogJs)]
+    // Unrecognized posthog SDKs → Other (not misclassified as browsers)
+    #[case("posthog-custom/1.0 Chrome/91.0 Safari/537.36", Library::Other)]
     // Unknown clients → Other
     #[case("some-random-client/1.0", Library::Other)]
     #[case("curl/7.68.0", Library::Other)]
@@ -292,7 +334,7 @@ mod tests {
         let mut headers = HeaderMap::new();
         headers.insert("user-agent", "some-custom-client".parse().unwrap());
         headers.insert("sec-fetch-mode", "navigate".parse().unwrap());
-        assert_eq!(Library::from_headers(&headers), Library::InsightsJs);
+        assert_eq!(Library::from_headers(&headers), Library::PosthogJs);
     }
 
     #[test]
@@ -301,7 +343,7 @@ mod tests {
         let mut headers = HeaderMap::new();
         headers.insert("user-agent", "some-custom-client".parse().unwrap());
         headers.insert("sec-fetch-site", "same-origin".parse().unwrap());
-        assert_eq!(Library::from_headers(&headers), Library::InsightsJs);
+        assert_eq!(Library::from_headers(&headers), Library::PosthogJs);
     }
 
     #[test]
@@ -317,40 +359,42 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Library::InsightsJs, "insights-js")]
-    #[case(Library::InsightsNode, "insights-node")]
-    #[case(Library::InsightsPython, "insights-python")]
-    #[case(Library::InsightsPhp, "insights-php")]
-    #[case(Library::InsightsRuby, "insights-ruby")]
-    #[case(Library::InsightsGo, "insights-go")]
-    #[case(Library::InsightsJava, "insights-java")]
-    #[case(Library::InsightsDotnet, "insights-dotnet")]
-    #[case(Library::InsightsElixir, "insights-elixir")]
-    #[case(Library::InsightsAndroid, "insights-android")]
-    #[case(Library::InsightsIos, "insights-ios")]
-    #[case(Library::InsightsReactNative, "insights-react-native")]
-    #[case(Library::InsightsFlutter, "insights-flutter")]
-    #[case(Library::InsightsServer, "insights-server")]
+    #[case(Library::PosthogJs, "posthog-js")]
+    #[case(Library::PosthogNode, "posthog-node")]
+    #[case(Library::PosthogPython, "posthog-python")]
+    #[case(Library::PosthogPhp, "posthog-php")]
+    #[case(Library::PosthogRuby, "posthog-ruby")]
+    #[case(Library::PosthogGo, "posthog-go")]
+    #[case(Library::PosthogJava, "posthog-java")]
+    #[case(Library::PosthogDotnet, "posthog-dotnet")]
+    #[case(Library::PosthogElixir, "posthog-elixir")]
+    #[case(Library::PosthogRs, "posthog-rs")]
+    #[case(Library::PosthogAndroid, "posthog-android")]
+    #[case(Library::PosthogIos, "posthog-ios")]
+    #[case(Library::PosthogReactNative, "posthog-react-native")]
+    #[case(Library::PosthogFlutter, "posthog-flutter")]
+    #[case(Library::PosthogServer, "posthog-server")]
     #[case(Library::Other, "other")]
     fn test_library_display(#[case] library: Library, #[case] expected: &str) {
         assert_eq!(library.to_string(), expected);
     }
 
     #[rstest]
-    #[case(Library::InsightsJs, "\"insights-js\"")]
-    #[case(Library::InsightsNode, "\"insights-node\"")]
-    #[case(Library::InsightsPython, "\"insights-python\"")]
-    #[case(Library::InsightsPhp, "\"insights-php\"")]
-    #[case(Library::InsightsRuby, "\"insights-ruby\"")]
-    #[case(Library::InsightsGo, "\"insights-go\"")]
-    #[case(Library::InsightsJava, "\"insights-java\"")]
-    #[case(Library::InsightsDotnet, "\"insights-dotnet\"")]
-    #[case(Library::InsightsElixir, "\"insights-elixir\"")]
-    #[case(Library::InsightsAndroid, "\"insights-android\"")]
-    #[case(Library::InsightsIos, "\"insights-ios\"")]
-    #[case(Library::InsightsReactNative, "\"insights-react-native\"")]
-    #[case(Library::InsightsFlutter, "\"insights-flutter\"")]
-    #[case(Library::InsightsServer, "\"insights-server\"")]
+    #[case(Library::PosthogJs, "\"posthog-js\"")]
+    #[case(Library::PosthogNode, "\"posthog-node\"")]
+    #[case(Library::PosthogPython, "\"posthog-python\"")]
+    #[case(Library::PosthogPhp, "\"posthog-php\"")]
+    #[case(Library::PosthogRuby, "\"posthog-ruby\"")]
+    #[case(Library::PosthogGo, "\"posthog-go\"")]
+    #[case(Library::PosthogJava, "\"posthog-java\"")]
+    #[case(Library::PosthogDotnet, "\"posthog-dotnet\"")]
+    #[case(Library::PosthogElixir, "\"posthog-elixir\"")]
+    #[case(Library::PosthogRs, "\"posthog-rs\"")]
+    #[case(Library::PosthogAndroid, "\"posthog-android\"")]
+    #[case(Library::PosthogIos, "\"posthog-ios\"")]
+    #[case(Library::PosthogReactNative, "\"posthog-react-native\"")]
+    #[case(Library::PosthogFlutter, "\"posthog-flutter\"")]
+    #[case(Library::PosthogServer, "\"posthog-server\"")]
     #[case(Library::Other, "\"other\"")]
     fn test_library_serialization(#[case] library: Library, #[case] expected_json: &str) {
         assert_eq!(serde_json::to_string(&library).unwrap(), expected_json);
@@ -372,7 +416,7 @@ mod tests {
     #[test]
     fn test_from_sdk_name_unknown_returns_other() {
         assert_eq!(Library::from_sdk_name("unknown-sdk"), Library::Other);
-        assert_eq!(Library::from_sdk_name("insights-custom"), Library::Other);
+        assert_eq!(Library::from_sdk_name("posthog-custom"), Library::Other);
         assert_eq!(Library::from_sdk_name(""), Library::Other);
     }
 }
