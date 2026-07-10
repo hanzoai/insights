@@ -1,21 +1,14 @@
 #!/bin/bash
-# RETIRED. The Hanzo Insights Django served surface is decommissioned.
-cat >&2 <<'MSG'
-============================================================================
- Hanzo Insights' legacy Django server is RETIRED. There is now
- exactly ONE observability way, served natively (Go) by the cloud binary:
+set -e
 
-   /v1/evals/*   datasets, dataset-items, evaluators, score-configs, scores,
-                 traces, runs   (LIVE, org-scoped by IAM owner)
-   /v1/analytics/*   LLM analytics lens (cloud clients/analytics)
+./bin/migrate-check
 
- LLM telemetry (traces / observations / scores) is written by the AI gateway
- into the ClickHouse warehouse (hanzo.traces / hanzo.observations /
- hanzo.scores) and read back through /v1/evals + /v1/analytics.
+# Stop any background jobs on exit
+trap 'kill $(jobs -p)' EXIT
 
- See LLM.md -> "Django -> Go retire map" for the full feature mapping.
- The Django web/worker are no longer built or deployed. No backwards compat.
-============================================================================
-MSG
-echo "refused: bin/docker-worker — the Django server is retired (one way: Go /v1/evals + /v1/analytics)." >&2
-exit 1
+./bin/insights-node &
+./bin/docker-worker-celery --with-scheduler &
+
+# Exit if any processes exit, and exit with it's exit code
+wait -n
+exit $?
