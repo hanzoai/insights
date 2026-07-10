@@ -482,6 +482,14 @@ pub struct Config {
     #[envconfig(default = "")]
     pub hanzo_iam_url: String,
 
+    // Safety interlock for personal_api_key_backend = "iam". The IAM path does NOT yet
+    // reconcile the IAM introspection `aud` with `team.organization_id`, nor carry
+    // per-key team/org scoping through introspection. Until that reconciliation is done,
+    // enabling the iam backend risks cross-tenant reads / scope widening, so startup
+    // hard-refuses `backend=iam` unless this is explicitly set true (see main.rs).
+    #[envconfig(default = "false")]
+    pub iam_aud_org_reconciled: FlexBool,
+
     // Redis timeout settings (in milliseconds)
     #[envconfig(default = "100")]
     pub redis_response_timeout_ms: u64,
@@ -975,6 +983,26 @@ impl Config {
     const MAX_RESPONSE_TIMEOUT_MS: u64 = 30_000; // 30 seconds
     const MAX_CONNECTION_TIMEOUT_MS: u64 = 60_000; // 60 seconds
 
+    /// Startup interlock for the Hanzo IAM personal-API-key backend.
+    ///
+    /// The IAM path (`PERSONAL_API_KEY_BACKEND=iam`) is NOT yet tenant-isolation
+    /// complete: introspection `aud` is not reconciled with `team.organization_id`, and
+    /// per-key `scoped_teams`/`scoped_orgs` are not carried through. Enabling it without
+    /// that reconciliation risks cross-tenant reads / scope widening. Refuse to start
+    /// unless the operator explicitly asserts the reconciliation is in place. Returns
+    /// `Err(reason)` when misconfigured; the postgres default always passes.
+    pub fn check_iam_backend_gate(&self) -> Result<(), String> {
+        if self.personal_api_key_backend == "iam" && !self.iam_aud_org_reconciled.0 {
+            return Err(
+                "PERSONAL_API_KEY_BACKEND=iam requires IAM_AUD_ORG_RECONCILED=true — the IAM \
+                 personal-key path does not yet reconcile introspection `aud` with \
+                 team.organization_id nor carry per-key team/org scoping"
+                    .to_string(),
+            );
+        }
+        Ok(())
+    }
+
     /// Validate and fix timeout configuration, logging warnings and applying defaults for invalid values
     ///
     /// This method checks timeout values and relationships, applying safe defaults when invalid
@@ -1105,6 +1133,7 @@ impl Config {
             object_storage_endpoint: "".to_string(),
             personal_api_key_backend: "postgres".to_string(),
             hanzo_iam_url: "".to_string(),
+            iam_aud_org_reconciled: FlexBool(false),
             // `Enforced` so tests exercise the bot short-circuit envelope.
             // Tests wanting prod posture override to `LogOnly` explicitly.
             bot_filter_mode: BotFilterMode::Enforced,
@@ -1602,6 +1631,34 @@ mod tests {
 
         assert_eq!(zero_config.redis_response_timeout_ms, 0);
         assert_eq!(zero_config.redis_connection_timeout_ms, 0);
+    }
+}
+
+#[cfg(test)]
+mod iam_backend_gate_tests {
+    use super::*;
+
+    #[test]
+    fn postgres_backend_always_permitted() {
+        let config = Config::default_test_config();
+        assert_eq!(config.personal_api_key_backend, "postgres");
+        assert!(config.check_iam_backend_gate().is_ok());
+    }
+
+    #[test]
+    fn iam_backend_refused_without_reconciled_flag() {
+        let mut config = Config::default_test_config();
+        config.personal_api_key_backend = "iam".to_string();
+        config.iam_aud_org_reconciled = FlexBool(false);
+        assert!(config.check_iam_backend_gate().is_err());
+    }
+
+    #[test]
+    fn iam_backend_permitted_only_with_explicit_reconciled_ack() {
+        let mut config = Config::default_test_config();
+        config.personal_api_key_backend = "iam".to_string();
+        config.iam_aud_org_reconciled = FlexBool(true);
+        assert!(config.check_iam_backend_gate().is_ok());
     }
 }
 

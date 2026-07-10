@@ -26,6 +26,36 @@ members = [
   "common/types",
 ]
 
+# Legacy PostHog-port crates still on disk but NOT adapted to the Hanzo stack. Excluded
+# so plain `cargo`/`cargo metadata`/`cargo audit` (without `--workspace`) don't try to
+# resolve them and so they can't silently rejoin the build. Delete or adapt in follow-on.
+exclude = [
+  "batch-import-worker",
+  "capture",
+  "capture-logs",
+  "cyclotron-core",
+  "cyclotron-janitor",
+  "cyclotron-node",
+  "cymbal",
+  "embedding-worker",
+  "hook-api",
+  "hook-common",
+  "hook-janitor",
+  "hook-worker",
+  "kafka-deduplicator",
+  "property-defs-rs",
+  "personinsights-coordination",
+  "personinsights-proto",
+  "personinsights-replica",
+  "personinsights-router",
+  "common/dns",
+  "common/kafka",
+  "common/profiler",
+  "common/scriptvm",
+  "common/serve_metrics",
+  "common/symbol_data",
+]
+
 [workspace.lints.rust]
 # See https://doc.rust-lang.org/stable/rustc/lints/listing/allowed-by-default.html
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tokio_unstable)'] }
