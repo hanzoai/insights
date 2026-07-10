@@ -214,6 +214,15 @@ CLICKHOUSE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", os.getenv
 CLICKHOUSE_USER: str = os.getenv("DATASTORE_USER", os.getenv("CLICKHOUSE_USER", "default"))
 CLICKHOUSE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", os.getenv("CLICKHOUSE_PASSWORD", ""))
 CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", os.getenv("CLICKHOUSE_DATABASE", "default"))
+
+# RED M1: fail closed on a shared-datastore misconfig. The `insights` database is
+# co-resident with o11y/analytics on the shared datastore; running migrations or
+# queries against "default"/"system" could read or ALTER another tenant's data.
+if not TEST and not IS_COLLECT_STATIC and CLICKHOUSE_DATABASE in ("", "default", "system"):
+    raise ImproperlyConfigured(
+        f"DATASTORE_DATABASE/CLICKHOUSE_DATABASE must name an explicit Insights database "
+        f"(got {CLICKHOUSE_DATABASE!r}); refusing to run against a shared/system database."
+    )
 CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", os.getenv("CLICKHOUSE_CLUSTER", "insights"))
 CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "insights_migrations"))
 CLICKHOUSE_CA: str | None = os.getenv("DATASTORE_CA", os.getenv("CLICKHOUSE_CA", None))
