@@ -1,4 +1,8 @@
 #!/bin/bash
 set -e
 
-python manage.py migrate
+# RED H1: delegate to ./bin/migrate so this runs the FULL migration set —
+# Postgres (manage.py migrate) + ClickHouse (migrate_clickhouse) + persons.
+# The old `manage.py migrate` alone left the `insights` ClickHouse schema
+# uncreated, so web/worker 500'd on every analytics query.
+exec "$(dirname "$0")/migrate"
