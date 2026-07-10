@@ -30,10 +30,19 @@ where
     }))
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FlagRequestType {
     Decide,
     FlagDefinitions,
+}
+
+impl FlagRequestType {
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            FlagRequestType::Decide => "decide",
+            FlagRequestType::FlagDefinitions => "flag_definitions",
+        }
+    }
 }
 
 #[derive(Default, Debug, Deserialize, Serialize)]
@@ -54,7 +63,7 @@ pub struct FlagRequest {
     pub geoip_disable: Option<bool>,
     // Web and mobile clients can configure this parameter to disable flags for a request.
     // It's mostly used for folks who want to save money on flag evaluations while still using
-    // `/flags` to load the rest of their Insights configuration.
+    // `/flags` to load the rest of their PostHog configuration.
     pub disable_flags: Option<bool>,
     #[serde(default, alias = "$properties")]
     pub person_properties: Option<HashMap<String, Value>>,
@@ -77,6 +86,8 @@ pub struct FlagRequest {
     pub evaluation_contexts: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub evaluation_runtime: Option<EvaluationRuntime>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub override_flags_definitions: Option<HashMap<String, Value>>,
 }
 
 impl FlagRequest {
@@ -185,6 +196,24 @@ impl FlagRequest {
         }
     }
 
+    /// Extracts device_id from the request.
+    /// Checks the top-level device_id field first, then falls back to
+    /// person_properties.$device_id for SDKs that only send it as a property.
+    pub fn extract_device_id(&self) -> Option<String> {
+        self.device_id
+            .as_ref()
+            .filter(|s| !s.is_empty())
+            .cloned()
+            .or_else(|| {
+                self.person_properties
+                    .as_ref()
+                    .and_then(|props| props.get("$device_id"))
+                    .and_then(|v| v.as_str())
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.to_string())
+            })
+    }
+
     /// Checks if feature flags should be disabled for this request.
     /// Returns true if disable_flags is explicitly set to true.
     pub fn is_flags_disabled(&self) -> bool {
@@ -196,8 +225,11 @@ impl FlagRequest {
 mod tests {
     use std::collections::HashMap;
 
+    use std::sync::Arc;
+
     use crate::api::errors::FlagError;
 
+    use crate::flags::flag_definitions_cache::FlagDefinitionsCache;
     use crate::flags::flag_request::{FlagRequest, MAX_DISTINCT_ID_LEN};
     use crate::flags::flag_service::FlagService;
     use crate::utils::test_utils::{
@@ -205,7 +237,9 @@ mod tests {
         setup_redis_client, setup_team_hypercache_reader,
     };
     use bytes::Bytes;
+    use common_cache::NegativeCache;
     use serde_json::json;
+    use serde_json::Value;
 
     #[test]
     fn empty_distinct_id_is_accepted() {
@@ -339,7 +373,7 @@ mod tests {
     #[test]
     fn numeric_distinct_id_is_returned_correctly() {
         let json = json!({
-            "$distinct_id": 1234567,
+            "$distinct_id": 8675309,
             "token": "my_token1",
         });
         let bytes = Bytes::from(json.to_string());
@@ -347,7 +381,7 @@ mod tests {
         let flag_payload = FlagRequest::from_bytes(bytes).expect("failed to parse request");
 
         match flag_payload.extract_distinct_id() {
-            Ok(id) => assert_eq!(id, "1234567"),
+            Ok(id) => assert_eq!(id, "8675309"),
             _ => panic!("expected distinct id"),
         };
     }
@@ -375,6 +409,92 @@ mod tests {
 
         let flag_payload = FlagRequest::from_bytes(bytes).expect("failed to parse request");
         assert_eq!(flag_payload.distinct_id, Some("123.45".to_string()));
+    }
+
+    #[test]
+    fn test_extract_device_id() {
+        struct Case {
+            name: &'static str,
+            device_id: Option<String>,
+            person_properties: Option<HashMap<String, Value>>,
+            expected: Option<String>,
+        }
+
+        let cases = vec![
+            Case {
+                name: "returns top-level device_id",
+                device_id: Some("top-level-device".to_string()),
+                person_properties: None,
+                expected: Some("top-level-device".to_string()),
+            },
+            Case {
+                name: "falls back to person_properties device_id",
+                device_id: None,
+                person_properties: Some(HashMap::from([(
+                    "$device_id".to_string(),
+                    json!("prop-device"),
+                )])),
+                expected: Some("prop-device".to_string()),
+            },
+            // top-level takes precedence
+            Case {
+                name: "prefers top-level device_id over person_properties",
+                device_id: Some("top-level-device".to_string()),
+                person_properties: Some(HashMap::from([(
+                    "$device_id".to_string(),
+                    json!("prop-device"),
+                )])),
+                expected: Some("top-level-device".to_string()),
+            },
+            // absent entirely
+            Case {
+                name: "returns none when device_id is absent everywhere",
+                device_id: None,
+                person_properties: Some(HashMap::from([(
+                    "other_prop".to_string(),
+                    json!("value"),
+                )])),
+                expected: None,
+            },
+            // empty string in person_properties → None
+            Case {
+                name: "ignores empty string in person_properties device_id",
+                device_id: None,
+                person_properties: Some(HashMap::from([("$device_id".to_string(), json!(""))])),
+                expected: None,
+            },
+            // non-string device_id in person_properties is ignored
+            Case {
+                name: "ignores non-string person_properties device_id",
+                device_id: None,
+                person_properties: Some(HashMap::from([("$device_id".to_string(), json!(12345))])),
+                expected: None,
+            },
+            // empty string at top level → should also return None / fall through
+            Case {
+                name: "falls through when top-level device_id is empty",
+                device_id: Some("".to_string()),
+                person_properties: Some(HashMap::from([(
+                    "$device_id".to_string(),
+                    json!("prop-device"),
+                )])),
+                expected: Some("prop-device".to_string()),
+            },
+        ];
+
+        for case in cases {
+            let flag_request = FlagRequest {
+                device_id: case.device_id,
+                person_properties: case.person_properties,
+                ..Default::default()
+            };
+            assert_eq!(
+                flag_request.extract_device_id(),
+                case.expected,
+                "Failed: {}",
+                case.name
+            );
+        }
     }
 
     #[test]
@@ -494,6 +614,9 @@ mod tests {
             pg_client.clone(),
             team_hypercache_reader,
             hypercache_reader,
+            Arc::new(FlagDefinitionsCache::disabled()),
+            NegativeCache::new(100, 300),
+            false,
         );
 
         match flag_service.verify_token_and_get_team(&token).await {
@@ -523,6 +646,9 @@ mod tests {
             pg_client.clone(),
             team_hypercache_reader,
             hypercache_reader,
+            Arc::new(FlagDefinitionsCache::disabled()),
+            NegativeCache::new(100, 300),
+            false,
         );
         assert!(matches!(
             flag_service.verify_token_and_get_team(&result).await,

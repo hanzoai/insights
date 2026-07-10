@@ -1,4 +1,4 @@
-//! User-Agent parsing utilities for Insights SDKs.
+//! User-Agent parsing utilities for PostHog SDKs.
 //!
 //! Provides a unified way to extract SDK information from User-Agent headers,
 //! including SDK name, version, and runtime environment detection.
@@ -6,11 +6,11 @@
 /// Parsed information from a User-Agent header.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserAgentInfo {
-    /// The SDK name if this is a Insights SDK (e.g., "insights-python", "insights-js").
+    /// The SDK name if this is a PostHog SDK (e.g., "posthog-python", "posthog-js").
     /// For browser requests without SDK header, this is None.
     /// Uses static str since SDK names are from a known set.
     pub sdk_name: Option<&'static str>,
-    /// The SDK version if this is a Insights SDK.
+    /// The SDK version if this is a PostHog SDK.
     pub sdk_version: Option<String>,
     /// Whether this appears to be a browser request.
     pub is_browser: bool,
@@ -40,9 +40,9 @@ impl UserAgentInfo {
             return Self::unknown();
         }
 
-        // Try to parse as Insights SDK first
-        if let Some(rest) = ua.strip_prefix("insights-") {
-            return Self::parse_insights_sdk(rest);
+        // Try to parse as PostHog SDK first
+        if let Some(rest) = ua.strip_prefix("posthog-") {
+            return Self::parse_posthog_sdk(rest);
         }
 
         // Check for browser patterns
@@ -68,8 +68,17 @@ impl UserAgentInfo {
         Self::unknown()
     }
 
-    /// Parse a Insights SDK User-Agent (after stripping "insights-" prefix).
-    fn parse_insights_sdk(rest: &str) -> Self {
+    /// Parse a PostHog SDK User-Agent (after stripping "posthog-" prefix).
+    fn parse_posthog_sdk(rest: &str) -> Self {
+        if let Some(legacy_ruby_version) = Self::legacy_ruby_version(rest) {
+            return Self {
+                sdk_name: Some("posthog-ruby"),
+                sdk_version: Some(legacy_ruby_version.to_string()),
+                is_browser: false,
+                runtime: RuntimeType::Server,
+            };
+        }
+
         // Pattern: <sdk-name>/<version> [optional extra info]
         let Some(slash_idx) = rest.find('/') else {
             return Self::unknown();
@@ -90,22 +99,23 @@ impl UserAgentInfo {
         // Match SDK name to static str and determine runtime in one step
         let (sdk_name, runtime) = match name {
             // Server-side SDKs
-            "python" => ("insights-python", RuntimeType::Server),
-            "ruby" => ("insights-ruby", RuntimeType::Server),
-            "php" => ("insights-php", RuntimeType::Server),
-            "java" => ("insights-java", RuntimeType::Server),
-            "go" => ("insights-go", RuntimeType::Server),
-            "node" => ("insights-node", RuntimeType::Server),
-            "dotnet" => ("insights-dotnet", RuntimeType::Server),
-            "elixir" => ("insights-elixir", RuntimeType::Server),
-            // Deprecated: insights-server users are migrating to insights-java
-            "server" => ("insights-server", RuntimeType::Server),
+            "python" => ("posthog-python", RuntimeType::Server),
+            "ruby" => ("posthog-ruby", RuntimeType::Server),
+            "php" => ("posthog-php", RuntimeType::Server),
+            "java" => ("posthog-java", RuntimeType::Server),
+            "go" => ("posthog-go", RuntimeType::Server),
+            "node" => ("posthog-node", RuntimeType::Server),
+            "dotnet" => ("posthog-dotnet", RuntimeType::Server),
+            "elixir" => ("posthog-elixir", RuntimeType::Server),
+            "rs" => ("posthog-rs", RuntimeType::Server),
+            // Deprecated: posthog-server users are migrating to posthog-java
+            "server" => ("posthog-server", RuntimeType::Server),
             // Client-side SDKs (mobile and browser)
-            "js" => ("insights-js", RuntimeType::Client),
-            "android" => ("insights-android", RuntimeType::Client),
-            "ios" => ("insights-ios", RuntimeType::Client),
-            "react-native" => ("insights-react-native", RuntimeType::Client),
-            "flutter" => ("insights-flutter", RuntimeType::Client),
+            "js" => ("posthog-js", RuntimeType::Client),
+            "android" => ("posthog-android", RuntimeType::Client),
+            "ios" => ("posthog-ios", RuntimeType::Client),
+            "react-native" => ("posthog-react-native", RuntimeType::Client),
+            "flutter" => ("posthog-flutter", RuntimeType::Client),
             // Unknown SDK - don't set sdk_name for unrecognized SDKs
             _ => return Self::unknown(),
         };
@@ -115,6 +125,17 @@ impl UserAgentInfo {
             sdk_version: Some(version.to_string()),
             is_browser: false,
             runtime,
+        }
+    }
+
+    fn legacy_ruby_version(rest: &str) -> Option<&str> {
+        let version = rest.strip_prefix("ruby")?;
+        let first = version.chars().next()?;
+
+        if first.is_ascii_digit() {
+            Some(version.split_whitespace().next().unwrap_or(version))
+        } else {
+            None
         }
     }
 
@@ -137,7 +158,7 @@ impl UserAgentInfo {
     }
 
     /// Get a low-cardinality client type label suitable for metrics.
-    /// Returns values like "insights-python", "browser", or "other".
+    /// Returns values like "posthog-python", "browser", or "other".
     pub fn client_type_label(&self) -> &'static str {
         if let Some(name) = self.sdk_name {
             return name;
@@ -150,7 +171,7 @@ impl UserAgentInfo {
 
     /// Get a low-cardinality client type label suitable for metrics.
     /// This version parses the raw user-agent and handles additional patterns
-    /// like curl and python-requests that aren't Insights SDKs.
+    /// like curl and python-requests that aren't PostHog SDKs.
     pub fn client_type_label_from_raw(user_agent: Option<&str>) -> &'static str {
         let Some(ua) = user_agent else {
             return "unknown";
@@ -160,7 +181,7 @@ impl UserAgentInfo {
             return "unknown";
         }
 
-        // Check for common HTTP clients first (not Insights SDKs)
+        // Check for common HTTP clients first (not PostHog SDKs)
         if ua.contains("curl/") {
             return "curl";
         }
@@ -173,7 +194,7 @@ impl UserAgentInfo {
     }
 
     /// Get the library name for canonical logging.
-    /// Returns the SDK name for Insights SDKs, "web" for browsers, or None.
+    /// Returns the SDK name for PostHog SDKs, "web" for browsers, or None.
     pub fn lib_for_logging(&self) -> Option<&'static str> {
         self.sdk_name.or(self.is_browser.then_some("web"))
     }
@@ -186,102 +207,120 @@ mod tests {
 
     #[rstest]
     #[case(
-        "insights-python/3.0.0",
-        Some("insights-python"),
+        "posthog-python/3.0.0",
+        Some("posthog-python"),
         Some("3.0.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-node/1.2.3",
-        Some("insights-node"),
+        "posthog-node/1.2.3",
+        Some("posthog-node"),
         Some("1.2.3"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-ruby/2.0.0",
-        Some("insights-ruby"),
+        "posthog-ruby/2.0.0",
+        Some("posthog-ruby"),
         Some("2.0.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-go/1.0.0",
-        Some("insights-go"),
+        "posthog-ruby2.0.0",
+        Some("posthog-ruby"),
+        Some("2.0.0"),
+        RuntimeType::Server
+    )]
+    #[case(
+        "posthog-ruby2.0.0 (Linux)",
+        Some("posthog-ruby"),
+        Some("2.0.0"),
+        RuntimeType::Server
+    )]
+    #[case(
+        "posthog-go/1.0.0",
+        Some("posthog-go"),
         Some("1.0.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-php/3.1.0",
-        Some("insights-php"),
+        "posthog-php/3.1.0",
+        Some("posthog-php"),
         Some("3.1.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-java/1.1.0",
-        Some("insights-java"),
+        "posthog-java/1.1.0",
+        Some("posthog-java"),
         Some("1.1.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-dotnet/1.0.0",
-        Some("insights-dotnet"),
+        "posthog-dotnet/1.0.0",
+        Some("posthog-dotnet"),
         Some("1.0.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-elixir/0.2.0",
-        Some("insights-elixir"),
+        "posthog-elixir/0.2.0",
+        Some("posthog-elixir"),
         Some("0.2.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-server/1.0.0",
-        Some("insights-server"),
+        "posthog-rs/0.10.0",
+        Some("posthog-rs"),
+        Some("0.10.0"),
+        RuntimeType::Server
+    )]
+    #[case(
+        "posthog-server/1.0.0",
+        Some("posthog-server"),
         Some("1.0.0"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-server/3.2.1 (Android SDK)",
-        Some("insights-server"),
+        "posthog-server/3.2.1 (Android SDK)",
+        Some("posthog-server"),
         Some("3.2.1"),
         RuntimeType::Server
     )]
     #[case(
-        "insights-js/1.88.0",
-        Some("insights-js"),
+        "posthog-js/1.88.0",
+        Some("posthog-js"),
         Some("1.88.0"),
         RuntimeType::Client
     )]
     #[case(
-        "insights-android/3.0.0",
-        Some("insights-android"),
+        "posthog-android/3.0.0",
+        Some("posthog-android"),
         Some("3.0.0"),
         RuntimeType::Client
     )]
     #[case(
-        "insights-ios/3.0.0",
-        Some("insights-ios"),
+        "posthog-ios/3.0.0",
+        Some("posthog-ios"),
         Some("3.0.0"),
         RuntimeType::Client
     )]
     #[case(
-        "insights-react-native/2.5.0",
-        Some("insights-react-native"),
+        "posthog-react-native/2.5.0",
+        Some("posthog-react-native"),
         Some("2.5.0"),
         RuntimeType::Client
     )]
     #[case(
-        "insights-flutter/4.0.0",
-        Some("insights-flutter"),
+        "posthog-flutter/4.0.0",
+        Some("posthog-flutter"),
         Some("4.0.0"),
         RuntimeType::Client
     )]
     #[case(
-        "insights-python/3.0.0 (Linux; Python 3.11)",
-        Some("insights-python"),
+        "posthog-python/3.0.0 (Linux; Python 3.11)",
+        Some("posthog-python"),
         Some("3.0.0"),
         RuntimeType::Server
     )]
-    fn test_parse_insights_sdks(
+    fn test_parse_posthog_sdks(
         #[case] ua: &str,
         #[case] expected_name: Option<&str>,
         #[case] expected_version: Option<&str>,
@@ -318,9 +357,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case("insights-python", None, None)] // No slash
-    #[case("insights-python/", None, None)] // Empty version
-    #[case("insights-/1.0.0", None, None)] // Empty SDK name
+    #[case("posthog-python", None, None)] // No slash
+    #[case("posthog-ruby", None, None)] // Legacy Ruby format still needs a version
+    #[case("posthog-rubybeta", None, None)] // Legacy Ruby version must start with a digit
+    #[case("posthog-python/", None, None)] // Empty version
+    #[case("posthog-/1.0.0", None, None)] // Empty SDK name
     #[case("", None, None)] // Empty string
     fn test_parse_edge_cases(
         #[case] ua: &str,
@@ -342,20 +383,22 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Some("insights-js/1.88.0"), "insights-js")]
-    #[case(Some("insights-android/3.1.0"), "insights-android")]
-    #[case(Some("insights-ios/3.0.0"), "insights-ios")]
-    #[case(Some("insights-react-native/2.5.0"), "insights-react-native")]
-    #[case(Some("insights-flutter/4.0.0"), "insights-flutter")]
-    #[case(Some("insights-python/1.4.0"), "insights-python")]
-    #[case(Some("insights-ruby/2.0.0"), "insights-ruby")]
-    #[case(Some("insights-php/3.0.0"), "insights-php")]
-    #[case(Some("insights-java/1.0.0"), "insights-java")]
-    #[case(Some("insights-go/0.1.0"), "insights-go")]
-    #[case(Some("insights-node/2.2.0"), "insights-node")]
-    #[case(Some("insights-dotnet/1.0.0"), "insights-dotnet")]
-    #[case(Some("insights-elixir/0.2.0"), "insights-elixir")]
-    #[case(Some("insights-server/1.0.0"), "insights-server")]
+    #[case(Some("posthog-js/1.88.0"), "posthog-js")]
+    #[case(Some("posthog-android/3.1.0"), "posthog-android")]
+    #[case(Some("posthog-ios/3.0.0"), "posthog-ios")]
+    #[case(Some("posthog-react-native/2.5.0"), "posthog-react-native")]
+    #[case(Some("posthog-flutter/4.0.0"), "posthog-flutter")]
+    #[case(Some("posthog-python/1.4.0"), "posthog-python")]
+    #[case(Some("posthog-ruby/2.0.0"), "posthog-ruby")]
+    #[case(Some("posthog-ruby2.0.0"), "posthog-ruby")]
+    #[case(Some("posthog-php/3.0.0"), "posthog-php")]
+    #[case(Some("posthog-java/1.0.0"), "posthog-java")]
+    #[case(Some("posthog-go/0.1.0"), "posthog-go")]
+    #[case(Some("posthog-node/2.2.0"), "posthog-node")]
+    #[case(Some("posthog-dotnet/1.0.0"), "posthog-dotnet")]
+    #[case(Some("posthog-elixir/0.2.0"), "posthog-elixir")]
+    #[case(Some("posthog-rs/0.10.0"), "posthog-rs")]
+    #[case(Some("posthog-server/1.0.0"), "posthog-server")]
     #[case(
         Some("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"),
         "browser"
@@ -378,10 +421,12 @@ mod tests {
     }
 
     #[rstest]
-    #[case("insights-python/3.0.0", Some("insights-python"))]
-    #[case("insights-node/1.2.3", Some("insights-node"))]
-    #[case("insights-android/3.0.0", Some("insights-android"))]
-    #[case("insights-server/1.0.0", Some("insights-server"))]
+    #[case("posthog-python/3.0.0", Some("posthog-python"))]
+    #[case("posthog-node/1.2.3", Some("posthog-node"))]
+    #[case("posthog-ruby2.0.0", Some("posthog-ruby"))]
+    #[case("posthog-rs/0.10.0", Some("posthog-rs"))]
+    #[case("posthog-android/3.0.0", Some("posthog-android"))]
+    #[case("posthog-server/1.0.0", Some("posthog-server"))]
     #[case("Mozilla/5.0 (Windows NT 10.0; Win64; x64)", Some("web"))]
     #[case("Chrome/120.0.0.0 Safari/537.36", Some("web"))]
     #[case("curl/7.68.0", None)]
