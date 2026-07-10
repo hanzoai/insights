@@ -82,7 +82,20 @@ SANDBOX_JWT_PRIVATE_KEY: str | None = os.getenv("SANDBOX_JWT_PRIVATE_KEY")
 # These are legacy values only kept around for backwards compatibility with self hosted versions
 SALT_KEY = get_list(os.getenv("SALT_KEY", "0123456789abcdefghijklmnopqrstuvwxyz"))
 # We provide a default as it is needed for hobby deployments
-ENCRYPTION_SALT_KEYS = get_list(os.getenv("ENCRYPTION_SALT_KEYS", "00beef0000beef0000beef0000beef00"))
+DEFAULT_ENCRYPTION_SALT_KEY = "00beef0000beef0000beef0000beef00"
+ENCRYPTION_SALT_KEYS = get_list(os.getenv("ENCRYPTION_SALT_KEYS", DEFAULT_ENCRYPTION_SALT_KEY))
+
+# RED M4: a missing/default salt makes integration, OAuth, and data-warehouse
+# credentials decryptable by anyone who knows the public default. Fail closed in
+# production, exactly like the SECRET_KEY guard above.
+if (
+    not DEBUG
+    and not TEST
+    and not STATIC_COLLECTION
+    and (not ENCRYPTION_SALT_KEYS or ENCRYPTION_SALT_KEYS == [DEFAULT_ENCRYPTION_SALT_KEY])
+):
+    logger.critical("You are using the default/empty ENCRYPTION_SALT_KEYS in a production environment!")
+    sys.exit("[ERROR] Default/empty ENCRYPTION_SALT_KEYS in production. Stopping Django server…\n")
 
 INTERNAL_IPS = ["127.0.0.1", "172.18.0.1"]  # Docker IP
 if os.getenv("CORS_ALLOWED_ORIGINS", False):
