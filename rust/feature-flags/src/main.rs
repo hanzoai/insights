@@ -168,6 +168,14 @@ async fn async_main(mut config: Config, rayon_dispatcher: RayonDispatcher) {
 fn main() {
     let config = Config::init_from_env().expect("Invalid configuration:");
 
+    // Safety interlock: refuse to half-enable the Hanzo IAM personal-API-key backend
+    // before its tenant-isolation gaps are closed. See Config::check_iam_backend_gate,
+    // rust/feature-flags/LLM.md, and api::hanzo_iam.
+    if let Err(reason) = config.check_iam_backend_gate() {
+        eprintln!("FATAL: {reason}. Refusing to start.");
+        std::process::exit(1);
+    }
+
     let threads = ThreadCounts::new(config.thread_pool_cores);
 
     rayon::ThreadPoolBuilder::new()

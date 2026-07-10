@@ -108,6 +108,13 @@ impl FlagRequest {
             }
         };
 
+        // json5 (unlike serde_json, which caps recursion at 128) has NO depth guard,
+        // so a deeply-nested body overflows the worker thread's stack DURING parsing —
+        // a pre-auth crash (parsing happens before token extraction). A Rust stack
+        // overflow aborts the process (SIGABRT) and is not catchable. Bound structural
+        // nesting BEFORE handing the body to the recursive parser.
+        Self::check_json_depth(&payload)?;
+
         // Use json5 to parse, which handles NaN/Infinity natively
         let mut value: Value = match json5::from_str(&payload) {
             Ok(v) => v,
@@ -133,9 +140,86 @@ impl FlagRequest {
         }
     }
 
+    /// Maximum structural nesting depth accepted in a request body. Matches
+    /// serde_json's own default recursion limit (128) so the json5 pre-scan and the
+    /// downstream serde recursion agree. Real flag-request bodies nest only a few
+    /// levels; 128 is far below the ~50k depth that overflows a 2 MiB worker stack.
+    const MAX_JSON_DEPTH: usize = 128;
+
+    /// Reject a body whose JSON/JSON5 structural nesting exceeds [`Self::MAX_JSON_DEPTH`].
+    ///
+    /// Iterative (no recursion), O(n), runs BEFORE `json5::from_str` — which is not
+    /// depth-limited and would otherwise blow the stack. Only structural `{`/`[` count;
+    /// brackets inside strings and `//` / `/* */` comments are skipped, so the counter is
+    /// exactly the recursive parser's max depth (no false positives on bracket-heavy
+    /// string values). Byte-scanning is UTF-8 safe: no structural ASCII byte can appear
+    /// inside a multi-byte sequence.
+    fn check_json_depth(payload: &str) -> Result<(), FlagError> {
+        let bytes = payload.as_bytes();
+        let mut i = 0usize;
+        let mut depth = 0usize;
+        // None = outside a string; Some(q) = inside a string opened by quote byte `q`.
+        let mut string_quote: Option<u8> = None;
+        while i < bytes.len() {
+            let c = bytes[i];
+            if let Some(q) = string_quote {
+                if c == b'\\' {
+                    i += 2; // skip the escaped byte (escapes are ASCII; never a quote)
+                    continue;
+                }
+                if c == q {
+                    string_quote = None;
+                }
+                i += 1;
+                continue;
+            }
+            match c {
+                b'"' | b'\'' => string_quote = Some(c),
+                b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
+                    i += 2;
+                    while i < bytes.len() && bytes[i] != b'\n' {
+                        i += 1;
+                    }
+                    continue;
+                }
+                b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'*' => {
+                    i += 2;
+                    while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
+                        i += 1;
+                    }
+                    i += 2;
+                    continue;
+                }
+                b'{' | b'[' => {
+                    depth += 1;
+                    if depth > Self::MAX_JSON_DEPTH {
+                        tracing::warn!("rejected request body: JSON nesting exceeds {}", Self::MAX_JSON_DEPTH);
+                        return Err(FlagError::RequestDecodingError(String::from(
+                            "JSON nesting too deep",
+                        )));
+                    }
+                }
+                b'}' | b']' => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+            i += 1;
+        }
+        Ok(())
+    }
+
     /// Replaces non-finite numbers (NaN, Infinity, -Infinity) with null in a JSON Value
     /// This matches Python decide endpoint behavior: parse_constant=lambda x: None
     fn clean_non_finite_values(value: &mut Value) {
+        // `from_bytes` depth-caps the input before this runs, so `value` is already
+        // shallower than MAX_JSON_DEPTH; the explicit guard is defense-in-depth in case
+        // this is ever called on a Value built by another path.
+        Self::clean_non_finite_values_inner(value, 0);
+    }
+
+    fn clean_non_finite_values_inner(value: &mut Value, depth: usize) {
+        if depth > Self::MAX_JSON_DEPTH {
+            return;
+        }
         match value {
             Value::Number(n) => {
                 if let Some(f) = n.as_f64() {
@@ -146,12 +230,12 @@ impl FlagRequest {
             }
             Value::Object(map) => {
                 for (_, v) in map.iter_mut() {
-                    Self::clean_non_finite_values(v);
+                    Self::clean_non_finite_values_inner(v, depth + 1);
                 }
             }
             Value::Array(arr) => {
                 for v in arr.iter_mut() {
-                    Self::clean_non_finite_values(v);
+                    Self::clean_non_finite_values_inner(v, depth + 1);
                 }
             }
             _ => {}
@@ -240,6 +324,64 @@ mod tests {
     use common_cache::NegativeCache;
     use serde_json::json;
     use serde_json::Value;
+
+    // ── HIGH-1 regression: pre-auth stack-overflow DoS via unbounded json5 recursion ──
+
+    #[test]
+    fn deeply_nested_body_is_rejected_not_aborted() {
+        // A single unauthenticated request of ~2 MiB of nested `[` used to overflow the
+        // worker thread's stack inside json5::from_str (SIGABRT). The depth pre-scan must
+        // return a decoding error instead — for the whole crash range (50k .. 2M levels).
+        for levels in [50_000usize, 200_000, 2_000_000] {
+            let payload = "[".repeat(levels);
+            let bytes = Bytes::from(payload);
+            match FlagRequest::from_bytes(bytes) {
+                Err(FlagError::RequestDecodingError(_)) => {}
+                other => panic!("expected RequestDecodingError for {levels} levels, got {other:?}"),
+            }
+        }
+        // Balanced deep nesting (objects+arrays) is likewise rejected, not parsed.
+        let payload = "[{".repeat(100_000) + &"}]".repeat(100_000);
+        match FlagRequest::from_bytes(Bytes::from(payload)) {
+            Err(FlagError::RequestDecodingError(_)) => {}
+            other => panic!("expected rejection for balanced deep nesting, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn depth_guard_boundary_129_deep_rejected_below_passes_to_parser() {
+        // 129 structural levels are rejected BY THE DEPTH GUARD ("JSON nesting too deep").
+        let too_deep = "[".repeat(129);
+        match FlagRequest::from_bytes(Bytes::from(too_deep)) {
+            Err(FlagError::RequestDecodingError(msg)) => {
+                assert!(msg.contains("too deep"), "expected depth rejection, got: {msg}")
+            }
+            other => panic!("expected depth rejection, got {other:?}"),
+        }
+        // 100 structural levels are UNDER the cap, so the depth guard lets the body reach
+        // the parser (which then fails as invalid-JSON / not-a-FlagRequest — NOT "too deep").
+        // This proves the guard has no false positives at/below the limit.
+        let under_cap = "[".repeat(100);
+        match FlagRequest::from_bytes(Bytes::from(under_cap)) {
+            Err(FlagError::RequestDecodingError(msg)) => {
+                assert!(!msg.contains("too deep"), "under-cap body wrongly depth-rejected: {msg}")
+            }
+            other => panic!("expected a parser decoding error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn brackets_inside_strings_do_not_count_toward_depth() {
+        // A bracket-heavy STRING value must NOT be miscounted as structural nesting
+        // (no false-positive rejection). 10k `[` live inside the distinct_id string.
+        let json = json!({
+            "distinct_id": "[".repeat(10_000),
+            "token": "t",
+        });
+        let payload = FlagRequest::from_bytes(Bytes::from(json.to_string()))
+            .expect("bracket-heavy string value must parse");
+        assert_eq!(payload.extract_token().unwrap(), "t");
+    }
 
     #[test]
     fn empty_distinct_id_is_accepted() {
