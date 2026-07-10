@@ -90,6 +90,25 @@ Hot request path is **Kafka-free**: persons from Postgres, config from HyperCach
 - Live-IAM integration test for the `iam` backend (mapping fn is unit-tested; the HTTP
   round-trip is not exercised against a running IAM).
 
+## Hardening (red round 1)
+
+- **Pre-auth DoS fixed (HIGH-1)**: `json5` has no recursion guard; a deeply-nested body
+  overflowed the worker stack during parse, before auth (uncatchable SIGABRT).
+  `FlagRequest::from_bytes` now runs an iterative `check_json_depth` (cap `MAX_JSON_DEPTH=128`,
+  matching serde_json) BEFORE `json5::from_str`; brackets inside strings/comments don't
+  count. `clean_non_finite_values` is also depth-bounded. Regression test rejects 50k / 200k
+  / 2M-level bodies without aborting.
+- **IAM tenant-isolation gated (HIGH-2)**: the `iam` backend now **refuses to start**
+  (`Config::check_iam_backend_gate`, called in `main`) unless `IAM_AUD_ORG_RECONCILED=true`,
+  because introspection `aud`↔`team.organization_id` reconciliation and per-key
+  team/org scoping are not yet carried through (see `api::hanzo_iam` hazard comment).
+  `validate_personal_key_metadata(_, _, strict_org)` DENIES a no-org team under `iam`
+  (`strict_org=true`); the postgres default keeps upstream permissive behavior.
+- **Cache cutover safety (MED)**: the personal-key auth cache key is now backend-scoped
+  (`personal:{backend}:{sha256}`) so a `postgres`↔`iam` flip self-invalidates.
+- **Config knobs added**: `PERSONAL_API_KEY_BACKEND` (default `postgres`), `HANZO_IAM_URL`,
+  `IAM_AUD_ORG_RECONCILED` (default `false`).
+
 ## Attack surface (for red)
 
 - **IAM introspection (`api::hanzo_iam`)**: fail-closed on transport/status/decode errors
