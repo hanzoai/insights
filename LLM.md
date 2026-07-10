@@ -69,3 +69,12 @@ decommission decision, out of scope for retiring the Django app.
 
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
 (`/v1/evals`, `/v1/analytics`) scopes exclusively by `c.Org()`; secrets via KMS.
+
+## Feature flags (Rust)
+
+Server-side feature-flag **evaluation** service, vendored MIT from PostHog
+`rust/feature-flags` and adapted to the Hanzo stack (hanzoai/s3, Hanzo KMS creds,
+Hanzo IAM personal-key validation; Kafka cache-builder deferred). Serves `/flags`,
+`/decide`, `/flags/definitions`, `/api/feature_flag/local_evaluation`. Authoritative
+record — what was vendored, the adaptation seams, build/test status, follow-on, and
+attack surface — lives in **`rust/feature-flags/LLM.md`**.

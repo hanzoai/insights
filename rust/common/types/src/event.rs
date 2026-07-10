@@ -3,6 +3,7 @@ use std::ops::Not;
 
 use crate::util::{empty_datetime_is_none, empty_string_uuid_is_none};
 use chrono::{DateTime, Utc};
+use metrics::counter;
 use rdkafka::message::{Header, Headers, OwnedHeaders};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -55,7 +56,7 @@ pub trait EventWithLibraryInfo {
     fn extract_library_info(&self) -> Option<LibraryInfo>;
 }
 
-#[derive(Default, Debug, Deserialize, Serialize)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct RawEvent {
     #[serde(
         alias = "$token",
@@ -64,7 +65,7 @@ pub struct RawEvent {
     )]
     pub token: Option<String>,
     #[serde(alias = "$distinct_id", skip_serializing_if = "Option::is_none")]
-    pub distinct_id: Option<Value>, // insights-js accepts arbitrary values as distinct_id
+    pub distinct_id: Option<Value>, // posthog-js accepts arbitrary values as distinct_id
     #[serde(default, deserialize_with = "empty_string_uuid_is_none")]
     pub uuid: Option<Uuid>,
     pub event: String,
@@ -89,12 +90,12 @@ pub struct RawEngageEvent {
     )]
     pub token: Option<String>,
     #[serde(alias = "$distinct_id", skip_serializing_if = "Option::is_none")]
-    pub distinct_id: Option<Value>, // insights-js accepts arbitrary values as distinct_id
+    pub distinct_id: Option<Value>, // posthog-js accepts arbitrary values as distinct_id
     #[serde(default, deserialize_with = "empty_string_uuid_is_none")]
     pub uuid: Option<Uuid>,
     // NOTE: missing event name is the only difference between RawEvent and RawEngageEvent
     // when the event name is missing, we need fill in $identify as capture.py does:
-    // https://github.com/hanzoai/insights/blob/70ce86a73f6c3d3ee6f44e1ac0acd695e2f78682/insights/api/capture.py#L501-L502
+    // https://github.com/PostHog/posthog/blob/70ce86a73f6c3d3ee6f44e1ac0acd695e2f78682/posthog/api/capture.py#L501-L502
     #[serde(default)]
     pub properties: HashMap<String, Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -118,14 +119,20 @@ pub struct CapturedEventHeaders {
     pub now: Option<String>,
     pub force_disable_person_processing: Option<bool>,
     pub historical_migration: Option<bool>,
+    pub skip_heatmap_processing: Option<bool>,
     pub dlq_reason: Option<String>,
     pub dlq_step: Option<String>,
     pub dlq_timestamp: Option<String>,
+    pub content_encoding: Option<String>,
 }
 
 impl CapturedEventHeaders {
     pub fn set_force_disable_person_processing(&mut self, value: bool) {
         self.force_disable_person_processing = Some(value);
+    }
+
+    pub fn set_skip_heatmap_processing(&mut self, value: bool) {
+        self.skip_heatmap_processing = Some(value);
     }
 
     pub fn set_dlq_reason(&mut self, value: String) {
@@ -138,6 +145,10 @@ impl CapturedEventHeaders {
 
     pub fn set_dlq_timestamp(&mut self, value: String) {
         self.dlq_timestamp = Some(value);
+    }
+
+    pub fn set_content_encoding(&mut self, value: String) {
+        self.content_encoding = Some(value);
     }
 }
 
@@ -185,7 +196,14 @@ impl From<CapturedEventHeaders> for OwnedHeaders {
                 value: historical_migration_str.as_deref(),
             });
 
-        // To prevent adding bloat to the other topic headers, only add add dlq headers when present.
+        // Only add optional headers when present, to avoid bloating every message.
+        if let Some(skip_heatmap_processing) = headers.skip_heatmap_processing {
+            let val = skip_heatmap_processing.to_string();
+            owned = owned.insert(Header {
+                key: "skip_heatmap_processing",
+                value: Some(val.as_str()),
+            });
+        }
         if let Some(ref reason) = headers.dlq_reason {
             owned = owned.insert(Header {
                 key: "dlq_reason",
@@ -202,6 +220,12 @@ impl From<CapturedEventHeaders> for OwnedHeaders {
             owned = owned.insert(Header {
                 key: "dlq_timestamp",
                 value: Some(timestamp.as_str()),
+            });
+        }
+        if let Some(ref encoding) = headers.content_encoding {
+            owned = owned.insert(Header {
+                key: "content-encoding",
+                value: Some(encoding.as_str()),
             });
         }
 
@@ -234,9 +258,13 @@ impl From<OwnedHeaders> for CapturedEventHeaders {
             historical_migration: headers_map
                 .get("historical_migration")
                 .and_then(|v| v.parse::<bool>().ok()),
+            skip_heatmap_processing: headers_map
+                .get("skip_heatmap_processing")
+                .and_then(|v| v.parse::<bool>().ok()),
             dlq_reason: headers_map.get("dlq_reason").cloned(),
             dlq_step: headers_map.get("dlq_step").cloned(),
             dlq_timestamp: headers_map.get("dlq_timestamp").cloned(),
+            content_encoding: headers_map.get("content-encoding").cloned(),
         }
     }
 }
@@ -293,10 +321,11 @@ impl CapturedEvent {
             } else {
                 None
             },
-            // DLQ headers should only be explicitly set when needed
+            skip_heatmap_processing: None,
             dlq_reason: None,
             dlq_step: None,
             dlq_timestamp: None,
+            content_encoding: None,
         }
     }
 
@@ -443,10 +472,20 @@ impl RawEvent {
         // Replace null characters with Unicode replacement character
         let distinct_id = distinct_id.replace('\0', "\u{FFFD}");
 
-        match distinct_id.len() {
-            0 => None,
-            1..=200 => Some(distinct_id),
-            _ => Some(distinct_id.chars().take(200).collect()),
+        let trimmed = distinct_id.trim();
+
+        if trimmed.is_empty() {
+            return None;
+        }
+
+        if trimmed.len() != distinct_id.len() {
+            counter!("capture_distinct_id_has_whitespace_total").increment(1);
+        }
+
+        if distinct_id.len() <= 200 {
+            Some(distinct_id)
+        } else {
+            Some(distinct_id.chars().take(200).collect())
         }
     }
 
@@ -487,6 +526,39 @@ impl CapturedEvent {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_extract_distinct_id_whitespace_only_returns_none() {
+        for input in [" ", "\t\n", "   ", "\r\n\t "] {
+            let event = RawEvent {
+                distinct_id: Some(Value::String(input.to_string())),
+                ..Default::default()
+            };
+            assert_eq!(
+                event.extract_distinct_id(),
+                None,
+                "expected None for whitespace-only distinct_id: {input:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_extract_distinct_id_with_surrounding_whitespace_preserved() {
+        let event = RawEvent {
+            distinct_id: Some(Value::String("  hello  ".to_string())),
+            ..Default::default()
+        };
+        assert_eq!(event.extract_distinct_id(), Some("  hello  ".to_string()),);
+    }
+
+    #[test]
+    fn test_extract_distinct_id_normal_value() {
+        let event = RawEvent {
+            distinct_id: Some(Value::String("hello".to_string())),
+            ..Default::default()
+        };
+        assert_eq!(event.extract_distinct_id(), Some("hello".to_string()));
+    }
 
     #[test]
     fn test_captured_event_serialization_with_historical_migration_true() {

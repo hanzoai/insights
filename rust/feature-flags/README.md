@@ -1,7 +1,7 @@
 
 # Testing
 
-First, make sure docker compose is running (from main insights repo), and test database exists:
+First, make sure docker compose is running (from main posthog repo), and test database exists:
 
 ```sh
 docker compose -f ../docker-compose.dev.yml up -d
