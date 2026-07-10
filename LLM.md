@@ -1,10 +1,14 @@
-# Hanzo Insights — RETIRED (Django decommissioned)
+# Hanzo Insights — served Django monolith (RESTORED) + native Go observability
 
 ## Status
 
-The legacy **Django** served surface is **RETIRED**. There is now
-exactly **ONE observability way**, served natively (Go) by the `hanzoai/cloud`
-binary:
+The served **Django** monolith is **RESTORED** and published to
+`ghcr.io/hanzoai/insights` for the `insights.hanzo.ai` deploy (K8s pulls ghcr).
+`manage.py` + `bin/docker*` serve again (real management + server/worker/migrate
+startup), IAM-OIDC login is wired, and the surface is Hanzo-branded. It runs on
+a real Postgres (`insights-sql`), Valkey (`REDIS_URL`), Kafka and ClickHouse.
+
+Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
 
 - **`/v1/evals/*`** — datasets, dataset-items, evaluators, score-configs,
   scores, **traces**, runs. Org-scoped by the IAM `owner` claim (one tenancy).
@@ -19,11 +23,15 @@ LLM telemetry (traces / observations / scores) is written by the **AI gateway**
 (`hanzo.traces`, `hanzo.observations`, `hanzo.scores`) and read
 back through `/v1/evals` + `/v1/analytics`.
 
-The Django `manage.py` and every Django serving entrypoint (`bin/docker`,
-`bin/docker-server`, `bin/docker-worker`, `bin/docker-worker-celery`) are
-neutered — they refuse to run and point here. No backwards compat.
+The Django `manage.py` and every serving entrypoint (`bin/docker`,
+`bin/docker-server`, `bin/docker-worker`, `bin/docker-worker-celery`,
+`bin/docker-migrate`) run for real again (restored from pre-`175eace7b`). The
+retirement of the served surface (`175eace7b`) is reversed; the ghcr publisher
+(`.github/workflows/container-images-cd.yml`, deleted in `657c5fbcef`) is
+restored so CI builds the monolith `Dockerfile` and pushes to
+`ghcr.io/hanzoai/insights`.
 
-## Django → Go retire map (no capability dropped silently)
+## Django → Go observability map (both planes live)
 
 | Django surface | Go replacement | Status |
 |---|---|---|
@@ -54,16 +62,19 @@ Event **ingestion** substrate stays live (it is not the Django app):
 query layer gone these ingest without a product-analytics reader — a follow-up
 decommission decision, out of scope for retiring the Django app.
 
-## Live deploy (do-sfo3-hanzo-k8s / ns hanzo) — post-retire
+## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
-- `insights-web` (Django) — **removed** (Service CR `NotFound`; host `502`).
-- `insights-worker` (Celery) — **removed** (Service CR `NotFound`).
+- `ghcr.io/hanzoai/insights:<VERSION>` (served monolith) — published by
+  `container-images-cd.yml` on a `v*` tag push (e.g. `v1.51.4`), also
+  `:sha-<sha>`. Deploy pins `kubernetes.io/arch: amd64`.
+- `insights-web` (Django) + `insights-worker` (Celery) — Service CRs to be
+  restored in `hanzoai/universe` (`infra/k8s/operator/crs/insights-*`,
+  `infra/k8s/ingress/routes.yaml`) pointing at the ghcr image. Needs
+  `DATABASE_URL` (`insights-sql`), `REDIS_URL` (`insights-kv`/Valkey), Kafka,
+  ClickHouse, and Django `migrate` (`bin/docker` runs it on boot). Deploy is
+  gated — not applied by this change.
 - Retained operator `Service` CRs: `insights-capture`, `insights-kafka`,
   `insights-kv`, `insights-plugin`, `insights-sql`.
-- Declared state persisted in `hanzoai/universe` (`infra/k8s/insights/*`,
-  `infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`,
-  `infra/k8s/monitoring/insights-servicemonitor.yaml`) with the web/worker/route
-  entries deleted so the operator never resurrects Django.
 
 ## Auth / tenancy
 
