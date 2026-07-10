@@ -63,9 +63,12 @@ pub fn introspection_to_personal_auth(resp: &IamIntrospection) -> Option<TokenAu
         user_id: stable_user_id(&resp.sub),
         key_id: Some(key_id),
         org_ids: resp.aud.clone(),
-        // IAM introspection does not carry PostHog-style team/org scoping lists; access
-        // is governed by `scope` + `aud`. Leaving these `None` means "not further
-        // restricted", matching an unscoped personal key.
+        // HAZARD (why the iam backend is startup-gated behind IAM_AUD_ORG_RECONCILED):
+        // RFC 7662 introspection does not carry PostHog-style per-key `scoped_teams` /
+        // `scoped_orgs`. Emitting `None` here means "not further restricted", which would
+        // WIDEN a team-scoped IAM key to every team in its org(s) — a privilege
+        // escalation. Until per-key scoping is carried through introspection, the backend
+        // must not run in production (main.rs refuses to start without the reconciled flag).
         scoped_teams: None,
         scoped_orgs: None,
         scopes: Some(scopes),

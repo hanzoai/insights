@@ -329,7 +329,16 @@ pub(crate) fn hash_token_value(value: &str) -> String {
 }
 
 /// Validates cached personal API key metadata against the team
-fn validate_personal_key_metadata(data: &TokenAuthData, team: &Team) -> Result<(), FlagError> {
+/// `strict_org`: when true (Hanzo IAM backend), a team with no `organization_id`
+/// is DENIED rather than allowed to fall through the org membership check. The
+/// upstream Postgres path keeps the permissive behavior (`false`), where a no-org team
+/// is a legitimate pre-organization state; but for IAM-issued keys there is no org to
+/// reconcile against and skipping the check would permit a cross-tenant read.
+fn validate_personal_key_metadata(
+    data: &TokenAuthData,
+    team: &Team,
+    strict_org: bool,
+) -> Result<(), FlagError> {
     match data {
         TokenAuthData::Personal {
             org_ids,
@@ -392,12 +401,24 @@ fn validate_personal_key_metadata(data: &TokenAuthData, team: &Team) -> Result<(
                     );
                     return Err(FlagError::PersonalApiKeyInvalid);
                 }
+            } else if strict_org {
+                // No organization on the team: the IAM backend cannot reconcile the key's
+                // `aud`/org against nothing. Fail closed rather than skip the check.
+                debug!("Team has no organization_id; denying IAM-backed personal key (strict_org)");
+                return Err(FlagError::PersonalApiKeyInvalid);
             }
 
             Ok(())
         }
         _ => Err(FlagError::PersonalApiKeyInvalid),
     }
+}
+
+/// Read-through auth-token cache key for a personal API key. The backend is part of the
+/// key so a `postgres`↔`iam` cutover self-invalidates instead of serving the previous
+/// backend's grant for up to the cache TTL (the two backends can disagree on a token).
+pub(crate) fn personal_key_cache_key(backend: &str, sha256_hash: &str) -> String {
+    format!("personal:{backend}:{sha256_hash}")
 }
 
 /// Validates personal API key with feature flag scopes for a specific team
@@ -410,17 +431,20 @@ pub async fn validate_personal_api_key_with_scopes_for_team(
     debug!(team_id = team.id, "Validating personal API key for team");
 
     let sha256_hash = hash_token_value(key);
+    let backend = state.config.personal_api_key_backend.as_str();
+    let is_iam = backend == "iam";
+    // Backend-discriminated cache key (see `personal_key_cache_key`).
+    let cache_key = personal_key_cache_key(backend, &sha256_hash);
 
     // Personal-API-key validation backend. Hanzo IAM (RFC 7662 introspection) or the
     // upstream Postgres personalapikey table. Project (secret) tokens are unaffected —
-    // they never reach this function. Both loaders yield the same `TokenAuthData::Personal`
-    // and share the read-through auth-token cache keyed on the sha256 of the key.
-    let result = if state.config.personal_api_key_backend == "iam" {
+    // they never reach this function. Both loaders yield the same `TokenAuthData::Personal`.
+    let result = if is_iam {
         let iam_url = state.config.hanzo_iam_url.clone();
         let key_for_loader = key.to_string();
         state
             .auth_token_cache
-            .get_or_load(&sha256_hash, |_key| async move {
+            .get_or_load(&cache_key, |_key| async move {
                 crate::api::hanzo_iam::validate_via_iam(&iam_url, &key_for_loader).await
             })
             .await?
@@ -429,7 +453,7 @@ pub async fn validate_personal_api_key_with_scopes_for_team(
         let hash_for_loader = sha256_hash.clone();
         state
             .auth_token_cache
-            .get_or_load(&sha256_hash, |_key| async move {
+            .get_or_load(&cache_key, |_key| async move {
                 load_personal_key_from_pg(pg_reader, &hash_for_loader).await
             })
             .await?
@@ -437,7 +461,7 @@ pub async fn validate_personal_api_key_with_scopes_for_team(
 
     match &result.value {
         Some(data) => {
-            validate_personal_key_metadata(data, team)?;
+            validate_personal_key_metadata(data, team, is_iam)?;
             let pak_id = match data {
                 TokenAuthData::Personal { key_id, .. } => key_id.clone().ok_or_else(|| {
                     warn!("Cached personal API key missing key_id (stale cache entry)");
@@ -686,7 +710,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -709,7 +733,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -732,7 +756,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -755,7 +779,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -778,7 +802,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -801,7 +825,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -824,7 +848,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -847,7 +871,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -865,7 +889,7 @@ mod tests {
             api_token: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -885,7 +909,7 @@ mod tests {
             api_token: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_err());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_err());
     }
 
     #[test]
@@ -908,7 +932,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -934,7 +958,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -959,7 +983,7 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
     }
 
     #[test]
@@ -985,7 +1009,7 @@ mod tests {
         };
 
         assert!(matches!(
-            validate_personal_key_metadata(&data, &team),
+            validate_personal_key_metadata(&data, &team, false),
             Err(FlagError::PersonalApiKeyInsufficientScopes)
         ));
     }
@@ -1008,7 +1032,41 @@ mod tests {
             current_team_id: None,
         };
 
-        assert!(validate_personal_key_metadata(&data, &team).is_ok());
+        assert!(validate_personal_key_metadata(&data, &team, false).is_ok());
+    }
+
+    #[test]
+    fn test_validate_personal_key_metadata_strict_org_denies_no_org_team() {
+        // HIGH-2: under the IAM backend (strict_org = true) a team with no organization
+        // must be DENIED — there is no org to reconcile the IAM key against, so skipping
+        // the org check would permit a cross-tenant read.
+        let team = Team {
+            id: 1,
+            organization_id: None,
+            ..Default::default()
+        };
+        let data = TokenAuthData::Personal {
+            user_id: 42,
+            key_id: None,
+            org_ids: vec![],
+            scoped_teams: None,
+            scoped_orgs: None,
+            scopes: None,
+            current_team_id: None,
+        };
+        assert!(validate_personal_key_metadata(&data, &team, true).is_err());
+    }
+
+    #[test]
+    fn test_personal_key_cache_key_includes_backend() {
+        // MED: the auth-token cache key must be backend-discriminated so a
+        // postgres↔iam cutover self-invalidates instead of serving a stale grant.
+        let hash = "sha256$deadbeef";
+        let pg = personal_key_cache_key("postgres", hash);
+        let iam = personal_key_cache_key("iam", hash);
+        assert_ne!(pg, iam);
+        assert!(pg.contains("postgres") && pg.contains(hash));
+        assert!(iam.contains("iam") && iam.contains(hash));
     }
 
     #[tokio::test]
