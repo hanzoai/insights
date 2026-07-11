@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 # Remove constraint unique_on_user_and_issue from model errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "unique_on_user_and_issue";
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT IF EXISTS "unique_on_user_and_issue";
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "unique_on_user_and_issue" UNIQUE ("issue_id", "user_id");
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_errortrackingissueassignment" ADD COLUMN "user_group_id" uuid NULL CONSTRAINT "insights_errortrackin_user_group_id_459a0006_fk_insights_u" REFERENCES "insights_usergroup"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "insights_errortrackin_user_group_id_459a0006_fk_insights_u" IMMEDIATE;
+                    SET CONSTRAINTS ALL IMMEDIATE;
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_errortrackingissueassignment" DROP COLUMN "user_group_id" CASCADE;
@@ -64,30 +64,30 @@ class Migration(migrations.Migration):
                 # Alter field issue on errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" IMMEDIATE;
-                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
-                    DROP INDEX IF EXISTS "insights_errortrackingissueassignment_issue_id_d9cce9cb";
+                    SET CONSTRAINTS ALL IMMEDIATE;
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT IF EXISTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
+                    DROP INDEX IF EXISTS "insights_errortrackingissueassignment_issue_id_66da10e2";
                     ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackingissueassignment_issue_id_d9cce9cb_uniq" UNIQUE ("issue_id"); -- existing-table-constraint-ignore
                     ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" FOREIGN KEY ("issue_id") REFERENCES "insights_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" IMMEDIATE;
-                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
-                        CREATE INDEX "insights_errortrackingissueassignment_issue_id_d9cce9cb" ON "insights_errortrackingissueassignment" ("issue_id");
+                        SET CONSTRAINTS ALL IMMEDIATE;
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT IF EXISTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
+                        CREATE INDEX "insights_errortrackingissueassignment_issue_id_66da10e2" ON "insights_errortrackingissueassignment" ("issue_id");
                         ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" FOREIGN KEY ("issue_id") REFERENCES "insights_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED;
                     """,
                 ),
                 # Alter field user on errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "insights_errortrackin_user_id_83f2e696_fk_insights_u" IMMEDIATE;
-                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u";
+                    SET CONSTRAINTS ALL IMMEDIATE;
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT IF EXISTS "insights_errortrackin_user_id_83f2e696_fk_insights_u";
                     ALTER TABLE "insights_errortrackingissueassignment" ALTER COLUMN "user_id" DROP NOT NULL;
                     ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u" FOREIGN KEY ("user_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "insights_errortrackin_user_id_83f2e696_fk_insights_u" IMMEDIATE;
-                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u";
+                        SET CONSTRAINTS ALL IMMEDIATE;
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT IF EXISTS "insights_errortrackin_user_id_83f2e696_fk_insights_u";
                         ALTER TABLE "insights_errortrackingissueassignment" ALTER COLUMN "user_id" SET NOT NULL;
                         ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u" FOREIGN KEY ("user_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED;
                     """,

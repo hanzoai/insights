@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="type",
             field=models.CharField(
                 blank=True,
@@ -27,5 +27,5 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
-        migrations.RunSQL("UPDATE insights_function SET type = 'destination' WHERE type IS NULL", "SELECT 1"),
+        migrations.RunSQL("UPDATE insights_insightsfunction SET type = 'destination' WHERE type IS NULL", "SELECT 1"),
     ]

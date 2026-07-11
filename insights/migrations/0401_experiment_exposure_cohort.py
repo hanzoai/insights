@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_experiment" ADD COLUMN "exposure_cohort_id" integer NULL CONSTRAINT "insights_experiment_exposure_cohort_id_19450b9e_fk_insights_c" REFERENCES "insights_cohort"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_experiment_exposure_cohort_id_19450b9e_fk_insights_c" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_experiment" DROP COLUMN IF EXISTS "exposure_cohort_id";
