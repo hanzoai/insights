@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_resourcetransfer" ADD COLUMN "created_by_id" integer NULL CONSTRAINT "insights_resourcetran_created_by_id_cfdd93a0_fk_insights_u" REFERENCES "insights_user"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_resourcetran_created_by_id_cfdd93a0_fk_insights_u" IMMEDIATE;  -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE;  -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_resourcetransfer" DROP COLUMN IF EXISTS "created_by_id";

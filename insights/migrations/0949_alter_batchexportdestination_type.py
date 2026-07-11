@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             """
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS "insights_function_batch_export_id_d64c3403" ON "insights_function" ("batch_export_id");
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS "insights_function_batch_export_id_d64c3403" ON "insights_insightsfunction" ("batch_export_id");
             """,
             reverse_sql="""
                 DROP INDEX CONCURRENTLY IF EXISTS "insights_function_batch_export_id_d64c3403";
