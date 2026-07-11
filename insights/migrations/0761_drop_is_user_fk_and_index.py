@@ -18,9 +18,9 @@ class Migration(migrations.Migration):
                 IF EXISTS (
                     SELECT 1
                     FROM pg_constraint
-                    WHERE conname = 'insights_person_is_user_id_cfc91ae7_fk_insights_user_id'
+                    WHERE conname = 'insights_person_is_user_id_3ba667dc_fk_insights_user_id'
                 ) THEN
-                    ALTER TABLE insights_person DROP CONSTRAINT insights_person_is_user_id_cfc91ae7_fk_insights_user_id;
+                    ALTER TABLE insights_person DROP CONSTRAINT insights_person_is_user_id_3ba667dc_fk_insights_user_id;
                 END IF;
             END$$;
             """,
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-            DROP INDEX CONCURRENTLY IF EXISTS insights_person_is_user_id_cfc91ae7;
+            DROP INDEX CONCURRENTLY IF EXISTS insights_person_is_user_id_3ba667dc;
             """,
             reverse_sql="""
             """,

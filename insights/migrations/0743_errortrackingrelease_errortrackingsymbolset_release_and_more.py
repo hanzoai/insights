@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     sql="""
                     ALTER TABLE "insights_errortrackingsymbolset" ADD COLUMN "release_id" uuid NULL CONSTRAINT "insights_errortrackingsymbolset_release_id_fk" REFERENCES "insights_errortrackingrelease" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_errortrackingsymbolset_release_id_fk" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                     ALTER TABLE "insights_errortrackingsymbolset" DROP COLUMN IF EXISTS "release_id";

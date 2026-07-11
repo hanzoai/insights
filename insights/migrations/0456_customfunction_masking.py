@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="masking",
             field=models.JSONField(blank=True, null=True),
         ),

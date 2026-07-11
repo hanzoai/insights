@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_grouptypemapping" ADD COLUMN "detail_dashboard_id" integer NULL CONSTRAINT "insights_grouptypemapping_detail_dashboard_id_fk" REFERENCES "insights_dashboard"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_grouptypemapping_detail_dashboard_id_fk" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_grouptypemapping" DROP COLUMN IF EXISTS "detail_dashboard_id";

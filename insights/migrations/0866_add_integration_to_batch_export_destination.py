@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("insights", "0865_remove_experimentmetricresult_insights_exp_experim_b5f6d4_idx_and_more")]
+    dependencies = [("insights", "0865_remove_experimentmetricresult_posthog_exp_experim_b5f6d4_idx_and_more")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_batchexportdestination" ADD COLUMN "integration_id" integer NULL CONSTRAINT "insights_batchexportd_integration_id_7927a172_fk_insights_i" REFERENCES "insights_integration"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_batchexportd_integration_id_7927a172_fk_insights_i" IMMEDIATE;  -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE;  -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_batchexportdestination" DROP COLUMN IF EXISTS "integration_id";
