@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="encrypted_inputs",
             field=insights.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),

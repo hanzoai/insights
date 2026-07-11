@@ -13,7 +13,7 @@ from django.db import migrations, models
 ### --
 ### -- Add field match_action to pluginconfig
 ### --
-### ALTER TABLE "insights_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" REFERENCES "insights_action"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" IMMEDIATE;
+### ALTER TABLE "insights_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" REFERENCES "insights_action"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS ALL IMMEDIATE;
 ### CREATE INDEX "insights_pluginconfig_match_action_id_1cbf8562" ON "insights_pluginconfig" ("match_action_id");
 ### COMMIT;
 # and then modify the migration from the below commented version to a safe non-blocking version
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" REFERENCES "insights_action"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_pluginconfig" DROP COLUMN IF EXISTS "match_action_id";

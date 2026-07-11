@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddConstraint(
-            model_name="customflow",
+            model_name="insightsflow",
             constraint=models.UniqueConstraint(fields=("team", "version", "id"), name="unique_version_per_flow"),
         ),
     ]

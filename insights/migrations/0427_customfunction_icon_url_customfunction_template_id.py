@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="icon_url",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="template_id",
             field=models.CharField(blank=True, max_length=400, null=True),
         ),
