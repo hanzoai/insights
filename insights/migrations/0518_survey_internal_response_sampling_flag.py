@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                 ALTER TABLE "insights_survey" ADD COLUMN "internal_response_sampling_flag_id" integer NULL CONSTRAINT "insights_survey_internal_response_sa_e682f708_fk_insights_f" REFERENCES "insights_featureflag"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                SET CONSTRAINTS "insights_survey_internal_response_sa_e682f708_fk_insights_f" IMMEDIATE; -- existing-table-constraint-ignore
+                SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                 """,
                     reverse_sql="""
                     ALTER TABLE "insights_survey" DROP COLUMN IF EXISTS "internal_response_sampling_flag_id";

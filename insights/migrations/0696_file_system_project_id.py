@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_filesystem" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_filesystem_project_id_767c1359_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "insights_filesystem_project_id_767c1359_fk_insights_p" IMMEDIATE;""",
+                    SET CONSTRAINTS ALL IMMEDIATE;""",
                     reverse_sql="""
                         ALTER TABLE "insights_filesystem" DROP COLUMN IF EXISTS "project_id";""",
                 ),

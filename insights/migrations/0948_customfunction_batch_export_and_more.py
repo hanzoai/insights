@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name="customfunction",
+                    model_name="insightsfunction",
                     name="batch_export",
                     field=models.ForeignKey(
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.batchexport"
@@ -42,11 +42,11 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                        ALTER TABLE "insights_function" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "insights_function_batch_export_id_d64c3403_fk_insights_b" REFERENCES "insights_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                        SET CONSTRAINTS "insights_function_batch_export_id_d64c3403_fk_insights_b" IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_insightsfunction" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "insights_function_batch_export_id_d64c3403_fk_insights_b" REFERENCES "insights_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "insights_function" DROP COLUMN IF EXISTS "batch_export_id";
+                        ALTER TABLE "insights_insightsfunction" DROP COLUMN IF EXISTS "batch_export_id";
                     """,
                 ),
             ],
