@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="customflow",
+            model_name="insightsflow",
             name="conversion",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name="customflow",
+            model_name="insightsflow",
             name="trigger_masking",
             field=models.JSONField(blank=True, null=True),
         ),

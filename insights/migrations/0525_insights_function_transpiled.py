@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="transpiled",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="type",
             field=models.CharField(
                 blank=True,
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             ),
         ),
         AddIndexConcurrently(
-            model_name="customfunction",
+            model_name="insightsfunction",
             index=models.Index(fields=["type", "enabled", "team"], name="insights_iql_type_6f8967_idx"),
         ),
     ]

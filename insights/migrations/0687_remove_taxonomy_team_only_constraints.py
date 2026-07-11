@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
                 # Using RunSQL just to work around a decade-old bug in Django's sqlmigrate failing @ AlterUniqueTogether
                 # https://code.djangoproject.com/ticket/26624
                 migrations.RunSQL(
-                    "ALTER TABLE insights_eventdefinition DROP CONSTRAINT insights_eventdefinition_team_id_name_80fa0b87_uniq",
-                    reverse_sql="ALTER TABLE insights_eventdefinition ADD CONSTRAINT insights_eventdefinition_team_id_name_80fa0b87_uniq UNIQUE (team_id, name)",
+                    "ALTER TABLE insights_eventdefinition DROP CONSTRAINT insights_eventdefinition_team_id_name_6609de02_uniq",
+                    reverse_sql="ALTER TABLE insights_eventdefinition ADD CONSTRAINT insights_eventdefinition_team_id_name_6609de02_uniq UNIQUE (team_id, name)",
                 ),
             ],
         ),

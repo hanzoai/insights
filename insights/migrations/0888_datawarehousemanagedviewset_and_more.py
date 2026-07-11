@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_datawarehousesavedquery" ADD COLUMN "managed_viewset_id" uuid NULL CONSTRAINT "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_insights_a" REFERENCES "insights_datawarehousemanagedviewset"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_insights_a" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_datawarehousesavedquery" DROP COLUMN IF EXISTS "managed_viewset_id";
