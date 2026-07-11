@@ -80,3 +80,45 @@ decommission decision, out of scope for retiring the Django app.
 
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
 (`/v1/evals`, `/v1/analytics`) scopes exclusively by `c.Org()`; secrets via KMS.
+
+## Debrand / find-replace — NEVER rewrite migration internals
+
+`insights/migrations/` and `insights/clickhouse/migrations/` are OFF-LIMITS to
+any `posthog`→`insights` (or any brand) find-replace / debrand pass. Migration
+files are immutable, cross-referenced plumbing whose identifiers are NOT
+user-facing branding:
+
+- `dependencies` / `run_before` entries key on another migration's **filename**;
+- `RunSQL` hardcodes Postgres table / index / constraint names — including
+  Django-generated FK/unique constraint names whose 8-hex hash is derived from
+  the **table name** (`names_digest(table, *cols)`), so renaming the table part
+  of a hardcoded name without recomputing the hash points it at a name that
+  never exists on a fresh DB;
+- state operations (`AddField`, `AddConstraint`, `RemoveField`, …) key on the
+  model **state name**, not the class's brand.
+
+A blanket rename corrupts all three. That is exactly what #52 / `203fdd70b`
+("strangle Redis", actually a wholesale `posthog`→`insights` find-replace) did:
+a fresh `manage.py migrate` fell from 1018/1018 to hard failures — broken
+dependency identifiers, constraint hashes computed for `posthog_*` tables, a
+split `HogFunction`→{`InsightsFunction` create, `customfunction` refs,
+`insights_function` table} and `HogFlow`→{`InsightsFlow`, `customflow`} rename,
+plus a stale `role`/`role_id_legacy` field ref. Fixed on
+`fix/migrations-consistency`.
+
+Rule: debrand only user-facing strings (templates, UI, docs, API labels). Leave
+every migration identifier alone — migrations only need to be INTERNALLY
+consistent with the `insights`-form models, not brand-clean. A migration whose
+table is `insights_insightsfunction` or `customflow_templates` is correct; the
+name is invisible plumbing.
+
+Guard before shipping migration changes: `manage.py migrate` on a scratch
+Postgres must reach the last migration (currently `1018`) clean. Two fast
+static checks catch the corruption classes without a full DB run: (1) every
+`dependencies`/`run_before` entry resolves to a real migration file; (2) a
+state-only `ProjectState` build over all migrations (catches dangling
+`model_name`/field refs). NOTE: the debrand-era `posthog/`→`insights/` file
+rename (`071e2d369a`) also DELETED `insights/models/exchange_rate/historical.csv`
+without re-adding it, so `insights/models/exchange_rate/sql.py` opens a missing
+file — the ClickHouse `0101/0102_*_exchange_rates` migrations need it restored
+from history (`git show 071e2d369a^:posthog/models/exchange_rate/historical.csv`).
