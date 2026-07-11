@@ -15,14 +15,14 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name="customfunction",
+                    model_name="insightsfunction",
                     name="insights_function_template",
                     field=models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="insights_functions",
-                        to="insights.customfunctiontemplate",
+                        to="insights.insightsfunctiontemplate",
                     ),
                 ),
             ],
@@ -30,17 +30,17 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "insights_function" ADD COLUMN "insights_function_template_id" uuid NULL CONSTRAINT "insights_function_insights_function_templat_3dc757e7_fk_insights_h" REFERENCES "insights_function_template"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_function_insights_function_templat_3dc757e7_fk_insights_h" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_insightsfunction" ADD COLUMN "insights_function_template_id" uuid NULL CONSTRAINT "insights_function_insights_function_templat_3dc757e7_fk_insights_h" REFERENCES "insights_insightsfunctiontemplate"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "insights_function" DROP COLUMN IF EXISTS "insights_function_template_id";
+                        ALTER TABLE "insights_insightsfunction" DROP COLUMN IF EXISTS "insights_function_template_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "insights_function_insights_function_template_id_3dc757e7" ON "insights_function" ("insights_function_template_id");
+                    CREATE INDEX CONCURRENTLY "insights_function_insights_function_template_id_3dc757e7" ON "insights_insightsfunction" ("insights_function_template_id");
                     """,
                     reverse_sql="""
                         DROP INDEX IF EXISTS "insights_function_insights_function_template_id_3dc757e7";

@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "insights_flow",
-                    models.ForeignKey(to="insights.customflow", on_delete=django.db.models.deletion.DO_NOTHING),
+                    models.ForeignKey(to="insights.insightsflow", on_delete=django.db.models.deletion.DO_NOTHING),
                 ),
                 (
                     "variables",
