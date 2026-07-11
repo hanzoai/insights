@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_annotation" ADD COLUMN "dashboard_id" integer NULL CONSTRAINT "insights_annotation_dashboard_id_91ef4125_fk_insights_d" REFERENCES "insights_dashboard"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_annotation_dashboard_id_91ef4125_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_annotation" DROP COLUMN IF EXISTS "dashboard_id";

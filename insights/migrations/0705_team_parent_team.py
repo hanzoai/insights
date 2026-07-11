@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_team" ADD COLUMN "parent_team_id" bigint NULL CONSTRAINT "insights_team_parent_team_id_bkr8e799nE_fk_insights_p" REFERENCES "insights_team"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "insights_team_parent_team_id_bkr8e799nE_fk_insights_p" IMMEDIATE;""",
+                    SET CONSTRAINTS ALL IMMEDIATE;""",
                     reverse_sql="""
                         ALTER TABLE "insights_team" DROP COLUMN IF EXISTS "parent_team_id";""",
                 ),

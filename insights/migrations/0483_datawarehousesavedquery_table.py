@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_datawarehousesavedquery" ADD COLUMN "table_id" uuid NULL CONSTRAINT "insights_datawarehous_table_id_96fdb4f5_fk_insights_d" REFERENCES "insights_datawarehousetable"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_datawarehous_table_id_96fdb4f5_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                     ALTER TABLE "insights_datawarehousesavedquery" DROP COLUMN IF EXISTS "table_id";

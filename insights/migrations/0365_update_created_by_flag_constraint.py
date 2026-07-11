@@ -54,27 +54,27 @@ class Migration(migrations.Migration):
                 # This should be safe, because we are making the constraint NOT VALID, so doesn't lock things up for long.
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "insights_experiment_created_by_id_b40aea95_fk_insights_user_id" IMMEDIATE; -- existing-table-constraint-ignore
-                    ALTER TABLE "insights_experiment" DROP CONSTRAINT "insights_experiment_created_by_id_b40aea95_fk_insights_user_id"; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_experiment" DROP CONSTRAINT IF EXISTS "insights_experiment_created_by_id_b40aea95_fk_insights_user_id"; -- existing-table-constraint-ignore
                     ALTER TABLE "insights_experiment" ALTER COLUMN "created_by_id" DROP NOT NULL;
                     ALTER TABLE "insights_experiment" ADD CONSTRAINT "insights_experiment_created_by_id_b40aea95_fk_insights_user_id" FOREIGN KEY ("created_by_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "insights_experiment_created_by_id_b40aea95_fk_insights_user_id" IMMEDIATE;
-                        ALTER TABLE "insights_experiment" DROP CONSTRAINT "insights_experiment_created_by_id_b40aea95_fk_insights_user_id";
+                        SET CONSTRAINTS ALL IMMEDIATE;
+                        ALTER TABLE "insights_experiment" DROP CONSTRAINT IF EXISTS "insights_experiment_created_by_id_b40aea95_fk_insights_user_id";
                         ALTER TABLE "insights_experiment" ALTER COLUMN "created_by_id" SET NOT NULL;
                         ALTER TABLE "insights_experiment" ADD CONSTRAINT "insights_experiment_created_by_id_b40aea95_fk_insights_user_id" FOREIGN KEY ("created_by_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID;
                     """,
                 ),
                 migrations.RunSQL(
-                    """SET CONSTRAINTS "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id" IMMEDIATE; -- existing-table-constraint-ignore
-                    ALTER TABLE "insights_featureflag" DROP CONSTRAINT "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id"; -- existing-table-constraint-ignore
+                    """SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_featureflag" DROP CONSTRAINT IF EXISTS "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id"; -- existing-table-constraint-ignore
                     ALTER TABLE "insights_featureflag" ALTER COLUMN "created_by_id" DROP NOT NULL;
                     ALTER TABLE "insights_featureflag" ADD CONSTRAINT "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id" FOREIGN KEY ("created_by_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id" IMMEDIATE;
-                        ALTER TABLE "insights_featureflag" DROP CONSTRAINT "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id";
+                        SET CONSTRAINTS ALL IMMEDIATE;
+                        ALTER TABLE "insights_featureflag" DROP CONSTRAINT IF EXISTS "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id";
                         ALTER TABLE "insights_featureflag" ALTER COLUMN "created_by_id" SET NOT NULL;
                         ALTER TABLE "insights_featureflag" ADD CONSTRAINT "insights_featureflag_created_by_id_4571fe1a_fk_insights_user_id" FOREIGN KEY ("created_by_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID;
                         -- existing-table-constraint-ignore

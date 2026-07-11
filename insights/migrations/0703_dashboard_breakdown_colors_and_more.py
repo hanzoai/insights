@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_dashboard" ADD COLUMN "data_color_theme_id" integer NULL CONSTRAINT "insights_dashboard_data_color_theme_id_0084ccbf_fk_insights_d" REFERENCES "insights_datacolortheme"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_dashboard_data_color_theme_id_0084ccbf_fk_insights_d" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_dashboard" DROP COLUMN IF EXISTS "data_color_theme_id";
