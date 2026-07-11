@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         # --
         # -- Alter field team on persondistinctid
         # --
-        # SET CONSTRAINTS "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id" IMMEDIATE; ALTER TABLE "insights_persondistinctid" DROP CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id";
+        # SET CONSTRAINTS ALL IMMEDIATE; ALTER TABLE "insights_persondistinctid" DROP CONSTRAINT IF EXISTS "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id";
         # DROP INDEX IF EXISTS "insights_persondistinctid_team_id_46330ec9";
         # ALTER TABLE "insights_persondistinctid" ADD CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id" FOREIGN KEY ("team_id") REFERENCES "insights_team" ("id") DEFERRABLE INITIALLY DEFERRED;
         # COMMIT;

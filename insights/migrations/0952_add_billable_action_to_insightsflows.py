@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customflow",
+            model_name="insightsflow",
             name="billable_action_types",
             field=models.JSONField(blank=True, default=list, null=True),
         ),

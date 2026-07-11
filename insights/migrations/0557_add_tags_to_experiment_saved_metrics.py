@@ -10,15 +10,15 @@ from django.db import migrations, models
 # --
 # -- Remove constraint exactly_one_related_object from model taggeditem
 # --
-# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "exactly_one_related_object";
 # --
 # -- Alter unique_together for taggeditem (0 constraint(s))
 # --
-# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
+# ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_00dc5a44_uniq";
 # --
 # -- Add field experiment_saved_metric to taggeditem
 # --
-# ALTER TABLE "insights_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" REFERENCES "insights_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" IMMEDIATE;
+# ALTER TABLE "insights_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" REFERENCES "insights_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS ALL IMMEDIATE;
 # --
 # -- Alter unique_together for taggeditem (1 constraint(s))
 # --
@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_taggeditem" ADD COLUMN "experiment_saved_metric_id" integer NULL CONSTRAINT "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" REFERENCES "insights_experimentsavedmetric"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_taggeditem_experiment_saved_met_b6af2199_fk_insights_e" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_taggeditem" DROP COLUMN IF EXISTS "experiment_saved_metric_id";
@@ -197,7 +197,7 @@ class Migration(migrations.Migration):
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "exactly_one_related_object";
                     ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
                             (
                                 (dashboard_id IS NOT NULL AND insight_id IS NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL AND experiment_saved_metric_id IS NULL) OR /* -- not-null-ignore */
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                         ) NOT VALID;
                     """,
                     reverse_sql="""
-                        ALTER TABLE "insights_taggeditem" DROP CONSTRAINT "exactly_one_related_object";
+                        ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "exactly_one_related_object";
                         ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "exactly_one_related_object" CHECK ( /* -- existing-table-constraint-ignore */
                             (
                                 (dashboard_id IS NOT NULL AND insight_id IS NULL AND event_definition_id IS NULL AND property_definition_id IS NULL AND action_id IS NULL AND feature_flag_id IS NULL) OR /* -- not-null-ignore */
@@ -226,11 +226,11 @@ class Migration(migrations.Migration):
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq";
+                    ALTER TABLE "insights_taggeditem" DROP CONSTRAINT IF EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_00dc5a44_uniq";
                     """,
                     # Intentially swapped with below because these three statements go together.
                     reverse_sql="""
-                        ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" UNIQUE USING INDEX "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq"; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_taggeditem" ADD CONSTRAINT "insights_taggeditem_tag_id_dashboard_id_insi_00dc5a44_uniq" UNIQUE USING INDEX "insights_taggeditem_tag_id_dashboard_id_insi_00dc5a44_uniq"; -- existing-table-constraint-ignore
                     """,
                 ),
                 # This statement doesn't need to be reversed because it's always the middle of the three statements.
@@ -239,7 +239,7 @@ class Migration(migrations.Migration):
                     CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_734394e1_uniq" ON "insights_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id", "experiment_saved_metric_id");
                     """,
                     reverse_sql="""
-                        CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_a13e3a20_uniq" ON "insights_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id");
+                        CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "insights_taggeditem_tag_id_dashboard_id_insi_00dc5a44_uniq" ON "insights_taggeditem" ("tag_id", "dashboard_id", "insight_id", "event_definition_id", "property_definition_id", "action_id", "feature_flag_id");
                     """,
                 ),
                 migrations.RunSQL(

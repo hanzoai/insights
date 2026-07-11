@@ -14,7 +14,7 @@ class Command(BaseCommand):
         silent = options.get("silent", False)
         query = """
         SELECT DISTINCT hf.id
-        FROM insights_function hf
+        FROM insights_insightsfunction hf
         CROSS JOIN LATERAL jsonb_array_elements(hf.inputs_schema) AS schema
         JOIN insights_integration i
         ON i.id = CAST((hf.inputs -> (schema->>'key')) ->> 'value' AS INTEGER)
