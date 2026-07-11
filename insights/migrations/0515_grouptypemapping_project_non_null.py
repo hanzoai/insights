@@ -21,11 +21,11 @@ class Migration(migrations.Migration):
                 # We signal safety here with `-- existing-table-constraint-ignore`
                 migrations.RunSQL(
                     sql='ALTER TABLE "insights_grouptypemapping" ADD CONSTRAINT "unique group types for project" UNIQUE ("project_id", "group_type"); -- existing-table-constraint-ignore',
-                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT "unique group types for project";',
+                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT IF EXISTS "unique group types for project";',
                 ),
                 migrations.RunSQL(
                     sql='ALTER TABLE "insights_grouptypemapping" ADD CONSTRAINT "unique event column indexes for project" UNIQUE ("project_id", "group_type_index"); -- existing-table-constraint-ignore',
-                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT "unique event column indexes for project";',
+                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT IF EXISTS "unique event column indexes for project";',
                 ),
             ],
             state_operations=[

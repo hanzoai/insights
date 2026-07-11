@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 ALTER TABLE insights_persondistinctid
-                DROP CONSTRAINT IF EXISTS "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id";
+                DROP CONSTRAINT IF EXISTS "insights_persondistinctid_team_id_8f5c9804_fk_insights_team_id";
             """,
             reverse_sql="""
                 ALTER TABLE insights_persondistinctid
-                ADD CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id"
+                ADD CONSTRAINT "insights_persondistinctid_team_id_8f5c9804_fk_insights_team_id"
                 FOREIGN KEY (team_id)
                 REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
@@ -42,11 +42,11 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 ALTER TABLE insights_personoverride
-                DROP CONSTRAINT IF EXISTS "insights_personoverride_team_id_92291e67_fk_insights_team_id";
+                DROP CONSTRAINT IF EXISTS "insights_personoverride_team_id_cf1a22c0_fk_insights_team_id";
             """,
             reverse_sql="""
                 ALTER TABLE insights_personoverride
-                ADD CONSTRAINT "insights_personoverride_team_id_92291e67_fk_insights_team_id"
+                ADD CONSTRAINT "insights_personoverride_team_id_cf1a22c0_fk_insights_team_id"
                 FOREIGN KEY (team_id)
                 REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;
@@ -70,11 +70,11 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 ALTER TABLE insights_grouptypemapping
-                DROP CONSTRAINT IF EXISTS "insights_grouptypemapping_team_id_5fb54d04_fk_insights_team_id";
+                DROP CONSTRAINT IF EXISTS "insights_grouptypemapping_team_id_d66aad62_fk_insights_team_id";
             """,
             reverse_sql="""
                 ALTER TABLE insights_grouptypemapping
-                ADD CONSTRAINT "insights_grouptypemapping_team_id_5fb54d04_fk_insights_team_id"
+                ADD CONSTRAINT "insights_grouptypemapping_team_id_d66aad62_fk_insights_team_id"
                 FOREIGN KEY (team_id)
                 REFERENCES insights_team(id)
                 DEFERRABLE INITIALLY DEFERRED;

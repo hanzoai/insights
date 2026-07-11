@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_batchexportrun" ADD COLUMN "backfill_id" uuid NULL CONSTRAINT "insights_batchexportr_backfill_id_9243c0f7_fk_insights_b" REFERENCES "insights_batchexportbackfill"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_batchexportr_backfill_id_9243c0f7_fk_insights_b" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_batchexportrun" DROP COLUMN IF EXISTS "backfill_id";

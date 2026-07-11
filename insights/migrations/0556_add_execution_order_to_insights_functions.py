@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="execution_order",
             field=models.PositiveSmallIntegerField(null=True, blank=True),
         ),

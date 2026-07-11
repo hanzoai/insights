@@ -28,14 +28,14 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "insights_plugin_organization_id_d040b9a9_fk_insights_o" IMMEDIATE; -- existing-table-constraint-ignore
-                    ALTER TABLE "insights_plugin" DROP CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_plugin" DROP CONSTRAINT IF EXISTS "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
                     ALTER TABLE "insights_plugin" ALTER COLUMN "organization_id" DROP NOT NULL;
                     ALTER TABLE "insights_plugin" ADD CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o" FOREIGN KEY ("organization_id") REFERENCES "insights_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "insights_plugin_organization_id_d040b9a9_fk_insights_o" IMMEDIATE; -- existing-table-constraint-ignore
-                        ALTER TABLE "insights_plugin" DROP CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_plugin" DROP CONSTRAINT IF EXISTS "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
                         ALTER TABLE "insights_plugin" ALTER COLUMN "organization_id" SET NOT NULL;
                         ALTER TABLE "insights_plugin" ADD CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o" FOREIGN KEY ("organization_id") REFERENCES "insights_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                         """,

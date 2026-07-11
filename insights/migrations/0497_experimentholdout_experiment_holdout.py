@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     """
                     ALTER TABLE "insights_experiment" ADD COLUMN "holdout_id" integer NULL CONSTRAINT "insights_experiment_holdout_id_ffd173dd_fk_insights_e" REFERENCES "insights_experimentholdout"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_experiment_holdout_id_ffd173dd_fk_insights_e" IMMEDIATE; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS ALL IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_experiment" DROP COLUMN IF EXISTS "holdout_id";
