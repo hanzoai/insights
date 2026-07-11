@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="customfunction",
+            model_name="insightsfunction",
             name="kind",
             field=models.CharField(
                 blank=True,

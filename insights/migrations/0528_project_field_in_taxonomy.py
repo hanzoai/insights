@@ -16,13 +16,13 @@ class Migration(migrations.Migration):
             """
             -- Add field project to eventdefinition
             ALTER TABLE "insights_eventdefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_eventdefinit_project_id_f93fcbb0_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "insights_eventdefinit_project_id_f93fcbb0_fk_insights_p" IMMEDIATE;
+            SET CONSTRAINTS ALL IMMEDIATE;
             -- Add field project to eventproperty
             ALTER TABLE "insights_eventproperty" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_eventproperty_project_id_dd2337d2_fk_insights_project_id" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "insights_eventproperty_project_id_dd2337d2_fk_insights_project_id" IMMEDIATE;
+            SET CONSTRAINTS ALL IMMEDIATE;
             -- Add field project to propertydefinition
             ALTER TABLE "insights_propertydefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_propertydefi_project_id_d3eb982d_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "insights_propertydefi_project_id_d3eb982d_fk_insights_p" IMMEDIATE;""",
+            SET CONSTRAINTS ALL IMMEDIATE;""",
             reverse_sql="""
             ALTER TABLE "insights_eventdefinition" DROP COLUMN IF EXISTS "project_id";
             ALTER TABLE "insights_eventproperty" DROP COLUMN IF EXISTS "project_id";
