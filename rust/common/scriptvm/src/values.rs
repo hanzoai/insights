@@ -622,7 +622,7 @@ impl Display for Closure {
 /// correctly laid out in VM-memory space, and pushing it directly onto the
 /// stack is undefined behavior. It's designed for use within native function
 /// extensions, where you don't have mutable access to a VM's heap, but still
-/// need to construct an IQLValue from a JSON value.
+/// need to construct an HogValue from a JSON value.
 ///
 /// `ExecutionContext::execute_native_function_call` correctly maps the return
 /// value of the native function call to the VM's memory space, making values
