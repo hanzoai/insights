@@ -17,7 +17,7 @@ permissions:
 
 jobs:
     build-and-push:
-        runs-on: evo
+        runs-on: hanzo-build-linux-amd64
         steps:
             - uses: actions/checkout@v4
               with:
@@ -44,6 +44,7 @@ jobs:
                       type=raw,value=latest
                       type=ref,event=branch
                       type=sha,prefix=sha-
+                      type=semver,pattern={{version}}
 
             - uses: docker/build-push-action@v5
               with:
