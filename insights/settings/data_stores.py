@@ -386,35 +386,47 @@ KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD", None)
 # needing to have a deploy.
 TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 
-# The last case happens when someone upgrades Heroku but doesn't have Redis installed yet. Collectstatic gets called before we can provision Redis.
+# Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
+# Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
+# RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
+# never REDIS_URL. REDIS_URL below is the derived RESP connection URL, not an env.
+def _kv_to_resp(url: str) -> str:
+    """Map Hanzo KV's kv:// scheme to the redis:// RESP wire the driver speaks."""
+    return "redis://" + url[len("kv://") :] if url.startswith("kv://") else url
+
+
 if TEST or DEBUG or IS_COLLECT_STATIC:
     if PYTEST_XDIST_WORKER_NUM is not None:
-        REDIS_URL = os.getenv("REDIS_URL", f"redis://localhost/{PYTEST_XDIST_WORKER_NUM}")
+        KV_URL = os.getenv("KV_URL", f"kv://localhost/{PYTEST_XDIST_WORKER_NUM}")
     else:
-        REDIS_URL = os.getenv("REDIS_URL", "redis://localhost/")
+        KV_URL = os.getenv("KV_URL", "kv://localhost/")
 else:
-    REDIS_URL = os.getenv("REDIS_URL", "")
+    KV_URL = os.getenv("KV_URL", "")
 
-if not REDIS_URL and get_from_env("INSIGHTS_REDIS_HOST", ""):
-    REDIS_URL = "redis://:{}@{}:{}/".format(
-        os.getenv("INSIGHTS_REDIS_PASSWORD", ""),
-        os.getenv("INSIGHTS_REDIS_HOST", ""),
-        os.getenv("INSIGHTS_REDIS_PORT", "6379"),
+if not KV_URL and get_from_env("INSIGHTS_KV_HOST", ""):
+    KV_URL = "kv://:{}@{}:{}/".format(
+        os.getenv("INSIGHTS_KV_PASSWORD", ""),
+        os.getenv("INSIGHTS_KV_HOST", ""),
+        os.getenv("INSIGHTS_KV_PORT", "6379"),
     )
+
+# RESP connection URL consumed by redis-py / django_redis / celery (Hanzo KV backend).
+REDIS_URL = _kv_to_resp(KV_URL)
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""):
-    SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""),
-        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_PORT", "6379"),
+if get_from_env("INSIGHTS_SESSION_RECORDING_KV_HOST", ""):
+    SESSION_RECORDING_REDIS_URL = _kv_to_resp(
+        "kv://{}:{}/".format(
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_HOST", ""),
+            os.getenv("INSIGHTS_SESSION_RECORDING_KV_PORT", "6379"),
+        )
     )
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var REDIS_URL or INSIGHTS_REDIS_HOST is absolutely required to run this software.\n"
-        "If upgrading from Insights 1.0.10 or earlier, see here: "
-        "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
+        "Env var KV_URL (or INSIGHTS_KV_HOST) is absolutely required to run this software.\n"
+        "Hanzo KV backs the cache, celery broker and rate-limits; there is no Redis."
     )
 
 # Controls whether the ZstdCompressor is used for Redis compression when writing to Redis.
