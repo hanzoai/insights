@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                o.id, o.is_ai_data_processing_approved\n            FROM insights_organization o\n                JOIN insights_team ON o.id = insights_team.organization_id\n            WHERE insights_team.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "is_ai_data_processing_approved",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "310dce7d42702139d33a655bf3f6f2ab325a8325eb99d3091b49b479b9ff141e"
+}
