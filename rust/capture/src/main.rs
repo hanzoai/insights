@@ -61,9 +61,25 @@ fn init_tracer(sink_url: &str, sampling_rate: f64, service_name: &str) -> Tracer
         .unwrap()
 }
 
+/// Hanzo KV speaks the Redis (RESP) wire protocol; map its kv:// scheme to the
+/// redis:// URL the RESP driver understands. Non-kv:// URLs pass through unchanged.
+fn kv_to_resp(url: &str) -> String {
+    match url.strip_prefix("kv://") {
+        Some(rest) => format!("redis://{rest}"),
+        None => url.to_string(),
+    }
+}
+
 #[tokio::main]
 async fn main() {
-    let config = Config::init_from_env().expect("Invalid configuration:");
+    let mut config = Config::init_from_env().expect("Invalid configuration:");
+    // Hanzo KV speaks the Redis (RESP) wire protocol; normalize its kv:// scheme
+    // to redis:// so the RESP driver connects. Config surface is KV_URL, never REDIS_URL.
+    config.redis_url = kv_to_resp(&config.redis_url);
+    config.global_rate_limit_redis_url =
+        config.global_rate_limit_redis_url.as_deref().map(|u| kv_to_resp(u));
+    config.event_restrictions_redis_url =
+        config.event_restrictions_redis_url.as_deref().map(|u| kv_to_resp(u));
 
     // Start continuous profiling if enabled (keep _agent alive for the duration of the program)
     // Fails gracefully - logs error but doesn't prevent service from starting
