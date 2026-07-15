@@ -9,7 +9,7 @@ use crate::{
     memory::{HeapReference, VmHeap},
     ops::Operation,
     util::{get_json_nested, like, regex_match},
-    values::{Callable, Closure, FromIQLLiteral, IQLLiteral, IQLValue, LocalCallable, Num, NumOp},
+    values::{Callable, Closure, FromHogLiteral, HogLiteral, HogValue, LocalCallable, Num, NumOp},
 };
 
 pub const MAX_JSON_SERDE_DEPTH: usize = 64;
@@ -20,7 +20,7 @@ pub enum StepOutcome {
     /// The program has completed, returning a value
     Finished(JsonValue),
     /// The program has requested a native function call
-    NativeCall(String, Vec<IQLValue>),
+    NativeCall(String, Vec<HogValue>),
     /// The program has requested another step
     Continue,
 }
@@ -31,16 +31,16 @@ pub enum StepOutcome {
 pub struct VmFailure {
     pub error: VmError,
     pub ip: usize,
-    pub stack: Vec<IQLValue>, // TODO - only used for debugging, should remove
+    pub stack: Vec<HogValue>, // TODO - only used for debugging, should remove
     pub step: usize,
 }
 
 /// The Script Virtual Machine. Represents the state of a running program.
 pub struct ScriptVM<'a> {
-    /// The heap of the virtual machine. Generally used for `IQLValue::deref`, to allow you to access
-    /// `IQLLiteral` values for native function implementation.
+    /// The heap of the virtual machine. Generally used for `HogValue::deref`, to allow you to access
+    /// `HogLiteral` values for native function implementation.
     pub heap: VmHeap, // Needs to be pub to allow users to write their own extension native functions
-    stack: Vec<IQLValue>,
+    stack: Vec<HogValue>,
 
     stack_frames: Vec<CallFrame>,
     throw_frames: Vec<ThrowFrame>,
@@ -125,7 +125,7 @@ impl<'a> ScriptVM<'a> {
                     // If the first element of the chain is a global, push null onto the stack, e.g.
                     // if a program is looking for "properties.blah", and "properties" exists, but
                     // "blah" doesn't, push null onto the stack.
-                    self.push_stack(IQLLiteral::Null)?;
+                    self.push_stack(HogLiteral::Null)?;
                 } else {
                     // But if the first element in the chain didn't exist, this is an error (the mental model here
                     // comes from SQL, where a missing column is an error, but a missing field in a column is, or
@@ -172,7 +172,7 @@ impl<'a> ScriptVM<'a> {
             }
             Operation::And => {
                 let count: usize = self.next()?;
-                let mut acc: IQLLiteral = true.into();
+                let mut acc: HogLiteral = true.into();
                 for _ in 0..count {
                     let value = self.pop_stack()?;
                     let value = value.deref(&self.heap)?;
@@ -182,7 +182,7 @@ impl<'a> ScriptVM<'a> {
             }
             Operation::Or => {
                 let count: usize = self.next()?;
-                let mut acc: IQLLiteral = false.into();
+                let mut acc: HogLiteral = false.into();
                 for _ in 0..count {
                     let value = self.pop_stack()?;
                     let value = value.deref(&self.heap)?;
@@ -194,7 +194,7 @@ impl<'a> ScriptVM<'a> {
                 let val = self.pop_stack_as::<bool>()?;
                 // TODO - technically, we could assert here that this push will always succeed,
                 // and it'd let us skip a bounds check I /think/, but lets not go microoptimizing yet
-                self.push_stack(IQLLiteral::from(!val))?;
+                self.push_stack(HogLiteral::from(!val))?;
             }
             Operation::Plus => {
                 let (a, b) = (self.pop_stack_as()?, self.pop_stack_as()?);
@@ -291,7 +291,7 @@ impl<'a> ScriptVM<'a> {
                 self.push_stack(false)?;
             }
             Operation::Null => {
-                self.push_stack(IQLLiteral::Null)?;
+                self.push_stack(HogLiteral::Null)?;
             }
             Operation::String => {
                 let val: String = self.next()?;
@@ -366,7 +366,7 @@ impl<'a> ScriptVM<'a> {
                 if !self.stack.is_empty() {
                     let item = self.clone_stack_item(self.stack.len() - 1)?;
                     let item = item.deref(&self.heap)?;
-                    if !matches!(item, IQLLiteral::Null) {
+                    if !matches!(item, HogLiteral::Null) {
                         self.ip = ((self.ip as i64)
                             .checked_add(offset as i64)
                             .ok_or(VmError::IntegerOverflow)?)
@@ -385,12 +385,12 @@ impl<'a> ScriptVM<'a> {
                     values.push(self.pop_stack()?);
                     keys.push(self.pop_stack_as::<String>()?);
                 }
-                let map: HashMap<String, IQLValue> =
+                let map: HashMap<String, HogValue> =
                     HashMap::from_iter(keys.into_iter().zip(values));
-                let obj = IQLLiteral::Object(map);
+                let obj = HogLiteral::Object(map);
                 // For the non-primitive types below (objects, arrays, "tuples"), we /always/ heap allocate them. The reason
                 // is that the pattern for e.g. nestedly setting an array value is to GetLocal followed by GetProperty, followed
-                // by a SetProperty. If the array is "flat", as in, element 3 is an IQLLiteral rather than Value, that SetProperty
+                // by a SetProperty. If the array is "flat", as in, element 3 is an HogLiteral rather than Value, that SetProperty
                 // will do nothing, because there's nowhere to write the new value /to/ (as the stack copy of the literal array would be
                 // immediately dropped). We assert in SetProperty that the target is a reference, in order to prevent this surprising no-op
                 // behaviour, but that means we have to either always heap-allocate our indexable values, or hoist in GetProperty. I've decided
@@ -407,7 +407,7 @@ impl<'a> ScriptVM<'a> {
                 }
                 // We've walked back down the stack, but the compiler expects the array to be in pushed order
                 elements.reverse();
-                let array = IQLLiteral::Array(elements);
+                let array = HogLiteral::Array(elements);
                 // See above
                 let ptr = self.heap.emplace(array)?;
                 self.push_stack(ptr)?;
@@ -422,7 +422,7 @@ impl<'a> ScriptVM<'a> {
                 }
                 // We've walked back down the stack, but the compiler expects the "tuple" to be in pushed order
                 elements.reverse();
-                let tuple = IQLLiteral::Array(elements);
+                let tuple = HogLiteral::Array(elements);
                 // See above
                 let ptr = self.heap.emplace(tuple)?;
                 self.push_stack(ptr)?;
@@ -443,7 +443,7 @@ impl<'a> ScriptVM<'a> {
                 let res = haystack
                     .get_nested(&chain, &self.heap)?
                     .cloned()
-                    .unwrap_or(IQLLiteral::Null.into());
+                    .unwrap_or(HogLiteral::Null.into());
                 self.push_stack(res)?;
             }
             Operation::SetProperty => {
@@ -456,14 +456,14 @@ impl<'a> ScriptVM<'a> {
 
                 // Location to set it at in the target - this could be a literal or a reference, but
                 // it doesn't matter which it is, we deref anyway as only literals can be object keys
-                let key: IQLLiteral = self.pop_stack_as()?;
+                let key: HogLiteral = self.pop_stack_as()?;
 
                 // This can be either a literal or a reference. If it's a reference, we have to deref_mut it
                 // from the head, so we can modify it
                 let mut target = self.pop_stack()?;
                 let target = match &mut target {
-                    IQLValue::Ref(ptr) => self.heap.get_mut(*ptr)?,
-                    IQLValue::Lit(_) => {
+                    HogValue::Ref(ptr) => self.heap.get_mut(*ptr)?,
+                    HogValue::Lit(_) => {
                         // TODO - this is a divergence from the original implementation - basically, if the target you've specified isn't on the heap,
                         // we'll drop it immediately after setting the property, which is a no-op. This should never happen - we should be using GET_LOCAL
                         // to hoist properties onto the heap before calling SET_PROPERTY, I /think/, but I'm not certain. I might end up making all
@@ -508,21 +508,21 @@ impl<'a> ScriptVM<'a> {
             }
             Operation::Throw => {
                 let exception = self.pop_stack()?;
-                let type_key: IQLValue = IQLLiteral::from("type".to_string()).into();
+                let type_key: HogValue = HogLiteral::from("type".to_string()).into();
                 let _type = exception.get_nested(&[type_key], &self.heap)?;
-                let message_key = IQLLiteral::from("message".to_string()).into();
+                let message_key = HogLiteral::from("message".to_string()).into();
                 let message = exception.get_nested(&[message_key], &self.heap)?;
                 // The other impls here have some special case handling that treats "Error" as a distinct type, but
-                // as far as I can tell, a "iql error" is just an IQLValue::Object with some specific properties, so
+                // as far as I can tell, a "iql error" is just an HogValue::Object with some specific properties, so
                 // I'll just check those exist. iql is mostly duck-typed, based on the existing impls
                 if _type.is_none() || message.is_none() {
                     return Err(VmError::InvalidException);
                 };
 
                 let Some(frame) = self.throw_frames.pop() else {
-                    // TODO - we need some helper that'll deeply clone an IQLValue::Object and product a HashMap<String, IQLLiteral>, since
+                    // TODO - we need some helper that'll deeply clone an HogValue::Object and product a HashMap<String, HogLiteral>, since
                     // this is escaping the VM, so heap references can't leak.
-                    // let payload_key = IQLLiteral::from("payload".to_string()).into();
+                    // let payload_key = HogLiteral::from("payload".to_string()).into();
                     // let payload = exception.get_nested(&[payload_key], &self.heap)?;
                     let _type: &str = _type.unwrap().deref(&self.heap)?.try_as()?;
                     let _message: &str = message.unwrap().deref(&self.heap)?.try_as()?;
@@ -552,7 +552,7 @@ impl<'a> ScriptVM<'a> {
                     symbol: self.current_symbol.clone(), // Cross-module jumps are currently only done via CallGlobal
                 }
                 .into();
-                self.push_stack(IQLLiteral::Callable(callable))?;
+                self.push_stack(HogLiteral::Callable(callable))?;
                 self.ip = self
                     .ip
                     .checked_add(body_length)
@@ -591,7 +591,7 @@ impl<'a> ScriptVM<'a> {
                 }
 
                 let closure = Closure { callable, captures };
-                self.push_stack(IQLLiteral::Closure(closure))?;
+                self.push_stack(HogLiteral::Closure(closure))?;
             }
             Operation::CallLocal => {
                 let closure: Closure = self.pop_stack_as()?;
@@ -608,7 +608,7 @@ impl<'a> ScriptVM<'a> {
                 // then construct the stack frame, and jump to the callable's frame ip. For other kinds of calls (which we don't support yet),
                 // we'll have to do something more complicated
                 for _ in 0..null_args {
-                    self.push_stack(IQLLiteral::Null)?;
+                    self.push_stack(HogLiteral::Null)?;
                 }
                 let frame = CallFrame {
                     ret_ptr: self.ip,
@@ -634,7 +634,7 @@ impl<'a> ScriptVM<'a> {
                 let val = self.pop_stack()?;
                 let new_size = val.size();
                 match val {
-                    IQLValue::Lit(iql_literal) => {
+                    HogValue::Lit(iql_literal) => {
                         let target = self.heap.get_mut(ptr)?;
                         let old_size = target.size();
                         *target = iql_literal;
@@ -645,7 +645,7 @@ impl<'a> ScriptVM<'a> {
                             .saturating_sub(old_size)
                             .saturating_add(new_size)
                     }
-                    IQLValue::Ref(heap_reference) => self.set_capture(index, heap_reference)?,
+                    HogValue::Ref(heap_reference) => self.set_capture(index, heap_reference)?,
                 }
             }
             Operation::CloseUpvalue => {
@@ -706,7 +706,7 @@ impl<'a> ScriptVM<'a> {
             .map_err(|_| VmError::InvalidValue(next_type_name, expected.to_string()))
     }
 
-    fn pop_stack(&mut self) -> Result<IQLValue, VmError> {
+    fn pop_stack(&mut self) -> Result<HogValue, VmError> {
         if self.stack.len() <= self.current_frame_base() {
             return Err(VmError::StackUnderflow);
         }
@@ -717,10 +717,10 @@ impl<'a> ScriptVM<'a> {
     // if the stack item was a reference.
     fn pop_stack_as<T>(&mut self) -> Result<T, VmError>
     where
-        T: FromIQLLiteral,
+        T: FromHogLiteral,
     {
         match self.pop_stack()? {
-            IQLValue::Lit(lit) => lit.try_into(), // Purely an optimisation to skip a clone
+            HogValue::Lit(lit) => lit.try_into(), // Purely an optimisation to skip a clone
             other => other.deref(&self.heap)?.clone().try_into(),
         }
     }
@@ -730,16 +730,16 @@ impl<'a> ScriptVM<'a> {
     fn hoist(&mut self, idx: usize) -> Result<HeapReference, VmError> {
         let item = self.clone_stack_item(idx)?;
         match item {
-            IQLValue::Lit(lit) => {
+            HogValue::Lit(lit) => {
                 let ptr = self.heap.emplace(lit)?;
                 self.set_stack_val(idx, ptr)?;
                 Ok(ptr)
             }
-            IQLValue::Ref(ptr) => Ok(ptr),
+            HogValue::Ref(ptr) => Ok(ptr),
         }
     }
 
-    fn set_stack_val(&mut self, idx: usize, value: impl Into<IQLValue>) -> Result<(), VmError> {
+    fn set_stack_val(&mut self, idx: usize, value: impl Into<HogValue>) -> Result<(), VmError> {
         // TODO - revisit this, idk about it
         self.stack
             .get_mut(idx)
@@ -755,7 +755,7 @@ impl<'a> ScriptVM<'a> {
         Ok(())
     }
 
-    pub(crate) fn push_stack(&mut self, value: impl Into<IQLValue>) -> Result<(), VmError> {
+    pub(crate) fn push_stack(&mut self, value: impl Into<HogValue>) -> Result<(), VmError> {
         if self.stack.len() >= self.context.max_stack_depth {
             return Err(VmError::StackOverflow);
         }
@@ -765,15 +765,15 @@ impl<'a> ScriptVM<'a> {
 
     // TODO - we don't support function imports right now - most trivial programs don't need them,
     // and filters are generally trivial
-    fn get_fn_reference(&self, _chain: &[IQLValue]) -> Result<IQLLiteral, VmError> {
+    fn get_fn_reference(&self, _chain: &[HogValue]) -> Result<HogLiteral, VmError> {
         Err(VmError::NotImplemented("imports".to_string()))
     }
 
-    fn clone_stack_item(&self, idx: usize) -> Result<IQLValue, VmError> {
+    fn clone_stack_item(&self, idx: usize) -> Result<HogValue, VmError> {
         self.stack.get(idx).cloned().ok_or(VmError::StackUnderflow)
     }
 
-    fn prep_native_call(&self, name: String, args: Vec<IQLValue>) -> StepOutcome {
+    fn prep_native_call(&self, name: String, args: Vec<HogValue>) -> StepOutcome {
         StepOutcome::NativeCall(name, args)
     }
 
@@ -794,7 +794,7 @@ impl<'a> ScriptVM<'a> {
         }
         let null_args = to_call.arg_count().saturating_sub(arg_count);
         for _ in 0..null_args {
-            self.push_stack(IQLLiteral::Null)?;
+            self.push_stack(HogLiteral::Null)?;
         }
         let frame = CallFrame {
             ret_ptr: self.ip,
@@ -811,7 +811,7 @@ impl<'a> ScriptVM<'a> {
     }
 
     // Construct a iql value from a Json object. If the json object would be heap allocated
-    // as an IQLValue (e.g. if it's an array or object), then it will be allocated onto the heap,
+    // as an HogValue (e.g. if it's an array or object), then it will be allocated onto the heap,
     // and a reference will be returned. Nested json objects are flattened during allocation,
     // such that e.g. [[1,2],[3,4]] would lead to an array of [HeapReference, HeapReference] being
     // put into the heap, and a HeapReference being returned.
@@ -819,11 +819,11 @@ impl<'a> ScriptVM<'a> {
     // This is a function on the VM, rather than being standalone, because iql values don't really
     // exist outside of the context of a VM (and specifically a heap). It could be a function on the
     // heap itself, though.
-    pub fn json_to_iql(&mut self, json: JsonValue) -> Result<IQLValue, VmError> {
+    pub fn json_to_iql(&mut self, json: JsonValue) -> Result<HogValue, VmError> {
         self.json_to_iql_impl(json, 0)
     }
 
-    fn json_to_iql_impl(&mut self, current: JsonValue, depth: usize) -> Result<IQLValue, VmError> {
+    fn json_to_iql_impl(&mut self, current: JsonValue, depth: usize) -> Result<HogValue, VmError> {
         if depth > MAX_JSON_SERDE_DEPTH {
             return Err(VmError::OutOfResource(
                 "json->iql deserialization depth".to_string(),
@@ -831,16 +831,16 @@ impl<'a> ScriptVM<'a> {
         };
 
         match current {
-            JsonValue::Null => Ok(IQLLiteral::Null.into()),
-            JsonValue::Bool(b) => Ok(IQLLiteral::Boolean(b).into()),
-            JsonValue::Number(n) => Ok(IQLLiteral::Number(n.into()).into()),
-            JsonValue::String(s) => Ok(IQLLiteral::String(s).into()),
+            JsonValue::Null => Ok(HogLiteral::Null.into()),
+            JsonValue::Bool(b) => Ok(HogLiteral::Boolean(b).into()),
+            JsonValue::Number(n) => Ok(HogLiteral::Number(n.into()).into()),
+            JsonValue::String(s) => Ok(HogLiteral::String(s).into()),
             JsonValue::Array(arr) => {
                 let mut values = Vec::new();
                 for value in arr {
                     values.push(self.json_to_iql_impl(value, depth + 1)?);
                 }
-                let to_emplace = IQLLiteral::Array(values);
+                let to_emplace = HogLiteral::Array(values);
                 let ptr = self.heap.emplace(to_emplace)?;
                 Ok(ptr.into())
             }
@@ -849,20 +849,20 @@ impl<'a> ScriptVM<'a> {
                 for (key, value) in obj {
                     map.insert(key, self.json_to_iql_impl(value, depth + 1)?);
                 }
-                let to_emplace = IQLLiteral::Object(map);
+                let to_emplace = HogLiteral::Object(map);
                 let ptr = self.heap.emplace(to_emplace)?;
                 Ok(ptr.into())
             }
         }
     }
 
-    // Convert back from an arbitrary IQLValue to a json Value. Again, this function exists on
-    // the VM, because IQLValues don't really exist in any other context.
-    pub fn iql_to_json(&self, value: &IQLValue) -> Result<JsonValue, VmError> {
+    // Convert back from an arbitrary HogValue to a json Value. Again, this function exists on
+    // the VM, because HogValues don't really exist in any other context.
+    pub fn iql_to_json(&self, value: &HogValue) -> Result<JsonValue, VmError> {
         self.iql_to_json_impl(value, 0)
     }
 
-    fn iql_to_json_impl(&self, value: &IQLValue, depth: usize) -> Result<JsonValue, VmError> {
+    fn iql_to_json_impl(&self, value: &HogValue, depth: usize) -> Result<JsonValue, VmError> {
         if depth > MAX_JSON_SERDE_DEPTH {
             return Err(VmError::OutOfResource(
                 "fn->json serialization depth".to_string(),
@@ -871,28 +871,28 @@ impl<'a> ScriptVM<'a> {
 
         let val = value.deref(&self.heap)?;
         match val {
-            IQLLiteral::Null => Ok(JsonValue::Null),
-            IQLLiteral::Boolean(b) => Ok(JsonValue::Bool(*b)),
-            IQLLiteral::Number(n) => Ok(JsonValue::Number(n.clone().try_into()?)),
-            IQLLiteral::String(s) => Ok(JsonValue::String(s.clone())),
-            IQLLiteral::Array(arr) => {
+            HogLiteral::Null => Ok(JsonValue::Null),
+            HogLiteral::Boolean(b) => Ok(JsonValue::Bool(*b)),
+            HogLiteral::Number(n) => Ok(JsonValue::Number(n.clone().try_into()?)),
+            HogLiteral::String(s) => Ok(JsonValue::String(s.clone())),
+            HogLiteral::Array(arr) => {
                 let mut json_arr = Vec::new();
                 for elem in arr {
                     json_arr.push(self.iql_to_json_impl(elem, depth + 1)?);
                 }
                 Ok(JsonValue::Array(json_arr))
             }
-            IQLLiteral::Object(obj) => {
+            HogLiteral::Object(obj) => {
                 let mut map = serde_json::Map::new();
                 for (key, value) in obj {
                     map.insert(key.clone(), self.iql_to_json_impl(value, depth + 1)?);
                 }
                 Ok(JsonValue::Object(map))
             }
-            IQLLiteral::Callable(_) => Err(VmError::NotImplemented(
+            HogLiteral::Callable(_) => Err(VmError::NotImplemented(
                 "Callable serialisation".to_string(),
             )),
-            IQLLiteral::Closure(_) => {
+            HogLiteral::Closure(_) => {
                 Err(VmError::NotImplemented("Closure serialisation".to_string()))
             }
         }
