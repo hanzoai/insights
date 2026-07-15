@@ -62,6 +62,9 @@ pub struct Config {
     #[envconfig(default = "127.0.0.1:3000")]
     pub address: SocketAddr,
 
+    // Hanzo KV backs capture's rate-limits/restrictions. Config surface is KV_URL
+    // (never REDIS_URL); the kv:// scheme is normalized to the RESP wire in main().
+    #[envconfig(from = "KV_URL")]
     pub redis_url: String,
 
     #[envconfig(default = "100")]
@@ -89,6 +92,7 @@ pub struct Config {
     /// Optional dedicated Redis URL for global rate limiter.
     /// If set, creates a separate Redis client for the limiter.
     /// Falls back to the shared redis_url if unset.
+    #[envconfig(from = "GLOBAL_RATE_LIMIT_KV_URL")]
     pub global_rate_limit_redis_url: Option<String>,
 
     /// Response timeout for dedicated global rate limiter Redis (milliseconds).
@@ -103,7 +107,8 @@ pub struct Config {
     #[envconfig(default = "false")]
     pub event_restrictions_enabled: bool,
 
-    /// Redis URL for event restrictions (separate from main redis_url)
+    /// KV URL for event restrictions (separate from main redis_url)
+    #[envconfig(from = "EVENT_RESTRICTIONS_KV_URL")]
     pub event_restrictions_redis_url: Option<String>,
 
     #[envconfig(default = "30")]
