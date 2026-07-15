@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE insights_errortrackingsymbolset SET last_used = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "42e0d5591c2a146a9c3004e002fe56b91393114d18bed439bc9002b22f477e3f"
+}
