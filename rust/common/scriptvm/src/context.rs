@@ -174,8 +174,8 @@ impl std::fmt::Display for Symbol {
     }
 }
 
-/// Walk an IQLValue and its children recursively to ensure all indexable types (arrays and objects) are heap allocated,
-/// and then return the now-properly-allocated value. This is useful if, for example, you've constructed an IQLValue
+/// Walk an HogValue and its children recursively to ensure all indexable types (arrays and objects) are heap allocated,
+/// and then return the now-properly-allocated value. This is useful if, for example, you've constructed an HogValue
 /// from a JSON object without mutable access to a VM's heap, and now need to push it into the VM's memory space for the
 /// program to use.
 ///
