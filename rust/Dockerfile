@@ -46,15 +46,20 @@ RUN --mount=type=secret,id=SCCACHE_WEBDAV_ENDPOINT,required=false \
 
 FROM debian:bookworm-slim AS runtime
 
+# GeoIP City DB via the free DB-IP City Lite source (same as the Django image);
+# mmdbcdn.insights.hanzo.ai is retired. Download to a file so a fetch error
+# fails the build instead of yielding a truncated mmdb.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libssl-dev "ca-certificates" \
     "curl" \
-    "brotli" \
+    "gzip" \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.insights.hanzo.ai/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
+    DBIP_MONTH=$(date +%Y-%m) && \
+    curl -fsS -L "https://download.db-ip.com/free/dbip-city-lite-${DBIP_MONTH}.mmdb.gz" -o ./share/GeoLite2-City.mmdb.gz && \
+    gunzip ./share/GeoLite2-City.mmdb.gz && \
     chmod -R 755 ./share/GeoLite2-City.mmdb && \
     mkdir -p /app/share && \
     mv ./share/GeoLite2-City.mmdb /app/share/ && \
