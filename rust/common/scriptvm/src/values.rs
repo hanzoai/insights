@@ -81,7 +81,7 @@ impl HogValue {
         literal.type_name()
     }
 
-    pub fn deref<'a, 'b: 'a>(&'a self, heap: &'b VmHeap) -> Result<&'an IQLLiteral, VmError> {
+    pub fn deref<'a, 'b: 'a>(&'a self, heap: &'b VmHeap) -> Result<&'a HogLiteral, VmError> {
         match self {
             HogValue::Lit(lit) => Ok(lit),
             HogValue::Ref(ptr) => heap.get(*ptr),
@@ -93,7 +93,7 @@ impl HogValue {
         &'a self,
         chain: &[HogValue],
         heap: &'b VmHeap,
-    ) -> Result<Option<&'an IQLValue>, VmError> {
+    ) -> Result<Option<&'a HogValue>, VmError> {
         if chain.is_empty() {
             return Ok(Some(self));
         }
