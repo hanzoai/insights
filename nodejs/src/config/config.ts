@@ -413,6 +413,13 @@ export function overrideWithEnv(
     }
     const newConfig: PluginsServerConfig = { ...tmpConfig }
 
+    // Hanzo KV is the canonical shared RESP backend. `KV_URL` (kv:// / kvs://) is the
+    // ONLY env surface — there is no REDIS_URL env surface. Normalize it to the RESP
+    // wire so every pool, including the cross-pod pub/sub pool, speaks to Hanzo KV.
+    if (env.KV_URL) {
+        newConfig.REDIS_URL = env.KV_URL.replace(/^kv:\/\//, 'redis://').replace(/^kvs:\/\//, 'rediss://')
+    }
+
     if (!newConfig.DATABASE_URL && !newConfig.INSIGHTS_DB_NAME) {
         throw Error(
             'You must specify either DATABASE_URL or the database options INSIGHTS_DB_NAME, INSIGHTS_DB_USER, INSIGHTS_DB_PASSWORD, INSIGHTS_POSTGRES_HOST, INSIGHTS_POSTGRES_PORT!'
