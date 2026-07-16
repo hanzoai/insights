@@ -54,7 +54,7 @@ pub struct CaptureQuotaLimiter {
     capture_mode: CaptureMode,
 
     redis_timeout: Duration,
-    redis_key_prefix: Option<String>,
+    kv_key_prefix: Option<String>,
     redis_client: Arc<dyn Client + Send + Sync>,
 
     // these are scoped to a specific event subset (e.g. survey events, AI events, etc.)
@@ -81,7 +81,7 @@ impl CaptureQuotaLimiter {
             redis_timeout,
             redis_client.clone(),
             QUOTA_LIMITER_CACHE_KEY.to_string(),
-            config.redis_key_prefix.clone(),
+            config.kv_key_prefix.clone(),
             Self::get_resource_for_mode(config.capture_mode),
             ServiceName::Capture,
         )
@@ -90,7 +90,7 @@ impl CaptureQuotaLimiter {
         Self {
             capture_mode: config.capture_mode,
             redis_timeout,
-            redis_key_prefix: config.redis_key_prefix.clone(),
+            kv_key_prefix: config.kv_key_prefix.clone(),
             redis_client: redis_client.clone(),
             global_limiter,
             scoped_limiters: vec![],
@@ -108,7 +108,7 @@ impl CaptureQuotaLimiter {
                 self.redis_timeout,
                 self.redis_client.clone(),
                 QUOTA_LIMITER_CACHE_KEY.to_string(),
-                self.redis_key_prefix.clone(),
+                self.kv_key_prefix.clone(),
                 resource.clone(),
                 ServiceName::Capture,
             )

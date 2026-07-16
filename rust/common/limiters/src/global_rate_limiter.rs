@@ -71,7 +71,7 @@ pub struct GlobalRateLimiterConfig {
     /// The interval over which a key will be rate limited if it exceeds the threshold
     pub rate_limit_interval: Duration,
     /// Redis key prefix (not including final separator)
-    pub redis_key_prefix: String,
+    pub kv_key_prefix: String,
     /// How long to cache globally before refreshing from Redis
     pub global_cache_ttl: Duration,
     /// How long to cache locally before refreshing from Redis
@@ -102,7 +102,7 @@ impl Default for GlobalRateLimiterConfig {
             window_interval: Duration::from_secs(60),
             bucket_interval: Duration::from_secs(10),
             rate_limit_interval: Duration::from_secs(60),
-            redis_key_prefix: "@hanzo/global_rate_limiter".to_string(),
+            kv_key_prefix: "@hanzo/global_rate_limiter".to_string(),
             // 10 minutes - long enough to benefit from hot cache under high cardinality
             local_cache_ttl: Duration::from_secs(600),
             // long enough to avoid stale Redis entries piling up
@@ -195,7 +195,7 @@ impl ReadWindowParams {
             .map(|i| {
                 format!(
                     "{}:{}:{}",
-                    config.redis_key_prefix,
+                    config.kv_key_prefix,
                     key,
                     current_bucket - (i as i64 * bucket_secs)
                 )
@@ -627,7 +627,7 @@ impl GlobalRateLimiterImpl {
         let mut partitions: Vec<Vec<(String, i64)>> = vec![Vec::new(); redis_instances.len()];
         for ((key, bucket_id), count) in aggregated {
             let (_, idx) = select_redis_client(&key, redis_instances);
-            let redis_key = format!("{}:{}:{}", config.redis_key_prefix, key, bucket_id);
+            let redis_key = format!("{}:{}:{}", config.kv_key_prefix, key, bucket_id);
             partitions[idx].push((redis_key, count as i64));
         }
 
@@ -705,7 +705,7 @@ mod tests {
             window_interval: Duration::from_secs(60),
             bucket_interval: Duration::from_secs(10),
             rate_limit_interval: Duration::from_secs(60),
-            redis_key_prefix: "test:".to_string(),
+            kv_key_prefix: "test:".to_string(),
             global_cache_ttl: Duration::from_secs(300),
             local_cache_ttl: Duration::from_secs(1),
             local_cache_max_entries: 100,
@@ -1024,7 +1024,7 @@ mod tests {
         assert_eq!(config.global_threshold, 100_000);
         assert_eq!(config.window_interval, Duration::from_secs(60));
         assert_eq!(config.bucket_interval, Duration::from_secs(10));
-        assert_eq!(config.redis_key_prefix, "@hanzo/global_rate_limiter");
+        assert_eq!(config.kv_key_prefix, "@hanzo/global_rate_limiter");
         assert_eq!(config.global_cache_ttl, Duration::from_secs(300));
         assert_eq!(config.local_cache_ttl, Duration::from_secs(600));
         assert_eq!(config.global_read_timeout, Duration::from_millis(10));

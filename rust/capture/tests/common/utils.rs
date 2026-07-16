@@ -35,18 +35,18 @@ use limiters::redis::{QuotaResource, OVERFLOW_LIMITER_CACHE_KEY, QUOTA_LIMITER_C
 pub static DEFAULT_CONFIG: Lazy<Config> = Lazy::new(|| Config {
     print_sink: false,
     address: SocketAddr::from_str("127.0.0.1:0").unwrap(),
-    redis_url: "redis://localhost:6379/".to_string(),
-    redis_response_timeout_ms: 100,
-    redis_connection_timeout_ms: 5000,
+    kv_url: "redis://localhost:6379/".to_string(),
+    kv_response_timeout_ms: 100,
+    kv_connection_timeout_ms: 5000,
     global_rate_limit_enabled: false,
     global_rate_limit_threshold: 10_000,
     global_rate_limit_window_interval_secs: 60,
     global_rate_limit_overrides_csv: None,
-    global_rate_limit_redis_url: None,
-    global_rate_limit_redis_response_timeout_ms: None,
-    global_rate_limit_redis_connection_timeout_ms: None,
+    global_rate_limit_kv_url: None,
+    global_rate_limit_kv_response_timeout_ms: None,
+    global_rate_limit_kv_connection_timeout_ms: None,
     event_restrictions_enabled: false,
-    event_restrictions_redis_url: None,
+    event_restrictions_kv_url: None,
     event_restrictions_refresh_interval_secs: 30,
     event_restrictions_fail_open_after_secs: 300,
     overflow_enabled: false,
@@ -92,7 +92,7 @@ pub static DEFAULT_CONFIG: Lazy<Config> = Lazy::new(|| Config {
     otel_sampling_rate: 0.0,
     otel_service_name: "capture-testing".to_string(),
     export_prometheus: false,
-    redis_key_prefix: None,
+    kv_key_prefix: None,
     capture_mode: CaptureMode::Events,
     concurrency_limit: None,
     s3_fallback_enabled: false,
@@ -466,7 +466,7 @@ impl PrefixedRedis {
     pub async fn new() -> Self {
         Self {
             key_prefix: random_string("test", 8) + "/",
-            client: Client::open(DEFAULT_CONFIG.redis_url.clone())
+            client: Client::open(DEFAULT_CONFIG.kv_url.clone())
                 .expect("failed to create redis client"),
         }
     }
