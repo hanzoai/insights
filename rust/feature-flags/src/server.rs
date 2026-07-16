@@ -26,7 +26,7 @@ where
     F: Future<Output = ()> + Send + 'static,
 {
     // Configure compression based on environment variable
-    let compression_config = if *config.redis_compression_enabled {
+    let compression_config = if *config.kv_compression_enabled {
         let config = CompressionConfig::default();
         tracing::info!(
             "Redis compression enabled (threshold: {} bytes)",
@@ -43,12 +43,12 @@ where
     // Automatically routes reads to replica and writes to primary
     let Some(redis_client) = create_readwrite_client(
         config.get_redis_writer_url(),
-        config.get_redis_reader_url(),
+        config.get_kv_reader_url(),
         "shared",
         compression_config.clone(),
-        config.redis_response_timeout_ms,
-        config.redis_connection_timeout_ms,
-        config.redis_client_retry_count,
+        config.kv_response_timeout_ms,
+        config.kv_connection_timeout_ms,
+        config.kv_client_retry_count,
     )
     .await
     else {
@@ -62,7 +62,7 @@ where
     // Log the cache migration mode based on configuration
     let cache_mode = match (
         dedicated_redis_client.is_some(),
-        *config.flags_redis_enabled,
+        *config.flags_kv_enabled,
     ) {
         (false, _) => "Mode 1 (Shared-only): All caches use shared Redis",
         (true, false) => {
@@ -165,9 +165,9 @@ where
         &config.get_redis_cookieless_url(),
         "cookieless",
         compression_config.clone(),
-        config.redis_response_timeout_ms,
-        config.redis_connection_timeout_ms,
-        config.redis_client_retry_count,
+        config.kv_response_timeout_ms,
+        config.kv_connection_timeout_ms,
+        config.kv_client_retry_count,
     )
     .await
     else {
@@ -429,8 +429,8 @@ async fn create_readwrite_client(
 /// Create dedicated ReadWriteClient for flags cache with graceful fallback
 ///
 /// Implements fallback strategy:
-/// 1. FLAGS_REDIS_READER_URL is not set → use FLAGS_REDIS_URL for both reads and writes
-/// 2. FLAGS_REDIS_URL is not set → return None (use shared Redis)
+/// 1. FLAGS_KV_READER_URL is not set → use FLAGS_KV_URL for both reads and writes
+/// 2. FLAGS_KV_URL is not set → return None (use shared Redis)
 ///
 /// Returns: Optional ReadWriteClient
 async fn create_dedicated_readwrite_client(
@@ -438,7 +438,7 @@ async fn create_dedicated_readwrite_client(
     compression_config: CompressionConfig,
 ) -> Option<Arc<dyn Client + Send + Sync>> {
     let writer_url = config.get_flags_redis_writer_url();
-    let reader_url = config.get_flags_redis_reader_url();
+    let reader_url = config.get_flags_kv_reader_url();
 
     match (writer_url, reader_url) {
         (Some(w_url), Some(r_url)) => {
@@ -450,9 +450,9 @@ async fn create_dedicated_readwrite_client(
                 r_url,
                 "dedicated flags",
                 compression_config,
-                config.redis_response_timeout_ms,
-                config.redis_connection_timeout_ms,
-                config.redis_client_retry_count,
+                config.kv_response_timeout_ms,
+                config.kv_connection_timeout_ms,
+                config.kv_client_retry_count,
             )
             .await
         }
@@ -463,15 +463,15 @@ async fn create_dedicated_readwrite_client(
                 w_url,
                 "dedicated flags",
                 compression_config,
-                config.redis_response_timeout_ms,
-                config.redis_connection_timeout_ms,
-                config.redis_client_retry_count,
+                config.kv_response_timeout_ms,
+                config.kv_connection_timeout_ms,
+                config.kv_client_retry_count,
             )
             .await
         }
         (None, Some(_)) => {
             tracing::warn!(
-                "FLAGS_REDIS_READER_URL set but FLAGS_REDIS_URL not set. \
+                "FLAGS_KV_READER_URL set but FLAGS_KV_URL not set. \
                  Cannot use reader without writer. Falling back to shared Redis."
             );
             None
@@ -588,11 +588,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_dedicated_readwrite_client_no_config() {
-        // When FLAGS_REDIS_URL is not set, should return None
+        // When FLAGS_KV_URL is not set, should return None
         let config = Config {
-            flags_redis_url: "".to_string(),
-            flags_redis_reader_url: "".to_string(),
-            redis_client_retry_count: 0,
+            flags_kv_url: "".to_string(),
+            flags_kv_reader_url: "".to_string(),
+            kv_client_retry_count: 0,
             ..Config::default_test_config()
         };
 
@@ -604,11 +604,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_dedicated_readwrite_client_with_invalid_url() {
-        // When FLAGS_REDIS_URL is set but unreachable, should return None
+        // When FLAGS_KV_URL is set but unreachable, should return None
         let config = Config {
-            flags_redis_url: "redis://invalid-host:6379/".to_string(),
-            flags_redis_reader_url: "".to_string(),
-            redis_client_retry_count: 0, // No retries for fast test
+            flags_kv_url: "redis://invalid-host:6379/".to_string(),
+            flags_kv_reader_url: "".to_string(),
+            kv_client_retry_count: 0, // No retries for fast test
             ..Config::default_test_config()
         };
 
@@ -620,11 +620,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_dedicated_readwrite_client_reader_without_writer() {
-        // When only FLAGS_REDIS_READER_URL is set (misconfiguration), should return None
+        // When only FLAGS_KV_READER_URL is set (misconfiguration), should return None
         let config = Config {
-            flags_redis_url: "".to_string(),
-            flags_redis_reader_url: "redis://localhost:6379/".to_string(),
-            redis_client_retry_count: 0,
+            flags_kv_url: "".to_string(),
+            flags_kv_reader_url: "redis://localhost:6379/".to_string(),
+            kv_client_retry_count: 0,
             ..Config::default_test_config()
         };
 

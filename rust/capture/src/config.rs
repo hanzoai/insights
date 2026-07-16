@@ -65,13 +65,13 @@ pub struct Config {
     // Hanzo KV backs capture's rate-limits/restrictions. Config surface is KV_URL
     // (never REDIS_URL); the kv:// scheme is normalized to the RESP wire in main().
     #[envconfig(from = "KV_URL")]
-    pub redis_url: String,
+    pub kv_url: String,
 
     #[envconfig(default = "100")]
-    pub redis_response_timeout_ms: u64,
+    pub kv_response_timeout_ms: u64,
 
     #[envconfig(default = "5000")]
-    pub redis_connection_timeout_ms: u64,
+    pub kv_connection_timeout_ms: u64,
 
     #[envconfig(default = "false")]
     pub global_rate_limit_enabled: bool,
@@ -91,25 +91,25 @@ pub struct Config {
 
     /// Optional dedicated Redis URL for global rate limiter.
     /// If set, creates a separate Redis client for the limiter.
-    /// Falls back to the shared redis_url if unset.
+    /// Falls back to the shared kv_url if unset.
     #[envconfig(from = "GLOBAL_RATE_LIMIT_KV_URL")]
-    pub global_rate_limit_redis_url: Option<String>,
+    pub global_rate_limit_kv_url: Option<String>,
 
     /// Response timeout for dedicated global rate limiter Redis (milliseconds).
-    /// Defaults to redis_response_timeout_ms if unset.
-    pub global_rate_limit_redis_response_timeout_ms: Option<u64>,
+    /// Defaults to kv_response_timeout_ms if unset.
+    pub global_rate_limit_kv_response_timeout_ms: Option<u64>,
 
     /// Connection timeout for dedicated global rate limiter Redis (milliseconds).
-    /// Defaults to redis_connection_timeout_ms if unset.
-    pub global_rate_limit_redis_connection_timeout_ms: Option<u64>,
+    /// Defaults to kv_connection_timeout_ms if unset.
+    pub global_rate_limit_kv_connection_timeout_ms: Option<u64>,
 
     // Event restrictions configuration (reads from Redis, synced by Django)
     #[envconfig(default = "false")]
     pub event_restrictions_enabled: bool,
 
-    /// KV URL for event restrictions (separate from main redis_url)
+    /// KV URL for event restrictions (separate from main kv_url)
     #[envconfig(from = "EVENT_RESTRICTIONS_KV_URL")]
-    pub event_restrictions_redis_url: Option<String>,
+    pub event_restrictions_kv_url: Option<String>,
 
     #[envconfig(default = "30")]
     pub event_restrictions_refresh_interval_secs: u64,
@@ -153,7 +153,7 @@ pub struct Config {
     // Used for integration tests
     #[envconfig(default = "true")]
     pub export_prometheus: bool,
-    pub redis_key_prefix: Option<String>,
+    pub kv_key_prefix: Option<String>,
 
     #[envconfig(default = "events")]
     pub capture_mode: CaptureMode,

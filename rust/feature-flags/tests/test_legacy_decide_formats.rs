@@ -19,7 +19,7 @@ async fn test_legacy_decide_v1_format() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -169,7 +169,7 @@ async fn test_legacy_decide_v2_format() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 
@@ -292,7 +292,7 @@ async fn test_decide_header_changes_version_interpretation() -> Result<()> {
     let config = DEFAULT_TEST_CONFIG.clone();
     let distinct_id = "user_distinct_id".to_string();
 
-    let client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(client.clone()).await.unwrap();
     let token = team.api_token.clone();
 

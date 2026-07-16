@@ -192,24 +192,24 @@ pub struct Config {
     pub min_persons_writer_connections: u32,
 
     #[envconfig(default = "redis://localhost:6379/")]
-    pub redis_url: String,
+    pub kv_url: String,
 
     #[envconfig(default = "")]
-    pub redis_reader_url: String,
+    pub kv_reader_url: String,
 
     // Dedicated Redis for feature flags (critical path: team cache + flags cache)
     // When empty, falls back to shared Redis URLs above
     #[envconfig(default = "")]
-    pub flags_redis_url: String,
+    pub flags_kv_url: String,
 
     #[envconfig(default = "")]
-    pub flags_redis_reader_url: String,
+    pub flags_kv_reader_url: String,
 
     // Controls whether to read from dedicated Redis cache
     // false = Mode 2: dual-write to both caches, read from shared (warming phase)
     // true = Mode 3: read and write dedicated Redis only (cutover complete)
     #[envconfig(default = "false")]
-    pub flags_redis_enabled: FlexBool,
+    pub flags_kv_enabled: FlexBool,
 
     // S3 configuration for HyperCache fallback
     #[envconfig(default = "insights")]
@@ -223,10 +223,10 @@ pub struct Config {
 
     // Redis timeout settings (in milliseconds)
     #[envconfig(default = "100")]
-    pub redis_response_timeout_ms: u64,
+    pub kv_response_timeout_ms: u64,
 
     #[envconfig(default = "5000")]
-    pub redis_connection_timeout_ms: u64,
+    pub kv_connection_timeout_ms: u64,
 
     // How long to wait for a connection from the pool before timing out
     // - Increase if seeing "pool timed out" errors under load (e.g., 5-10s)
@@ -354,11 +354,11 @@ pub struct Config {
     #[envconfig(from = "COOKIELESS_SALT_TTL_SECONDS", default = "345600")]
     pub cookieless_salt_ttl_seconds: u64,
 
-    #[envconfig(from = "COOKIELESS_REDIS_HOST", default = "localhost")]
-    pub cookieless_redis_host: String,
+    #[envconfig(from = "COOKIELESS_KV_HOST", default = "localhost")]
+    pub cookieless_kv_host: String,
 
-    #[envconfig(from = "COOKIELESS_REDIS_PORT", default = "6379")]
-    pub cookieless_redis_port: u64,
+    #[envconfig(from = "COOKIELESS_KV_PORT", default = "6379")]
+    pub cookieless_kv_port: u64,
 
     #[envconfig(from = "NEW_ANALYTICS_CAPTURE_ENDPOINT", default = "/i/v0/e/")]
     pub new_analytics_capture_endpoint: String,
@@ -457,14 +457,14 @@ pub struct Config {
     // Redis compression configuration
     // When enabled, uses zstd compression for Redis values above threshold
     // The `default_test_config()` sets this to true for test/development scenarios.
-    #[envconfig(from = "REDIS_COMPRESSION_ENABLED", default = "false")]
-    pub redis_compression_enabled: FlexBool,
+    #[envconfig(from = "KV_COMPRESSION_ENABLED", default = "false")]
+    pub kv_compression_enabled: FlexBool,
 
     // Number of times to retry creating a Redis client before giving up
     // Helps handle transient network issues during startup
     // Set to 0 to disable retries (fail immediately on first error)
-    #[envconfig(from = "REDIS_CLIENT_RETRY_COUNT", default = "3")]
-    pub redis_client_retry_count: u32,
+    #[envconfig(from = "KV_CLIENT_RETRY_COUNT", default = "3")]
+    pub kv_client_retry_count: u32,
 
     // Threshold for parallel flag evaluation
     // Below this count, flags are evaluated sequentially (faster for small counts)
@@ -489,31 +489,31 @@ impl Config {
         // The RedisClient will skip setting the timeout when Duration::ZERO is provided
 
         // Fix excessive values
-        if self.redis_response_timeout_ms > Self::MAX_RESPONSE_TIMEOUT_MS {
+        if self.kv_response_timeout_ms > Self::MAX_RESPONSE_TIMEOUT_MS {
             tracing::warn!(
                 "Redis response timeout ({}ms) exceeds maximum recommended value ({}ms), capping at maximum",
-                self.redis_response_timeout_ms,
+                self.kv_response_timeout_ms,
                 Self::MAX_RESPONSE_TIMEOUT_MS
             );
-            self.redis_response_timeout_ms = Self::MAX_RESPONSE_TIMEOUT_MS;
+            self.kv_response_timeout_ms = Self::MAX_RESPONSE_TIMEOUT_MS;
             fixed = true;
         }
 
-        if self.redis_connection_timeout_ms > Self::MAX_CONNECTION_TIMEOUT_MS {
+        if self.kv_connection_timeout_ms > Self::MAX_CONNECTION_TIMEOUT_MS {
             tracing::warn!(
                 "Redis connection timeout ({}ms) exceeds maximum recommended value ({}ms), capping at maximum",
-                self.redis_connection_timeout_ms,
+                self.kv_connection_timeout_ms,
                 Self::MAX_CONNECTION_TIMEOUT_MS
             );
-            self.redis_connection_timeout_ms = Self::MAX_CONNECTION_TIMEOUT_MS;
+            self.kv_connection_timeout_ms = Self::MAX_CONNECTION_TIMEOUT_MS;
             fixed = true;
         }
 
         if fixed {
             tracing::info!(
                 "Using Redis timeouts: response={}ms, connection={}ms",
-                self.redis_response_timeout_ms,
-                self.redis_connection_timeout_ms
+                self.kv_response_timeout_ms,
+                self.kv_connection_timeout_ms
             );
         }
     }
@@ -522,13 +522,13 @@ impl Config {
         Self {
             continuous_profiling: ContinuousProfilingConfig::default(),
             address: SocketAddr::from_str("127.0.0.1:0").unwrap(),
-            redis_url: "redis://localhost:6379/".to_string(),
-            redis_reader_url: "".to_string(),
-            flags_redis_url: "".to_string(),
-            flags_redis_reader_url: "".to_string(),
-            flags_redis_enabled: FlexBool(false),
-            redis_response_timeout_ms: 100,
-            redis_connection_timeout_ms: 5000,
+            kv_url: "redis://localhost:6379/".to_string(),
+            kv_reader_url: "".to_string(),
+            flags_kv_url: "".to_string(),
+            flags_kv_reader_url: "".to_string(),
+            flags_kv_enabled: FlexBool(false),
+            kv_response_timeout_ms: 100,
+            kv_connection_timeout_ms: 5000,
             write_database_url: "postgres://insights:insights@localhost:5432/test_insights"
                 .to_string(),
             read_database_url: "postgres://insights:insights@localhost:5432/test_insights".to_string(),
@@ -563,8 +563,8 @@ impl Config {
             cookieless_force_stateless: false,
             cookieless_identifies_ttl_seconds: 345600,
             cookieless_salt_ttl_seconds: 345600,
-            cookieless_redis_host: "localhost".to_string(),
-            cookieless_redis_port: 6379,
+            cookieless_kv_host: "localhost".to_string(),
+            cookieless_kv_port: 6379,
             new_analytics_capture_endpoint: "/i/v0/e/".to_string(),
             new_analytics_capture_excluded_team_ids: TeamIdCollection::None,
             element_chain_as_string_excluded_teams: TeamIdCollection::None,
@@ -588,8 +588,8 @@ impl Config {
             flags_rate_limit_log_only: FlexBool(true),
             flags_ip_rate_limit_log_only: FlexBool(true),
             rate_limiter_cleanup_interval_secs: 60,
-            redis_compression_enabled: FlexBool(true),
-            redis_client_retry_count: 3,
+            kv_compression_enabled: FlexBool(true),
+            kv_client_retry_count: 3,
             optimize_experience_continuity_lookups: FlexBool(true),
             parallel_eval_threshold: 100,
         }
@@ -609,25 +609,25 @@ impl Config {
         }
     }
 
-    pub fn get_redis_reader_url(&self) -> &str {
-        if self.redis_reader_url.is_empty() {
-            &self.redis_url
+    pub fn get_kv_reader_url(&self) -> &str {
+        if self.kv_reader_url.is_empty() {
+            &self.kv_url
         } else {
-            &self.redis_reader_url
+            &self.kv_reader_url
         }
     }
 
     pub fn get_redis_writer_url(&self) -> &str {
-        &self.redis_url
+        &self.kv_url
     }
 
     /// Get the Redis URL for flags cache reads (critical path: team cache + flags cache)
     /// Returns None if dedicated flags Redis is not configured
-    pub fn get_flags_redis_reader_url(&self) -> Option<&str> {
-        if !self.flags_redis_reader_url.is_empty() {
-            Some(&self.flags_redis_reader_url)
-        } else if !self.flags_redis_url.is_empty() {
-            Some(&self.flags_redis_url)
+    pub fn get_flags_kv_reader_url(&self) -> Option<&str> {
+        if !self.flags_kv_reader_url.is_empty() {
+            Some(&self.flags_kv_reader_url)
+        } else if !self.flags_kv_url.is_empty() {
+            Some(&self.flags_kv_url)
         } else {
             None
         }
@@ -636,8 +636,8 @@ impl Config {
     /// Get the Redis URL for flags cache writes (critical path: team cache + flags cache)
     /// Returns None if dedicated flags Redis is not configured
     pub fn get_flags_redis_writer_url(&self) -> Option<&str> {
-        if !self.flags_redis_url.is_empty() {
-            Some(&self.flags_redis_url)
+        if !self.flags_kv_url.is_empty() {
+            Some(&self.flags_kv_url)
         } else {
             None
         }
@@ -646,7 +646,7 @@ impl Config {
     pub fn get_redis_cookieless_url(&self) -> String {
         format!(
             "redis://{}:{}",
-            self.cookieless_redis_host, self.cookieless_redis_port
+            self.cookieless_kv_host, self.cookieless_kv_port
         )
     }
 
@@ -719,7 +719,7 @@ mod tests {
         assert_eq!(config.min_non_persons_writer_connections, 0);
         assert_eq!(config.min_persons_reader_connections, 0);
         assert_eq!(config.min_persons_writer_connections, 0);
-        assert_eq!(config.redis_url, "redis://localhost:6379/");
+        assert_eq!(config.kv_url, "redis://localhost:6379/");
         assert_eq!(config.team_ids_to_track, TeamIdCollection::All);
         assert_eq!(
             config.new_analytics_capture_excluded_team_ids,
@@ -752,7 +752,7 @@ mod tests {
         assert_eq!(config.min_non_persons_writer_connections, 0);
         assert_eq!(config.min_persons_reader_connections, 0);
         assert_eq!(config.min_persons_writer_connections, 0);
-        assert_eq!(config.redis_url, "redis://localhost:6379/");
+        assert_eq!(config.kv_url, "redis://localhost:6379/");
         assert_eq!(config.team_ids_to_track, TeamIdCollection::All);
         assert_eq!(
             config.new_analytics_capture_excluded_team_ids,
@@ -782,7 +782,7 @@ mod tests {
         assert_eq!(config.min_non_persons_writer_connections, 0);
         assert_eq!(config.min_persons_reader_connections, 0);
         assert_eq!(config.min_persons_writer_connections, 0);
-        assert_eq!(config.redis_url, "redis://localhost:6379/");
+        assert_eq!(config.kv_url, "redis://localhost:6379/");
         assert_eq!(config.team_ids_to_track, TeamIdCollection::All);
         assert_eq!(
             config.new_analytics_capture_excluded_team_ids,
@@ -906,35 +906,35 @@ mod tests {
     #[test]
     fn test_validate_and_fix_timeouts_valid_config() {
         let mut config = Config::default_test_config();
-        let original_response = config.redis_response_timeout_ms;
-        let original_connection = config.redis_connection_timeout_ms;
+        let original_response = config.kv_response_timeout_ms;
+        let original_connection = config.kv_connection_timeout_ms;
         config.validate_and_fix_timeouts();
         // Should not change valid config
-        assert_eq!(config.redis_response_timeout_ms, original_response);
-        assert_eq!(config.redis_connection_timeout_ms, original_connection);
+        assert_eq!(config.kv_response_timeout_ms, original_response);
+        assert_eq!(config.kv_connection_timeout_ms, original_connection);
     }
 
     #[test]
     fn test_validate_and_fix_timeouts_zero_values_allowed() {
         let mut config = Config::default_test_config();
         // Zero values are allowed - they mean "no timeout"
-        config.redis_response_timeout_ms = 0;
-        config.redis_connection_timeout_ms = 0;
+        config.kv_response_timeout_ms = 0;
+        config.kv_connection_timeout_ms = 0;
         config.validate_and_fix_timeouts();
         // Should preserve zero values
-        assert_eq!(config.redis_response_timeout_ms, 0);
-        assert_eq!(config.redis_connection_timeout_ms, 0);
+        assert_eq!(config.kv_response_timeout_ms, 0);
+        assert_eq!(config.kv_connection_timeout_ms, 0);
     }
 
     #[test]
     fn test_validate_and_fix_timeouts_excessive_response_timeout() {
         let mut config = Config::default_test_config();
-        config.redis_response_timeout_ms = 31_000; // > 30 seconds max
-        config.redis_connection_timeout_ms = 40_000; // Allow connection timeout to be higher
+        config.kv_response_timeout_ms = 31_000; // > 30 seconds max
+        config.kv_connection_timeout_ms = 40_000; // Allow connection timeout to be higher
         config.validate_and_fix_timeouts();
         // Should cap at maximum
         assert_eq!(
-            config.redis_response_timeout_ms,
+            config.kv_response_timeout_ms,
             Config::MAX_RESPONSE_TIMEOUT_MS
         );
     }
@@ -942,11 +942,11 @@ mod tests {
     #[test]
     fn test_validate_and_fix_timeouts_excessive_connection_timeout() {
         let mut config = Config::default_test_config();
-        config.redis_connection_timeout_ms = 61_000; // > 60 seconds max
+        config.kv_connection_timeout_ms = 61_000; // > 60 seconds max
         config.validate_and_fix_timeouts();
         // Should cap at maximum
         assert_eq!(
-            config.redis_connection_timeout_ms,
+            config.kv_connection_timeout_ms,
             Config::MAX_CONNECTION_TIMEOUT_MS
         );
     }
@@ -956,25 +956,25 @@ mod tests {
         let mut config = Config::default_test_config();
 
         // Test 1: Equal values are allowed
-        config.redis_response_timeout_ms = 1000;
-        config.redis_connection_timeout_ms = 1000;
+        config.kv_response_timeout_ms = 1000;
+        config.kv_connection_timeout_ms = 1000;
         config.validate_and_fix_timeouts();
-        assert_eq!(config.redis_response_timeout_ms, 1000);
-        assert_eq!(config.redis_connection_timeout_ms, 1000);
+        assert_eq!(config.kv_response_timeout_ms, 1000);
+        assert_eq!(config.kv_connection_timeout_ms, 1000);
 
         // Test 2: Response > Connection is also allowed (no relationship validation)
-        config.redis_response_timeout_ms = 5000;
-        config.redis_connection_timeout_ms = 1000;
+        config.kv_response_timeout_ms = 5000;
+        config.kv_connection_timeout_ms = 1000;
         config.validate_and_fix_timeouts();
-        assert_eq!(config.redis_response_timeout_ms, 5000);
-        assert_eq!(config.redis_connection_timeout_ms, 1000);
+        assert_eq!(config.kv_response_timeout_ms, 5000);
+        assert_eq!(config.kv_connection_timeout_ms, 1000);
 
         // Test 3: Response < Connection is allowed
-        config.redis_response_timeout_ms = 100;
-        config.redis_connection_timeout_ms = 5000;
+        config.kv_response_timeout_ms = 100;
+        config.kv_connection_timeout_ms = 5000;
         config.validate_and_fix_timeouts();
-        assert_eq!(config.redis_response_timeout_ms, 100);
-        assert_eq!(config.redis_connection_timeout_ms, 5000);
+        assert_eq!(config.kv_response_timeout_ms, 100);
+        assert_eq!(config.kv_connection_timeout_ms, 5000);
     }
 
     #[test]
@@ -984,20 +984,20 @@ mod tests {
         let config = Config::default_test_config();
 
         // Verify that config values would translate correctly to Duration
-        let response_timeout = Duration::from_millis(config.redis_response_timeout_ms);
-        let connection_timeout = Duration::from_millis(config.redis_connection_timeout_ms);
+        let response_timeout = Duration::from_millis(config.kv_response_timeout_ms);
+        let connection_timeout = Duration::from_millis(config.kv_connection_timeout_ms);
 
         assert_eq!(response_timeout, Duration::from_millis(100));
         assert_eq!(connection_timeout, Duration::from_millis(5000));
 
         // Verify zero values work (treated as None/no timeout)
         let mut zero_config = Config::default_test_config();
-        zero_config.redis_response_timeout_ms = 0;
-        zero_config.redis_connection_timeout_ms = 0;
+        zero_config.kv_response_timeout_ms = 0;
+        zero_config.kv_connection_timeout_ms = 0;
         zero_config.validate_and_fix_timeouts();
 
-        assert_eq!(zero_config.redis_response_timeout_ms, 0);
-        assert_eq!(zero_config.redis_connection_timeout_ms, 0);
+        assert_eq!(zero_config.kv_response_timeout_ms, 0);
+        assert_eq!(zero_config.kv_connection_timeout_ms, 0);
     }
 }
 
@@ -1059,12 +1059,12 @@ mod timeout_behavior_tests {
 
         // This test requires a running Redis instance
         // Set REDIS_URL environment variable to customize, defaults to localhost
-        let redis_url =
-            std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+        let kv_url =
+            std::env::var("KV_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
 
         // Test 1: Very short timeout should fail quickly with timeout error
         let short_timeout_client = RedisClient::with_config(
-            redis_url.clone(),
+            kv_url.clone(),
             CompressionConfig::disabled(),
             RedisValueFormat::default(),
             Some(Duration::from_millis(1)), // 1ms - too short for any operation
@@ -1093,7 +1093,7 @@ mod timeout_behavior_tests {
 
         // Test 2: Reasonable timeout should allow successful connection
         let normal_client = RedisClient::with_config(
-            redis_url,
+            kv_url,
             CompressionConfig::disabled(),
             RedisValueFormat::default(),
             Some(Duration::from_millis(5000)), // 5 seconds - plenty of time

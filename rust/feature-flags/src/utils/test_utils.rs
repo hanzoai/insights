@@ -120,7 +120,7 @@ pub async fn insert_flags_for_team_in_redis(
 }
 
 pub async fn setup_redis_client(url: Option<String>) -> Arc<dyn RedisClientTrait + Send + Sync> {
-    let redis_url = match url {
+    let kv_url = match url {
         Some(value) => value,
         None => "redis://localhost:6379/".to_string(),
     };
@@ -129,7 +129,7 @@ pub async fn setup_redis_client(url: Option<String>) -> Arc<dyn RedisClientTrait
     const TEST_CONNECTION_TIMEOUT_MS: u64 = 5000; // 5s connection timeout
 
     let client = RedisClient::with_config(
-        redis_url,
+        kv_url,
         common_redis::CompressionConfig::disabled(),
         common_redis::RedisValueFormat::default(),
         Some(Duration::from_millis(TEST_RESPONSE_TIMEOUT_MS)),
@@ -1366,7 +1366,7 @@ impl TestContext {
     /// Simplified helper to populate cache for a team
     /// Handles Redis client setup internally
     pub async fn populate_cache_for_team(&self, team_id: i32) -> Result<(), Error> {
-        let redis_client = setup_redis_client(Some(self.config.redis_url.clone())).await;
+        let redis_client = setup_redis_client(Some(self.config.kv_url.clone())).await;
         self.populate_flag_definitions_cache(redis_client, team_id)
             .await
     }
