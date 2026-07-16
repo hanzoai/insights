@@ -64,7 +64,7 @@ Django app): `insights-capture` (Rust), `insights-plugin` (Node),
 Proven path: `POST https://insights.hanzo.ai/v1/e` → `200` → capture → kafka →
 plugin → ClickHouse `events`.
 
-### Ingest is clean `/v1/*` — NO PostHog `/i/v0` cruft
+### Ingest is clean `/v1/*`
 
 We own capture AND the SDK, so ingest is `/v1/*` like every other Hanzo API.
 The Rust capture router serves exactly (forward-only; the legacy
@@ -118,7 +118,7 @@ Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
 ## Django migrations — squashed to a clean baseline (v1.52.0)
 
 The Postgres/Django migrations were **squashed to a fresh `0001_initial` per app**
-(v1.52.0, `6e3d624ac4`). ~1050 PostHog-era migrations across 21 apps collapsed to
+(v1.52.0, `6e3d624ac4`). ~1050 upstream-era migrations across 21 apps collapsed to
 one initial each — no customers, forward-only. This ended the old
 "never-rewrite-migration-internals / double `insights_insightsfunction` names are
 correct plumbing" era: table names are now clean natively (`insights_function`),
