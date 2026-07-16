@@ -19,15 +19,24 @@ const REDIS_ERROR_COUNTER_LIMIT = 10
  * single place transport is chosen; every call-site is transport-agnostic.
  */
 function useBaseBackend(url: string): boolean {
-    const backend = (process.env.INSIGHTS_REDIS_BACKEND || 'base').toLowerCase()
+    const backend = (process.env.INSIGHTS_REDIS_BACKEND || 'auto').toLowerCase()
     if (backend === 'redis') {
         return false
     }
     if (backend === 'base') {
         return true
     }
-    // 'auto': use Base unless an explicit non-localhost redis URL is given.
-    return !(url.startsWith('redis://') || url.startsWith('rediss://'))
+    // 'auto' (default): speak RESP to a real, shared endpoint — Hanzo KV, configured
+    // via KV_URL and normalized to the redis:// wire. Fall back to the embedded Base
+    // (per-pod SQLite) only for localhost / unconfigured targets, i.e. local dev.
+    // Hanzo KV is the canonical shared backend in the cluster (scalable across pods,
+    // and it serves RESP pub/sub natively); Base cannot fan pub/sub across pods.
+    const target = url || ''
+    const isLocal = target === '' || target.includes('127.0.0.1') || target.includes('localhost')
+    if (!isLocal && (target.startsWith('redis://') || target.startsWith('rediss://'))) {
+        return false
+    }
+    return true
 }
 
 /**
