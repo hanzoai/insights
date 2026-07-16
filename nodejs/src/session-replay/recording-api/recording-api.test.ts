@@ -58,10 +58,10 @@ describe('RecordingApi', () => {
             SESSION_RECORDING_V2_S3_ENDPOINT: undefined,
             SESSION_RECORDING_V2_S3_BUCKET: 'test-bucket',
             SESSION_RECORDING_V2_S3_PREFIX: 'session_recordings',
-            SESSION_RECORDING_API_REDIS_HOST: '127.0.0.1',
-            SESSION_RECORDING_API_REDIS_PORT: 6379,
-            REDIS_POOL_MIN_SIZE: 1,
-            REDIS_POOL_MAX_SIZE: 10,
+            SESSION_RECORDING_API_KV_HOST: '127.0.0.1',
+            SESSION_RECORDING_API_KV_PORT: 6379,
+            KV_POOL_MIN_SIZE: 1,
+            KV_POOL_MAX_SIZE: 10,
             postgres: {} as any,
         }
 

@@ -8,9 +8,9 @@ export type ScriptRateLimiterServiceHub = Pick<
     'CDP_RATE_LIMITER_BUCKET_SIZE' | 'CDP_RATE_LIMITER_REFILL_RATE' | 'CDP_RATE_LIMITER_TTL'
 >
 
-export const BASE_REDIS_KEY =
+export const BASE_KV_KEY =
     process.env.NODE_ENV == 'test' ? '@insights-test/script-rate-limiter' : '@hanzo/script-rate-limiter'
-const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
+const REDIS_KEY_TOKENS = `${BASE_KV_KEY}/tokens`
 
 export type ScriptRateLimit = {
     tokens: number

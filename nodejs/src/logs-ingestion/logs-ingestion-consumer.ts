@@ -28,9 +28,9 @@ export type LogsIngestionConsumerHub = LogsIngestionConsumerConfig &
     Pick<
         Hub,
         // Redis config (common fields not in LogsIngestionConsumerConfig)
-        | 'REDIS_URL'
-        | 'REDIS_POOL_MIN_SIZE'
-        | 'REDIS_POOL_MAX_SIZE'
+        | 'KV_URL'
+        | 'KV_POOL_MIN_SIZE'
+        | 'KV_POOL_MAX_SIZE'
         // StreamProducerWrapper.create
         | 'STREAM_CLIENT_RACK'
         // TeamManager
@@ -133,18 +133,18 @@ export class LogsIngestionConsumer {
         this.streamConsumer = new StreamConsumer({ groupId: this.groupId, topic: this.topic })
         // Logs ingestion uses its own Redis instance with TLS support
         this.redis = createRedisV2PoolFromConfig({
-            connection: hub.LOGS_REDIS_HOST
+            connection: hub.LOGS_KV_HOST
                 ? {
-                      url: hub.LOGS_REDIS_HOST,
+                      url: hub.LOGS_KV_HOST,
                       options: {
-                          port: hub.LOGS_REDIS_PORT,
-                          tls: hub.LOGS_REDIS_TLS ? {} : undefined,
+                          port: hub.LOGS_KV_PORT,
+                          tls: hub.LOGS_KV_TLS ? {} : undefined,
                       },
-                      name: 'logs-redis',
+                      name: 'logs-kv',
                   }
-                : { url: hub.REDIS_URL, name: 'logs-redis-fallback' },
-            poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                : { url: hub.KV_URL, name: 'logs-kv-fallback' },
+            poolMinSize: hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: hub.KV_POOL_MAX_SIZE,
         })
         this.rateLimiter = new LogsRateLimiterService(hub, this.redis)
     }

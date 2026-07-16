@@ -3,7 +3,7 @@ import { Hub } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
 import { deleteKeysWithPrefix } from '../../_tests/redis'
-import { BASE_REDIS_KEY, ScriptRateLimiterService } from './script-rate-limiter.service'
+import { BASE_KV_KEY, ScriptRateLimiterService } from './script-rate-limiter.service'
 
 const mockNow: jest.SpyInstance = jest.spyOn(Date, 'now')
 
@@ -28,16 +28,16 @@ describe('ScriptRateLimiter', () => {
             hub.CDP_RATE_LIMITER_TTL = 60 * 60 * 24
 
             redis = createRedisV2PoolFromConfig({
-                connection: hub.CDP_REDIS_HOST
+                connection: hub.CDP_KV_HOST
                     ? {
-                          url: hub.CDP_REDIS_HOST,
-                          options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
+                          url: hub.CDP_KV_HOST,
+                          options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
 
             rateLimiter = new ScriptRateLimiterService(hub, redis)
         })

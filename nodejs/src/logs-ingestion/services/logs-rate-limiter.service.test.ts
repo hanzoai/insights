@@ -3,7 +3,7 @@ import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { Hub } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
-import { BASE_REDIS_KEY, LogsRateLimiterService } from './logs-rate-limiter.service'
+import { BASE_KV_KEY, LogsRateLimiterService } from './logs-rate-limiter.service'
 
 const mockNow: jest.SpyInstance = jest.spyOn(Date, 'now')
 
@@ -30,16 +30,16 @@ describe('LogsRateLimiterService', () => {
             hub.LOGS_LIMITER_TTL_SECONDS = 60 * 60 * 24
 
             redis = createRedisV2PoolFromConfig({
-                connection: hub.LOGS_REDIS_HOST
+                connection: hub.LOGS_KV_HOST
                     ? {
-                          url: hub.LOGS_REDIS_HOST,
-                          options: { port: hub.LOGS_REDIS_PORT, tls: hub.LOGS_REDIS_TLS ? {} : undefined },
+                          url: hub.LOGS_KV_HOST,
+                          options: { port: hub.LOGS_KV_PORT, tls: hub.LOGS_KV_TLS ? {} : undefined },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
 
             rateLimiter = new LogsRateLimiterService(hub, redis)
         })
@@ -246,16 +246,16 @@ describe('LogsRateLimiterService', () => {
             hub.LOGS_LIMITER_ENABLED_TEAMS = '*'
 
             redis = createRedisV2PoolFromConfig({
-                connection: hub.LOGS_REDIS_HOST
+                connection: hub.LOGS_KV_HOST
                     ? {
-                          url: hub.LOGS_REDIS_HOST,
-                          options: { port: hub.LOGS_REDIS_PORT, tls: hub.LOGS_REDIS_TLS ? {} : undefined },
+                          url: hub.LOGS_KV_HOST,
+                          options: { port: hub.LOGS_KV_PORT, tls: hub.LOGS_KV_TLS ? {} : undefined },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
 
             rateLimiter = new LogsRateLimiterService(hub, redis)
         })
@@ -574,16 +574,16 @@ describe('LogsRateLimiterService', () => {
             hub.LOGS_LIMITER_ENABLED_TEAMS = '*'
 
             redis = createRedisV2PoolFromConfig({
-                connection: hub.LOGS_REDIS_HOST
+                connection: hub.LOGS_KV_HOST
                     ? {
-                          url: hub.LOGS_REDIS_HOST,
-                          options: { port: hub.LOGS_REDIS_PORT, tls: hub.LOGS_REDIS_TLS ? {} : undefined },
+                          url: hub.LOGS_KV_HOST,
+                          options: { port: hub.LOGS_KV_PORT, tls: hub.LOGS_KV_TLS ? {} : undefined },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
         })
 
         afterEach(async () => {
