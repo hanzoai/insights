@@ -36,12 +36,12 @@ export type ScriptTransformerHub = Pick<
     | 'geoipService'
     | 'SITE_URL'
     // Redis pool config
-    | 'REDIS_URL'
-    | 'REDIS_POOL_MIN_SIZE'
-    | 'REDIS_POOL_MAX_SIZE'
-    | 'CDP_REDIS_HOST'
-    | 'CDP_REDIS_PORT'
-    | 'CDP_REDIS_PASSWORD'
+    | 'KV_URL'
+    | 'KV_POOL_MIN_SIZE'
+    | 'KV_POOL_MAX_SIZE'
+    | 'CDP_KV_HOST'
+    | 'CDP_KV_PORT'
+    | 'CDP_KV_PASSWORD'
     // InsightsFunctionManagerService
     | 'postgres'
     | 'pubSub'
@@ -138,15 +138,15 @@ export class ScriptTransformerService {
         this.hub = hub
         // Script transformer uses CDP Redis instance with fallback to default
         this.redis = createRedisV2PoolFromConfig({
-            connection: hub.CDP_REDIS_HOST
+            connection: hub.CDP_KV_HOST
                 ? {
-                      url: hub.CDP_REDIS_HOST,
-                      options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
-                      name: 'script-transformer-redis',
+                      url: hub.CDP_KV_HOST,
+                      options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
+                      name: 'script-transformer-kv',
                   }
-                : { url: hub.REDIS_URL, name: 'script-transformer-redis-fallback' },
-            poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                : { url: hub.KV_URL, name: 'script-transformer-kv-fallback' },
+            poolMinSize: hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: hub.KV_POOL_MAX_SIZE,
         })
         this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
         this.scriptExecutor = new ScriptExecutorService(hub)

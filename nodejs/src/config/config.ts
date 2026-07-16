@@ -20,6 +20,27 @@ import {
 
 export const DEFAULT_HTTP_SERVER_PORT = 6738
 
+/**
+ * Hanzo KV speaks the RESP wire protocol; KV_URL (kv:// / kvs://) is the ONE
+ * config surface. Map the kv:// scheme to the RESP URL the driver understands.
+ * Non-kv:// URLs pass through unchanged.
+ */
+export function kvToResp(url: string | undefined): string | undefined {
+    if (!url) {
+        return undefined
+    }
+    if (url.startsWith('kvs://')) {
+        return 'rediss://' + url.slice('kvs://'.length)
+    }
+    if (url.startsWith('kv+tls://')) {
+        return 'rediss://' + url.slice('kv+tls://'.length)
+    }
+    if (url.startsWith('kv://')) {
+        return 'redis://' + url.slice('kv://'.length)
+    }
+    return url
+}
+
 export const defaultConfig = overrideWithEnv(getDefaultConfig())
 
 export function getDefaultConfig(): PluginsServerConfig {
@@ -95,14 +116,16 @@ export function getDefaultConfig(): PluginsServerConfig {
         STREAM_CLIENT_RACK: undefined,
         APP_METRICS_FLUSH_FREQUENCY_MS: isTestEnv() ? 5 : 20_000,
         APP_METRICS_FLUSH_MAX_QUEUE_SIZE: isTestEnv() ? 5 : 1000,
-        // ok to connect to localhost over plaintext
+        // The shared Hanzo KV endpoint (RESP wire), normalized from the KV_URL env
+        // in overrideWithEnv. Localhost is the dev/test fallback only; a localhost
+        // or empty value means "no shared KV" and every pool stays on embedded Base.
         // nosemgrep: trailofbits.generic.redis-unencrypted-transport.redis-unencrypted-transport
-        REDIS_URL: 'redis://127.0.0.1',
-        INGESTION_REDIS_HOST: '',
-        INGESTION_REDIS_PORT: 6379,
-        INSIGHTS_REDIS_PASSWORD: '',
-        INSIGHTS_REDIS_HOST: '',
-        INSIGHTS_REDIS_PORT: 6379,
+        KV_URL: 'redis://127.0.0.1',
+        INGESTION_KV_HOST: '',
+        INGESTION_KV_PORT: 6379,
+        INSIGHTS_KV_PASSWORD: '',
+        INSIGHTS_KV_HOST: '',
+        INSIGHTS_KV_PORT: 6379,
         BASE_DIR: '..',
         TASK_TIMEOUT: 30,
         TASKS_PER_WORKER: 10,
@@ -112,13 +135,13 @@ export function getDefaultConfig(): PluginsServerConfig {
         INGESTION_FORCE_OVERFLOW_BY_TOKEN_DISTINCT_ID: '',
         INGESTION_OVERFLOW_PRESERVE_PARTITION_LOCALITY: false,
         INGESTION_STATEFUL_OVERFLOW_ENABLED: false,
-        INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS: 300, // 5 minutes
+        INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS: 300, // 5 minutes
         INGESTION_STATEFUL_OVERFLOW_LOCAL_CACHE_TTL_SECONDS: 60, // 1 minute
         LOG_LEVEL: isTestEnv() ? 'warn' : 'info',
         HTTP_SERVER_PORT: DEFAULT_HTTP_SERVER_PORT,
         SCHEDULE_LOCK_TTL: 60,
-        REDIS_POOL_MIN_SIZE: 1,
-        REDIS_POOL_MAX_SIZE: 3,
+        KV_POOL_MIN_SIZE: 1,
+        KV_POOL_MAX_SIZE: 3,
         MMDB_FILE_LOCATION: '../share/GeoLite2-City.mmdb',
         DISTINCT_ID_LRU_SIZE: 10000,
         EVENT_PROPERTY_LRU_SIZE: 10000,
@@ -148,7 +171,7 @@ export function getDefaultConfig(): PluginsServerConfig {
         SKIP_PERSONS_PROCESSING_BY_TOKEN_DISTINCT_ID: '',
         PIPELINE_STEP_STALLED_LOG_TIMEOUT: 30,
         RELOAD_PLUGIN_JITTER_MAX_MS: 60000,
-        CAPTURE_CONFIG_REDIS_HOST: null,
+        CAPTURE_CONFIG_KV_HOST: null,
         LAZY_LOADER_DEFAULT_BUFFER_MS: 10,
         LAZY_LOADER_MAX_SIZE: 100_000, // Maximum entries per cache before LRU eviction
         CAPTURE_INTERNAL_URL: isProdEnv()
@@ -172,13 +195,13 @@ export function getDefaultConfig(): PluginsServerConfig {
         SESSION_RECORDING_BUFFER_AGE_IN_MEMORY_MULTIPLIER: 1.2,
         SESSION_RECORDING_MAX_BUFFER_SIZE_KB: 1024 * 50, // 50MB
         SESSION_RECORDING_REMOTE_FOLDER: 'session_recordings',
-        SESSION_RECORDING_REDIS_PREFIX: '@hanzo/replay/',
+        SESSION_RECORDING_KV_PREFIX: '@hanzo/replay/',
         SESSION_RECORDING_PARTITION_REVOKE_OPTIMIZATION: false,
         SESSION_RECORDING_PARALLEL_CONSUMPTION: false,
-        INSIGHTS_SESSION_RECORDING_REDIS_HOST: undefined,
-        INSIGHTS_SESSION_RECORDING_REDIS_PORT: undefined,
-        SESSION_RECORDING_API_REDIS_HOST: '127.0.0.1',
-        SESSION_RECORDING_API_REDIS_PORT: 6379,
+        INSIGHTS_SESSION_RECORDING_KV_HOST: undefined,
+        INSIGHTS_SESSION_RECORDING_KV_PORT: undefined,
+        SESSION_RECORDING_API_KV_HOST: '127.0.0.1',
+        SESSION_RECORDING_API_KV_PORT: 6379,
         SESSION_RECORDING_CONSOLE_LOGS_INGESTION_ENABLED: true,
         SESSION_RECORDING_REPLAY_EVENTS_INGESTION_ENABLED: true,
         SESSION_RECORDING_DEBUG_PARTITION: '',
@@ -213,10 +236,10 @@ export function getDefaultConfig(): PluginsServerConfig {
         CDP_RATE_LIMITER_TTL: 60 * 60 * 24, // This is really long as it is essentially only important to make sure the key is eventually deleted
         CDP_FILTERS_TELEMETRY_TEAMS: '',
         DISABLE_OPENTELEMETRY_TRACING: false, // Disable OpenTelemetry spans for better performance (keeps metrics and timeouts)
-        CDP_REDIS_PASSWORD: '',
+        CDP_KV_PASSWORD: '',
         CDP_EVENT_PROCESSOR_EXECUTE_FIRST_STEP: true,
-        CDP_REDIS_HOST: '127.0.0.1',
-        CDP_REDIS_PORT: 6379,
+        CDP_KV_HOST: '127.0.0.1',
+        CDP_KV_PORT: 6379,
         CDP_CYCLOTRON_BATCH_DELAY_MS: 50,
         CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN: '',
         CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND: 'fn',
@@ -322,8 +345,8 @@ export function getDefaultConfig(): PluginsServerConfig {
                 24) * // amount of time salt is valid in one timezone
             60 *
             60,
-        COOKIELESS_REDIS_HOST: '',
-        COOKIELESS_REDIS_PORT: 6379,
+        COOKIELESS_KV_HOST: '',
+        COOKIELESS_KV_PORT: 6379,
 
         // Timestamp comparison logging (0.0 = disabled, 1.0 = 100% sampling)
         TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: isDevEnv() || isTestEnv() ? 1.0 : 0.0,
@@ -372,10 +395,10 @@ export function getDefaultConfig(): PluginsServerConfig {
         LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC: STREAM_LOGS_INGESTION_OVERFLOW,
         LOGS_INGESTION_CONSUMER_DLQ_TOPIC: STREAM_LOGS_INGESTION_DLQ,
         LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC: STREAM_LOGS_DATASTORE,
-        LOGS_REDIS_HOST: '127.0.0.1',
-        LOGS_REDIS_PORT: 6379,
-        LOGS_REDIS_PASSWORD: '',
-        LOGS_REDIS_TLS: isProdEnv() ? true : false,
+        LOGS_KV_HOST: '127.0.0.1',
+        LOGS_KV_PORT: 6379,
+        LOGS_KV_PASSWORD: '',
+        LOGS_KV_TLS: isProdEnv() ? true : false,
         LOGS_LIMITER_ENABLED_TEAMS: isProdEnv() ? '' : '*',
         LOGS_LIMITER_DISABLED_FOR_TEAMS: '',
         LOGS_LIMITER_BUCKET_SIZE_KB: 10000, // 10MB burst
@@ -413,11 +436,12 @@ export function overrideWithEnv(
     }
     const newConfig: PluginsServerConfig = { ...tmpConfig }
 
-    // Hanzo KV is the canonical shared RESP backend. `KV_URL` (kv:// / kvs://) is the
-    // ONLY env surface — there is no REDIS_URL env surface. Normalize it to the RESP
-    // wire so every pool, including the cross-pod pub/sub pool, speaks to Hanzo KV.
+    // Hanzo KV is the canonical shared RESP backend and `KV_URL` (kv:// / kvs://)
+    // is the ONE env surface. Normalize it to the RESP wire here — the single
+    // normalization site — so every pool, including the cross-pod pub/sub pool,
+    // speaks to Hanzo KV. Unset = no shared KV: pools stay on embedded Base.
     if (env.KV_URL) {
-        newConfig.REDIS_URL = env.KV_URL.replace(/^kv:\/\//, 'redis://').replace(/^kvs:\/\//, 'rediss://')
+        newConfig.KV_URL = kvToResp(env.KV_URL)!
     }
 
     if (!newConfig.DATABASE_URL && !newConfig.INSIGHTS_DB_NAME) {

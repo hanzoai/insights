@@ -3,7 +3,7 @@ import { LRUCache } from 'lru-cache'
 import { RedisPool } from '../../types'
 import { logger } from '../../utils/logger'
 import { Limiter } from '../../utils/token-bucket'
-import { SESSION_FILTER_REDIS_TTL_SECONDS } from '../constants'
+import { SESSION_FILTER_KV_TTL_SECONDS } from '../constants'
 import { SessionBatchMetrics } from './metrics'
 
 const DEFAULT_LOCAL_CACHE_MAX_SIZE = 100_000
@@ -77,7 +77,7 @@ export class SessionFilter {
         let client
         try {
             client = await this.redisPool.acquire()
-            await client.set(key, '1', 'EX', SESSION_FILTER_REDIS_TTL_SECONDS)
+            await client.set(key, '1', 'EX', SESSION_FILTER_KV_TTL_SECONDS)
 
             logger.info('session_filter_blocked_session', {
                 teamId,
