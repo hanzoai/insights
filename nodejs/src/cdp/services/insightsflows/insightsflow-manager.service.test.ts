@@ -87,7 +87,7 @@ describe('InsightsFlowManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_insightsflow SET name='Test Custom Flow team 1 updated', updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_flow SET name='Test Custom Flow team 1 updated', updated_at = NOW() WHERE id = $1`,
             [insightsFlows[0].id],
             'testKey'
         )
@@ -127,7 +127,7 @@ describe('InsightsFlowManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_insightsflow SET status='archived', updated_at = NOW() WHERE id = $1`,
+                `UPDATE insights_flow SET status='archived', updated_at = NOW() WHERE id = $1`,
                 [insightsFlows[0].id],
                 'testKey'
             )
