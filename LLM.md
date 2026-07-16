@@ -115,44 +115,43 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
 (`/v1/evals`, `/v1/analytics`) scopes exclusively by `c.Org()`; secrets via KMS.
 
-## Debrand / find-replace — NEVER rewrite migration internals
+## Django migrations — squashed to a clean baseline (v1.52.0)
 
-`insights/migrations/` and `insights/clickhouse/migrations/` are OFF-LIMITS to
-any `posthog`→`insights` (or any brand) find-replace / debrand pass. Migration
-files are immutable, cross-referenced plumbing whose identifiers are NOT
-user-facing branding:
+The Postgres/Django migrations were **squashed to a fresh `0001_initial` per app**
+(v1.52.0, `6e3d624ac4`). ~1050 PostHog-era migrations across 21 apps collapsed to
+one initial each — no customers, forward-only. This ended the old
+"never-rewrite-migration-internals / double `insights_insightsfunction` names are
+correct plumbing" era: table names are now clean natively (`insights_function`),
+there is no doubled-name history, and `makemigrations` is the source of truth.
 
-- `dependencies` / `run_before` entries key on another migration's **filename**;
-- `RunSQL` hardcodes Postgres table / index / constraint names — including
-  Django-generated FK/unique constraint names whose 8-hex hash is derived from
-  the **table name** (`names_digest(table, *cols)`), so renaming the table part
-  of a hardcoded name without recomputing the hash points it at a name that
-  never exists on a fresh DB;
-- state operations (`AddField`, `AddConstraint`, `RemoveField`, …) key on the
-  model **state name**, not the class's brand.
+Three insights migrations carry what `makemigrations` can't express (all captured
+verbatim from the live DB so a fresh migrate hits EXACT schema parity):
 
-A blanket rename corrupts all three. That is exactly what #52 / `203fdd70b`
-("strangle Redis", actually a wholesale `posthog`→`insights` find-replace) did:
-a fresh `manage.py migrate` fell from 1018/1018 to hard failures — broken
-dependency identifiers, constraint hashes computed for `posthog_*` tables, a
-split `HogFunction`→{`InsightsFunction` create, `customfunction` refs,
-`insights_function` table} and `HogFlow`→{`InsightsFlow`, `customflow`} rename,
-plus a stale `role`/`role_id_legacy` field ref. Fixed on
-`fix/migrations-consistency`.
+- `0001_initial` — 5 pg extensions (`pg_trgm`, `btree_gin`, `btree_gist`,
+  `ltree`, `intarray`) prepended; `atomic = False` (custom
+  `UniqueConstraintByExpression` emits `CREATE INDEX CONCURRENTLY`).
+- `0002_managed_tables` — the 18 `managed=False` tables (`Person`/`Group`/
+  `PersonOverride`/`CohortPeople`/`Role` families + task/workflow) via `RunSQL`;
+  depends on all app leaves so FK targets exist.
+- `0003_special_indexes` — 15 `RunSQL`-added feature columns + 20 special indexes
+  (GIN jsonb, partial `WHERE`, unique-partial integrity), all `IF NOT EXISTS`.
 
-Rule: debrand only user-facing strings (templates, UI, docs, API labels). Leave
-every migration identifier alone — migrations only need to be INTERNALLY
-consistent with the `insights`-form models, not brand-clean. A migration whose
-table is `insights_insightsfunction` or `customflow_templates` is correct; the
-name is invisible plumbing.
+Helper modules inside migration dirs (`insights/rbac/migrations/rbac_*_migration.py`)
+are imported by app code — they are NOT migrations; never delete them in a squash
+(the delete filter must match `class Migration` only). ClickHouse
+(`insights/clickhouse/migrations/`, 225 files) and async migrations
+(`insights/async_migrations/migrations/`, 11) are SEPARATE systems — untouched by
+the squash.
 
-Guard before shipping migration changes: `manage.py migrate` on a scratch
-Postgres must reach the last migration (currently `1018`) clean. Two fast
-static checks catch the corruption classes without a full DB run: (1) every
-`dependencies`/`run_before` entry resolves to a real migration file; (2) a
-state-only `ProjectState` build over all migrations (catches dangling
-`model_name`/field refs). NOTE: the debrand-era `posthog/`→`insights/` file
-rename (`071e2d369a`) also DELETED `insights/models/exchange_rate/historical.csv`
-without re-adding it, so `insights/models/exchange_rate/sql.py` opens a missing
-file — the ClickHouse `0101/0102_*_exchange_rates` migrations need it restored
-from history (`git show 071e2d369a^:posthog/models/exchange_rate/historical.csv`).
+### Guard + adoption
+- **Fresh install / CI guard**: `manage.py migrate` from zero on a scratch
+  Postgres must reach head clean (validated: 246/246 tables, 0 missing columns,
+  index parity).
+- **Adoption on an EXISTING DB (e.g. live `insights.hanzo.ai`)**: the squash does
+  NOT change the schema, so do NOT re-migrate destructively. Run a **`--fake`
+  adoption** when moving that DB to a squash-containing image:
+  `manage.py migrate <app> zero --fake` for each app (clears records, keeps
+  tables) then `manage.py migrate --fake` (re-records the new initials as
+  applied). Live intentionally stays on `1.51.10` (identical schema, old history);
+  the operator CR pins an explicit tag so it won't auto-move to a squash image
+  without this step.
