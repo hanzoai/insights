@@ -28,8 +28,7 @@ use crate::metrics_middleware::{apply_request_timeout, track_metrics};
 use crate::prometheus::setup_metrics_recorder;
 use crate::quota_limiters::CaptureQuotaLimiter;
 
-const EVENT_BODY_SIZE: usize = 2 * 1024 * 1024; // 2MB
-pub const BATCH_BODY_SIZE: usize = 20 * 1024 * 1024; // 20MB, up from the default 2MB used for normal event payloads
+pub const BATCH_BODY_SIZE: usize = 20 * 1024 * 1024; // 20MB
 const RECORDING_BODY_SIZE: usize = 25 * 1024 * 1024; // 25MB, up from the default 2MB used for normal event payloads
 
 #[derive(Clone)]
@@ -160,83 +159,23 @@ pub fn router<
         )
         .layer(DefaultBodyLimit::max(BATCH_BODY_SIZE));
 
-    let batch_router = Router::new()
-        .route(
-            "/batch",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/batch/",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .layer(DefaultBodyLimit::max(BATCH_BODY_SIZE)); // Have to use this, rather than RequestBodyLimitLayer, because we use `Bytes` in the handler (this limit applies specifically to Bytes body types)
-
+    // Canonical Hanzo ingest endpoint — one /v1 path. The handler accepts a
+    // single event or a batch array, so /v1/e covers both. Batch-sized body
+    // limit (the Bytes body type needs DefaultBodyLimit, not RequestBodyLimitLayer).
     let event_router = Router::new()
         .route(
-            "/i/v0/e",
+            "/v1/e",
             post(v0_endpoint::event)
                 .get(v0_endpoint::event)
                 .options(v0_endpoint::options),
         )
         .route(
-            "/i/v0/e/",
+            "/v1/e/",
             post(v0_endpoint::event)
                 .get(v0_endpoint::event)
                 .options(v0_endpoint::options),
         )
-        .route(
-            "/e",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/e/",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/track",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/track/",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/engage",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/engage/",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/capture",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .route(
-            "/capture/",
-            post(v0_endpoint::event)
-                .get(v0_endpoint::event)
-                .options(v0_endpoint::options),
-        )
-        .layer(DefaultBodyLimit::max(EVENT_BODY_SIZE));
+        .layer(DefaultBodyLimit::max(BATCH_BODY_SIZE));
 
     let status_router = Router::new()
         .route("/", get(index))
@@ -245,13 +184,13 @@ pub fn router<
 
     let recordings_router = Router::new()
         .route(
-            "/s",
+            "/v1/s",
             post(v0_endpoint::recording)
                 .get(v0_endpoint::recording)
                 .options(v0_endpoint::options),
         )
         .route(
-            "/s/",
+            "/v1/s/",
             post(v0_endpoint::recording)
                 .get(v0_endpoint::recording)
                 .options(v0_endpoint::options),
@@ -263,18 +202,17 @@ pub fn router<
 
     let ai_router = Router::new()
         .route(
-            "/i/v0/ai",
+            "/v1/ai",
             post(ai_endpoint::ai_handler).options(ai_endpoint::options),
         )
         .route(
-            "/i/v0/ai/",
+            "/v1/ai/",
             post(ai_endpoint::ai_handler).options(ai_endpoint::options),
         )
         .layer(DefaultBodyLimit::max(ai_body_limit));
 
     let mut router = match capture_mode {
         CaptureMode::Events | CaptureMode::Ai => Router::new()
-            .merge(batch_router)
             .merge(event_router)
             .merge(test_router)
             .merge(ai_router),
