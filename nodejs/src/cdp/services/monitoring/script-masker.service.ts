@@ -11,8 +11,8 @@ import {
 } from '../../types'
 import { execFn } from '../../utils/script-exec'
 
-export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@hanzo/script-masker'
-const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/mask`
+export const BASE_KV_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@hanzo/script-masker'
+const REDIS_KEY_TOKENS = `${BASE_KV_KEY}/mask`
 
 // NOTE: These are controlled via the api so are more of a sanity fallback
 const MASKER_MAX_TTL_INSIGHTS_FUNCTION = 60 * 60 * 24

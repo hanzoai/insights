@@ -171,9 +171,9 @@ export type CdpConfig = {
     CDP_CYCLOTRON_COMPRESS_VM_STATE: boolean
     CDP_CYCLOTRON_USE_BULK_COPY_JOB: boolean
     CDP_CYCLOTRON_COMPRESS_STREAM_DATA: boolean
-    CDP_REDIS_HOST: string
-    CDP_REDIS_PORT: number
-    CDP_REDIS_PASSWORD: string
+    CDP_KV_HOST: string
+    CDP_KV_PORT: number
+    CDP_KV_PASSWORD: string
 
     CDP_EVENT_PROCESSOR_EXECUTE_FIRST_STEP: boolean
     CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN: string
@@ -268,7 +268,7 @@ export type IngestionConsumerConfig = {
     /** If true, use stateful overflow redirect with Redis. If false, use stateless MemoryRateLimiter. */
     INGESTION_STATEFUL_OVERFLOW_ENABLED: boolean
     /** TTL in seconds for overflow flags in Redis (default: 300 = 5 minutes) */
-    INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS: number
+    INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS: number
     /** TTL in seconds for local cache entries (default: 60 = 1 minute) */
     INGESTION_STATEFUL_OVERFLOW_LOCAL_CACHE_TTL_SECONDS: number
 
@@ -296,8 +296,8 @@ export type IngestionConsumerConfig = {
     COOKIELESS_SALT_TTL_SECONDS: number
     COOKIELESS_SESSION_INACTIVITY_MS: number
     COOKIELESS_IDENTIFIES_TTL_SECONDS: number
-    COOKIELESS_REDIS_HOST: string
-    COOKIELESS_REDIS_PORT: number
+    COOKIELESS_KV_HOST: string
+    COOKIELESS_KV_PORT: number
 }
 
 export type LogsIngestionConsumerConfig = {
@@ -306,10 +306,10 @@ export type LogsIngestionConsumerConfig = {
     LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC: string
     LOGS_INGESTION_CONSUMER_DLQ_TOPIC: string
     LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC: string
-    LOGS_REDIS_HOST: string
-    LOGS_REDIS_PORT: number
-    LOGS_REDIS_PASSWORD: string
-    LOGS_REDIS_TLS: boolean
+    LOGS_KV_HOST: string
+    LOGS_KV_PORT: number
+    LOGS_KV_PASSWORD: string
+    LOGS_KV_TLS: boolean
     LOGS_LIMITER_ENABLED_TEAMS: string
     LOGS_LIMITER_DISABLED_FOR_TEAMS: string
     LOGS_LIMITER_BUCKET_SIZE_KB: number
@@ -320,8 +320,8 @@ export type LogsIngestionConsumerConfig = {
 }
 
 export type SessionRecordingApiConfig = {
-    SESSION_RECORDING_API_REDIS_HOST: string
-    SESSION_RECORDING_API_REDIS_PORT: number
+    SESSION_RECORDING_API_KV_HOST: string
+    SESSION_RECORDING_API_KV_PORT: number
     SESSION_RECORDING_KMS_ENDPOINT: string | undefined
     SESSION_RECORDING_DYNAMODB_ENDPOINT: string | undefined
 }
@@ -334,7 +334,7 @@ export type SessionRecordingConfig = {
     SESSION_RECORDING_BUFFER_AGE_IN_MEMORY_MULTIPLIER: number
     SESSION_RECORDING_BUFFER_AGE_JITTER: number
     SESSION_RECORDING_REMOTE_FOLDER: string
-    SESSION_RECORDING_REDIS_PREFIX: string
+    SESSION_RECORDING_KV_PREFIX: string
     SESSION_RECORDING_PARTITION_REVOKE_OPTIMIZATION: boolean
     SESSION_RECORDING_PARALLEL_CONSUMPTION: boolean
     SESSION_RECORDING_CONSOLE_LOGS_INGESTION_ENABLED: boolean
@@ -350,8 +350,8 @@ export type SessionRecordingConfig = {
     SESSION_RECORDING_OVERFLOW_MIN_PER_BATCH: number
     SESSION_RECORDING_MAX_PARALLEL_FLUSHES: number
 
-    INSIGHTS_SESSION_RECORDING_REDIS_HOST: string | undefined
-    INSIGHTS_SESSION_RECORDING_REDIS_PORT: number | undefined
+    INSIGHTS_SESSION_RECORDING_KV_HOST: string | undefined
+    INSIGHTS_SESSION_RECORDING_KV_PORT: number | undefined
 
     SESSION_RECORDING_MAX_BATCH_SIZE_KB: number
     SESSION_RECORDING_MAX_BATCH_AGE_MS: number
@@ -420,17 +420,17 @@ export interface PluginsServerConfig
     POSTGRES_BEHAVIORAL_COHORTS_USER: string
     POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: string
     // Redis url pretty much only used locally / self hosted
-    REDIS_URL: string
+    KV_URL: string
     // Redis params for the ingestion services
-    INGESTION_REDIS_HOST: string
-    INGESTION_REDIS_PORT: number
+    INGESTION_KV_HOST: string
+    INGESTION_KV_PORT: number
     // Redis params for the core insights (django+celery) services
-    INSIGHTS_REDIS_PASSWORD: string
-    INSIGHTS_REDIS_HOST: string
-    INSIGHTS_REDIS_PORT: number
+    INSIGHTS_KV_PASSWORD: string
+    INSIGHTS_KV_HOST: string
+    INSIGHTS_KV_PORT: number
     // Common redis params
-    REDIS_POOL_MIN_SIZE: number // minimum number of Redis connections to use per thread
-    REDIS_POOL_MAX_SIZE: number // maximum number of Redis connections to use per thread
+    KV_POOL_MIN_SIZE: number // minimum number of Redis connections to use per thread
+    KV_POOL_MAX_SIZE: number // maximum number of Redis connections to use per thread
 
     CONSUMER_BATCH_SIZE: number // Primarily for stream consumers the batch size to use
     CONSUMER_MAX_HEARTBEAT_INTERVAL_MS: number // Primarily for stream consumers the max heartbeat interval to use after which it will be considered unhealthy
@@ -485,7 +485,7 @@ export interface PluginsServerConfig
     EXTERNAL_REQUEST_KEEP_ALIVE_TIMEOUT_MS: number
     EXTERNAL_REQUEST_CONNECTIONS: number
     RELOAD_PLUGIN_JITTER_MAX_MS: number
-    CAPTURE_CONFIG_REDIS_HOST: string | null // Redis cluster to use to coordinate with capture (overflow, routing)
+    CAPTURE_CONFIG_KV_HOST: string | null // Redis cluster to use to coordinate with capture (overflow, routing)
     LAZY_LOADER_DEFAULT_BUFFER_MS: number
     LAZY_LOADER_MAX_SIZE: number
     CAPTURE_INTERNAL_URL: string

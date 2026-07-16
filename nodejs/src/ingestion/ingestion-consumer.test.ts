@@ -314,7 +314,7 @@ describe('IngestionConsumer', () => {
                 it('refreshes Redis TTL when processing events in overflow lane', async () => {
                     // Enable stateful overflow
                     hub.INGESTION_STATEFUL_OVERFLOW_ENABLED = true
-                    hub.INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS = 300
+                    hub.INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS = 300
                     hub.INGESTION_LANE = 'overflow'
 
                     // Create overflow lane consumer
@@ -358,7 +358,7 @@ describe('IngestionConsumer', () => {
                 it('does not create keys when refreshing TTL for non-existent keys', async () => {
                     // Enable stateful overflow
                     hub.INGESTION_STATEFUL_OVERFLOW_ENABLED = true
-                    hub.INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS = 300
+                    hub.INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS = 300
                     hub.INGESTION_LANE = 'overflow'
 
                     // Create overflow lane consumer

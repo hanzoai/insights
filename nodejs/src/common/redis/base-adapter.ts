@@ -665,12 +665,12 @@ export class BaseRedis implements BaseRedisClient {
      * The correct target is Base realtime (SSE/WS record-change events). Until
      * that channel→collection mapping ships (it also touches the Django
      * publisher, out of scope here), run the pub/sub pool on real Redis via
-     * INSIGHTS_REDIS_BACKEND=redis with a redis:// URL. See pubsub.ts.
+     * INSIGHTS_KV_BACKEND=resp with a redis:// URL. See pubsub.ts.
      */
     private refusePubSub(op: string): never {
         throw new Error(
             `base-adapter: ${op} is cross-process and not supported by embedded SQLite. ` +
-                'Configure the pub/sub pool with INSIGHTS_REDIS_BACKEND=redis (Base realtime migration pending).'
+                'Configure the pub/sub pool with INSIGHTS_KV_BACKEND=resp (Base realtime migration pending).'
         )
     }
 

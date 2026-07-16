@@ -44,7 +44,18 @@ def setup_async_migrations(ignore_insights_version: bool = False):
     unapplied_migrations = set(ALL_ASYNC_MIGRATIONS.keys()) - applied_migrations
 
     for migration_name, migration in ALL_ASYNC_MIGRATIONS.items():
-        setup_model(migration_name, migration)
+        sm = setup_model(migration_name, migration)
+
+        # A migration that reports itself not required (fresh installs whose
+        # schema already matches the target) is completed eagerly instead of
+        # blocking boot — only genuinely-required ones gate the version check.
+        if migration_name in unapplied_migrations and not migration.is_required():
+            from insights.async_migrations.utils import complete_migration
+
+            complete_migration(sm, email=False)
+            applied_migrations.add(migration_name)
+            unapplied_migrations.discard(migration_name)
+            continue
 
         if (
             (not ignore_insights_version)

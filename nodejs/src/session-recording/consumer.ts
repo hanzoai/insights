@@ -59,15 +59,15 @@ export type SessionRecordingIngesterHub = SessionRecordingConfig &
         // For StreamProducerWrapper.create
         | 'STREAM_CLIENT_RACK'
         // For createRedisPool (common Redis config not in SessionRecordingConfig)
-        | 'REDIS_URL'
-        | 'REDIS_POOL_MIN_SIZE'
-        | 'REDIS_POOL_MAX_SIZE'
+        | 'KV_URL'
+        | 'KV_POOL_MIN_SIZE'
+        | 'KV_POOL_MAX_SIZE'
         // For restriction manager redis pool (must match the ingestion redis that Django writes to)
-        | 'INGESTION_REDIS_HOST'
-        | 'INGESTION_REDIS_PORT'
-        | 'INSIGHTS_REDIS_HOST'
-        | 'INSIGHTS_REDIS_PORT'
-        | 'INSIGHTS_REDIS_PASSWORD'
+        | 'INGESTION_KV_HOST'
+        | 'INGESTION_KV_PORT'
+        | 'INSIGHTS_KV_HOST'
+        | 'INSIGHTS_KV_PORT'
+        | 'INSIGHTS_KV_PASSWORD'
         // For encryption key management
         | 'SESSION_RECORDING_KMS_ENDPOINT'
         | 'SESSION_RECORDING_DYNAMODB_ENDPOINT'
@@ -157,35 +157,35 @@ export class SessionRecordingIngester {
 
         // Session recording uses its own Redis instance with fallback to default
         this.redisPool = createRedisPoolFromConfig({
-            connection: hub.INSIGHTS_SESSION_RECORDING_REDIS_HOST
+            connection: hub.INSIGHTS_SESSION_RECORDING_KV_HOST
                 ? {
-                      url: hub.INSIGHTS_SESSION_RECORDING_REDIS_HOST,
-                      options: { port: hub.INSIGHTS_SESSION_RECORDING_REDIS_PORT ?? 6379 },
-                      name: 'session-recording-redis',
+                      url: hub.INSIGHTS_SESSION_RECORDING_KV_HOST,
+                      options: { port: hub.INSIGHTS_SESSION_RECORDING_KV_PORT ?? 6379 },
+                      name: 'session-recording-kv',
                   }
-                : { url: hub.REDIS_URL, name: 'session-recording-redis-fallback' },
-            poolMinSize: this.hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: this.hub.REDIS_POOL_MAX_SIZE,
+                : { url: hub.KV_URL, name: 'session-recording-kv-fallback' },
+            poolMinSize: this.hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: this.hub.KV_POOL_MAX_SIZE,
         })
 
         // Restriction manager needs to read from the same Redis as Django writes to
         // This must match the ingestion redis fallback chain from hub.ts
         this.restrictionRedisPool = createRedisPoolFromConfig({
-            connection: hub.INGESTION_REDIS_HOST
+            connection: hub.INGESTION_KV_HOST
                 ? {
-                      url: hub.INGESTION_REDIS_HOST,
-                      options: { port: hub.INGESTION_REDIS_PORT },
-                      name: 'ingestion-redis',
+                      url: hub.INGESTION_KV_HOST,
+                      options: { port: hub.INGESTION_KV_PORT },
+                      name: 'ingestion-kv',
                   }
-                : hub.INSIGHTS_REDIS_HOST
+                : hub.INSIGHTS_KV_HOST
                   ? {
-                        url: hub.INSIGHTS_REDIS_HOST,
-                        options: { port: hub.INSIGHTS_REDIS_PORT, password: hub.INSIGHTS_REDIS_PASSWORD },
-                        name: 'ingestion-redis',
+                        url: hub.INSIGHTS_KV_HOST,
+                        options: { port: hub.INSIGHTS_KV_PORT, password: hub.INSIGHTS_KV_PASSWORD },
+                        name: 'ingestion-kv',
                     }
-                  : { url: hub.REDIS_URL, name: 'ingestion-redis' },
-            poolMinSize: this.hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: this.hub.REDIS_POOL_MAX_SIZE,
+                  : { url: hub.KV_URL, name: 'ingestion-kv' },
+            poolMinSize: this.hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: this.hub.KV_POOL_MAX_SIZE,
         })
 
         this.teamService = new TeamService(postgres)
