@@ -3,7 +3,7 @@ import { RedisOverflowRepository } from './overflow-redis-repository'
 
 /**
  * End-to-end seam test: the overflow repository against a REAL Base-backed
- * pool (the production code path with INSIGHTS_REDIS_BACKEND defaulting to
+ * pool (the production code path with INSIGHTS_KV_BACKEND defaulting to
  * Base). No live Redis. Proves mget / pipeline.set EX / getex / ping all flow
  * through the base-adapter unchanged.
  */

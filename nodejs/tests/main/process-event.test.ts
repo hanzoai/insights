@@ -196,14 +196,14 @@ describe('processEvent', () => {
         now = DateTime.utc()
 
         const redis = await createRedisFromConfig(
-            hub.INGESTION_REDIS_HOST
-                ? { url: hub.INGESTION_REDIS_HOST, options: { port: hub.INGESTION_REDIS_PORT } }
-                : hub.INSIGHTS_REDIS_HOST
+            hub.INGESTION_KV_HOST
+                ? { url: hub.INGESTION_KV_HOST, options: { port: hub.INGESTION_KV_PORT } }
+                : hub.INSIGHTS_KV_HOST
                   ? {
-                        url: hub.INSIGHTS_REDIS_HOST,
-                        options: { port: hub.INSIGHTS_REDIS_PORT, password: hub.INSIGHTS_REDIS_PASSWORD },
+                        url: hub.INSIGHTS_KV_HOST,
+                        options: { port: hub.INSIGHTS_KV_PORT, password: hub.INSIGHTS_KV_PASSWORD },
                     }
-                  : { url: hub.REDIS_URL }
+                  : { url: hub.KV_URL }
         )
         const hooksCacheKey = `@hanzo/plugin-server/hooks/${team.id}`
         await redis.del(hooksCacheKey)

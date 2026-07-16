@@ -20,7 +20,7 @@ import { logger } from '../logger'
 import { PubSub } from '../pubsub'
 import { TeamManager } from '../team-manager'
 import { PostgresRouter } from './postgres'
-import { createRedisPoolFromConfig } from './redis'
+import { createRedisPoolFromConfig, isSharedKv } from './redis'
 
 // `node-postgres` would return dates as plain JS Date objects, which would use the local timezone.
 // This converts all date fields to a proper luxon UTC DateTime and then casts them to a string
@@ -64,65 +64,68 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     const postgres = new PostgresRouter(serverConfig)
     logger.info('👍', `Postgres Router ready`)
 
-    logger.info('🤔', `Connecting to ingestion Redis...`)
+    logger.info('🤔', `Connecting to ingestion KV...`)
     const redisPool = createRedisPoolFromConfig({
-        connection: serverConfig.INGESTION_REDIS_HOST
+        connection: serverConfig.INGESTION_KV_HOST
             ? {
-                  url: serverConfig.INGESTION_REDIS_HOST,
-                  options: { port: serverConfig.INGESTION_REDIS_PORT },
-                  name: 'ingestion-redis',
+                  url: serverConfig.INGESTION_KV_HOST,
+                  options: { port: serverConfig.INGESTION_KV_PORT },
+                  name: 'ingestion-kv',
               }
-            : serverConfig.INSIGHTS_REDIS_HOST
+            : serverConfig.INSIGHTS_KV_HOST
               ? {
-                    url: serverConfig.INSIGHTS_REDIS_HOST,
-                    options: { port: serverConfig.INSIGHTS_REDIS_PORT, password: serverConfig.INSIGHTS_REDIS_PASSWORD },
-                    name: 'ingestion-redis',
+                    url: serverConfig.INSIGHTS_KV_HOST,
+                    options: { port: serverConfig.INSIGHTS_KV_PORT, password: serverConfig.INSIGHTS_KV_PASSWORD },
+                    name: 'ingestion-kv',
                 }
-              : { url: serverConfig.REDIS_URL, name: 'ingestion-redis' },
-        poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
-        poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
+              : { url: serverConfig.KV_URL, name: 'ingestion-kv' },
+        poolMinSize: serverConfig.KV_POOL_MIN_SIZE,
+        poolMaxSize: serverConfig.KV_POOL_MAX_SIZE,
     })
-    logger.info('👍', `Ingestion Redis ready`)
+    logger.info('👍', `Ingestion KV ready`)
 
-    logger.info('🤔', `Connecting to cookieless Redis...`)
+    logger.info('🤔', `Connecting to cookieless KV...`)
     const cookielessRedisPool = createRedisPoolFromConfig({
-        connection: serverConfig.COOKIELESS_REDIS_HOST
+        connection: serverConfig.COOKIELESS_KV_HOST
             ? {
-                  url: serverConfig.COOKIELESS_REDIS_HOST,
-                  options: { port: serverConfig.COOKIELESS_REDIS_PORT ?? 6379 },
-                  name: 'cookieless-redis',
+                  url: serverConfig.COOKIELESS_KV_HOST,
+                  options: { port: serverConfig.COOKIELESS_KV_PORT ?? 6379 },
+                  name: 'cookieless-kv',
               }
-            : { url: serverConfig.REDIS_URL, name: 'cookieless-redis' },
-        poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
-        poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
+            : { url: serverConfig.KV_URL, name: 'cookieless-kv' },
+        poolMinSize: serverConfig.KV_POOL_MIN_SIZE,
+        poolMaxSize: serverConfig.KV_POOL_MAX_SIZE,
     })
-    logger.info('👍', `Cookieless Redis ready`)
+    logger.info('👍', `Cookieless KV ready`)
 
     const teamManager = new TeamManager(postgres)
-    logger.info('🤔', `Connecting to Insights Redis...`)
+    logger.info('🤔', `Connecting to Insights KV...`)
     const insightsRedisPool = createRedisPoolFromConfig({
-        connection: serverConfig.INSIGHTS_REDIS_HOST
+        connection: serverConfig.INSIGHTS_KV_HOST
             ? {
-                  url: serverConfig.INSIGHTS_REDIS_HOST,
-                  options: { port: serverConfig.INSIGHTS_REDIS_PORT, password: serverConfig.INSIGHTS_REDIS_PASSWORD },
-                  name: 'insights-redis',
+                  url: serverConfig.INSIGHTS_KV_HOST,
+                  options: { port: serverConfig.INSIGHTS_KV_PORT, password: serverConfig.INSIGHTS_KV_PASSWORD },
+                  name: 'insights-kv',
               }
-            : { url: serverConfig.REDIS_URL, name: 'insights-redis' },
-        poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
-        poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
+            : { url: serverConfig.KV_URL, name: 'insights-kv' },
+        poolMinSize: serverConfig.KV_POOL_MIN_SIZE,
+        poolMaxSize: serverConfig.KV_POOL_MAX_SIZE,
     })
-    logger.info('👍', `Insights Redis ready`)
+    logger.info('👍', `Insights KV ready`)
 
-    // Pub/Sub is cross-process (Django publishes; every worker pod subscribes
-    // to invalidate caches). The Base adapter cannot fan messages across pods,
-    // so the pub/sub pool is pinned to Redis until the Base-realtime migration
-    // lands. Every other pool above uses the default (Base) backend.
-    const pubSubRedisPool = createRedisPoolFromConfig({
-        connection: { url: serverConfig.REDIS_URL, name: 'pubsub-redis', forceBackend: 'redis' },
-        poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
-        poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
-    })
-    const pubSub = new PubSub(pubSubRedisPool)
+    // Pub/Sub is cross-process (Django publishes; every worker pod subscribes to
+    // invalidate caches). It rides the shared Hanzo KV (native RESP pub/sub)
+    // whenever KV_URL is configured. KV is OPTIONAL: with no shared KV the
+    // pub/sub degrades to process-local delivery (loud warning in PubSub.start)
+    // until Base realtime carries it. Every other pool above defaults to Base.
+    const pubSubKvPool = isSharedKv(serverConfig.KV_URL)
+        ? createRedisPoolFromConfig({
+              connection: { url: serverConfig.KV_URL, name: 'pubsub-kv', forceBackend: 'resp' },
+              poolMinSize: serverConfig.KV_POOL_MIN_SIZE,
+              poolMaxSize: serverConfig.KV_POOL_MAX_SIZE,
+          })
+        : null
+    const pubSub = new PubSub(pubSubKvPool)
     await pubSub.start()
 
     const groupRepository = new PostgresGroupRepository(postgres)

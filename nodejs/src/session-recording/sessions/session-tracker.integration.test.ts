@@ -5,7 +5,7 @@ import { createRedisPoolFromConfig } from '../../utils/db/redis'
 import { SessionTracker } from './session-tracker'
 
 // nosemgrep: redis-unencrypted-transport (local testing only)
-const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1'
+const KV_URL = process.env.KV_URL || 'redis://127.0.0.1'
 
 describe('SessionTracker integration', () => {
     let redisPool: RedisPool
@@ -13,7 +13,7 @@ describe('SessionTracker integration', () => {
 
     beforeAll(() => {
         redisPool = createRedisPoolFromConfig({
-            connection: { url: REDIS_URL, name: 'session-tracker-integration-test' },
+            connection: { url: KV_URL, name: 'session-tracker-integration-test' },
             poolMinSize: 1,
             poolMaxSize: 2,
         })

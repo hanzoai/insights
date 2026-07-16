@@ -6,7 +6,7 @@ import { createExampleInvocation, createInsightsFunction } from '../../_tests/fi
 import { deleteKeysWithPrefix } from '../../_tests/redis'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '../../types'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { BASE_REDIS_KEY, ScriptWatcherService, ScriptWatcherState } from './script-watcher.service'
+import { BASE_KV_KEY, ScriptWatcherService, ScriptWatcherState } from './script-watcher.service'
 
 jest.mock('~/utils/insights', () => ({ captureTeamEvent: jest.fn() }))
 
@@ -35,11 +35,11 @@ describe('ScriptWatcher', () => {
         hub = await createHub()
         jest.spyOn(hub.teamManager, 'getTeam').mockResolvedValue(team)
         redis = createRedisV2PoolFromConfig({
-            connection: hub.CDP_REDIS_HOST
-                ? { url: hub.CDP_REDIS_HOST, options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD } }
-                : { url: hub.REDIS_URL },
-            poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+            connection: hub.CDP_KV_HOST
+                ? { url: hub.CDP_KV_HOST, options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD } }
+                : { url: hub.KV_URL },
+            poolMinSize: hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: hub.KV_POOL_MAX_SIZE,
         })
         process.env.CDP_HOG_WATCHER_2_ENABLED = 'true'
         process.env.CDP_HOG_WATCHER_2_CAPTURE_ENABLED = 'true'
@@ -48,7 +48,7 @@ describe('ScriptWatcher', () => {
     beforeEach(async () => {
         now = 1720000000000
         mockNow.mockReturnValue(now)
-        await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+        await deleteKeysWithPrefix(redis, BASE_KV_KEY)
         hub.CDP_WATCHER_AUTOMATICALLY_DISABLE_FUNCTIONS = true
 
         watcher = new ScriptWatcherService(hub, redis)
