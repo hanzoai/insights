@@ -497,7 +497,7 @@ async fn test_personal_api_key_with_scoped_teams_allowed() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -609,7 +609,7 @@ async fn test_personal_api_key_with_scoped_organizations_allowed() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -780,7 +780,7 @@ async fn test_personal_api_key_with_all_access_scopes() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -845,7 +845,7 @@ async fn test_personal_api_key_with_feature_flag_write_scope() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -890,7 +890,7 @@ async fn test_backup_secret_api_token_authentication() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -1000,7 +1000,7 @@ async fn test_secret_token_takes_priority_over_personal_api_key() {
 
     // Populate cache for team1 only
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team1.id)
         .await
@@ -1053,7 +1053,7 @@ async fn test_flag_definitions_rate_limit_enforced() {
 
     // Populate cache to avoid 503 errors
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await
@@ -1131,7 +1131,7 @@ async fn test_flag_definitions_custom_rate_limit_overrides_default() {
 
     // Populate cache for both teams
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client.clone(), custom_team.id)
         .await
@@ -1216,7 +1216,7 @@ async fn test_flag_definitions_rate_limit_metrics_incremented() {
 
     // Populate cache
     let redis_client =
-        feature_flags::utils::test_utils::setup_redis_client(Some(config.redis_url.clone())).await;
+        feature_flags::utils::test_utils::setup_redis_client(Some(config.kv_url.clone())).await;
     context
         .populate_flag_definitions_cache(redis_client, team.id)
         .await

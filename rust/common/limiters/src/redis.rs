@@ -103,12 +103,12 @@ impl RedisLimiter {
         interval: Duration,
         redis: Arc<dyn Client + Send + Sync>,
         limiter_cache_key: String,
-        redis_key_prefix: Option<String>,
+        kv_key_prefix: Option<String>,
         resource: QuotaResource,
         service_name: ServiceName,
     ) -> anyhow::Result<RedisLimiter> {
         let limited = Arc::new(DashMap::new());
-        let key_prefix = redis_key_prefix.unwrap_or_default();
+        let key_prefix = kv_key_prefix.unwrap_or_default();
 
         let limiter = RedisLimiter {
             limited,

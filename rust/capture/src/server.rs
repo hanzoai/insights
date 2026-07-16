@@ -167,7 +167,7 @@ async fn create_sink(
                     Duration::from_secs(5),
                     redis_client.clone(),
                     OVERFLOW_LIMITER_CACHE_KEY.to_string(),
-                    config.redis_key_prefix.clone(),
+                    config.kv_key_prefix.clone(),
                     QuotaResource::Replay,
                     ServiceName::Capture,
                 )
@@ -223,18 +223,18 @@ where
 
     let redis_client = Arc::new(
         RedisClient::with_config(
-            config.redis_url.clone(),
+            config.kv_url.clone(),
             common_redis::CompressionConfig::disabled(),
             common_redis::RedisValueFormat::default(),
-            if config.redis_response_timeout_ms == 0 {
+            if config.kv_response_timeout_ms == 0 {
                 None
             } else {
-                Some(Duration::from_millis(config.redis_response_timeout_ms))
+                Some(Duration::from_millis(config.kv_response_timeout_ms))
             },
-            if config.redis_connection_timeout_ms == 0 {
+            if config.kv_connection_timeout_ms == 0 {
                 None
             } else {
-                Some(Duration::from_millis(config.redis_connection_timeout_ms))
+                Some(Duration::from_millis(config.kv_connection_timeout_ms))
             },
         )
         .await
@@ -244,17 +244,17 @@ where
     let global_rate_limiter = if config.global_rate_limit_enabled {
         // Use dedicated Redis if configured, otherwise fall back to shared client
         let grl_redis_client: Arc<dyn common_redis::Client + Send + Sync> =
-            if let Some(ref grl_redis_url) = config.global_rate_limit_redis_url {
+            if let Some(ref grl_kv_url) = config.global_rate_limit_kv_url {
                 let response_timeout = config
-                    .global_rate_limit_redis_response_timeout_ms
-                    .unwrap_or(config.redis_response_timeout_ms);
+                    .global_rate_limit_kv_response_timeout_ms
+                    .unwrap_or(config.kv_response_timeout_ms);
                 let connection_timeout = config
-                    .global_rate_limit_redis_connection_timeout_ms
-                    .unwrap_or(config.redis_connection_timeout_ms);
+                    .global_rate_limit_kv_connection_timeout_ms
+                    .unwrap_or(config.kv_connection_timeout_ms);
 
                 Arc::new(
                     RedisClient::with_config(
-                        grl_redis_url.clone(),
+                        grl_kv_url.clone(),
                         common_redis::CompressionConfig::disabled(),
                         common_redis::RedisValueFormat::default(),
                         if response_timeout == 0 {
@@ -372,19 +372,19 @@ where
         Option<CancellationToken>,
         Option<JoinHandle<()>>,
     ) = if config.event_restrictions_enabled {
-        if let Some(ref redis_url) = config.event_restrictions_redis_url {
+        if let Some(ref kv_url) = config.event_restrictions_kv_url {
             let repository = Arc::new(
                 RedisRestrictionsRepository::new(
-                    redis_url.clone(),
-                    if config.redis_response_timeout_ms == 0 {
+                    kv_url.clone(),
+                    if config.kv_response_timeout_ms == 0 {
                         None
                     } else {
-                        Some(Duration::from_millis(config.redis_response_timeout_ms))
+                        Some(Duration::from_millis(config.kv_response_timeout_ms))
                     },
-                    if config.redis_connection_timeout_ms == 0 {
+                    if config.kv_connection_timeout_ms == 0 {
                         None
                     } else {
-                        Some(Duration::from_millis(config.redis_connection_timeout_ms))
+                        Some(Duration::from_millis(config.kv_connection_timeout_ms))
                     },
                 )
                 .await
