@@ -6,7 +6,9 @@ The served **Django** monolith is **RESTORED** and published to
 `ghcr.io/hanzoai/insights` for the `insights.hanzo.ai` deploy (K8s pulls ghcr).
 `manage.py` + `bin/docker*` serve again (real management + server/worker/migrate
 startup), IAM-OIDC login is wired, and the surface is Hanzo-branded. It runs on
-a real Postgres (`insights-sql`), Valkey (`REDIS_URL`), Kafka and ClickHouse.
+Hanzo SQL (`insights-sql`), Hanzo KV (`KV_URL`, RESP wire — never `REDIS_URL`;
+`data_stores.py` normalizes kv://→RESP at the driver boundary), the
+`hanzoai/stream` Kafka-shim over NATS, and Hanzo Datastore (ClickHouse).
 
 Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
 
@@ -67,12 +69,14 @@ decommission decision, out of scope for retiring the Django app.
 - `ghcr.io/hanzoai/insights:<VERSION>` (served monolith) — published by
   `container-images-cd.yml` on a `v*` tag push (e.g. `v1.51.4`), also
   `:sha-<sha>`. Deploy pins `kubernetes.io/arch: amd64`.
-- `insights-web` (Django) + `insights-worker` (Celery) — Service CRs to be
-  restored in `hanzoai/universe` (`infra/k8s/operator/crs/insights-*`,
-  `infra/k8s/ingress/routes.yaml`) pointing at the ghcr image. Needs
-  `DATABASE_URL` (`insights-sql`), `REDIS_URL` (`insights-kv`/Valkey), Kafka,
-  ClickHouse, and Django `migrate` (`bin/docker` runs it on boot). Deploy is
-  gated — not applied by this change.
+- `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
+  `insights.hanzo.ai` (v1.51.8). Operator App CRs in `hanzoai/universe`
+  (`infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`) point at
+  the ghcr image. Env: `DATABASE_URL` (`insights-sql`), `KV_URL`
+  (`kv://insights-kv:6379`, never `REDIS_URL`), the `hanzoai/stream` shim,
+  Datastore. Migrations run current on boot (1018/1018 postgres). Probes are
+  `tcpSocket:8000` (Django rejects kubelet `httpGet` Host under restricted
+  `ALLOWED_HOSTS`; the CRD probe schema has no `httpHeaders`).
 - Retained operator `Service` CRs: `insights-capture`, `insights-kafka`,
   `insights-kv`, `insights-plugin`, `insights-sql`.
 
