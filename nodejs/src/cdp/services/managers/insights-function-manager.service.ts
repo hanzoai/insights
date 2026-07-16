@@ -163,7 +163,7 @@ export class InsightsFunctionManagerService {
             await this.hub.postgres.query(
                 PostgresUse.COMMON_READ,
                 `SELECT ${INSIGHTS_FUNCTION_FIELDS.join(', ')}
-                FROM insights_function
+                FROM insights_insightsfunction
                 WHERE id = $1 AND deleted = FALSE`,
                 [id],
                 'fetchInsightsFunction'
@@ -183,7 +183,7 @@ export class InsightsFunctionManagerService {
         logger.debug('[InsightsFunctionManager]', 'Fetching team custom functions', { teamIds })
         const response = await this.hub.postgres.query<Pick<InsightsFunctionType, 'id' | 'team_id' | 'type'>>(
             PostgresUse.COMMON_READ,
-            `SELECT id, team_id, type FROM insights_function WHERE enabled = TRUE AND deleted = FALSE AND team_id = ANY($1)`,
+            `SELECT id, team_id, type FROM insights_insightsfunction WHERE enabled = TRUE AND deleted = FALSE AND team_id = ANY($1)`,
             [teamIds],
             'fetchAllTeamInsightsFunctions'
         )
@@ -206,7 +206,7 @@ export class InsightsFunctionManagerService {
 
         const response = await this.hub.postgres.query<InsightsFunctionType>(
             PostgresUse.COMMON_READ,
-            `SELECT ${INSIGHTS_FUNCTION_FIELDS.join(', ')} FROM insights_function WHERE id = ANY($1)`,
+            `SELECT ${INSIGHTS_FUNCTION_FIELDS.join(', ')} FROM insights_insightsfunction WHERE id = ANY($1)`,
             [ids],
             'fetchInsightsFunctions'
         )
