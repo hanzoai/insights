@@ -117,7 +117,7 @@ export class InsightsFlowManagerService {
         logger.debug('[InsightsFlowManager]', 'Fetching team custom flows', { teamIds })
         const response = await this.postgres.query<InsightsFlowTeamInfo>(
             PostgresUse.COMMON_READ,
-            `SELECT id, team_id, version FROM insights_flow WHERE status='active' AND team_id = ANY($1)`,
+            `SELECT id, team_id, version FROM insights_insightsflow WHERE status='active' AND team_id = ANY($1)`,
             [teamIds],
             'fetchAllTeamInsightsFlows'
         )
@@ -140,7 +140,7 @@ export class InsightsFlowManagerService {
 
         const response = await this.postgres.query<InsightsFlow>(
             PostgresUse.COMMON_READ,
-            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_flow WHERE id = ANY($1)`,
+            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_insightsflow WHERE id = ANY($1)`,
             [ids],
             'fetchInsightsFlows'
         )
