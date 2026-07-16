@@ -60,6 +60,7 @@ COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
 COPY ./common/siphash/ ./common/siphash/
 COPY ./common/insights-node/ ./common/insights-node/
 COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
+COPY ./nodejs/vendor/ ./nodejs/vendor/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
 # Use system librdkafka from Confluent (2.10.1) instead of bundled version
