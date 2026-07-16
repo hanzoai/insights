@@ -450,7 +450,9 @@ class Migration(AsyncMigrationDefinition):
                 {where_clause}
             """,
             where_clause_params,
-            settings={"max_execution_time": 0},
+            # dictGet is non-deterministic; replicated storage refuses it in
+            # ALTER UPDATE unless explicitly allowed (BAD_ARGUMENTS code 36).
+            settings={"max_execution_time": 0, "allow_nondeterministic_mutations": 1},
             per_shard=True,
             query_id=query_id,
         )

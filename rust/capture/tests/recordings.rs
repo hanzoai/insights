@@ -309,7 +309,7 @@ async fn it_applies_overflow_limits() -> Result<()> {
     redis.add_overflow_limit(QuotaResource::Replay, &session2, Duration::seconds(60));
 
     let mut config = DEFAULT_CONFIG.clone();
-    config.redis_key_prefix = redis.key_prefix();
+    config.kv_key_prefix = redis.key_prefix();
     config.kafka.kafka_topic = topic.topic_name().to_string();
     config.kafka.kafka_replay_overflow_topic = overflow_topic.topic_name().to_string();
     config.kafka.kafka_replay_overflow_topic = overflow_topic.topic_name().to_string();
