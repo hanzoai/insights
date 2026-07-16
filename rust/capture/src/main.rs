@@ -75,11 +75,11 @@ async fn main() {
     let mut config = Config::init_from_env().expect("Invalid configuration:");
     // Hanzo KV speaks the Redis (RESP) wire protocol; normalize its kv:// scheme
     // to redis:// so the RESP driver connects. Config surface is KV_URL, never REDIS_URL.
-    config.redis_url = kv_to_resp(&config.redis_url);
-    config.global_rate_limit_redis_url =
-        config.global_rate_limit_redis_url.as_deref().map(|u| kv_to_resp(u));
-    config.event_restrictions_redis_url =
-        config.event_restrictions_redis_url.as_deref().map(|u| kv_to_resp(u));
+    config.kv_url = kv_to_resp(&config.kv_url);
+    config.global_rate_limit_kv_url =
+        config.global_rate_limit_kv_url.as_deref().map(|u| kv_to_resp(u));
+    config.event_restrictions_kv_url =
+        config.event_restrictions_kv_url.as_deref().map(|u| kv_to_resp(u));
 
     // Start continuous profiling if enabled (keep _agent alive for the duration of the program)
     // Fails gracefully - logs error but doesn't prevent service from starting

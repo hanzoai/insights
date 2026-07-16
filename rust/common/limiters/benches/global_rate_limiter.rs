@@ -66,7 +66,7 @@ fn report_fail_opens(bench_name: &str) {
     }
 }
 
-const REDIS_URL: &str = "redis://localhost:6379/";
+const KV_URL: &str = "redis://localhost:6379/";
 
 fn bench_config() -> GlobalRateLimiterConfig {
     GlobalRateLimiterConfig {
@@ -74,7 +74,7 @@ fn bench_config() -> GlobalRateLimiterConfig {
         window_interval: Duration::from_secs(60),
         bucket_interval: Duration::from_secs(10),
         rate_limit_interval: Duration::from_secs(60),
-        redis_key_prefix: "bench:grl".to_string(),
+        kv_key_prefix: "bench:grl".to_string(),
         global_cache_ttl: Duration::from_secs(300),
         local_cache_ttl: Duration::from_secs(1200), // 20 minutes for hot cache simulation
         local_cache_max_entries: 100_000,
@@ -92,7 +92,7 @@ fn bench_config() -> GlobalRateLimiterConfig {
 fn setup_redis() -> Option<(Runtime, Arc<common_redis::RedisClient>)> {
     let rt = Runtime::new().unwrap();
     let redis = rt.block_on(async {
-        match common_redis::RedisClient::new(REDIS_URL.to_string()).await {
+        match common_redis::RedisClient::new(KV_URL.to_string()).await {
             Ok(client) => Some(Arc::new(client)),
             Err(e) => {
                 eprintln!("Redis unavailable ({e}), skipping Redis benchmarks");
@@ -153,7 +153,7 @@ async fn prime_redis_buckets(
     let items: Vec<(String, i64)> = bucket_ids
         .iter()
         .map(|bucket_id| {
-            let bucket_key = format!("{}:{}:{}", config.redis_key_prefix, key, bucket_id);
+            let bucket_key = format!("{}:{}:{}", config.kv_key_prefix, key, bucket_id);
             (bucket_key, count_per_bucket)
         })
         .collect();

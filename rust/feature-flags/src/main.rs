@@ -64,9 +64,28 @@ fn init_tracer(
         .expect("Failed to initialize OpenTelemetry tracer")
 }
 
+/// Hanzo KV speaks the Redis (RESP) wire protocol; map its kv:// scheme to the
+/// redis:// URL the RESP driver understands. Non-kv:// URLs pass through unchanged.
+fn kv_to_resp(url: &str) -> String {
+    match url.strip_prefix("kvs://") {
+        Some(rest) => return format!("rediss://{rest}"),
+        None => {}
+    }
+    match url.strip_prefix("kv://") {
+        Some(rest) => format!("redis://{rest}"),
+        None => url.to_string(),
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let mut config = Config::init_from_env().expect("Invalid configuration:");
+    // Hanzo KV is the ONE config surface (KV_URL, kv://); normalize to the RESP
+    // wire so the driver connects. Never REDIS_URL.
+    config.kv_url = kv_to_resp(&config.kv_url);
+    config.kv_reader_url = kv_to_resp(&config.kv_reader_url);
+    config.flags_kv_url = kv_to_resp(&config.flags_kv_url);
+    config.flags_kv_reader_url = kv_to_resp(&config.flags_kv_reader_url);
     config.validate_and_fix_timeouts();
 
     // Instantiate tracing outputs following Django's DEBUG-based approach:
