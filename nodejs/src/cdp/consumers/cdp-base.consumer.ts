@@ -37,12 +37,12 @@ export type CdpConsumerBaseHub = CdpFetchConfig &
     Pick<
         Hub,
         // Redis config
-        | 'REDIS_URL'
-        | 'REDIS_POOL_MIN_SIZE'
-        | 'REDIS_POOL_MAX_SIZE'
-        | 'CDP_REDIS_HOST'
-        | 'CDP_REDIS_PORT'
-        | 'CDP_REDIS_PASSWORD'
+        | 'KV_URL'
+        | 'KV_POOL_MIN_SIZE'
+        | 'KV_POOL_MAX_SIZE'
+        | 'CDP_KV_HOST'
+        | 'CDP_KV_PORT'
+        | 'CDP_KV_PASSWORD'
         // StreamProducerWrapper.create
         | 'STREAM_CLIENT_RACK'
         // PersonsManagerService needs personRepository
@@ -94,15 +94,15 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     constructor(protected hub: THub) {
         // CDP consumers use their own Redis instance with fallback to default
         this.redis = createRedisV2PoolFromConfig({
-            connection: hub.CDP_REDIS_HOST
+            connection: hub.CDP_KV_HOST
                 ? {
-                      url: hub.CDP_REDIS_HOST,
-                      options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
-                      name: 'cdp-redis',
+                      url: hub.CDP_KV_HOST,
+                      options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
+                      name: 'cdp-kv',
                   }
-                : { url: hub.REDIS_URL, name: 'cdp-redis-fallback' },
-            poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                : { url: hub.KV_URL, name: 'cdp-kv-fallback' },
+            poolMinSize: hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: hub.KV_POOL_MAX_SIZE,
         })
         this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
         this.insightsFlowManager = new InsightsFlowManagerService(hub.postgres, hub.pubSub)

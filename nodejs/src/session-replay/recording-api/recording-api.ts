@@ -85,12 +85,12 @@ export class RecordingApi {
         const teamService = new TeamService(this.hub.postgres)
         this.redisPool = createRedisPoolFromConfig({
             connection: {
-                url: this.hub.SESSION_RECORDING_API_REDIS_HOST,
-                options: { port: this.hub.SESSION_RECORDING_API_REDIS_PORT },
+                url: this.hub.SESSION_RECORDING_API_KV_HOST,
+                options: { port: this.hub.SESSION_RECORDING_API_KV_PORT },
                 name: 'recording-api',
             },
-            poolMinSize: this.hub.REDIS_POOL_MIN_SIZE,
-            poolMaxSize: this.hub.REDIS_POOL_MAX_SIZE,
+            poolMinSize: this.hub.KV_POOL_MIN_SIZE,
+            poolMaxSize: this.hub.KV_POOL_MAX_SIZE,
         })
         const retentionService = new RetentionService(this.redisPool, teamService)
 

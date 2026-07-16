@@ -4,7 +4,7 @@ import { createRedisPoolFromConfig } from '../../utils/db/redis'
 import { SessionFilter, SessionFilterConfig } from './session-filter'
 
 // nosemgrep: redis-unencrypted-transport (local testing only)
-const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1'
+const KV_URL = process.env.KV_URL || 'redis://127.0.0.1'
 
 describe('SessionFilter integration', () => {
     let sessionFilter: SessionFilter
@@ -13,7 +13,7 @@ describe('SessionFilter integration', () => {
 
     beforeAll(() => {
         redisPool = createRedisPoolFromConfig({
-            connection: { url: REDIS_URL, name: 'session-filter-integration-test' },
+            connection: { url: KV_URL, name: 'session-filter-integration-test' },
             poolMinSize: 1,
             poolMaxSize: 2,
         })

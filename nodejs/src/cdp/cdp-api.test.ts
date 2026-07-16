@@ -20,7 +20,7 @@ import { insertInsightsFlow as _insertInsightsFlow } from './_tests/fixtures-ins
 import { deleteKeysWithPrefix } from './_tests/redis'
 import { CdpApi } from './cdp-api'
 import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insights-filter-out-plugin/template'
-import { BASE_REDIS_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
+import { BASE_KV_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from './types'
 
 describe('CDP API', () => {
@@ -552,16 +552,16 @@ describe('CDP API', () => {
         beforeEach(async () => {
             jest.spyOn(hub.teamManager, 'getTeam').mockResolvedValue(team)
             const redis = createRedisV2PoolFromConfig({
-                connection: hub.CDP_REDIS_HOST
+                connection: hub.CDP_KV_HOST
                     ? {
-                          url: hub.CDP_REDIS_HOST,
-                          options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
+                          url: hub.CDP_KV_HOST,
+                          options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
         })
 
         afterAll(() => {
