@@ -46,7 +46,7 @@ export class InsightsFunctionTemplateManagerService {
             PostgresUse.COMMON_READ,
             `SELECT ${INSIGHTS_FUNCTION_TEMPLATE_FIELDS.join(
                 ', '
-            )} FROM insights_insightsfunctiontemplate WHERE template_id = ANY($1)`,
+            )} FROM insights_function_template WHERE template_id = ANY($1)`,
             [ids],
             'fetchInsightsFunctionTemplates'
         )
