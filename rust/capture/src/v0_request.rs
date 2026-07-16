@@ -294,7 +294,7 @@ mod tests {
                 .expect("payload is not base64"),
         );
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let events = RawRequest::from_bytes(
             compressed_bytes,
             Compression::Unsupported,
@@ -325,7 +325,7 @@ mod tests {
                 .expect("payload is not base64"),
         );
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let events = RawRequest::from_bytes(
             compressed_bytes,
             Compression::Unsupported,
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn extract_distinct_id() {
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let parse_and_extract = |input: &'static str| -> Result<String, CaptureError> {
             let parsed = RawRequest::from_bytes(
                 input.into(),
@@ -478,7 +478,7 @@ mod tests {
             "distinct_id": distinct_id
         }]);
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let parsed = RawRequest::from_bytes(
             input.to_string().into(),
             Compression::Unsupported,
@@ -531,7 +531,7 @@ mod tests {
         // Set a reasonable limit that should catch the bomb
         let limit = 1024 * 1024; // 1MB limit
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let result = RawRequest::from_bytes(
             Bytes::from(compressed),
             Compression::Gzip,
@@ -591,7 +591,7 @@ mod tests {
         // Should succeed with reasonable limit
         let limit = 10 * 1024; // 10KB limit
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let result = RawRequest::from_bytes(
             Bytes::from(compressed),
             Compression::Gzip,
@@ -649,7 +649,7 @@ mod tests {
             limit
         );
 
-        let path = "/i/v0/e";
+        let path = "/v1/e";
         let result = RawRequest::from_bytes(
             Bytes::from(compressed),
             Compression::Gzip,
@@ -675,7 +675,7 @@ mod tests {
     #[test]
     fn test_extract_and_verify_token() {
         let parse_and_extract = |input: &'static str| -> Result<String, CaptureError> {
-            let path = "/i/v0/e";
+            let path = "/v1/e";
             let raw_req = RawRequest::from_bytes(
                 input.into(),
                 Compression::Unsupported,
