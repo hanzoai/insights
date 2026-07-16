@@ -11,37 +11,41 @@ import { captureException } from '../insights'
 const REDIS_ERROR_COUNTER_LIMIT = 10
 
 /**
+ * A shared Hanzo KV endpoint is a real, non-local RESP URL (KV_URL normalized
+ * in config). Localhost / empty means "no shared KV" — KV is OPTIONAL and the
+ * embedded Base (SQLite) backend carries everything per-pod. This is the ONE
+ * definition of "is KV configured"; pub/sub pool creation keys off it too.
+ */
+export function isSharedKv(url: string | undefined): boolean {
+    const target = url || ''
+    const isLocal = target === '' || target.includes('127.0.0.1') || target.includes('localhost')
+    return !isLocal && (target.startsWith('redis://') || target.startsWith('rediss://'))
+}
+
+/**
  * Backend selection — strangle seam.
  *
- * The default backend is Base (embedded SQLite via the base-adapter). The
- * legacy ioredis transport stays reachable ONLY when a `redis://` / `rediss://`
- * URL is configured AND `INSIGHTS_REDIS_BACKEND` is not `base`. This is the
- * single place transport is chosen; every call-site is transport-agnostic.
+ * The default backend is Base (embedded SQLite via the base-adapter). The RESP
+ * transport (Hanzo KV) is used ONLY when a shared KV endpoint is configured via
+ * KV_URL AND `INSIGHTS_KV_BACKEND` is not `base`. This is the single place
+ * transport is chosen; every call-site is transport-agnostic.
  */
 function useBaseBackend(url: string): boolean {
-    const backend = (process.env.INSIGHTS_REDIS_BACKEND || 'auto').toLowerCase()
-    if (backend === 'redis') {
+    const backend = (process.env.INSIGHTS_KV_BACKEND || 'auto').toLowerCase()
+    if (backend === 'resp') {
         return false
     }
     if (backend === 'base') {
         return true
     }
-    // 'auto' (default): speak RESP to a real, shared endpoint — Hanzo KV, configured
-    // via KV_URL and normalized to the redis:// wire. Fall back to the embedded Base
-    // (per-pod SQLite) only for localhost / unconfigured targets, i.e. local dev.
-    // Hanzo KV is the canonical shared backend in the cluster (scalable across pods,
-    // and it serves RESP pub/sub natively); Base cannot fan pub/sub across pods.
-    const target = url || ''
-    const isLocal = target === '' || target.includes('127.0.0.1') || target.includes('localhost')
-    if (!isLocal && (target.startsWith('redis://') || target.startsWith('rediss://'))) {
-        return false
-    }
-    return true
+    // 'auto' (default): speak RESP to the shared Hanzo KV (scalable across pods,
+    // native RESP pub/sub) whenever one is configured; embedded Base otherwise.
+    return !isSharedKv(url)
 }
 
 /**
- * Configuration for a Redis connection.
- * Consumers should build this config inline where they create Redis connections,
+ * Configuration for a KV connection.
+ * Consumers should build this config inline where they create KV connections,
  * rather than relying on centralized builder functions.
  */
 export interface RedisConnectionConfig {
@@ -49,11 +53,11 @@ export interface RedisConnectionConfig {
     options?: RedisOptions
     name?: string
     /**
-     * Force a specific transport for this pool, overriding INSIGHTS_REDIS_BACKEND.
-     * Pub/Sub MUST set `forceBackend: 'redis'` because it is cross-process and
-     * the Base adapter cannot fan messages across worker pods.
+     * Force a specific transport for this pool, overriding INSIGHTS_KV_BACKEND.
+     * Cross-process pools (pub/sub) MUST set `forceBackend: 'resp'` because the
+     * Base adapter cannot fan messages across worker pods.
      */
-    forceBackend?: 'base' | 'redis'
+    forceBackend?: 'base' | 'resp'
 }
 
 /**
@@ -66,13 +70,13 @@ export interface RedisPoolConfig {
 }
 
 export async function createRedisFromConfig(config: RedisConnectionConfig): Promise<Redis.Redis> {
-    if (config.forceBackend === 'redis') {
+    if (config.forceBackend === 'resp') {
         return createRedisClient(config.url, config.options, config.name)
     }
     if (config.forceBackend === 'base' || useBaseBackend(config.url)) {
         const scope = baseScopeFromUrl(config.url)
         if (process.env.NODE_ENV !== 'test') {
-            logger.info('✅', `[base-adapter] ${config.name ?? 'redis'} backed by Base`, { scope })
+            logger.info('✅', `[base-adapter] ${config.name ?? 'kv'} backed by Base`, { scope })
         }
         // The base-adapter implements the ioredis subset insights uses. This is
         // the single deliberate cast at the strangle seam; it is removed when

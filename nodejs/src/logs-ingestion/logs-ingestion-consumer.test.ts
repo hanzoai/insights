@@ -24,7 +24,7 @@ import {
     logsRecordsDroppedCounter,
     logsRecordsReceivedCounter,
 } from './logs-ingestion-consumer'
-import { BASE_REDIS_KEY } from './services/logs-rate-limiter.service'
+import { BASE_KV_KEY } from './services/logs-rate-limiter.service'
 
 const DEFAULT_TEST_TIMEOUT = 5000
 jest.setTimeout(DEFAULT_TEST_TIMEOUT)
@@ -144,7 +144,7 @@ describe('LogsIngestionConsumer', () => {
 
         consumer = await createLogsIngestionConsumer(hub)
 
-        await deleteKeysWithPrefix(consumer['redis'], BASE_REDIS_KEY)
+        await deleteKeysWithPrefix(consumer['redis'], BASE_KV_KEY)
         logMessageDroppedCounterSpy = jest.spyOn(logMessageDroppedCounter, 'inc')
 
         // Default to not quota limited - tests can override this

@@ -2,7 +2,7 @@ import { LRUCache } from 'lru-cache'
 
 import { RedisPool } from '../../types'
 import { logger } from '../../utils/logger'
-import { SESSION_TRACKER_REDIS_TTL_SECONDS } from '../constants'
+import { SESSION_TRACKER_KV_TTL_SECONDS } from '../constants'
 import { SessionBatchMetrics } from './metrics'
 
 const DEFAULT_LOCAL_CACHE_MAX_SIZE = 100_000
@@ -52,7 +52,7 @@ export class SessionTracker {
 
             // Use SET with NX (only set if not exists) and EX (expiry) for atomic check-and-set
             // Returns 'OK' if key was set (new session), null if already exists
-            const wasSet = await client.set(key, '1', 'EX', SESSION_TRACKER_REDIS_TTL_SECONDS, 'NX')
+            const wasSet = await client.set(key, '1', 'EX', SESSION_TRACKER_KV_TTL_SECONDS, 'NX')
             const isNewSession = wasSet === 'OK'
 
             // Cache the result locally regardless of whether it's new

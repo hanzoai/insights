@@ -9,7 +9,7 @@ import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFu
 import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
 import { deleteKeysWithPrefix } from '../../_tests/redis'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../../types'
-import { BASE_REDIS_KEY, ScriptMaskerService } from './script-masker.service'
+import { BASE_KV_KEY, ScriptMaskerService } from './script-masker.service'
 
 const mockNow: jest.SpyInstance = jest.spyOn(Date, 'now')
 
@@ -27,16 +27,16 @@ describe('ScriptMasker', () => {
             mockNow.mockReturnValue(now)
 
             redis = createRedisV2PoolFromConfig({
-                connection: hub.CDP_REDIS_HOST
+                connection: hub.CDP_KV_HOST
                     ? {
-                          url: hub.CDP_REDIS_HOST,
-                          options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
+                          url: hub.CDP_KV_HOST,
+                          options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
                       }
-                    : { url: hub.REDIS_URL },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
-            await deleteKeysWithPrefix(redis, BASE_REDIS_KEY)
+            await deleteKeysWithPrefix(redis, BASE_KV_KEY)
 
             masker = new ScriptMaskerService(redis)
         })
@@ -256,7 +256,7 @@ describe('ScriptMasker', () => {
             describe('ttl constraints', () => {
                 const getRedisKeyTtl = async (): Promise<number> => {
                     const keys = await redis.useClient({ name: 'test-keys' }, async (client) => {
-                        return await client.keys(`${BASE_REDIS_KEY}/mask/*`)
+                        return await client.keys(`${BASE_KV_KEY}/mask/*`)
                     })
                     expect(keys?.length).toBe(1)
                     const ttl = await redis.useClient({ name: 'test-ttl' }, async (client) => {

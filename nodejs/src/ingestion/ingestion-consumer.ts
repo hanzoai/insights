@@ -141,7 +141,7 @@ export class IngestionConsumer {
         // Create shared Redis repository for overflow redirect services
         const overflowRedisRepository = new RedisOverflowRepository({
             redisPool: this.hub.redisPool,
-            redisTTLSeconds: this.hub.INGESTION_STATEFUL_OVERFLOW_REDIS_TTL_SECONDS,
+            redisTTLSeconds: this.hub.INGESTION_STATEFUL_OVERFLOW_KV_TTL_SECONDS,
         })
 
         // Create overflow redirect service only when overflow is enabled (main lane)

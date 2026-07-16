@@ -50,12 +50,12 @@ export type CdpApiHub = CdpSourceWebhooksConsumerHub &
         Hub,
         | 'teamManager'
         | 'SITE_URL'
-        | 'REDIS_URL'
-        | 'REDIS_POOL_MIN_SIZE'
-        | 'REDIS_POOL_MAX_SIZE'
-        | 'CDP_REDIS_HOST'
-        | 'CDP_REDIS_PORT'
-        | 'CDP_REDIS_PASSWORD'
+        | 'KV_URL'
+        | 'KV_POOL_MIN_SIZE'
+        | 'KV_POOL_MAX_SIZE'
+        | 'CDP_KV_HOST'
+        | 'CDP_KV_PORT'
+        | 'CDP_KV_PASSWORD'
     >
 
 export class CdpApi {
@@ -102,15 +102,15 @@ export class CdpApi {
         this.scriptWatcher = new ScriptWatcherService(
             hub,
             createRedisV2PoolFromConfig({
-                connection: hub.CDP_REDIS_HOST
+                connection: hub.CDP_KV_HOST
                     ? {
-                          url: hub.CDP_REDIS_HOST,
-                          options: { port: hub.CDP_REDIS_PORT, password: hub.CDP_REDIS_PASSWORD },
-                          name: 'cdp-api-redis',
+                          url: hub.CDP_KV_HOST,
+                          options: { port: hub.CDP_KV_PORT, password: hub.CDP_KV_PASSWORD },
+                          name: 'cdp-api-kv',
                       }
-                    : { url: hub.REDIS_URL, name: 'cdp-api-redis-fallback' },
-                poolMinSize: hub.REDIS_POOL_MIN_SIZE,
-                poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
+                    : { url: hub.KV_URL, name: 'cdp-api-kv-fallback' },
+                poolMinSize: hub.KV_POOL_MIN_SIZE,
+                poolMaxSize: hub.KV_POOL_MAX_SIZE,
             })
         )
         this.scriptTransformer = new ScriptTransformerService(hub)

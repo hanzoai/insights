@@ -21,9 +21,9 @@ export type LogsRateLimiterServiceHub = Pick<
     | 'LOGS_LIMITER_TTL_SECONDS'
 >
 
-export const BASE_REDIS_KEY =
+export const BASE_KV_KEY =
     process.env.NODE_ENV == 'test' ? '@insights-test/logs-rate-limiter' : '@hanzo/logs-rate-limiter'
-const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
+const REDIS_KEY_TOKENS = `${BASE_KV_KEY}/tokens`
 
 export type LogsRateLimit = {
     tokensBefore: number

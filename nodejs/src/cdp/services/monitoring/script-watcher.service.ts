@@ -34,10 +34,10 @@ export type ScriptWatcherServiceHub = Pick<
     | 'CDP_WATCHER_OBSERVE_RESULTS_BUFFER_MAX_RESULTS'
 >
 
-export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@hanzo/script-watcher-2'
-const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
-const REDIS_KEY_STATE = `${BASE_REDIS_KEY}/state`
-const REDIS_KEY_STATE_LOCK = `${BASE_REDIS_KEY}/state-lock`
+export const BASE_KV_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@hanzo/script-watcher-2'
+const REDIS_KEY_TOKENS = `${BASE_KV_KEY}/tokens`
+const REDIS_KEY_STATE = `${BASE_KV_KEY}/state`
+const REDIS_KEY_STATE_LOCK = `${BASE_KV_KEY}/state-lock`
 
 export enum ScriptWatcherState {
     healthy = 1,
