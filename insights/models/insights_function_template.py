@@ -18,6 +18,9 @@ class InsightsFunctionTemplate(UUIDTModel):
     efficient storage, and easier updates for InsightsFunction templates.
     """
 
+    class Meta:
+        db_table = "insights_function_template"
+
     # Core Template Information
     template_id = models.CharField(max_length=255, db_index=True)
     sha = models.CharField(max_length=100, db_index=True)

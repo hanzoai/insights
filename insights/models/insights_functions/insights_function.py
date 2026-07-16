@@ -72,6 +72,7 @@ TYPES_WITH_JAVASCRIPT_SOURCE = (InsightsFunctionType.SITE_DESTINATION, InsightsF
 
 class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
     class Meta:
+        db_table = "insights_function"
         indexes = [
             models.Index(fields=["type", "enabled", "team"]),
         ]
