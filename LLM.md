@@ -58,11 +58,41 @@ restored so CI builds the monolith `Dockerfile` and pushes to
 
 ## What is retained (NOT Django — separate concerns)
 
-Event **ingestion** substrate stays live (it is not the Django app):
-`insights-capture` (Rust), `insights-plugin` (Node), `insights-kafka`,
-`insights-kv`, `insights-sql`, `datastore` (ClickHouse). NOTE: with the Django
-query layer gone these ingest without a product-analytics reader — a follow-up
-decommission decision, out of scope for retiring the Django app.
+Event **ingestion** substrate is LIVE and proven end-to-end (it is not the
+Django app): `insights-capture` (Rust), `insights-plugin` (Node),
+`insights-kafka`, `insights-kv`, `insights-sql`, `datastore` (ClickHouse).
+Proven path: `POST https://insights.hanzo.ai/v1/e` → `200` → capture → kafka →
+plugin → ClickHouse `events`.
+
+### Ingest is clean `/v1/*` — NO PostHog `/i/v0` cruft
+
+We own capture AND the SDK, so ingest is `/v1/*` like every other Hanzo API.
+The Rust capture router serves exactly (forward-only; the legacy
+`/i/v0/e`,`/e`,`/batch`,`/track`,`/engage`,`/capture`,`/s`,`/i/v0/ai` paths were
+REMOVED — do not re-add):
+
+- `POST /v1/e`  — events (single OR batch array; 20MB body limit)
+- `POST /v1/s`  — session recordings
+- `POST /v1/ai` — AI/LLM events
+
+Ingress: `insights.hanzo.ai` + `insights-app.hanzo.ai` route `PathPrefix(/v1)`
+(priority 100) → capture service; catch-all (priority 1) → Django web. ONE
+`/v1` router per host in `universe infra/k8s/ingress/routes.yaml` (the old
+per-path `-batch`/`-capture`/`-e` routers are gone; a couple of dead *service*
+defs may linger at the bottom of routes.yaml — harmless, sweep on next pass).
+The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
+`rollout restart deploy/ingress` (ACME/TLS outage).
+
+### Clean single-`insights_` table names (double `insights_insights*` dropped)
+
+The debrand left three CDP tables double-named (`insights_insightsfunction`,
+`insights_insightsflow`, `insights_insightsfunctiontemplate`). Migration
+`1019_rename_insights_tables_clean` (`AlterModelTable`, runs LAST so it's safe
+for fresh + live) + `Meta.db_table` on the 3 models renamed them to
+`insights_function` / `insights_flow` / `insights_function_template`. Plugin SQL
+queries the clean names (`plugin sha-fe74083`). NOTE: `manage.py migrate` is a
+SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
+`manage.py migrate` in the web pod after a schema bump.
 
 ## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
