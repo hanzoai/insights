@@ -32,6 +32,7 @@ class InsightsFlow(UUIDTModel):
     """
 
     class Meta:
+        db_table = "insights_flow"
         indexes = [
             models.Index(fields=["status", "team"]),
             models.Index(fields=["version", "team"]),
