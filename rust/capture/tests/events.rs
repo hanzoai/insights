@@ -1114,7 +1114,7 @@ async fn it_applies_billing_limits() -> Result<()> {
     redis.add_billing_limit(QuotaResource::Events, &token2, Duration::seconds(60));
 
     let mut config = DEFAULT_CONFIG.clone();
-    config.redis_key_prefix = redis.key_prefix();
+    config.kv_key_prefix = redis.key_prefix();
     config.kafka.kafka_topic = topic.topic_name().to_string();
     let server = ServerHandle::for_config(config).await;
 

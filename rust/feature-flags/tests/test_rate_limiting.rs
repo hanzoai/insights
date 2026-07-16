@@ -20,7 +20,7 @@ async fn test_rate_limit_basic() -> Result<()> {
     config.flags_bucket_replenish_rate = 0.1;
 
     // Set up team and token in Redis and Postgres
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -96,7 +96,7 @@ async fn test_rate_limit_disabled() -> Result<()> {
     assert!(!*config.flags_rate_limit_enabled);
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -153,7 +153,7 @@ async fn test_rate_limit_per_token_isolation() -> Result<()> {
     config.flags_bucket_replenish_rate = 0.1;
 
     // Set up two teams with different tokens
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team1 = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -353,7 +353,7 @@ async fn test_rate_limit_replenishment() -> Result<()> {
     config.flags_bucket_capacity = 1;
     config.flags_bucket_replenish_rate = 1.0; // 1 token per second
 
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -435,7 +435,7 @@ async fn test_ip_rate_limit_basic() -> Result<()> {
     config.flags_ip_replenish_rate = 0.1;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -572,7 +572,7 @@ async fn test_both_rate_limiters_together() -> Result<()> {
     config.flags_ip_replenish_rate = 1.0;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -645,7 +645,7 @@ async fn test_ip_rate_limit_disabled() -> Result<()> {
     config.flags_ip_rate_limit_enabled = FlexBool(false);
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -702,7 +702,7 @@ async fn test_ip_rate_limit_respects_x_forwarded_for() -> Result<()> {
     config.flags_ip_replenish_rate = 0.1;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -811,7 +811,7 @@ async fn test_token_rate_limit_log_only_mode() -> Result<()> {
     config.flags_bucket_replenish_rate = 0.1;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -884,7 +884,7 @@ async fn test_ip_rate_limit_log_only_mode() -> Result<()> {
     config.flags_ip_replenish_rate = 0.1;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
@@ -961,7 +961,7 @@ async fn test_mixed_log_only_modes() -> Result<()> {
     config.flags_ip_replenish_rate = 0.1;
 
     // Set up team and token
-    let redis_client = setup_redis_client(Some(config.redis_url.clone())).await;
+    let redis_client = setup_redis_client(Some(config.kv_url.clone())).await;
     let team = insert_new_team_in_redis(redis_client.clone())
         .await
         .unwrap();
