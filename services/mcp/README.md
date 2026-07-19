@@ -299,7 +299,7 @@ And replace `https://mcp.hanzo.ai/mcp` with `http://localhost:8787/mcp` in the M
 
 To develop with warm loading for MCP resources (workflows, prompts, examples):
 
-1. Start the [context-mill](https://github.com/Hanzo Insights/context-mill) dev server: `cd ../context-mill && npm run dev`
+1. Start the [context-mill](https://github.com/hanzoai/context-mill) dev server: `cd ../context-mill && npm run dev`
 2. Start the MCP server with local resources: `pnpm run dev:local-resources`
 
 Changes in the examples repo will be reflected on the next request.
@@ -361,7 +361,7 @@ npx
 - **Privacy Policy:** https://hanzo.ai/privacy
 - **Terms of Service:** https://hanzo.ai/terms
 - **Support:** https://hanzo.ai/questions or email support@hanzo.ai
-- **GitHub Issues:** https://github.com/Hanzo Insights/insights/issues
+- **GitHub Issues:** https://github.com/hanzoai/insights/issues
 
 ### Data handling
 

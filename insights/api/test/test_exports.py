@@ -175,7 +175,7 @@ class TestExports(APIBaseTest):
 
     @patch("insights.api.exports.exporter")
     def test_swallow_missing_schema_and_allow_front_end_to_poll(self, mock_exporter_task) -> None:
-        # regression test see https://github.com/Hanzo Insights/insights/issues/11204
+        # regression test see https://github.com/hanzoai/insights/issues/11204
 
         mock_exporter_task.get.side_effect = requests.exceptions.MissingSchema("why is this raised?")
 

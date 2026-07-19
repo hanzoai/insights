@@ -202,7 +202,7 @@ export const breadcrumbsLogic = kea<breadcrumbsLogicType>([
                         .filter((breadcrumb) => !!breadcrumb.name)
                         .map((breadcrumb) => breadcrumb.name)
                         .reverse(),
-                    preflight?.demo ? 'Insights Demo' : 'Insights',
+                    preflight?.demo ? 'Hanzo Insights Demo' : 'Hanzo Insights',
                 ].join(' • '),
         ],
     })),

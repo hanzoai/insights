@@ -8,7 +8,7 @@ def clamp_to_range(
 ) -> float:
     """
     Clamps a value to a range. This has been ported from insights-js.
-    https://github.com/Hanzo Insights/insights-js/blob/9de949e26c560535122c50d7fcf9e74d4361ecef/src/utils/number-utils.ts#L4-L33
+    https://github.com/hanzoai/insights-js/blob/9de949e26c560535122c50d7fcf9e74d4361ecef/src/utils/number-utils.ts#L4-L33
 
     Args:
         value: The value to clamp

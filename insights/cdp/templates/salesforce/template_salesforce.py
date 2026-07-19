@@ -203,7 +203,7 @@ if (res.status >= 400) {
 
 
 class TemplatSalesforceMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-plugin-replicator"
+    plugin_url = "https://github.com/hanzoai/insights-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):

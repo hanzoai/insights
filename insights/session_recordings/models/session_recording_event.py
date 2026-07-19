@@ -19,7 +19,7 @@ class SessionRecordingEvent(models.Model):
             models.Index(fields=["team_id", "session_id"]),
             models.Index(fields=["team_id", "distinct_id", "timestamp", "session_id"]),
             # The index below exists but was replaced with SQL to avoid some issues
-            # The migration is in 0110, and see https://github.com/Hanzo Insights/insights/issues/4969 for more info
+            # The migration is in 0110, and see https://github.com/hanzoai/insights/issues/4969 for more info
             #   models.Index(fields=["team_id", "timestamp"]),
         ]
 

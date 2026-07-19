@@ -81,7 +81,7 @@ fetch(f'{host}/e', {
 
 
 class TemplateInsightsMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-plugin-replicator"
+    plugin_url = "https://github.com/hanzoai/insights-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):

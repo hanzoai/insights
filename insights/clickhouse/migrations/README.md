@@ -64,8 +64,8 @@ When you want to pull data from Kafka into ClickHouse, you should:
    2. If your data table is sharded, you should point it to all shards: `Distributed(..., cluster=settings.CLICKHOUSE_CLUSTER, sharding_key="...")`, using a sharding key.
 3. Create a materialized view between Kafka table and the writable table.
 
-Example PR for non-sharded table: https://github.com/Hanzo Insights/insights/pull/38890/files
-Example PR for sharded table: https://github.com/Hanzo Insights/insights/issues/38668/files
+Example PR for non-sharded table: https://github.com/hanzoai/insights/pull/38890/files
+Example PR for sharded table: https://github.com/hanzoai/insights/issues/38668/files
 
 `Medium` tier contains 4 consumers, while `Small` tier contain just one. Depending on the throughput of the Kafka topic, you should choose the appropriate tier, in case of doubts choose `Small` and you can later upgrade to `Medium` if lag is too high.
 
@@ -97,7 +97,7 @@ We have extra nodes with a sole purpose of ingesting the data from Kafka topics 
 3. Create a Kafka table in ingestion nodes: `node_roles=[NodeRole.INGESTION_SMALL]`.
 4. Create materialized view between Kafka table and writable table on ingestion nodes.
 
-Example PR for non-sharded table: https://github.com/Hanzo Insights/insights/pull/38890/files
+Example PR for non-sharded table: https://github.com/hanzoai/insights/pull/38890/files
 
 **How and why?**
 

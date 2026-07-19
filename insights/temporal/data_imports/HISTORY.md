@@ -28,8 +28,8 @@ Makes building new sources a breeze, we now have other teams building sources (s
 
 **Further reading**:
 
-- Limited internal workings of the pipeline and handling OOMs: https://github.com/Hanzo Insights/insights/blob/main/insights/temporal/data_imports/README.md
-- How to build a new source: https://github.com/Hanzo Insights/insights/blob/main/insights/temporal/data_imports/sources/README.md
+- Limited internal workings of the pipeline and handling OOMs: https://github.com/hanzoai/insights/blob/main/insights/temporal/data_imports/README.md
+- How to build a new source: https://github.com/hanzoai/insights/blob/main/insights/temporal/data_imports/sources/README.md
 
 ### Problems
 
@@ -82,8 +82,8 @@ We want lots of sources, of well running sources - that is, sources that run eff
 
 We've got a decent prompt to one-shot source creation via Claude, examples:
 
-- https://github.com/Hanzo Insights/insights/compare/main...claude/add-klaviyo-warehouse-source-0168rKr1z9DsehvfpUi56vXt
-- https://github.com/Hanzo Insights/insights/compare/main...claude/mailgun-data-warehouse-source-01WUz5GQwBaUarJnrqU2hSeV
+- https://github.com/hanzoai/insights/compare/main...claude/add-klaviyo-warehouse-source-0168rKr1z9DsehvfpUi56vXt
+- https://github.com/hanzoai/insights/compare/main...claude/mailgun-data-warehouse-source-01WUz5GQwBaUarJnrqU2hSeV
 
 The next step is to automate the above process for when a user requests a new source, and then add self-healing sources.
 

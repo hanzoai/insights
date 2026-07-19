@@ -351,7 +351,7 @@ class PersonlessDistinctId(models.Model):
 
 
 class PersonOverrideMapping(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/hanzoai/insights/pull/23616
 
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -366,7 +366,7 @@ class PersonOverrideMapping(models.Model):
 
 
 class PersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/hanzoai/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     # DO_NOTHING + db_constraint=False: Team deletion handled manually, may be cross-database
@@ -404,7 +404,7 @@ class PersonOverride(models.Model):
 
 
 class PendingPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/hanzoai/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -418,7 +418,7 @@ class PendingPersonOverride(models.Model):
 
 
 class FlatPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
+    # XXX: NOT USED, see https://github.com/hanzoai/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()

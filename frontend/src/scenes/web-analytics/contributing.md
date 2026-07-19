@@ -113,7 +113,7 @@ Captured at session start and persisted for the session lifetime:
 - Session docs: <https://hanzo.ai/docs/data/sessions>
 - Web analytics FAQ: <https://hanzo.ai/docs/web-analytics/faq>
 - SPA pageview tutorial: <https://hanzo.ai/tutorials/single-page-app-pageviews>
-- Source code: [session-props.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/Hanzo Insights/insights-js/blob/main/packages/browser/src/page-view.ts)
+- Source code: [session-props.ts](https://github.com/hanzoai/insights-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/hanzoai/insights-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/hanzoai/insights-js/blob/main/packages/browser/src/page-view.ts)
 
 ### Implementation details
 

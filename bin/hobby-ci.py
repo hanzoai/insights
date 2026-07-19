@@ -151,7 +151,7 @@ class HobbyTester:
 
         return [
             'echo "$LOG_PREFIX Downloading hobby installer from GitHub releases..."',
-            "curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/hobby-installer -o hobby-installer",
+            "curl -L https://github.com/hanzoai/insights/releases/download/hobby-latest/hobby-installer -o hobby-installer",
             "chmod +x hobby-installer",
         ]
 
@@ -174,7 +174,7 @@ runcmd:
             'echo "$LOG_PREFIX Setting up needrestart config"',
             "sed -i \"s/#\\$nrconf{restart} = 'i';/\\$nrconf{restart} = 'a';/g\" /etc/needrestart/needrestart.conf",
             'echo "$LOG_PREFIX Cloning Insights repository"',
-            "git clone https://github.com/Hanzo Insights/insights.git",
+            "git clone https://github.com/hanzoai/insights.git",
             "cd insights",
             f'echo "$LOG_PREFIX Fetching commit: {safe_sha}"',
             f"git fetch origin {safe_sha}",

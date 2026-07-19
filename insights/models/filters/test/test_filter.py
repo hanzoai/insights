@@ -835,7 +835,7 @@ class TestDjangoPropertiesToQ(property_to_Q_test_factory(_filter_persons, _creat
             distinct_ids=[person1_distinct_id],
             properties={"registration_ts": 1716447600},
         )
-        # This broken filter came from this issue: https://github.com/Hanzo Insights/insights/issues/23213
+        # This broken filter came from this issue: https://github.com/hanzoai/insights/issues/23213
         filter = Filter(
             data={
                 "properties": {

@@ -221,7 +221,7 @@ if (res.status >= 400) {
 
 
 class TemplateCustomerioMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/customerio-plugin"
+    plugin_url = "https://github.com/hanzoai/customerio-plugin"
 
     @classmethod
     def migrate(cls, obj):
