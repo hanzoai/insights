@@ -18,7 +18,7 @@ class CoreFilterDefinition(TypedDict):
 
 
 """
-Same as https://github.com/Hanzo Insights/insights-js/blob/main/src/utils/event-utils.ts
+Same as https://github.com/hanzoai/insights-js/blob/main/src/utils/event-utils.ts
 Ideally this would be imported from one place.
 """
 CAMPAIGN_PROPERTIES: list[str] = [

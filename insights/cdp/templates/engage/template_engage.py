@@ -56,7 +56,7 @@ fetch('https://api.engage.so/insights', {
 
 
 class TemplateEngageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-engage-so-plugin"
+    plugin_url = "https://github.com/hanzoai/insights-engage-so-plugin"
 
     @classmethod
     def migrate(cls, obj):

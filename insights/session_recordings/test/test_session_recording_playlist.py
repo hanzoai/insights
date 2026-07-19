@@ -440,7 +440,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
     def test_does_not_count_empty_object_as_filters(self) -> None:
         """
         can delete a collection despite there is an empty object for filters
-        a regression test for https://github.com/Hanzo Insights/insights/issues/35820
+        a regression test for https://github.com/hanzoai/insights/issues/35820
         """
         create_response = self._create_playlist({"type": "collection"})
         assert "short_id" in create_response.json(), create_response.json()

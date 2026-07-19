@@ -65,7 +65,7 @@ class TestFindPythonDependencies(unittest.TestCase):
             # Direct dependencies - should trigger rebuild
             ("entrypoint_init", "insights/temporal/subscriptions/__init__.py", True),
             ("entrypoint_workflow", "insights/temporal/subscriptions/subscription_scheduling_workflow.py", True),
-            # Transitive dependencies (the bug that caused issue https://github.com/Hanzo Insights/insights/pull/42307) - should trigger rebuild
+            # Transitive dependencies (the bug that caused issue https://github.com/hanzoai/insights/pull/42307) - should trigger rebuild
             ("transitive_utils", "insights/utils.py", True),
             ("transitive_query_runner", "insights/insightsql_queries/query_runner.py", True),
             # Export-related files - should trigger rebuild

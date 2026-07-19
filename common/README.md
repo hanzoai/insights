@@ -2,7 +2,7 @@
 
 This folder contains projects, tools and utilities, which are `common/` and shared amongst all the `products/`.
 
-- Internal RFC: https://github.com/Hanzo Insights/product-internal/pull/703
+- Internal RFC: https://github.com/hanzoai/product-internal/pull/703
 
 ## Dev guidelines
 

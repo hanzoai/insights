@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 # ClickHouse query timeout in seconds
-# From https://github.com/Hanzo Insights/insights-cloud-infra/blob/main/ansible/config/clickhouse-users.xml#L11
+# From https://github.com/hanzoai/insights-cloud-infra/blob/main/ansible/config/clickhouse-users.xml#L11
 # Keep in sync with the above! And note that this doesn't hold for async queries (which are flagged as of Feb 2023)
 CLICKHOUSE_MAX_EXECUTION_TIME = timedelta(seconds=180)
 

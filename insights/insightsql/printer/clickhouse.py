@@ -745,7 +745,7 @@ class ClickHousePrinter(InsightsQLPrinter):
         nullable_right = self._is_nullable(node.right)
         not_nullable = not nullable_left and not nullable_right
 
-        # :HACK: until the new type system is out: https://github.com/Hanzo Insights/insights/pull/17267
+        # :HACK: until the new type system is out: https://github.com/hanzoai/insights/pull/17267
         # If we add a ifNull() around `events.timestamp`, we lose on the performance of the index.
         # Only apply this optimization to actual table timestamp fields, not CTE fields.
         if self._is_events_table_timestamp_field(node.left) or self._is_events_table_timestamp_field(node.right):

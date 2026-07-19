@@ -273,7 +273,7 @@ class TestPluginSourceFile(BaseTest, QueryMatchingTest):
             organization=self.organization,
             name="Contoso",
             archive=base64.b64decode(HELLO_WORLD_PLUGIN_RAW_SUBDIR),
-            url="https://www.github.com/Hanzo Insights/helloworldplugin/tree/main/app",
+            url="https://www.github.com/hanzoai/helloworldplugin/tree/main/app",
         )
 
         (

@@ -798,6 +798,9 @@ class SocialAuthExceptionMiddleware:
                 "github_sso_enforced",
                 "gitlab_sso_enforced",
                 "sso_enforced",
+                # Fail-closed IAM org binding (insights.api.iam_org_pipeline): the OIDC
+                # login carried no resolvable `owner` claim / org could not be bound.
+                "sso_no_organization",
             ):
                 return redirect(f"/login?error_code={error}")
 
