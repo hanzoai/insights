@@ -33,7 +33,7 @@ def migrate_batch(legacy_plugins: Any, kind: str, test_mode: bool, dry_run: bool
                 print("Skipping plugin", plugin_config["plugin__name"], "as it doesn't have a url")  # noqa: T201
                 continue
 
-            plugin_id = url.replace("inline://", "").replace("https://github.com/Hanzo Insights/", "")
+            plugin_id = url.replace("inline://", "").replace("https://github.com/hanzoai/", "")
             plugin_name = plugin_config["plugin__name"]
 
             # Inline plugins are named slightly differently so we fix it here

@@ -70,7 +70,7 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGoogleCloudStorageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-gcs-plugin"
+    plugin_url = "https://github.com/hanzoai/insights-gcs-plugin"
 
     @classmethod
     def migrate(cls, obj):

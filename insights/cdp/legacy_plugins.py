@@ -6,7 +6,7 @@ def insights_function_from_plugin_config(plugin_config: dict, serializer_context
     plugin = plugin_config["plugin"]
     # Attempts to find a related InsightsFunctionTemplate for the plugin config
 
-    plugin_id = plugin.url.replace("inline://", "").replace("https://github.com/Hanzo Insights/", "")
+    plugin_id = plugin.url.replace("inline://", "").replace("https://github.com/hanzoai/", "")
 
     # Inline plugins are named slightly differently so we fix it here
     if plugin_id == "semver-flattener":

@@ -120,7 +120,7 @@ class EventsQueryRunner(AnalyticsQueryRunner[EventsQueryResponse]):
         return True
 
     def to_query(self) -> ast.SelectQuery:
-        # Note: This code is inefficient and problematic, see https://github.com/Hanzo Insights/insights/issues/13485 for details.
+        # Note: This code is inefficient and problematic, see https://github.com/hanzoai/insights/issues/13485 for details.
         with self.timings.measure("build_ast"):
             # columns & group_by
             with self.timings.measure("columns"):

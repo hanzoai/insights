@@ -3663,7 +3663,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                             ),
                         ]
                     ),
-                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Hanzo Insights/insights/pull/44346 but test for equivalence here
+                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/hanzoai/insights/pull/44346 but test for equivalence here
             ],
             select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
             where=ast.CompareOperation(

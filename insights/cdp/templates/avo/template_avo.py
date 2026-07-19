@@ -135,7 +135,7 @@ fetch('https://api.avo.app/inspector/insights/v1/track', {
 
 
 class TemplateAvoMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-avo-plugin"
+    plugin_url = "https://github.com/hanzoai/insights-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):

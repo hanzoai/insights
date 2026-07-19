@@ -795,6 +795,17 @@ def social_create_user(
             code="required",
         )
 
+    # Hanzo IAM (hanzo.id) is authoritative for org membership. Under SSO enforcement the
+    # OIDC `owner` claim -- not self-service org creation -- decides the tenant, so provision
+    # the bare user here and let iam_org_assign (later in SOCIAL_AUTH_PIPELINE) bind them
+    # fail-closed. This also sidesteps get_can_create_org, which returns False on an already
+    # populated instance and would otherwise strand brand-new OIDC users at no_new_organizations.
+    if settings.SSO_ENFORCED and backend.name == "oidc":
+        user = strategy.create_user(
+            email=email, first_name=full_name, password=None, is_email_verified=True
+        )
+        return {"is_new": True, "user": user}
+
     # If we get here then it's a new user. We'll check for outstanding invites for them
     # on the organization domain or if JIT provisioning is enabled, we'll provision them.
     # And fallback to a form where they can create an organization.

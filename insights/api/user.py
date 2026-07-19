@@ -880,7 +880,7 @@ def redirect_to_site(request):
         params["distinctId"] = request.user.distinct_id
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/Hanzo Insights/insights/issues/9671
+    # see https://github.com/hanzoai/insights/issues/9671
     state = urllib.parse.quote(json.dumps(params), safe="")
 
     if str(request.GET.get("generateOnly")) in ["1", "yes", "true"]:
@@ -945,7 +945,7 @@ def redirect_to_website(request):
         )
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/Hanzo Insights/insights/issues/9671
+    # see https://github.com/hanzoai/insights/issues/9671
     userData = urllib.parse.quote(json.dumps({"jwt": token}), safe="")
 
     return redirect("{}?userData={}&redirect={}".format("https://hanzo.ai/auth", userData, app_url))

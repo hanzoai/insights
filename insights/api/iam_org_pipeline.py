@@ -21,7 +21,9 @@ correct Organization->Team hierarchy.
 from typing import Any, Optional, Union
 
 import structlog
+from django.conf import settings
 from django.db import transaction
+from social_core.exceptions import AuthFailed
 from social_django.strategy import DjangoStrategy
 
 from insights.models import Organization, OrganizationMembership, Team, User
@@ -170,8 +172,16 @@ def iam_org_assign(
     if not response:
         response = {}
 
+    # Under SSO enforcement the OIDC `owner` claim is the AUTHORITATIVE, fail-closed
+    # source of tenancy: an SSO user we cannot bind to an org must not get a session.
+    # Escape hatch (SSO_ENFORCED=0) restores the legacy fail-open behavior below.
+    enforced = settings.SSO_ENFORCED and getattr(backend, "name", None) == "oidc"
+
     org_slug = _extract_iam_org_slug(response, kwargs)
     if not org_slug:
+        if enforced and not OrganizationMembership.objects.filter(user=user).exists():
+            logger.error("iam_org_pipeline_no_org_slug_fail_closed", user_id=str(user.uuid))
+            raise AuthFailed(backend, "sso_no_organization")
         logger.debug("iam_org_pipeline_no_org_slug", user_id=str(user.uuid))
         return None
 
@@ -200,7 +210,10 @@ def iam_org_assign(
             response_keys=list(response.keys()) if response else [],
             exc_info=True,
         )
-        # Don't fail the login -- just log the error
-        # User will need to be manually assigned via admin
+        if enforced:
+            # Fail-closed: never leave an SSO user half-provisioned or in the wrong tenant.
+            raise AuthFailed(backend, "sso_no_organization")
+        # Escape hatch (SSO_ENFORCED=0): log and let the login proceed;
+        # the user is assigned to an org manually via admin.
 
     return None

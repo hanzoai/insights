@@ -8,7 +8,7 @@ This is an internal guide to setting up and working with the data warehouse for 
 
 ## Adding a new source
 
-Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/Hanzo Insights/insights/blob/main/insights/temporal/data_imports/sources/README.md).
+Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/hanzoai/insights/blob/main/insights/temporal/data_imports/sources/README.md).
 
 > If you're a customer of Insights Cloud and are looking to import data into your project, then you're likely looking for [this section of the docs instead](https://hanzo.ai/docs/cdp/sources)
 
@@ -67,7 +67,7 @@ After the job runs, clicking on the synced table name should take you to your da
 
 ## Working with a MS SQL source
 
-You'll need to install MS SQL drivers for the Insights app to connect to a MS SQL database. Learn the entire process in [insights/warehouse/README.md](https://github.com/Hanzo Insights/insights/blob/main/insights/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
+You'll need to install MS SQL drivers for the Insights app to connect to a MS SQL database. Learn the entire process in [insights/warehouse/README.md](https://github.com/hanzoai/insights/blob/main/insights/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
 
 ```text
 symbol not found in flat namespace '_bcp_batch'
