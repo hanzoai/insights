@@ -147,7 +147,7 @@ class ActivityLogTestHelper(APILicensedTest):
             "name": name,
             "plugin_type": "local",
             "description": "Test plugin",
-            "url": "https://github.com/Hanzo Insights/insights-plugin-test",
+            "url": "https://github.com/hanzoai/insights-plugin-test",
             **kwargs,
         }
         response = self.client.post("/api/organizations/@current/plugins/", data, format="json")

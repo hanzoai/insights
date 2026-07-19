@@ -512,7 +512,7 @@ class Team(UUIDTClassicModel):
     # Environment-level default InsightsQL query modifiers
     modifiers = models.JSONField(null=True, blank=True)
 
-    # This is meant to be used as a stopgap until https://github.com/Hanzo Insights/meta/pull/39 gets implemented
+    # This is meant to be used as a stopgap until https://github.com/hanzoai/meta/pull/39 gets implemented
     # Switches _most_ queries to using distinct_id as aggregator instead of person_id
     @property
     def aggregate_users_by_distinct_id(self) -> bool:
