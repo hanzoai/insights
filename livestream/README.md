@@ -1,4 +1,4 @@
-<img src="https://github.com/Hanzo Insights/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
+<img src="https://github.com/hanzoai/livestream/assets/391319/d4a4964d-4b19-4605-b268-157366817863" width="280" height="280" />
 
 # RealTime Insights 3000
 

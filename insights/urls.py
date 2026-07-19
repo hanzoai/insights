@@ -139,6 +139,20 @@ def authorize_and_redirect(request: HttpRequest) -> HttpResponse:
     )
 
 
+# Self-service signup is disabled while Hanzo IAM SSO is enforced (settings.SSO_ENFORCED,
+# default ON): OIDC provisioning via hanzo.id is the only way an account is created.
+# These routes return only via the SSO_ENFORCED=0 escape hatch.
+_self_serve_signup_routes = (
+    []
+    if settings.SSO_ENFORCED
+    else [
+        opt_slash_path("api/signup/precheck", signup.SignupEmailPrecheckViewset.as_view()),
+        opt_slash_path("api/signup", signup.SignupViewset.as_view()),
+        opt_slash_path("api/social_signup", signup.SocialSignupViewset.as_view()),
+        path("api/signup/<str:invite_id>/", signup.InviteSignupViewset.as_view()),
+    ]
+)
+
 urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
@@ -185,10 +199,7 @@ urlpatterns = [
     opt_slash_path("api/surveys", surveys),
     opt_slash_path("api/product_tours", product_tours),
     re_path(r"^external_surveys/(?P<survey_id>[^/]+)/?$", public_survey_page),
-    opt_slash_path("api/signup/precheck", signup.SignupEmailPrecheckViewset.as_view()),
-    opt_slash_path("api/signup", signup.SignupViewset.as_view()),
-    opt_slash_path("api/social_signup", signup.SocialSignupViewset.as_view()),
-    path("api/signup/<str:invite_id>/", signup.InviteSignupViewset.as_view()),
+    *_self_serve_signup_routes,  # gated by settings.SSO_ENFORCED (see above)
     path(
         "api/reset/<str:user_uuid>/",
         authentication.PasswordResetCompleteViewSet.as_view({"get": "retrieve", "post": "create"}),
@@ -310,8 +321,9 @@ urlpatterns.append(path("login", _login_oidc_redirect))
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
     "preflight",
-    "signup",
-    r"signup\/[A-Za-z0-9\-]*",
+    # signup SPA routes are public only when SSO is not enforced; under enforcement
+    # they fall through to login_required -> /login -> OIDC.
+    *([] if settings.SSO_ENFORCED else ["signup", r"signup\/[A-Za-z0-9\-]*"]),
     "reset",
     "organization/billing/subscribed",
     "organization/confirm-creation",

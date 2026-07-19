@@ -174,14 +174,26 @@ WSGI_APPLICATION = "insights.wsgi.application"
 ####
 # Authentication
 
+# Hanzo IAM (hanzo.id) is the ONLY login path. SSO enforcement (default ON) makes
+# OIDC the single way in: it drops the built-in email/password backend
+# (ModelBackend), every non-IAM social backend (GitHub/GitLab), and WebAuthn, and
+# disables self-service signup (see insights/urls.py) plus the fail-open org
+# binding (see insights/api/iam_org_pipeline.py). Escape hatch for local bootstrap
+# or emergency recovery: set SSO_ENFORCED=0 to restore the full backend + signup set.
+SSO_ENFORCED: bool = get_from_env("SSO_ENFORCED", True, type_cast=str_to_bool)
+
+# AxesBackend is a lockout guard (it defers real auth) and must stay first.
 AUTHENTICATION_BACKENDS: list[str] = [
     "axes.backends.AxesBackend",
     "social_core.backends.open_id_connect.OpenIdConnectAuth",  # Hanzo IAM SSO
-    "social_core.backends.github.GithubOAuth2",
-    "social_core.backends.gitlab.GitLabOAuth2",
-    "django.contrib.auth.backends.ModelBackend",
-    "insights.auth.WebauthnBackend",
 ]
+if not SSO_ENFORCED:
+    AUTHENTICATION_BACKENDS += [
+        "social_core.backends.github.GithubOAuth2",
+        "social_core.backends.gitlab.GitLabOAuth2",
+        "django.contrib.auth.backends.ModelBackend",
+        "insights.auth.WebauthnBackend",
+    ]
 
 # Hanzo IAM OIDC SSO (social-auth)
 SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
