@@ -1126,8 +1126,6 @@ def get_instance_available_sso_providers() -> dict[str, bool]:
     Validates configuration settings and license validity (if applicable).
     """
     output: dict[str, bool] = {
-        "github": bool(settings.SOCIAL_AUTH_GITHUB_KEY and settings.SOCIAL_AUTH_GITHUB_SECRET),
-        "gitlab": bool(settings.SOCIAL_AUTH_GITLAB_KEY and settings.SOCIAL_AUTH_GITLAB_SECRET),
         "google-oauth2": False,
         "oidc": bool(
             getattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None)

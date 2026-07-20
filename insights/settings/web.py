@@ -176,9 +176,7 @@ WSGI_APPLICATION = "insights.wsgi.application"
 
 AUTHENTICATION_BACKENDS: list[str] = [
     "axes.backends.AxesBackend",
-    "social_core.backends.open_id_connect.OpenIdConnectAuth",  # Hanzo IAM SSO
-    "social_core.backends.github.GithubOAuth2",
-    "social_core.backends.gitlab.GitLabOAuth2",
+    "social_core.backends.open_id_connect.OpenIdConnectAuth",  # Hanzo IAM SSO (hanzo.id) — the single federated login
     "django.contrib.auth.backends.ModelBackend",
     "insights.auth.WebauthnBackend",
 ]
@@ -229,15 +227,6 @@ SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = [
     "organization_name",
     "reauth",
 ]
-SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
-SOCIAL_AUTH_GITHUB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITHUB_KEY")
-SOCIAL_AUTH_GITHUB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
-
-SOCIAL_AUTH_GITLAB_SCOPE = ["read_user"]
-SOCIAL_AUTH_GITLAB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITLAB_KEY")
-SOCIAL_AUTH_GITLAB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITLAB_SECRET")
-SOCIAL_AUTH_GITLAB_API_URL: str = os.getenv("SOCIAL_AUTH_GITLAB_API_URL", "https://gitlab.com")
-
 LICENSE_SECRET_KEY = os.getenv("LICENSE_SECRET_KEY", "license-so-secret")
 
 # Cookie age in seconds (default 2 weeks) - these are the standard defaults for Django but having it here to be explicit
