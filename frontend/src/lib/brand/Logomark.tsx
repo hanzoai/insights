@@ -1,20 +1,17 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
+import { MARK_PATHS, MARK_VIEWBOX } from '@hanzo/logo'
 
-// Hanzo Insights logomark — the canonical @hanzo/logo block-H mark.
-// fill-[var(--brand-key)] flips #000→#fff in dark mode (styles/base.scss),
-// so the mark stays legible on both light and dark chrome. The five paths are
-// direct children of <svg> so AnimatedLogomark's `svg > *` jump targets them.
+// Hanzo Insights logomark — the canonical @hanzo/logo block-H mark. Geometry is
+// sourced from @hanzo/logo (MARK_PATHS, the ONE home) — no longer re-typed here.
+// fill-[var(--brand-key)] flips #000→#fff in dark mode (styles/base.scss), so
+// the mark stays legible on both light and dark chrome. The paths live under a
+// single <g> child so AnimatedLogomark's `svg > *` jump still targets it.
 export function Logomark(): JSX.Element {
     return (
-        <svg width="28" height="28" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g className="fill-[var(--brand-key)] dark:fill-white">
-                <path d="M22.21 67V44.6369H0V67H22.21Z" />
-                <path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z" />
-                <path d="M22.21 0H0V22.3184H22.21V0Z" />
-                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" />
-                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" />
-            </g>
+        <svg width="28" height="28" viewBox={MARK_VIEWBOX} fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* MARK_PATHS is a build-time-trusted @hanzo/logo constant — never user input. */}
+            <g className="fill-[var(--brand-key)] dark:fill-white" dangerouslySetInnerHTML={{ __html: MARK_PATHS }} />
         </svg>
     )
 }
