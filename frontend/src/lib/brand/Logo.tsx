@@ -1,7 +1,10 @@
+import { MARK_PATHS } from '@hanzo/logo'
+
 // TODO the rest of the app shouldn't be importing this 🙈
 // Hanzo Insights lockup: the block-H mark + "HANZO" wordmark. Uses --brand-key
 // so it inherits the light/dark flip (#000 in light, #fff in dark) defined in
-// styles/base.scss. Mark geometry is the canonical @hanzo/logo block-H.
+// styles/base.scss. The mark geometry is sourced from @hanzo/logo (MARK_PATHS,
+// the ONE home) — no longer re-typed here; only the wordmark is local.
 export function Logo({ style }: React.PropsWithoutRef<JSX.IntrinsicElements['svg']>): JSX.Element {
     return (
         <svg
@@ -13,13 +16,8 @@ export function Logo({ style }: React.PropsWithoutRef<JSX.IntrinsicElements['svg
             viewBox="0 0 272 67"
             xmlns="http://www.w3.org/2000/svg"
         >
-            <g fill="var(--brand-key)">
-                <path d="M22.21 67V44.6369H0V67H22.21Z" />
-                <path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z" />
-                <path d="M22.21 0H0V22.3184H22.21V0Z" />
-                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" />
-                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" />
-            </g>
+            {/* MARK_PATHS is a build-time-trusted @hanzo/logo constant — never user input. */}
+            <g fill="var(--brand-key)" dangerouslySetInnerHTML={{ __html: MARK_PATHS }} />
             <g fill="var(--brand-key)" transform="translate(82 4.3) scale(1.535)">
                 <path d="M4 4h4v9h10V4h4v22h-4V17H8v9H4V4z" />
                 <path d="M28 26V4h4l12 14.5V4h4v22h-3.8L32 11.5V26h-4z" />
