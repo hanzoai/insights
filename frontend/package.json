@@ -66,6 +66,7 @@
         "@microsoft/fetch-event-source": "^2.0.1",
         "@monaco-editor/react": "4.7.0",
         "@hanzo/docs-onboarding": "workspace:*",
+        "@hanzo/logo": "^1.0.13",
         "@hanzo/esbuilder": "workspace:*",
         "@hanzo/mascot-mode": "^0.0.48",
         "@hanzo/insightsql-parser": "workspace:*",
