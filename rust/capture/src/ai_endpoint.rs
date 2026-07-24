@@ -4,7 +4,7 @@ use axum::http::HeaderMap;
 use axum::response::Json;
 use axum_client_ip::InsecureClientIp;
 use bytes::Bytes;
-use common_types::{CapturedEvent, HasEventName};
+use common_types::{CapturedEvent, HasEventName, TeamId};
 use flate2::read::GzDecoder;
 use futures::stream;
 use metrics::{counter, histogram};
@@ -196,6 +196,23 @@ pub async fn ai_handler(
     let token = &auth_header[7..]; // Remove "Bearer " prefix
     validate_token(token)?;
 
+    // Positive token→team allow-list AND the tenant the AI blob store is keyed by.
+    // Unknown ⇒ reject (forged/unknown project key). Unavailable ⇒ reject (fail
+    // CLOSED — never write a PII AI blob we cannot bind to a validated team). Only
+    // `None` when no resolver is wired (setups that do not exercise the blob path).
+    let team_id: Option<TeamId> = match &state.team_resolver {
+        Some(resolver) => match resolver.resolve(token).await {
+            Ok(id) => Some(id),
+            Err(crate::team::TeamResolveError::Unknown) => return Err(CaptureError::UnknownToken),
+            Err(crate::team::TeamResolveError::Unavailable) => {
+                return Err(CaptureError::ServiceUnavailable(
+                    "team resolution unavailable".to_string(),
+                ))
+            }
+        },
+        None => None,
+    };
+
     // Capture body size for logging (before we move the Bytes)
     let body_size = decompressed_body.len();
 
@@ -323,11 +340,15 @@ pub async fn ai_handler(
             })
             .collect();
 
-        // Upload blobs and get URLs
-        // TODO: Replace token with team_id once secret key signing is implemented
-        // and we can resolve tokens to team IDs in capture
+        // Upload blobs and get URLs, partitioned by the validated team_id. Without
+        // a resolved team there is no safe tenant to key by, so refuse rather than
+        // fall back to the old attacker-choosable hash(token) partition.
+        let team_id = team_id.ok_or_else(|| {
+            warn!("AI endpoint received blobs but no team resolver is configured");
+            CaptureError::ServiceUnavailable("team resolution required for AI blobs".to_string())
+        })?;
         let uploaded = blob_storage
-            .upload_blobs(token, &parsed.event_uuid.to_string(), blobs)
+            .upload_blobs(team_id, &parsed.event_uuid.to_string(), blobs)
             .await
             .map_err(|e| {
                 warn!("Failed to upload blobs to S3: {:?}", e);
