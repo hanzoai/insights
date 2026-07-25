@@ -26,6 +26,11 @@ from insights.utils import SingletonDecorator
 
 KAFKA_PRODUCER_RETRIES = 5
 
+# Bound on the metadata round-trip used for health checks. Short on purpose: a
+# health endpoint must answer quickly, and a broker that cannot serve metadata
+# within this window is not one we can ingest through either.
+KAFKA_HEALTH_TIMEOUT_SECONDS = 5.0
+
 logger = get_logger(__name__)
 
 
@@ -260,6 +265,17 @@ class _KafkaProducer:
         b = json.dumps(d).encode("utf-8")
         return b
 
+    def can_reach_broker(self, timeout: float = KAFKA_HEALTH_TIMEOUT_SECONDS) -> None:
+        """
+        Force a metadata round-trip, raising if no broker answers in `timeout`.
+
+        The test double has no broker behind it and is always "reachable"; every
+        real producer goes over the wire.
+        """
+        if self._test:
+            return
+        self.producer.list_topics(timeout=timeout)
+
     def _on_delivery(self, topic: str, result: ProduceResult, err: Optional[KafkaError], msg: Message):
         """Delivery callback for confluent-kafka."""
         result.set_result(err, msg)
@@ -409,21 +425,25 @@ class _AsyncKafkaProducer:
 
 def can_connect():
     """
-    This is intended to validate if we are able to connect to kafka, without
-    actually sending any messages. I'm not amazingly pleased with this as a
-    solution. Would have liked to have validated that the singleton producer was
-    connected. It does expose `bootstrap_connected`, but this becomes false if
-    the cluster restarts despite still being able to successfully send messages.
+    Validate that a broker is actually reachable, without sending any messages.
 
-    I'm hoping that the load this generates on the cluster will be
-    insignificant, even if it is occuring from, say, 30 separate pods, say,
-    every 10 seconds.
+    Constructing a `ConfluentProducer` is NOT a connectivity check: librdkafka
+    resolves and dials brokers on a background thread, so the constructor
+    returns successfully even when `bootstrap.servers` does not resolve at all.
+    Relying on it reported `kafka: true` on an instance with no broker deployed
+    while the producer logged `Failed to resolve ...: Name or service not known`
+    on every flush — a health signal that said "fine" about a dead pipeline.
+
+    `list_topics` issues a real metadata request and raises on timeout, so it
+    answers the question actually being asked. `bootstrap_connected` is the
+    tempting alternative but goes false on a broker restart even while sends
+    still succeed, which is why it is not used here.
     """
     if settings.DEBUG and not settings.TEST:
         return True  # Skip check in development - assume Kafka is "good enough"
 
     try:
-        _KafkaProducer(test=settings.TEST)
+        _KafkaProducer(test=settings.TEST).can_reach_broker()
     except Exception:
         logger.debug("kafka_connection_failure", exc_info=True)
         return False
