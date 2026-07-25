@@ -301,60 +301,67 @@
     --color-insights-brand-orange-hue: 0;
     --color-insights-brand-orange-saturation: 0%;
     --color-insights-brand-orange-lightness: 20%;
-    --color-insights-brand-blue-hue: 228;
-    --color-insights-brand-blue-saturation: 100%;
+    --color-insights-brand-blue-hue: 0;
+    --color-insights-brand-blue-saturation: 0%;
     --color-insights-brand-blue-lightness: 56%;
     --color-insights-brand-yellow-hue: 0;
     --color-insights-brand-yellow-saturation: 0%;
     --color-insights-brand-yellow-lightness: 80%;
 
-    // Product specific colors
-    --color-product-data-pipeline-light: rgb(46 162 211);
-    --color-product-product-analytics-light: rgb(47 128 250);
-    --color-product-workflows-light: rgb(47 128 250);
-    --color-product-web-analytics-light: rgb(52 175 102);
-    --color-product-web-analytics-dark: rgb(54 196 111); // original color
-    --color-product-embedded-analytics-light: rgb(243 153 109);
-    --color-product-embedded-analytics-dark: rgb(250 158 120);
-    --color-product-session-replay-light: rgb(235 162 18);
-    --color-product-session-replay-dark: rgb(247 165 1);
-    --color-product-heatmaps-light: rgb(220 152 16);
-    --color-product-heatmaps-dark: rgb(247 165 1);
-    --color-product-logs-light: rgb(214 37 123);
-    --color-product-marketing-analytics-light: rgb(214 37 123);
-    --color-product-live-debugger-light: rgb(76 14 200);
-    --color-product-feature-flags-light: rgb(48 171 198);
-    --color-product-experiments-light: rgb(182 42 217);
-    --color-product-error-tracking-light: rgb(211 148 24);
-    --color-product-error-tracking-dark: rgb(247 165 1);
-    --color-product-surveys-light: rgb(243 84 84);
-    --color-product-data-warehouse-light: rgb(133 103 255);
-    --color-product-llm-analytics-light: rgb(182 42 217);
-    --color-product-llm-clusters-light: rgb(147 51 234);
-    --color-product-llm-datasets-light: rgb(124 58 237);
-    --color-product-llm-evaluations-light: rgb(167 139 250);
-    --color-product-llm-prompts-light: rgb(196 181 253);
-    --color-product-links-light: rgb(143 7 255);
-    --color-product-revenue-analytics-light: rgb(52 175 102);
-    --color-product-revenue-analytics-dark: rgb(54 196 111);
-    --color-product-user-interviews-light: rgb(0 140 255);
-    --color-product-dashboards-light: rgb(255 139 7);
-    --color-product-early-access-features-light: rgb(39 171 151);
-    --color-product-early-access-features-dark: rgb(53 213 189);
-    --color-product-support-light: rgb(243 84 84);
-    --color-product-support-dark: rgb(247 165 1);
+    // Product + insight icon colors (monochrome).
+    //
+    // These feed `iconColor` in products.tsx / defaultTree.tsx / every product
+    // manifest, and are consumed as `color: var(--product-icon-color-{light,dark})`.
+    // Resolving them to `currentColor` makes every product icon inherit the
+    // surrounding text colour, which is monochrome and correct in both themes
+    // without a second ramp to keep in sync. It matches the built-in fallback in
+    // `getIconColor()`, so coloured and uncoloured icons now render identically.
+    --color-product-data-pipeline-light: currentColor;
+    --color-product-product-analytics-light: currentColor;
+    --color-product-workflows-light: currentColor;
+    --color-product-web-analytics-light: currentColor;
+    --color-product-web-analytics-dark: currentColor;
+    --color-product-embedded-analytics-light: currentColor;
+    --color-product-embedded-analytics-dark: currentColor;
+    --color-product-session-replay-light: currentColor;
+    --color-product-session-replay-dark: currentColor;
+    --color-product-heatmaps-light: currentColor;
+    --color-product-heatmaps-dark: currentColor;
+    --color-product-logs-light: currentColor;
+    --color-product-marketing-analytics-light: currentColor;
+    --color-product-live-debugger-light: currentColor;
+    --color-product-feature-flags-light: currentColor;
+    --color-product-experiments-light: currentColor;
+    --color-product-error-tracking-light: currentColor;
+    --color-product-error-tracking-dark: currentColor;
+    --color-product-surveys-light: currentColor;
+    --color-product-data-warehouse-light: currentColor;
+    --color-product-llm-analytics-light: currentColor;
+    --color-product-llm-clusters-light: currentColor;
+    --color-product-llm-datasets-light: currentColor;
+    --color-product-llm-evaluations-light: currentColor;
+    --color-product-llm-prompts-light: currentColor;
+    --color-product-links-light: currentColor;
+    --color-product-revenue-analytics-light: currentColor;
+    --color-product-revenue-analytics-dark: currentColor;
+    --color-product-user-interviews-light: currentColor;
+    --color-product-dashboards-light: currentColor;
+    --color-product-early-access-features-light: currentColor;
+    --color-product-early-access-features-dark: currentColor;
+    --color-product-support-light: currentColor;
+    --color-product-support-dark: currentColor;
 
     // Insight colors
-    --color-insight-funnel-light: rgb(47 128 250);
-    --color-insight-trends-light: rgb(247 165 1);
-    --color-insight-user-paths-light: rgb(30 179 152);
-    --color-user-paths-dark: rgb(41 219 187);
-    --color-insight-retention-light: rgb(243 84 84);
-    --color-insight-stickiness-light: rgb(247 165 1);
-    --color-insight-lifecycle-light: rgb(48 171 198);
-    --color-insight-calendar-heatmap-light: rgb(12 39 146);
-    --color-insight-calendar-heatmap-dark: rgb(61 91 215);
-    --color-insight-sql-light: rgb(245 78 0);
+    --color-insight-funnel-light: currentColor;
+    --color-insight-trends-light: currentColor;
+    --color-insight-user-paths-light: currentColor;
+    --color-user-paths-dark: currentColor;
+    --color-insight-retention-light: currentColor;
+    --color-insight-stickiness-light: currentColor;
+    --color-insight-lifecycle-light: currentColor;
+    --color-insight-calendar-heatmap-light: currentColor;
+    --color-insight-calendar-heatmap-dark: currentColor;
+    --color-insight-sql-light: currentColor;
 
     // Generic brand color assignments
     // Change these to change the brand colors
@@ -367,7 +374,7 @@
     --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
 
     // AI
-    --color-ai: oklch(0.67 0.26 359.84deg);
+    --color-ai: oklch(0.67 0 0);
 
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
@@ -561,8 +568,8 @@
 
     // Brand colors (Hanzo monochrome)
     // //////////////////////////////////////////////////////////
-    --brand-blue: #1d4aff;
-    --brand-red: #333333;
+    --brand-blue: #555;
+    --brand-red: #333;
     --brand-yellow: #888888;
     --brand-key: #000;
 
@@ -594,48 +601,48 @@
         monospace;
 
     // Dashboard item colors
-    --blue: #597dce;
-    --purple: #c278cf;
+    --blue: #8a8a8a;
+    --purple: #b5b5b5;
     --green: var(--success);
     --black: var(--text-3000);
 
     // Data colors (e.g. insight series). Note: colors.ts relies on these values being hexadecimal
-    --data-color-1: #1d4aff;
-    --data-color-1-hover: #1a3cf6;
-    --data-color-2: #621da6;
-    --data-color-3: #42827e;
-    --data-color-4: #ce0e74;
-    --data-color-5: #f14f58;
-    --data-color-6: #7c440e;
-    --data-color-7: #529a0a;
-    --data-color-8: #0476fb;
-    --data-color-9: #fe729e;
-    --data-color-10: #35416b;
-    --data-color-11: #41cbc4;
-    --data-color-12: #b64b02;
-    --data-color-13: #e4a604;
-    --data-color-14: #a56eff;
-    --data-color-15: #30d5c8;
+    --data-color-1: #3d3d3d;
+    --data-color-1-hover: #2e2e2e;
+    --data-color-2: #ccc;
+    --data-color-3: #666;
+    --data-color-4: #a3a3a3;
+    --data-color-5: #4f4f4f;
+    --data-color-6: #b8b8b8;
+    --data-color-7: #7a7a7a;
+    --data-color-8: #8f8f8f;
+    --data-color-9: #474747;
+    --data-color-10: #c2c2c2;
+    --data-color-11: #5c5c5c;
+    --data-color-12: #999;
+    --data-color-13: #707070;
+    --data-color-14: #adadad;
+    --data-color-15: #858585;
 
     // Lifecycle series (compiled)
-    --color-lifecycle-new: #1d4aff;
-    --color-lifecycle-returning: #388600;
-    --color-lifecycle-resurrecting: #a56eff;
-    --color-lifecycle-dormant: #db3707;
-    --color-lifecycle-new-hover: #0024b6;
-    --color-lifecycle-returning-hover: #254d08;
-    --color-lifecycle-resurrecting-hover: #6608ff;
-    --color-lifecycle-dormant-hover: #781e04;
+    --color-lifecycle-new: #3d3d3d;
+    --color-lifecycle-returning: #7a7a7a;
+    --color-lifecycle-resurrecting: #a3a3a3;
+    --color-lifecycle-dormant: #ccc;
+    --color-lifecycle-new-hover: #262626;
+    --color-lifecycle-returning-hover: #5c5c5c;
+    --color-lifecycle-resurrecting-hover: #858585;
+    --color-lifecycle-dormant-hover: #adadad;
 
     // Revenue analytics MRR series (compiled)
-    --color-revenue-analytics-new: #388600;
-    --color-revenue-analytics-expansion: #1d4aff;
-    --color-revenue-analytics-contraction: #ffa500;
-    --color-revenue-analytics-churn: #db3707;
-    --color-revenue-analytics-new-hover: #254d08;
-    --color-revenue-analytics-expansion-hover: #0024b6;
-    --color-revenue-analytics-contraction-hover: #a26c07;
-    --color-revenue-analytics-churn-hover: #781e04;
+    --color-revenue-analytics-new: #3d3d3d;
+    --color-revenue-analytics-expansion: #7a7a7a;
+    --color-revenue-analytics-contraction: #a3a3a3;
+    --color-revenue-analytics-churn: #ccc;
+    --color-revenue-analytics-new-hover: #262626;
+    --color-revenue-analytics-expansion-hover: #5c5c5c;
+    --color-revenue-analytics-contraction-hover: #858585;
+    --color-revenue-analytics-churn-hover: #adadad;
 
     // Z-indexes
     --z-bottom-notice: 1450;
@@ -707,38 +714,38 @@
 
     // In-app prompts
     --in-app-prompts-width: 26rem;
-    --lettermark-1-bg: #dcb1e3;
-    --lettermark-1-text: #572e5e;
-    --lettermark-2-bg: #ffc4b2;
-    --lettermark-2-text: #3e5891;
-    --lettermark-3-bg: #b1985d;
-    --lettermark-3-text: #3e5891;
-    --lettermark-4-bg: #3e5891;
-    --lettermark-4-text: #ffc4b2;
-    --lettermark-5-bg: #8da9e7;
-    --lettermark-5-text: #572e5e;
-    --lettermark-6-bg: #572e5e;
-    --lettermark-6-text: #dcb1e3;
-    --lettermark-7-bg: #ffc035;
-    --lettermark-7-text: #35416b;
-    --lettermark-8-bg: #ff906e;
-    --lettermark-8-text: #2a3d65;
-    --lettermark-9-bg: #5dd4db;
-    --lettermark-9-text: #1a4a4d;
-    --lettermark-10-bg: #c8e65c;
-    --lettermark-10-text: #3d4a1a;
-    --lettermark-11-bg: #e85da4;
-    --lettermark-11-text: #4a1a35;
-    --lettermark-12-bg: #e85c5c;
-    --lettermark-12-text: #4a1a1a;
-    --lettermark-13-bg: #3d7a5a;
-    --lettermark-13-text: #c8f0dc;
-    --lettermark-14-bg: #6b5bd4;
-    --lettermark-14-text: #e0ddf5;
-    --lettermark-15-bg: #98e8c8;
-    --lettermark-15-text: #1a4a3d;
-    --lettermark-16-bg: #8c3d5a;
-    --lettermark-16-text: #f0d0dc;
+    --lettermark-1-bg: #e5e5e5;
+    --lettermark-1-text: #404040;
+    --lettermark-2-bg: #404040;
+    --lettermark-2-text: #e5e5e5;
+    --lettermark-3-bg: #ccc;
+    --lettermark-3-text: #333;
+    --lettermark-4-bg: #595959;
+    --lettermark-4-text: #f0f0f0;
+    --lettermark-5-bg: #b8b8b8;
+    --lettermark-5-text: #2e2e2e;
+    --lettermark-6-bg: #737373;
+    --lettermark-6-text: #f5f5f5;
+    --lettermark-7-bg: #a3a3a3;
+    --lettermark-7-text: #262626;
+    --lettermark-8-bg: #8c8c8c;
+    --lettermark-8-text: #f5f5f5;
+    --lettermark-9-bg: #dedede;
+    --lettermark-9-text: #3d3d3d;
+    --lettermark-10-bg: #4a4a4a;
+    --lettermark-10-text: #e0e0e0;
+    --lettermark-11-bg: #c4c4c4;
+    --lettermark-11-text: #303030;
+    --lettermark-12-bg: #666;
+    --lettermark-12-text: #ededed;
+    --lettermark-13-bg: #b0b0b0;
+    --lettermark-13-text: #2a2a2a;
+    --lettermark-14-bg: #7d7d7d;
+    --lettermark-14-text: #f2f2f2;
+    --lettermark-15-bg: #9a9a9a;
+    --lettermark-15-text: #242424;
+    --lettermark-16-bg: #545454;
+    --lettermark-16-text: #e8e8e8;
 
     // Modals
     --modal-backdrop-blur: 5px; // Half the value in Figma as blur is calculated differently there it seems
@@ -752,19 +759,19 @@
 
     // Deprecated colors
     // Vars
-    --danger-highlight: rgb(219 55 7 / 10%);
-    --danger-lighter: #ffa599;
-    --danger-light: #df4b20;
-    --danger: #db3707;
-    --danger-dark: #992705;
-    --warning-highlight: rgb(247 165 1 / 10%);
-    --warning: #f7a501;
-    --warning-dark: #e09423;
-    --highlight: #e49f2c;
-    --success-highlight: rgb(56 134 0 / 10%);
-    --success-light: #5f9d32;
-    --success: #388600;
-    --success-dark: #245700;
+    --danger-highlight: rgb(38 38 38 / 10%);
+    --danger-lighter: #b0b0b0;
+    --danger-light: #4a4a4a;
+    --danger: #262626;
+    --danger-dark: #171717;
+    --warning-highlight: rgb(115 115 115 / 10%);
+    --warning: #737373;
+    --warning-dark: #525252;
+    --highlight: #8a8a8a;
+    --success-highlight: rgb(163 163 163 / 10%);
+    --success-light: #c4c4c4;
+    --success: #a3a3a3;
+    --success-dark: #7d7d7d;
     --muted: #5f5f5f;
     --muted-alt: #747ea1;
     --mark: hsl(42deg 93% 86% / 80%);
@@ -781,28 +788,28 @@
     --trace-3000-light: rgb(17 17 17 / 25%);
     --primary-3000-light: #111111;
     --primary-highlight-light: rgb(17 17 17 / 10%);
-    --primary-3000-hover-light: #333333;
+    --primary-3000-hover-light: #333;
     --primary-3000-active-light: #000000;
     --secondary-3000-light: rgb(200 200 200 / 60%);
-    --secondary-3000-hover-light: #cccccc;
+    --secondary-3000-hover-light: #ccc;
     --color-accent-3000-light: #ebebeb;
     --color-bg-3000-light: #f5f5f5;
     --border-3000-light: #e0e0e0;
     --border-bold-3000-light: #c0c0c0;
     --glass-bg-3000-light: #e5e5e5b3;
     --glass-border-3000-light: #e5e5e5;
-    --link-3000-light: #333333;
-    --primary-3000-frame-bg-light: #333333;
+    --link-3000-light: #333;
+    --primary-3000-frame-bg-light: #333;
     --primary-3000-button-bg-light: #fff;
     --primary-3000-button-border-light: #888888;
-    --primary-3000-button-border-hover-light: #555555;
+    --primary-3000-button-border-hover-light: #555;
     --secondary-3000-frame-bg-light: #e0e0e0;
     --secondary-3000-button-bg-light: #f5f5f5;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
-    --danger-3000-frame-bg-light: #33333380;
-    --danger-3000-button-border-light: #cc3333;
-    --danger-3000-button-border-hover-light: #333333;
+    --danger-3000-frame-bg-light: #33380;
+    --danger-3000-button-border-light: #333;
+    --danger-3000-button-border-hover-light: #333;
     --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
     --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
     --text-3000-dark: #fff;
@@ -823,7 +830,7 @@
     --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
     --link-3000-dark: #ffffff;
-    --primary-3000-frame-bg-dark: #555555;
+    --primary-3000-frame-bg-dark: #555;
     --primary-3000-button-bg-dark: var(--color-accent);
     --primary-3000-button-border-dark: #888888;
     --primary-3000-button-border-hover-dark: #aaaaaa;
@@ -832,9 +839,9 @@
     --secondary-3000-button-bg-dark: #1d1f27;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
-    --danger-3000-frame-bg-dark: #33333380;
-    --danger-3000-button-border-dark: #c44003;
-    --danger-3000-button-border-hover-dark: #333333;
+    --danger-3000-frame-bg-dark: #33380;
+    --danger-3000-button-border-dark: #666;
+    --danger-3000-button-border-hover-dark: #333;
 
     // Light mode
     --text-3000: var(--text-3000-light);
@@ -882,7 +889,7 @@
     --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
 
     // AI colors (dark mode)
-    --color-ai: oklch(0.69 0.29 341.57deg);
+    --color-ai: oklch(0.69 0 0);
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
@@ -1072,12 +1079,12 @@
     --danger-3000-button-border: var(--danger-3000-button-border-dark);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-dark);
     --tooltip-bg: var(--tooltip-bg-dark);
-    --data-color-2: #7f26d9;
-    --data-color-3: #3e7a76;
-    --data-color-4: #bf0d6c;
-    --data-color-5: #f0474f;
-    --data-color-6: #b36114;
-    --data-color-10: #6576b3;
+    --data-color-2: #ccc;
+    --data-color-3: #666;
+    --data-color-4: #a3a3a3;
+    --data-color-5: #4f4f4f;
+    --data-color-6: #b8b8b8;
+    --data-color-10: #c2c2c2;
 }
 
 @layer base {
