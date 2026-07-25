@@ -8,6 +8,7 @@ import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductSetupButton } from 'lib/components/ProductSetup'
+import { AI_AVAILABLE } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
 import { ButtonPrimitive, buttonPrimitiveVariants } from 'lib/ui/Button/ButtonPrimitives'
@@ -51,7 +52,7 @@ export function SceneTitlePanelButton({
 
     if (isRemovingSidePanelFlag) {
         // Open Info tab if scene has panel content, otherwise default to Insights AI
-        const defaultTab = scenePanelIsPresent ? SidePanelTab.Info : SidePanelTab.Max
+        const defaultTab = scenePanelIsPresent || !AI_AVAILABLE ? SidePanelTab.Info : SidePanelTab.Max
 
         if (sidePanelOpen) {
             return null
@@ -59,43 +60,45 @@ export function SceneTitlePanelButton({
 
         return (
             <>
-                <ButtonPrimitive
-                    className={buttonClassName}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        if (openMax) {
-                            openMax()
-                        } else {
-                            openSidePanel(SidePanelTab.Max)
+                {AI_AVAILABLE && (
+                    <ButtonPrimitive
+                        className={buttonClassName}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            if (openMax) {
+                                openMax()
+                            } else {
+                                openSidePanel(SidePanelTab.Max)
+                            }
+                        }}
+                        tooltip={
+                            definition ? (
+                                <>
+                                    Open Insights AI
+                                    <br />
+                                    <div className="flex items-center">
+                                        {definition.icon || <IconWrench />}
+                                        <i className="ml-1.5">{definition.name}</i>
+                                    </div>
+                                </>
+                            ) : (
+                                'Open Insights AI'
+                            )
                         }
-                    }}
-                    tooltip={
-                        definition ? (
-                            <>
-                                Open Insights AI
-                                <br />
-                                <div className="flex items-center">
-                                    {definition.icon || <IconWrench />}
-                                    <i className="ml-1.5">{definition.name}</i>
-                                </div>
-                            </>
-                        ) : (
-                            'Open Insights AI'
-                        )
-                    }
-                    tooltipPlacement="bottom-end"
-                    tooltipCloseDelayMs={0}
-                    iconOnly
-                    data-attr="open-context-panel-ai-button"
-                >
-                    <div className="relative">
-                        <IconSparkles className="text-ai group-hover/button-primitive:animate-hue-rotate" />
-                        {maxToolProps && (
-                            <IconBrackets className="absolute size-2.5 top-0 -right-1 text-black dark:text-white" />
-                        )}
-                    </div>
-                </ButtonPrimitive>
+                        tooltipPlacement="bottom-end"
+                        tooltipCloseDelayMs={0}
+                        iconOnly
+                        data-attr="open-context-panel-ai-button"
+                    >
+                        <div className="relative">
+                            <IconSparkles className="text-ai group-hover/button-primitive:animate-hue-rotate" />
+                            {maxToolProps && (
+                                <IconBrackets className="absolute size-2.5 top-0 -right-1 text-black dark:text-white" />
+                            )}
+                        </div>
+                    </ButtonPrimitive>
+                )}
 
                 {/* Size to mimic lemon button small */}
                 <ButtonPrimitive

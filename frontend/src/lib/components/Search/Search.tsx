@@ -19,6 +19,7 @@ import { TextMorph } from 'torph/react'
 import { IconSearch, IconSparkles, IconX } from '@hanzo/icons'
 import { LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
+import { AI_AVAILABLE } from 'lib/constants'
 import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuTrigger } from 'lib/ui/ContextMenu/ContextMenu'
@@ -243,11 +244,13 @@ function SearchRoot({
     logicKey = 'default',
     isActive = true,
     onItemSelect,
-    showAskAiLink = true,
+    showAskAiLink: showAskAiLinkProp = true,
     onAskAiClick,
     className = '',
     defaultSearchValue = '',
 }: SearchRootProps): JSX.Element {
+    // The assistant backend is not part of this build, so never offer to ask it.
+    const showAskAiLink = AI_AVAILABLE && showAskAiLinkProp
     const { allCategories, isSearching } = useValues(searchLogic({ logicKey }))
     const { setSearch } = useActions(searchLogic({ logicKey }))
 

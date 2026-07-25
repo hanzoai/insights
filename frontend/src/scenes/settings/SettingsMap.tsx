@@ -14,7 +14,7 @@ import { GoalsConfiguration } from '@hanzo/products-revenue-analytics/frontend/s
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
 import { FEATURE_SUPPORT } from 'lib/components/SupportedPlatforms/featureSupport'
-import { OrganizationMembershipLevel } from 'lib/constants'
+import { AI_AVAILABLE, OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { BounceRateDurationSetting } from 'scenes/settings/environment/BounceRateDuration'
 import { BounceRatePageViewModeSetting } from 'scenes/settings/environment/BounceRatePageViewMode'
@@ -301,30 +301,32 @@ export const SETTINGS_MAP: SettingSection[] = [
             },
         ],
     },
-    {
-        level: 'environment',
-        id: 'environment-max',
-        title: 'Hanzo AI',
-        group: 'AI',
-        settings: [
-            {
-                id: 'core-memory',
-                title: 'Memory',
-                description:
-                    "Hanzo AI automatically remembers details about your company and product. This context helps our AI assistant provide relevant answers and suggestions. If there are any details you don't want Hanzo AI to remember, you can edit or remove them below.",
-                component: <MaxMemorySettings />,
-                hideOn: [Realm.SelfHostedClickHouse, Realm.SelfHostedPostgres],
-            },
-            {
-                id: 'changelog',
-                title: 'Changelog',
-                description:
-                    'See the latest Hanzo AI features and control whether the changelog appears in the main UI.',
-                component: <MaxChangelogSettings />,
-                hideOn: [Realm.SelfHostedClickHouse, Realm.SelfHostedPostgres],
-            },
-        ],
-    },
+    ...((AI_AVAILABLE
+        ? [
+              {
+                  level: 'environment',
+                  id: 'environment-max',
+                  title: 'Hanzo AI',
+                  group: 'AI',
+                  settings: [
+                      {
+                          id: 'core-memory',
+                          title: 'Memory',
+                          description:
+                              "Hanzo AI automatically remembers details about your company and product. This context helps our AI assistant provide relevant answers and suggestions. If there are any details you don't want Hanzo AI to remember, you can edit or remove them below.",
+                          component: <MaxMemorySettings />,
+                      },
+                      {
+                          id: 'changelog',
+                          title: 'Changelog',
+                          description:
+                              'See the latest Hanzo AI features and control whether the changelog appears in the main UI.',
+                          component: <MaxChangelogSettings />,
+                      },
+                  ],
+              },
+          ]
+        : []) as SettingSection[]),
     {
         level: 'environment',
         id: 'mcp-server',
