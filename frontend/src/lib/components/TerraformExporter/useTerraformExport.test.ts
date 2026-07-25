@@ -9,7 +9,7 @@ import * as insightHclExporter from './insightHclExporter'
 import { TerraformExportResource, useTerraformExport } from './useTerraformExport'
 
 jest.mock('~/lib/api')
-jest.mock('insights-js')
+jest.mock('@hanzo/insights')
 jest.mock('kea', () => ({
     ...jest.requireActual('kea'),
     useValues: jest.fn(),

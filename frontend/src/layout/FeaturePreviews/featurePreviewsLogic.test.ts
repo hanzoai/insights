@@ -12,7 +12,7 @@ import { initKeaTests } from '~/test/init'
 import { featurePreviewsLogic } from './featurePreviewsLogic'
 
 // Mock insights-js
-jest.mock('insights-js')
+jest.mock('@hanzo/insights')
 // Mock lemonToast
 jest.mock('lib/lemon-ui/LemonToast')
 
