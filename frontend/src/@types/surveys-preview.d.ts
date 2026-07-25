@@ -1,1 +1,1 @@
-declare module 'insights-js/dist/surveys-preview'
+declare module '@hanzo/insights/dist/surveys-preview'
