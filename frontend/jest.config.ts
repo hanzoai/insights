@@ -33,6 +33,8 @@ const esmModules = [
     'comma-separated-tokens',
     'zwitch',
     '@hanzo/insightsql-parser',
+    // uuid v13 is published as `"type": "module"` with no CJS entry point
+    'uuid',
 ]
 function rootDirectories(): string[] {
     return ['<rootDir>/src', '<rootDir>/../products']
