@@ -1,7 +1,6 @@
 /* Geist Sans and Geist Mono — Vercel's open-source typeface, SIL OFL 1.1.
  *
- * Self-hosted from `frontend/public/fonts` (copied to `frontend/dist`, served at
- * /static/fonts) rather than pulled from a CDN. The previous jsDelivr `@import`s
+ * Self-hosted rather than pulled from a CDN. The previous jsDelivr `@import`s
  * pointed at stylesheets the `geist` package does not publish — both returned 404,
  * so the app silently rendered in the fallback face. An `@import` is also governed
  * by `style-src`, which does not list jsDelivr, so a corrected CDN path would have
@@ -9,13 +8,21 @@
  *
  * Each file is a variable font covering weights 100–900, so one file per family
  * replaces the entire static weight set.
+ *
+ * The paths are RELATIVE so esbuild's `.woff2` file loader resolves them, emits
+ * them content-hashed under `assets/`, and rewrites the URL with the ONE configured
+ * `publicPath` (common/esbuilder/utils.mjs). An absolute `/static/fonts/…` re-typed
+ * that publicPath in a second place AND asked esbuild to resolve a path that only
+ * exists at runtime — which does not fail quietly: it breaks the whole frontend
+ * build (`Could not resolve "/static/fonts/Geist-Variable.woff2"`), and with it
+ * every insights image. Keep them relative.
  */
 
 @font-face {
     font-family: Geist;
     font-style: normal;
     font-weight: 100 900;
-    src: url('/static/fonts/Geist-Variable.woff2') format('woff2');
+    src: url('../../public/fonts/Geist-Variable.woff2') format('woff2');
     font-display: swap;
 }
 
@@ -23,6 +30,6 @@
     font-family: 'Geist Mono';
     font-style: normal;
     font-weight: 100 900;
-    src: url('/static/fonts/GeistMono-Variable.woff2') format('woff2');
+    src: url('../../public/fonts/GeistMono-Variable.woff2') format('woff2');
     font-display: swap;
 }
