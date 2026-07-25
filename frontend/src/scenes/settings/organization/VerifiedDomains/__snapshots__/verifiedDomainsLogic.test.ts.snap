@@ -46,8 +46,8 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "anonymize_ips": false,
         "api_token": "default-team-api-token",
         "app_urls": [
-          "https://insights.com/",
-          "https://app.insights.com",
+          "https://hanzo.ai/",
+          "https://insights.hanzo.ai",
           "https://example.com",
           "http://127.0.0.1:*",
         ],
@@ -155,7 +155,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
         "project_id": 997,
         "receive_org_level_activity_logs": false,
         "recording_domains": [
-          "https://recordings.insights.com/",
+          "https://recordings.hanzo.ai/",
         ],
         "require_evaluation_contexts": false,
         "revenue_analytics_config": {
@@ -209,8 +209,8 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
             },
           ],
         },
-        "secret_api_token": "phs_default-team-secret-api-token",
-        "secret_api_token_backup": "phs_default-team-secret-api-token-backup",
+        "secret_api_token": "his_default-team-secret-api-token",
+        "secret_api_token_backup": "his_default-team-secret-api-token-backup",
         "session_recording_linked_flag": null,
         "session_recording_masking_config": {
           "maskAllInputs": true,
@@ -230,7 +230,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
             "key": "email",
             "operator": "not_icontains",
             "type": "person",
-            "value": "insights.com",
+            "value": "hanzo.ai",
           },
         ],
         "test_account_filters_default_checked": false,
@@ -268,7 +268,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
   "updatingDomainLoading": false,
   "verifiedDomains": [
     {
-      "domain": "my.insights.com",
+      "domain": "my.hanzo.ai",
       "id": "8db3b0c2-a0ab-490a-9037-14f3358a81bc",
       "is_verified": true,
       "jit_provisioning_enabled": true,
@@ -276,7 +276,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
       "verified_at": "2022-01-01T23:59:59",
     },
     {
-      "domain": "temp.insights.com",
+      "domain": "temp.hanzo.ai",
       "id": "id_will_be_deleted",
       "is_verified": false,
       "jit_provisioning_enabled": false,
