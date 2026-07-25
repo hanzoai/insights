@@ -91,8 +91,11 @@ describe('maxLogic', () => {
         logic = maxLogic({ tabId: 'test' })
         logic.mount()
 
-        // Wait for initial conversationHistory load to complete
-        await expectLogic(logic).toDispatchActions(['loadConversationHistorySuccess'])
+        // The assistant backend is absent from this build, so history is not fetched on mount
+        // (see AI_AVAILABLE). Drive the load explicitly to set up the race condition under test.
+        await expectLogic(logic, () => {
+            logic.actions.loadConversationHistory()
+        }).toDispatchActions(['loadConversationHistorySuccess'])
 
         // Simulate asking Max a question (which starts a new conversation)
         await expectLogic(logic, () => {
