@@ -1,6 +1,7 @@
 import { connect, kea, path, selectors } from 'kea'
 import { combineUrl, router, urlToAction } from 'kea-router'
 
+import { AI_AVAILABLE } from 'lib/constants'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -74,7 +75,9 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
                 const tabs: SidePanelTab[] = []
 
                 /* Always show Insights AI at the top of the tabs list */
-                tabs.push(SidePanelTab.Max)
+                if (AI_AVAILABLE) {
+                    tabs.push(SidePanelTab.Max)
+                }
 
                 if (isCloudOrDev) {
                     tabs.push(SidePanelTab.Status)

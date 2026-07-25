@@ -41,11 +41,7 @@ class SuggestedQuestionsQueryRunner(QueryRunner):
                 "content": (
                     f"You are a product manager at organization {team.organization.name}, handling project {team.project.name}. "
                     f"This project was created {(timezone.now() - team.project.created_at).total_seconds() // 86400} days ago.\n"
-                    f"Your task is helping product teams understand their users. Your help must be tailored for the product you own. "
-                    "You have access to the core memory about the company and product in the <core_memory> tag.\n\n"
-                    "<core_memory>\n"
-                    f"{self.core_memory.formatted_text if self.core_memory else 'No core memory available.'}\n"
-                    "</core_memory>"
+                    f"Your task is helping product teams understand their users. Your help must be tailored for the product you own."
                 ),
             },
             {
@@ -106,19 +102,6 @@ class SuggestedQuestionsQueryRunner(QueryRunner):
             raise ValueError("Persistently failed to determine questions from AI response")
 
         return SuggestedQuestionsQueryResponse(questions=[q for q, _ in questions[:12]])
-
-    @property
-    def core_memory(self) -> CoreMemory | None:
-        try:
-            return CoreMemory.objects.get(team=self.team)
-        except CoreMemory.DoesNotExist:
-            return None
-
-    def get_cache_payload(self):
-        return {
-            **super().get_cache_payload(),
-            "core_memory": self.core_memory.formatted_text if self.core_memory else None,
-        }
 
     def _is_stale(self, last_refresh: Optional[datetime], lazy: bool = False) -> bool:
         # We don't want to regenerate suggestions more often than 3 days, as there's no point
