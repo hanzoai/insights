@@ -241,26 +241,26 @@
     --color-white: #fff;
 
     // Primitive neutral cool colors
-    --color-neutral-cool-50: hsl(240deg 8% 95%);
-    --color-neutral-cool-75: hsl(236deg 8% 92.5%);
-    --color-neutral-cool-100: hsl(232deg 8% 90%);
-    --color-neutral-cool-150: hsl(232.5deg 8% 85%);
-    --color-neutral-cool-200: hsl(233deg 8% 80%);
-    --color-neutral-cool-250: hsl(231.5deg 8% 75%);
-    --color-neutral-cool-300: hsl(230deg 8% 70%);
-    --color-neutral-cool-350: hsl(230.5deg 8% 65%);
-    --color-neutral-cool-400: hsl(231deg 8% 60%);
-    --color-neutral-cool-450: hsl(231deg 8% 55%);
-    --color-neutral-cool-500: hsl(231deg 8% 50%);
-    --color-neutral-cool-550: hsl(230.5deg 8% 45%);
-    --color-neutral-cool-600: hsl(230deg 8% 40%);
-    --color-neutral-cool-650: hsl(230deg 8% 35%);
-    --color-neutral-cool-700: hsl(230deg 8% 30%);
-    --color-neutral-cool-750: hsl(235deg 8% 25%);
-    --color-neutral-cool-800: hsl(230deg 8% 20%);
-    --color-neutral-cool-850: hsl(235deg 8% 15%);
-    --color-neutral-cool-900: hsl(240deg 8% 10%);
-    --color-neutral-cool-950: hsl(240deg 8% 8%);
+    --color-neutral-cool-50: hsl(0deg 0% 95%);
+    --color-neutral-cool-75: hsl(0deg 0% 92.5%);
+    --color-neutral-cool-100: hsl(0deg 0% 90%);
+    --color-neutral-cool-150: hsl(0deg 0% 85%);
+    --color-neutral-cool-200: hsl(0deg 0% 80%);
+    --color-neutral-cool-250: hsl(0deg 0% 75%);
+    --color-neutral-cool-300: hsl(0deg 0% 70%);
+    --color-neutral-cool-350: hsl(0deg 0% 65%);
+    --color-neutral-cool-400: hsl(0deg 0% 60%);
+    --color-neutral-cool-450: hsl(0deg 0% 55%);
+    --color-neutral-cool-500: hsl(0deg 0% 50%);
+    --color-neutral-cool-550: hsl(0deg 0% 45%);
+    --color-neutral-cool-600: hsl(0deg 0% 40%);
+    --color-neutral-cool-650: hsl(0deg 0% 35%);
+    --color-neutral-cool-700: hsl(0deg 0% 30%);
+    --color-neutral-cool-750: hsl(0deg 0% 25%);
+    --color-neutral-cool-800: hsl(0deg 0% 20%);
+    --color-neutral-cool-850: hsl(0deg 0% 15%);
+    --color-neutral-cool-900: hsl(0deg 0% 10%);
+    --color-neutral-cool-950: hsl(0deg 0% 8%);
 
     // Primitive neutral colors
     --color-neutral-50: hsl(0deg 0% 95%);
@@ -703,6 +703,9 @@
     --toastify-color-warning: var(--warning);
     --toastify-color-error: var(--danger);
     --toastify-color-progress-info: var(--toastify-color-info);
+    // react-toastify ships a purple default for these two; override both.
+    --toastify-color-progress-dark: var(--color-neutral-cool-300);
+    --toastify-color-progress-light: var(--color-neutral-cool-600);
     --toastify-color-progress-success: var(--toastify-color-success);
     --toastify-color-progress-warning: var(--toastify-color-warning);
     --toastify-color-progress-error: var(--toastify-color-error);
@@ -773,8 +776,8 @@
     --success: #a3a3a3;
     --success-dark: #7d7d7d;
     --muted: #5f5f5f;
-    --muted-alt: #747ea1;
-    --mark: hsl(42deg 93% 86% / 80%);
+    --muted-alt: #7c7c7c;
+    --mark: hsl(0deg 0% 86% / 80%);
     --white: #fff;
     --side: #fafaf9;
     --mid: #f2f2f2;
@@ -821,11 +824,11 @@
     --primary-3000-hover-dark: #e0e0e0;
     --primary-3000-active-dark: #c0c0c0;
     --primary-alt-highlight-light: #e5e5e5;
-    --secondary-3000-dark: #1d1f27;
-    --secondary-3000-hover-dark: #575d77;
-    --color-accent-3000-dark: #21242b;
-    --color-bg-3000-dark: #1d1f27;
-    --border-3000-dark: #35373e;
+    --secondary-3000-dark: #1f1f1f;
+    --secondary-3000-hover-dark: #5d5d5d;
+    --color-accent-3000-dark: #242424;
+    --color-bg-3000-dark: #1f1f1f;
+    --border-3000-dark: #373737;
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
@@ -836,7 +839,7 @@
     --primary-3000-button-border-hover-dark: #aaaaaa;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
-    --secondary-3000-button-bg-dark: #1d1f27;
+    --secondary-3000-button-bg-dark: #1f1f1f;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
     --danger-3000-frame-bg-dark: #33380;
@@ -1057,7 +1060,7 @@
     --color-accent-3000: var(--color-accent-3000-dark);
     --color-bg-3000: var(--color-bg-3000-dark);
     --border-3000: var(--border-3000-dark);
-    --border-light-opaque: #1e2028;
+    --border-light-opaque: #202020;
     --border-bold-3000: var(--border-bold-3000-dark);
     --glass-bg-3000: var(--glass-bg-3000-dark);
     --glass-border-3000: var(--glass-border-3000-dark);
