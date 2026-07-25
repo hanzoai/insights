@@ -34,6 +34,14 @@ Possible values:
 - Unset for **self-hosted** environments.
 """
 SELF_CAPTURE: bool = get_from_env("SELF_CAPTURE", DEBUG and not DEMO, type_cast=str_to_bool)
+
+# Where this instance reports its OWN product usage. Both must be set for the
+# app to phone home; unset (the default) means no telemetry snippet is emitted
+# at all. There is no vendor collector to fall back on — never point these at a
+# host that does not serve the ingest SDK's routes.
+TELEMETRY_HOST: str = get_from_env("TELEMETRY_HOST", "", type_cast=str).rstrip("/")
+TELEMETRY_KEY: str = get_from_env("TELEMETRY_KEY", "", type_cast=str)
+
 E2E_TESTING: bool = get_from_env(
     "E2E_TESTING", False, type_cast=str_to_bool
 )  # whether the app is currently running for E2E tests
