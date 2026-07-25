@@ -14,6 +14,7 @@ from insights.api.utils import get_token
 from insights.auth import (
     JwtAuthentication,
     OAuthAccessTokenAuthentication,
+    IamAuthentication,
     PersonalAPIKeyAuthentication,
     SessionAuthentication,
     SharingAccessTokenAuthentication,
@@ -129,8 +130,18 @@ class TeamAndOrgViewSetMixin(_GenericViewSet):  # TODO: Rename to include "Env" 
             authentication_classes.append(SharingPasswordProtectedAuthentication)
             authentication_classes.append(SharingAccessTokenAuthentication)
 
+        # IamAuthentication FIRST: Hanzo IAM (hanzo.id) is the estate's ONE identity
+        # provider, so an IAM bearer authenticates here exactly as it does on every
+        # other Hanzo service. It returns None for a non-IAM token, so the
+        # fork-native classes below still get their turn unchanged.
         authentication_classes.extend(
-            [JwtAuthentication, OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication, SessionAuthentication]
+            [
+                IamAuthentication,
+                JwtAuthentication,
+                OAuthAccessTokenAuthentication,
+                PersonalAPIKeyAuthentication,
+                SessionAuthentication,
+            ]
         )
 
         return [auth() for auth in authentication_classes]

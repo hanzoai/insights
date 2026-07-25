@@ -383,6 +383,100 @@ class TemporaryTokenAuthentication(authentication.BaseAuthentication):
         return "Bearer"
 
 
+@functools.lru_cache(maxsize=1)
+def _iam_jwk_client() -> Optional["jwt.PyJWKClient"]:
+    """The JWKS client for the Hanzo IAM issuer, or None when IAM is not configured.
+
+    Cached because PyJWKClient keeps its own signing-key cache; rebuilding it per
+    request would refetch JWKS on every call.
+    """
+    from django.conf import settings
+
+    issuer = getattr(settings, "SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER", None) or getattr(
+        settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None
+    )
+    if not issuer:
+        return None
+    return jwt.PyJWKClient(f"{str(issuer).rstrip('/')}/.well-known/jwks.json")
+
+
+class IamAuthentication(authentication.BaseAuthentication):
+    """Authenticate an API request with a Hanzo IAM bearer (hanzo.id OIDC).
+
+    ONE auth system: IAM is the estate's single identity provider, so the API
+    accepts the same token every other Hanzo service does instead of requiring a
+    fork-native personal key. The token is verified against the issuer's JWKS
+    (signature + `iss` + `aud` + expiry) — never merely decoded — and the
+    validated `email` claim resolves an existing insights User.
+
+    Fail-CLOSED: any verification error raises AuthenticationFailed. A token that
+    is not an IAM JWT returns None so the rest of the chain (personal key,
+    session) still gets its turn, mirroring JwtAuthentication's behaviour.
+
+    Never auto-provisions: an IAM subject with no insights User is rejected, so
+    this widens *how* an existing user authenticates, not *who* has access.
+    """
+
+    keyword = "Bearer"
+
+    @classmethod
+    def authenticate(cls, request: Union[HttpRequest, Request]) -> Optional[tuple[Any, None]]:
+        header = request.headers.get("authorization")
+        if not header:
+            return None
+        match = re.match(rf"^{cls.keyword}\s+(\S.+)$", header)
+        if not match:
+            return None
+        token = match.group(1).strip()
+
+        client = _iam_jwk_client()
+        if client is None:
+            # IAM not configured — defer to the rest of the chain.
+            return None
+
+        from django.conf import settings
+
+        issuer = getattr(settings, "SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER", None) or getattr(
+            settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None
+        )
+        audience = getattr(settings, "SOCIAL_AUTH_OIDC_KEY", None)
+
+        try:
+            signing_key = client.get_signing_key_from_jwt(token)
+            claims = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256", "ES256"],
+                issuer=str(issuer).rstrip("/"),
+                audience=audience,
+                options={"require": ["exp", "iss", "sub"], "verify_aud": bool(audience)},
+            )
+        except jwt.DecodeError:
+            # Not a JWT at all (e.g. a hix_ personal key) — let the next class try.
+            return None
+        except jwt.PyJWKClientError:
+            # JWKS unavailable: fail CLOSED rather than fall through to a weaker check.
+            raise AuthenticationFailed(detail="IAM verification unavailable.")
+        except Exception:
+            raise AuthenticationFailed(detail="Token invalid.")
+
+        email = claims.get("email")
+        if not email:
+            raise AuthenticationFailed(detail="Token invalid.")
+
+        User = apps.get_model("insights", "User")
+        user = User.objects.filter(is_active=True, email__iexact=str(email)).first()
+        if user is None:
+            # Deliberately no auto-provisioning: IAM proves identity, not access.
+            raise AuthenticationFailed(detail="No insights user for this identity.")
+
+        return (user, None)
+
+    @classmethod
+    def authenticate_header(cls, request) -> str:
+        return cls.keyword
+
+
 class JwtAuthentication(authentication.BaseAuthentication):
     """
     A way of authenticating with a JWT, primarily by background jobs impersonating a User
