@@ -432,7 +432,11 @@ class Team(UUIDTClassicModel):
     logs_settings = models.JSONField(null=True, blank=True)
 
     # Heatmaps
-    heatmaps_opt_in = models.BooleanField(null=True, blank=True)
+    # On by default: heatmaps ride the autocapture path a new project already has
+    # enabled, so leaving this off shipped every new project an empty Heatmaps
+    # page plus a "you aren't collecting heatmaps data" warning. Existing teams
+    # keep whatever they have (NULL reads as off) until backfilled.
+    heatmaps_opt_in = models.BooleanField(null=True, blank=True, default=True)
 
     # Activity logs
     receive_org_level_activity_logs = models.BooleanField(null=True, blank=True, default=False)
