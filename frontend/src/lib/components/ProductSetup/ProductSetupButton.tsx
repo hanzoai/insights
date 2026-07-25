@@ -94,7 +94,7 @@ const MinimizedButton = forwardRef<HTMLButtonElement, MinimizedButtonProps>(func
                 <span className="relative">
                     <IconTarget />
                     {remainingCount > 0 && (
-                        <LemonBadge.Number count={remainingCount} status="warning" size="medium" position="top-right" />
+                        <LemonBadge.Number count={remainingCount} status="muted" size="medium" position="top-right" />
                     )}
                 </span>
             }
@@ -130,7 +130,7 @@ const ExpandedButton = forwardRef<HTMLButtonElement, ExpandedButtonProps>(functi
             data-attr="global-product-setup-button"
             sideIcon={
                 showBadge && remainingCount > 0 ? (
-                    <LemonBadge.Number count={remainingCount} status="warning" size="medium" />
+                    <LemonBadge.Number count={remainingCount} status="muted" size="medium" />
                 ) : undefined
             }
         >
