@@ -19,6 +19,7 @@ import {
 } from '@hanzo/icons'
 import { ProfilePicture } from '@hanzo/lemon-ui'
 
+import { AI_AVAILABLE } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Link } from 'lib/lemon-ui/Link/Link'
 import { IconBlank } from 'lib/lemon-ui/icons'
@@ -109,31 +110,33 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                             className="flex flex-col gap-px overflow-x-hidden"
                             innerClassName="primitive-menu-content-inner p-1 "
                         >
-                            <div className="flex flex-col gap-px">
-                                <Menu.Item
-                                    render={(props) => (
-                                        <Link
-                                            {...props}
-                                            to={urls.ai()}
-                                            buttonProps={{
-                                                menuItem: true,
-                                                size: 'fit',
-                                                className:
-                                                    'flex flex-col gap-1 p-2 border border-primary rounded h-32 items-center justify-center shadow hover:border-accent transition-colors',
-                                            }}
-                                            data-attr="help-menu-ask-insights-ai-button"
-                                        >
-                                            <span className="size-3 [&>svg]:size-4 mb-3">
-                                                <IconSparkles className="text-ai" />
-                                            </span>
-                                            <span className="text-sm font-medium">Ask Insights AI</span>
-                                            <span className="text-xs text-tertiary text-center text-pretty">
-                                                Insights AI answers 80%+ of support questions we receive!
-                                            </span>
-                                        </Link>
-                                    )}
-                                />
-                            </div>
+                            {AI_AVAILABLE && (
+                                <div className="flex flex-col gap-px">
+                                    <Menu.Item
+                                        render={(props) => (
+                                            <Link
+                                                {...props}
+                                                to={urls.ai()}
+                                                buttonProps={{
+                                                    menuItem: true,
+                                                    size: 'fit',
+                                                    className:
+                                                        'flex flex-col gap-1 p-2 border border-primary rounded h-32 items-center justify-center shadow hover:border-accent transition-colors',
+                                                }}
+                                                data-attr="help-menu-ask-insights-ai-button"
+                                            >
+                                                <span className="size-3 [&>svg]:size-4 mb-3">
+                                                    <IconSparkles className="text-ai" />
+                                                </span>
+                                                <span className="text-sm font-medium">Ask Insights AI</span>
+                                                <span className="text-xs text-tertiary text-center text-pretty">
+                                                    Insights AI answers 80%+ of support questions we receive!
+                                                </span>
+                                            </Link>
+                                        )}
+                                    />
+                                </div>
+                            )}
                             <div className="flex flex-col gap-px pt-1">
                                 <Menu.Item
                                     onClick={() => openSidePanel(SidePanelTab.Support)}
