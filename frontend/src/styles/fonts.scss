@@ -1,3 +1,28 @@
-/* Geist Sans and Geist Mono — Vercel's open-source font, via jsDelivr CDN */
-@import url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.css');
-@import url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.css');
+/* Geist Sans and Geist Mono — Vercel's open-source typeface, SIL OFL 1.1.
+ *
+ * Self-hosted from `frontend/public/fonts` (copied to `frontend/dist`, served at
+ * /static/fonts) rather than pulled from a CDN. The previous jsDelivr `@import`s
+ * pointed at stylesheets the `geist` package does not publish — both returned 404,
+ * so the app silently rendered in the fallback face. An `@import` is also governed
+ * by `style-src`, which does not list jsDelivr, so a corrected CDN path would have
+ * been blocked anyway. Serving from our own origin satisfies `font-src 'self'`.
+ *
+ * Each file is a variable font covering weights 100–900, so one file per family
+ * replaces the entire static weight set.
+ */
+
+@font-face {
+    font-family: Geist;
+    font-style: normal;
+    font-weight: 100 900;
+    src: url('/static/fonts/Geist-Variable.woff2') format('woff2');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Geist Mono';
+    font-style: normal;
+    font-weight: 100 900;
+    src: url('/static/fonts/GeistMono-Variable.woff2') format('woff2');
+    font-display: swap;
+}
