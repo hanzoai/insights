@@ -34,28 +34,28 @@ configure({ testIdAttribute: 'data-attr' })
 // Mock DecompressionWorkerManager globally to avoid import.meta.url issues in tests
 jest.mock('scenes/session-recordings/player/snapshot-processing/DecompressionWorkerManager')
 
-// Mock insights-js surveys-preview to avoid ESM import issues in tests
-jest.mock('insights-js/dist/surveys-preview', () => ({
+// Mock @hanzo/insights surveys-preview to avoid ESM import issues in tests
+jest.mock('@hanzo/insights/dist/surveys-preview', () => ({
     renderFeedbackWidgetPreview: jest.fn(),
     renderSurveysPreview: jest.fn(),
     getNextSurveyStep: jest.fn(),
 }))
 
-// Mock insights-js product-tours-preview to avoid ESM import issues in tests
-jest.mock('insights-js/dist/product-tours-preview', () => ({
+// Mock @hanzo/insights product-tours-preview to avoid ESM import issues in tests
+jest.mock('@hanzo/insights/dist/product-tours-preview', () => ({
     renderProductTourPreview: jest.fn(),
 }))
 
-// Mock insights-js element-inference to avoid ESM import issues in tests
-jest.mock('insights-js/dist/element-inference', () => ({
+// Mock @hanzo/insights element-inference to avoid ESM import issues in tests
+jest.mock('@hanzo/insights/dist/element-inference', () => ({
     findElement: jest.fn(),
     getElementPath: jest.fn(),
 }))
 
-// Mock insights-js to avoid issues in tests
-jest.mock('insights-js', () => {
+// Mock @hanzo/insights to avoid issues in tests
+jest.mock('@hanzo/insights', () => {
     // Get the actual module to preserve type exports (enums, etc.)
-    const actual = jest.requireActual('insights-js')
+    const actual = jest.requireActual('@hanzo/insights')
 
     const mock: Record<string, any> = {
         capture: jest.fn(),
