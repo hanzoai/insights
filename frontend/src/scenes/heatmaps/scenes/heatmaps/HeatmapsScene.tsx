@@ -7,7 +7,6 @@ import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
 import { HeatmapsWarnings } from 'scenes/heatmaps/components/HeatmapsWarnings'
@@ -132,17 +131,6 @@ export function HeatmapsScene(): JSX.Element {
                     </AppShortcut>
                 }
             />
-            <LemonBanner
-                type="info"
-                dismissKey="heatmaps-beta-banner"
-                className="mb-4"
-                action={{ children: 'Send feedback', id: 'heatmaps-feedback-button' }}
-            >
-                <p>
-                    Heatmaps is in beta. Please let us know what you'd like to see here and/or report any issues
-                    directly to us!
-                </p>
-            </LemonBanner>
             <div className="flex justify-between gap-2 items-center flex-wrap">
                 <AppShortcut
                     name="SearchHeatmaps"
