@@ -11,7 +11,7 @@ import { initKeaTests } from '~/test/init'
 import { timeSensitiveAuthenticationLogic } from './timeSensitiveAuthenticationLogic'
 
 jest.mock('lib/api')
-jest.mock('insights-js')
+jest.mock('@hanzo/insights')
 
 describe('timeSensitiveAuthenticationLogic', () => {
     let logic: ReturnType<typeof timeSensitiveAuthenticationLogic.build>
