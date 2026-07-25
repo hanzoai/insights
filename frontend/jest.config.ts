@@ -35,6 +35,8 @@ const esmModules = [
     '@hanzo/insightsql-parser',
     // uuid v13 is published as `"type": "module"` with no CJS entry point
     'uuid',
+    // @hanzo/logo ships ESM only (`export * from './logos.js'`)
+    '@hanzo/logo',
 ]
 function rootDirectories(): string[] {
     return ['<rootDir>/src', '<rootDir>/../products']
