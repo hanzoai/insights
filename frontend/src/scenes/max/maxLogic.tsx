@@ -4,6 +4,7 @@ import { router } from 'kea-router'
 import { IconBook } from '@hanzo/icons'
 
 import api from 'lib/api'
+import { AI_AVAILABLE } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -509,7 +510,9 @@ export const maxLogic = kea<maxLogicType>([
         }
 
         // Load conversation history on mount
-        actions.loadConversationHistory()
+        if (AI_AVAILABLE) {
+            actions.loadConversationHistory()
+        }
     }),
 
     tabAwareUrlToAction(({ actions, values }) => ({
