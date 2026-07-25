@@ -411,17 +411,21 @@ def get_context_for_template(
     if settings.E2E_TESTING:
         context["e2e_testing"] = True
         context["js_insights_api_key"] = "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
-        context["js_insights_host"] = "https://internal-j.hanzo.ai"
-        context["js_insights_ui_host"] = "https://insights.hanzo.ai"
+        context["js_insights_host"] = settings.TELEMETRY_HOST
+        context["js_insights_ui_host"] = settings.TELEMETRY_HOST
 
     elif settings.SELF_CAPTURE:
         if hanzo_insights.api_key:
             context["js_insights_api_key"] = hanzo_insights.api_key
             context["js_insights_host"] = ""  # Becomes location.origin in the frontend
-    else:
-        context["js_insights_api_key"] = "sTMFPsFhdP1Ssg"
-        context["js_insights_host"] = "https://internal-j.hanzo.ai"
-        context["js_insights_ui_host"] = "https://insights.hanzo.ai"
+
+    elif settings.TELEMETRY_KEY:
+        context["js_insights_api_key"] = settings.TELEMETRY_KEY
+        context["js_insights_host"] = settings.TELEMETRY_HOST
+        context["js_insights_ui_host"] = settings.TELEMETRY_HOST
+
+    # No telemetry destination configured: leave js_insights_api_key unset so
+    # head.html emits no snippet and loadInsightsJS() never initialises the SDK.
 
     context["js_capture_time_to_see_data"] = settings.CAPTURE_TIME_TO_SEE_DATA
     context["js_url"] = get_js_url(request)
