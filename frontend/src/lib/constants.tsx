@@ -2,6 +2,21 @@ import { LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { ChartDisplayCategory, ChartDisplayType, Region, SDKKey, SSOProvider } from '../types'
 
+/**
+ * Whether this build serves the Insights AI assistant.
+ *
+ * The Django app backing `api/environments/:team_id/conversations/` and
+ * `api/environments/:team_id/core_memory/` is not part of this fork: it was
+ * removed wholesale because it shipped under the upstream Enterprise licence,
+ * which this MIT-licensed codebase cannot carry. No URL route defines either
+ * endpoint, so every assistant request 404s.
+ *
+ * Until a natively-licensed assistant backend exists, the AI surface stays
+ * hidden and fires no requests. Flip this to `true` in the same commit that
+ * registers those routes — nothing else needs to change.
+ */
+export const AI_AVAILABLE: boolean = false
+
 // Sync with backend DISPLAY_TYPES_TO_CATEGORIES
 export const DISPLAY_TYPES_TO_CATEGORIES: Record<ChartDisplayType, ChartDisplayCategory> = {
     [ChartDisplayType.ActionsLineGraph]: ChartDisplayCategory.TimeSeries,

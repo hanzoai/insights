@@ -3,6 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
+import { AI_AVAILABLE } from 'lib/constants'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 
 import { CoreMemory } from '~/types'
@@ -82,6 +83,8 @@ export const maxSettingsLogic = kea<maxSettingsLogicType>([
     })),
 
     afterMount(({ actions }) => {
-        actions.loadCoreMemory()
+        if (AI_AVAILABLE) {
+            actions.loadCoreMemory()
+        }
     }),
 ])
