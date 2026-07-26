@@ -150,8 +150,8 @@ jobs:
 
         env:
             REDIS_URL: 'redis://localhost'
-            CLICKHOUSE_HOST: 'localhost'
-            CLICKHOUSE_DATABASE: 'insights_test'
+            DATASTORE_HOST: 'localhost'
+            DATASTORE_DATABASE: 'insights_test'
             KAFKA_HOSTS: 'kafka:9092'
 
         steps:
