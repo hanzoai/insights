@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import render
 from django.template import loader
 from django.urls import include, path, re_path
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -306,6 +307,36 @@ def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
 
 
 urlpatterns.append(path("login", _login_oidc_redirect))
+
+
+@ensure_csrf_cookie
+def root(request: HttpRequest) -> HttpResponse:
+    """`/` — the app for a signed-in user, the marketing landing for everyone else.
+
+    Anonymous `/` used to fall through to the catch-all below and bounce straight
+    to SSO, so the product had no public face at all: the only thing an
+    unauthenticated visitor could see was a login screen. Signed-in behaviour is
+    unchanged — same `home` view, same SPA.
+
+    The CTAs point at surfaces that actually work. Plans deliberately leave for
+    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing`
+    is not served here, so an in-app upgrade funnel would dead-end.
+    """
+    if request.user.is_authenticated:
+        return home(request)
+    return render(
+        request,
+        "landing.html",
+        {
+            "login_url": "/login",
+            "plans_url": "https://hanzo.ai/pricing",
+            "docs_url": "https://docs.hanzo.ai",
+            "source_url": "https://github.com/hanzoai/insights",
+        },
+    )
+
+
+urlpatterns.append(re_path(r"^$", root))
 
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
