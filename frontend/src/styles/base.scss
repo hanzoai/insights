@@ -578,10 +578,20 @@
     --shadow-elevation-3000: 0 3px 0 var(--border-3000-light);
 
     // Non-color vars
-    --radius: 0.375rem; // Increased from Tailwind's default of 0.25rem
-    --radius-sm: 0.25rem; // Increased from Tailwind's default of 0.125rem
-    --radius-base: var(--radius); // Increased from Tailwind's default of 0.25rem
-    --radius-lg: 0.625rem; // Increased from Tailwind's default of 0.5rem
+    //
+    // RADIUS IS THE HANZO SCALE. 9px is the corner every other Hanzo surface
+    // rounds to — measured off the live console's primary and secondary buttons,
+    // which are the reference. The upstream 6px (0.375rem) is what made this app
+    // read blocky next to the rest of the product: same monochrome palette, same
+    // type, but squarer corners on every button, input, card and menu.
+    //
+    // One token decides it. `--lemon-button-radius` already resolves to `--radius`
+    // (LemonButton.scss), so buttons follow from here rather than from a rule of
+    // their own — and nothing needs a per-component override.
+    --radius: 0.5625rem; // 9px — the Hanzo corner
+    --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
+    --radius-base: var(--radius);
+    --radius-lg: 0.75rem; // 12px — modals, large cards, one step up
     --radius-full: 9999px;
     --modal-shadow-elevation: 0px 16px 16px -16px rgb(0 0 0 / 35%);
     --opacity-disabled: 0.65;
