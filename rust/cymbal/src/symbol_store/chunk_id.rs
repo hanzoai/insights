@@ -204,7 +204,7 @@ mod test {
 
     use axum::async_trait;
     use chrono::Utc;
-    use common_types::ClickHouseEvent;
+    use common_types::DatastoreEvent;
     use mockall::predicate;
     use insights_symbol_data::write_symbol_data;
     use reqwest::Url;
@@ -254,7 +254,7 @@ mod test {
     }
 
     fn get_example_frame() -> RawJSFrame {
-        let event: ClickHouseEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
+        let event: DatastoreEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
         let mut props: RawErrProps = serde_json::from_str(&event.properties.unwrap()).unwrap();
         let stack = props.exception_list.swap_remove(0).stack.unwrap();
         let Stacktrace::Raw { frames } = stack else {

@@ -2,7 +2,7 @@ import json
 import datetime as dt
 
 from freezegun.api import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest import mock
 
 from rest_framework import status
@@ -20,7 +20,7 @@ SAMPLE_PAYLOAD = {"dateRange": ["2021-06-10", "2022-06-12"], "parallelism": 1}
 
 
 @freeze_time("2021-12-05T13:23:00Z")
-class TestAppMetricsAPI(ClickhouseTestMixin, APIBaseTest):
+class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def setUp(self):

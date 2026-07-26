@@ -4,14 +4,14 @@ from datetime import timedelta
 from temporalio import common, workflow
 
 from insights.temporal.cleanup_property_definitions.activities import (
-    delete_property_definitions_from_clickhouse,
+    delete_property_definitions_from_datastore,
     delete_property_definitions_from_postgres,
     preview_property_definitions,
 )
 from insights.temporal.cleanup_property_definitions.types import (
     CleanupPropertyDefinitionsError,
     CleanupPropertyDefinitionsInput,
-    DeleteClickHousePropertyDefinitionsInput,
+    DeleteDatastorePropertyDefinitionsInput,
     DeletePostgresPropertyDefinitionsInput,
     PreviewPropertyDefinitionsInput,
 )
@@ -22,7 +22,7 @@ from insights.temporal.common.base import InsightsWorkflow
 class CleanupPropertyDefinitionsWorkflow(InsightsWorkflow):
     """Workflow to clean up person property definitions matching a regex pattern.
 
-    This workflow deletes property definitions from both PostgreSQL and ClickHouse.
+    This workflow deletes property definitions from both PostgreSQL and Datastore.
     It supports dry-run mode to preview what would be deleted.
     """
 
@@ -104,10 +104,10 @@ class CleanupPropertyDefinitionsWorkflow(InsightsWorkflow):
         result["property_definitions_deleted"] = total_property_definitions_deleted
         result["event_properties_deleted"] = total_event_properties_deleted
 
-        # Delete from ClickHouse
+        # Delete from Datastore
         await workflow.execute_activity(
-            delete_property_definitions_from_clickhouse,
-            DeleteClickHousePropertyDefinitionsInput(
+            delete_property_definitions_from_datastore,
+            DeleteDatastorePropertyDefinitionsInput(
                 team_id=input.team_id,
                 pattern=input.pattern,
                 property_type=property_type_int,
@@ -123,7 +123,7 @@ class CleanupPropertyDefinitionsWorkflow(InsightsWorkflow):
         workflow.logger.info(
             f"Cleanup complete: deleted {total_property_definitions_deleted} property definitions "
             f"and {total_event_properties_deleted} event properties from PostgreSQL, "
-            f"and matching definitions from ClickHouse"
+            f"and matching definitions from Datastore"
         )
 
         return result

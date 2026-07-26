@@ -24,8 +24,8 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import (
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import (
     KAFKA_LOG_ENTRIES_TABLE_SQL,
     LOG_ENTRIES_TABLE,
     LOG_ENTRIES_TABLE_MV_SQL,
@@ -517,9 +517,9 @@ def log_entries_table():
 async def test_logger_produces_to_kafka_from_activity(activity_environment, producer, queue, log_entries_table):
     """Test whether our log entries logger produces messages to Kafka.
 
-    We also check if those messages are ingested into ClickHouse.
+    We also check if those messages are ingested into Datastore.
 
-    Notice that we give each log message that is ingested into ClickHouse a different
+    Notice that we give each log message that is ingested into Datastore a different
     `team_id` parameter. This is because The `log_entries` table is a ReplacingMergeTree
     table that will remove duplicate log entries. So, since the table is ordered by a key
     that contains `team_id`, we give each log a different `team_id` to avoid automatic
@@ -706,9 +706,9 @@ async def test_logger_produces_to_log_queue_from_workflow(queue):
 async def test_logger_produces_to_kafka_from_workflow(producer, queue, log_entries_table):
     """Test whether our log entries logger produces messages to Kafka.
 
-    We also check if those messages are ingested into ClickHouse.
+    We also check if those messages are ingested into Datastore.
 
-    Notice that we give each log message that is ingested into ClickHouse a different
+    Notice that we give each log message that is ingested into Datastore a different
     `team_id` parameter. This is because The `log_entries` table is a ReplacingMergeTree
     table that will remove duplicate log entries. So, since the table is ordered by a key
     that contains `team_id`, we give each log a different `team_id` to avoid automatic

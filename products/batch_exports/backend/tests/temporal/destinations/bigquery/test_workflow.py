@@ -35,7 +35,7 @@ from products.batch_exports.backend.tests.temporal.destinations.bigquery.utils i
     SKIP_IF_MISSING_GOOGLE_APPLICATION_CREDENTIALS,
     TEST_MODELS,
     TEST_TIME,
-    assert_clickhouse_records_in_bigquery,
+    assert_datastore_records_in_bigquery,
 )
 from products.batch_exports.backend.tests.temporal.utils.workflow import mocked_start_batch_export_run
 
@@ -89,7 +89,7 @@ async def bigquery_batch_export(
 @pytest.mark.parametrize("use_json_type", [False, True], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_bigquery_export_workflow(
-    clickhouse_client,
+    datastore_client,
     bigquery_client,
     bigquery_batch_export,
     interval,
@@ -170,9 +170,9 @@ async def test_bigquery_export_workflow(
             == len([event for event in events_to_export_created if event["properties"] is not None])
         )
 
-        await assert_clickhouse_records_in_bigquery(
+        await assert_datastore_records_in_bigquery(
             bigquery_client=bigquery_client,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             table_id=table_id,
             dataset_id=bigquery_batch_export.destination.config["dataset_id"],
             team_id=ateam.pk,
@@ -190,7 +190,7 @@ async def test_bigquery_export_workflow(
 @pytest.mark.parametrize("exclude_events", [None], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_bigquery_export_workflow_without_events(
-    clickhouse_client,
+    datastore_client,
     bigquery_batch_export,
     interval,
     exclude_events,
@@ -270,7 +270,7 @@ async def test_bigquery_export_workflow_backfill_earliest_persons(
     ateam,
     bigquery_client,
     bigquery_batch_export,
-    clickhouse_client,
+    datastore_client,
     data_interval_start,
     data_interval_end,
     generate_test_data,
@@ -335,9 +335,9 @@ async def test_bigquery_export_workflow_backfill_earliest_persons(
     assert run.status == "Completed"
     assert run.data_interval_start is None
 
-    await assert_clickhouse_records_in_bigquery(
+    await assert_datastore_records_in_bigquery(
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         table_id=table_id,
         dataset_id=bigquery_batch_export.destination.config["dataset_id"],
         team_id=ateam.pk,

@@ -22,14 +22,14 @@ from structlog import get_logger
 from temporalio import activity
 
 import insights.temporal.common.asyncpa as asyncpa
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import QueryTags, TemporalTags, get_query_tags
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import QueryTags, TemporalTags, get_query_tags
 
 LOGGER = get_logger(__name__)
 
 
-def encode_clickhouse_data(data: typing.Any, quote_char="'") -> bytes:
-    """Encode data for ClickHouse.
+def encode_datastore_data(data: typing.Any, quote_char="'") -> bytes:
+    """Encode data for Datastore.
 
     Depending on the type of data the encoding is different.
 
@@ -58,17 +58,17 @@ def encode_clickhouse_data(data: typing.Any, quote_char="'") -> bytes:
             return f"toDateTime64('{data:%Y-%m-%d %H:%M:%S.%f}', 6{timezone_arg})".encode()
 
         case list():
-            encoded_data = [encode_clickhouse_data(value) for value in data]
+            encoded_data = [encode_datastore_data(value) for value in data]
             result = b"[" + b",".join(encoded_data) + b"]"
             return result
 
         case tuple():
-            encoded_data = [encode_clickhouse_data(value) for value in data]
+            encoded_data = [encode_datastore_data(value) for value in data]
             result = b"(" + b",".join(encoded_data) + b")"
             return result
 
         case dict():
-            # Encode dictionaries as JSON, as it can represent a Python dictionary in a way ClickHouse understands.
+            # Encode dictionaries as JSON, as it can represent a Python dictionary in a way Datastore understands.
             # This means INSERT queries with dictionary data are only supported with 'FORMAT JSONEachRow', which
             # is enough for now as most if not all of our INSERT query workloads are in unit test setup.
             encoded_data = []
@@ -81,7 +81,7 @@ def encode_clickhouse_data(data: typing.Any, quote_char="'") -> bytes:
                     value = str(value)
 
                 encoded_data.append(
-                    f'"{str(key)}"'.encode() + b":" + encode_clickhouse_data(value, quote_char=quote_char)
+                    f'"{str(key)}"'.encode() + b":" + encode_datastore_data(value, quote_char=quote_char)
                 )
 
             result = b"{" + b",".join(encoded_data) + b"}"
@@ -93,7 +93,7 @@ def encode_clickhouse_data(data: typing.Any, quote_char="'") -> bytes:
             return f"{quote_char}{str_data}{quote_char}".encode()
 
 
-class ClickHouseQueryStatus(enum.StrEnum):
+class DatastoreQueryStatus(enum.StrEnum):
     FINISHED = "Finished"
     RUNNING = "Running"
     ERROR = "Error"
@@ -121,15 +121,15 @@ class ChunkBytesAsyncStreamIterator:
         return data
 
 
-class ClickHouseClientNotConnected(Exception):
+class DatastoreClientNotConnected(Exception):
     """Exception raised when attempting to run an async query without connecting."""
 
     def __init__(self):
-        super().__init__("ClickHouseClient is not connected. Are you running in a context manager?")
+        super().__init__("DatastoreClient is not connected. Are you running in a context manager?")
 
 
-class ClickHouseError(Exception):
-    """Base Exception representing anything going wrong with ClickHouse."""
+class DatastoreError(Exception):
+    """Base Exception representing anything going wrong with Datastore."""
 
     def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
         self.query = query
@@ -137,15 +137,15 @@ class ClickHouseError(Exception):
         super().__init__(error_message)
 
 
-class ClickHouseAllReplicasAreStaleError(ClickHouseError):
+class DatastoreAllReplicasAreStaleError(DatastoreError):
     """Exception raised when all replicas are stale."""
 
     def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
         super().__init__(error_message, query, query_id)
 
 
-class ClickHouseClientTimeoutError(ClickHouseError):
-    """Exception raised when `ClickHouseClient` timed-out waiting for a response.
+class DatastoreClientTimeoutError(DatastoreError):
+    """Exception raised when `DatastoreClient` timed-out waiting for a response.
 
     This does not indicate the query failed as the timeout is local.
     """
@@ -154,21 +154,21 @@ class ClickHouseClientTimeoutError(ClickHouseError):
         super().__init__(f"Timed-out waiting for response running query '{query_id}'", query, query_id)
 
 
-class ClickHouseQueryNotFound(ClickHouseError):
+class DatastoreQueryNotFound(DatastoreError):
     """Exception raised when a query with a given ID is not found."""
 
     def __init__(self, query_id: str):
         super().__init__(f"Query with ID '{query_id}' was not found in query log", query_id=query_id)
 
 
-class ClickHouseMemoryLimitExceededError(ClickHouseError):
+class DatastoreMemoryLimitExceededError(DatastoreError):
     """Exception raised when a query exceeds the memory limit."""
 
     def __init__(self, error_message, query: str | None = None, query_id: str | None = None):
         super().__init__(error_message, query, query_id)
 
 
-class ClickHouseCheckQueryStatusError(ClickHouseError):
+class DatastoreCheckQueryStatusError(DatastoreError):
     """Exception raised when checking the status of a query fails."""
 
     def __init__(self, error_message: str, query_id: str | None = None):
@@ -239,15 +239,15 @@ class KeywordOnlyFormatter(Formatter):
             return f"{{{key}}}"
 
 
-class ClickHouseClient:
-    """An asynchronous client to access ClickHouse via HTTP.
+class DatastoreClient:
+    """An asynchronous client to access Datastore via HTTP.
 
     Attributes:
         session: The underlying aiohttp.ClientSession used for HTTP communication.
-        url: The URL of the ClickHouse cluster.
-        headers: Headers sent to ClickHouse in an HTTP request. Includes authentication details.
+        url: The URL of the Datastore cluster.
+        headers: Headers sent to Datastore in an HTTP request. Includes authentication details.
         params: Parameters passed as query arguments in the HTTP request. Common ones include the
-            ClickHouse database and the 'max_execution_time'.
+            Datastore database and the 'max_execution_time'.
     """
 
     def __init__(
@@ -270,9 +270,9 @@ class ClickHouseClient:
         self.logger = LOGGER.bind(url=url, database=database, user=user)
 
         if user:
-            self.headers["X-ClickHouse-User"] = user
+            self.headers["X-Datastore-User"] = user
         if password:
-            self.headers["X-ClickHouse-Key"] = password
+            self.headers["X-Datastore-Key"] = password
         if database:
             self.params["database"] = database
 
@@ -280,12 +280,12 @@ class ClickHouseClient:
 
     @classmethod
     def from_insights_settings(cls, settings, **kwargs):
-        """Initialize a ClickHouseClient from Insights settings."""
+        """Initialize a DatastoreClient from Insights settings."""
         return cls(
-            url=settings.CLICKHOUSE_URL,
-            user=settings.CLICKHOUSE_USER,
-            password=settings.CLICKHOUSE_PASSWORD,
-            database=settings.CLICKHOUSE_DATABASE,
+            url=settings.DATASTORE_URL,
+            user=settings.DATASTORE_USER,
+            password=settings.DATASTORE_PASSWORD,
+            database=settings.DATASTORE_DATABASE,
             **kwargs,
         )
 
@@ -296,7 +296,7 @@ class ClickHouseClient:
             A boolean indicating whether the connection is alive.
         """
         if self.session is None:
-            raise ClickHouseClientNotConnected()
+            raise DatastoreClientNotConnected()
 
         ping_url = urljoin(self.url, "ping")
 
@@ -308,10 +308,10 @@ class ClickHouseClient:
                 timeout=aiohttp.ClientTimeout(total=timeout),
             )
         except aiohttp.ClientResponseError as exc:
-            self.logger.exception("Failed ClickHouse liveness check", exc_info=exc)
+            self.logger.exception("Failed Datastore liveness check", exc_info=exc)
             return False
         except TimeoutError:
-            self.logger.exception("ClickHouse liveness check timed out after %s seconds", timeout)
+            self.logger.exception("Datastore liveness check timed out after %s seconds", timeout)
             return False
         return True
 
@@ -326,7 +326,7 @@ class ClickHouseClient:
 
         has_format_placeholders = re.search(r"(?<!{){[^{}]*}(?!})|{{[^{}]*}}", query)
 
-        format_parameters = {k: encode_clickhouse_data(v).decode("utf-8") for k, v in query_parameters.items()}
+        format_parameters = {k: encode_datastore_data(v).decode("utf-8") for k, v in query_parameters.items()}
         query = query % format_parameters
 
         if has_format_placeholders:
@@ -341,73 +341,73 @@ class ClickHouseClient:
             The request data to be passed as the body of the request.
         """
         if len(data) > 0:
-            request_data = b",".join(encode_clickhouse_data(value) for value in data)
+            request_data = b",".join(encode_datastore_data(value) for value in data)
         else:
             request_data = None
         return request_data
 
     async def acheck_response(self, response, query) -> None:
-        """Asynchronously check the HTTP response received from ClickHouse.
+        """Asynchronously check the HTTP response received from Datastore.
 
         Raises:
-            ClickHouseAllReplicasAreStaleError: If status code is not 200 and error message contains
+            DatastoreAllReplicasAreStaleError: If status code is not 200 and error message contains
                 "ALL_REPLICAS_ARE_STALE". This can happen when using max_replica_delay_for_distributed_queries
                 and fallback_to_stale_replicas_for_distributed_queries=0
-            ClickHouseMemoryLimitExceededError: If the status code is not 200 and error message contains
+            DatastoreMemoryLimitExceededError: If the status code is not 200 and error message contains
                 "MEMORY_LIMIT_EXCEEDED".
-            ClickHouseError: If the status code is not 200.
+            DatastoreError: If the status code is not 200.
         """
         if response.status != 200:
             error_message = await response.text()
             if "ALL_REPLICAS_ARE_STALE" in error_message:
-                raise ClickHouseAllReplicasAreStaleError(error_message, query=query)
+                raise DatastoreAllReplicasAreStaleError(error_message, query=query)
             if "MEMORY_LIMIT_EXCEEDED" in error_message:
-                raise ClickHouseMemoryLimitExceededError(error_message, query=query)
-            raise ClickHouseError(error_message, query=query)
+                raise DatastoreMemoryLimitExceededError(error_message, query=query)
+            raise DatastoreError(error_message, query=query)
 
     def check_response(self, response, query) -> None:
-        """Check the HTTP response received from ClickHouse.
+        """Check the HTTP response received from Datastore.
 
         Raises:
-            ClickHouseAllReplicasAreStaleError: If status code is not 200 and error message contains
+            DatastoreAllReplicasAreStaleError: If status code is not 200 and error message contains
                 "ALL_REPLICAS_ARE_STALE". This can happen when using max_replica_delay_for_distributed_queries
                 and fallback_to_stale_replicas_for_distributed_queries=0
-            ClickHouseMemoryLimitExceededError: If the status code is not 200 and error message contains
+            DatastoreMemoryLimitExceededError: If the status code is not 200 and error message contains
                 "MEMORY_LIMIT_EXCEEDED".
-            ClickHouseError: If the status code is not 200.
+            DatastoreError: If the status code is not 200.
         """
         if response.status_code != 200:
             error_message = response.text
             if "ALL_REPLICAS_ARE_STALE" in error_message:
-                raise ClickHouseAllReplicasAreStaleError(error_message, query=query)
+                raise DatastoreAllReplicasAreStaleError(error_message, query=query)
             if "MEMORY_LIMIT_EXCEEDED" in error_message:
-                raise ClickHouseMemoryLimitExceededError(error_message, query=query)
-            raise ClickHouseError(error_message, query=query)
+                raise DatastoreMemoryLimitExceededError(error_message, query=query)
+            raise DatastoreError(error_message, query=query)
 
     @contextlib.asynccontextmanager
     async def aget_query(
         self, query, query_parameters, query_id
     ) -> collections.abc.AsyncIterator[aiohttp.ClientResponse]:
-        """Send a GET request to the ClickHouse HTTP interface with a query.
+        """Send a GET request to the Datastore HTTP interface with a query.
 
         Only read-only queries may be sent as a GET request. For inserts, use apost_query.
 
         The context manager protocol is used to control when to release the response.
 
         Query parameters will be formatted with string formatting and additionally sent to
-        ClickHouse in the query string.
+        Datastore in the query string.
 
         Arguments:
             query: The query to POST.
             *data: Iterable of values to include in the body of the request. For example, the tuples of VALUES for an INSERT query.
             query_parameters: Parameters to be formatted in the query.
-            query_id: A query ID to pass to ClickHouse.
+            query_id: A query ID to pass to Datastore.
 
         Returns:
-            The response received from the ClickHouse HTTP interface.
+            The response received from the Datastore HTTP interface.
         """
         if self.session is None:
-            raise ClickHouseClientNotConnected()
+            raise DatastoreClientNotConnected()
 
         params = {**self.params}
         if query_id is not None:
@@ -416,7 +416,7 @@ class ClickHouseClient:
         # Certain views, like person_batch_exports* still rely on us formatting arguments.
         params["query"] = self.prepare_query(query, query_parameters)
 
-        # TODO: Let clickhouse handle all parameter formatting.
+        # TODO: Let datastore handle all parameter formatting.
         if query_parameters is not None:
             for key, value in query_parameters.items():
                 if key in query:
@@ -432,24 +432,24 @@ class ClickHouseClient:
     async def apost_query(
         self, query, *data, query_parameters, query_id, timeout: float | None = None
     ) -> collections.abc.AsyncIterator[aiohttp.ClientResponse]:
-        """POST a query to the ClickHouse HTTP interface.
+        """POST a query to the Datastore HTTP interface.
 
         The context manager protocol is used to control when to release the response.
 
         Query parameters will be formatted with string formatting and additionally sent to
-        ClickHouse in the query string.
+        Datastore in the query string.
 
         Arguments:
             query: The query to POST.
             *data: Iterable of values to include in the body of the request. For example, the tuples of VALUES for an INSERT query.
             query_parameters: Parameters to be formatted in the query.
-            query_id: A query ID to pass to ClickHouse.
+            query_id: A query ID to pass to Datastore.
 
         Returns:
-            The response received from the ClickHouse HTTP interface.
+            The response received from the Datastore HTTP interface.
         """
         if self.session is None:
-            raise ClickHouseClientNotConnected()
+            raise DatastoreClientNotConnected()
 
         params = {**self.params}
         if query_id is not None:
@@ -458,7 +458,7 @@ class ClickHouseClient:
         # Certain views, like person_batch_exports* still rely on us formatting arguments.
         query = self.prepare_query(query, query_parameters)
 
-        # TODO: Let clickhouse handle all parameter formatting.
+        # TODO: Let datastore handle all parameter formatting.
         if query_parameters is not None:
             for key, value in query_parameters.items():
                 if key not in query:
@@ -468,7 +468,7 @@ class ClickHouseClient:
                     # Encode lists of strings in case they contain single quotes.
                     # This is intended only to handle `exclude_events` from batch
                     # exports. A further refactor of this whole block is pending.
-                    params[f"param_{key}"] = encode_clickhouse_data(value).decode("utf-8")
+                    params[f"param_{key}"] = encode_datastore_data(value).decode("utf-8")
                 else:
                     params[f"param_{key}"] = str(value)
         add_log_comment_param(params)
@@ -492,25 +492,25 @@ class ClickHouseClient:
                 await self.acheck_response(response, query)
                 yield response
         except TimeoutError:
-            raise ClickHouseClientTimeoutError(query, query_id)
+            raise DatastoreClientTimeoutError(query, query_id)
 
     @contextlib.contextmanager
     def post_query(self, query, *data, query_parameters, query_id) -> collections.abc.Iterator:
-        """POST a query to the ClickHouse HTTP interface.
+        """POST a query to the Datastore HTTP interface.
 
         The context manager protocol is used to control when to release the response.
 
         Query parameters will be formatted with string formatting and additionally sent to
-        ClickHouse in the query string.
+        Datastore in the query string.
 
         Arguments:
             query: The query to POST.
             *data: Iterable of values to include in the body of the request. For example, the tuples of VALUES for an INSERT query.
             query_parameters: Parameters to be formatted in the query.
-            query_id: A query ID to pass to ClickHouse.
+            query_id: A query ID to pass to Datastore.
 
         Returns:
-            The response received from the ClickHouse HTTP interface.
+            The response received from the Datastore HTTP interface.
         """
         params = {**self.params}
         if query_id is not None:
@@ -524,7 +524,7 @@ class ClickHouseClient:
         else:
             request_data = query.encode("utf-8")
 
-        # TODO: Let clickhouse handle all parameter formatting.
+        # TODO: Let datastore handle all parameter formatting.
         if query_parameters is not None:
             for key, value in query_parameters.items():
                 if key in query:
@@ -546,7 +546,7 @@ class ClickHouseClient:
     async def execute_query(
         self, query, *data, query_parameters=None, query_id: str | None = None, timeout: float | None = None
     ) -> None:
-        """Execute the given query in ClickHouse.
+        """Execute the given query in Datastore.
 
         This method doesn't return any response.
         """
@@ -556,7 +556,7 @@ class ClickHouseClient:
             return None
 
     async def read_query(self, query, query_parameters=None, query_id: str | None = None) -> bytes:
-        """Execute the given readonly query in ClickHouse and read the response in full.
+        """Execute the given readonly query in Datastore and read the response in full.
 
         As the entire payload will be read at once, use this method when expecting a small payload, like
         when running a 'count(*)' query.
@@ -567,7 +567,7 @@ class ClickHouseClient:
     async def read_query_as_jsonl(
         self, query, query_parameters=None, query_id: str | None = None
     ) -> list[dict[typing.Any, typing.Any]]:
-        """Execute the given readonly query in ClickHouse and read the response as JSONL.
+        """Execute the given readonly query in Datastore and read the response as JSONL.
 
         This will return a list of Python dictionaries (each one a JSON document).
 
@@ -582,8 +582,8 @@ class ClickHouseClient:
         self,
         query_id: str,
         raise_on_error: bool = True,
-    ) -> ClickHouseQueryStatus:
-        """Check the status of a query in ClickHouse.
+    ) -> DatastoreQueryStatus:
+        """Check the status of a query in Datastore.
 
         This method first checks the query log to see if the query has finished, failed, or is still running.
         If it's not found in the query log for whatever reason (we've seen this happen many times in production), it
@@ -595,16 +595,16 @@ class ClickHouseClient:
                 failed.
 
         Raises:
-            ClickHouseQueryNotFound: If the query is not found in the query log or process list.
-            ClickHouseCheckQueryStatusError: If an error occurs while checking the query status.
-            ClickHouseError: If raise_on_error is True and the query has failed.
+            DatastoreQueryNotFound: If the query is not found in the query log or process list.
+            DatastoreCheckQueryStatusError: If an error occurs while checking the query status.
+            DatastoreError: If raise_on_error is True and the query has failed.
         """
         try:
             return await self.acheck_query_in_query_log(query_id, raise_on_error=raise_on_error)
-        except ClickHouseQueryNotFound:
+        except DatastoreQueryNotFound:
             is_running = await self.acheck_query_in_process_list(query_id)
             if is_running:
-                return ClickHouseQueryStatus.RUNNING
+                return DatastoreQueryStatus.RUNNING
             else:
                 self.logger.warning("Expected query not found in query log or process list", query_id=query_id)
                 raise
@@ -613,8 +613,8 @@ class ClickHouseClient:
         self,
         query_id: str,
         raise_on_error: bool = True,
-    ) -> ClickHouseQueryStatus:
-        """Check the status of a query in the ClickHouse query log.
+    ) -> DatastoreQueryStatus:
+        """Check the status of a query in the Datastore query log.
 
         Arguments:
             query_id: The ID of the query to check.
@@ -632,16 +632,16 @@ class ClickHouseClient:
         try:
             results = await self.read_query_as_jsonl(
                 query,
-                query_parameters={"query_id": query_id, "cluster_name": settings.CLICKHOUSE_CLUSTER},
+                query_parameters={"query_id": query_id, "cluster_name": settings.DATASTORE_CLUSTER},
                 query_id=f"{query_id}-CHECK-QUERY-LOG",
             )
-        except ClickHouseError as e:
+        except DatastoreError as e:
             error_message = f"Error checking for query '{query_id}' in query log: {str(e)}"
-            raise ClickHouseCheckQueryStatusError(error_message, query_id=query_id) from e
+            raise DatastoreCheckQueryStatusError(error_message, query_id=query_id) from e
 
         num_rows = len(results)
         if num_rows == 0:
-            raise ClickHouseQueryNotFound(query_id)
+            raise DatastoreQueryNotFound(query_id)
 
         events = set()
         error = None
@@ -649,12 +649,12 @@ class ClickHouseClient:
             if not row:
                 continue
 
-            # In some circumstances, ClickHouse returns errors as inside the query result, using a single "exception"
+            # In some circumstances, Datastore returns errors as inside the query result, using a single "exception"
             # key, therefore, if this is the case, raise an error.
             if "type" not in row:
                 error = row.get("exception", "Neither 'type' nor 'exception' keys found in result")
                 error_message = f"Error checking for query '{query_id}' in query log: {error}"
-                raise ClickHouseCheckQueryStatusError(error_message, query_id=query_id)
+                raise DatastoreCheckQueryStatusError(error_message, query_id=query_id)
 
             events.add(row["type"])
 
@@ -663,21 +663,21 @@ class ClickHouseClient:
                 error = error_value
 
         if "QueryFinish" in events:
-            return ClickHouseQueryStatus.FINISHED
+            return DatastoreQueryStatus.FINISHED
         elif "ExceptionWhileProcessing" in events or "ExceptionBeforeStart" in events:
             if raise_on_error:
                 error_message = error or f"Unknown query error in query with ID: {query_id}"
                 # we don't have the original query here so just use the query id
-                raise ClickHouseError(error_message, query_id=query_id)
+                raise DatastoreError(error_message, query_id=query_id)
 
-            return ClickHouseQueryStatus.ERROR
+            return DatastoreQueryStatus.ERROR
         elif "QueryStart" in events:
-            return ClickHouseQueryStatus.RUNNING
+            return DatastoreQueryStatus.RUNNING
         else:
-            raise ClickHouseQueryNotFound(query_id)
+            raise DatastoreQueryNotFound(query_id)
 
     async def acheck_query_in_process_list(self, query_id: str) -> bool:
-        """Check if a query is running in the ClickHouse process list.
+        """Check if a query is running in the Datastore process list.
 
         Arguments:
             query_id: The ID of the query to check.
@@ -696,12 +696,12 @@ class ClickHouseClient:
         try:
             resp = await self.read_query(
                 query,
-                query_parameters={"query_id": query_id, "cluster_name": settings.CLICKHOUSE_CLUSTER},
+                query_parameters={"query_id": query_id, "cluster_name": settings.DATASTORE_CLUSTER},
                 query_id=f"{query_id}-CHECK-PROCESS-LIST",
             )
-        except ClickHouseError as e:
+        except DatastoreError as e:
             error_message = f"Error checking for query '{query_id}' in process list: {str(e)}"
-            raise ClickHouseCheckQueryStatusError(error_message, query_id=query_id) from e
+            raise DatastoreCheckQueryStatusError(error_message, query_id=query_id) from e
 
         if not resp:
             return False
@@ -710,12 +710,12 @@ class ClickHouseClient:
         return result == "1"
 
     async def acancel_query(self, query_id: str) -> None:
-        """Cancel a running query in ClickHouse.
+        """Cancel a running query in Datastore.
 
         Arguments:
             query_id: The ID of the query to cancel.
         """
-        query = f"KILL QUERY ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}' WHERE query_id = {{{{query_id:String}}}}"
+        query = f"KILL QUERY ON CLUSTER '{settings.DATASTORE_CLUSTER}' WHERE query_id = {{{{query_id:String}}}}"
 
         await self.execute_query(
             query,
@@ -733,7 +733,7 @@ class ClickHouseClient:
         query_id: str | None = None,
         line_separator=b"\n",
     ) -> typing.AsyncGenerator[dict[typing.Any, typing.Any], None]:
-        """Execute the given query in ClickHouse and stream back the response as one JSON per line.
+        """Execute the given query in Datastore and stream back the response as one JSON per line.
 
         This method makes sense when running with FORMAT JSONEachRow, although we currently do not enforce this.
         """
@@ -756,7 +756,7 @@ class ClickHouseClient:
         query_parameters=None,
         query_id: str | None = None,
     ) -> typing.Generator[pa.RecordBatch, None, None]:
-        """Execute the given query in ClickHouse and stream back the response as Arrow record batches.
+        """Execute the given query in Datastore and stream back the response as Arrow record batches.
 
         This method makes sense when running with FORMAT ArrowStreaming, although we currently do not enforce this.
         As pyarrow doesn't support async/await buffers, this method is sync and utilizes requests instead of aiohttp.
@@ -772,7 +772,7 @@ class ClickHouseClient:
         query_parameters=None,
         query_id: str | None = None,
     ) -> typing.AsyncGenerator[pa.RecordBatch, None]:
-        """Execute the given query in ClickHouse and stream back the response as Arrow record batches.
+        """Execute the given query in Datastore and stream back the response as Arrow record batches.
 
         This method makes sense when running with FORMAT ArrowStream, although we currently do not enforce this.
         """
@@ -789,7 +789,7 @@ class ClickHouseClient:
         query_parameters=None,
         query_id: str | None = None,
     ) -> None:
-        """Execute the given query in ClickHouse and produce Arrow record batches to given buffer queue.
+        """Execute the given query in Datastore and produce Arrow record batches to given buffer queue.
 
         This method makes sense when running with FORMAT ArrowStream, although we currently do not enforce this.
         This method is intended to be ran as a background task, producing record batches continuously, while other
@@ -847,10 +847,10 @@ class ClickHouseClient:
 
 @contextlib.asynccontextmanager
 async def get_client(
-    *, team_id: typing.Optional[int] = None, clickhouse_url: str | None = None, **kwargs
-) -> collections.abc.AsyncIterator[ClickHouseClient]:
+    *, team_id: typing.Optional[int] = None, datastore_url: str | None = None, **kwargs
+) -> collections.abc.AsyncIterator[DatastoreClient]:
     """
-    Returns a ClickHouse client based on the aiochclient library. This is an
+    Returns a Datastore client based on the aiochclient library. This is an
     async context manager.
 
     Usage:
@@ -872,37 +872,37 @@ async def get_client(
     # the settings, but I can't get this to work as expected.
     #
     # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-    # ssl_context.verify_mode = ssl.CERT_REQUIRED if settings.CLICKHOUSE_VERIFY else ssl.CERT_NONE
+    # ssl_context.verify_mode = ssl.CERT_REQUIRED if settings.DATASTORE_VERIFY else ssl.CERT_NONE
     # if ssl_context.verify_mode is ssl.CERT_REQUIRED:
-    #    if settings.CLICKHOUSE_CA:
-    #        ssl_context.load_verify_locations(settings.CLICKHOUSE_CA)
+    #    if settings.DATASTORE_CA:
+    #        ssl_context.load_verify_locations(settings.DATASTORE_CA)
     #    elif ssl_context.verify_mode is ssl.CERT_REQUIRED:
     #        ssl_context.load_default_certs(ssl.Purpose.SERVER_AUTH)
     timeout = aiohttp.ClientTimeout(total=None, connect=None, sock_connect=30, sock_read=None)
 
     if team_id is None:
-        default_max_block_size = settings.CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT
+        default_max_block_size = settings.DATASTORE_MAX_BLOCK_SIZE_DEFAULT
     else:
-        default_max_block_size = settings.CLICKHOUSE_MAX_BLOCK_SIZE_OVERRIDES.get(
-            team_id, settings.CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT
+        default_max_block_size = settings.DATASTORE_MAX_BLOCK_SIZE_OVERRIDES.get(
+            team_id, settings.DATASTORE_MAX_BLOCK_SIZE_DEFAULT
         )
     max_block_size = kwargs.pop("max_block_size", None) or default_max_block_size
     http_send_timeout = kwargs.pop("http_send_timeout", 0)
 
-    if clickhouse_url is None:
-        url = settings.CLICKHOUSE_OFFLINE_HTTP_URL
+    if datastore_url is None:
+        url = settings.DATASTORE_OFFLINE_HTTP_URL
     else:
-        url = clickhouse_url
+        url = datastore_url
 
-    async with ClickHouseClient(
+    async with DatastoreClient(
         url=url,
-        user=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        database=settings.CLICKHOUSE_DATABASE,
+        user=settings.DATASTORE_USER,
+        password=settings.DATASTORE_PASSWORD,
+        database=settings.DATASTORE_DATABASE,
         timeout=timeout,
         ssl=False,
-        max_execution_time=settings.CLICKHOUSE_MAX_EXECUTION_TIME,
-        max_memory_usage=settings.CLICKHOUSE_MAX_MEMORY_USAGE,
+        max_execution_time=settings.DATASTORE_MAX_EXECUTION_TIME,
+        max_memory_usage=settings.DATASTORE_MAX_MEMORY_USAGE,
         max_block_size=max_block_size,
         cancel_http_readonly_queries_on_client_close=1,
         output_format_arrow_string_as_string="true",

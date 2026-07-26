@@ -4,7 +4,7 @@ from datetime import timedelta
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
@@ -112,7 +112,7 @@ expected_rage_click_data_response_results: list[dict] = [
 ]
 
 
-class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_automatic_order(self) -> None:
         elements = [
             Element(tag_name="a", href="https://hanzo.ai/about", text="click here"),

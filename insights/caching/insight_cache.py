@@ -9,7 +9,7 @@ import structlog
 from prometheus_client import Counter, Gauge
 
 from insights.api.services.query import process_query_dict
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_runner import ExecutionMode
 from insights.models import Dashboard, Insight, InsightCachingState

@@ -1,8 +1,8 @@
 import { randomBytes } from 'crypto'
 import { DateTime } from 'luxon'
 
-import { ClickHouseTimestamp } from '../src/types'
-import { safeClickhouseString } from '../src/utils/db/utils'
+import { DatastoreTimestamp } from '../src/types'
+import { safeDatastoreString } from '../src/utils/db/utils'
 import {
     UUID,
     UUID7,
@@ -12,7 +12,7 @@ import {
     clickHouseTimestampToDateTime,
     cloneObject,
     createRandomUint32x4,
-    escapeClickHouseString,
+    escapeDatastoreString,
     getPropertyValueByPath,
     groupBy,
     sanitizeSqlIdentifier,
@@ -183,11 +183,11 @@ describe('utils', () => {
         })
     })
 
-    describe('escapeClickHouseString', () => {
+    describe('escapeDatastoreString', () => {
         it('escapes single quotes and slashes', () => {
             const rawString = "insert'escape \\"
 
-            const sanitizedString = escapeClickHouseString(rawString)
+            const sanitizedString = escapeDatastoreString(rawString)
 
             expect(sanitizedString).toStrictEqual("insert\\'escape \\\\")
         })
@@ -287,7 +287,7 @@ describe('utils', () => {
         })
     })
 
-    describe('safeClickhouseString', () => {
+    describe('safeDatastoreString', () => {
         // includes real data
         const validStrings = [
             `$autocapture`,
@@ -304,26 +304,26 @@ describe('utils', () => {
 
         test('does not modify valid strings', () => {
             for (const str of validStrings) {
-                expect(safeClickhouseString(str)).toEqual(str)
+                expect(safeDatastoreString(str)).toEqual(str)
             }
         })
 
         test('handles surrogate unicode characters correctly', () => {
-            expect(safeClickhouseString(`foo \ud83d\ bar`)).toEqual(`foo \\ud83d\\ bar`)
-            expect(safeClickhouseString(`\ud83d\ bar`)).toEqual(`\\ud83d\\ bar`)
-            expect(safeClickhouseString(`\ud800\ \ud803\ `)).toEqual(`\\ud800\\ \\ud803\\ `)
+            expect(safeDatastoreString(`foo \ud83d\ bar`)).toEqual(`foo \\ud83d\\ bar`)
+            expect(safeDatastoreString(`\ud83d\ bar`)).toEqual(`\\ud83d\\ bar`)
+            expect(safeDatastoreString(`\ud800\ \ud803\ `)).toEqual(`\\ud800\\ \\ud803\\ `)
         })
 
         test('does not modify non-surrogate unicode characters', () => {
-            expect(safeClickhouseString(`✨`)).toEqual(`✨`)
-            expect(safeClickhouseString(`foo \u2728\ bar`)).toEqual(`foo \u2728\ bar`)
-            expect(safeClickhouseString(`💜 \u1f49c\ 💜`)).toEqual(`💜 \u1f49c\ 💜`)
+            expect(safeDatastoreString(`✨`)).toEqual(`✨`)
+            expect(safeDatastoreString(`foo \u2728\ bar`)).toEqual(`foo \u2728\ bar`)
+            expect(safeDatastoreString(`💜 \u1f49c\ 💜`)).toEqual(`💜 \u1f49c\ 💜`)
         })
     })
 
     describe('clickHouseTimestampToDateTime()', () => {
         it('casts to a datetime', () => {
-            expect(clickHouseTimestampToDateTime('2020-02-23 02:15:00.00' as ClickHouseTimestamp)).toEqual(
+            expect(clickHouseTimestampToDateTime('2020-02-23 02:15:00.00' as DatastoreTimestamp)).toEqual(
                 DateTime.fromISO('2020-02-23T02:15:00.000Z').toUTC()
             )
         })

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Union
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 from unittest.mock import Mock
 
 from insights.schema import (
@@ -107,7 +107,7 @@ def _create_action(team, name: str = "test_action") -> Action:
     )
 
 
-class TestMarketingAnalyticsTableQueryRunnerBusiness(ClickhouseTestMixin, BaseTest):
+class TestMarketingAnalyticsTableQueryRunnerBusiness(DatastoreTestMixin, BaseTest):
     maxDiff = None
     CLASS_DATA_LEVEL_SETUP = False
 
@@ -122,13 +122,13 @@ class TestMarketingAnalyticsTableQueryRunnerBusiness(ClickhouseTestMixin, BaseTe
                 source_type="BigQuery",
                 bucket_suffix="facebook",
                 column_schema={
-                    "campaign1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "spend1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "date1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "impressions1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "clicks1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "source1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "conversions1": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
+                    "campaign1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "spend1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "date1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "impressions1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "clicks1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "source1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "conversions1": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                 },
             ),
             "tiktok_ads": DataConfig(
@@ -138,12 +138,12 @@ class TestMarketingAnalyticsTableQueryRunnerBusiness(ClickhouseTestMixin, BaseTe
                 source_type="AWS",
                 bucket_suffix="tiktok",
                 column_schema={
-                    "campaign2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "spend2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "date2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "impressions2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "clicks2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "source2": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
+                    "campaign2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "spend2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "date2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "impressions2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "clicks2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "source2": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                 },
             ),
             "linkedin_ads": DataConfig(
@@ -153,12 +153,12 @@ class TestMarketingAnalyticsTableQueryRunnerBusiness(ClickhouseTestMixin, BaseTe
                 source_type="google_cloud",
                 bucket_suffix="linkedin",
                 column_schema={
-                    "campaign3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "spend3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "date3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "impressions3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "clicks3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
-                    "source3": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True},
+                    "campaign3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "spend3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "date3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "impressions3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "clicks3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
+                    "source3": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True},
                 },
             ),
         }

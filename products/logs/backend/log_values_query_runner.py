@@ -8,7 +8,7 @@ from insights.insightsql.constants import InsightsQLGlobalSettings
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from insights.models.filters.mixins.utils import cached_property

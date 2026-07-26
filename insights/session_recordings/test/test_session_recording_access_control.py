@@ -110,7 +110,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
             team=self.team, session_id="test_session_456", distinct_id="user456", deleted=False
         )
 
-        # Mock the ClickHouse query to return our test recordings
+        # Mock the Datastore query to return our test recordings
         mock_list_recordings.return_value = ([self.recording, recording2], False, "", None)
 
         self._create_access_control(self.editor_user, access_level="editor")

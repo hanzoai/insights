@@ -8,7 +8,7 @@ from insights.insightsql.database.models import (
     Table,
 )
 
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 
 # 50GB - limit for user-provided InsightsQL queries on log tables to prevent expensive full scans
 INSIGHTSQL_MAX_BYTES_TO_READ_FOR_LOGS_USER_QUERIES = 50_000_000_000
@@ -42,7 +42,7 @@ class LogsTable(Table):
         "mat_body_ipv4_matches": StringJSONDatabaseField(name="mat_body_ipv4_matches", nullable=True, hidden=True),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "logs"
 
     def to_printed_insightsql(self):
@@ -62,7 +62,7 @@ class LogAttributesTable(Table):
         "service_name": StringDatabaseField(name="service_name", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "log_attributes"
 
     def to_printed_insightsql(self):
@@ -83,7 +83,7 @@ class LogsKafkaMetricsTable(DANGEROUS_NoTeamIdCheckTable):
         "max_observed_timestamp": DateTimeDatabaseField(name="max_observed_timestamp", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "logs_kafka_metrics"
 
     def to_printed_insightsql(self):

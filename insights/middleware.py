@@ -28,8 +28,8 @@ from social_core.exceptions import AuthCanceled, AuthFailed
 from statshog.defaults.django import statsd
 
 from insights.api.shared import UserBasicSerializer
-from insights.clickhouse.client.execute import clickhouse_query_counter
-from insights.clickhouse.query_tagging import QueryCounter, reset_query_tags, tag_queries
+from insights.datastore.client.execute import datastore_query_counter
+from insights.datastore.query_tagging import QueryCounter, reset_query_tags, tag_queries
 from insights.cloud_utils import is_cloud, is_dev_mode
 from insights.constants import AUTH_BACKEND_KEYS
 from insights.geoip import get_geoip_properties
@@ -385,7 +385,7 @@ class QueryTimeCountingMiddleware:
 
         pg_query_counter, ch_query_counter = QueryCounter(), QueryCounter()
         start_time = time.perf_counter()
-        with connection.execute_wrapper(pg_query_counter), clickhouse_query_counter(ch_query_counter):
+        with connection.execute_wrapper(pg_query_counter), datastore_query_counter(ch_query_counter):
             response: HttpResponse = self.get_response(request)
 
         response.headers["Server-Timing"] = self._construct_header(

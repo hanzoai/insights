@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
@@ -23,7 +23,7 @@ from rest_framework import status
 from insights.schema import PersonsOnEventsMode, PropertyOperator
 
 from insights.api.test.test_exports import TestExportMixin
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models import Action, FeatureFlag, Person, User
 from insights.models.activity_logging.activity_log import ActivityLog
 from insights.models.async_deletion.async_deletion import AsyncDeletion
@@ -41,7 +41,7 @@ from insights.tasks.calculate_cohort import (
 
 
 
-class TestCohort(TestExportMixin, ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     # select all queries for snapshots
     def capture_select_queries(self):
         return self.capture_queries_startswith(("INSERT INTO cohortpeople", "SELECT", "ALTER", "select", "DELETE"))
@@ -1796,7 +1796,7 @@ email@example.org,
         )
         self.assertEqual(len(response.json()["results"]), 1, response)
 
-    def test_filter_by_cohort_prop_from_clickhouse(self):
+    def test_filter_by_cohort_prop_from_datastore(self):
         for i in range(5):
             _create_person(
                 team=self.team,
@@ -3587,7 +3587,7 @@ email@example.org,
 
     def test_remove_person_from_static_cohort_person_in_ch_but_not_pg(self):
         """
-        Test that removal succeeds when person exists in ClickHouse but not PostgreSQL.
+        Test that removal succeeds when person exists in Datastore but not PostgreSQL.
         This simulates the CH/PG sync issue where data exists in CH but not PG.
         """
         from insights.models.cohort.util import insert_static_cohort
@@ -3605,7 +3605,7 @@ email@example.org,
         )
         flush_persons_and_events()
 
-        # Insert directly into ClickHouse WITHOUT inserting into PostgreSQL CohortPeople
+        # Insert directly into Datastore WITHOUT inserting into PostgreSQL CohortPeople
         # This simulates the sync issue where CH has data but PG doesn't
         insert_static_cohort([person.uuid], static_cohort.id, team_id=self.team.pk)
 
@@ -3614,7 +3614,7 @@ email@example.org,
             f"SELECT count() FROM {PERSON_STATIC_COHORT_TABLE} WHERE person_id = %(person_id)s AND cohort_id = %(cohort_id)s AND team_id = %(team_id)s",
             {"person_id": str(person.uuid), "cohort_id": static_cohort.id, "team_id": self.team.pk},
         )[0][0]
-        assert ch_count_before >= 1, "Person should be in ClickHouse before removal"
+        assert ch_count_before >= 1, "Person should be in Datastore before removal"
 
         response = self.client.patch(
             f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
@@ -3626,13 +3626,13 @@ email@example.org,
         assert response.status_code == 200
         assert response.json()["success"] is True
 
-        # Verify person was actually removed from ClickHouse
+        # Verify person was actually removed from Datastore
         # Note: CH DELETE is async (mutations_sync=0), so we may need to wait or use FINAL
         ch_count_after = sync_execute(
             f"SELECT count() FROM {PERSON_STATIC_COHORT_TABLE} FINAL WHERE person_id = %(person_id)s AND cohort_id = %(cohort_id)s AND team_id = %(team_id)s",
             {"person_id": str(person.uuid), "cohort_id": static_cohort.id, "team_id": self.team.pk},
         )[0][0]
-        assert ch_count_after == 0, "Person should be removed from ClickHouse after removal"
+        assert ch_count_after == 0, "Person should be removed from Datastore after removal"
 
     def test_remove_person_from_static_cohort_person_not_in_either(self):
         """
@@ -4409,7 +4409,7 @@ email@example.org,
             filters={},
             started_at=timezone.now(),
             finished_at=timezone.now(),
-            error="ClickHouse query timeout after 1200 seconds",
+            error="Datastore query timeout after 1200 seconds",
             error_code=CohortErrorCode.TIMEOUT,
         )
 

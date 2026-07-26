@@ -70,9 +70,9 @@ class SyncPersonDistinctIdsWorkflowResult:
 
     Attributes:
         team_id: The team that was processed.
-        total_orphaned_persons: Total count of orphaned persons found in ClickHouse.
+        total_orphaned_persons: Total count of orphaned persons found in Datastore.
         persons_with_pg_distinct_ids: Count of persons that have distinct IDs in PostgreSQL (fixable).
-        distinct_ids_synced: Count of distinct IDs that were synced to ClickHouse.
+        distinct_ids_synced: Count of distinct IDs that were synced to Datastore.
         persons_without_pg_data: Count of persons without DIDs in PG (truly orphaned + CH-only).
         persons_truly_orphaned: Count of persons in PG but without DIDs (only if categorize_orphans=True).
         persons_ch_only: Count of persons not in PG at all (only if categorize_orphans=True).
@@ -93,12 +93,12 @@ class SyncPersonDistinctIdsWorkflowResult:
 
 @temporalio.workflow.defn(name="sync-person-distinct-ids")
 class SyncPersonDistinctIdsWorkflow(InsightsWorkflow):
-    """Workflow to sync missing person distinct IDs from PostgreSQL to ClickHouse.
+    """Workflow to sync missing person distinct IDs from PostgreSQL to Datastore.
 
     This workflow:
-    1. Finds orphaned persons in ClickHouse (persons without distinct IDs)
+    1. Finds orphaned persons in Datastore (persons without distinct IDs)
     2. Looks up their distinct IDs in PostgreSQL
-    3. Syncs the missing distinct IDs to ClickHouse via Kafka
+    3. Syncs the missing distinct IDs to Datastore via Kafka
     4. Optionally marks CH-only orphans (no PG data) as deleted
     """
 
@@ -124,8 +124,8 @@ class SyncPersonDistinctIdsWorkflow(InsightsWorkflow):
             maximum_attempts=5,
         )
 
-        # Step 1: Find orphaned persons in ClickHouse
-        # This also fetches versions needed for deletion (ClickHouse needs version+1 to override)
+        # Step 1: Find orphaned persons in Datastore
+        # This also fetches versions needed for deletion (Datastore needs version+1 to override)
         find_result = await temporalio.workflow.execute_activity(
             find_orphaned_persons,
             FindOrphanedPersonsInputs(
@@ -165,7 +165,7 @@ class SyncPersonDistinctIdsWorkflow(InsightsWorkflow):
             persons_truly_orphaned += len(lookup_result.persons_truly_orphaned)
             persons_ch_only += len(lookup_result.persons_ch_only)
 
-            # Sync distinct IDs to ClickHouse
+            # Sync distinct IDs to Datastore
             if lookup_result.mappings:
                 sync_result = await temporalio.workflow.execute_activity(
                     sync_distinct_ids_to_ch,

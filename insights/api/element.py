@@ -10,7 +10,7 @@ from insights.schema import ProductKey
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import ServerTimingsGathered, action
 from insights.auth import TemporaryTokenAuthentication
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Element, Filter
 from insights.models.element.element import chain_to_elements
 from insights.models.element.sql import GET_ELEMENTS, GET_VALUES

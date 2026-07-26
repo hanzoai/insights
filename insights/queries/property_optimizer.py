@@ -18,7 +18,7 @@ class PropertyOptimizer:
     This class is responsible for figuring out what person or group properties can and should be pushed down to their
     respective tables in the query filter.
 
-    This speeds up queries since clickhouse ends up selecting less data.
+    This speeds up queries since datastore ends up selecting less data.
     """
 
     def parse_property_groups(self, property_group: PropertyGroup) -> PropertyGroups:

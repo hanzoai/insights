@@ -18,7 +18,7 @@ import pytest_asyncio
 from temporalio.testing import ActivityEnvironment
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.pipeline.internal_stage import (
     BatchExportInsertIntoInternalStageInputs,
@@ -27,8 +27,8 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
 from products.batch_exports.backend.temporal.pipeline.producer import Producer
 from products.batch_exports.backend.temporal.spmc import RecordBatchQueue, wait_for_schema_or_producer
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 from products.batch_exports.backend.tests.temporal.utils.s3 import (
     assert_files_in_s3,
@@ -41,11 +41,11 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.django_db]
 TEST_DATA_INTERVAL_END = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
-class MockClickHouseClient:
-    """Helper class to mock ClickHouse client."""
+class MockDatastoreClient:
+    """Helper class to mock Datastore client."""
 
     def __init__(self):
-        self.mock_client = mock.AsyncMock(spec=ClickHouseClient)
+        self.mock_client = mock.AsyncMock(spec=DatastoreClient)
         self.mock_client_cm = mock.AsyncMock()
         self.mock_client_cm.__aenter__.return_value = self.mock_client
         self.mock_client_cm.__aexit__.return_value = None
@@ -85,9 +85,9 @@ class MockClickHouseClient:
 
 
 @pytest.fixture
-def mock_clickhouse_client():
-    """Fixture to mock ClickHouse client."""
-    mock_client = MockClickHouseClient()
+def mock_datastore_client():
+    """Fixture to mock Datastore client."""
+    mock_client = MockDatastoreClient()
     with patch(
         "products.batch_exports.backend.temporal.pipeline.internal_stage.get_client",
         return_value=mock_client.mock_client_cm,
@@ -106,7 +106,7 @@ def mock_clickhouse_client():
 @pytest.mark.parametrize("backfill_within_last_6_days", [False, True])
 @pytest.mark.parametrize("data_interval_end", [TEST_DATA_INTERVAL_END])
 async def test_insert_into_stage_activity_executes_the_expected_query_for_events_model(
-    mock_clickhouse_client,
+    mock_datastore_client,
     interval,
     activity_environment,
     data_interval_start,
@@ -116,7 +116,7 @@ async def test_insert_into_stage_activity_executes_the_expected_query_for_events
     is_backfill: bool,
     backfill_within_last_6_days: bool,
 ):
-    """Test that the insert_into_internal_stage_activity executes the expected ClickHouse query when the model is an events model.
+    """Test that the insert_into_internal_stage_activity executes the expected Datastore query when the model is an events model.
 
     The query used for the events model is quite complex, and depends on a number of factors:
     - If it's a backfill
@@ -163,8 +163,8 @@ async def test_insert_into_stage_activity_executes_the_expected_query_for_events
     )
 
     await activity_environment.run(insert_into_internal_stage_activity, insert_inputs)
-    mock_clickhouse_client.expect_select_from_table(expected_table)
-    mock_clickhouse_client.expect_properties_in_log_comment(
+    mock_datastore_client.expect_select_from_table(expected_table)
+    mock_datastore_client.expect_properties_in_log_comment(
         {
             "team_id": insert_inputs.team_id,
             "batch_export_id": insert_inputs.batch_export_id,
@@ -182,7 +182,7 @@ async def test_insert_into_stage_activity_executes_the_expected_query_for_events
 )
 @pytest.mark.parametrize("data_interval_end", [TEST_DATA_INTERVAL_END])
 async def test_insert_into_stage_activity_executes_the_expected_query_for_sessions_model(
-    mock_clickhouse_client,
+    mock_datastore_client,
     interval,
     activity_environment,
     data_interval_start,
@@ -190,7 +190,7 @@ async def test_insert_into_stage_activity_executes_the_expected_query_for_sessio
     ateam,
     model: BatchExportModel,
 ):
-    """Test that the insert_into_internal_stage_activity executes the expected ClickHouse query when the model is a sessions model."""
+    """Test that the insert_into_internal_stage_activity executes the expected Datastore query when the model is a sessions model."""
 
     expected_table = "raw_sessions"
 
@@ -209,8 +209,8 @@ async def test_insert_into_stage_activity_executes_the_expected_query_for_sessio
     )
 
     await activity_environment.run(insert_into_internal_stage_activity, insert_inputs)
-    mock_clickhouse_client.expect_select_from_table(expected_table)
-    mock_clickhouse_client.expect_properties_in_log_comment(
+    mock_datastore_client.expect_select_from_table(expected_table)
+    mock_datastore_client.expect_properties_in_log_comment(
         {
             "team_id": insert_inputs.team_id,
             "batch_export_id": insert_inputs.batch_export_id,
@@ -354,7 +354,7 @@ class PersonToExport(t.TypedDict):
 
 
 async def _generate_persons_to_export(
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     team_id: int,
     data_interval_start: dt.datetime,
     data_interval_end: dt.datetime,
@@ -363,8 +363,8 @@ async def _generate_persons_to_export(
     count_other_team: int = 3,
     count_distinct_ids_per_person: int = 1,
 ) -> list[PersonToExport]:
-    persons, _ = await generate_test_persons_in_clickhouse(
-        client=clickhouse_client,
+    persons, _ = await generate_test_persons_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -376,8 +376,8 @@ async def _generate_persons_to_export(
     persons_to_export_created = []
     for person in persons:
         for i in range(count_distinct_ids_per_person):
-            person_distinct_id, _ = await generate_test_person_distinct_id2_in_clickhouse(
-                client=clickhouse_client,
+            person_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
+                client=datastore_client,
                 team_id=team_id,
                 person_id=uuid.UUID(person["id"]),
                 distinct_id=f"distinct-id-{uuid.UUID(person['id'])}-{i}",
@@ -398,12 +398,12 @@ async def _generate_persons_to_export(
 
 async def _generate_new_version_of_person(
     person: PersonToExport,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     start_time: dt.datetime,
     end_time: dt.datetime,
 ):
-    new_persons, _ = await generate_test_persons_in_clickhouse(
-        client=clickhouse_client,
+    new_persons, _ = await generate_test_persons_in_datastore(
+        client=datastore_client,
         team_id=person["team_id"],
         start_time=start_time,
         end_time=end_time,
@@ -418,10 +418,10 @@ async def _generate_new_version_of_person(
 
 
 async def _generate_new_distinct_id_for_person(
-    person: PersonToExport, clickhouse_client: ClickHouseClient, timestamp: dt.datetime
+    person: PersonToExport, datastore_client: DatastoreClient, timestamp: dt.datetime
 ):
-    new_distinct_id, _ = await generate_test_person_distinct_id2_in_clickhouse(
-        client=clickhouse_client,
+    new_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
+        client=datastore_client,
         team_id=person["team_id"],
         person_id=uuid.UUID(person["person_id"]),
         # generate a new distinct_id
@@ -469,7 +469,7 @@ async def test_insert_into_stage_activity_for_persons_model(
     data_interval_end,
     ateam,
     test_person_properties,
-    clickhouse_client,
+    datastore_client,
     model: BatchExportModel,
     limited_export: bool,
 ):
@@ -486,7 +486,7 @@ async def test_insert_into_stage_activity_for_persons_model(
     # first generate 3 persons with timestamps inside of the data interval
     # each of these persons will have 1 distinct_id associated with them
     persons_to_export_created = await _generate_persons_to_export(
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team_id=ateam.pk,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
@@ -520,7 +520,7 @@ async def test_insert_into_stage_activity_for_persons_model(
     person_1: PersonToExport = persons_to_export_created[0]
     person_1_v2 = await _generate_new_version_of_person(
         person=person_1,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         start_time=next_data_interval_start,
         end_time=next_data_interval_end,
     )
@@ -528,7 +528,7 @@ async def test_insert_into_stage_activity_for_persons_model(
     person_2: PersonToExport = persons_to_export_created[1]
     person_2_new_distinct_id = await _generate_new_distinct_id_for_person(
         person=person_2,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         timestamp=next_data_interval_start + dt.timedelta(seconds=1),
     )
 
@@ -563,7 +563,7 @@ async def test_insert_into_stage_activity_for_persons_model(
     # create a new person with 2 new distinct_ids associated with it
     new_persons_to_export.extend(
         await _generate_persons_to_export(
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             team_id=ateam.pk,
             data_interval_start=next_data_interval_start,
             data_interval_end=next_data_interval_end,

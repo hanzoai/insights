@@ -1,7 +1,7 @@
 """
-Dagster job to backfill ClickHouse events to DuckLake.
+Dagster job to backfill Datastore events to DuckLake.
 
-This job exports events from ClickHouse's `insights.events` table to S3 as Parquet files,
+This job exports events from Datastore's `insights.events` table to S3 as Parquet files,
 then registers those files with DuckLake using `ducklake_add_data_files`.
 
 The job is partitioned by date to allow incremental backfilling of historical data.
@@ -23,7 +23,7 @@ import duckdb
 import dagster
 import structlog
 from clickhouse_driver import Client
-from clickhouse_driver.errors import Error as ClickHouseError
+from clickhouse_driver.errors import Error as DatastoreError
 from dagster import (
     AssetExecutionContext,
     BackfillPolicy,
@@ -35,9 +35,9 @@ from dagster import (
 )
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from insights.clickhouse.client.connection import NodeRole, Workload
-from insights.clickhouse.cluster import get_cluster
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.client.connection import NodeRole, Workload
+from insights.datastore.cluster import get_cluster
+from insights.datastore.query_tagging import tags_context
 from insights.cloud_utils import is_cloud
 from insights.dags.common.common import JobOwners, dagster_tags, settings_with_log_comment
 from insights.ducklake.common import attach_catalog, escape, get_config
@@ -76,7 +76,7 @@ BACKFILL_S3_PREFIX = "backfill/events"
 class EventsBackfillConfig(Config):
     """Config for events backfill to DuckLake jobs."""
 
-    clickhouse_settings: dict[str, Any] | None = None
+    datastore_settings: dict[str, Any] | None = None
     team_id_chunks: int = 64
     parallel_chunks: int = MAX_PARALLEL_CHUNKS
     skip_ducklake_registration: bool = False
@@ -94,17 +94,17 @@ daily_partitions = DailyPartitionsDefinition(
 ONE_HOUR_IN_SECONDS = 60 * 60
 ONE_GB_IN_BYTES = 1024 * 1024 * 1024
 
-DEFAULT_CLICKHOUSE_SETTINGS = {
+DEFAULT_DATASTORE_SETTINGS = {
     "max_execution_time": 4 * ONE_HOUR_IN_SECONDS,
     "max_memory_usage": 50 * ONE_GB_IN_BYTES,
     "distributed_aggregation_memory_efficient": "1",
 }
 
 
-# Columns to export from ClickHouse events table.
+# Columns to export from Datastore events table.
 # This matches the schema that the DuckLake streaming connector (via Kafka) expects.
 # Note: We use toInt64(team_id) as project_id since they're equivalent in Insights.
-# Materialized columns (dmat_*) are ClickHouse-specific and not present in DuckLake.
+# Materialized columns (dmat_*) are Datastore-specific and not present in DuckLake.
 EVENTS_COLUMNS = """
     toString(uuid) as uuid,
     event,
@@ -177,12 +177,12 @@ def tags_for_events_partition(partition_key: str) -> dict[str, str]:
 
 
 def metabase_debug_query_url(run_id: str) -> str | None:
-    """Generate a debug URL for viewing ClickHouse query logs for this run."""
+    """Generate a debug URL for viewing Datastore query logs for this run."""
     cloud_deployment = getattr(django_settings, "CLOUD_DEPLOYMENT", None)
     if cloud_deployment == "US":
-        return f"https://metabase.prod-us.insights.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-us.insights.dev/question/1671-get-datastore-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     if cloud_deployment == "EU":
-        return f"https://metabase.prod-eu.insights.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-eu.insights.dev/question/544-get-datastore-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     sql = f"""
 SELECT
     hostName() as host,
@@ -295,7 +295,7 @@ def get_s3_path_for_partition(
 
 
 def get_s3_function_args(s3_path: str, is_local: bool = False) -> tuple[str, str]:
-    """Build the arguments for ClickHouse s3() function.
+    """Build the arguments for Datastore s3() function.
 
     Returns tuple of (args_string, safe_args_string_for_logging).
     """
@@ -311,7 +311,7 @@ def get_s3_function_args(s3_path: str, is_local: bool = False) -> tuple[str, str
 @retry(
     stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
     wait=wait_exponential(multiplier=1, min=4, max=60),
-    retry=retry_if_exception_type((ClickHouseError, OSError, TimeoutError)),
+    retry=retry_if_exception_type((DatastoreError, OSError, TimeoutError)),
     reraise=True,
 )
 def _execute_export_with_retry(
@@ -540,12 +540,12 @@ events_backfill_partitioned_config = PartitionedConfig(
     tags={"owner": JobOwners.TEAM_DATA_STACK.value, **CONCURRENCY_TAG},
 )
 def events_ducklake_backfill(context: AssetExecutionContext, config: EventsBackfillConfig) -> None:
-    """Backfill events from ClickHouse to DuckLake.
+    """Backfill events from Datastore to DuckLake.
 
     This asset:
     1. Validates DuckLake schema compatibility before starting
     2. Cleans up orphaned files from prior failed runs
-    3. Exports events for the partition date from ClickHouse to S3 as Parquet
+    3. Exports events for the partition date from Datastore to S3 as Parquet
     4. Registers the Parquet files with DuckLake using ducklake_add_data_files
 
     Events are chunked by team_id modulo and exported in parallel for better performance.
@@ -579,12 +579,12 @@ def events_ducklake_backfill(context: AssetExecutionContext, config: EventsBackf
         context.log.info("Cleaning up orphaned files from prior runs...")
         cleanup_prior_run_files(context, partition_date, run_id)
 
-    merged_settings = DEFAULT_CLICKHOUSE_SETTINGS.copy()
+    merged_settings = DEFAULT_DATASTORE_SETTINGS.copy()
     # Add query tagging for observability
     merged_settings.update(settings_with_log_comment(context))
-    if config.clickhouse_settings:
-        merged_settings.update(config.clickhouse_settings)
-        context.log.info(f"Using custom ClickHouse settings: {config.clickhouse_settings}")
+    if config.datastore_settings:
+        merged_settings.update(config.datastore_settings)
+        context.log.info(f"Using custom Datastore settings: {config.datastore_settings}")
 
     team_id_chunks = max(1, config.team_id_chunks)
     parallel_chunks = min(max(1, config.parallel_chunks), team_id_chunks)
@@ -604,7 +604,7 @@ def events_ducklake_backfill(context: AssetExecutionContext, config: EventsBackf
     def export_single_chunk(chunk_i: int) -> list[str]:
         """Export a single chunk with its own client connection.
 
-        Each thread gets its own ClickHouse client via any_host_by_role() because
+        Each thread gets its own Datastore client via any_host_by_role() because
         clickhouse-driver is NOT thread-safe - concurrent queries from different
         threads cannot use the same Client instance.
         """

@@ -1,24 +1,24 @@
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.case import skip
 
 from insights.constants import INSIGHT_FUNNELS, TRENDS_LINEAR, FunnelOrderType
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_time_to_convert import ClickhouseFunnelTimeToConvert
+from insights.queries.funnels.funnel_time_to_convert import DatastoreFunnelTimeToConvert
 
 FORMAT_TIME = "%Y-%m-%d %H:%M:%S"
 FORMAT_TIME_DAY_END = "%Y-%m-%d 23:59:59"
 
 
-class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelTimeToConvert(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_auto_bin_count_single_step(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -89,7 +89,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         # Autobinned using the minimum time to convert, maximum time to convert, and sample count
@@ -186,7 +186,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         # Autobinned using the minimum time to convert, maximum time to convert, and sample count
@@ -282,7 +282,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         # 7 bins, autoscaled to work best with minimum time to convert and maximum time to convert at hand
@@ -313,7 +313,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
         )
 
     @skip("Compatibility issue CH 23.12 (see #21318)")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_auto_bin_count_total(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -380,7 +380,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         self.assertEqual(
@@ -401,7 +401,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
         )
 
         # Let's verify that behavior with steps unspecified is the same as when first and last steps specified
-        funnel_trends_steps_specified = ClickhouseFunnelTimeToConvert(
+        funnel_trends_steps_specified = DatastoreFunnelTimeToConvert(
             Filter(data={**filter._data, "funnel_from_step": 0, "funnel_to_step": 2}),
             self.team,
         )
@@ -409,7 +409,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(results, results_steps_specified)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_unordered(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -482,7 +482,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         # Autobinned using the minimum time to convert, maximum time to convert, and sample count
@@ -507,7 +507,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_strict(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -613,7 +613,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTimeToConvert(filter, self.team)
+        funnel_trends = DatastoreFunnelTimeToConvert(filter, self.team)
         results = funnel_trends.run()
 
         # Autobinned using the minimum time to convert, maximum time to convert, and sample count

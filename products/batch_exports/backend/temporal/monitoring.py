@@ -11,7 +11,7 @@ from insights.batch_exports.models import BatchExport, BatchExportRun
 from insights.batch_exports.service import afetch_batch_export_runs_in_range, aupdate_records_total_count
 from insights.batch_exports.sql import EVENT_COUNT_BY_INTERVAL
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
@@ -110,8 +110,8 @@ class EventCount:
 
 
 @activity.defn
-async def get_clickhouse_event_counts(inputs: GetEventCountsInputs) -> list[EventCount]:
-    """Get the total number of events for a given team over a set of time intervals from ClickHouse."""
+async def get_datastore_event_counts(inputs: GetEventCountsInputs) -> list[EventCount]:
+    """Get the total number of events for a given team over a set of time intervals from Datastore."""
 
     query = EVENT_COUNT_BY_INTERVAL
 
@@ -134,7 +134,7 @@ async def get_clickhouse_event_counts(inputs: GetEventCountsInputs) -> list[Even
     }
     async with Heartbeater(), get_client() as client:
         if not await client.is_alive():
-            raise ConnectionError("Cannot establish connection to ClickHouse")
+            raise ConnectionError("Cannot establish connection to Datastore")
 
         response = await client.read_query(query, query_params)
         results = []
@@ -221,15 +221,15 @@ class ReconcileEventCountsInputs:
     batch_export_id: UUID
     overall_interval_start: str
     overall_interval_end: str
-    clickhouse_event_counts: list[EventCount]
+    datastore_event_counts: list[EventCount]
     exported_event_counts: list[EventCount]
 
 
 @activity.defn
 async def reconcile_event_counts(inputs: ReconcileEventCountsInputs) -> None:
-    """Reconcile the number of exported events with the number of events in ClickHouse.
+    """Reconcile the number of exported events with the number of events in Datastore.
 
-    Log a warning if the number of exported events is lower than the number of events in ClickHouse.
+    Log a warning if the number of exported events is lower than the number of events in Datastore.
     Also log a warning if we have any intervals for which we don't have any runs (this indicates that no run was
     scheduled in Temporal, which we've seen in the past during outages).
     These will subseqently trigger an alertmanager alert.
@@ -249,11 +249,11 @@ async def reconcile_event_counts(inputs: ReconcileEventCountsInputs) -> None:
         start_str = datetime_to_str(start)
         end_str = datetime_to_str(end)
 
-        # event count in ClickHouse
-        clickhouse_event_count = next(
+        # event count in Datastore
+        datastore_event_count = next(
             (
                 count
-                for count in inputs.clickhouse_event_counts
+                for count in inputs.datastore_event_counts
                 if count.interval_start == start_str and count.interval_end == end_str
             ),
             None,
@@ -272,18 +272,18 @@ async def reconcile_event_counts(inputs: ReconcileEventCountsInputs) -> None:
             missing_runs.append((start, end))
             continue
 
-        if clickhouse_event_count is None:
-            # it's possible that we don't have any events in ClickHouse for a given interval, but probably very rare for
+        if datastore_event_count is None:
+            # it's possible that we don't have any events in Datastore for a given interval, but probably very rare for
             # the batch exports we monitor
-            logger.info("No events in ClickHouse in interval %s to %s", start_str, end_str)
+            logger.info("No events in Datastore in interval %s to %s", start_str, end_str)
             continue
 
-        if exported_event_count.count < clickhouse_event_count.count:
+        if exported_event_count.count < datastore_event_count.count:
             missing_events.append(
                 EventCount(
                     interval_start=start_str,
                     interval_end=end_str,
-                    count=clickhouse_event_count.count - exported_event_count.count,
+                    count=datastore_event_count.count - exported_event_count.count,
                 )
             )
 
@@ -344,7 +344,7 @@ class BatchExportMonitoringWorkflow(InsightsWorkflow):
         where Temporal has not scheduled a workflow for a particular time interval
         for some reason).
     2. Reconciling the number of exported events with the number of events in
-        ClickHouse for a given interval.
+        Datastore for a given interval.
     """
 
     @staticmethod
@@ -379,8 +379,8 @@ class BatchExportMonitoringWorkflow(InsightsWorkflow):
         interval_end_str = datetime_to_str(interval_end)
         interval_start_str = datetime_to_str(interval_start)
 
-        clickhouse_event_counts = await workflow.execute_activity(
-            get_clickhouse_event_counts,
+        datastore_event_counts = await workflow.execute_activity(
+            get_datastore_event_counts,
             GetEventCountsInputs(
                 team_id=batch_export_details.team_id,
                 interval=batch_export_details.interval,
@@ -413,7 +413,7 @@ class BatchExportMonitoringWorkflow(InsightsWorkflow):
                 batch_export_id=batch_export_details.id,
                 overall_interval_start=interval_start_str,
                 overall_interval_end=interval_end_str,
-                clickhouse_event_counts=clickhouse_event_counts,
+                datastore_event_counts=datastore_event_counts,
                 exported_event_counts=exported_event_counts,
             ),
             start_to_close_timeout=dt.timedelta(minutes=5),
@@ -423,7 +423,7 @@ class BatchExportMonitoringWorkflow(InsightsWorkflow):
 
         return await workflow.execute_activity(
             update_batch_export_runs,
-            UpdateBatchExportRunsInputs(batch_export_id=batch_export_details.id, results=clickhouse_event_counts),
+            UpdateBatchExportRunsInputs(batch_export_id=batch_export_details.id, results=datastore_event_counts),
             start_to_close_timeout=dt.timedelta(hours=1),
             retry_policy=RetryPolicy(maximum_attempts=3, initial_interval=dt.timedelta(seconds=20)),
             heartbeat_timeout=dt.timedelta(minutes=1),

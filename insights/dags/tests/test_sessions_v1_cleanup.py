@@ -6,7 +6,7 @@ import pytest
 
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.sessions_v1_cleanup import sessions_v1_cleanup_job
 from insights.models.sessions.sql import ALLOWED_TEAM_IDS, SESSIONS_DATA_TABLE
 
@@ -46,7 +46,7 @@ def get_team_ids_with_prefix(prefix: str, table: str, client: Client) -> set[int
 
 
 @pytest.mark.django_db
-def test_cleanup_job_deletes_non_allowed_teams(cluster: ClickhouseCluster):
+def test_cleanup_job_deletes_non_allowed_teams(cluster: DatastoreCluster):
     """Test that the cleanup job deletes sessions for teams not in ALLOWED_TEAM_IDS."""
     timestamp = datetime.now()
     prefix = generate_test_prefix()
@@ -74,7 +74,7 @@ def test_cleanup_job_deletes_non_allowed_teams(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_cleanup_job_handles_empty_table(cluster: ClickhouseCluster):
+def test_cleanup_job_handles_empty_table(cluster: DatastoreCluster):
     """Test that the job handles when there's nothing to delete gracefully."""
     result = sessions_v1_cleanup_job.execute_in_process(
         resources={"cluster": cluster},
@@ -83,7 +83,7 @@ def test_cleanup_job_handles_empty_table(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_cleanup_job_handles_only_allowed_teams(cluster: ClickhouseCluster):
+def test_cleanup_job_handles_only_allowed_teams(cluster: DatastoreCluster):
     """Test that the job handles a table with only allowed teams (nothing to delete)."""
     timestamp = datetime.now()
     prefix = generate_test_prefix()
@@ -108,7 +108,7 @@ def test_cleanup_job_handles_only_allowed_teams(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_delete_with_multiple_allowed_teams_in_data(cluster: ClickhouseCluster):
+def test_delete_with_multiple_allowed_teams_in_data(cluster: DatastoreCluster):
     """Test deletion when multiple allowed teams have data alongside non-allowed teams."""
     timestamp = datetime.now()
     prefix = generate_test_prefix()

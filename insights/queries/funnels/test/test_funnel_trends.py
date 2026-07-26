@@ -2,25 +2,25 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from freezegun.api import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_person, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_person, snapshot_datastore_queries
 
 from insights.constants import INSIGHT_FUNNELS, TRENDS_LINEAR, FunnelOrderType
 from insights.models.cohort import Cohort
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_trends import ClickhouseFunnelTrends
-from insights.queries.funnels.funnel_trends_persons import ClickhouseFunnelTrendsActors
+from insights.queries.funnels.funnel_trends import DatastoreFunnelTrends
+from insights.queries.funnels.funnel_trends_persons import DatastoreFunnelTrendsActors
 from insights.test.test_journeys import journeys_for
 
 FORMAT_TIME = "%Y-%m-%d %H:%M:%S"
 FORMAT_TIME_DAY_END = "%Y-%m-%d 23:59:59"
 
 
-class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelTrends(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actors_at_step(self, filter, entrance_period_start, drop_off):
         person_filter = filter.shallow_clone({"entrance_period_start": entrance_period_start, "drop_off": drop_off})
-        funnel_query_builder = ClickhouseFunnelTrendsActors(person_filter, self.team)
+        funnel_query_builder = DatastoreFunnelTrendsActors(person_filter, self.team)
         _, serialized_result, _ = funnel_query_builder.get_actors()
 
         return serialized_result
@@ -81,7 +81,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        funnel_trends = DatastoreFunnelTrends(filter, self.team)
         results = funnel_trends._exec_query()
         formatted_results = funnel_trends._format_results(results)
 
@@ -109,7 +109,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        funnel_trends = DatastoreFunnelTrends(filter, self.team)
         results = funnel_trends._exec_query()
 
         self.assertEqual(
@@ -202,7 +202,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             }
         )
         with freeze_time("2021-05-06T23:40:59Z"):
-            results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+            results = DatastoreFunnelTrends(filter, self.team)._exec_query()
         self.assertEqual(len(results), 144)
 
     def test_day_interval(self):
@@ -233,14 +233,14 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             self.team,
         )
 
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
         self.assertEqual(7, len(results))
 
         persons = self._get_actors_at_step(filter, "2021-05-01 00:00:00", False)
 
         self.assertEqual([person["distinct_ids"] for person in persons], [["user_one"]])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_week_interval(self):
         filter = Filter(
             data={
@@ -269,7 +269,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             self.team,
         )
 
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
         persons = self._get_actors_at_step(filter, "2021-04-25 00:00:00", False)
 
         self.assertEqual(2, len(results))
@@ -302,7 +302,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             self.team,
         )
 
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
         self.assertEqual(
             results,
             [
@@ -383,7 +383,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
         )
 
         with freeze_time("2021-05-20T13:01:01Z"):
-            results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+            results = DatastoreFunnelTrends(filter, self.team)._exec_query()
         self.assertEqual(20, len(results))
 
         persons = self._get_actors_at_step(filter, "2021-05-01 00:00:00", False)
@@ -408,7 +408,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         saturday = results[0]  # 5/1
         self.assertEqual(3, saturday["reached_to_step_count"])
@@ -463,7 +463,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         saturday = results[0]  # 5/1
         self.assertEqual(1, saturday["reached_to_step_count"])
@@ -530,7 +530,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 2)
 
@@ -584,7 +584,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 1)
 
@@ -620,7 +620,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 1)
 
@@ -668,7 +668,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 4)
 
@@ -757,7 +757,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 2)
 
@@ -814,7 +814,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 2)
 
@@ -868,7 +868,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 4)
 
@@ -960,7 +960,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.assertEqual(len(results), 4)
 
@@ -1059,7 +1059,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 "breakdown": "$browser",
             }
         )
-        funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        funnel_trends = DatastoreFunnelTrends(filter, self.team)
         result = funnel_trends.run()
 
         self.assertEqual(len(result), 2)
@@ -1138,7 +1138,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 "breakdown": "$browser",
             }
         )
-        funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        funnel_trends = DatastoreFunnelTrends(filter, self.team)
         result = funnel_trends.run()
 
         self.assertEqual(len(result), 2)
@@ -1223,7 +1223,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 "breakdown": [cohort.pk],
             }
         )
-        funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        funnel_trends = DatastoreFunnelTrends(filter, self.team)
 
         result = funnel_trends.run()
         self.assertEqual(len(result), 1)
@@ -1232,7 +1232,7 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             [100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones_trends(self):
         journeys_for(
             {
@@ -1298,12 +1298,12 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
                 ],
             }
         )
-        results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         self.team.timezone = "US/Pacific"
         self.team.save()
 
-        results_pacific = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+        results_pacific = DatastoreFunnelTrends(filter, self.team)._exec_query()
 
         saturday = results[1]  # 5/1
         self.assertEqual(3, saturday["reached_to_step_count"])
@@ -1352,6 +1352,6 @@ class TestFunnelTrends(ClickhouseTestMixin, APIBaseTest):
             }
         )
         with freeze_time("2021-05-06T23:40:59Z"):
-            results = ClickhouseFunnelTrends(filter, self.team)._exec_query()
+            results = DatastoreFunnelTrends(filter, self.team)._exec_query()
             conversion_rates = [row["conversion_rate"] for row in results]
             self.assertEqual(conversion_rates, [50.0, 0.0, 0.0, 0.0, 0.0, 0.0])

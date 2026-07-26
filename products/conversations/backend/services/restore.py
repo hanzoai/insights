@@ -32,7 +32,7 @@ class RestoreService:
     @staticmethod
     def _find_distinct_ids_by_person_email(team: Team, email_lower: str) -> list[str]:
         """
-        Find distinct_ids of persons whose email matches via InsightsQL (ClickHouse).
+        Find distinct_ids of persons whose email matches via InsightsQL (Datastore).
         Uses the persons table's built-in pdi lazy join to person_distinct_ids.
         """
         query = parse_select(
@@ -49,7 +49,7 @@ class RestoreService:
 
         Checks both:
         1. anonymous_traits.email on Ticket (Postgres, fast)
-        2. Person properties.email → distinct_id → Ticket (via InsightsQL/ClickHouse)
+        2. Person properties.email → distinct_id → Ticket (via InsightsQL/Datastore)
         """
         email_lower = email.lower().strip()
 
@@ -139,7 +139,7 @@ class RestoreService:
         2. Check consumed (before expiry to avoid leaking token existence)
         3. Check expired
         4. Atomically consume the token (short PG transaction)
-        5. Find and migrate tickets (may hit ClickHouse, no row lock held)
+        5. Find and migrate tickets (may hit Datastore, no row lock held)
         """
         token_hash_value = hash_token(raw_token)
 
@@ -171,7 +171,7 @@ class RestoreService:
             token.consumed_by_widget_session_id = widget_session_id
             token.save(update_fields=["consumed_at", "consumed_by_widget_session_id"])
 
-        # Phase 2: find and migrate tickets (may hit ClickHouse, no row lock held).
+        # Phase 2: find and migrate tickets (may hit Datastore, no row lock held).
         # Token is already consumed — if this fails the user can request a new link.
         try:
             tickets = RestoreService.find_tickets_by_email(token.team, token.recipient_email)

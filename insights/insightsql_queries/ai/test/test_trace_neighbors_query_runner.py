@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import DateRange, EventPropertyFilter, PropertyOperator, TraceNeighborsQuery
 
@@ -36,7 +36,7 @@ def _create_ai_generation_event(
     )
 
 
-class TestTraceNeighborsQueryRunner(ClickhouseTestMixin, BaseTest):
+class TestTraceNeighborsQueryRunner(DatastoreTestMixin, BaseTest):
     def test_finds_prev_and_next_traces(self):
         """Test that the query finds both previous and next traces correctly."""
         _create_person(distinct_ids=["person1"], team=self.team)

@@ -1,4 +1,4 @@
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 from unittest.mock import Mock, patch
 
 from insights.schema import (
@@ -21,7 +21,7 @@ from products.marketing_analytics.backend.insightsql_queries.marketing_analytics
 )
 
 
-class TestMarketingAnalyticsTableQueryRunner(ClickhouseTestMixin, BaseTest):
+class TestMarketingAnalyticsTableQueryRunner(DatastoreTestMixin, BaseTest):
     """
     Test suite for MarketingAnalyticsTableQueryRunner.
 

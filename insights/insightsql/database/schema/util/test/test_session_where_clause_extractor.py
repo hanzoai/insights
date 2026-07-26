@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import SessionTableVersion
 
@@ -33,7 +33,7 @@ def parse(
 
 
 @pytest.mark.usefixtures("unittest_snapshot")
-class TestSessionWhereClauseExtractorV1(ClickhouseTestMixin, APIBaseTest):
+class TestSessionWhereClauseExtractorV1(DatastoreTestMixin, APIBaseTest):
     snapshot: Any
 
     @property
@@ -318,7 +318,7 @@ SELECT
         assert expected == actual
 
 
-class TestSessionsQueriesInsightsQLToClickhouse(ClickhouseTestMixin, APIBaseTest):
+class TestSessionsQueriesInsightsQLToDatastore(DatastoreTestMixin, APIBaseTest):
     def print_query(self, query: str) -> str:
         team = self.team
         modifiers = create_default_modifiers_for_team(team)
@@ -329,10 +329,10 @@ class TestSessionsQueriesInsightsQLToClickhouse(ClickhouseTestMixin, APIBaseTest
             enable_select_queries=True,
             modifiers=modifiers,
         )
-        prepared_ast = prepare_ast_for_printing(node=parse(query), context=context, dialect="clickhouse")
+        prepared_ast = prepare_ast_for_printing(node=parse(query), context=context, dialect="datastore")
         if prepared_ast is None:
             return ""
-        pretty = print_prepared_ast(prepared_ast, context=context, dialect="clickhouse", pretty=True)
+        pretty = print_prepared_ast(prepared_ast, context=context, dialect="datastore", pretty=True)
         return pretty
 
     def test_select_with_timestamp(self):

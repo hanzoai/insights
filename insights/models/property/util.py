@@ -18,8 +18,8 @@ from insights.insightsql.insightsql import InsightsQLContext
 from insights.insightsql.parser import parse_expr
 from insights.insightsql.visitor import TraversingVisitor
 
-from insights.clickhouse.kafka_engine import trim_quotes_expr
-from insights.clickhouse.materialized_columns import TableWithProperties, get_materialized_column_for_property
+from insights.datastore.kafka_engine import trim_quotes_expr
+from insights.datastore.materialized_columns import TableWithProperties, get_materialized_column_for_property
 from insights.constants import PropertyOperatorType
 from insights.models.action.action import Action
 from insights.models.action.util import get_action_tables_and_properties
@@ -639,7 +639,7 @@ def get_single_or_multi_property_string_expr(
     When querying for breakdown properties:
      * If the breakdown provided is a string, we extract the JSON from the properties object stored in the DB
      * If it is an array of strings, we extract each of those properties and concatenate them into a single value
-    clickhouse parameterizes into a query template from a flat list using % string formatting
+    datastore parameterizes into a query template from a flat list using % string formatting
     values are escaped and inserted in the query here instead of adding new items to the flat list of values
 
     :param query_alias:

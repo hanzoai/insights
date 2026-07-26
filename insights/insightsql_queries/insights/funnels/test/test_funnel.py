@@ -5,13 +5,13 @@ from typing import cast
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     create_person_id_override_by_distinct_id,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.test import override_settings
@@ -46,7 +46,7 @@ from insights.schema import (
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.api.instance_settings import get_instance_setting
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.constants import INSIGHT_FUNNELS, FunnelOrderType, FunnelVizType
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
 from insights.insightsql_queries.insights.funnels.funnels_query_runner import FunnelsQueryRunner
@@ -66,7 +66,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 
 class TestFunnelBreakdownUDF(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(FunnelOrderType.ORDERED),  # type: ignore
 ):
     maxDiff = None
@@ -74,7 +74,7 @@ class TestFunnelBreakdownUDF(
 
 
 class TestFunnelGroupBreakdownUDF(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_group_test_factory(FunnelOrderType.ORDERED),  # type: ignore
 ):
     maxDiff = None
@@ -82,14 +82,14 @@ class TestFunnelGroupBreakdownUDF(
 
 
 class TestFunnelConversionTimeUDF(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_conversion_time_test_factory(FunnelOrderType.ORDERED),  # type: ignore
 ):
     maxDiff = None
     pass
 
 
-class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
+class TestFOSSFunnelUDF(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actor_ids_at_step(self, filters, funnelStep, funnelStepBreakdown=None):
@@ -239,7 +239,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result[2]["count"], 1)
 
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_events_with_person_on_events_v2(self):
         # KLUDGE: We need to do this to ensure create_person_id_override_by_distinct_id
         # works correctly. Worth considering other approaches as we generally like to
@@ -642,7 +642,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(["test_propX"])
     def test_funnel_multiple_actions(self):
-        # we had an issue on clickhouse where multiple actions with different property filters would incorrectly grab only the last
+        # we had an issue on datastore where multiple actions with different property filters would incorrectly grab only the last
         # properties.
         # This test prevents a regression
         _create_person(distinct_ids=["person1"], team_id=self.team.pk)
@@ -1837,7 +1837,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
             ids_to_compare,
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_conversion_window_seconds(self):
         ids_to_compare = []
         for i in range(10):
@@ -3066,7 +3066,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
             self.assertCountEqual(self._get_actor_ids_at_step(filters, 2), [person1.uuid])
 
     # TODO: fix this test
-    # @snapshot_clickhouse_queries
+    # @snapshot_datastore_queries
     # def test_funnel_with_cohorts_step_filter(self):
     #     _create_person(
     #         distinct_ids=["user_1"],
@@ -3140,7 +3140,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
     #     self.assertEqual(results[1]["name"], "paid")
     #     self.assertEqual(results[1]["count"], 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_with_precalculated_cohort_step_filter(self):
         _create_person(
             distinct_ids=["user_1"],
@@ -3223,7 +3223,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(results[1]["name"], "paid")
             self.assertEqual(results[1]["count"], 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_with_static_cohort_step_filter(self):
         _create_person(
             distinct_ids=["user_1"],
@@ -3284,7 +3284,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[1]["name"], "paid")
         self.assertEqual(results[1]["count"], 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(["$current_url"], person_properties=["email", "age"])
     def test_funnel_with_property_groups(self):
         filters = {
@@ -3470,7 +3470,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
             [people["stopped_after_pageview3"].uuid],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones(self):
         self.team.timezone = "US/Pacific"
         self.team.save()
@@ -4866,7 +4866,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[1]["name"], "added to cart")
         self.assertEqual(results[1]["count"], 0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_aggregation_with_groups(self):
         """Basic test for aggregation by groups."""
         self._create_groups()
@@ -4911,7 +4911,7 @@ class TestFOSSFunnelUDF(ClickhouseTestMixin, APIBaseTest):
         assert result[1]["count"] == 1
         assert result[1]["average_conversion_time"] == 86400
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_aggregation_with_groups_across_persons(self):
         """Test that aggregation by groups works across different persons."""
         self._create_groups()

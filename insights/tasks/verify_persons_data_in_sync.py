@@ -9,7 +9,7 @@ from django.utils.timezone import now
 import structlog
 from celery import shared_task
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.person import Person, PersonDistinctId
 
 logger = structlog.get_logger(__name__)
@@ -64,7 +64,7 @@ def verify_persons_data_in_sync(
     results = Counter(
         {
             "total": 0,
-            "missing_in_clickhouse": 0,
+            "missing_in_datastore": 0,
             "version_mismatch": 0,
             "properties_mismatch": 0,
             "distinct_ids_mismatch": 0,
@@ -122,8 +122,8 @@ def _team_integrity_statistics(person_data: list[Any]) -> Counter:
         result["total"] += 1
         pg_person = pg_persons[uuid]
         if uuid not in ch_persons:
-            result["missing_in_clickhouse"] += 1
-            logger.info("Found person missing in clickhouse", team_id=team_id, uuid=uuid)
+            result["missing_in_datastore"] += 1
+            logger.info("Found person missing in datastore", team_id=team_id, uuid=uuid)
             continue
         _, ch_version, ch_properties = ch_persons[uuid]
         ch_properties = json.loads(ch_properties)

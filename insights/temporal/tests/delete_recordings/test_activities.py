@@ -140,22 +140,22 @@ def test_parse_session_recording_list_response_empty_data():
 
 
 def test_parse_session_recording_list_response_empty_bytes():
-    with pytest.raises(LoadRecordingError, match="Got empty response from ClickHouse."):
+    with pytest.raises(LoadRecordingError, match="Got empty response from Datastore."):
         _parse_session_recording_list_response(b"")
 
 
 def test_parse_session_recording_list_response_invalid_json():
-    with pytest.raises(LoadRecordingError, match="Unable to parse JSON response from ClickHouse."):
+    with pytest.raises(LoadRecordingError, match="Unable to parse JSON response from Datastore."):
         _parse_session_recording_list_response(b"not valid json")
 
 
 def test_parse_session_recording_list_response_malformed_json():
-    with pytest.raises(LoadRecordingError, match="Got malformed JSON response from ClickHouse."):
+    with pytest.raises(LoadRecordingError, match="Got malformed JSON response from Datastore."):
         _parse_session_recording_list_response(b'{"wrong_key":[]}')
 
 
 def test_parse_session_recording_list_response_missing_session_id():
-    with pytest.raises(LoadRecordingError, match="Got malformed JSON response from ClickHouse."):
+    with pytest.raises(LoadRecordingError, match="Got malformed JSON response from Datastore."):
         _parse_session_recording_list_response(b'{"data":[{"wrong_key":"value"}]}')
 
 
@@ -428,22 +428,22 @@ def test_parse_block_listing_response_valid():
 
 
 def test_parse_block_listing_response_empty_bytes():
-    with pytest.raises(DeleteRecordingError, match="Got empty response from ClickHouse."):
+    with pytest.raises(DeleteRecordingError, match="Got empty response from Datastore."):
         _parse_block_listing_response(b"")
 
 
 def test_parse_block_listing_response_invalid_json():
-    with pytest.raises(DeleteRecordingError, match="Unable to parse JSON response from ClickHouse."):
+    with pytest.raises(DeleteRecordingError, match="Unable to parse JSON response from Datastore."):
         _parse_block_listing_response(b"not valid json")
 
 
 def test_parse_block_listing_response_malformed_json():
-    with pytest.raises(DeleteRecordingError, match="Got malformed JSON response from ClickHouse."):
+    with pytest.raises(DeleteRecordingError, match="Got malformed JSON response from Datastore."):
         _parse_block_listing_response(b'{"wrong_key":[]}')
 
 
 def test_parse_block_listing_response_no_rows():
-    with pytest.raises(DeleteRecordingError, match="No rows in response from ClickHouse."):
+    with pytest.raises(DeleteRecordingError, match="No rows in response from Datastore."):
         _parse_block_listing_response(b'{"data":[]}')
 
 
@@ -605,7 +605,7 @@ async def test_perform_recording_metadata_deletion_dry_run():
     ):
         await perform_recording_metadata_deletion(DeleteRecordingMetadataInput(dry_run=True))
 
-    # ClickHouse should not be called in dry_run mode
+    # Datastore should not be called in dry_run mode
     mock_client.execute_query.assert_not_called()
 
     # Postgres should use acount instead of adelete

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.insightsql_queries.insights.funnels.test.test_funnel_persons import get_actors_legacy_filters
@@ -9,7 +9,7 @@ from insights.test.test_journeys import journeys_for
 FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
-class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelUnorderedStepsPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         events_by_person = {}
         for i in range(5):

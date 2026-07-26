@@ -8,8 +8,8 @@ defs = dagster.Definitions(
     assets=[
         exchange_rate.daily_exchange_rates,
         exchange_rate.hourly_exchange_rates,
-        exchange_rate.daily_exchange_rates_in_clickhouse,
-        exchange_rate.hourly_exchange_rates_in_clickhouse,
+        exchange_rate.daily_exchange_rates_in_datastore,
+        exchange_rate.hourly_exchange_rates_in_datastore,
     ],
     jobs=[
         exchange_rate.daily_exchange_rates_job,

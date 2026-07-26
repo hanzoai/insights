@@ -11,10 +11,10 @@ from rest_framework import exceptions, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.cloud_utils import is_cloud
 from insights.settings.base_variables import DEBUG
-from insights.settings.data_stores import CLICKHOUSE_CLUSTER
+from insights.settings.data_stores import DATASTORE_CLUSTER
 
 
 class DebugCHQueries(viewsets.ViewSet):
@@ -33,7 +33,7 @@ class DebugCHQueries(viewsets.ViewSet):
             "insight_id": insight_id,
             "start_time": (datetime.now() - timedelta(days=14)).timestamp(),
             "not_query": "%request:_api_debug_ch_queries_%",
-            "cluster": CLICKHOUSE_CLUSTER,
+            "cluster": DATASTORE_CLUSTER,
         }
 
         sql_query = """
@@ -84,7 +84,7 @@ class DebugCHQueries(viewsets.ViewSet):
         params = {
             "insight_id": insight_id,
             "start_time": (datetime.now(UTC) - timedelta(days=14)).timestamp(),
-            "cluster": CLICKHOUSE_CLUSTER,
+            "cluster": DATASTORE_CLUSTER,
         }
 
         sql_query = """
@@ -120,7 +120,7 @@ class DebugCHQueries(viewsets.ViewSet):
     def queries(self, request: Request, insight_id: Optional[str] = None):
         params: dict = {
             "not_query": "%request:_api_debug_ch_queries_%",
-            "cluster": CLICKHOUSE_CLUSTER,
+            "cluster": DATASTORE_CLUSTER,
         }
         limit_clause = ""
 
@@ -133,7 +133,7 @@ class DebugCHQueries(viewsets.ViewSet):
             params["query"] = f"/* user_id:{request.user.pk} %"
             params["start_time"] = (now() - relativedelta(minutes=10)).timestamp()
 
-        # nosemgrep: clickhouse-fstring-param-audit - where_clause/limit_clause from internal builder
+        # nosemgrep: datastore-fstring-param-audit - where_clause/limit_clause from internal builder
         response = sync_execute(
             f"""
             SELECT

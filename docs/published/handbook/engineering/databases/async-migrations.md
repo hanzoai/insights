@@ -31,7 +31,7 @@ When a migration is triggered, the following happens:
    1. We're not over the concurrent migrations limit
    2. The migration can be run with the current Insights version
    3. The migration is not already running
-   4. The service version requirements are met (e.g. X < ClickHouse version < Y)
+   4. The service version requirements are met (e.g. X < Datastore version < Y)
    5. The migration's `is_required` check passes
    6. The migration's `healthcheck` passes
    7. The migration's dependency (if any) has been completed
@@ -60,7 +60,7 @@ If a migration errors, the error message is added to the migration's database re
 
 The initial implementation of async migrations targets only **data migrations**, and assumes that the migration is used as a mechanism to help users move into a new default state.
 
-For example, when we [moved our ClickHouse `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/Hanzo Insights/insights/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
+For example, when we [moved our Datastore `person_distinct_id` table to a `CollapsingMergeTree`](https://github.com/Hanzo Insights/insights/pull/5563), we updated the SQL for creating the table, and wrote a migration to help users on the old schema migrate to the new schema.
 
 However, users that did a fresh deploy of Insights _after_ this change already had the table with the new schema created by default.
 
@@ -78,7 +78,7 @@ def is_required(self):
     return result[0][0] == 0
 ```
 
-Is required functions could also take into consideration table schemas, for example by checking the output of `SHOW CREATE TABLE` in ClickHouse.
+Is required functions could also take into consideration table schemas, for example by checking the output of `SHOW CREATE TABLE` in Datastore.
 
 ### Codebase structure
 

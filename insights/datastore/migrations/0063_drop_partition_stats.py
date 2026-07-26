@@ -1,0 +1,25 @@
+from insights.datastore.client.migration_tools import run_sql_with_exceptions
+from insights.kafka_client.topics import (
+    KAFKA_EVENTS_PLUGIN_INGESTION,
+    KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW,
+    KAFKA_SESSION_RECORDING_EVENTS,
+)
+from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
+
+DROP_EVENTS_PLUGIN_INGESTION_PARTITION_STATISTICS_TABLE = (
+    lambda: f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.events_plugin_ingestion_partition_statistics ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
+)
+
+DROP_PARTITION_STATISTICS_MV = (
+    lambda monitored_topic: f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{monitored_topic}_partition_statistics_mv ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
+)
+
+operations = map(
+    run_sql_with_exceptions,
+    [
+        DROP_EVENTS_PLUGIN_INGESTION_PARTITION_STATISTICS_TABLE(),
+        DROP_PARTITION_STATISTICS_MV(KAFKA_EVENTS_PLUGIN_INGESTION),
+        DROP_PARTITION_STATISTICS_MV(KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW),
+        DROP_PARTITION_STATISTICS_MV(KAFKA_SESSION_RECORDING_EVENTS),
+    ],
+)

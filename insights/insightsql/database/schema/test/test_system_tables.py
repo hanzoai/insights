@@ -36,7 +36,7 @@ ALL_SYSTEM_TABLE_NAMES = sorted(SystemTables().children.keys())
 
 # {table_name: "sql_alias.column_name"} for team_id filter assertion
 TEAM_ID_FILTER_PATTERNS = {
-    "ingestion_warnings": "ingestion_warnings.team_id",  # ClickHouse-native table, no system__ prefix
+    "ingestion_warnings": "ingestion_warnings.team_id",  # Datastore-native table, no system__ prefix
     "teams": "system__teams.id",  # team_id is aliased to id column
 }
 
@@ -53,7 +53,7 @@ class TestSystemTablesTeamScoping(BaseTest):
             database=db,
         )
         sql = f"SELECT * FROM system.{table_name}"
-        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="clickhouse")
+        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="datastore")
 
         pattern = TEAM_ID_FILTER_PATTERNS.get(table_name, f"system__{table_name}.team_id")
         assert f"equals({pattern}, {self.team.pk})" in query
@@ -63,7 +63,7 @@ class TestSystemTablesTeamScoping(BaseTest):
         all_tables = set(SystemTables().children.keys())
         tested_tables = {name for name, _ in SYSTEM_TABLE_FACTORIES}
         excluded_tables = {
-            # ingestion_warnings is a ClickHouse-native table (not backed by PostgreSQL),
+            # ingestion_warnings is a Datastore-native table (not backed by PostgreSQL),
             # so it can't be tested with Django model factories.
             "ingestion_warnings",
         }
@@ -178,7 +178,7 @@ SYSTEM_TABLE_FACTORIES = [
 
 
 class TestSystemTablesTeamIsolation(NonAtomicBaseTest):
-    """Create entities in two teams and query via ClickHouse's postgresql() function
+    """Create entities in two teams and query via Datastore's postgresql() function
     to verify each team only sees its own data."""
 
     CLASS_DATA_LEVEL_SETUP = False

@@ -1,10 +1,10 @@
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -21,8 +21,8 @@ from insights.schema import (
 from insights.insightsql_queries.web_analytics.web_vitals_path_breakdown import WebVitalsPathBreakdownQueryRunner
 
 
-@snapshot_clickhouse_queries
-class TestWebVitalsPathBreakdownQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestWebVitalsPathBreakdownQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-01-29"
 
     def _create_events(self, data, metric: WebVitalsMetric = WebVitalsMetric.INP):

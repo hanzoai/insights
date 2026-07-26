@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 from django.test.runner import DiscoverRunner as TestRunner
 
-from infi.clickhouse_orm import Database
+from datastore_orm import Database
 
-from insights.clickhouse.schema import (
+from insights.datastore.schema import (
     CREATE_DATA_QUERIES,
     CREATE_DICTIONARY_QUERIES,
     CREATE_DISTRIBUTED_TABLE_QUERIES,
@@ -14,12 +14,12 @@ from insights.clickhouse.schema import (
     build_query,
 )
 from insights.settings import (
-    CLICKHOUSE_CLUSTER,
-    CLICKHOUSE_DATABASE,
-    CLICKHOUSE_HTTP_URL,
-    CLICKHOUSE_PASSWORD,
-    CLICKHOUSE_USER,
-    CLICKHOUSE_VERIFY,
+    DATASTORE_CLUSTER,
+    DATASTORE_DATABASE,
+    DATASTORE_HTTP_URL,
+    DATASTORE_PASSWORD,
+    DATASTORE_USER,
+    DATASTORE_VERIFY,
     TEST,
 )
 
@@ -33,14 +33,14 @@ class Command(BaseCommand):
             "--only-postgres", action="store_true", help="Only set up the Postgres database", default=False
         )
         parser.add_argument(
-            "--only-clickhouse", action="store_true", help="Only set up the ClickHouse database", default=False
+            "--only-datastore", action="store_true", help="Only set up the Datastore database", default=False
         )
 
     def handle(self, *args, **options):
         if not TEST:
             raise ValueError("TEST environment variable needs to be set for this command to function")
 
-        if not options["only_clickhouse"]:
+        if not options["only_datastore"]:
             disable_migrations()
 
             test_runner = TestRunner(interactive=False)
@@ -51,38 +51,38 @@ class Command(BaseCommand):
             print("Only setting up Postgres database")  # noqa: T201
             return
 
-        print("\nCreating test ClickHouse database...")  # noqa: T201
+        print("\nCreating test Datastore database...")  # noqa: T201
         database = Database(
-            CLICKHOUSE_DATABASE,
-            db_url=CLICKHOUSE_HTTP_URL,
-            username=CLICKHOUSE_USER,
-            password=CLICKHOUSE_PASSWORD,
-            cluster=CLICKHOUSE_CLUSTER,
-            verify_ssl_cert=CLICKHOUSE_VERIFY,
+            DATASTORE_DATABASE,
+            db_url=DATASTORE_HTTP_URL,
+            username=DATASTORE_USER,
+            password=DATASTORE_PASSWORD,
+            cluster=DATASTORE_CLUSTER,
+            verify_ssl_cert=DATASTORE_VERIFY,
             autocreate=False,
             randomize_replica_paths=True,
         )
         if database.db_exists:
             print(  # noqa: T201
-                f'Got an error creating the test ClickHouse database: database "{CLICKHOUSE_DATABASE}" already exists\n'
+                f'Got an error creating the test Datastore database: database "{DATASTORE_DATABASE}" already exists\n'
             )
-            print("Destroying old test ClickHouse database...")  # noqa: T201
+            print("Destroying old test Datastore database...")  # noqa: T201
             database.drop_database()
         database.create_database()
-        create_clickhouse_schema_in_parallel(CREATE_MERGETREE_TABLE_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_KAFKA_TABLE_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_DISTRIBUTED_TABLE_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_MV_TABLE_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_VIEW_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_DICTIONARY_QUERIES)
-        create_clickhouse_schema_in_parallel(CREATE_DATA_QUERIES())
+        create_datastore_schema_in_parallel(CREATE_MERGETREE_TABLE_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_KAFKA_TABLE_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_DISTRIBUTED_TABLE_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_MV_TABLE_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_VIEW_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_DICTIONARY_QUERIES)
+        create_datastore_schema_in_parallel(CREATE_DATA_QUERIES())
 
 
-def create_clickhouse_schema_in_parallel(queries):
-    from insights.test.base import run_clickhouse_statement_in_parallel
+def create_datastore_schema_in_parallel(queries):
+    from insights.test.base import run_datastore_statement_in_parallel
 
     queries = list(map(build_query, queries))
-    run_clickhouse_statement_in_parallel(queries)
+    run_datastore_statement_in_parallel(queries)
 
 
 def disable_migrations() -> None:

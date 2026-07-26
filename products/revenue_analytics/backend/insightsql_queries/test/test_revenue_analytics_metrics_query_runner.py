@@ -4,10 +4,10 @@ from pathlib import Path
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import ANY, patch
 
@@ -104,8 +104,8 @@ LAST_6_MONTHS_DAYS = ALL_MONTHS_DAYS[:7].copy()
 LAST_6_MONTHS_FAKEDATETIMES = ALL_MONTHS_FAKEDATETIMES[:7].copy()
 
 
-@snapshot_clickhouse_queries
-class TestRevenueAnalyticsMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestRevenueAnalyticsMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-05-30"
 
     def _create_managed_viewsets(self):

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from freezegun.api import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries, snapshot_postgres_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, snapshot_datastore_queries, snapshot_postgres_queries
 from unittest import mock
 
 from insights.models.activity_logging.activity_log import Detail, Trigger, log_activity
@@ -16,7 +16,7 @@ SAMPLE_PAYLOAD = {"dateRange": ["2021-06-10", "2022-06-12"], "parallelism": 1}
 
 
 @freeze_time("2021-08-25T13:00:00Z")
-class TestHistoricalExports(ClickhouseTestMixin, BaseTest):
+class TestHistoricalExports(DatastoreTestMixin, BaseTest):
     maxDiff = None
 
     def setUp(self):
@@ -237,7 +237,7 @@ class TestHistoricalExports(ClickhouseTestMixin, BaseTest):
         )
 
     @snapshot_postgres_queries
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_historical_export_metrics(self):
         with freeze_time("2021-08-25T01:00:00Z"):
             self._create_activity_log(

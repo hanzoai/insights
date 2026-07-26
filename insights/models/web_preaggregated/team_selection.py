@@ -1,6 +1,6 @@
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import ReplacingMergeTree
-from insights.settings.data_stores import CLICKHOUSE_DATABASE, CLICKHOUSE_PASSWORD, CLICKHOUSE_USER
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import ReplacingMergeTree
+from insights.settings.data_stores import DATASTORE_DATABASE, DATASTORE_PASSWORD, DATASTORE_USER
 
 WEB_PRE_AGGREGATED_TEAM_SELECTION_TABLE_NAME = "web_pre_aggregated_teams"
 WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME = "web_pre_aggregated_teams_dict"
@@ -111,7 +111,7 @@ def WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_QUERY():
 SELECT
     team_id
 FROM
-    `{CLICKHOUSE_DATABASE}`.`{WEB_PRE_AGGREGATED_TEAM_SELECTION_TABLE_NAME}`
+    `{DATASTORE_DATABASE}`.`{WEB_PRE_AGGREGATED_TEAM_SELECTION_TABLE_NAME}`
 FINAL
 WHERE version > 0
 """.replace("\n", " ").strip()
@@ -123,14 +123,14 @@ CREATE DICTIONARY IF NOT EXISTS {dictionary_name} {on_cluster_clause} (
     team_id UInt64
 )
 PRIMARY KEY team_id
-SOURCE(CLICKHOUSE(QUERY '{query}' USER '{clickhouse_user}' PASSWORD '{clickhouse_password}'))
+SOURCE(DATASTORE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(HASHED())""".format(
         dictionary_name=f"`{WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
         query=WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_QUERY(),
-        clickhouse_user=CLICKHOUSE_USER,
-        clickhouse_password=CLICKHOUSE_PASSWORD,
+        datastore_user=DATASTORE_USER,
+        datastore_password=DATASTORE_PASSWORD,
     )
 
 

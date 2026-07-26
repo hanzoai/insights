@@ -2,7 +2,7 @@ import uuid
 from time import time_ns
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from parameterized import parameterized
 
@@ -26,7 +26,7 @@ from insights.models.property_definition import PropertyType
 from insights.models.utils import uuid7
 
 
-class TestSessionsV2(ClickhouseTestMixin, APIBaseTest):
+class TestSessionsV2(DatastoreTestMixin, APIBaseTest):
     def __execute(
         self,
         query,
@@ -753,7 +753,7 @@ class TestSessionsV2(ClickhouseTestMixin, APIBaseTest):
         assert response.results == [(2,)]
 
 
-class TestGetLazySessionProperties(ClickhouseTestMixin, APIBaseTest):
+class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
     def test_all(self):
         results = get_lazy_session_table_properties_v2(None)
         self.assertEqual(

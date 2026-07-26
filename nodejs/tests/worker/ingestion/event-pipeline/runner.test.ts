@@ -199,7 +199,7 @@ describe('EventPipelineRunner', () => {
         groupStoreForBatch = new BatchWritingGroupStore({
             kafkaProducer: hub.kafkaProducer,
             groupRepository: hub.groupRepository,
-            clickhouseGroupRepository: hub.clickhouseGroupRepository,
+            datastoreGroupRepository: hub.datastoreGroupRepository,
         })
         const options: EventPipelineRunnerOptions = {
             SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: hub.SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP,
@@ -328,7 +328,7 @@ describe('EventPipelineRunner', () => {
                 const heatmapGroupStoreForBatch = new BatchWritingGroupStore({
                     kafkaProducer: hub.kafkaProducer,
                     groupRepository: hub.groupRepository,
-                    clickhouseGroupRepository: hub.clickhouseGroupRepository,
+                    datastoreGroupRepository: hub.datastoreGroupRepository,
                 })
                 const heatmapOptions: EventPipelineRunnerOptions = {
                     SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: hub.SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP,

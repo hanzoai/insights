@@ -4,11 +4,11 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 
 from products.logs.backend.logs_query_runner import LogsQueryResponse, LogsQueryRunner
 
-# Maps API breakdown type to ClickHouse field name
+# Maps API breakdown type to Datastore field name
 BREAKDOWN_DB_FIELD: dict[LogsSparklineBreakdownBy, str] = {
     LogsSparklineBreakdownBy.SEVERITY: "severity_text",
     LogsSparklineBreakdownBy.SERVICE: "service_name",

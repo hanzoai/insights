@@ -128,7 +128,7 @@ class Command(BaseCommand):
                 logger.exception("event_submission_fail", error=e)
 
         while True:
-            offsets = admin.list_consumer_group_offsets(group_id="clickhouse-ingestion")
+            offsets = admin.list_consumer_group_offsets(group_id="datastore-ingestion")
             end_offsets = consumer.end_offsets([TopicPartition(topic=KAFKA_EVENTS_PLUGIN_INGESTION, partition=0)])
             if end_offsets is None:
                 logger.error(

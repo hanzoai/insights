@@ -5,14 +5,14 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseDestroyTablesMixin,
-    ClickhouseTestMixin,
+    DatastoreDestroyTablesMixin,
+    DatastoreTestMixin,
     _create_person,
     flush_persons_and_events,
 )
 from unittest.mock import MagicMock, patch
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Organization, Team
 from insights.models.event.util import create_event
 from insights.tasks.llm_analytics_usage_report import (
@@ -28,7 +28,7 @@ from insights.utils import get_previous_day
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesMixin):
+class TestLLMAnalyticsUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMixin):
     """Tests for LLM Analytics usage reporting functionality."""
 
     def setUp(self) -> None:

@@ -23,11 +23,11 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
 from products.batch_exports.backend.tests.temporal.destinations.postgres.utils import (
     EXPECTED_PERSONS_BATCH_EXPORT_FIELDS,
     TEST_MODELS,
-    assert_clickhouse_records_in_postgres,
+    assert_datastore_records_in_postgres,
 )
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 
 pytestmark = [
@@ -39,7 +39,7 @@ pytestmark = [
 async def _run_activity(
     activity_environment,
     postgres_connection,
-    clickhouse_client,
+    datastore_client,
     postgres_config,
     team,
     data_interval_start,
@@ -88,9 +88,9 @@ async def _run_activity(
     insert_inputs.stage_folder = stage_folder
     result = await activity_environment.run(insert_into_postgres_activity_from_stage, insert_inputs)
 
-    await assert_clickhouse_records_in_postgres(
+    await assert_datastore_records_in_postgres(
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=postgres_config["schema"],
         table_name=table_name,
         team_id=team.pk,
@@ -109,7 +109,7 @@ async def _run_activity(
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_insert_into_postgres_activity_inserts_data_into_postgres_table(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     postgres_connection,
     postgres_config,
@@ -122,7 +122,7 @@ async def test_insert_into_postgres_activity_inserts_data_into_postgres_table(
 ):
     """Test that the insert_into_postgres_activity_from_stage function inserts data into a PostgreSQL table.
 
-    We use the generate_test_events_in_clickhouse function to generate several sets
+    We use the generate_test_events_in_datastore function to generate several sets
     of events. Some of these sets are expected to be exported, and others not. Expected
     events are those that:
     * Are created for the team_id of the batch export.
@@ -160,7 +160,7 @@ async def test_insert_into_postgres_activity_inserts_data_into_postgres_table(
         await _run_activity(
             activity_environment=activity_environment,
             postgres_connection=postgres_connection,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             postgres_config=postgres_config,
             team=ateam,
             data_interval_start=data_interval_start,
@@ -194,7 +194,7 @@ async def test_insert_into_postgres_activity_inserts_data_into_postgres_table(
     indirect=True,
 )
 async def test_insert_into_postgres_activity_handles_problematic_json(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     postgres_connection,
     postgres_config,
@@ -208,14 +208,14 @@ async def test_insert_into_postgres_activity_handles_problematic_json(
     """Sometimes users send us invalid JSON. We want to test that we handle this gracefully.
 
     We only use the event model here since custom models with expressions such as JSONExtractString will still fail, as
-    ClickHouse is not able to parse invalid JSON. There's not much we can do about this case.
+    Datastore is not able to parse invalid JSON. There's not much we can do about this case.
     """
 
     with override_settings(BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2):
         await _run_activity(
             activity_environment=activity_environment,
             postgres_connection=postgres_connection,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             postgres_config=postgres_config,
             team=ateam,
             data_interval_start=data_interval_start,
@@ -228,7 +228,7 @@ async def test_insert_into_postgres_activity_handles_problematic_json(
 
 
 async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     postgres_connection,
     postgres_config,
@@ -251,7 +251,7 @@ async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_ru
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -265,8 +265,8 @@ async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_ru
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -275,8 +275,8 @@ async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_ru
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -288,7 +288,7 @@ async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_ru
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -300,7 +300,7 @@ async def test_insert_into_postgres_activity_merges_persons_data_in_follow_up_ru
 
 
 async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     postgres_connection,
     postgres_config,
@@ -317,7 +317,7 @@ async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_r
     """
     import datetime as dt
 
-    from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+    from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
     model = BatchExportModel(name="sessions", schema=None)
     table_name = f"test_insert_activity_mutability_table_sessions_{ateam.pk}"
@@ -326,7 +326,7 @@ async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_r
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -344,8 +344,8 @@ async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_r
         data_interval_end + dt.timedelta(hours=1),
     )
 
-    new_events, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    new_events, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=new_data_interval_start,
         end_time=new_data_interval_end,
@@ -364,7 +364,7 @@ async def test_insert_into_postgres_activity_merges_sessions_data_in_follow_up_r
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=new_data_interval_start,
@@ -493,7 +493,7 @@ async def test_insert_into_postgres_activity_inserts_fails_on_missing_primary_ke
 
 
 async def test_insert_into_postgres_activity_handles_person_schema_changes(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     postgres_connection,
     postgres_config,
@@ -520,7 +520,7 @@ async def test_insert_into_postgres_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -543,8 +543,8 @@ async def test_insert_into_postgres_activity_handles_person_schema_changes(
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -553,8 +553,8 @@ async def test_insert_into_postgres_activity_handles_person_schema_changes(
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -568,7 +568,7 @@ async def test_insert_into_postgres_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment=activity_environment,
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         postgres_config=postgres_config,
         team=ateam,
         data_interval_start=data_interval_start,

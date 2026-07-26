@@ -1,6 +1,6 @@
 from typing import Any
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.async_deletion import AsyncDeletion, DeletionType
 from insights.models.async_deletion.delete import AsyncDeletionProcess, logger
 
@@ -14,7 +14,7 @@ class AsyncCohortDeletion(AsyncDeletionProcess):
             return
 
         logger.warn(
-            "Starting AsyncDeletion on `cohortpeople` table in ClickHouse",
+            "Starting AsyncDeletion on `cohortpeople` table in Datastore",
             {
                 "count": len(deletions),
                 "team_ids": list({row.team_id for row in deletions}),
@@ -23,7 +23,7 @@ class AsyncCohortDeletion(AsyncDeletionProcess):
 
         conditions, args = self._conditions(deletions)
 
-        # nosemgrep: clickhouse-fstring-param-audit - conditions from internal _conditions method
+        # nosemgrep: datastore-fstring-param-audit - conditions from internal _conditions method
         sync_execute(
             f"""
             DELETE FROM cohortpeople
@@ -44,8 +44,8 @@ class AsyncCohortDeletion(AsyncDeletionProcess):
 
     def _verify_by_column(self, distinct_columns: str, async_deletions: list[AsyncDeletion]) -> set[tuple[Any, ...]]:
         conditions, args = self._conditions(async_deletions)
-        # nosemgrep: clickhouse-fstring-param-audit - distinct_columns hardcoded, conditions internal
-        clickhouse_result = sync_execute(
+        # nosemgrep: datastore-fstring-param-audit - distinct_columns hardcoded, conditions internal
+        datastore_result = sync_execute(
             f"""
             SELECT DISTINCT {distinct_columns}
             FROM cohortpeople
@@ -54,7 +54,7 @@ class AsyncCohortDeletion(AsyncDeletionProcess):
             args,
             settings={},
         )
-        return {tuple(row) for row in clickhouse_result}
+        return {tuple(row) for row in datastore_result}
 
     def _column_name(self, async_deletion: AsyncDeletion):
         assert async_deletion.deletion_type in (

@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from rest_framework import status
 
@@ -8,7 +8,7 @@ from products.endpoints.backend.models import Endpoint, EndpointVersion
 from products.endpoints.backend.tests.conftest import create_endpoint_with_version
 
 
-class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
+class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
     ENDPOINT = "endpoints"
 
     def setUp(self):

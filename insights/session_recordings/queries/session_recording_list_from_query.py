@@ -185,7 +185,7 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
                 team=self._team,
                 query_type="SessionRecordingListQuery",
                 modifiers=self._insightsql_query_modifiers,
-                settings=InsightsQLGlobalSettings(allow_experimental_analyzer=None),  # Using global ClickHouse setting
+                settings=InsightsQLGlobalSettings(allow_experimental_analyzer=None),  # Using global Datastore setting
             )
 
         with tracer.start_as_current_span("SessionRecordingListFromQuery._data_to_return"):

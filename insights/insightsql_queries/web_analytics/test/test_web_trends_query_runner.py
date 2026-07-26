@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import MagicMock, patch
 
 from insights.schema import InsightsQLQueryModifiers, IntervalType, WebTrendsMetric, WebTrendsQuery
@@ -6,7 +6,7 @@ from insights.schema import InsightsQLQueryModifiers, IntervalType, WebTrendsMet
 from insights.insightsql_queries.web_analytics.web_trends_query_runner import WebTrendsQueryRunner
 
 
-class TestWebTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestWebTrendsQueryRunner(DatastoreTestMixin, APIBaseTest):
     def test_can_instantiate_runner(self):
         query = WebTrendsQuery(
             interval=IntervalType.DAY,

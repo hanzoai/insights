@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 import hanzo_insights
 from dateutil import parser
 
-from insights.clickhouse.query_tagging import QueryTags, get_query_tags, update_tags
+from insights.datastore.query_tagging import QueryTags, get_query_tags, update_tags
 from insights.constants import (
     INSIGHT_LIFECYCLE,
     NON_BREAKDOWN_DISPLAY_TYPES,

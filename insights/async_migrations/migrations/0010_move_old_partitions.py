@@ -4,7 +4,7 @@ from functools import cached_property
 import structlog
 
 from insights.async_migrations.definition import AsyncMigrationDefinition, AsyncMigrationOperationSQL
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.cloud_utils import is_cloud
 from insights.constants import AnalyticsDBMS
 from insights.version_requirement import ServiceVersionRequirement
@@ -37,13 +37,13 @@ class Migration(AsyncMigrationDefinition):
         ),
     }
 
-    service_version_requirements = [ServiceVersionRequirement(service="clickhouse", supported_version=">=22.3.0")]
+    service_version_requirements = [ServiceVersionRequirement(service="datastore", supported_version=">=22.3.0")]
 
     def is_required(self) -> bool:
         return is_cloud()
 
     def _get_partitions_to_move(self):
-        # nosemgrep: clickhouse-injection-taint - migration params, not user input
+        # nosemgrep: datastore-injection-taint - migration params, not user input
         result = sync_execute(
             f"""
             SELECT DISTINCT partition_id FROM system.parts
@@ -72,12 +72,12 @@ class Migration(AsyncMigrationDefinition):
         replica = "{replica}"
         operations = [
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=f"""
                 CREATE TABLE {backup_table_name}
                 ON CLUSTER 'insights'
                 AS sharded_events
-                ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/insights.{backup_table_name}', '{replica}', _timestamp)
+                ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/{shard}/insights.{backup_table_name}', '{replica}', _timestamp)
                 PARTITION BY toYYYYMM(timestamp)
                 ORDER BY (team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))
                 SAMPLE BY cityHash64(distinct_id)
@@ -93,7 +93,7 @@ class Migration(AsyncMigrationDefinition):
         for partition in partitions_to_move:
             operations.append(
                 AsyncMigrationOperationSQL(
-                    database=AnalyticsDBMS.CLICKHOUSE,
+                    database=AnalyticsDBMS.DATASTORE,
                     sql=f"""
                     ALTER TABLE sharded_events MOVE PARTITION '{partition}' TO TABLE {backup_table_name}
                     """,
@@ -105,7 +105,7 @@ class Migration(AsyncMigrationDefinition):
         if self.get_parameter("OPTIMIZE_TABLE"):
             operations.append(
                 AsyncMigrationOperationSQL(
-                    database=AnalyticsDBMS.CLICKHOUSE,
+                    database=AnalyticsDBMS.DATASTORE,
                     sql=f"""
                     OPTIMIZE TABLE sharded_events FINAL
                     """,

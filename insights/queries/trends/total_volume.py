@@ -5,7 +5,7 @@ from typing import Any, Union
 
 from insights.schema import PersonsOnEventsMode
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.constants import (
     MONTHLY_ACTIVE,
     NON_TIME_SERIES_DISPLAY_TYPES,

@@ -576,7 +576,7 @@ export interface InsightsQLQueryModifiersApi {
      * If these are provided, the query will fail if these skip indexes are not used
      * @nullable
      */
-    forceClickhouseDataSkippingIndexes?: string[] | null
+    forceDatastoreDataSkippingIndexes?: string[] | null
     /** @nullable */
     formatCsvAllowDoubleQuotes?: boolean | null
     inCohortVia?: InCohortViaApi | null
@@ -643,7 +643,7 @@ export interface InsightsQLMetadataResponseApi {
     warnings: InsightsQLNoticeApi[]
 }
 
-export interface ClickhouseQueryProgressApi {
+export interface DatastoreQueryProgressApi {
     active_cpu_time: number
     bytes_read: number
     estimated_rows_total: number
@@ -685,7 +685,7 @@ export interface QueryStatusApi {
     pickup_time?: string | null
     /** ONLY async queries use QueryStatus. */
     query_async?: boolean
-    query_progress?: ClickhouseQueryProgressApi | null
+    query_progress?: DatastoreQueryProgressApi | null
     results?: unknown | null
     /**
      * When was query execution task enqueued.
@@ -711,10 +711,10 @@ export interface QueryTimingApi {
 
 export interface InsightsQLQueryResponseApi {
     /**
-     * Executed ClickHouse query
+     * Executed Datastore query
      * @nullable
      */
-    clickhouse?: string | null
+    datastore?: string | null
     /**
      * Returned columns
      * @nullable

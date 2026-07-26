@@ -1,13 +1,13 @@
-//! Similarity calculation for ClickHouseEvent.
+//! Similarity calculation for DatastoreEvent.
 
 use std::collections::HashMap;
 
 use anyhow::Result;
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 
 use crate::pipelines::results::{EventSimilarity, SimilarityComparable};
 
-impl SimilarityComparable for ClickHouseEvent {
+impl SimilarityComparable for DatastoreEvent {
     fn calculate_similarity(original: &Self, new: &Self) -> Result<EventSimilarity> {
         let mut different_fields = Vec::new();
         let mut matching_fields = 0u32;
@@ -109,8 +109,8 @@ mod tests {
     use common_types::PersonMode;
     use uuid::Uuid;
 
-    fn create_test_event(uuid: Uuid) -> ClickHouseEvent {
-        ClickHouseEvent {
+    fn create_test_event(uuid: Uuid) -> DatastoreEvent {
+        DatastoreEvent {
             uuid,
             team_id: 123,
             project_id: Some(456),
@@ -140,7 +140,7 @@ mod tests {
     }
 
     #[test]
-    fn test_clickhouse_event_similarity_identical() {
+    fn test_datastore_event_similarity_identical() {
         let uuid = Uuid::new_v4();
         let event1 = create_test_event(uuid);
         let event2 = create_test_event(uuid);
@@ -154,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn test_clickhouse_event_similarity_only_uuid_differs() {
+    fn test_datastore_event_similarity_only_uuid_differs() {
         let event1 = create_test_event(Uuid::new_v4());
         let event2 = create_test_event(Uuid::new_v4());
 
@@ -169,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn test_clickhouse_event_similarity_multiple_differences() {
+    fn test_datastore_event_similarity_multiple_differences() {
         let mut event1 = create_test_event(Uuid::new_v4());
         let mut event2 = create_test_event(Uuid::new_v4());
 

@@ -16,7 +16,7 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import action
-from insights.errors import look_up_clickhouse_error_code_meta
+from insights.errors import look_up_datastore_error_code_meta
 from insights.exceptions_capture import capture_exception
 
 from products.data_warehouse.backend.models import DataWarehouseJoin
@@ -251,7 +251,7 @@ class ViewLinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR  # type: ignore[assignment]
             response_data["is_valid"] = False
 
-            is_safe = look_up_clickhouse_error_code_meta(e).user_safe
+            is_safe = look_up_datastore_error_code_meta(e).user_safe
             if is_safe:
                 response_data["detail"] = str(e)
         except QueryError as e:

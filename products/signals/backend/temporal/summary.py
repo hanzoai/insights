@@ -45,7 +45,7 @@ class SignalReportSummaryWorkflow:
     Workflow that runs when a signal report is promoted to candidate status.
 
     Flow:
-    1. Fetch all signals for the report from ClickHouse
+    1. Fetch all signals for the report from Datastore
     2. Mark report as in_progress
     3. Summarize signals into a title + summary via LLM
     4. Safety judge: assess the report for prompt injection / manipulation attempts

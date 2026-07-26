@@ -123,7 +123,7 @@ class DailyTraceClusteringWorkflow(InsightsWorkflow):
     This workflow orchestrates 3 activities:
     1. Compute: Fetch embeddings, perform k-means clustering, compute distances
     2. Label: Generate LLM-based cluster labels (long timeout for API call)
-    3. Emit: Write clustering results to ClickHouse
+    3. Emit: Write clustering results to Datastore
 
     The workflow calculates window_start/window_end from lookback_days and
     passes them to activities. Embeddings (~30+ MB) stay within Activity 1,
@@ -212,7 +212,7 @@ class DailyTraceClusteringWorkflow(InsightsWorkflow):
             retry_policy=LLM_ACTIVITY_RETRY_POLICY,
         )
 
-        # Activity 3: Emit events to ClickHouse
+        # Activity 3: Emit events to Datastore
         result = await workflow.execute_activity(
             emit_cluster_events_activity,
             args=[

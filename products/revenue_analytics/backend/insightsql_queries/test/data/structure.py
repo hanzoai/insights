@@ -1,13 +1,13 @@
 from insights.schema import RevenueAnalyticsEventItem, RevenueCurrencyPropertyConfig
 
-from products.data_warehouse.backend.models import CLICKHOUSE_INSIGHTSQL_MAPPING
+from products.data_warehouse.backend.models import DATASTORE_INSIGHTSQL_MAPPING
 
 
 def _convert_columns(basic_types: dict[str, str]):
     return {
         str(key): {
-            "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[value].__name__,
-            "clickhouse": value,
+            "insightsql": DATASTORE_INSIGHTSQL_MAPPING[value].__name__,
+            "datastore": value,
             "valid": True,
         }
         for key, value in basic_types.items()

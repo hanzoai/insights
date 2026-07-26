@@ -14,7 +14,7 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.models.team import Team
 from insights.temporal.llm_analytics.trace_clustering import constants
 from insights.temporal.llm_analytics.trace_clustering.models import (
@@ -50,7 +50,7 @@ def fetch_item_embeddings_for_clustering(
 ) -> tuple[list[ItemId], ItemEmbeddings, ItemBatchRunIds]:
     """Query item IDs and embeddings from document_embeddings table using InsightsQL.
 
-    When event_filters are provided, uses ClickHouse subqueries to push the
+    When event_filters are provided, uses Datastore subqueries to push the
     trace→generation→embedding join into the database rather than materializing
     intermediate ID lists in Python.
 

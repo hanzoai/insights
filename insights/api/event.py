@@ -31,17 +31,17 @@ from insights.api.documentation import PropertiesSerializer, extend_schema
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
 from insights.auth import PersonalAPIKeyAuthentication
-from insights.clickhouse.client import query_with_columns
-from insights.clickhouse.client.limit import get_events_list_rate_limiter
+from insights.datastore.client import query_with_columns
+from insights.datastore.client.limit import get_events_list_rate_limiter
 from insights.exceptions_capture import capture_exception
 from insights.models import Element, Filter, Person, PersonDistinctId, PropertyDefinition
 from insights.models.event.query_event_list import query_events_list
 from insights.models.event.sql import SELECT_ONE_EVENT_SQL
-from insights.models.event.util import ClickhouseEventSerializer
+from insights.models.event.util import DatastoreEventSerializer
 from insights.models.person.util import get_persons_by_distinct_ids
 from insights.models.team import Team
 from insights.models.utils import UUIDT
-from insights.rate_limit import ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle
+from insights.rate_limit import DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle
 from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
 from insights.utils import convert_property_value, flatten, generate_short_id, relative_date_parse
 
@@ -158,8 +158,8 @@ class EventViewSet(
 ):
     scope_object = "query"
     renderer_classes = (*tuple(api_settings.DEFAULT_RENDERER_CLASSES), csvrenderers.PaginatedCSVRenderer)
-    serializer_class = ClickhouseEventSerializer
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    serializer_class = DatastoreEventSerializer
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     pagination_class = UncountedLimitOffsetPagination
 
     def _build_next_url(
@@ -358,7 +358,7 @@ class EventViewSet(
                         action_id=request.GET.get("action_id"),
                     )
 
-            result = ClickhouseEventSerializer(
+            result = DatastoreEventSerializer(
                 query_result[0:limit],
                 many=True,
                 context={"people": self._get_people(query_result, team)},
@@ -427,7 +427,7 @@ class EventViewSet(
         if request.query_params.get("include_person", False):
             query_context["people"] = self._get_people(query_result, self.team)
 
-        res = ClickhouseEventSerializer(query_result[0], many=False, context=query_context).data
+        res = DatastoreEventSerializer(query_result[0], many=False, context=query_context).data
         return response.Response(res)
 
     @action(methods=["GET"], detail=False, required_scopes=["query:read"])

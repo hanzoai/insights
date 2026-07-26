@@ -16,7 +16,7 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 - **Direct S3 Access**: Test suite has direct S3 client access to verify blob storage and retrieval
 - **Database**: PostgreSQL for team/token storage and event metadata
 - **Kafka**: Event streaming for ingestion pipeline
-- **ClickHouse**: Event storage and query API
+- **Datastore**: Event storage and query API
 
 ### Test Framework
 
@@ -146,7 +146,7 @@ The acceptance test suite is implemented in Python using pytest to test against 
 
 #### Prerequisites
 
-- **Local Insights Instance**: Full Insights deployment running locally with all services (Django, capture, Kafka, ClickHouse, PostgreSQL)
+- **Local Insights Instance**: Full Insights deployment running locally with all services (Django, capture, Kafka, Datastore, PostgreSQL)
 - **Capture Service**: Running with `/i/v0/ai` endpoint enabled
 - **Personal API Key**: Insights personal API key for creating test organizations/projects
 

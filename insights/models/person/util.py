@@ -12,8 +12,8 @@ from django.utils.timezone import now
 
 from dateutil.parser import isoparse
 
-from insights.clickhouse.client import sync_execute
-from insights.kafka_client.client import ClickhouseProducer
+from insights.datastore.client import sync_execute
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_PERSON, KAFKA_PERSON_DISTINCT_ID
 from insights.models.person import Person, PersonDistinctId
 from insights.models.person.person import READ_DB_FOR_PERSONS
@@ -144,7 +144,7 @@ def create_person(
     if not timestamp:
         timestamp = now()
 
-    # clickhouse specific formatting
+    # datastore specific formatting
     if isinstance(timestamp, str):
         timestamp = isoparse(timestamp)
     else:
@@ -173,7 +173,7 @@ def create_person(
         "_timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
         "last_seen_at": last_seen_at_formatted,
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_PERSON, sql=INSERT_PERSON_SQL, data=data, sync=sync)
     return uuid
 
@@ -186,7 +186,7 @@ def create_person_distinct_id(
     is_deleted: bool = False,
     sync: bool = False,
 ) -> None:
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(
         topic=KAFKA_PERSON_DISTINCT_ID,
         sql=INSERT_PERSON_DISTINCT_ID2,

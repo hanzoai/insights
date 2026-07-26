@@ -92,8 +92,8 @@ class TestView(APIBaseTest):
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
         return_value={
-            "id": {"clickhouse": "String", "insightsql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "String", "insightsql": "StringDatabaseField", "valid": True},
+            "id": {"datastore": "String", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"datastore": "String", "insightsql": "StringDatabaseField", "valid": True},
         },
     )
     @patch(

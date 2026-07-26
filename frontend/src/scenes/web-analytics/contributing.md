@@ -7,7 +7,7 @@
 - The list of tiles is created in the [webAnalyticsLogic](./webAnalyticsLogic.tsx) selector called `tiles`, it's quite a large function, and it returns the data for every tile on the page. See also the `<WebAnalyticsTile/>` type
 - Different types of tiles have different components to render them, I'll just focus on `<QueryTileItem/>` and `<TabsTileItem/>`. They call `<WebQuery/>`, which adds some UI for different kinds of queries, but they all eventually include a `<Query/>`
 - The `<Query/>` component is the front-end component that handles everything related to actually running and visualizing one query, so it'll handle the network request, caching, rendering a table, etc.
-- Jumping to the back end, when we make a query via the API it'll go through some django stuff, and then `get_query_runner` will try to find a query runner to run the specific query. One example is the [WebOverviewQueryRunner](../../../../insights/insightsql_queries/web_analytics/web_overview.py). These query runners have a `to_query` method which is responsible for generating SQL based on their inputs, and a `calculate` method which is responsible for running the query on clickhouse and returning a response.
+- Jumping to the back end, when we make a query via the API it'll go through some django stuff, and then `get_query_runner` will try to find a query runner to run the specific query. One example is the [WebOverviewQueryRunner](../../../../insights/insightsql_queries/web_analytics/web_overview.py). These query runners have a `to_query` method which is responsible for generating SQL based on their inputs, and a `calculate` method which is responsible for running the query on datastore and returning a response.
 - The query input and output types are defined in typescript, and we have a script which converts them to pydantic models for type hinting in the back end. See [schema-general.ts](../../queries/schema/schema-general.ts) and [schema.py](../../../../insights/schema.py)
 
 ## How to regenerate the schema
@@ -34,11 +34,11 @@ The snapshot tests in `insights/insightsql_queries/web_analytics/test/test_sampl
 
 ## Sessions table
 
-The sessions table is a core component of web analytics, you can check what defines a session on our doc and update it if it ever changes on the [website doc](https://hanzo.ai/docs/data/sessions). While we refer to it as "the sessions table", it's actually implemented as a set of ClickHouse tables that work together.
+The sessions table is a core component of web analytics, you can check what defines a session on our doc and update it if it ever changes on the [website doc](https://hanzo.ai/docs/data/sessions). While we refer to it as "the sessions table", it's actually implemented as a set of Datastore tables that work together.
 
 ### How it works
 
-The sessions table uses ClickHouse's `AggregatingMergeTree` engine to continuously aggregate events by session ID:
+The sessions table uses Datastore's `AggregatingMergeTree` engine to continuously aggregate events by session ID:
 
 - Events are aggregated via materialized views that run automatically as events are inserted
 - All events with the same session ID are merged using the sorting key on the version, you can check the current sorting key in the table definition in [sessions_v3.py](../../../../insights/models/raw_sessions/sessions_v3.py)
@@ -121,7 +121,7 @@ The table definitions and materialized view logic are in:
 
 - [insights/models/raw_sessions/sessions_v3.py](../../../../insights/models/raw_sessions/sessions_v3.py) - SQL table definitions and materialized view queries
 - [insights/insightsql/database/schema/sessions_v3.py](../../../../insights/insightsql/database/schema/sessions_v3.py) - InsightsQL schema that exposes sessions table to queries
-- [insights/clickhouse/migrations/](../../../../insights/clickhouse/migrations/) - Search for `sessions_v3` to find related migrations
+- [insights/datastore/migrations/](../../../../insights/datastore/migrations/) - Search for `sessions_v3` to find related migrations
 
 ## What is InsightsQL?
 
@@ -130,7 +130,7 @@ Web analytics queries are written in InsightsQL. Here's some links to learn more
 - <https://hanzo.ai/blog/introducing-insightsql>
 - <https://hanzo.ai/handbook/engineering/databases/insightsql-python>
 
-The TLDR is that you can construct InsightsQL queries by either parsing a string or by creating the ast nodes in python, and these are converted into Clickhouse SQL queries. There are lazy joins to make property access easier, so e.g. you can write `SELECT person.properties from events` instead of having to write the join between `events` and `persons` yourself, but the join will only be added to query if it's actually needed.
+The TLDR is that you can construct InsightsQL queries by either parsing a string or by creating the ast nodes in python, and these are converted into Datastore SQL queries. There are lazy joins to make property access easier, so e.g. you can write `SELECT person.properties from events` instead of having to write the join between `events` and `persons` yourself, but the join will only be added to query if it's actually needed.
 
 ## Where do events come from?
 
@@ -144,9 +144,9 @@ Some web analytics features are present in the [toolbar](https://hanzo.ai/docs/t
 
 ## More resources
 
-- Clickhouse
-  - Insights maintains a [Clickhouse manual](https://hanzo.ai/handbook/engineering/clickhouse)
-  - Clickhouse has a [video course](https://learn.clickhouse.com/visitor_class_catalog/category/116050), which has been recommended by some team members
-    - You can skip the videos that are about e.g. migrating from another tool to Clickhouse
+- Datastore
+  - Insights maintains a [Datastore manual](https://hanzo.ai/handbook/engineering/datastore)
+  - Datastore has a [video course](https://learn.clickhouse.com/visitor_class_catalog/category/116050), which has been recommended by some team members
+    - You can skip the videos that are about e.g. migrating from another tool to Datastore
   - [Designing Data-Intensive Applications](https://dataintensive.net/) is a great book about distributed systems, and chapter 3 introduces OLAP / columnar databases.
-    - If you already know what an OLAP database is, you'd probably get more out of the Clickhouse course than this book. This book is good at introducing concepts but won't touch on Clickhouse specifically.
+    - If you already know what an OLAP database is, you'd probably get more out of the Datastore course than this book. This book is good at introducing concepts but won't touch on Datastore specifically.

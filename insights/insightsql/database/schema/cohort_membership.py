@@ -19,7 +19,7 @@ class CohortMembershipTable(Table):
         "last_updated": DateTimeDatabaseField(name="last_updated", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "cohort_membership"
 
     def to_printed_insightsql(self):

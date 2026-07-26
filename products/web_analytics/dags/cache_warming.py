@@ -8,8 +8,8 @@ from prometheus_client import Counter, Gauge
 
 from insights.insightsql.constants import LimitContext
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import Feature, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import Feature, tag_queries
 from insights.dags.common import JobOwners
 from insights.dags.common.resources import InsightsAnalyticsResource
 from insights.exceptions_capture import capture_exception

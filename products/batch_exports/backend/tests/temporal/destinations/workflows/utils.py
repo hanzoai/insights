@@ -9,7 +9,7 @@ from django.conf import settings
 import aiokafka
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.workflows_batch_export import workflows_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
@@ -17,8 +17,8 @@ from products.batch_exports.backend.temporal.spmc import Producer, RecordBatchQu
 from products.batch_exports.backend.tests.temporal.utils.records import get_record_batch_from_queue
 
 
-async def assert_clickhouse_records_in_kafka(
-    clickhouse_client: ClickHouseClient,
+async def assert_datastore_records_in_kafka(
+    datastore_client: DatastoreClient,
     team_id: int,
     topic: str,
     sort_key: str,

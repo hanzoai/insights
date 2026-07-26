@@ -65,7 +65,7 @@ class TestViewLinkQuery(APIBaseTest):
             external_data_source_id=source.id,
             credential=credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         ExternalDataSchema.objects.create(
             team=self.team,
@@ -292,11 +292,11 @@ class TestViewLinkQuery(APIBaseTest):
 def _mock_execute_insightsql_side_effect(*args, **kwargs):
     """Helper to minimize side effects of mocking, just avoiding the query execution itself."""
     executor = InsightsQLQueryExecutor(*args, **kwargs)
-    executor.generate_clickhouse_sql()
+    executor.generate_datastore_sql()
     return InsightsQLQueryResponse(
         query=executor.query,
         insightsql=executor.insightsql,
-        clickhouse=executor.clickhouse_sql,
+        datastore=executor.datastore_sql,
         error=executor.error,
         timings=executor.timings.to_list(),
         results=[("foo", "bar")],
@@ -339,8 +339,8 @@ class TestViewLinkValidation(APIBaseTest):
             credential=credentials,
             url_pattern="s3://bucket/user/*",
             columns={
-                "id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
-                "email": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+                "id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True},
+                "email": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True},
             },
         )
 

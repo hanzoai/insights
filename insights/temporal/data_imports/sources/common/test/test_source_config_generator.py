@@ -1,7 +1,7 @@
 from typing import cast
 
 import pytest
-from insights.test.base import ClickhouseTestMixin
+from insights.test.base import DatastoreTestMixin
 
 from insights.schema import (
     ExternalDataSourceType as SchemaExternalDataSourceType,
@@ -23,7 +23,7 @@ from insights.temporal.data_imports.sources.common.base import FieldType
 from products.data_warehouse.backend.types import ExternalDataSourceType
 
 
-class TestSourceConfigGenerator(ClickhouseTestMixin):
+class TestSourceConfigGenerator(DatastoreTestMixin):
     def _run(self, sources: dict[ExternalDataSourceType, SourceConfig]) -> str:
         generator = SourceConfigGenerator()
         for name, config in sources.items():

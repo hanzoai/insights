@@ -11,7 +11,7 @@ from insights.api.mixins import PydanticModelMixin
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
 from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication, SessionAuthentication
-from insights.clickhouse.client.limit import get_web_analytics_api_rate_limiter
+from insights.datastore.client.limit import get_web_analytics_api_rate_limiter
 from insights.models.user import User
 from insights.rate_limit import WebAnalyticsAPIBurstThrottle, WebAnalyticsAPISustainedThrottle
 

@@ -304,7 +304,7 @@ export function getSurveyResponse(question: SurveyQuestion, index: number): stri
  * @returns A InsightsQL expression string that can be used in queries. If there are no filters, it returns an empty string.
  *
  * TODO: Consider leveraging the backend query builder instead of duplicating this logic in the frontend.
- * ClickHouse has powerful functions like match(), multiIf(), etc. that could be used more effectively.
+ * Datastore has powerful functions like match(), multiIf(), etc. that could be used more effectively.
  */
 export function createAnswerFilterInsightsQLExpression(filters: EventPropertyFilter[], survey: Survey): string {
     if (!filters || !filters.length) {

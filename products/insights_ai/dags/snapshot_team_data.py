@@ -19,7 +19,7 @@ from insights.schema import (
 
 from insights.insightsql.constants import InsightsQLGlobalSettings
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.dags.common import JobOwners
 from insights.errors import InternalCHQueryError
 from insights.insightsql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
@@ -31,7 +31,7 @@ from insights.models.property_definition import PropertyDefinition
 
 from products.insights_ai.dags.utils import (
     check_dump_exists,
-    compose_clickhouse_dump_path,
+    compose_datastore_dump_path,
     compose_postgres_dump_path,
     dump_model,
 )
@@ -171,8 +171,8 @@ def snapshot_events_taxonomy(
     code_version: str | None = None,
 ):
     # Check if files are cached
-    events_file_key = compose_clickhouse_dump_path(team.id, "events_taxonomy", code_version=code_version)
-    properties_file_key = compose_clickhouse_dump_path(team.id, "properties_taxonomy", code_version=code_version)
+    events_file_key = compose_datastore_dump_path(team.id, "events_taxonomy", code_version=code_version)
+    properties_file_key = compose_datastore_dump_path(team.id, "properties_taxonomy", code_version=code_version)
     if check_dump_exists(s3, events_file_key) and check_dump_exists(s3, properties_file_key):
         context.log.info(f"Skipping events and properties taxonomy snapshot for {team.id} because it already exists")
         return events_file_key, properties_file_key
@@ -226,7 +226,7 @@ def snapshot_actors_property_taxonomy(
     team: Team,
     code_version: str | None = None,
 ):
-    file_key = compose_clickhouse_dump_path(team.id, "actors_property_taxonomy", code_version=code_version)
+    file_key = compose_datastore_dump_path(team.id, "actors_property_taxonomy", code_version=code_version)
     if check_dump_exists(s3, file_key):
         context.log.info(f"Skipping actors property taxonomy snapshot for {team.id} because it already exists")
         return file_key
@@ -254,7 +254,7 @@ def snapshot_actors_property_taxonomy(
             .iterator(chunk_size=200)
         )
 
-        # Query ClickHouse in batches of 200 properties
+        # Query Datastore in batches of 200 properties
         for batch in chunked(property_defs, 200):
 
             def wrapped_query_runner(index: int | None, batch: list[str]):
@@ -295,7 +295,7 @@ def snapshot_actors_property_taxonomy(
 
 
 @dagster.op(
-    description="Snapshots ClickHouse team data",
+    description="Snapshots Datastore team data",
     retry_policy=DEFAULT_RETRY_POLICY,
     tags={
         "owner": JobOwners.TEAM_INSIGHTS_AI.value,
@@ -303,9 +303,9 @@ def snapshot_actors_property_taxonomy(
     },
     code_version="v1",
 )
-def snapshot_clickhouse_team_data(
+def snapshot_datastore_team_data(
     context: dagster.OpExecutionContext, team_id: int, s3: S3Resource
-) -> ClickhouseTeamDataSnapshot:
+) -> DatastoreTeamDataSnapshot:
     try:
         team = Team.objects.get(id=team_id)
 
@@ -329,7 +329,7 @@ def snapshot_clickhouse_team_data(
             allow_retries=False,
         ) from e
 
-    materialized_result = ClickhouseTeamDataSnapshot(
+    materialized_result = DatastoreTeamDataSnapshot(
         event_taxonomy=event_taxonomy_file_key,
         properties_taxonomy=properties_taxonomy_file_key,
         actors_property_taxonomy=actors_property_taxonomy_file_key,
@@ -337,8 +337,8 @@ def snapshot_clickhouse_team_data(
 
     context.log_event(
         dagster.AssetMaterialization(
-            asset_key="team_clickhouse_snapshot",
-            description="Avro snapshots of team's ClickHouse queries",
+            asset_key="team_datastore_snapshot",
+            description="Avro snapshots of team's Datastore queries",
             metadata={
                 "team_id": team_id,
                 **materialized_result.model_dump(),

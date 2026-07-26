@@ -265,7 +265,7 @@ class LogsViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
 
         attributeType = request.GET.get("attribute_type", "log")
         # I don't know why went with 'log' and 'resource' not 'log_attribute' and 'log_resource_attribute'
-        # like the property type, but annoyingly it's hard to update this in clickhouse so we're stuck with it for now
+        # like the property type, but annoyingly it's hard to update this in datastore so we're stuck with it for now
         if attributeType not in ["log", "resource"]:
             attributeType = "log"
 
@@ -321,7 +321,7 @@ class LogsViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
 
         attributeType = request.GET.get("attribute_type", "log")
         # I don't know why went with 'log' and 'resource' not 'log_attribute' and 'log_resource_attribute'
-        # like the property type, but annoyingly it's hard to update this in clickhouse so we're stuck with it for now
+        # like the property type, but annoyingly it's hard to update this in datastore so we're stuck with it for now
         if attributeType not in ["log", "resource"]:
             attributeType = "log"
 

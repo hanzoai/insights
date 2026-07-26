@@ -7,10 +7,10 @@ from django.conf import settings
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
-from insights.clickhouse.log_entries import INSERT_LOG_ENTRY_SQL
-from insights.kafka_client.client import ClickhouseProducer
+from insights.datastore.log_entries import INSERT_LOG_ENTRY_SQL
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_DATASTORE_SESSION_REPLAY_EVENTS, KAFKA_LOG_ENTRIES
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.utils import cast_timestamp_or_now
 
 INSERT_SINGLE_SESSION_REPLAY = """
@@ -86,7 +86,7 @@ def _sensible_first_timestamp(
 
             sensible_timestamp = (last_timestamp - relativedelta(seconds=3600)).isoformat()
 
-    return format_clickhouse_timestamp(cast_timestamp_or_now(sensible_timestamp))
+    return format_datastore_timestamp(cast_timestamp_or_now(sensible_timestamp))
 
 
 def _sensible_last_timestamp(
@@ -111,7 +111,7 @@ def _sensible_last_timestamp(
 
             sensible_timestamp = (first_timestamp + relativedelta(seconds=3600)).isoformat()
 
-    return format_clickhouse_timestamp(cast_timestamp_or_now(sensible_timestamp))
+    return format_datastore_timestamp(cast_timestamp_or_now(sensible_timestamp))
 
 
 def produce_replay_summary(
@@ -142,8 +142,8 @@ def produce_replay_summary(
     retention_period_days: int | None = None,
 ):
     """
-    Creates a session replay event in ClickHouse for testing purposes.
-    Writes session replay data directly to ClickHouse and creates associated analytics events.
+    Creates a session replay event in Datastore for testing purposes.
+    Writes session replay data directly to Datastore and creates associated analytics events.
     """
     if log_messages is None:
         log_messages = {}
@@ -151,13 +151,13 @@ def produce_replay_summary(
     first_timestamp = _sensible_first_timestamp(first_timestamp, last_timestamp)
     last_timestamp = _sensible_last_timestamp(first_timestamp, last_timestamp)
 
-    timestamp = format_clickhouse_timestamp(cast_timestamp_or_now(first_timestamp))
+    timestamp = format_datastore_timestamp(cast_timestamp_or_now(first_timestamp))
     data = {
         "session_id": session_id or "1",
         "team_id": team_id,
         "distinct_id": distinct_id or "user",
         "first_timestamp": timestamp,
-        "last_timestamp": format_clickhouse_timestamp(cast_timestamp_or_now(last_timestamp)),
+        "last_timestamp": format_datastore_timestamp(cast_timestamp_or_now(last_timestamp)),
         "first_url": first_url,
         "all_urls": all_urls or [],
         "click_count": click_count or 0,
@@ -178,10 +178,10 @@ def produce_replay_summary(
 
     if settings.TEST:
         # we don't want to set _timestamp if we're using a real KafkaProducer
-        # and `ClickhouseProducer` does not use kafka when in test mode
+        # and `DatastoreProducer` does not use kafka when in test mode
         data["_timestamp"] = kafka_timestamp or datetime.utcnow().timestamp()
 
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     # because this is in a test it will write directly using SQL not really with Kafka
     p.produce(
         topic=KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
@@ -215,7 +215,7 @@ def produce_replay_summary(
                     "log_source": "session_replay",
                     "log_source_id": session_id,
                     # TRICKY: this is a hack to make sure the log entry is unique
-                    # otherwise ClickHouse will assume that multiple entries
+                    # otherwise Datastore will assume that multiple entries
                     # with the same timestamp can be ignored
                     "instance_id": str(uuid4()),
                     "timestamp": timestamp,

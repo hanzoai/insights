@@ -289,7 +289,7 @@ class RawPersonsTable(Table):
         "version": IntegerDatabaseField(name="version", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person"
 
     def to_printed_insightsql(self):
@@ -347,7 +347,7 @@ class PersonsTable(LazyTable):
             return select_from_persons_table(table_to_add, context, node, filter=clone_expr(self.filter, True))
         return select_from_persons_table(table_to_add, context, node)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person"
 
     def to_printed_insightsql(self):

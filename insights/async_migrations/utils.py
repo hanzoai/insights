@@ -13,17 +13,17 @@ import hanzo_insights
 from insights.async_migrations.definition import AsyncMigrationOperation
 from insights.async_migrations.setup import DEPENDENCY_TO_ASYNC_MIGRATION
 from insights.celery import app
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import make_ch_pool
-from insights.clickhouse.query_tagging import reset_query_tags, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import make_ch_pool
+from insights.datastore.query_tagging import reset_query_tags, tag_queries
 from insights.email import is_email_available
 from insights.models.async_migration import AsyncMigration, AsyncMigrationError, MigrationStatus
 from insights.models.instance_setting import get_instance_setting
 from insights.models.user import User
 from insights.settings import (
     ASYNC_MIGRATIONS_DEFAULT_TIMEOUT_SECONDS,
-    CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION,
-    CLICKHOUSE_CLUSTER,
+    DATASTORE_ALLOW_PER_SHARD_EXECUTION,
+    DATASTORE_CLUSTER,
     TEST,
 )
 from insights.utils import get_machine_id
@@ -50,7 +50,7 @@ def execute_op(op: AsyncMigrationOperation, uuid: str, rollback: bool = False):
     op.rollback_fn(uuid) if rollback else op.fn(uuid)
 
 
-def execute_op_clickhouse(
+def execute_op_datastore(
     sql: str,
     args=None,
     *,
@@ -60,7 +60,7 @@ def execute_op_clickhouse(
     # If True, query is run on each shard.
     per_shard=False,
 ):
-    from insights.clickhouse import client
+    from insights.datastore import client
 
     tag_queries(kind="async_migration", id=query_id)
     settings = settings if settings else {"max_execution_time": timeout_seconds}
@@ -73,7 +73,7 @@ def execute_op_clickhouse(
             client.sync_execute(sql, args, settings=settings)
     except Exception as e:
         reset_query_tags()
-        raise Exception(f"Failed to execute ClickHouse op: sql={sql},\nquery_id={query_id},\nexception={str(e)}")
+        raise Exception(f"Failed to execute Datastore op: sql={sql},\nquery_id={query_id},\nexception={str(e)}")
 
     reset_query_tags()
 
@@ -85,10 +85,10 @@ def execute_on_each_shard(sql: str, args=None, settings=None) -> None:
     Note that the shard selection is stable - subsequent queries are guaranteed to hit the same shards!
     """
 
-    if CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION:
+    if DATASTORE_ALLOW_PER_SHARD_EXECUTION:
         sql = sql.format(on_cluster_clause="")
     else:
-        sql = sql.format(on_cluster_clause=f"ON CLUSTER '{CLICKHOUSE_CLUSTER}'")
+        sql = sql.format(on_cluster_clause=f"ON CLUSTER '{DATASTORE_CLUSTER}'")
 
     async def run_on_all_shards():
         tasks = []
@@ -106,9 +106,9 @@ def execute_on_each_shard(sql: str, args=None, settings=None) -> None:
 
 
 def _get_all_shard_connections():
-    from insights.clickhouse.client.connection import ch_pool as default_ch_pool
+    from insights.datastore.client.connection import ch_pool as default_ch_pool
 
-    if CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION:
+    if DATASTORE_ALLOW_PER_SHARD_EXECUTION:
         rows = sync_execute(
             """
             SELECT shard_num, min(host_name) as host_name
@@ -117,7 +117,7 @@ def _get_all_shard_connections():
             GROUP BY shard_num
             ORDER BY shard_num
             """,
-            {"cluster": CLICKHOUSE_CLUSTER},
+            {"cluster": DATASTORE_CLUSTER},
         )
         for shard, host in rows:
             ch_pool = make_ch_pool(host=host)
@@ -143,7 +143,7 @@ def _get_number_running_on_cluster(query_pattern: str) -> int:
         FROM clusterAllReplicas(%(cluster)s, system, 'processes')
         WHERE query LIKE %(query_pattern)s AND query NOT LIKE '%%clusterAllReplicas%%'
         """,
-        {"cluster": CLICKHOUSE_CLUSTER, "query_pattern": query_pattern},
+        {"cluster": DATASTORE_CLUSTER, "query_pattern": query_pattern},
     )[0][0]
 
 
@@ -181,9 +181,9 @@ def run_optimize_table(
         sql = f"OPTIMIZE TABLE {table_name} {{on_cluster_clause}} {final_clause} {deduplicate_clause}"
 
         if not per_shard:
-            sql = sql.format(on_cluster_clause=f"ON CLUSTER '{CLICKHOUSE_CLUSTER}'")
+            sql = sql.format(on_cluster_clause=f"ON CLUSTER '{DATASTORE_CLUSTER}'")
 
-        execute_op_clickhouse(
+        execute_op_datastore(
             sql,
             query_id=f"optimize:{unique_name}/{query_id}",
             settings={

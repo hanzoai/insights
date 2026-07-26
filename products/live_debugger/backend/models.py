@@ -75,7 +75,7 @@ class LiveDebuggerBreakpoint(UUIDModel):
         cls, team: "Team", breakpoint_ids: Optional[list] = None, limit: int = 100, offset: int = 0
     ) -> list[BreakpointHit]:
         """
-        Query ClickHouse for breakpoint hit events using InsightsQL.
+        Query Datastore for breakpoint hit events using InsightsQL.
 
         Returns a list of BreakpointHit dataclass instances.
         """

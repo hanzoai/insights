@@ -49,7 +49,7 @@ CREATE TABLE insights.sharded_events_ordered_by_event(
     `$session_id` String MATERIALIZED replaceRegexpAll(JSONExtractRaw(properties, '$session_id'), concat('^[', regexpQuoteMeta('"'), ']*|[', regexpQuoteMeta('"'), ']*$'), '')
 )
 ENGINE = ReplicatedReplacingMergeTree(
-    '/clickhouse/prod/tables/{shard}/insights.sharded_events_ordered_by_event3',
+    '/datastore/prod/tables/{shard}/insights.sharded_events_ordered_by_event3',
     '{replica}',
     _timestamp
 ) PARTITION BY toYYYYMM(timestamp)
@@ -95,7 +95,7 @@ CREATE TABLE insights.writable_events2
 ENGINE = Distributed('insights', 'insights', 'sharded_events_ordered_by_event', sipHash64(distinct_id))
 
 
-CREATE TABLE insights.kafka_events_proto2 (`uuid` String, `event` String, `properties` String, `timestamp` DateTime64(6, 'UTC'), `team_id` UInt64, `distinct_id` String, `created_at` DateTime64(6, 'UTC'), `elements_chain` String) ENGINE = Kafka SETTINGS kafka_broker_list = 'XXX', kafka_topic_list = 'clickhouse_events_proto', kafka_group_name = 'prod_kafka_proto_events_group2', kafka_format = 'Protobuf', kafka_schema = 'eventsmsg:EventMsg', kafka_skip_broken_messages = 10
+CREATE TABLE insights.kafka_events_proto2 (`uuid` String, `event` String, `properties` String, `timestamp` DateTime64(6, 'UTC'), `team_id` UInt64, `distinct_id` String, `created_at` DateTime64(6, 'UTC'), `elements_chain` String) ENGINE = Kafka SETTINGS kafka_broker_list = 'XXX', kafka_topic_list = 'datastore_events_proto', kafka_group_name = 'prod_kafka_proto_events_group2', kafka_format = 'Protobuf', kafka_schema = 'eventsmsg:EventMsg', kafka_skip_broken_messages = 10
 
 CREATE MATERIALIZED VIEW insights.events_mv2 TO insights.writable_events2 (`uuid` UUID, `event` String, `properties` String, `timestamp` DateTime64(6, 'UTC'), `team_id` Int64, `distinct_id` String, `elements_chain` String, `created_at` DateTime64(6, 'UTC'), `_timestamp` DateTime, `_offset` UInt64) AS SELECT uuid, event, properties, timestamp, team_id, distinct_id, elements_chain, created_at, _timestamp, _offset FROM insights.kafka_events_proto2
 
@@ -110,7 +110,7 @@ Note that the kafka consumer group name needs be different from the previous one
 
 select concat('ALTER TABLE sharded_events_ordered_by_event ADD COLUMN ', name, ' VARCHAR MATERIALIZED ', default_expression, ';') from system.columns where table = 'sharded_events' and default_kind = 'DEFAULT' format TSV
 
-clickhouse-client --queries-file 2022-01-23-sharded_events_materialized.sql
+datastore-client --queries-file 2022-01-23-sharded_events_materialized.sql
 ```
 
 The following commands worked for me during this migration, this will need to be adjusted for the next migration
@@ -211,15 +211,15 @@ The settings used during copy were:
 set max_block_size=200000, max_insert_block_size=200000, max_threads=20, max_insert_threads=20, optimize_on_insert=0, max_execution_time=0, max_partitions_per_insert_block=100000, max_memory_usage=100000000000
 ```
 
-### Why not clickhouse-copier?
+### Why not datastore-copier?
 
-We initially attempted the copy using clickhouse-copier, but ran into issues:
+We initially attempted the copy using datastore-copier, but ran into issues:
 
 1. Copy speed was low (~50000 rows per second)
 2. Errors during operations - copier copies tables in chunks and these chunks exceeded 50GB (max_table_size_to_drop setting), causing errors
 3. Hard to ensure correctness due to events being ingested from Kafka
-4. clickhouse-copier always requires setting `sharding_key`, which slowed down copying
-5. Issues with materialized columns (due to the old version of ClickHouse) we were on
+4. datastore-copier always requires setting `sharding_key`, which slowed down copying
+5. Issues with materialized columns (due to the old version of Datastore) we were on
 
 ### Why not use async migrations?
 
@@ -233,5 +233,5 @@ That said, learnings from here will help future async migrations.
 ### Relevant reading
 
 - https://github.com/Hanzo Insights/insights/issues/5684
-- https://clickhouse.com/docs/en/operations/utilities/clickhouse-copier/
+- https://clickhouse.com/docs/en/operations/utilities/datastore-copier/
 - https://kb.altinity.com/altinity-kb-setup-and-maintenance/altinity-kb-data-migration/

@@ -8,10 +8,10 @@ from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.export_recording.activities import (
     build_recording_export_context,
     cleanup_export_data,
-    export_event_clickhouse_rows,
+    export_event_datastore_rows,
     export_recording_data,
     export_recording_data_prefix,
-    export_replay_clickhouse_rows,
+    export_replay_datastore_rows,
     store_export_data,
 )
 from insights.temporal.export_recording.types import ExportRecordingInput
@@ -39,7 +39,7 @@ class ExportRecordingWorkflow(InsightsWorkflow):
         async with asyncio.TaskGroup() as export_tasks:
             export_tasks.create_task(
                 workflow.execute_activity(
-                    export_replay_clickhouse_rows,
+                    export_replay_datastore_rows,
                     export_context,
                     start_to_close_timeout=timedelta(minutes=30),
                     schedule_to_close_timeout=timedelta(hours=3),
@@ -51,7 +51,7 @@ class ExportRecordingWorkflow(InsightsWorkflow):
             )
             export_tasks.create_task(
                 workflow.execute_activity(
-                    export_event_clickhouse_rows,
+                    export_event_datastore_rows,
                     export_context,
                     start_to_close_timeout=timedelta(minutes=30),
                     schedule_to_close_timeout=timedelta(hours=3),

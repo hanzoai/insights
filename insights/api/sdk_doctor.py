@@ -37,7 +37,7 @@ def sdk_doctor(request: Request) -> Response:
     if not team_data:
         if settings.DEBUG:  # Running locally, usually doesn't have anything in the cache, just return empty
             logger.info(
-                f"[SDK Doctor] Running locally, no data received from ClickHouse for team {team_id}, returning empty response"
+                f"[SDK Doctor] Running locally, no data received from Datastore for team {team_id}, returning empty response"
             )
             return Response({}, status=200)
 
@@ -86,14 +86,14 @@ def get_team_data(team_id: int, force_refresh: bool) -> dict[str, Any] | None:
     else:
         logger.info(f"[SDK Doctor] Force refresh requested for team {team_id}, bypassing cache")
 
-    logger.info(f"[SDK Doctor] Team {team_id} SDK versions not found in cache, querying ClickHouse")
+    logger.info(f"[SDK Doctor] Team {team_id} SDK versions not found in cache, querying Datastore")
     try:
         sdk_versions = get_and_cache_team_sdk_versions(team_id, redis_client)
         if sdk_versions is not None:
             logger.info(f"[SDK Doctor] Team {team_id} SDK versions cached successfully")
             return sdk_versions
         else:
-            logger.error(f"[SDK Doctor] No data received from ClickHouse for team {team_id}")
+            logger.error(f"[SDK Doctor] No data received from Datastore for team {team_id}")
     except Exception as e:
         logger.exception(f"[SDK Doctor] Failed to get SDK versions for team {team_id}")
         capture_exception(e)

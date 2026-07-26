@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.kafka_client.client import KafkaProducer
 from insights.kafka_client.topics import KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_EMBEDDINGS
 
@@ -78,7 +78,7 @@ class Command(BaseCommand):
 
 def create_embedding_events(batch: list[ErrorTrackingIssueFingerprintV2]):
     logger.info(f"Creating embedding events for {len(batch)} fingerprints")
-    # Go to clickhouse to fetch an event for each fingerprint
+    # Go to datastore to fetch an event for each fingerprint
     event_query = """
         SELECT properties FROM events
         WHERE event = '$exception'

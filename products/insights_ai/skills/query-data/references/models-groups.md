@@ -48,7 +48,7 @@ Column | Type | Nullable | Description
 `created_at` | timestamp with tz | NOT NULL | Creation timestamp
 `properties_last_updated_at` | jsonb | NOT NULL | Per-property update timestamps
 `properties_last_operation` | jsonb | NOT NULL | Per-property operation type (`set`/`set_once`)
-`version` | bigint | NOT NULL | Version for ClickHouse sync
+`version` | bigint | NOT NULL | Version for Datastore sync
 
 ### Key Relationships
 
@@ -57,5 +57,5 @@ Column | Type | Nullable | Description
 ### Important Notes
 
 - This table lives in the persons database (separate from main DB)
-- `version` is used for ClickHouse row collapsing during sync
+- `version` is used for Datastore row collapsing during sync
 - Properties support `$set` and `$set_once` operations

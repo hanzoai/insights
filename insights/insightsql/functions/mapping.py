@@ -7,14 +7,14 @@ from insights.insightsql.base import UnknownType
 from insights.insightsql.language_mappings import LANGUAGE_CODES, LANGUAGE_NAMES
 
 from .aggregations import INSIGHTSQL_AGGREGATIONS
-from .clickhouse.arithmetic import ARITHMETIC_FUNCTIONS
-from .clickhouse.arrays import ARRAYS_FUNCTIONS
-from .clickhouse.conversions import CONVERSION_FUNCTIONS
-from .clickhouse.datetime import DATETIME_AND_INTERVAL_FUNCTIONS
-from .clickhouse.geo import GEO_FUNCTIONS
-from .clickhouse.json import JSON_FUNCTIONS
-from .clickhouse.mathematical import MATH_FUNCTIONS
-from .clickhouse.strings import STRINGS_FUNCTIONS
+from .datastore.arithmetic import ARITHMETIC_FUNCTIONS
+from .datastore.arrays import ARRAYS_FUNCTIONS
+from .datastore.conversions import CONVERSION_FUNCTIONS
+from .datastore.datetime import DATETIME_AND_INTERVAL_FUNCTIONS
+from .datastore.geo import GEO_FUNCTIONS
+from .datastore.json import JSON_FUNCTIONS
+from .datastore.mathematical import MATH_FUNCTIONS
+from .datastore.strings import STRINGS_FUNCTIONS
 from .config import INSIGHTSQL_PERMITTED_PARAMETRIC_FUNCTIONS
 from .core import InsightsQLFunctionMeta
 from .insights import INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
@@ -35,7 +35,7 @@ INSIGHTSQL_COMPARISON_MAPPING: dict[str, ast.CompareOperationOp] = {
     "notIn": ast.CompareOperationOp.NotIn,
 }
 
-INSIGHTSQL_CLICKHOUSE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
+INSIGHTSQL_DATASTORE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     **ARITHMETIC_FUNCTIONS,
     **ARRAYS_FUNCTIONS,
     **CONVERSION_FUNCTIONS,
@@ -224,7 +224,7 @@ INSIGHTSQL_CLICKHOUSE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     ),
     # Translates languages codes to full language name
     "languageCodeToName": InsightsQLFunctionMeta(
-        clickhouse_name="transform",
+        datastore_name="transform",
         min_args=1,
         max_args=1,
         suffix_args=[
@@ -237,10 +237,10 @@ INSIGHTSQL_CLICKHOUSE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 
-INSIGHTSQL_CLICKHOUSE_FUNCTIONS.update(UDFS)
+INSIGHTSQL_DATASTORE_FUNCTIONS.update(UDFS)
 
 ALL_EXPOSED_FUNCTION_NAMES = [
-    name for name in chain(INSIGHTSQL_CLICKHOUSE_FUNCTIONS.keys(), INSIGHTSQL_AGGREGATIONS.keys()) if not name.startswith("_")
+    name for name in chain(INSIGHTSQL_DATASTORE_FUNCTIONS.keys(), INSIGHTSQL_AGGREGATIONS.keys()) if not name.startswith("_")
 ]
 
 
@@ -266,7 +266,7 @@ def find_insightsql_aggregation(name: str) -> Optional[InsightsQLFunctionMeta]:
 
 
 def find_insightsql_function(name: str) -> Optional[InsightsQLFunctionMeta]:
-    return _find_function(name, INSIGHTSQL_CLICKHOUSE_FUNCTIONS)
+    return _find_function(name, INSIGHTSQL_DATASTORE_FUNCTIONS)
 
 
 def find_insightsql_postinsights_function(name: str) -> Optional[InsightsQLFunctionMeta]:

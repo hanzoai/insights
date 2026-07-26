@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import DateRange, WebPageURLSearchQuery
 
@@ -7,7 +7,7 @@ from insights.insightsql_queries.web_analytics.page_url_search_query_runner impo
 from insights.models.utils import uuid7
 
 
-class TestPageUrlSearchQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestPageUrlSearchQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-01-29"
 
     def _create_events(self, data, event="$pageview"):

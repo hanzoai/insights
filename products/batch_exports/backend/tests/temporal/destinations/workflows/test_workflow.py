@@ -20,7 +20,7 @@ from products.batch_exports.backend.temporal.destinations.workflows_batch_export
 )
 from products.batch_exports.backend.temporal.pipeline.internal_stage import insert_into_internal_stage_activity
 from products.batch_exports.backend.tests.temporal.destinations.workflows.utils import (
-    assert_clickhouse_records_in_kafka,
+    assert_datastore_records_in_kafka,
 )
 
 pytestmark = [
@@ -56,7 +56,7 @@ async def workflows_batch_export(ateam, interval, exclude_events, temporal_clien
 @pytest.mark.parametrize("interval", ["hour", "day"], indirect=True)
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 async def test_workflows_export_workflow(
-    clickhouse_client,
+    datastore_client,
     workflows_batch_export,
     ateam,
     interval,
@@ -116,8 +116,8 @@ async def test_workflows_export_workflow(
     assert run.status == "Completed"
     assert run.records_completed == len(events_to_export_created)
 
-    await assert_clickhouse_records_in_kafka(
-        clickhouse_client=clickhouse_client,
+    await assert_datastore_records_in_kafka(
+        datastore_client=datastore_client,
         topic=topic,
         date_ranges=[(data_interval_start, data_interval_end)],
         team_id=ateam.pk,

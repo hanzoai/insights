@@ -10,7 +10,7 @@ from clickhouse_driver import Client
 from dateutil.relativedelta import relativedelta
 
 from insights import settings
-from insights.clickhouse.cluster import AlterTableMutationRunner, ClickhouseCluster, HostInfo
+from insights.datastore.cluster import AlterTableMutationRunner, DatastoreCluster, HostInfo
 from insights.dags.common import JobOwners
 
 K1 = TypeVar("K1")
@@ -100,7 +100,7 @@ class MaterializationConfig(dagster.Config):
                 ORDER BY position
                 LIMIT 1
                 """,
-                {"database": settings.CLICKHOUSE_DATABASE, "table": self.table},
+                {"database": settings.DATASTORE_DATABASE, "table": self.table},
             )
 
             if not key_column_result:
@@ -129,7 +129,7 @@ class MaterializationConfig(dagster.Config):
                     ORDER BY partition DESC
                     """,
                     {
-                        "database": settings.CLICKHOUSE_DATABASE,
+                        "database": settings.DATASTORE_DATABASE,
                         "table": self.table,
                         "key_column": key_column,
                         "column": column,
@@ -176,7 +176,7 @@ def _convert_hostinfo_keys_to_shard_num(input: Mapping[HostInfo, T]) -> Mapping[
 def run_materialize_mutations(
     context: dagster.OpExecutionContext,
     config: MaterializationConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ):
     # Since this is only being run on a single host in the shard, we're assuming that the other hosts either have the
     # same set of partitions already materialized, or that a materialization mutation already exists (and is running) if
@@ -194,6 +194,6 @@ def run_materialize_mutations(
         context.log.info("Completed materializations for partition %r!", partition_id)
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def backfill_materialized_column():
     run_materialize_mutations()

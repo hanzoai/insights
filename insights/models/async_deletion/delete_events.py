@@ -3,18 +3,18 @@ from typing import Any
 from clickhouse_driver.errors import SocketTimeoutError
 from prometheus_client import Counter
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.async_deletion import AsyncDeletion, DeletionType
 from insights.models.async_deletion.delete import AsyncDeletionProcess, logger
-from insights.settings.data_stores import CLICKHOUSE_CLUSTER
+from insights.settings.data_stores import DATASTORE_CLUSTER
 
 logger.setLevel("DEBUG")
 
-deletions_counter = Counter("deletions_executed", "Total number of deletions sent to clickhouse", ["deletion_type"])
+deletions_counter = Counter("deletions_executed", "Total number of deletions sent to datastore", ["deletion_type"])
 
-# We purposely set this lower than the 256KB limit in ClickHouse to account for the potential overhead of the argument
+# We purposely set this lower than the 256KB limit in Datastore to account for the potential overhead of the argument
 # substitution and settings injection. This is a conservative estimate, but it's better to be safe than hit the limit.
-MAX_QUERY_SIZE = 230_000  # 230KB which is less than 256KB limit in ClickHouse
+MAX_QUERY_SIZE = 230_000  # 230KB which is less than 256KB limit in Datastore
 MAX_SELECT_EXECUTION_TIME = 1 * 60 * 60  # 1 hour(s)
 
 
@@ -43,7 +43,7 @@ class AsyncEventDeletion(AsyncDeletionProcess):
         team_ids = list({row.team_id for row in deletions})
 
         logger.info(
-            "Starting AsyncDeletion on `events` table in ClickHouse",
+            "Starting AsyncDeletion on `events` table in Datastore",
             {
                 "count": len(deletions),
                 "team_ids": team_ids,
@@ -59,7 +59,7 @@ class AsyncEventDeletion(AsyncDeletionProcess):
 
             # Get estimated  byte size of the query
             str_predicate = " OR ".join(conditions)
-            query = f"DELETE FROM sharded_events ON CLUSTER '{CLICKHOUSE_CLUSTER}' WHERE {str_predicate}"
+            query = f"DELETE FROM sharded_events ON CLUSTER '{DATASTORE_CLUSTER}' WHERE {str_predicate}"
             query_size = len(query.encode("utf-8"))
 
             logger.debug(f"Query size: {query_size}")
@@ -78,7 +78,7 @@ class AsyncEventDeletion(AsyncDeletionProcess):
                 except SocketTimeoutError:
                     # This is unfortunately needed because currently all lightweight deletes are executed sync
                     logger.warning(
-                        "ClickHouse query timed out during async deletion. This is expected. Continuing with next batch.",
+                        "Datastore query timed out during async deletion. This is expected. Continuing with next batch.",
                         exc_info=True,
                     )
 
@@ -109,7 +109,7 @@ class AsyncEventDeletion(AsyncDeletionProcess):
         )
         conditions, args = self._conditions(team_deletions)
         for table in TABLES_TO_DELETE_TEAM_DATA_FROM:
-            query = f"""DELETE FROM {table} ON CLUSTER '{CLICKHOUSE_CLUSTER}' WHERE {" OR ".join(conditions)}"""
+            query = f"""DELETE FROM {table} ON CLUSTER '{DATASTORE_CLUSTER}' WHERE {" OR ".join(conditions)}"""
             sync_execute(
                 query,
                 args,
@@ -129,8 +129,8 @@ class AsyncEventDeletion(AsyncDeletionProcess):
 
     def _verify_by_column(self, distinct_columns: str, async_deletions: list[AsyncDeletion]) -> set[tuple[Any, ...]]:
         conditions, args = self._conditions(async_deletions)
-        # nosemgrep: clickhouse-fstring-param-audit - distinct_columns hardcoded, conditions internal
-        clickhouse_result = sync_execute(
+        # nosemgrep: datastore-fstring-param-audit - distinct_columns hardcoded, conditions internal
+        datastore_result = sync_execute(
             f"""
             SELECT DISTINCT {distinct_columns}
             FROM events
@@ -139,7 +139,7 @@ class AsyncEventDeletion(AsyncDeletionProcess):
             args,
             settings={"max_execution_time": MAX_SELECT_EXECUTION_TIME},
         )
-        return {tuple(row) for row in clickhouse_result}
+        return {tuple(row) for row in datastore_result}
 
     def _column_name(self, async_deletion: AsyncDeletion):
         assert async_deletion.deletion_type in (DeletionType.Person, DeletionType.Group)

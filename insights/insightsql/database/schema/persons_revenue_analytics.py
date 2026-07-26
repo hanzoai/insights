@@ -209,7 +209,7 @@ class PersonsRevenueAnalyticsTable(LazyTable):
     ):
         return _select_from_persons_revenue_analytics_table(context)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "persons_revenue_analytics"
 
     def to_printed_insightsql(self):

@@ -1,7 +1,7 @@
 from typing import Optional
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseDestroyTablesMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreDestroyTablesMixin, _create_event, flush_persons_and_events
 from unittest.mock import MagicMock, patch
 
 from insights.schema import AlertState, ChartDisplayType, EventsNode, TrendsFilter, TrendsFormulaNode, TrendsQuery
@@ -19,7 +19,7 @@ from insights.tasks.test.utils_email_tests import mock_email_messages
 @freeze_time("2024-06-02T08:55:00.000Z")
 @patch("insights.tasks.alerts.checks.send_notifications_for_errors")
 @patch("insights.tasks.alerts.checks.send_notifications_for_breaches")
-class TestAlertChecks(APIBaseTest, ClickhouseDestroyTablesMixin):
+class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
     def setUp(self) -> None:
         super().setUp()
 

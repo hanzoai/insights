@@ -88,7 +88,7 @@ class TestDataWarehouseManagedViewSetModel(BaseTest):
 
         # Create a view with old query/columns
         old_query = {"kind": "InsightsQLQuery", "query": "SELECT 1 as old_column"}
-        old_columns = {"old_column": {"insightsql": "String", "clickhouse": "String", "valid": True}}
+        old_columns = {"old_column": {"insightsql": "String", "datastore": "String", "valid": True}}
 
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_person, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_person, snapshot_datastore_queries
 
 from insights.schema import (
     DataWarehouseNode,
@@ -25,7 +25,7 @@ from products.data_warehouse.backend.test.utils import create_data_warehouse_tab
 TEST_BUCKET = "test_storage_bucket-insights.insightsql_queries.insights.funnels.funnel_data_warehouse"
 
 
-class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
+class TestFunnelDataWarehouse(DatastoreTestMixin, BaseTest):
     def teardown_method(self, method) -> None:
         if getattr(self, "cleanUpDataWarehouse", None):
             self.cleanUpDataWarehouse()
@@ -43,24 +43,24 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
             csv_path=Path(__file__).parent / "funnels_data.csv",
             table_name="test_table_1",
             table_columns={
-                "id": {"clickhouse": "Int64", "insightsql": "IntegerDatabaseField"},
+                "id": {"datastore": "Int64", "insightsql": "IntegerDatabaseField"},
                 "id_with_nulls": {
-                    "clickhouse": "Nullable(Int64)",
+                    "datastore": "Nullable(Int64)",
                     "insightsql": "IntegerDatabaseField",
                 },
-                "id_decimal": {"clickhouse": "Decimal(18, 2)", "insightsql": "DecimalDatabaseField"},
-                "uuid": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "user_id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id_decimal": {"datastore": "Decimal(18, 2)", "insightsql": "DecimalDatabaseField"},
+                "uuid": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "user_id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                 "created": {
-                    "clickhouse": "DateTime64(3, 'UTC')",
+                    "datastore": "DateTime64(3, 'UTC')",
                     "insightsql": "DateTimeDatabaseField",
                 },
                 "event_name": {
-                    "clickhouse": "String",
+                    "datastore": "String",
                     "insightsql": "StringDatabaseField",
                 },
                 "properties": {
-                    "clickhouse": "Nullable(String)",
+                    "datastore": "Nullable(String)",
                     "insightsql": "StringJSONDatabaseField",
                 },
             },
@@ -75,13 +75,13 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
             csv_path=Path(__file__).parent / "salesforce_lead_data.csv",
             table_name="salesforce_lead",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                 "created_date": {
-                    "clickhouse": "DateTime64(3, 'UTC')",
+                    "datastore": "DateTime64(3, 'UTC')",
                     "insightsql": "DateTimeDatabaseField",
                 },
                 "converted_opportunity_id": {
-                    "clickhouse": "Nullable(String)",
+                    "datastore": "Nullable(String)",
                     "insightsql": "StringDatabaseField",
                 },
             },
@@ -94,12 +94,12 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
                 csv_path=Path(__file__).parent / "salesforce_opportunity_data.csv",
                 table_name="salesforce_opportunity",
                 table_columns={
-                    "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                    "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                     "created_date": {
-                        "clickhouse": "DateTime64(3, 'UTC')",
+                        "datastore": "DateTime64(3, 'UTC')",
                         "insightsql": "DateTimeDatabaseField",
                     },
-                    "close_date": {"clickhouse": "Nullable(Date)", "insightsql": "DateDatabaseField"},
+                    "close_date": {"datastore": "Nullable(Date)", "insightsql": "DateDatabaseField"},
                 },
                 test_bucket=TEST_BUCKET,
                 team=self.team,
@@ -114,12 +114,12 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
                 csv_path=Path(__file__).parent / "salesforce_opportunity_repeated_created_date_data.csv",
                 table_name="salesforce_opportunity_repeated_created_date",
                 table_columns={
-                    "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                    "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                     "created_date": {
-                        "clickhouse": "DateTime64(3, 'UTC')",
+                        "datastore": "DateTime64(3, 'UTC')",
                         "insightsql": "DateTimeDatabaseField",
                     },
-                    "close_date": {"clickhouse": "Nullable(Date)", "insightsql": "DateDatabaseField"},
+                    "close_date": {"datastore": "Nullable(Date)", "insightsql": "DateDatabaseField"},
                 },
                 test_bucket=TEST_BUCKET,
                 team=self.team,
@@ -133,14 +133,14 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
             csv_path=Path(__file__).parent / "cross_match_table_one_data.csv",
             table_name="cross_match_table_one",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "user_id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "user_id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                 "created": {
-                    "clickhouse": "DateTime64(3, 'UTC')",
+                    "datastore": "DateTime64(3, 'UTC')",
                     "insightsql": "DateTimeDatabaseField",
                 },
                 "step_tag": {
-                    "clickhouse": "String",
+                    "datastore": "String",
                     "insightsql": "StringDatabaseField",
                 },
             },
@@ -151,10 +151,10 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
             csv_path=Path(__file__).parent / "cross_match_table_two_data.csv",
             table_name="cross_match_table_two",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "user_id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "user_id": {"datastore": "String", "insightsql": "StringDatabaseField"},
                 "created": {
-                    "clickhouse": "DateTime64(3, 'UTC')",
+                    "datastore": "DateTime64(3, 'UTC')",
                     "insightsql": "DateTimeDatabaseField",
                 },
             },
@@ -163,7 +163,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
         )
         return table_one.name, table_two.name
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnels_data_warehouse(self):
         table_name = self.setup_data_warehouse()
 
@@ -196,7 +196,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
         assert results[0]["count"] == 5
         assert results[1]["count"] == 1
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnels_data_warehouse_and_regular_nodes(self):
         table_name = self.setup_data_warehouse()
         with freeze_time("2025-11-07"):
@@ -251,7 +251,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
             assert results[0]["count"] == 2
             assert results[1]["count"] == 2
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnels_data_warehouse_non_uuid_id_column(self):
         table_name = self.setup_data_warehouse()
 
@@ -316,7 +316,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
         assert results[0]["count"] == 5
         assert results[1]["count"] == 1
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnels_data_warehouse_non_uuid_id_column_with_nulls(self):
         table_name = self.setup_data_warehouse()
 
@@ -365,7 +365,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
         assert results[0]["count"] == 4
         assert results[1]["count"] == 1
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnels_salesforce_lead_to_opportunity(self):
         lead_table_name, opportunity_table_name = self.setup_salesforce_data_warehouse()
 

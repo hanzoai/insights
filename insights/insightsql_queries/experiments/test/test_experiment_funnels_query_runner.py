@@ -6,12 +6,12 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     create_person_id_override_by_distinct_id,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
@@ -35,7 +35,7 @@ from insights.models.feature_flag.feature_flag import FeatureFlag
 from insights.test.test_journeys import journeys_for
 
 
-class TestExperimentFunnelsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestExperimentFunnelsQueryRunner(DatastoreTestMixin, APIBaseTest):
     def create_feature_flag(self, key="test-experiment"):
         return FeatureFlag.objects.create(
             name=f"Test experiment flag: {key}",
@@ -598,7 +598,7 @@ class TestExperimentFunnelsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ],
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2020-01-01T12:00:00Z")
     def test_query_runner_with_persons_on_events_mode(self, name, persons_on_events_mode, filters, expected_results):
         feature_flag = self.create_feature_flag()

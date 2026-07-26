@@ -671,7 +671,7 @@ describe('migrate()', () => {
                                         id: '9847',
                                         kind: 'ActionsNode',
                                         math: 'unique_group',
-                                        name: 'User signed up (self-hosted Clickhouse)',
+                                        name: 'User signed up (self-hosted Datastore)',
                                         properties: [
                                             {
                                                 key: 'is_organization_first_user',
@@ -802,7 +802,7 @@ describe('migrate()', () => {
                                         id: '9847',
                                         kind: 'ActionsNode',
                                         math: 'unique_group',
-                                        name: 'User signed up (self-hosted Clickhouse)',
+                                        name: 'User signed up (self-hosted Datastore)',
                                         properties: [
                                             {
                                                 key: 'is_organization_first_user',

@@ -3,8 +3,8 @@ import os
 import dagster
 from clickhouse_driver import Client
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, settings_with_log_comment
 from insights.models.team.team import Team
 from insights.models.web_preaggregated.team_selection import (
@@ -71,12 +71,12 @@ def get_team_ids_from_sources(context: dagster.OpExecutionContext) -> list[int]:
     return team_list
 
 
-def store_team_selection_in_clickhouse(
+def store_team_selection_in_datastore(
     context: dagster.OpExecutionContext,
     team_ids: list[int],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> list[int]:
-    context.log.info(f"Storing {len(team_ids)} enabled team IDs in ClickHouse")
+    context.log.info(f"Storing {len(team_ids)} enabled team IDs in Datastore")
 
     if not team_ids:
         context.log.warning("No team IDs to store")
@@ -121,13 +121,13 @@ def store_team_selection_in_clickhouse(
 
 
 def _web_analytics_team_selection_impl(
-    context: dagster.AssetExecutionContext, cluster: dagster.ResourceParam[ClickhouseCluster]
+    context: dagster.AssetExecutionContext, cluster: dagster.ResourceParam[DatastoreCluster]
 ) -> dagster.MaterializeResult:
     context.log.info(f"Getting team IDs from sources tables")
     team_ids = get_team_ids_from_sources(context)
 
     context.log.info(f"Materializing team selection for {len(team_ids)} teams")
-    stored_team_ids = store_team_selection_in_clickhouse(context, team_ids, cluster)
+    stored_team_ids = store_team_selection_in_datastore(context, team_ids, cluster)
 
     context.log.info(f"Successfully materialized team selection for {len(stored_team_ids)} teams")
 
@@ -146,11 +146,11 @@ def _web_analytics_team_selection_impl(
 )
 def web_analytics_team_selection(
     context: dagster.AssetExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dagster.MaterializeResult:
     """
     This manages which teams have access to web analytics pre-aggregated tables.
-    The selection is then stored in a ClickHouse dictionary for fast lookups.
+    The selection is then stored in a Datastore dictionary for fast lookups.
     """
     return _web_analytics_team_selection_impl(context, cluster)
 

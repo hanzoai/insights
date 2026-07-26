@@ -1,13 +1,13 @@
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.async_deletion.delete_person import remove_deleted_person_data
 from insights.models.person.util import create_person
 
 
 @pytest.mark.ee
-class TestDeletePerson(BaseTest, ClickhouseTestMixin):
+class TestDeletePerson(BaseTest, DatastoreTestMixin):
     CLASS_DATA_LEVEL_SETUP = False
 
     def test_delete_person(self):

@@ -792,8 +792,8 @@ class Database(BaseModel):
                 def to_printed_insightsql(self):
                     return self.parent_table.to_printed_insightsql()
 
-                def to_printed_clickhouse(self, context):
-                    return self.parent_table.to_printed_clickhouse(context)
+                def to_printed_datastore(self, context):
+                    return self.parent_table.to_printed_datastore(context)
 
             with timings.measure("select"):
                 tables: list[DataWarehouseTable] = list(
@@ -878,7 +878,7 @@ class Database(BaseModel):
 
             if table_has_no_timestamp_field or not timestamp_field_is_datetime:
                 table_model = get_table(team=team, warehouse_modifier=warehouse_modifier)
-                timestamp_field_type = table_model.get_clickhouse_column_type(warehouse_modifier.timestamp_field)
+                timestamp_field_type = table_model.get_datastore_column_type(warehouse_modifier.timestamp_field)
                 modifier_timestamp_field_is_timestamp = warehouse_modifier.timestamp_field == "timestamp"
 
                 # If field type is none or datetime, we can use the field directly
@@ -1257,7 +1257,7 @@ def serialize_fields(
             else:
                 schema_valid = True
         except KeyError:
-            # We redefine fields on some sourced tables, causing the "insightsql" and "clickhouse" field names to be intentionally out of sync
+            # We redefine fields on some sourced tables, causing the "insightsql" and "datastore" field names to be intentionally out of sync
             schema_valid = True
 
         if any(n in field_key for n in INSIGHTSQL_CHARACTERS_TO_BE_WRAPPED):

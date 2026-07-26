@@ -2,7 +2,7 @@ from typing import Any
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_person,
     flush_persons_and_events,
     snapshot_postgres_queries,
@@ -18,7 +18,7 @@ from insights.queries.actor_base_query import (
 )
 
 
-class TestActorsBaseQuery(ClickhouseTestMixin, APIBaseTest):
+class TestActorsBaseQuery(DatastoreTestMixin, APIBaseTest):
     @snapshot_postgres_queries
     def test_serialize_people_basic(self):
         person = _create_person(

@@ -22,7 +22,7 @@ def capture_exception(error=None, additional_properties=None):
 
     logger = structlog.get_logger(__name__)
 
-    from insights.clickhouse.query_tagging import get_query_tags
+    from insights.datastore.query_tagging import get_query_tags
 
     properties = get_query_tags().model_dump(exclude_none=True)
 

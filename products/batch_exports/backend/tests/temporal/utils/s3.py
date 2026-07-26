@@ -43,7 +43,7 @@ async def read_parquet_from_s3(
             casted_record = {}
             for k, v in record.items():
                 if isinstance(v, dt.datetime):
-                    # We read data from clickhouse as string, but parquet already casts them as dates.
+                    # We read data from datastore as string, but parquet already casts them as dates.
                     # To facilitate comparison, we isoformat the dates.
                     casted_record[k] = v.isoformat()
                 elif k in json_columns and v is not None:

@@ -1,9 +1,9 @@
 from functools import cached_property
 
 from insights.async_migrations.definition import AsyncMigrationDefinition, AsyncMigrationOperationSQL
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import AnalyticsDBMS
-from insights.settings import CLICKHOUSE_DATABASE
+from insights.settings import DATASTORE_DATABASE
 
 """
 Migration summary:
@@ -44,7 +44,7 @@ class Migration(AsyncMigrationDefinition):
             FROM system.columns
             WHERE database = %(database)s
         """,
-            {"database": CLICKHOUSE_DATABASE},
+            {"database": DATASTORE_DATABASE},
         )
 
         comments = [row[0] for row in rows]
@@ -56,7 +56,7 @@ class Migration(AsyncMigrationDefinition):
 
     def migrate_team_operation(self, team_id: int):
         return AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=f"""
                 INSERT INTO person_distinct_id2(team_id, distinct_id, person_id, is_deleted, version)
                 SELECT

@@ -416,7 +416,7 @@ class GroupsRevenueAnalyticsTable(LazyTable):
     ):
         return select_from_groups_revenue_analytics_table(context)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "groups_revenue_analytics"
 
     def to_printed_insightsql(self):

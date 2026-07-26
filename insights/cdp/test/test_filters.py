@@ -1,6 +1,6 @@
 import json
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from insights.insightsql.compiler.bytecode import create_bytecode
 
@@ -11,7 +11,7 @@ from common.scriptvm.python.execute import execute_bytecode
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
-class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionFilters(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     action: Action
     filters: dict
 
@@ -283,7 +283,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
         ]
 
 
-class TestCohortExprHelpers(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_build_behavioral_event_expr_supported_with_event_filters(self):
         from insights.cdp.filters import build_behavioral_event_expr
 

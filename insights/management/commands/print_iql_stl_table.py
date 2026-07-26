@@ -6,9 +6,9 @@ class Command(BaseCommand):
     help = "Print a Script/InsightsQL STL compatibility table"
 
     def handle(self, *args, **options):
-        from insights.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_COMPARISON_MAPPING
+        from insights.insightsql.functions.mapping import INSIGHTSQL_DATASTORE_FUNCTIONS, INSIGHTSQL_COMPARISON_MAPPING
 
-        insightsql_functions = set(INSIGHTSQL_COMPARISON_MAPPING.keys()).union(set(INSIGHTSQL_CLICKHOUSE_FUNCTIONS.keys()))
+        insightsql_functions = set(INSIGHTSQL_COMPARISON_MAPPING.keys()).union(set(INSIGHTSQL_DATASTORE_FUNCTIONS.keys()))
 
         from common.scriptvm.python.stl import STL
         from common.scriptvm.python.stl.bytecode import BYTECODE_STL

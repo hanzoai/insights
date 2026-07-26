@@ -6,14 +6,14 @@ import pytest
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
     override_settings,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
     snapshot_postgres_queries_context,
 )
 from unittest import mock
@@ -23,7 +23,7 @@ from django.utils import timezone
 from rest_framework import status
 
 import insights.models.person.deletion
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Cohort, Organization, Person, PropertyDefinition, Team
 from insights.models.async_deletion import AsyncDeletion, DeletionType
 from insights.models.person import PersonDistinctId
@@ -31,7 +31,7 @@ from insights.models.person.sql import PERSON_DISTINCT_ID2_TABLE
 from insights.models.person.util import create_person, create_person_distinct_id
 
 
-class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_legacy_get_person_by_id(self) -> None:
         person = _create_person(
             team=self.team,
@@ -48,7 +48,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()["id"], person.pk)
 
     @also_test_with_materialized_columns(event_properties=["email"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search(self) -> None:
         _create_person(
             team=self.team,
@@ -72,7 +72,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(len(response.json()["results"]), 1)
 
     @also_test_with_materialized_columns(event_properties=["email"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_person_id(self) -> None:
         person = _create_person(
             team=self.team,
@@ -85,7 +85,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(len(response.json()["results"]), 1)
 
     @also_test_with_materialized_columns(event_properties=["email"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_properties(self) -> None:
         _create_person(
             team=self.team,
@@ -135,7 +135,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(len(response.json()["results"]), 1)
 
     @also_test_with_materialized_columns(person_properties=["random_prop"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_property_values(self):
         _create_person(
             distinct_ids=["person_1"],
@@ -174,7 +174,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()[0]["count"], 1)
 
     @also_test_with_materialized_columns(event_properties=["email"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_person_email(self):
         _create_person(
             team=self.team,
@@ -200,7 +200,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()["results"][0]["properties"]["email"], "another@gmail.com")
         self.assertEqual(response.json()["results"][0]["distinct_ids"], ["distinct_id_2"])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_person_prop(self):
         _create_person(
             team=self.team,
@@ -229,7 +229,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()["results"][0]["uuid"], str(person2.uuid))
 
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_person_list(self):
         person1: Person = _create_person(
             team=self.team,
@@ -926,7 +926,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         # CohortMinimalSerializer only returns id, name, count
         self.assertEqual(set(data["results"][0].keys()), {"id", "name", "count"})
 
-    def test_split_person_clickhouse(self):
+    def test_split_person_datastore(self):
         person = _create_person(
             team=self.team,
             distinct_ids=["1", "2", "3"],
@@ -938,11 +938,11 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertTrue(response["success"])
 
         people = Person.objects.filter(team_id=self.team.id).order_by("id")
-        clickhouse_people = sync_execute(
+        datastore_people = sync_execute(
             "SELECT id FROM person FINAL WHERE team_id = %(team_id)s",
             {"team_id": self.team.pk},
         )
-        self.assertCountEqual(clickhouse_people, [(person.uuid,) for person in people])
+        self.assertCountEqual(datastore_people, [(person.uuid,) for person in people])
 
         pdis2 = sync_execute(
             "SELECT person_id, distinct_id, is_deleted FROM person_distinct_id2 FINAL WHERE team_id = %(team_id)s",
@@ -962,7 +962,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
 
         When a person is deleted, the delete event uses version + 100 (e.g., version 100).
         When splitting, the new person should use version + 101 (e.g., version 101) to ensure
-        ClickHouse sees the split person as more recent than the delete event.
+        Datastore sees the split person as more recent than the delete event.
         """
         from insights.models.person.missing_person import uuidFromDistinctId
         from insights.models.person.util import delete_person
@@ -1029,7 +1029,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         response = self.client.post("/api/person/{}/split/".format(person_b.uuid)).json()
         self.assertTrue(response["success"])
 
-        # Verify ClickHouse has the correct state
+        # Verify Datastore has the correct state
         ch_persons = sync_execute(
             """
             SELECT id, version, is_deleted
@@ -1151,8 +1151,8 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"$browser": "whatever", "$os": "Windows"},
             )
 
-        # Very occasionally, a person might be deleted in postgres but not in Clickhouse due to network issues or whatever
-        # In this case Clickhouse will return a user that then doesn't get returned by postgres.
+        # Very occasionally, a person might be deleted in postgres but not in Datastore due to network issues or whatever
+        # In this case Datastore will return a user that then doesn't get returned by postgres.
         # We would return an empty "next" url.
         # Now we just return 9 people instead
         create_person(team_id=self.team.pk, version=0)
@@ -1387,7 +1387,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(pg_distinct_ids[0].distinct_id, "distinct_id-1")
         self.assertEqual(pg_distinct_ids[0].person.uuid, person_not_changed_1.uuid)
 
-        # clickhouse
+        # datastore
         ch_person_distinct_ids = sync_execute(
             f"""
             SELECT person_id, team_id, distinct_id, version, is_deleted FROM {PERSON_DISTINCT_ID2_TABLE} FINAL WHERE team_id = %(team_id)s ORDER BY version
@@ -1544,7 +1544,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertNotIn(distinct_ids[200], results)
 
 
-class TestPersonFromClickhouse(TestPerson):
+class TestPersonFromDatastore(TestPerson):
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_pagination_limit(self):
         created_ids = []

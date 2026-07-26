@@ -99,7 +99,7 @@ def toDateTime(input):
     }
 
 
-# From ClickHouse to Python
+# From Datastore to Python
 token_translations = {
     "a": "%a",
     "b": "%b",

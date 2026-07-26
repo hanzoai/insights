@@ -14,15 +14,15 @@ import pydantic
 from clickhouse_driver.client import Client
 from more_itertools import chunked
 
-from insights.clickhouse.adhoc_events_deletion import ADHOC_EVENTS_DELETION_TABLE
-from insights.clickhouse.cluster import (
-    ClickhouseCluster,
+from insights.datastore.adhoc_events_deletion import ADHOC_EVENTS_DELETION_TABLE
+from insights.datastore.cluster import (
+    DatastoreCluster,
     LightweightDeleteMutationRunner,
     MutationWaiter,
     NodeRole,
     Query,
 )
-from insights.clickhouse.plugin_log_entries import PLUGIN_LOG_ENTRIES_TABLE
+from insights.datastore.plugin_log_entries import PLUGIN_LOG_ENTRIES_TABLE
 from insights.dags.common import JobOwners
 from insights.dags.person_overrides import squash_person_overrides
 from insights.models.async_deletion import AsyncDeletion, DeletionType
@@ -51,7 +51,7 @@ class DeleteConfig(dagster.Config):
     shards: int = pydantic.Field(
         default=16,
         description="The number of shards to be used when building the dictionary. Using larger values can speed up the "
-        "creation process. See the ClickHouse documentation for more information.",
+        "creation process. See the Datastore documentation for more information.",
     )
     max_execution_time: int = pydantic.Field(
         default=0,
@@ -131,22 +131,22 @@ class PendingDeletesTable(Table):
         return self.timestamp.isoformat()
 
     @property
-    def clickhouse_timestamp(self) -> str:
+    def datastore_timestamp(self) -> str:
         return self.timestamp.strftime("%Y%m%d_%H%M%S")
 
     @property
     def table_name(self) -> str:
-        return f"pending_deletes_{self.clickhouse_timestamp}"
+        return f"pending_deletes_{self.datastore_timestamp}"
 
     @property
     def qualified_name(self):
-        return f"{settings.CLICKHOUSE_DATABASE}.{self.table_name}"
+        return f"{settings.DATASTORE_DATABASE}.{self.table_name}"
 
     @property
     def zk_path(self) -> str:
         ns_uuid = uuid.uuid4()
         testing = f"testing/{ns_uuid}/" if settings.TEST else ""
-        return f"/clickhouse/tables/{testing}noshard/{self.table_name}"
+        return f"/datastore/tables/{testing}noshard/{self.table_name}"
 
     @property
     def create_table_query(self) -> str:
@@ -187,7 +187,7 @@ class PendingDeletesTable(Table):
     def exists(self, client: Client) -> bool:
         result = client.execute(
             f"SELECT count() FROM system.tables WHERE database = %(database)s AND name = %(table_name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "table_name": self.table_name},
+            {"database": settings.DATASTORE_DATABASE, "table_name": self.table_name},
         )
         return bool(result[0][0]) if result else False
 
@@ -215,7 +215,7 @@ class AdhocEventDeletesTable(Table):
 
     @property
     def qualified_name(self):
-        return f"{settings.CLICKHOUSE_DATABASE}.{self.table_name}"
+        return f"{settings.DATASTORE_DATABASE}.{self.table_name}"
 
     def optimize(self, client: Client) -> None:
         # This is a pretty small table and has a TTL of 3 months, so we can optimize it.
@@ -232,7 +232,7 @@ class Dictionary(abc.ABC):
 
     @property
     def qualified_name(self):
-        return f"{settings.CLICKHOUSE_DATABASE}.{self.name}"
+        return f"{settings.DATASTORE_DATABASE}.{self.name}"
 
     @property
     @abc.abstractmethod
@@ -246,7 +246,7 @@ class Dictionary(abc.ABC):
     def exists(self, client: Client) -> bool:
         results = client.execute(
             "SELECT count() FROM system.dictionaries WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": self.name},
+            {"database": settings.DATASTORE_DATABASE, "name": self.name},
         )
         [[count]] = results
         return count > 0
@@ -257,7 +257,7 @@ class Dictionary(abc.ABC):
     def __is_loaded(self, client: Client) -> bool:
         results = client.execute(
             "SELECT status, last_exception FROM system.dictionaries WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": self.name},
+            {"database": settings.DATASTORE_DATABASE, "name": self.name},
         )
         if not results:
             raise Exception("dictionary does not exist")
@@ -306,15 +306,15 @@ class PendingDeletesDictionary(Dictionary):
                 created_at DateTime,
             )
             PRIMARY KEY team_id, deletion_type, key
-            SOURCE(CLICKHOUSE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
+            SOURCE(DATASTORE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
             LAYOUT(COMPLEX_KEY_HASHED(SHARDS {shards}))
             LIFETIME(0)
             SETTINGS(max_execution_time={max_execution_time}, max_memory_usage={max_memory_usage})
             """,
             {
-                "database": settings.CLICKHOUSE_DATABASE,
-                "user": settings.CLICKHOUSE_USER,
-                "password": settings.CLICKHOUSE_PASSWORD,
+                "database": settings.DATASTORE_DATABASE,
+                "user": settings.DATASTORE_USER,
+                "password": settings.DATASTORE_PASSWORD,
                 "query": self.query,
             },
         )
@@ -347,15 +347,15 @@ class AdhocEventDeletesDictionary(Dictionary):
                 created_at DateTime64(6, 'UTC')
             )
             PRIMARY KEY team_id, uuid
-            SOURCE(CLICKHOUSE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
+            SOURCE(DATASTORE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
             LAYOUT(COMPLEX_KEY_HASHED(SHARDS {shards}))
             LIFETIME(0)
             SETTINGS(max_execution_time={max_execution_time}, max_memory_usage={max_memory_usage})
             """,
             {
-                "database": settings.CLICKHOUSE_DATABASE,
-                "user": settings.CLICKHOUSE_USER,
-                "password": settings.CLICKHOUSE_PASSWORD,
+                "database": settings.DATASTORE_DATABASE,
+                "user": settings.DATASTORE_USER,
+                "password": settings.DATASTORE_PASSWORD,
                 "query": self.query,
             },
         )
@@ -373,7 +373,7 @@ class AdhocEventDeletesDictionary(Dictionary):
 
 @dagster.op
 def get_oldest_person_override_timestamp(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> datetime:
     """Get the oldest person override timestamp from the person_distinct_id_overrides table."""
 
@@ -387,11 +387,11 @@ def get_oldest_person_override_timestamp(
 @dagster.op
 def create_pending_deletions_table(
     config: DeleteConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     oldest_person_override_timestamp: datetime,
 ) -> PendingDeletesTable:
     """
-    Create a merge tree table in ClickHouse to store pending deletes.
+    Create a merge tree table in Datastore to store pending deletes.
 
     Important to note: we only get pending Person deletions for requests that happened before the oldest person override timestamp. The other type of deletions are not limited by this timestamp.
     """
@@ -408,9 +408,9 @@ def create_pending_deletions_table(
 def load_pending_deletions(
     context: dagster.OpExecutionContext,
     create_pending_deletions_table: PendingDeletesTable,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> PendingDeletesTable:
-    """Query postgres using django ORM to get pending deletions and insert directly into ClickHouse."""
+    """Query postgres using django ORM to get pending deletions and insert directly into Datastore."""
 
     pending_deletions = AsyncDeletion.objects.filter(
         Q(deletion_type=DeletionType.Person, created_at__lte=create_pending_deletions_table.timestamp)
@@ -457,9 +457,9 @@ def load_pending_deletions(
 def create_deletes_dict(
     load_pending_deletions: PendingDeletesTable,
     config: DeleteConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> PendingDeletesDictionary:
-    """Create a dictionary in ClickHouse to store pending event deletions."""
+    """Create a dictionary in Datastore to store pending event deletions."""
 
     # Wait for the table to be fully replicated
     def sync_replica(client: Client):
@@ -485,9 +485,9 @@ def create_deletes_dict(
 @dagster.op
 def create_adhoc_event_deletes_dict(
     config: DeleteConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> AdhocEventDeletesDictionary:
-    """Create a dictionary in ClickHouse to store pending event deletions."""
+    """Create a dictionary in Datastore to store pending event deletions."""
 
     adhoc_event_deletions = AdhocEventDeletesTable()
 
@@ -515,7 +515,7 @@ def create_adhoc_event_deletes_dict(
 
 @dagster.op
 def load_and_verify_deletes_dictionary(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: PendingDeletesDictionary,
 ) -> PendingDeletesDictionary:
     """Load the dictionary data on all hosts in the cluster, and ensure all hosts have identical data."""
@@ -526,7 +526,7 @@ def load_and_verify_deletes_dictionary(
 
 @dagster.op
 def load_and_verify_adhoc_event_deletes_dictionary(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: AdhocEventDeletesDictionary,
 ) -> AdhocEventDeletesDictionary:
     """Load the dictionary data on all hosts in the cluster, and ensure all hosts have identical data."""
@@ -538,7 +538,7 @@ def load_and_verify_adhoc_event_deletes_dictionary(
 @dagster.op
 def delete_events(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     load_and_verify_deletes_dictionary: PendingDeletesDictionary,
     load_and_verify_adhoc_event_deletes_dictionary: AdhocEventDeletesDictionary,
 ) -> tuple[PendingDeletesDictionary, ShardMutations]:
@@ -608,7 +608,7 @@ def delete_events(
 
 def delete_team_data(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     table_name,
     load_and_verify_deletes_dictionary: PendingDeletesDictionary,
 ) -> tuple[PendingDeletesDictionary, MutationWaiter | None]:
@@ -666,7 +666,7 @@ def delete_team_data_from(
     @dagster.op(name=f"delete_team_data_from_{table}")
     def delete_team_data_from_op(
         context: dagster.OpExecutionContext,
-        cluster: dagster.ResourceParam[ClickhouseCluster],
+        cluster: dagster.ResourceParam[DatastoreCluster],
         load_and_verify_deletes_dictionary: PendingDeletesDictionary,
     ) -> tuple[PendingDeletesDictionary, MutationWaiter | None]:
         return delete_team_data(
@@ -682,7 +682,7 @@ def delete_team_data_from(
 @dagster.op
 def wait_for_delete_mutations_in_shards(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     delete_mutations: tuple[PendingDeletesDictionary, ShardMutations],
 ) -> PendingDeletesDictionary:
     pending_deletes_dict, shard_mutations = delete_mutations
@@ -695,7 +695,7 @@ def wait_for_delete_mutations_in_shards(
 @dagster.op
 def wait_for_delete_mutations_in_all_hosts(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     delete_mutations: tuple[PendingDeletesDictionary, MutationWaiter | None],
 ) -> PendingDeletesDictionary:
     pending_deletes_dict, mutation = delete_mutations
@@ -714,7 +714,7 @@ class VerifiedDeletionResources:
 
 @dagster.op
 def mark_deletions_verified(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     pending_deletions_dictionary: PendingDeletesDictionary,
     adhoc_event_deletes_dictionary: AdhocEventDeletesDictionary,
 ) -> VerifiedDeletionResources:
@@ -743,7 +743,7 @@ def mark_deletions_verified(
 
 @dagster.op
 def cleanup_delete_assets(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     config: DeleteConfig,
     resources: VerifiedDeletionResources,
 ) -> bool:
@@ -763,7 +763,7 @@ def cleanup_delete_assets(
     return True
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def deletes_job():
     """Job that handles deletion of events."""
     # Prepare requested deletions data
@@ -809,7 +809,7 @@ def run_deletes_after_squash(context):
 def find_partitions_to_cleanup(
     context: dagster.OpExecutionContext,
     config: MonthlyCleanupConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> list[int]:
     """Find partitions that contain old events for the specified teams."""
     query = f"""
@@ -844,7 +844,7 @@ def find_partitions_to_cleanup(
 def cleanup_old_events_by_partition(
     context: dagster.OpExecutionContext,
     config: MonthlyCleanupConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     partitions: list[int],
 ) -> None:
     """Delete old events from the specified teams in each partition."""
@@ -889,7 +889,7 @@ def cleanup_old_events_by_partition(
     )
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def monthly_old_events_cleanup_job():
     """Monthly job to clean up old events for specific teams."""
     partitions = find_partitions_to_cleanup()

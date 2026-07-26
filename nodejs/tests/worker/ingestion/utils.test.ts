@@ -1,30 +1,30 @@
 import { Hub } from '../../../src/types'
 import { closeHub, createHub } from '../../../src/utils/db/hub'
 import { captureIngestionWarning } from '../../../src/worker/ingestion/utils'
-import { Clickhouse } from '../../helpers/clickhouse'
+import { Datastore } from '../../helpers/datastore'
 
 jest.setTimeout(60000) // 60 sec timeout
 
 describe('captureIngestionWarning()', () => {
     let hub: Hub
-    let clickhouse: Clickhouse
+    let datastore: Datastore
 
     beforeEach(async () => {
         hub = await createHub({ LOG_LEVEL: 'info' })
-        clickhouse = Clickhouse.create()
-        await clickhouse.resetTestDatabase()
+        datastore = Datastore.create()
+        await datastore.resetTestDatabase()
     })
 
     afterEach(async () => {
-        clickhouse.close()
+        datastore.close()
         await closeHub(hub)
     })
 
     it('can read own writes', async () => {
         await captureIngestionWarning(hub.kafkaProducer, 2, 'some_type', { foo: 'bar' })
 
-        const warnings = await clickhouse.delayUntilEventIngested(
-            async () => await clickhouse.query('SELECT * FROM ingestion_warnings')
+        const warnings = await datastore.delayUntilEventIngested(
+            async () => await datastore.query('SELECT * FROM ingestion_warnings')
         )
 
         expect(warnings).toEqual([

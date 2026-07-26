@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, cast
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.schema import FunnelsQuery
 
@@ -10,7 +10,7 @@ from insights.insightsql_queries.legacy_compatibility.filter_to_query import fil
 from insights.test.test_journeys import journeys_for
 
 
-class TestFunnelBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelBreakdownsByCurrentURL(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         journey = {
@@ -147,7 +147,7 @@ class TestFunnelBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
         results = FunnelsQueryRunner(query=query, team=self.team).calculate().results
         return results
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_pathname(self) -> None:
         response = self._run(
             {
@@ -179,7 +179,7 @@ class TestFunnelBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
             key=sk,
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_current_url(self) -> None:
         response = self._run(
             {

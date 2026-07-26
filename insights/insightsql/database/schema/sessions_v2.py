@@ -141,7 +141,7 @@ LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
 class RawSessionsTableV2(Table):
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "raw_sessions"
 
     def to_printed_insightsql(self):
@@ -150,7 +150,7 @@ class RawSessionsTableV2(Table):
     def avoid_asterisk_fields(self) -> list[str]:
         return [
             "session_id_v7",  # InsightsQL insights currently don't support returning uint128s due to json serialisation
-            # our clickhouse driver can't return aggregate states
+            # our datastore driver can't return aggregate states
             "distinct_id",
             "entry_url",
             "end_url",
@@ -447,7 +447,7 @@ class SessionsTableV2(LazyTable):
     ):
         return select_from_sessions_table_v2(table_to_add.fields_accessed, node, context)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "sessions"
 
     def to_printed_insightsql(self):

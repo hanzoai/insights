@@ -1,4 +1,4 @@
-//! Metadata storage for ClickHouse events deduplication.
+//! Metadata storage for Datastore events deduplication.
 //!
 //! This module tracks:
 //! - The original event (for reference and similarity comparison)
@@ -8,15 +8,15 @@
 use std::collections::HashSet;
 
 use anyhow::{Context, Result};
-use common_types::{ClickHouseEvent, PersonMode};
+use common_types::{DatastoreEvent, PersonMode};
 use serde::{Deserialize, Serialize};
 
 use crate::pipelines::results::EventSimilarity;
 use crate::pipelines::traits::DeduplicationMetadata;
 
-/// Serializable version of ClickHouseEvent for bincode storage.
+/// Serializable version of DatastoreEvent for bincode storage.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SerializableClickHouseEvent {
+pub struct SerializableDatastoreEvent {
     pub uuid: String,
     pub team_id: i32,
     pub project_id: Option<i64>,
@@ -28,8 +28,8 @@ pub struct SerializableClickHouseEvent {
     pub created_at: String,
 }
 
-impl From<&ClickHouseEvent> for SerializableClickHouseEvent {
-    fn from(event: &ClickHouseEvent) -> Self {
+impl From<&DatastoreEvent> for SerializableDatastoreEvent {
+    fn from(event: &DatastoreEvent) -> Self {
         Self {
             uuid: event.uuid.to_string(),
             team_id: event.team_id,
@@ -44,13 +44,13 @@ impl From<&ClickHouseEvent> for SerializableClickHouseEvent {
     }
 }
 
-impl TryFrom<&SerializableClickHouseEvent> for ClickHouseEvent {
+impl TryFrom<&SerializableDatastoreEvent> for DatastoreEvent {
     type Error = anyhow::Error;
 
-    fn try_from(serializable: &SerializableClickHouseEvent) -> Result<Self> {
+    fn try_from(serializable: &SerializableDatastoreEvent) -> Result<Self> {
         let uuid = serializable.uuid.parse().with_context(|| "Invalid UUID")?;
 
-        Ok(ClickHouseEvent {
+        Ok(DatastoreEvent {
             uuid,
             team_id: serializable.team_id,
             project_id: serializable.project_id,
@@ -80,43 +80,43 @@ impl TryFrom<&SerializableClickHouseEvent> for ClickHouseEvent {
     }
 }
 
-/// Metadata for tracking ClickHouse event duplicates.
+/// Metadata for tracking Datastore event duplicates.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ClickHouseEventMetadata {
+pub struct DatastoreEventMetadata {
     /// Original event data (minimal fields for reference)
-    pub original_event: SerializableClickHouseEvent,
+    pub original_event: SerializableDatastoreEvent,
     /// Set of UUIDs seen for this dedup key
     pub seen_uuids: HashSet<String>,
     /// Count of duplicate events
     pub duplicate_count: u64,
 }
 
-impl ClickHouseEventMetadata {
+impl DatastoreEventMetadata {
     /// Create new metadata for the first occurrence of an event.
-    pub fn new(event: &ClickHouseEvent) -> Self {
+    pub fn new(event: &DatastoreEvent) -> Self {
         let mut seen_uuids = HashSet::new();
         seen_uuids.insert(event.uuid.to_string());
 
         Self {
-            original_event: SerializableClickHouseEvent::from(event),
+            original_event: SerializableDatastoreEvent::from(event),
             seen_uuids,
             duplicate_count: 0,
         }
     }
 
     /// Update metadata when a duplicate is detected.
-    pub fn update_duplicate(&mut self, new_event: &ClickHouseEvent) {
+    pub fn update_duplicate(&mut self, new_event: &DatastoreEvent) {
         self.duplicate_count += 1;
         self.seen_uuids.insert(new_event.uuid.to_string());
     }
 
-    /// Get the original ClickHouseEvent.
-    pub fn get_original_event(&self) -> Result<ClickHouseEvent> {
-        ClickHouseEvent::try_from(&self.original_event)
+    /// Get the original DatastoreEvent.
+    pub fn get_original_event(&self) -> Result<DatastoreEvent> {
+        DatastoreEvent::try_from(&self.original_event)
     }
 
     /// Calculate similarity with another event.
-    pub fn calculate_similarity(&self, new_event: &ClickHouseEvent) -> Result<EventSimilarity> {
+    pub fn calculate_similarity(&self, new_event: &DatastoreEvent) -> Result<EventSimilarity> {
         let original_event = self.get_original_event()?;
         EventSimilarity::calculate(&original_event, new_event)
     }
@@ -124,37 +124,37 @@ impl ClickHouseEventMetadata {
     /// Serialize metadata to bytes for RocksDB storage.
     pub fn to_bytes(&self) -> Result<Vec<u8>> {
         bincode::serde::encode_to_vec(self, bincode::config::standard())
-            .with_context(|| "Failed to serialize ClickHouseEventMetadata")
+            .with_context(|| "Failed to serialize DatastoreEventMetadata")
     }
 
     /// Deserialize metadata from bytes.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         bincode::serde::decode_from_slice(bytes, bincode::config::standard())
             .map(|(m, _)| m)
-            .with_context(|| "Failed to deserialize ClickHouseEventMetadata")
+            .with_context(|| "Failed to deserialize DatastoreEventMetadata")
     }
 
     /// Check if this is a confirmed duplicate (same UUID seen before).
-    pub fn is_same_uuid(&self, event: &ClickHouseEvent) -> bool {
+    pub fn is_same_uuid(&self, event: &DatastoreEvent) -> bool {
         self.seen_uuids.contains(&event.uuid.to_string())
     }
 }
 
-impl DeduplicationMetadata<ClickHouseEvent> for ClickHouseEventMetadata {
-    fn new(event: &ClickHouseEvent) -> Self {
-        ClickHouseEventMetadata::new(event)
+impl DeduplicationMetadata<DatastoreEvent> for DatastoreEventMetadata {
+    fn new(event: &DatastoreEvent) -> Self {
+        DatastoreEventMetadata::new(event)
     }
 
-    fn update_duplicate(&mut self, new_event: &ClickHouseEvent) {
-        ClickHouseEventMetadata::update_duplicate(self, new_event)
+    fn update_duplicate(&mut self, new_event: &DatastoreEvent) {
+        DatastoreEventMetadata::update_duplicate(self, new_event)
     }
 
-    fn get_original_event(&self) -> Result<ClickHouseEvent> {
-        ClickHouseEventMetadata::get_original_event(self)
+    fn get_original_event(&self) -> Result<DatastoreEvent> {
+        DatastoreEventMetadata::get_original_event(self)
     }
 
-    fn calculate_similarity(&self, new_event: &ClickHouseEvent) -> Result<EventSimilarity> {
-        ClickHouseEventMetadata::calculate_similarity(self, new_event)
+    fn calculate_similarity(&self, new_event: &DatastoreEvent) -> Result<EventSimilarity> {
+        DatastoreEventMetadata::calculate_similarity(self, new_event)
     }
 
     fn unique_uuids_count(&self) -> usize {
@@ -162,11 +162,11 @@ impl DeduplicationMetadata<ClickHouseEvent> for ClickHouseEventMetadata {
     }
 
     fn to_bytes(&self) -> Result<Vec<u8>> {
-        ClickHouseEventMetadata::to_bytes(self)
+        DatastoreEventMetadata::to_bytes(self)
     }
 
     fn from_bytes(bytes: &[u8]) -> Result<Self> {
-        ClickHouseEventMetadata::from_bytes(bytes)
+        DatastoreEventMetadata::from_bytes(bytes)
     }
 }
 
@@ -176,8 +176,8 @@ mod tests {
     use common_types::PersonMode;
     use uuid::Uuid;
 
-    fn create_test_event(uuid: Uuid) -> ClickHouseEvent {
-        ClickHouseEvent {
+    fn create_test_event(uuid: Uuid) -> DatastoreEvent {
+        DatastoreEvent {
             uuid,
             team_id: 123,
             project_id: Some(456),
@@ -210,7 +210,7 @@ mod tests {
     fn test_metadata_creation() {
         let uuid = Uuid::new_v4();
         let event = create_test_event(uuid);
-        let metadata = ClickHouseEventMetadata::new(&event);
+        let metadata = DatastoreEventMetadata::new(&event);
 
         assert_eq!(metadata.duplicate_count, 0);
         assert_eq!(metadata.seen_uuids.len(), 1);
@@ -227,7 +227,7 @@ mod tests {
         let event1 = create_test_event(uuid1);
         let event2 = create_test_event(uuid2);
 
-        let mut metadata = ClickHouseEventMetadata::new(&event1);
+        let mut metadata = DatastoreEventMetadata::new(&event1);
         metadata.update_duplicate(&event2);
 
         assert_eq!(metadata.duplicate_count, 1);
@@ -240,7 +240,7 @@ mod tests {
     fn test_metadata_same_uuid_detection() {
         let uuid = Uuid::new_v4();
         let event = create_test_event(uuid);
-        let metadata = ClickHouseEventMetadata::new(&event);
+        let metadata = DatastoreEventMetadata::new(&event);
 
         // Same UUID should be detected
         assert!(metadata.is_same_uuid(&event));
@@ -254,10 +254,10 @@ mod tests {
     fn test_metadata_serialization_roundtrip() {
         let uuid = Uuid::new_v4();
         let event = create_test_event(uuid);
-        let metadata = ClickHouseEventMetadata::new(&event);
+        let metadata = DatastoreEventMetadata::new(&event);
 
         let bytes = metadata.to_bytes().unwrap();
-        let restored = ClickHouseEventMetadata::from_bytes(&bytes).unwrap();
+        let restored = DatastoreEventMetadata::from_bytes(&bytes).unwrap();
 
         assert_eq!(metadata.duplicate_count, restored.duplicate_count);
         assert_eq!(metadata.seen_uuids, restored.seen_uuids);
@@ -272,7 +272,7 @@ mod tests {
     fn test_metadata_multiple_duplicates() {
         let uuid1 = Uuid::new_v4();
         let event1 = create_test_event(uuid1);
-        let mut metadata = ClickHouseEventMetadata::new(&event1);
+        let mut metadata = DatastoreEventMetadata::new(&event1);
 
         // Add 5 duplicates with different UUIDs
         for _ in 0..5 {

@@ -1,11 +1,11 @@
 ---
-name: clickhouse-migrations
-description: ClickHouse migration patterns and rules. Use when creating or modifying ClickHouse migrations.
+name: datastore-migrations
+description: Datastore migration patterns and rules. Use when creating or modifying Datastore migrations.
 ---
 
-# ClickHouse Migrations
+# Datastore Migrations
 
-Read `insights/clickhouse/migrations/AGENTS.md` for comprehensive patterns, cluster setup, examples, and ingestion layer details.
+Read `insights/datastore/migrations/AGENTS.md` for comprehensive patterns, cluster setup, examples, and ingestion layer details.
 
 ## Quick reference
 
@@ -39,7 +39,7 @@ MergeTree engines:
 Distributed engine:
 
 - Sharded: `Distributed(data_table="sharded_events", sharding_key="sipHash64(person_id)")`
-- Non-sharded: `Distributed(data_table="my_table", cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER)`
+- Non-sharded: `Distributed(data_table="my_table", cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER)`
 
 ### Critical rules
 

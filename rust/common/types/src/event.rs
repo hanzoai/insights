@@ -318,7 +318,7 @@ pub enum PersonMode {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ClickHouseEvent {
+pub struct DatastoreEvent {
     pub uuid: Uuid,
     pub team_id: i32,
     // NOTE - option - this is a nullable column in the DB, so :shrug:
@@ -329,7 +329,7 @@ pub struct ClickHouseEvent {
     pub properties: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub person_id: Option<String>,
-    // ClickHouse DateTime64(6) format: "2024-01-01 12:00:00.000000"
+    // Datastore DateTime64(6) format: "2024-01-01 12:00:00.000000"
     pub timestamp: String,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -364,7 +364,7 @@ pub struct ClickHouseEvent {
     pub historical_migration: Option<bool>,
 }
 
-impl ClickHouseEvent {
+impl DatastoreEvent {
     pub fn take_raw_properties(&mut self) -> Result<HashMap<String, Value>, serde_json::Error> {
         // Sometimes properties are REALLY big, so we may as well do this.
         let props_str = self.properties.take();
@@ -391,7 +391,7 @@ impl ClickHouseEvent {
     }
 }
 
-impl EventWithLibraryInfo for ClickHouseEvent {
+impl EventWithLibraryInfo for DatastoreEvent {
     fn extract_library_info(&self) -> Option<LibraryInfo> {
         let properties_str = self.properties.as_ref()?;
         let properties: HashMap<String, Value> = serde_json::from_str(properties_str).ok()?;

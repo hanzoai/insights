@@ -19,7 +19,7 @@ from insights.models.property_definition import PropertyDefinition
 from products.insights_ai.dags.snapshot_team_data import (
     SnapshotUnrecoverableError,
     snapshot_actors_property_taxonomy,
-    snapshot_clickhouse_team_data,
+    snapshot_datastore_team_data,
     snapshot_events_taxonomy,
     snapshot_postgres_model,
     snapshot_postgres_team_data,
@@ -212,11 +212,11 @@ def test_snapshot_postgres_team_data_raises_failure_on_missing_team(mock_snapsho
 
 
 @pytest.mark.django_db
-def test_snapshot_clickhouse_team_data_raises_failure_on_missing_team(mock_s3):
+def test_snapshot_datastore_team_data_raises_failure_on_missing_team(mock_s3):
     context = dagster.build_op_context()
 
     with pytest.raises(dagster.Failure) as exc:
-        snapshot_clickhouse_team_data(context=context, team_id=424242, s3=mock_s3)
+        snapshot_datastore_team_data(context=context, team_id=424242, s3=mock_s3)
 
     assert getattr(exc.value, "allow_retries", None) is False
     assert "Team 424242 does not exist" in str(exc.value)
@@ -224,14 +224,14 @@ def test_snapshot_clickhouse_team_data_raises_failure_on_missing_team(mock_s3):
 
 @pytest.mark.django_db
 @patch("products.insights_ai.dags.snapshot_team_data.snapshot_events_taxonomy")
-def test_snapshot_clickhouse_team_data_raises_failure_on_unrecoverable_error(
+def test_snapshot_datastore_team_data_raises_failure_on_unrecoverable_error(
     mock_snapshot_events_taxonomy, mock_s3, team
 ):
     context = dagster.build_op_context()
     mock_snapshot_events_taxonomy.side_effect = SnapshotUnrecoverableError("boom")
 
     with pytest.raises(dagster.Failure) as exc:
-        snapshot_clickhouse_team_data(context=context, team_id=team.id, s3=mock_s3)
+        snapshot_datastore_team_data(context=context, team_id=team.id, s3=mock_s3)
 
     assert getattr(exc.value, "allow_retries", None) is False
 

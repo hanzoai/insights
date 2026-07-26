@@ -70,7 +70,7 @@ interface RowDetailsModalProps {
     columnKeys: string[]
 }
 
-const CLICKHOUSE_TYPES = [
+const DATASTORE_TYPES = [
     'UUID',
     'String',
     'Nothing',
@@ -122,7 +122,7 @@ const createDataTableQuery = (): DataTableNode => ({
     },
 })
 
-const cleanClickhouseType = (type: string | undefined): string | undefined => {
+const cleanDatastoreType = (type: string | undefined): string | undefined => {
     if (!type) {
         return undefined
     }
@@ -148,7 +148,7 @@ const cleanClickhouseType = (type: string | undefined): string | undefined => {
                     return true
                 }
 
-                return CLICKHOUSE_TYPES.includes(n)
+                return DATASTORE_TYPES.includes(n)
             })
             .join('')
     }
@@ -370,7 +370,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                         <>
                             {column}{' '}
                             {type && (
-                                <span className="text-[10px] font-medium italic">{cleanClickhouseType(type)}</span>
+                                <span className="text-[10px] font-medium italic">{cleanDatastoreType(type)}</span>
                             )}
                         </>
                     ),

@@ -36,9 +36,9 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             "is_test": True,
             "data_warehouse_integrations": {"hubspot": {"client_id": ""}, "salesforce": {"client_id": ""}},
             "demo": False,
-            "clickhouse": True,
+            "datastore": True,
             "kafka": True,
-            "realm": "hosted-clickhouse",
+            "realm": "hosted-datastore",
             "region": None,
             "available_social_auth_providers": {
                 "google-oauth2": False,
@@ -259,5 +259,5 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
         with self.settings(CLOUD_DEPLOYMENT=None):
             response = self.client.get("/_preflight/")
             assert response.status_code == status.HTTP_200_OK
-            assert response.json()["realm"] == "hosted-clickhouse"
+            assert response.json()["realm"] == "hosted-datastore"
             assert response.json()["cloud"] is False

@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import SessionTableVersion
 
@@ -8,7 +8,7 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 
 
-class TestSessionProfileQuery(ClickhouseTestMixin, APIBaseTest):
+class TestSessionProfileQuery(DatastoreTestMixin, APIBaseTest):
     def _print_session_query(self, query: str, version: SessionTableVersion) -> str:
         modifiers = create_default_modifiers_for_team(self.team)
         modifiers.sessionTableVersion = version
@@ -18,10 +18,10 @@ class TestSessionProfileQuery(ClickhouseTestMixin, APIBaseTest):
             enable_select_queries=True,
             modifiers=modifiers,
         )
-        prepared_ast = prepare_ast_for_printing(node=parse_select(query), context=context, dialect="clickhouse")
+        prepared_ast = prepare_ast_for_printing(node=parse_select(query), context=context, dialect="datastore")
         if prepared_ast is None:
             return ""
-        return print_prepared_ast(prepared_ast, context=context, dialect="clickhouse", pretty=True)
+        return print_prepared_ast(prepared_ast, context=context, dialect="datastore", pretty=True)
 
     def _print_session_v3_query(self, query: str) -> str:
         return self._print_session_query(query, SessionTableVersion.V3)

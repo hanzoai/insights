@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
-from insights.clickhouse.table_engines import Distributed, MergeTreeEngine
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
+from insights.datastore.table_engines import Distributed, MergeTreeEngine
 
 DUPLICATE_EVENTS_TABLE = "duplicate_events"
 DUPLICATE_EVENTS_WRITABLE_TABLE = f"writable_{DUPLICATE_EVENTS_TABLE}"
@@ -85,7 +85,7 @@ def DUPLICATE_EVENTS_WRITABLE_TABLE_SQL():
         table_name=DUPLICATE_EVENTS_WRITABLE_TABLE,
         engine=Distributed(
             data_table=DUPLICATE_EVENTS_TABLE,
-            cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER,
+            cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS_WITH_PARTITION,
     )
@@ -94,7 +94,7 @@ def DUPLICATE_EVENTS_WRITABLE_TABLE_SQL():
 def KAFKA_DUPLICATE_EVENTS_TABLE_SQL():
     return KAFKA_DUPLICATE_EVENTS_TABLE_BASE_SQL.format(
         table_name=KAFKA_DUPLICATE_EVENTS_TABLE,
-        engine=kafka_engine(topic="clickhouse_ingestion_events_duplicates", group="clickhouse_duplicate_events"),
+        engine=kafka_engine(topic="datastore_ingestion_events_duplicates", group="datastore_duplicate_events"),
     )
 
 
@@ -127,25 +127,25 @@ FROM {database}.{kafka_table}
         mv_name=DUPLICATE_EVENTS_MV,
         target_table=target_table,
         kafka_table=KAFKA_DUPLICATE_EVENTS_TABLE,
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 
 
 def DROP_DUPLICATE_EVENTS_TABLE_SQL():
-    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 def DROP_DUPLICATE_EVENTS_WRITABLE_TABLE_SQL():
-    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_WRITABLE_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_WRITABLE_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 def DROP_KAFKA_DUPLICATE_EVENTS_TABLE_SQL():
-    return f"DROP TABLE IF EXISTS {KAFKA_DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"DROP TABLE IF EXISTS {KAFKA_DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 def DROP_DUPLICATE_EVENTS_MV_SQL():
-    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_MV} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"DROP TABLE IF EXISTS {DUPLICATE_EVENTS_MV} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 def TRUNCATE_DUPLICATE_EVENTS_TABLE_SQL():
-    return f"TRUNCATE TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"TRUNCATE TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"

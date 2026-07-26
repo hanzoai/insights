@@ -13,7 +13,7 @@ class BatchExportResult:
     # This is the total number of records that were successfully exported
     # (not the number of record batches, but the number of records in all record batches)
     records_completed: int | None = None
-    # This is the number of bytes of data exported (i.e. not the number of bytes in ClickHouse or the internal stage)
+    # This is the number of bytes of data exported (i.e. not the number of bytes in Datastore or the internal stage)
     # and therefore takes into account things like the file type and compression
     bytes_exported: int | None = None
     # This is the error that occurred, if any

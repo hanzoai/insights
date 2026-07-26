@@ -18,8 +18,8 @@ type UpgradeCheck struct {
 func CheckUpgradeRequirements() (*UpgradeCheck, error) {
 	check := &UpgradeCheck{}
 
-	postgres, clickhouse := CheckDockerVolumes()
-	check.HasNamedVolumes = postgres && clickhouse
+	postgres, datastore := CheckDockerVolumes()
+	check.HasNamedVolumes = postgres && datastore
 
 	check.NeedsPostgresMigration = checkPostgres12InCompose()
 
@@ -30,16 +30,16 @@ func CheckUpgradeRequirements() (*UpgradeCheck, error) {
 }
 
 func GetVolumeWarning() string {
-	postgres, clickhouse := CheckDockerVolumes()
-	if postgres && clickhouse {
+	postgres, datastore := CheckDockerVolumes()
+	if postgres && datastore {
 		return ""
 	}
 
 	return `WARNING: POTENTIAL DATA LOSS
 
-We were unable to find named clickhouse and postgres volumes.
+We were unable to find named datastore and postgres volumes.
 If you created your Insights stack PRIOR TO August 12th, 2022 / v1.39.0,
-the Postgres and Clickhouse containers did NOT have persistent named volumes by default.
+the Postgres and Datastore containers did NOT have persistent named volumes by default.
 
 If you choose to upgrade, you will likely lose data contained in these anonymous volumes.
 
@@ -48,7 +48,7 @@ See: https://github.com/hanzoai/insights/pull/11256
 WE STRONGLY RECOMMEND YOU:
 • Stop and back up your entire environment
 • Back up /var/lib/postgresql/data in the postgres container
-• Back up /var/lib/clickhouse in the clickhouse container`
+• Back up /var/lib/datastore in the datastore container`
 }
 
 func checkPostgres12InCompose() bool {

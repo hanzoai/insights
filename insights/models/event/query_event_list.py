@@ -11,7 +11,7 @@ from insights.insightsql.constants import DEFAULT_RETURNED_ROWS
 from insights.insightsql.context import InsightsQLContext
 
 from insights.api.utils import get_pk_or_uuid
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.models import Action, Filter, Person, Team
 from insights.models.action.util import format_action_filter
 from insights.models.event.sql import (
@@ -163,7 +163,7 @@ def query_events_list(
                 query_type="events_list",
                 workload=Workload.OFFLINE,
                 team_id=team.pk,
-                settings={"max_threads": settings.CLICKHOUSE_EVENT_LIST_MAX_THREADS},
+                settings={"max_threads": settings.DATASTORE_EVENT_LIST_MAX_THREADS},
             ),
             applied_window_seconds,
         )
@@ -181,7 +181,7 @@ def query_events_list(
                 query_type="events_list",
                 workload=Workload.OFFLINE,
                 team_id=team.pk,
-                settings={"max_threads": settings.CLICKHOUSE_EVENT_LIST_MAX_THREADS},
+                settings={"max_threads": settings.DATASTORE_EVENT_LIST_MAX_THREADS},
             ),
             applied_window_seconds,
         )

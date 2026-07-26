@@ -24,7 +24,7 @@ Each individual product can also define their own DAGs on `products/<product>/da
 
 ### Cloud access for insights employees
 
-Ask someone on the #team-infrastructure or #team-clickhouse to add you to Dagster Cloud. You might also want to join the #dagster-insights slack channel.
+Ask someone on the #team-infrastructure or #team-datastore to add you to Dagster Cloud. You might also want to join the #dagster-insights slack channel.
 
 ### Adding a New Team
 
@@ -52,7 +52,7 @@ To set up a new team with their own Dagster definitions and Slack alerts, follow
            # List your schedules here
            my_module.my_schedule,
        ],
-       resources=resources,  # Include shared resources (ClickHouse, S3, Slack, etc.)
+       resources=resources,  # Include shared resources (Datastore, S3, Slack, etc.)
    )
    ```
 

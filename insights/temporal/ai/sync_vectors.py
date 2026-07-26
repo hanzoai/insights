@@ -16,12 +16,12 @@ import temporalio.exceptions
 from azure.core import exceptions as azure_exceptions
 from openai import APIError as OpenAIAPIError
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.exceptions_capture import capture_exception
 from insights.models import Action
 from insights.models.ai.pg_embeddings import INSERT_BULK_PG_EMBEDDINGS_SQL
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import ClickHouseClient, get_client
+from insights.temporal.common.datastore import DatastoreClient, get_client
 from insights.temporal.common.utils import get_scheduled_start_time
 
 
@@ -168,18 +168,18 @@ async def batch_embed_actions(
 
 
 async def sync_action_vectors(
-    client: ClickHouseClient,
+    client: DatastoreClient,
     actions_with_embeddings: list[tuple[dict[str, Any], list[float]]],
     insert_batch_size: int,
     workflow_start_dt: datetime,
     embedding_version: int | None = None,
 ):
     """
-    Syncs action vectors to ClickHouse and updates the last synced timestamp.
+    Syncs action vectors to Datastore and updates the last synced timestamp.
 
     Args:
         actions_with_embeddings: List of tuples containing the action and its embedding.
-        insert_batch_size: How many actions to insert in a single query to ClickHouse.
+        insert_batch_size: How many actions to insert in a single query to Datastore.
         workflow_start_dt: The start date of the workflow to set the timestamp to.
     """
     for i in range(0, len(actions_with_embeddings), insert_batch_size):
@@ -245,7 +245,7 @@ class BatchEmbedAndSyncActionsOutputs:
 @temporalio.activity.defn
 async def batch_embed_and_sync_actions(inputs: BatchEmbedAndSyncActionsInputs) -> BatchEmbedAndSyncActionsOutputs:
     """
-    Embeds actions in batches and syncs them to ClickHouse.
+    Embeds actions in batches and syncs them to Datastore.
 
     Args:
         inputs: Inputs for the activity.
@@ -345,7 +345,7 @@ class SyncVectorsInputs:
     max_parallel_requests: int = 5
     """How many parallel requests to send to vendors."""
     insert_batch_size: int = 10000
-    """How many rows to insert in a single query to ClickHouse."""
+    """How many rows to insert in a single query to Datastore."""
     delay_between_batches: int = 60
     """How many seconds to wait between batches."""
     embedding_version: int | None = None

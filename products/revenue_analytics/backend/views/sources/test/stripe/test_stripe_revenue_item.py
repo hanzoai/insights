@@ -1,6 +1,6 @@
 from typing import Any
 
-from insights.test.base import snapshot_clickhouse_queries
+from insights.test.base import snapshot_datastore_queries
 
 from parameterized import parameterized
 
@@ -191,7 +191,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
 
         assert response[0][0] == expected_months
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_calculate_months_query_snapshot(self):
         response: list[list[Any]] = execute_insightsql_query(
             ast.SelectQuery(

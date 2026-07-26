@@ -2,7 +2,7 @@
 //!
 //! This module provides a unified `TimestampDeduplicator<E>` that can deduplicate
 //! any event type that implements the required traits. This eliminates code
-//! duplication between the ingestion_events and clickhouse_events pipelines.
+//! duplication between the ingestion_events and datastore_events pipelines.
 //!
 //! # Example
 //!
@@ -14,10 +14,10 @@
 //!     .publisher(Some(publisher))
 //!     .build();
 //!
-//! // For clickhouse events without publishing:
-//! let dedup = TimestampDeduplicator::<ClickHouseEvent>::builder()
+//! // For datastore events without publishing:
+//! let dedup = TimestampDeduplicator::<DatastoreEvent>::builder()
 //!     .store_manager(store_manager)
-//!     .pipeline_name("clickhouse_events")
+//!     .pipeline_name("datastore_events")
 //!     .build();
 //! ```
 
@@ -285,4 +285,4 @@ impl<E: DeduplicatableEvent> TimestampDeduplicator<E> {
 }
 
 // Unit tests for TimestampDeduplicator use concrete event types
-// See clickhouse_events/processor.rs and ingestion_events/processor.rs for integration tests
+// See datastore_events/processor.rs and ingestion_events/processor.rs for integration tests

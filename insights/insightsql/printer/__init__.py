@@ -1,5 +1,5 @@
 from insights.insightsql.printer.base import InsightsQLPrinter
-from insights.insightsql.printer.clickhouse import ClickHousePrinter
+from insights.insightsql.printer.datastore import DatastorePrinter
 from insights.insightsql.printer.postgres import PostgresPrinter
 from insights.insightsql.printer.utils import (
     prepare_and_print_ast,
@@ -14,6 +14,6 @@ __all__ = [
     "print_prepared_ast",
     "to_printed_insightsql",
     "InsightsQLPrinter",
-    "ClickHousePrinter",
+    "DatastorePrinter",
     "PostgresPrinter",
 ]

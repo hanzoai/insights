@@ -8,7 +8,7 @@ import pytest_asyncio
 from psycopg import sql
 
 from insights.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.redshift_batch_export import (
     AWSCredentials,
@@ -27,12 +27,12 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
 from products.batch_exports.backend.tests.temporal.destinations.redshift.utils import (
     MISSING_REQUIRED_ENV_VARS,
     TEST_MODELS,
-    assert_clickhouse_records_in_redshift,
+    assert_datastore_records_in_redshift,
     has_valid_credentials,
 )
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 from products.batch_exports.backend.tests.temporal.utils.s3 import delete_all_from_s3
 
@@ -59,7 +59,7 @@ async def clean_up_s3_bucket(s3_client, bucket_name, key_prefix):
 async def _run_activity(
     activity_environment,
     redshift_connection,
-    clickhouse_client,
+    datastore_client,
     redshift_config,
     team,
     data_interval_start,
@@ -151,9 +151,9 @@ async def _run_activity(
     if not assert_records:
         return result
 
-    await assert_clickhouse_records_in_redshift(
+    await assert_datastore_records_in_redshift(
         redshift_connection=redshift_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=redshift_config["schema"],
         table_name=table_name,
         team_id=team.pk,
@@ -174,7 +174,7 @@ async def _run_activity(
 @pytest.mark.parametrize("properties_data_type", ["super", "varchar"], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_copy_into_redshift_activity_inserts_data_into_redshift_table(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -198,8 +198,8 @@ async def test_copy_into_redshift_activity_inserts_data_into_redshift_table(
     ):
         pytest.skip(f"Unnecessary test case as {model.name} batch export is not affected by 'exclude_events'")
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         event_name="test-funny-props-{i}",
         start_time=data_interval_start,
@@ -235,7 +235,7 @@ async def test_copy_into_redshift_activity_inserts_data_into_redshift_table(
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -254,7 +254,7 @@ async def test_copy_into_redshift_activity_inserts_data_into_redshift_table(
 
 
 async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -284,7 +284,7 @@ async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -305,8 +305,8 @@ async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs
     new_distinct_id_to_person_id = {}
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -315,8 +315,8 @@ async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -328,7 +328,7 @@ async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -366,7 +366,7 @@ async def test_copy_into_redshift_activity_merges_persons_data_in_follow_up_runs
 
 
 async def test_copy_into_redshift_activity_merges_sessions_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -396,7 +396,7 @@ async def test_copy_into_redshift_activity_merges_sessions_data_in_follow_up_run
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -419,8 +419,8 @@ async def test_copy_into_redshift_activity_merges_sessions_data_in_follow_up_run
         data_interval_end + dt.timedelta(hours=1),
     )
 
-    new_events, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    new_events, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=new_data_interval_start,
         end_time=new_data_interval_end,
@@ -438,7 +438,7 @@ async def test_copy_into_redshift_activity_merges_sessions_data_in_follow_up_run
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -475,7 +475,7 @@ async def test_copy_into_redshift_activity_merges_sessions_data_in_follow_up_run
 
 
 async def test_copy_into_redshift_activity_handles_person_schema_changes(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -519,7 +519,7 @@ async def test_copy_into_redshift_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -548,8 +548,8 @@ async def test_copy_into_redshift_activity_handles_person_schema_changes(
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -558,8 +558,8 @@ async def test_copy_into_redshift_activity_handles_person_schema_changes(
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -573,7 +573,7 @@ async def test_copy_into_redshift_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -594,7 +594,7 @@ async def test_copy_into_redshift_activity_handles_person_schema_changes(
 @pytest.mark.parametrize("properties_data_type", ["super"], indirect=True)
 @pytest.mark.parametrize("model", [TEST_MODELS[1]])
 async def test_copy_into_redshift_activity_inserts_data_with_extra_columns(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -623,7 +623,7 @@ async def test_copy_into_redshift_activity_inserts_data_with_extra_columns(
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -650,7 +650,7 @@ async def test_copy_into_redshift_activity_inserts_data_with_extra_columns(
     await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,
@@ -672,7 +672,7 @@ async def test_copy_into_redshift_activity_inserts_data_with_extra_columns(
 @pytest.mark.parametrize("properties_data_type", ["varchar"], indirect=True)
 @pytest.mark.parametrize("model", [TEST_MODELS[1]])
 async def test_copy_into_redshift_activity_handles_data_over_string_limit(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     psycopg_connection,
     redshift_config,
@@ -689,8 +689,8 @@ async def test_copy_into_redshift_activity_handles_data_over_string_limit(
 ):
     """Test that the copy_into_redshift_activity raises a non-retryable error on varchar limit exceeded."""
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         event_name="test-funny-props-{i}",
         start_time=data_interval_start,
@@ -711,7 +711,7 @@ async def test_copy_into_redshift_activity_handles_data_over_string_limit(
     result = await _run_activity(
         activity_environment,
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_name=table_name,
         bucket_name=bucket_name,

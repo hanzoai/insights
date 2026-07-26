@@ -19,7 +19,7 @@ from rest_framework.pagination import CursorPagination
 from insights.schema import InsightsQLQueryModifiers, PersonsOnEventsMode
 
 from insights.insightsql import ast, errors
-from insights.insightsql.escape_sql import escape_clickhouse_identifier
+from insights.insightsql.escape_sql import escape_datastore_identifier
 from insights.insightsql.insightsql import InsightsQLContext
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
@@ -380,7 +380,7 @@ class InsightsQLSelectQueryField(serializers.Field):
                             personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_NO_OVERRIDE_PROPERTIES_ON_EVENTS
                         ),
                     ),
-                    dialect="clickhouse",
+                    dialect="datastore",
                 ),
             )
         except errors.ExposedInsightsQLError as e:
@@ -794,7 +794,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
     def serialize_insightsql_query_to_batch_export_schema(self, insightsql_query: ast.SelectQuery) -> BatchExportSchema:
         """Return a batch export schema from a InsightsQL query ast."""
         try:
-            # Print the query in ClickHouse dialect to catch unresolved field errors, and discard the result
+            # Print the query in Datastore dialect to catch unresolved field errors, and discard the result
             context = InsightsQLContext(
                 team_id=self.context["team_id"],
                 enable_select_queries=True,
@@ -803,7 +803,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
                     personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_NO_OVERRIDE_PROPERTIES_ON_EVENTS
                 ),
             )
-            print_prepared_ast(insightsql_query, context=context, dialect="clickhouse")
+            print_prepared_ast(insightsql_query, context=context, dialect="datastore")
 
             # Recreate the context
             context = InsightsQLContext(
@@ -824,21 +824,21 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 expression = print_prepared_ast(
                     field.expr,
                     context=context,
-                    dialect="clickhouse",
+                    dialect="datastore",
                 )
-                alias = escape_clickhouse_identifier(field.alias)
+                alias = escape_datastore_identifier(field.alias)
             else:
                 expression = print_prepared_ast(
                     field,
                     context=context,
-                    dialect="clickhouse",
+                    dialect="datastore",
                 )
-                # String constants get parameterized by the ClickHouse printer (e.g., 'hello' becomes
-                # %(insightsql_val_0)s), which escape_clickhouse_identifier rejects. Use the raw value instead.
+                # String constants get parameterized by the Datastore printer (e.g., 'hello' becomes
+                # %(insightsql_val_0)s), which escape_datastore_identifier rejects. Use the raw value instead.
                 if isinstance(field, ast.Constant) and isinstance(field.value, str):
-                    alias = escape_clickhouse_identifier(field.value)
+                    alias = escape_datastore_identifier(field.value)
                 else:
-                    alias = escape_clickhouse_identifier(expression)
+                    alias = escape_datastore_identifier(expression)
 
             batch_export_field: BatchExportsField = {
                 "expression": expression,
@@ -1147,7 +1147,7 @@ def create_backfill(
     Returns:
         The backfill workflow ID
     """
-    # Currently, backfills from the beginning of time usually fail due to us hitting ClickHouse memory limits.
+    # Currently, backfills from the beginning of time usually fail due to us hitting Datastore memory limits.
     # Therefore, this feature is behind a feature flag while we improve backfilling behavior.
     if start_at_input is None:
         if not hanzo_insights.feature_enabled(

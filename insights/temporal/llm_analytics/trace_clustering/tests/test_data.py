@@ -239,7 +239,7 @@ class TestFetchItemSummaries:
                 "trace_2",
             ),
         ]
-        mock_result.clickhouse = "SELECT ..."
+        mock_result.datastore = "SELECT ..."
         mock_execute.return_value = mock_result
 
         summaries = fetch_item_summaries(
@@ -281,7 +281,7 @@ class TestFetchItemSummaries:
                 "trace_1",
             ),
         ]
-        mock_result.clickhouse = "SELECT ..."
+        mock_result.datastore = "SELECT ..."
         mock_execute.return_value = mock_result
 
         summaries = fetch_item_summaries(
@@ -301,7 +301,7 @@ class TestFetchItemSummaries:
         mock_result.results = [
             ("trace_1", "Legacy Title", "Flow", "Bullets", "Notes", datetime(2025, 1, 5), None, "trace_1"),
         ]
-        mock_result.clickhouse = "SELECT ..."
+        mock_result.datastore = "SELECT ..."
         mock_execute.return_value = mock_result
 
         summaries = fetch_item_summaries(
@@ -333,7 +333,7 @@ class TestFetchItemSummaries:
         mock_result.results = [
             ("trace_1", "Title", "Flow", "Bullets", "Notes", test_timestamp, "batch_123", "trace_1"),
         ]
-        mock_result.clickhouse = "SELECT ..."
+        mock_result.datastore = "SELECT ..."
         mock_execute.return_value = mock_result
 
         summaries = fetch_item_summaries(

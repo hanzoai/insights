@@ -16,7 +16,7 @@ class TestIngestionWarningsTable(BaseTest):
         )
 
         sql = "SELECT source, type, details, timestamp FROM system.ingestion_warnings"
-        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="clickhouse")
+        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="datastore")
 
         assert "ingestion_warnings" in query
         assert "source" in query
@@ -39,6 +39,6 @@ class TestIngestionWarningsTable(BaseTest):
         )
 
         sql = "SELECT * FROM system.ingestion_warnings"
-        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="clickhouse")
+        query, _ = prepare_and_print_ast(parse_select(sql), context, dialect="datastore")
 
         assert f"team_id = {self.team.pk}" in query or f"equals(ingestion_warnings.team_id, {self.team.pk})" in query

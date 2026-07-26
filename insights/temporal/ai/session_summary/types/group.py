@@ -24,7 +24,7 @@ class SessionGroupSummaryInputs:
     team_id: int
     redis_key_base: str
     summary_title: str | None
-    # Timestamps required to avoid reading too many days from ClickHouse
+    # Timestamps required to avoid reading too many days from Datastore
     min_timestamp_str: str
     max_timestamp_str: str
     model_to_use: str

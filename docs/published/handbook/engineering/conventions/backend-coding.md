@@ -98,22 +98,22 @@ A good test should:
 - They give greater confidence (because you avoid the mistake of just testing a mock) but they're slower
 - They are generally less brittle in response to changes because they test at a higher level than developer tests (e.g. they test a Django API not a class used inside it)
 
-### Querying ClickHouse
+### Querying Datastore
 
-**Always use InsightsQL instead of raw ClickHouse queries in product code.**
+**Always use InsightsQL instead of raw Datastore queries in product code.**
 
-Querying ClickHouse directly from product code is a bad idea for several reasons:
+Querying Datastore directly from product code is a bad idea for several reasons:
 
 1. **Data safety**: InsightsQL automatically scopes queries to the current team, preventing accidental cross-team data access. Raw queries that fetch data for multiple teams and separate it in code are risky—even if correct now, future changes could introduce data breaches.
 
 2. **Consistency**: InsightsQL handles property access, person mapping, and other Insights-specific concerns correctly and consistently.
 
-3. **Query attribution**: If you must query ClickHouse directly for a valid reason, ensure you [tag your queries appropriately](https://hanzo.ai/handbook/engineering/clickhouse/query-attribution) with the right product tag and ClickHouse user.
+3. **Query attribution**: If you must query Datastore directly for a valid reason, ensure you [tag your queries appropriately](https://hanzo.ai/handbook/engineering/datastore/query-attribution) with the right product tag and Datastore user.
 
-The only case where raw ClickHouse queries might be justified is cross-team queries, but even then consider alternatives:
+The only case where raw Datastore queries might be justified is cross-team queries, but even then consider alternatives:
 
 - Can you detect what you need via PostgreSQL instead? (e.g., checking feature usage via team settings)
-- Can you use one simple ClickHouse query to get team IDs, then run InsightsQL queries per-team for the actual data?
+- Can you use one simple Datastore query to get team IDs, then run InsightsQL queries per-team for the actual data?
 - Can you leverage existing cross-team infrastructure like usage reports?
 
 ### To ee or not to ee?

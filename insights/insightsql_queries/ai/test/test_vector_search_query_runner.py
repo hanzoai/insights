@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.schema import VectorSearchQuery
 
@@ -10,8 +10,8 @@ from insights.models import Organization, Project, Team
 from insights.models.ai.utils import PgEmbeddingRow, bulk_create_pg_embeddings
 
 
-class TestVectorSearchQueryRunner(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestVectorSearchQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_vector_search_query_runner(self):
         vectors = [
             PgEmbeddingRow(

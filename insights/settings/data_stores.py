@@ -204,94 +204,94 @@ elif TEST:
 
 # Hanzo Datastore. ONE env prefix: DATASTORE_*.
 #
-# The CLICKHOUSE_* fallback is gone — two spellings for one setting is two ways
-# to configure the same thing, and the loser is silent: a stale CLICKHOUSE_HOST
+# The DATASTORE_* fallback is gone — two spellings for one setting is two ways
+# to configure the same thing, and the loser is silent: a stale DATASTORE_HOST
 # would be read only when DATASTORE_HOST happened to be unset. Nothing in the
 # cluster sets the old names (the App CRs are DATASTORE_*), so this is a rename,
 # not a migration.
 #
-# Internal Python identifiers are still CLICKHOUSE_* — that rename spans ~974
+# Internal Python identifiers are still DATASTORE_* — that rename spans ~974
 # files and belongs in its own pass, not this one.
-CLICKHOUSE_TEST_DB: str = "insights" + SUFFIX
+DATASTORE_TEST_DB: str = "insights" + SUFFIX
 
-CLICKHOUSE_HOST: str = os.getenv("DATASTORE_HOST", "localhost")
-CLICKHOUSE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None)
-CLICKHOUSE_MIGRATIONS_HOST: str = os.getenv("DATASTORE_MIGRATIONS_HOST", CLICKHOUSE_HOST)
-CLICKHOUSE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", CLICKHOUSE_HOST)
-CLICKHOUSE_USER: str = os.getenv("DATASTORE_USER", "default")
-CLICKHOUSE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", "")
-CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", "default")
+DATASTORE_HOST: str = os.getenv("DATASTORE_HOST", "localhost")
+DATASTORE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None)
+DATASTORE_MIGRATIONS_HOST: str = os.getenv("DATASTORE_MIGRATIONS_HOST", DATASTORE_HOST)
+DATASTORE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", DATASTORE_HOST)
+DATASTORE_USER: str = os.getenv("DATASTORE_USER", "default")
+DATASTORE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", "")
+DATASTORE_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", "default")
 
 # RED M1: fail closed on a shared-datastore misconfig. The `insights` database is
 # co-resident with o11y/analytics on the shared datastore; running migrations or
 # queries against "default"/"system" could read or ALTER another tenant's data.
-if not TEST and not IS_COLLECT_STATIC and CLICKHOUSE_DATABASE in ("", "default", "system"):
+if not TEST and not IS_COLLECT_STATIC and DATASTORE_DATABASE in ("", "default", "system"):
     raise ImproperlyConfigured(
         f"DATASTORE_DATABASE must name an explicit Insights database "
-        f"(got {CLICKHOUSE_DATABASE!r}); refusing to run against a shared/system database."
+        f"(got {DATASTORE_DATABASE!r}); refusing to run against a shared/system database."
     )
-CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", "insights")
-CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", "insights_migrations")
-CLICKHOUSE_CA: str | None = os.getenv("DATASTORE_CA", None)
-CLICKHOUSE_SECURE: bool = get_from_env("DATASTORE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool)
-CLICKHOUSE_VERIFY: bool = get_from_env("DATASTORE_VERIFY", True, type_cast=str_to_bool)
-CLICKHOUSE_ENABLE_STORAGE_POLICY: bool = get_from_env("DATASTORE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool)
-CLICKHOUSE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", "insights_single_shard")
-CLICKHOUSE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", "insights_writable")
-CLICKHOUSE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", "insights_primary_replica")
-CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER = get_from_env(
+DATASTORE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", "insights")
+DATASTORE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", "insights_migrations")
+DATASTORE_CA: str | None = os.getenv("DATASTORE_CA", None)
+DATASTORE_SECURE: bool = get_from_env("DATASTORE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool)
+DATASTORE_VERIFY: bool = get_from_env("DATASTORE_VERIFY", True, type_cast=str_to_bool)
+DATASTORE_ENABLE_STORAGE_POLICY: bool = get_from_env("DATASTORE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool)
+DATASTORE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", "insights_single_shard")
+DATASTORE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", "insights_writable")
+DATASTORE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", "insights_primary_replica")
+DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER = get_from_env(
     "DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=False, type_cast=str_to_bool
 )
 
-CLICKHOUSE_USE_HTTP: str = get_from_env("DATASTORE_USE_HTTP", False, type_cast=str_to_bool)
-CLICKHOUSE_USE_HTTP_PER_TEAM = set[int]([])
+DATASTORE_USE_HTTP: str = get_from_env("DATASTORE_USE_HTTP", False, type_cast=str_to_bool)
+DATASTORE_USE_HTTP_PER_TEAM = set[int]([])
 with suppress(Exception):
     as_json = json.loads(os.getenv("DATASTORE_USE_HTTP_PER_TEAM", "[]"))
-    CLICKHOUSE_USE_HTTP_PER_TEAM = {int(v) for v in as_json}
+    DATASTORE_USE_HTTP_PER_TEAM = {int(v) for v in as_json}
 
-QUERYSERVICE_HOST: str = get_from_env("QUERYSERVICE_HOST", CLICKHOUSE_HOST)
-QUERYSERVICE_SECURE: bool = get_from_env("QUERYSERVICE_SECURE", CLICKHOUSE_SECURE, type_cast=str_to_bool)
-QUERYSERVICE_VERIFY: bool = get_from_env("QUERYSERVICE_VERIFY", CLICKHOUSE_VERIFY, type_cast=str_to_bool)
+QUERYSERVICE_HOST: str = get_from_env("QUERYSERVICE_HOST", DATASTORE_HOST)
+QUERYSERVICE_SECURE: bool = get_from_env("QUERYSERVICE_SECURE", DATASTORE_SECURE, type_cast=str_to_bool)
+QUERYSERVICE_VERIFY: bool = get_from_env("QUERYSERVICE_VERIFY", DATASTORE_VERIFY, type_cast=str_to_bool)
 
-CLICKHOUSE_CONN_POOL_MIN: int = get_from_env("DATASTORE_CONN_POOL_MIN", 20, type_cast=int)
-CLICKHOUSE_CONN_POOL_MAX: int = get_from_env("DATASTORE_CONN_POOL_MAX", 1000, type_cast=int)
+DATASTORE_CONN_POOL_MIN: int = get_from_env("DATASTORE_CONN_POOL_MIN", 20, type_cast=int)
+DATASTORE_CONN_POOL_MAX: int = get_from_env("DATASTORE_CONN_POOL_MAX", 1000, type_cast=int)
 
-CLICKHOUSE_STABLE_HOST: str = get_from_env("DATASTORE_STABLE_HOST", CLICKHOUSE_HOST)
+DATASTORE_STABLE_HOST: str = get_from_env("DATASTORE_STABLE_HOST", DATASTORE_HOST)
 # If enabled, some queries will use system.cluster table to query each shard
-CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
+DATASTORE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
     "DATASTORE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool
 )
 
-CLICKHOUSE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", "insights_single_shard")
-CLICKHOUSE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", "localhost")
-CLICKHOUSE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", "9000")
-CLICKHOUSE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", "default")
-CLICKHOUSE_LOGS_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_LOGS_CLUSTER_PASSWORD", "")
-CLICKHOUSE_LOGS_CLUSTER_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_LOGS_DATABASE", "default")
-CLICKHOUSE_LOGS_CLUSTER_SECURE: bool = get_from_env(
+DATASTORE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", "insights_single_shard")
+DATASTORE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", "localhost")
+DATASTORE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", "9000")
+DATASTORE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", "default")
+DATASTORE_LOGS_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_LOGS_CLUSTER_PASSWORD", "")
+DATASTORE_LOGS_CLUSTER_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_LOGS_DATABASE", "default")
+DATASTORE_LOGS_CLUSTER_SECURE: bool = get_from_env(
     "DATASTORE_LOGS_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool
 )
-CLICKHOUSE_LOGS_ENABLE_STORAGE_POLICY: bool = get_from_env(
+DATASTORE_LOGS_ENABLE_STORAGE_POLICY: bool = get_from_env(
     "DATASTORE_LOGS_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool
 )
 
-CLICKHOUSE_KAFKA_NAMED_COLLECTION: str = os.getenv("DATASTORE_KAFKA_NAMED_COLLECTION", "msk_cluster")
-CLICKHOUSE_KAFKA_WARPSTREAM_NAMED_COLLECTION: str = os.getenv(
+DATASTORE_KAFKA_NAMED_COLLECTION: str = os.getenv("DATASTORE_KAFKA_NAMED_COLLECTION", "msk_cluster")
+DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION: str = os.getenv(
     "DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION", "warpstream_ingestion"
 )
 
 # Per-team settings used for client/pool connection parameters. Note that this takes precedence over any workload-based
 # routing. Keys should be strings, not numbers.
 try:
-    CLICKHOUSE_PER_TEAM_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_SETTINGS", "{}"))
+    DATASTORE_PER_TEAM_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_SETTINGS", "{}"))
 except Exception:
-    CLICKHOUSE_PER_TEAM_SETTINGS = {}
+    DATASTORE_PER_TEAM_SETTINGS = {}
 
 # Per-team settings used for query execution. Keys should be strings, not numbers.
 try:
-    CLICKHOUSE_PER_TEAM_QUERY_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_QUERY_SETTINGS", "{}"))
+    DATASTORE_PER_TEAM_QUERY_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_QUERY_SETTINGS", "{}"))
 except Exception:
-    CLICKHOUSE_PER_TEAM_QUERY_SETTINGS = {}
+    DATASTORE_PER_TEAM_QUERY_SETTINGS = {}
 
 # Set of teams querying the data before we switched to new limits
 API_QUERIES_LEGACY_TEAM_LIST: Optional[set[int]] = None
@@ -305,25 +305,25 @@ with suppress(Exception):
     as_json = json.loads(os.getenv("API_QUERIES_PER_TEAM", "{}"))
     API_QUERIES_PER_TEAM = {int(k): int(v) for k, v in as_json.items()}
 
-_clickhouse_http_protocol = "http://"
-_clickhouse_http_port = "8123"
-if CLICKHOUSE_SECURE:
-    _clickhouse_http_protocol = "https://"
-    _clickhouse_http_port = "8443"
+_datastore_http_protocol = "http://"
+_datastore_http_port = "8123"
+if DATASTORE_SECURE:
+    _datastore_http_protocol = "https://"
+    _datastore_http_port = "8443"
 
-CLICKHOUSE_HTTP_URL: str = f"{_clickhouse_http_protocol}{CLICKHOUSE_HOST}:{_clickhouse_http_port}/"
+DATASTORE_HTTP_URL: str = f"{_datastore_http_protocol}{DATASTORE_HOST}:{_datastore_http_port}/"
 
-CLICKHOUSE_OFFLINE_HTTP_URL: str = (
-    f"{_clickhouse_http_protocol}{CLICKHOUSE_OFFLINE_CLUSTER_HOST}:{_clickhouse_http_port}/"
+DATASTORE_OFFLINE_HTTP_URL: str = (
+    f"{_datastore_http_protocol}{DATASTORE_OFFLINE_CLUSTER_HOST}:{_datastore_http_port}/"
 )
 
 if TEST or DEBUG or os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None) is None:
     # When testing, there is no offline cluster.
     # Also in EU, there is no offline cluster.
-    CLICKHOUSE_OFFLINE_HTTP_URL = CLICKHOUSE_HTTP_URL
+    DATASTORE_OFFLINE_HTTP_URL = DATASTORE_HTTP_URL
 
-READONLY_CLICKHOUSE_USER: str | None = os.getenv("READONLY_DATASTORE_USER", os.getenv("READONLY_CLICKHOUSE_USER", None))
-READONLY_CLICKHOUSE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD", os.getenv("READONLY_CLICKHOUSE_PASSWORD", None))
+READONLY_DATASTORE_USER: str | None = os.getenv("READONLY_DATASTORE_USER", None)
+READONLY_DATASTORE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD", None)
 
 
 def _parse_kafka_hosts(hosts_string: str) -> list[str]:
@@ -343,9 +343,9 @@ def _parse_kafka_hosts(hosts_string: str) -> list[str]:
 KAFKA_HOSTS = _parse_kafka_hosts(os.getenv("KAFKA_HOSTS", "") or os.getenv("KAFKA_URL", "") or "kafka:9092")
 # Dedicated kafka hosts for session recordings
 SESSION_RECORDING_KAFKA_HOSTS = _parse_kafka_hosts(os.getenv("SESSION_RECORDING_KAFKA_HOSTS", "")) or KAFKA_HOSTS
-# Kafka broker host(s) that is used by clickhouse for ingesting messages.
-# Useful if clickhouse is hosted outside the cluster.
-KAFKA_HOSTS_FOR_CLICKHOUSE = _parse_kafka_hosts(os.getenv("KAFKA_URL_FOR_CLICKHOUSE", "")) or KAFKA_HOSTS
+# Kafka broker host(s) that is used by datastore for ingesting messages.
+# Useful if datastore is hosted outside the cluster.
+KAFKA_HOSTS_FOR_DATASTORE = _parse_kafka_hosts(os.getenv("KAFKA_URL_FOR_DATASTORE", "")) or KAFKA_HOSTS
 
 # To support e.g. Multi-tenanted plans on Heroko, we support specifying a prefix for
 # Kafka Topics. See
@@ -532,10 +532,10 @@ if TEST:
 MATERIALIZED_COLUMNS_CACHE_TIMEOUT: int = get_from_env("MATERIALIZED_COLUMNS_CACHE_TIMEOUT", 900, type_cast=int)
 MATERIALIZED_COLUMNS_USE_CACHE: bool = get_from_env("MATERIALIZED_COLUMNS_USE_CACHE", False, type_cast=str_to_bool)
 
-# Limiting event_list API, saving ClickHouse, 0 - disabled, 1 - migration period, 2 - enabled.
+# Limiting event_list API, saving Datastore, 0 - disabled, 1 - migration period, 2 - enabled.
 PATCH_EVENT_LIST_MAX_OFFSET: int = get_from_env("PATCH_EVENT_LIST_MAX_OFFSET", 0, type_cast=int)
 PATCH_EVENT_LIST_MAX_OFFSET_PER_TEAM: set[int] = get_from_env(
     "PATCH_EVENT_LIST_MAX_OFFSET_PER_TEAM", default=set[int]([]), type_cast=str_to_int_set
 )
 
-CLICKHOUSE_EVENT_LIST_MAX_THREADS: int = get_from_env("DATASTORE_EVENT_LIST_MAX_THREADS", 50, type_cast=int)
+DATASTORE_EVENT_LIST_MAX_THREADS: int = get_from_env("DATASTORE_EVENT_LIST_MAX_THREADS", 50, type_cast=int)

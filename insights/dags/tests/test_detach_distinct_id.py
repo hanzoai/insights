@@ -152,7 +152,7 @@ class TestInsertChOverride:
 
 
 class TestDetachDistinctIdJob:
-    """Run the full Dagster job with mock Postgres (psycopg2), Kafka, and ClickHouse
+    """Run the full Dagster job with mock Postgres (psycopg2), Kafka, and Datastore
     (sync_execute). Verifies the three cleanup phases only fire when all safety checks pass."""
 
     def _make_connection(self, lookup_row, other_count, delete_version=PDI_VERSION):
@@ -227,7 +227,7 @@ class TestDetachDistinctIdJob:
         assert kafka_data["version"] == PDI_VERSION + 100
         producer.flush.assert_called_once()
 
-        # ClickHouse override
+        # Datastore override
         mock_sync_execute.assert_called_once()
         override_rows = mock_sync_execute.call_args.args[1]
         assert override_rows[0][0] == TEAM_ID
@@ -311,7 +311,7 @@ class TestDetachDistinctIdIntegration:
 
     Exercises the full Dagster job against real DB rows so cursor return types
     (tuple vs dict) are tested against production-like conditions.
-    Kafka and ClickHouse (sync_execute) remain mocked.
+    Kafka and Datastore (sync_execute) remain mocked.
     """
 
     @pytest.fixture
@@ -405,7 +405,7 @@ class TestDetachDistinctIdIntegration:
         assert kafka_data["is_deleted"] == 1
         assert kafka_data["version"] == pdi_detach.version + 100
 
-        # ClickHouse override inserted
+        # Datastore override inserted
         mock_sync_execute.assert_called_once()
         override_rows = mock_sync_execute.call_args.args[1]
         assert override_rows[0][0] == team.id

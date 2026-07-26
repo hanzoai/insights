@@ -21,7 +21,7 @@ class TestGzipMiddleware(APIBaseTest):
             contentEncoding = response.headers.get("Content-Encoding", None)
             self.assertEqual(contentEncoding, None)
 
-    @skip("fails in CI, but covered by test in test_clickhouse_session_recording")
+    @skip("fails in CI, but covered by test in test_datastore_session_recording")
     def test_compresses_when_on_allow_list(self) -> None:
         with self.settings(GZIP_RESPONSE_ALLOW_LIST=["something-else", "/home"]):
             response = self._get_path("/home")

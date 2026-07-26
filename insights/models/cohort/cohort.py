@@ -14,7 +14,7 @@ from django.utils import timezone
 import structlog
 import hanzo_insights
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import PropertyOperatorType
 from insights.exceptions_capture import capture_exception
 from insights.helpers.batch_iterators import ArrayBatchIterator, BatchIterator, FunctionBatchIterator
@@ -440,8 +440,8 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         # Use FunctionBatchIterator to process distinct IDs in batches
         batch_iterator = FunctionBatchIterator(create_uuid_batch, batch_size=batch_size, max_items=len(items))
 
-        # Call the batching method with ClickHouse insertion enabled
-        return self._insert_users_list_with_batching(batch_iterator, insert_in_clickhouse=True, team_id=team_id)
+        # Call the batching method with Datastore insertion enabled
+        return self._insert_users_list_with_batching(batch_iterator, insert_in_datastore=True, team_id=team_id)
 
     def insert_users_list_by_uuid(
         self,
@@ -463,7 +463,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         """
 
         batch_iterator = ArrayBatchIterator(items, batch_size=batchsize)
-        return self._insert_users_list_with_batching(batch_iterator, insert_in_clickhouse=True, team_id=team_id)
+        return self._insert_users_list_with_batching(batch_iterator, insert_in_datastore=True, team_id=team_id)
 
     def insert_users_by_email(
         self,
@@ -489,8 +489,8 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
             flush_persons_and_events()
 
         # Check feature flag once for the entire import process
-        use_clickhouse = hanzo_insights.feature_enabled(
-            "cohort-email-lookup-clickhouse",
+        use_datastore = hanzo_insights.feature_enabled(
+            "cohort-email-lookup-datastore",
             str(team_id),
             groups={"project": str(team_id)},
             group_properties={
@@ -507,23 +507,23 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
             start_idx = batch_index * batch_size
             end_idx = start_idx + batch_size
             batch_emails = items[start_idx:end_idx]
-            uuids = self._get_uuids_for_emails_batch(batch_emails, team_id, use_clickhouse=use_clickhouse)
+            uuids = self._get_uuids_for_emails_batch(batch_emails, team_id, use_datastore=use_datastore)
             return uuids
 
         # Use FunctionBatchIterator to process emails in batches
         batch_iterator = FunctionBatchIterator(create_uuid_batch, batch_size=batch_size, max_items=len(items))
 
-        # Call the batching method with ClickHouse insertion enabled
-        return self._insert_users_list_with_batching(batch_iterator, insert_in_clickhouse=True, team_id=team_id)
+        # Call the batching method with Datastore insertion enabled
+        return self._insert_users_list_with_batching(batch_iterator, insert_in_datastore=True, team_id=team_id)
 
-    def _get_uuids_for_emails_batch(self, emails: list[str], team_id: int, use_clickhouse: bool = False) -> list[str]:
+    def _get_uuids_for_emails_batch(self, emails: list[str], team_id: int, use_datastore: bool = False) -> list[str]:
         """
         Get UUIDs for a batch of email addresses, excluding those already in this cohort.
 
         Args:
             emails: List of email addresses to convert to UUIDs
             team_id: Team ID to filter by
-            use_clickhouse: Whether to use ClickHouse instead of PostgreSQL
+            use_datastore: Whether to use Datastore instead of PostgreSQL
 
         Returns:
             List of UUIDs for persons with the given email addresses who are not already in this cohort
@@ -531,7 +531,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         if not emails:
             return []
 
-        if use_clickhouse:
+        if use_datastore:
             return self._get_uuids_for_emails_batch_ch(emails, team_id)
 
         # Default to PostgreSQL method
@@ -562,8 +562,8 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
 
     def _get_uuids_for_emails_batch_ch(self, emails: list[str], team_id: int) -> list[str]:
         """
-        Get UUIDs for email addresses using ClickHouse (fast path).
-        Uses direct ClickHouse SQL for optimal performance.
+        Get UUIDs for email addresses using Datastore (fast path).
+        Uses direct Datastore SQL for optimal performance.
 
         Args:
             emails: List of email addresses to convert to UUIDs
@@ -576,7 +576,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
             return []
 
         try:
-            # Use optimized ClickHouse query with GROUP BY HAVING
+            # Use optimized Datastore query with GROUP BY HAVING
             query = """
             SELECT person.id
             FROM person
@@ -593,7 +593,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         except Exception:
             # Log error before falling back to PostgreSQL
             logger.exception(
-                "ClickHouse email lookup failed, falling back to PostgreSQL",
+                "Datastore email lookup failed, falling back to PostgreSQL",
                 team_id=team_id,
                 email_count=len(emails),
             )
@@ -606,20 +606,20 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         team_id: int,
     ) -> int:
         """
-        Insert users into Postgres cohortpeople table ONLY (not ClickHouse).
-        This method exists solely to support syncing from ClickHouse to Postgres
+        Insert users into Postgres cohortpeople table ONLY (not Datastore).
+        This method exists solely to support syncing from Datastore to Postgres
         after cohort calculations. Do not use for normal cohort operations.
 
         Used by: insert_cohort_people_into_pg
         """
 
         batch_iterator = ArrayBatchIterator(items, batch_size=DEFAULT_COHORT_INSERT_BATCH_SIZE)
-        return self._insert_users_list_with_batching(batch_iterator, insert_in_clickhouse=False, team_id=team_id)
+        return self._insert_users_list_with_batching(batch_iterator, insert_in_datastore=False, team_id=team_id)
 
     def _insert_users_list_with_batching(
         self,
         batch_iterator: BatchIterator[str],
-        insert_in_clickhouse: bool = False,
+        insert_in_datastore: bool = False,
         *,
         team_id: int,
     ) -> int:
@@ -628,7 +628,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
 
         Args:
             batch_iterator: BatchIterator of user UUIDs to be inserted into the cohort.
-            insert_in_clickhouse: Whether the data should also be inserted into ClickHouse.
+            insert_in_datastore: Whether the data should also be inserted into Datastore.
             batchsize: Number of UUIDs to process in each batch.
             team_id: The ID of the team to which the cohort belongs.
 
@@ -661,7 +661,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
                     .filter(uuid__in=batch)
                     .exclude(id__in=existing_person_ids)
                 )
-                if insert_in_clickhouse:
+                if insert_in_datastore:
                     insert_static_cohort(
                         list(persons_query.values_list("uuid", flat=True)),
                         self.pk,
@@ -720,7 +720,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         Remove a user from the cohort by their UUID.
 
         This operation is idempotent - it succeeds even if the person wasn't in the cohort,
-        to handle cases where ClickHouse and PostgreSQL data may be out of sync.
+        to handle cases where Datastore and PostgreSQL data may be out of sync.
 
         Args:
             user_uuid: UUID of the user to be removed from the cohort.
@@ -742,7 +742,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
                 person_id=person.id,
             ).first()
 
-            # Delete from PostgreSQL first (source of truth), then ClickHouse.
+            # Delete from PostgreSQL first (source of truth), then Datastore.
             # This order ensures if PG delete fails, we don't create inverse inconsistency.
             if cohort_person:
                 cohort_person.delete()

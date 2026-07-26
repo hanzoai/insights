@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 import regex
 import sqlparse
@@ -31,7 +31,7 @@ def format_query(query: ast.SelectQuery):
     return sqlparse.format(sql, keyword_case="upper", reindent=True)
 
 
-class TestFunnelEventQuery(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelEventQuery(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def setUp(self):
@@ -52,7 +52,7 @@ class TestFunnelEventQuery(ClickhouseTestMixin, APIBaseTest):
             timestamp_field="created_at_str",
             timestamp_column={
                 "insightsql": "StringDatabaseField",
-                "clickhouse": "String",
+                "datastore": "String",
                 "valid": True,
             },
         )
@@ -62,8 +62,8 @@ class TestFunnelEventQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id_field="user_id",
             timestamp_field="created_at",
             extra_columns={
-                "some_prop": {"insightsql": "StringDatabaseField", "clickhouse": "String", "valid": True},
-                "other_prop": {"insightsql": "StringDatabaseField", "clickhouse": "String", "valid": True},
+                "some_prop": {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
+                "other_prop": {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
             },
         )
         self._create_data_warehouse_table(
@@ -72,7 +72,7 @@ class TestFunnelEventQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_id_field="some_user_id",
             timestamp_field="ts",
             extra_columns={
-                "another_prop": {"insightsql": "StringDatabaseField", "clickhouse": "String", "valid": True},
+                "another_prop": {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
             },
         )
 
@@ -86,10 +86,10 @@ class TestFunnelEventQuery(ClickhouseTestMixin, APIBaseTest):
         timestamp_column: dict[str, str | bool] | None = None,
     ) -> None:
         columns: dict[str, dict[str, str | bool]] = {
-            id_field: {"insightsql": "StringDatabaseField", "clickhouse": "String", "valid": True},
-            distinct_id_field: {"insightsql": "StringDatabaseField", "clickhouse": "String", "valid": True},
+            id_field: {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
+            distinct_id_field: {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
             timestamp_field: timestamp_column
-            or {"insightsql": "DateTimeDatabaseField", "clickhouse": "DateTime64(3, 'UTC')", "valid": True},
+            or {"insightsql": "DateTimeDatabaseField", "datastore": "DateTime64(3, 'UTC')", "valid": True},
         }
         if extra_columns:
             columns.update(extra_columns)

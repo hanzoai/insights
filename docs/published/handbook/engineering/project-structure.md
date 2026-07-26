@@ -25,7 +25,7 @@ showTitle: true
 ├── nodejs           # Node.js service for event ingestion and plugins
 ├── insights          # Django backend application
 │   └── api          # REST API endpoints
-│   └── clickhouse   # ClickHouse database interactions
+│   └── datastore   # Datastore database interactions
 │   └── insightsql        # InsightsQL query language implementation
 │   └── models       # Django ORM models
 │   └── tasks        # Celery background tasks
@@ -51,7 +51,7 @@ The Insights web application, built with React and TypeScript. Uses [Kea](https:
 The Django backend application. Key subdirectories:
 
 - `api` – REST API endpoints and serializers
-- `clickhouse` – ClickHouse schema definitions and migrations
+- `datastore` – Datastore schema definitions and migrations
 - `insightsql` – Insights SQL query language compiler and executor
 - `models` – Django ORM models (PostgreSQL)
 - `tasks` – Celery background tasks

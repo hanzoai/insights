@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
 from insights.insightsql import ast
 from insights.insightsql.ast import DateType, FloatType, IntegerType, StringLiteralType, StringType
@@ -12,7 +12,7 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.functions.aggregations import generate_combinator_suffix_combinations
 from insights.insightsql.functions.core import InsightsQLFunctionMeta, compare_types
 from insights.insightsql.functions.mapping import (
-    INSIGHTSQL_CLICKHOUSE_FUNCTIONS,
+    INSIGHTSQL_DATASTORE_FUNCTIONS,
     find_insightsql_aggregation,
     find_insightsql_function,
     find_insightsql_postinsights_function,
@@ -23,7 +23,7 @@ from insights.insightsql.query import execute_insightsql_query
 
 
 @pytest.mark.usefixtures("unittest_snapshot")
-class TestMappings(ClickhouseTestMixin, BaseTest):
+class TestMappings(DatastoreTestMixin, BaseTest):
     snapshot: Any
 
     def _return_present_function(self, function: Optional[InsightsQLFunctionMeta]) -> InsightsQLFunctionMeta:
@@ -40,20 +40,20 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
         return self._return_present_function(find_insightsql_postinsights_function(name))
 
     def test_find_case_sensitive_function(self):
-        self.assertEqual(self._get_insightsql_function("toString").clickhouse_name, "toString")
+        self.assertEqual(self._get_insightsql_function("toString").datastore_name, "toString")
         self.assertEqual(find_insightsql_function("TOString"), None)
         self.assertEqual(find_insightsql_function("PlUs"), None)
 
-        self.assertEqual(self._get_insightsql_aggregation("countIf").clickhouse_name, "countIf")
+        self.assertEqual(self._get_insightsql_aggregation("countIf").datastore_name, "countIf")
         self.assertEqual(find_insightsql_aggregation("COUNTIF"), None)
 
-        self.assertEqual(self._get_insightsql_postinsights_function("sparkline").clickhouse_name, "sparkline")
+        self.assertEqual(self._get_insightsql_postinsights_function("sparkline").datastore_name, "sparkline")
         self.assertEqual(find_insightsql_postinsights_function("SPARKLINE"), None)
 
     def test_find_case_insensitive_function(self):
-        self.assertEqual(self._get_insightsql_function("CoAlesce").clickhouse_name, "coalesce")
+        self.assertEqual(self._get_insightsql_function("CoAlesce").datastore_name, "coalesce")
 
-        self.assertEqual(self._get_insightsql_aggregation("SuM").clickhouse_name, "sum")
+        self.assertEqual(self._get_insightsql_aggregation("SuM").datastore_name, "sum")
 
     def test_find_non_existent_function(self):
         self.assertEqual(find_insightsql_function("functionThatDoesntExist"), None)
@@ -102,14 +102,14 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
         assert res is True
 
     def test_unknown_type_mapping(self):
-        INSIGHTSQL_CLICKHOUSE_FUNCTIONS["overloadedFunction"] = InsightsQLFunctionMeta(
+        INSIGHTSQL_DATASTORE_FUNCTIONS["overloadedFunction"] = InsightsQLFunctionMeta(
             "overloadFailure",
             1,
             1,
             overloads=[((DateType,), "overloadSuccess")],
         )
 
-        INSIGHTSQL_CLICKHOUSE_FUNCTIONS["dateEmittingFunction"] = InsightsQLFunctionMeta(
+        INSIGHTSQL_DATASTORE_FUNCTIONS["dateEmittingFunction"] = InsightsQLFunctionMeta(
             "dateEmittingFunction",
             1,
             1,
@@ -120,7 +120,7 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
         sql, _ = prepare_and_print_ast(
             parse_expr("overloadedFunction(dateEmittingFunction('123123'))"),
             InsightsQLContext(self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         assert "overloadSuccess" in sql
 
@@ -361,7 +361,7 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
         self.assertEqual(result_dict["null_code"], "Unknown")
 
     def test_isValidJSON_function(self):
-        """Test that isValidJSON translates correctly from InsightsQL to ClickHouse."""
+        """Test that isValidJSON translates correctly from InsightsQL to Datastore."""
         response = execute_insightsql_query(
             """
             SELECT
@@ -375,12 +375,12 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
             raise ValueError("Query returned no columns")
         result_dict = dict(zip(response.columns, response.results[0]))
 
-        # Verify InsightsQL to ClickHouse translation works correctly
+        # Verify InsightsQL to Datastore translation works correctly
         self.assertEqual(result_dict["valid_json"], 1)
         self.assertEqual(result_dict["invalid_json"], 0)
 
     def test_JSONHas_function(self):
-        """Test that JSONHas translates correctly from InsightsQL to ClickHouse."""
+        """Test that JSONHas translates correctly from InsightsQL to Datastore."""
         response = execute_insightsql_query(
             """
             SELECT
@@ -394,12 +394,12 @@ class TestMappings(ClickhouseTestMixin, BaseTest):
             raise ValueError("Query returned no columns")
         result_dict = dict(zip(response.columns, response.results[0]))
 
-        # Verify InsightsQL to ClickHouse translation works correctly
+        # Verify InsightsQL to Datastore translation works correctly
         self.assertEqual(result_dict["has_key"], 1)
         self.assertEqual(result_dict["missing_key"], 0)
 
     def test_json_functions_basic(self):
-        """Test basic JSON functions translate correctly from InsightsQL to ClickHouse."""
+        """Test basic JSON functions translate correctly from InsightsQL to Datastore."""
         response = execute_insightsql_query(
             """
             SELECT

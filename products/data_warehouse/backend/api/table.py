@@ -22,8 +22,8 @@ from insights.tasks.warehouse import validate_data_warehouse_table_columns
 from products.data_warehouse.backend.api.external_data_source import SimpleExternalDataSourceSerializers
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
 from products.data_warehouse.backend.models.table import (
-    CLICKHOUSE_INSIGHTSQL_MAPPING,
-    SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING,
+    DATASTORE_INSIGHTSQL_MAPPING,
+    SERIALIZED_FIELD_TO_DATASTORE_MAPPING,
 )
 from products.data_warehouse.backend.models.util import validate_warehouse_table_url_pattern
 
@@ -289,13 +289,13 @@ class TableViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             if isinstance(current_value, str):
                 columns[key] = {}
 
-            columns[key]["clickhouse"] = f"Nullable({SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]})"
-            columns[key]["insightsql"] = CLICKHOUSE_INSIGHTSQL_MAPPING[SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]].__name__
+            columns[key]["datastore"] = f"Nullable({SERIALIZED_FIELD_TO_DATASTORE_MAPPING[value]})"
+            columns[key]["insightsql"] = DATASTORE_INSIGHTSQL_MAPPING[SERIALIZED_FIELD_TO_DATASTORE_MAPPING[value]].__name__
 
         table.columns = columns
         table.save()
 
-        # Have to update the `valid` value separately to the `columns` value as the columns are required in the `ast.S3Table` class when querying ClickHouse
+        # Have to update the `valid` value separately to the `columns` value as the columns are required in the `ast.S3Table` class when querying Datastore
         for key in updates.keys():
             columns[key]["valid"] = table.validate_column_type(key)
 

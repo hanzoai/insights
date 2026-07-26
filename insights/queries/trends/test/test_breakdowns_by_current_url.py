@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.models import Filter
 from insights.queries.trends.trends import Trends
 from insights.test.test_journeys import journeys_for
 
 
-class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
+class TestBreakdownsByCurrentURL(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         journey = {
@@ -121,7 +121,7 @@ class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
         )
         return response
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_pathname(self) -> None:
         response = self._run(
             {
@@ -136,7 +136,7 @@ class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
             ("/home", 4.0, [4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_current_url(self) -> None:
         response = self._run(
             {

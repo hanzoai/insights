@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
 from insights.api.utils import action
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 
 
 @dataclasses.dataclass(frozen=True)
@@ -46,41 +46,41 @@ def fetch_log_entries(
     search: Optional[str] = None,
     level: Optional[list[str]] = None,
 ) -> list[Any]:
-    """Fetch a list of batch export log entries from ClickHouse."""
+    """Fetch a list of batch export log entries from Datastore."""
     if level is None:
         level = []
-    clickhouse_where_parts: list[str] = []
-    clickhouse_kwargs: dict[str, Any] = {}
+    datastore_where_parts: list[str] = []
+    datastore_kwargs: dict[str, Any] = {}
 
-    clickhouse_where_parts.append("log_source = %(log_source)s")
-    clickhouse_kwargs["log_source"] = log_source
-    clickhouse_where_parts.append("log_source_id = %(log_source_id)s")
-    clickhouse_kwargs["log_source_id"] = log_source_id
-    clickhouse_where_parts.append("team_id = %(team_id)s")
-    clickhouse_kwargs["team_id"] = team_id
+    datastore_where_parts.append("log_source = %(log_source)s")
+    datastore_kwargs["log_source"] = log_source
+    datastore_where_parts.append("log_source_id = %(log_source_id)s")
+    datastore_kwargs["log_source_id"] = log_source_id
+    datastore_where_parts.append("team_id = %(team_id)s")
+    datastore_kwargs["team_id"] = team_id
 
     if instance_id:
-        clickhouse_where_parts.append("instance_id = %(instance_id)s")
-        clickhouse_kwargs["instance_id"] = instance_id
+        datastore_where_parts.append("instance_id = %(instance_id)s")
+        datastore_kwargs["instance_id"] = instance_id
     if after:
-        clickhouse_where_parts.append("timestamp > toDateTime64(%(after)s, 6)")
-        clickhouse_kwargs["after"] = after.isoformat().replace("+00:00", "")
+        datastore_where_parts.append("timestamp > toDateTime64(%(after)s, 6)")
+        datastore_kwargs["after"] = after.isoformat().replace("+00:00", "")
     if before:
-        clickhouse_where_parts.append("timestamp < toDateTime64(%(before)s, 6)")
-        clickhouse_kwargs["before"] = before.isoformat().replace("+00:00", "")
+        datastore_where_parts.append("timestamp < toDateTime64(%(before)s, 6)")
+        datastore_kwargs["before"] = before.isoformat().replace("+00:00", "")
     if search:
-        clickhouse_where_parts.append("message ILIKE %(search)s")
-        clickhouse_kwargs["search"] = f"%{search}%"
+        datastore_where_parts.append("message ILIKE %(search)s")
+        datastore_kwargs["search"] = f"%{search}%"
     if len(level) > 0:
-        clickhouse_where_parts.append("upper(level) in %(levels)s")
-        clickhouse_kwargs["levels"] = [lev.upper() for lev in level]
+        datastore_where_parts.append("upper(level) in %(levels)s")
+        datastore_kwargs["levels"] = [lev.upper() for lev in level]
 
-    clickhouse_query = f"""
+    datastore_query = f"""
         SELECT log_source_id, instance_id, timestamp, upper(level) as level, message FROM log_entries
-        WHERE {" AND ".join(clickhouse_where_parts)} ORDER BY timestamp DESC {f"LIMIT {limit}"}
+        WHERE {" AND ".join(datastore_where_parts)} ORDER BY timestamp DESC {f"LIMIT {limit}"}
     """
 
-    return [LogEntry(*result) for result in cast(list, sync_execute(clickhouse_query, clickhouse_kwargs))]
+    return [LogEntry(*result) for result in cast(list, sync_execute(datastore_query, datastore_kwargs))]
 
 
 class LogEntryMixin(viewsets.GenericViewSet):

@@ -228,7 +228,7 @@ const aSingleSnapshotWithNetworkPayloads = {
                     timeOrigin: 1706482394938,
                     timestamp: 1706482405592,
                     startTime: 10654,
-                    name: 'load_recordings_from_clickhouse',
+                    name: 'load_recordings_from_datastore',
                     duration: 384.21,
                     entryType: 'serverTiming',
                 },

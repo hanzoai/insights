@@ -3,12 +3,12 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 from unittest import mock
 
-import insights.management.commands.sync_persons_to_clickhouse
-from insights.clickhouse.client import sync_execute
-from insights.management.commands.sync_persons_to_clickhouse import (
+import insights.management.commands.sync_persons_to_datastore
+from insights.datastore.client import sync_execute
+from insights.management.commands.sync_persons_to_datastore import (
     run,
     run_distinct_id_sync,
     run_group_sync,
@@ -23,11 +23,11 @@ from insights.models.signals import mute_selected_signals
 
 
 @pytest.mark.ee
-class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
+class TestSyncPersonsToDatastore(BaseTest, DatastoreTestMixin):
     CLASS_DATA_LEVEL_SETUP = False
 
     def test_persons_sync(self):
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             person = Person.objects.create(
                 team_id=self.team.pk,
                 properties={"a": 1234},
@@ -47,7 +47,7 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         self.assertEqual(ch_persons, [(person.uuid, self.team.pk, '{"a": 1234}', True, 4, False)])
 
     def test_persons_sync_with_null_version(self):
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             person = Person.objects.create(
                 team_id=self.team.pk,
                 properties={"a": 1234},
@@ -86,7 +86,7 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         self.assertEqual(ch_persons, [(UUID(uuid), self.team.pk, "{}", False, 105, True)])
 
     def test_distinct_ids_sync(self):
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             person = Person.objects.create(team_id=self.team.pk, version=0, uuid=uuid4())
             PersonDistinctId.objects.create(team=self.team, person=person, distinct_id="test-id", version=4)
 
@@ -101,7 +101,7 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         self.assertEqual(ch_person_distinct_ids, [(person.uuid, self.team.pk, "test-id", 4, False)])
 
     def test_distinct_ids_sync_with_null_version(self):
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             person = Person.objects.create(team_id=self.team.pk, version=0, uuid=uuid4())
             PersonDistinctId.objects.create(team=self.team, person=person, distinct_id="test-id", version=None)
 
@@ -139,8 +139,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         )
 
     @mock.patch(
-        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_datastore.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_datastore.raw_create_group_ch,
     )
     def test_group_sync(self, mocked_ch_call):
         ts = datetime.now(UTC)
@@ -174,8 +174,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         mocked_ch_call.assert_called_once()
 
     @mock.patch(
-        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_datastore.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_datastore.raw_create_group_ch,
     )
     def test_group_sync_updates_group(self, mocked_ch_call):
         group = create_group(
@@ -221,8 +221,8 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         mocked_ch_call.assert_called_once()
 
     @mock.patch(
-        f"{insights.management.commands.sync_persons_to_clickhouse.__name__}.raw_create_group_ch",
-        wraps=insights.management.commands.sync_persons_to_clickhouse.raw_create_group_ch,
+        f"{insights.management.commands.sync_persons_to_datastore.__name__}.raw_create_group_ch",
+        wraps=insights.management.commands.sync_persons_to_datastore.raw_create_group_ch,
     )
     def test_group_sync_multiple_entries(self, mocked_ch_call):
         ts = datetime.now(UTC)
@@ -291,7 +291,7 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         )
 
         # 2 persons who should be created
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             person_should_be_created_1 = Person.objects.create(
                 team_id=self.team.pk,
                 properties={"abcde": 12553633},
@@ -361,7 +361,7 @@ class TestSyncPersonsToClickHouse(BaseTest, ClickhouseTestMixin):
         )
 
         # # 2 distinct id to be created
-        with mute_selected_signals():  # without creating/updating in clickhouse
+        with mute_selected_signals():  # without creating/updating in datastore
             PersonDistinctId.objects.create(
                 team=self.team,
                 person=person_not_changed_1,

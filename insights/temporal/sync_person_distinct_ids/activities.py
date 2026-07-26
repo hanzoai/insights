@@ -11,7 +11,7 @@ from psycopg import sql
 from structlog import get_logger
 
 from insights.models.person.util import create_person, create_person_distinct_id
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 
 LOGGER = get_logger(__name__)
@@ -42,7 +42,7 @@ def get_persons_database_url() -> str:
 
 @dataclasses.dataclass
 class OrphanedPerson:
-    """Represents an orphaned person from ClickHouse."""
+    """Represents an orphaned person from Datastore."""
 
     person_id: str
     team_id: int
@@ -61,14 +61,14 @@ class FindOrphanedPersonsInputs:
 
 @dataclasses.dataclass
 class FindOrphanedPersonsResult:
-    """Result of finding orphaned persons in ClickHouse."""
+    """Result of finding orphaned persons in Datastore."""
 
     orphaned_persons: list[OrphanedPerson]
 
 
 @temporalio.activity.defn
 async def find_orphaned_persons(inputs: FindOrphanedPersonsInputs) -> FindOrphanedPersonsResult:
-    """Find all persons in ClickHouse that have no corresponding distinct IDs.
+    """Find all persons in Datastore that have no corresponding distinct IDs.
 
     This runs a single query to get all orphaned persons for the team.
     The result set is small (just UUIDs + metadata), so it's efficient to fetch all at once.
@@ -76,7 +76,7 @@ async def find_orphaned_persons(inputs: FindOrphanedPersonsInputs) -> FindOrphan
     """
     async with Heartbeater() as heartbeater:
         logger = LOGGER.bind(team_id=inputs.team_id, limit=inputs.limit, person_ids_count=len(inputs.person_ids or []))
-        await logger.ainfo("Finding orphaned persons in ClickHouse")
+        await logger.ainfo("Finding orphaned persons in Datastore")
 
         heartbeater.details = ("Finding all orphaned persons",)
 
@@ -86,7 +86,7 @@ async def find_orphaned_persons(inputs: FindOrphanedPersonsInputs) -> FindOrphan
         # We use argMax/max with GROUP BY instead of FINAL for more consistent deduplication.
         # FINAL can return inconsistent results depending on merge state, which could cause
         # persons with valid distinct_ids to be incorrectly identified as orphaned.
-        # Note: We use aliases (tid, ver) that differ from column names to avoid ClickHouse
+        # Note: We use aliases (tid, ver) that differ from column names to avoid Datastore
         # confusing output aliases with column references in WHERE/HAVING/argMax clauses.
         query = f"""
             SELECT
@@ -296,7 +296,7 @@ class SyncDistinctIdsToChInputs:
 
 @dataclasses.dataclass
 class SyncDistinctIdsToChResult:
-    """Result of syncing distinct IDs to ClickHouse."""
+    """Result of syncing distinct IDs to Datastore."""
 
     distinct_ids_synced: int
     persons_synced: int
@@ -304,16 +304,16 @@ class SyncDistinctIdsToChResult:
 
 @temporalio.activity.defn
 async def sync_distinct_ids_to_ch(inputs: SyncDistinctIdsToChInputs) -> SyncDistinctIdsToChResult:
-    """Sync missing distinct IDs to ClickHouse via Kafka."""
+    """Sync missing distinct IDs to Datastore via Kafka."""
     async with Heartbeater() as heartbeater:
         logger = LOGGER.bind(team_id=inputs.team_id, mapping_count=len(inputs.mappings), dry_run=inputs.dry_run)
 
         total_distinct_ids = sum(len(m.distinct_id_versions) for m in inputs.mappings)
-        heartbeater.details = (f"Syncing {total_distinct_ids} distinct IDs to ClickHouse",)
+        heartbeater.details = (f"Syncing {total_distinct_ids} distinct IDs to Datastore",)
 
         if inputs.dry_run:
             await logger.ainfo(
-                "DRY RUN: Would sync distinct IDs to ClickHouse",
+                "DRY RUN: Would sync distinct IDs to Datastore",
                 persons=len(inputs.mappings),
                 distinct_ids=total_distinct_ids,
             )
@@ -329,7 +329,7 @@ async def sync_distinct_ids_to_ch(inputs: SyncDistinctIdsToChInputs) -> SyncDist
             )
 
         await logger.ainfo(
-            "Syncing distinct IDs to ClickHouse",
+            "Syncing distinct IDs to Datastore",
             persons=len(inputs.mappings),
             distinct_ids=total_distinct_ids,
         )
@@ -346,7 +346,7 @@ async def sync_distinct_ids_to_ch(inputs: SyncDistinctIdsToChInputs) -> SyncDist
                 )
 
         await logger.ainfo(
-            "Synced distinct IDs to ClickHouse",
+            "Synced distinct IDs to Datastore",
             persons=len(inputs.mappings),
             distinct_ids=total_distinct_ids,
         )
@@ -375,7 +375,7 @@ class MarkChOnlyOrphansDeletedResult:
 
 @temporalio.activity.defn
 async def mark_ch_only_orphans_deleted(inputs: MarkChOnlyOrphansDeletedInputs) -> MarkChOnlyOrphansDeletedResult:
-    """Mark persons without PostgreSQL data as deleted in ClickHouse."""
+    """Mark persons without PostgreSQL data as deleted in Datastore."""
     async with Heartbeater() as heartbeater:
         logger = LOGGER.bind(team_id=inputs.team_id, person_count=len(inputs.person_versions), dry_run=inputs.dry_run)
 

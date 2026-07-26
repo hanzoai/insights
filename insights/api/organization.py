@@ -325,7 +325,7 @@ class OrganizationViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         organization_name = organization.name
 
         # Queue background task to handle all deletion
-        # bulky postgres, batch exports, org/team records, ClickHouse, email
+        # bulky postgres, batch exports, org/team records, Datastore, email
         delete_organization_data_and_notify_task.delay(
             team_ids=team_ids,
             organization_id=str(organization_id),

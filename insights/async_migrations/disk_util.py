@@ -1,5 +1,5 @@
-from insights.clickhouse.client import sync_execute
-from insights.settings import CLICKHOUSE_DATABASE
+from insights.datastore.client import sync_execute
+from insights.settings import DATASTORE_DATABASE
 
 
 def analyze_enough_disk_space_free_for_table(table_name: str, required_ratio: float):
@@ -9,7 +9,7 @@ def analyze_enough_disk_space_free_for_table(table_name: str, required_ratio: fl
     This is done by checking whether there's at least ratio times space free to resize table_name with.
     """
 
-    # nosemgrep: clickhouse-fstring-param-audit - no interpolation, only parameterized values
+    # nosemgrep: datastore-fstring-param-audit - no interpolation, only parameterized values
     current_ratio, _, required_space_pretty = sync_execute(
         f"""
         WITH (
@@ -29,7 +29,7 @@ def analyze_enough_disk_space_free_for_table(table_name: str, required_ratio: fl
             formatReadableSize(required)
         """,
         {
-            "database": CLICKHOUSE_DATABASE,
+            "database": DATASTORE_DATABASE,
             "table_name": table_name,
             "ratio": required_ratio,
         },
@@ -40,5 +40,5 @@ def analyze_enough_disk_space_free_for_table(table_name: str, required_ratio: fl
     else:
         return (
             False,
-            f"Upgrade your ClickHouse storage to at least {required_space_pretty}.",
+            f"Upgrade your Datastore storage to at least {required_space_pretty}.",
         )

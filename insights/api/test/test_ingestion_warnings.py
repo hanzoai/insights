@@ -2,14 +2,14 @@ import json
 from math import floor
 
 from freezegun.api import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from rest_framework import status
 
-from insights.clickhouse.client import sync_execute
-from insights.kafka_client.client import ClickhouseProducer
+from insights.datastore.client import sync_execute
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_INGESTION_WARNINGS
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.models.ingestion_warnings.sql import INSERT_INGESTION_WARNING
 from insights.models.organization import Organization
 from insights.utils import cast_timestamp_or_now
@@ -23,14 +23,14 @@ def create_ingestion_warning(team_id: int, type: str, details: dict, timestamp: 
         "type": type,
         "source": source,
         "details": json.dumps(details),
-        "timestamp": format_clickhouse_timestamp(timestamp),
-        "_timestamp": format_clickhouse_timestamp(timestamp),
+        "timestamp": format_datastore_timestamp(timestamp),
+        "_timestamp": format_datastore_timestamp(timestamp),
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_INGESTION_WARNINGS, sql=INSERT_INGESTION_WARNING, data=data)
 
 
-class TestIngestionWarningsAPI(ClickhouseTestMixin, APIBaseTest):
+class TestIngestionWarningsAPI(DatastoreTestMixin, APIBaseTest):
     a_lot_of_ingestion_warning_timestamps: list[str] = []
 
     def setUp(self):

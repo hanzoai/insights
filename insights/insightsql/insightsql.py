@@ -10,17 +10,17 @@ from insights.insightsql.printer import prepare_ast_for_printing, print_prepared
 from insights.queries.util import alias_poe_mode_for_legacy
 
 
-# This is called only from "non-insightsql-based" insights to translate InsightsQL expressions into ClickHouse SQL
+# This is called only from "non-insightsql-based" insights to translate InsightsQL expressions into Datastore SQL
 # All the constant string values will be collected into context.values
 def translate_insightsql(
     query: str,
     context: InsightsQLContext,
-    dialect: Literal["insightsql", "clickhouse"] = "clickhouse",
+    dialect: Literal["insightsql", "datastore"] = "datastore",
     *,
     events_table_alias: Optional[str] = None,
     placeholders: Optional[dict[str, ast.Expr]] = None,
 ) -> str:
-    """Translate a InsightsQL expression into a ClickHouse expression."""
+    """Translate a InsightsQL expression into a Datastore expression."""
     if query == "":
         raise QueryError("Empty query")
 

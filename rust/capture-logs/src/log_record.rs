@@ -5,7 +5,7 @@ use base64::{prelude::BASE64_STANDARD, Engine};
 use chrono::serde::ts_microseconds;
 use chrono::DateTime;
 use chrono::Utc;
-use clickhouse::Row;
+use datastore::Row;
 use opentelemetry_proto::tonic::{
     common::v1::{
         any_value::{self, Value},

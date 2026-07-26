@@ -73,7 +73,7 @@ class InsightsClient:
         self._insights = insights_sdk
         self._session = self._create_http_session()
         # Store test start date for efficient event queries.
-        # ClickHouse ORDER BY uses toDate(timestamp) (day granularity), so filtering by date
+        # Datastore ORDER BY uses toDate(timestamp) (day granularity), so filtering by date
         # is sufficient. We subtract 1 day to handle clock skew between test machine and server.
         self._test_start_date = (datetime.now(UTC) - timedelta(days=1)).date()
 
@@ -288,7 +288,7 @@ class InsightsClient:
     def _fetch_event_by_uuid(self, event_uuid: str) -> CapturedEvent | None:
         """Fetch an event by UUID.
 
-        Includes a timestamp filter to benefit from ClickHouse's table partitioning
+        Includes a timestamp filter to benefit from Datastore's table partitioning
         (PARTITION BY toYYYYMM(timestamp)) and ordering (ORDER BY includes toDate(timestamp)).
         """
         query = """
@@ -348,7 +348,7 @@ class InsightsClient:
     def _fetch_events_by_person_id(self, person_id: str, expected_count: int) -> list[CapturedEvent] | None:
         """Fetch events by person_id. Returns None if fewer than expected_count events found.
 
-        Includes a timestamp filter to benefit from ClickHouse's table partitioning
+        Includes a timestamp filter to benefit from Datastore's table partitioning
         (PARTITION BY toYYYYMM(timestamp)) and ordering (ORDER BY includes toDate(timestamp)).
         """
         query = """

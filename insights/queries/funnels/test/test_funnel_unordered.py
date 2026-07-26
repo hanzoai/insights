@@ -2,19 +2,19 @@ from datetime import datetime
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from rest_framework.exceptions import ValidationError
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_unordered import ClickhouseFunnelUnordered
-from insights.queries.funnels.funnel_unordered_persons import ClickhouseFunnelUnorderedActors
+from insights.queries.funnels.funnel_unordered import DatastoreFunnelUnordered
+from insights.queries.funnels.funnel_unordered_persons import DatastoreFunnelUnorderedActors
 from insights.queries.funnels.test.breakdown_cases import (
     FunnelStepResult,
     assert_funnel_results_equal,
@@ -27,10 +27,10 @@ FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
 class TestFunnelUnorderedStepsBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(  # type: ignore
-        ClickhouseFunnelUnordered,
-        ClickhouseFunnelUnorderedActors,
+        DatastoreFunnelUnordered,
+        DatastoreFunnelUnorderedActors,
         _create_event,
         _create_action,
         _create_person,
@@ -53,7 +53,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         person1 = _create_person(distinct_ids=["person1"], team_id=self.team.pk)
@@ -166,7 +166,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         events_by_person = {
@@ -233,7 +233,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         events_by_person = {
@@ -333,7 +333,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         events_by_person = {
@@ -449,7 +449,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         events_by_person = {
@@ -548,7 +548,7 @@ class TestFunnelUnorderedStepsBreakdown(
 
         self.assertCountEqual(self._get_actor_ids_at_step(filter, 1, "alakazam"), [people["person4"].uuid])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_breakdown_correct_breakdown_props_are_chosen_for_step(self):
         # No person querying here, so snapshots are more legible
         # overridden from factory, since we need to add `funnel_order_type`
@@ -574,7 +574,7 @@ class TestFunnelUnorderedStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event
         events_by_person = {
@@ -628,10 +628,10 @@ class TestFunnelUnorderedStepsBreakdown(
 
 
 class TestFunnelUnorderedStepsConversionTime(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_conversion_time_test_factory(  # type: ignore
-        ClickhouseFunnelUnordered,
-        ClickhouseFunnelUnorderedActors,
+        DatastoreFunnelUnordered,
+        DatastoreFunnelUnorderedActors,
         _create_event,
         _create_person,
     ),
@@ -640,10 +640,10 @@ class TestFunnelUnorderedStepsConversionTime(
     pass
 
 
-class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelUnorderedSteps(DatastoreTestMixin, APIBaseTest):
     def _get_actor_ids_at_step(self, filter, funnel_step, breakdown_value=None):
         person_filter = filter.shallow_clone({"funnel_step": funnel_step, "funnel_step_breakdown": breakdown_value})
-        _, serialized_result, _ = ClickhouseFunnelUnorderedActors(person_filter, self.team).get_actors()
+        _, serialized_result, _ = DatastoreFunnelUnorderedActors(person_filter, self.team).get_actors()
 
         return [val["id"] for val in serialized_result]
 
@@ -659,7 +659,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         person1_stopped_after_signup = _create_person(distinct_ids=["stopped_after_signup1"], team_id=self.team.pk)
         _create_event(team=self.team, event="user signed up", distinct_id="stopped_after_signup1")
@@ -891,7 +891,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
         )
         _create_event(team=self.team, event="$pageview", distinct_id="stopped_after_insightview6")
 
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
         result = funnel.run()
 
         self.assertEqual(result[0]["name"], "Completed 1 step")
@@ -957,7 +957,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         person1_stopped_after_signup = _create_person(distinct_ids=["stopped_after_signup1"], team_id=self.team.pk)
         _create_event(
@@ -1072,7 +1072,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         _create_person(distinct_ids=["stopped_after_signup1"], team_id=self.team.pk)
         _create_event(
@@ -1120,7 +1120,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=filters)
-        self.assertRaises(ValidationError, lambda: ClickhouseFunnelUnordered(filter, self.team).run())
+        self.assertRaises(ValidationError, lambda: DatastoreFunnelUnordered(filter, self.team).run())
 
         # partial windows not allowed for unordered
         filter = filter.shallow_clone(
@@ -1135,7 +1135,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
                 ]
             }
         )
-        self.assertRaises(ValidationError, lambda: ClickhouseFunnelUnordered(filter, self.team).run())
+        self.assertRaises(ValidationError, lambda: DatastoreFunnelUnordered(filter, self.team).run())
 
     def test_funnel_exclusions_full_window(self):
         filters = {
@@ -1157,7 +1157,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         # event 1
         person1 = _create_person(distinct_ids=["person1"], team_id=self.team.pk)
@@ -1479,7 +1479,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
         )
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
 
         result = funnel.run()
 
@@ -1538,7 +1538,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
         result = funnel.run()
 
         self.assertEqual(result[0]["count"], 1)
@@ -1595,7 +1595,7 @@ class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelUnordered(filter, self.team)
+        funnel = DatastoreFunnelUnordered(filter, self.team)
         result = funnel.run()
 
         self.assertEqual(result[0]["count"], 1)

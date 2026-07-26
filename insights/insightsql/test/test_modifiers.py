@@ -75,8 +75,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsOnEventsMode=PersonsOnEventsMode.DISABLED),
         )
-        assert response.clickhouse is not None
-        assert " JOIN " in response.clickhouse
+        assert response.datastore is not None
+        assert " JOIN " in response.datastore
 
         # Test
         response = execute_insightsql_query(
@@ -86,8 +86,8 @@ class TestModifiers(BaseTest):
                 personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_NO_OVERRIDE_PROPERTIES_ON_EVENTS
             ),
         )
-        assert response.clickhouse is not None
-        assert " JOIN " not in response.clickhouse
+        assert response.datastore is not None
+        assert " JOIN " not in response.datastore
 
     def test_modifiers_persons_on_events_mode_mapping(self):
         query = "SELECT event, person.id, person.properties, person.created_at FROM events"
@@ -144,18 +144,18 @@ class TestModifiers(BaseTest):
         ]
 
         for test_case in test_cases:
-            clickhouse_query = execute_insightsql_query(
+            datastore_query = execute_insightsql_query(
                 query,
                 team=self.team,
                 modifiers=InsightsQLQueryModifiers(personsOnEventsMode=test_case.mode),
                 pretty=False,
-            ).clickhouse
-            assert clickhouse_query is not None
-            assert f"SELECT {', '.join(test_case.expected_columns)} FROM" in clickhouse_query, (
+            ).datastore
+            assert datastore_query is not None
+            assert f"SELECT {', '.join(test_case.expected_columns)} FROM" in datastore_query, (
                 f"PoE mode: {test_case.mode}"
             )
             for value in test_case.other_expected_values:
-                assert value in clickhouse_query
+                assert value in datastore_query
 
     def test_modifiers_persons_argmax_version_v2(self):
         query = "SELECT * FROM persons"
@@ -166,8 +166,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.V1),
         )
-        assert response.clickhouse is not None
-        assert "in(tuple(person.id, person.version)" not in response.clickhouse
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" not in response.datastore
 
         # Test (v2)
         response = execute_insightsql_query(
@@ -175,8 +175,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.V2),
         )
-        assert response.clickhouse is not None
-        assert "in(tuple(person.id, person.version)" in response.clickhouse
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" in response.datastore
 
     def test_modifiers_persons_argmax_version_auto(self):
         # Use the v2 query when selecting properties.x
@@ -185,8 +185,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.AUTO),
         )
-        assert response.clickhouse is not None
-        assert "in(tuple(person.id, person.version)" in response.clickhouse
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" in response.datastore
 
         # Use the v2 query when selecting properties
         response = execute_insightsql_query(
@@ -194,8 +194,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.AUTO),
         )
-        assert response.clickhouse is not None
-        assert "in(tuple(person.id, person.version)" in response.clickhouse
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" in response.datastore
 
         # Use the v1 query when not selecting any properties
         response = execute_insightsql_query(
@@ -203,8 +203,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.AUTO),
         )
-        assert response.clickhouse is not None
-        assert "in(tuple(person.id, person.version)" not in response.clickhouse
+        assert response.datastore is not None
+        assert "in(tuple(person.id, person.version)" not in response.datastore
 
     def test_modifiers_in_cohort_join(self):
         cohort = Cohort.objects.create(team=self.team, name="test")
@@ -213,8 +213,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(inCohortVia="subquery"),
         )
-        assert response.clickhouse is not None
-        assert "LEFT JOIN" not in response.clickhouse
+        assert response.datastore is not None
+        assert "LEFT JOIN" not in response.datastore
 
         # Use the v1 query when not selecting any properties
         response = execute_insightsql_query(
@@ -222,8 +222,8 @@ class TestModifiers(BaseTest):
             team=self.team,
             modifiers=InsightsQLQueryModifiers(inCohortVia="leftjoin"),
         )
-        assert response.clickhouse is not None
-        assert "LEFT JOIN" in response.clickhouse
+        assert response.datastore is not None
+        assert "LEFT JOIN" in response.datastore
 
     def test_modifiers_materialization_mode(self):
         materialize("events", "$browser")
@@ -234,9 +234,9 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
             pretty=False,
         )
-        assert response.clickhouse is not None
+        assert response.datastore is not None
         assert (
-            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.clickhouse
+            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.datastore
         )
 
         response = execute_insightsql_query(
@@ -245,9 +245,9 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_NULL),
             pretty=False,
         )
-        assert response.clickhouse is not None
+        assert response.datastore is not None
         assert (
-            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.clickhouse
+            "SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` FROM events" in response.datastore
         )
 
         response = execute_insightsql_query(
@@ -256,8 +256,8 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_STRING),
             pretty=False,
         )
-        assert response.clickhouse is not None
-        assert "SELECT nullIf(events.`mat_$browser`, '') AS `$browser` FROM events" in response.clickhouse
+        assert response.datastore is not None
+        assert "SELECT nullIf(events.`mat_$browser`, '') AS `$browser` FROM events" in response.datastore
 
         response = execute_insightsql_query(
             "SELECT properties.$browser FROM events",
@@ -265,10 +265,10 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
             pretty=False,
         )
-        assert response.clickhouse is not None
+        assert response.datastore is not None
         assert (
             "SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '') AS `$browser` FROM events"
-            in response.clickhouse
+            in response.datastore
         )
 
     def test_optimize_joined_filters(self):
@@ -280,8 +280,8 @@ class TestModifiers(BaseTest):
         )
         # "ilike" shows up once in the response
         assert response is not None
-        assert response.clickhouse is not None
-        assert response.clickhouse.count("ilike") == 1
+        assert response.datastore is not None
+        assert response.datastore.count("ilike") == 1
 
         # with optimizations
         response = execute_insightsql_query(
@@ -291,8 +291,8 @@ class TestModifiers(BaseTest):
         )
         # "ilike" shows up twice in the response
         assert response is not None
-        assert response.clickhouse is not None
-        assert response.clickhouse.count("ilike") == 2
+        assert response.datastore is not None
+        assert response.datastore.count("ilike") == 2
 
     def test_no_convert_timezone(self):
         # default to convert to timezone
@@ -302,8 +302,8 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(),
         )
         assert response is not None
-        assert response.clickhouse is not None
-        assert response.clickhouse.count("toTimeZone") == 1
+        assert response.datastore is not None
+        assert response.datastore.count("toTimeZone") == 1
 
         response = execute_insightsql_query(
             f"select timestamp from events limit 1",
@@ -311,5 +311,5 @@ class TestModifiers(BaseTest):
             modifiers=InsightsQLQueryModifiers(convertToProjectTimezone=False),
         )
         assert response is not None
-        assert response.clickhouse is not None
-        assert response.clickhouse.count("toTimeZone") == 0
+        assert response.datastore is not None
+        assert response.datastore.count("toTimeZone") == 0

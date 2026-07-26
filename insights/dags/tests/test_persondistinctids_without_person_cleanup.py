@@ -235,7 +235,7 @@ def create_mock_database_resource(rowcount_values=None, fetchall_results=None):
 
 
 def create_mock_cluster_resource():
-    """Create a mock ClickhouseCluster resource."""
+    """Create a mock DatastoreCluster resource."""
     return MagicMock()
 
 
@@ -704,7 +704,7 @@ class TestMetricsPublishing:
     """Test metrics publishing batching behavior."""
 
     def test_metrics_published_every_100_batches(self):
-        """Test that metrics are only published every 100 batches to reduce ClickHouse writes."""
+        """Test that metrics are only published every 100 batches to reduce Datastore writes."""
         config = PersonsDistinctIdsNoPersonCleanupConfig(
             chunk_size=50000,
             batch_size=100,

@@ -3,20 +3,20 @@ import { DateTime } from 'luxon'
 import { KAFKA_GROUPS } from '~/config/kafka-topics'
 
 import { GroupTypeIndex, TeamId } from '../../../../types'
-import { ClickhouseGroupRepository } from './clickhouse-group-repository'
+import { DatastoreGroupRepository } from './datastore-group-repository'
 
-describe('ClickhouseGroupRepository', () => {
+describe('DatastoreGroupRepository', () => {
     let kafkaProducer: any
-    let repository: ClickhouseGroupRepository
+    let repository: DatastoreGroupRepository
 
     beforeEach(() => {
         kafkaProducer = {
             queueMessages: jest.fn().mockResolvedValue(undefined),
         }
-        repository = new ClickhouseGroupRepository(kafkaProducer)
+        repository = new DatastoreGroupRepository(kafkaProducer)
     })
 
-    it('should upsert group to ClickHouse via Kafka', async () => {
+    it('should upsert group to Datastore via Kafka', async () => {
         const teamId = 1 as TeamId
         const groupTypeIndex = 0 as GroupTypeIndex
         const groupKey = 'test-group'

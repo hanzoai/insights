@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core import exceptions
 from django.db import IntegrityError, transaction
 
-from insights.clickhouse.client import query_with_columns, sync_execute
+from insights.datastore.client import query_with_columns, sync_execute
 from insights.demo.matrix.taxonomy_inference import infer_taxonomy_for_team
 from insights.models import (
     Cohort,
@@ -127,13 +127,13 @@ class MatrixManager:
         return team
 
     def run_on_team(self, team: Team, user: User):
-        does_clickhouse_data_need_saving = True
+        does_datastore_data_need_saving = True
         if self.use_pre_save:
-            does_clickhouse_data_need_saving = not self._is_demo_data_pre_saved()
+            does_datastore_data_need_saving = not self._is_demo_data_pre_saved()
             source_team = self._prepare_primary_team()
         else:
             source_team = team
-        if does_clickhouse_data_need_saving:
+        if does_datastore_data_need_saving:
             if self.matrix.is_complete is None:
                 if self.print_steps:
                     print(f"Simulating data...")
@@ -141,7 +141,7 @@ class MatrixManager:
             self._save_analytics_data(source_team)
         if self.use_pre_save:
             self._copy_analytics_data_from_primary_team(team)
-        self._sync_postgres_with_clickhouse_data(source_team.pk, team.pk)
+        self._sync_postgres_with_datastore_data(source_team.pk, team.pk)
         self.matrix.set_project_up(team, user)
         if self.print_steps:
             print(f"Inferring taxonomy for data management...")
@@ -188,7 +188,7 @@ class MatrixManager:
         for sim_person in sim_persons:
             self._save_sim_person(data_team, sim_person)
         # We need to wait a bit for data just queued into Kafka to show up in CH
-        self._sleep_until_person_data_in_clickhouse(data_team.pk)
+        self._sleep_until_person_data_in_datastore(data_team.pk)
 
     @classmethod
     def _prepare_primary_team(cls, *, ensure_blank_slate: bool = False) -> Team:
@@ -208,7 +208,7 @@ class MatrixManager:
     @classmethod
     def _erase_primary_team_data(cls):
         # 2024-05-23 note from Tim:
-        # this was absolutely thrashing throughput on clickhouse. Please don't re-enable
+        # this was absolutely thrashing throughput on datastore. Please don't re-enable
         # AsyncEventDeletion().process(
         #     [
         #         AsyncDeletion(
@@ -247,20 +247,20 @@ class MatrixManager:
         )
 
     @classmethod
-    def _sync_postgres_with_clickhouse_data(cls, source_team_id: int, target_team_id: int):
+    def _sync_postgres_with_datastore_data(cls, source_team_id: int, target_team_id: int):
         from insights.models.group.sql import SELECT_GROUPS_OF_TEAM
         from insights.models.person.sql import SELECT_PERSON_DISTINCT_ID2S_OF_TEAM, SELECT_PERSONS_OF_TEAM
 
         list_params = {"source_team_id": source_team_id}
         # Persons
-        clickhouse_persons = query_with_columns(
+        datastore_persons = query_with_columns(
             SELECT_PERSONS_OF_TEAM,
             list_params,
             columns_to_rename={"id": "uuid"},
         )
         bulk_persons: dict[str, Person] = {}
         person_fields = {f.name for f in Person._meta.get_fields()}
-        for row in clickhouse_persons:
+        for row in datastore_persons:
             filtered_row = {k: v for k, v in row.items() if k in person_fields}
             properties = json.loads(filtered_row.pop("properties", "{}"))
             bulk_persons[row["uuid"]] = Person(team_id=target_team_id, properties=properties, **filtered_row)
@@ -268,7 +268,7 @@ class MatrixManager:
         Person.objects.bulk_create(bulk_persons.values())
         # Person distinct IDs
         pre_existing_id_count = PersonDistinctId.objects.filter(team_id=target_team_id).count()
-        clickhouse_distinct_ids = query_with_columns(
+        datastore_distinct_ids = query_with_columns(
             SELECT_PERSON_DISTINCT_ID2S_OF_TEAM,
             list_params,
             ["team_id", "is_deleted", "_timestamp", "_offset", "_partition"],
@@ -276,7 +276,7 @@ class MatrixManager:
         )
         bulk_person_distinct_ids = []
         person_distinct_id_fields = {f.name for f in PersonDistinctId._meta.get_fields()}
-        for row in clickhouse_distinct_ids:
+        for row in datastore_distinct_ids:
             person_uuid = row.pop("person_uuid")
             try:
                 filtered_row = {k: v for k, v in row.items() if k in person_distinct_id_fields}
@@ -293,14 +293,14 @@ class MatrixManager:
             print(f"{pre_existing_id_count} IDS UNACCOUNTED FOR")
         PersonDistinctId.objects.bulk_create(bulk_person_distinct_ids, ignore_conflicts=True)
         # Groups
-        clickhouse_groups = query_with_columns(
+        datastore_groups = query_with_columns(
             SELECT_GROUPS_OF_TEAM,
             list_params,
             ["team_id", "_timestamp", "_offset", "is_deleted"],
         )
         bulk_groups = []
         group_fields = {f.name for f in Group._meta.get_fields()}
-        for row in clickhouse_groups:
+        for row in datastore_groups:
             filtered_row = {k: v for k, v in row.items() if k in group_fields}
             group_properties = json.loads(filtered_row.pop("group_properties", "{}"))
             bulk_groups.append(
@@ -345,7 +345,7 @@ class MatrixManager:
 
     @staticmethod
     def _save_past_sim_events(team: Team, events: list[SimEvent]):
-        """Past events are saved into ClickHouse right away (via Kafka of course)."""
+        """Past events are saved into Datastore right away (via Kafka of course)."""
         from insights.models.event.util import create_event
 
         for event in events:
@@ -384,7 +384,7 @@ class MatrixManager:
 
         raw_create_group_ch(team.pk, type_index, key, properties, timestamp)
 
-    def _sleep_until_person_data_in_clickhouse(self, team_id: int):
+    def _sleep_until_person_data_in_datastore(self, team_id: int):
         from insights.models.person.sql import GET_PERSON_COUNT_FOR_TEAM, GET_PERSON_DISTINCT_ID2_COUNT_FOR_TEAM
 
         MAX_WAIT_ITERATIONS = 240  # 240 * 0.5s = 120 seconds (increased from 60s for CI reliability)
@@ -400,25 +400,25 @@ class MatrixManager:
             if persons_ready and person_distinct_ids_ready:
                 if self.print_steps:
                     print(
-                        f"Source person data fully loaded into ClickHouse after {i * 0.5:.1f}s. "
+                        f"Source person data fully loaded into Datastore after {i * 0.5:.1f}s. "
                         f"Persons: {persons_progress}. Person distinct IDs: {person_distinct_ids_progress}.\n"
                         "Setting up project..."
                     )
                 break
             if self.print_steps:
                 print(
-                    "Waiting for person data to land in ClickHouse... "
+                    "Waiting for person data to land in Datastore... "
                     f"Persons: {persons_progress}. Person distinct IDs: {person_distinct_ids_progress}."
                 )
             elif i % 20 == 0 and i > 0:
                 print(
-                    f"Still waiting for ClickHouse sync... {i * 0.5:.0f}s elapsed. "
+                    f"Still waiting for Datastore sync... {i * 0.5:.0f}s elapsed. "
                     f"Persons: {persons_progress}. Person distinct IDs: {person_distinct_ids_progress}."
                 )
             sleep(0.5)
         else:
             raise TimeoutError(
-                f"Person data did not land in ClickHouse after {MAX_WAIT_ITERATIONS * 0.5}s. "
+                f"Person data did not land in Datastore after {MAX_WAIT_ITERATIONS * 0.5}s. "
                 f"Expected {self._persons_created} persons and {self._person_distinct_ids_created} distinct IDs, "
                 f"got {person_count} persons and {person_distinct_id_count} distinct IDs."
             )

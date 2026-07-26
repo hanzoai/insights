@@ -140,7 +140,7 @@ fancy-regex = "0.17"
 lz-str = "0.2.1"
 opentelemetry-proto = { version = "0.29.0", features = ["with-serde"] }
 tonic = "0.12.3"
-clickhouse = { version = "0.13.2", features = [
+datastore = { version = "0.13.2", features = [
     "uuid",
     "time",
     "inserter",

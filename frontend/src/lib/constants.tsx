@@ -257,7 +257,7 @@ export const FEATURE_FLAGS = {
     CDP_PERSON_UPDATES: 'cdp-person-updates', // owner: #team-workflows-cdp
     CDP_DWH_TABLE_SOURCE: 'cdp-dwh-table-source', // owner: #team-workflows-cdp
     COHORT_CALCULATION_HISTORY: 'cohort-calculation-history', // owner: @gustavo #team-feature-flags
-    COHORT_EMAIL_LOOKUP_CLICKHOUSE: 'cohort-email-lookup-clickhouse', // owner: @gustavo #team-feature-flags
+    COHORT_EMAIL_LOOKUP_DATASTORE: 'cohort-email-lookup-datastore', // owner: @gustavo #team-feature-flags
     CONDENSED_FILTER_BAR: 'condensed_filter_bar', // owner: @jordanm-insights #team-web-analytics
     CREATE_FORM_TOOL: 'phai-create-form-tool', // owner: @kappa90 #team-insights-ai
     CRM_ITERATION_ONE: 'crm-iteration-one', // owner: @arthurdedeus #team-customer-analytics
@@ -272,7 +272,7 @@ export const FEATURE_FLAGS = {
     DWH_FREE_SYNCS: 'dwh-free-syncs', // owner: @Gilbert09  #team-data-stack
     DWH_JOIN_TABLE_PREVIEW: 'dwh-join-table-preview', // owner: @arthurdedeus #team-customer-analytics
     EDITOR_DRAFTS: 'editor-drafts', // owner: @EDsCODE #team-data-stack
-    ENDPOINTS: 'embedded-analytics', // owner: @sakce #team-clickhouse
+    ENDPOINTS: 'embedded-analytics', // owner: @sakce #team-datastore
     ERROR_TRACKING_ISSUE_CORRELATION: 'error-tracking-issue-correlation', // owner: @david #team-error-tracking
     ERROR_TRACKING_ISSUE_SPLITTING: 'error-tracking-issue-splitting', // owner: @david #team-error-tracking
     ERROR_TRACKING_JIRA_INTEGRATION: 'error-tracking-jira-integration', // owner: #team-error-tracking

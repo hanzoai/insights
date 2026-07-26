@@ -331,7 +331,7 @@ def get_source_aggregation_expr(
             ExperimentMetricMathType.DAU,
             ExperimentMetricMathType.UNIQUE_GROUP,
         ]:
-            # Clickhouse counts empty values as distinct, so need to explicitly exclude them
+            # Datastore counts empty values as distinct, so need to explicitly exclude them
             # Also handle the special case of null UUIDs (00000000-0000-0000-0000-000000000000)
             return parse_expr(f"""toFloat(count(distinct
                 multiIf(

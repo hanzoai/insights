@@ -1,7 +1,7 @@
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -20,7 +20,7 @@ from insights.models.utils import uuid7
 
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentSessionPropertyMetrics(ExperimentQueryRunnerBaseTest):
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2024-01-01T12:00:00Z")
     def test_session_duration_not_multiplied_across_events(self):
         feature_flag = self.create_feature_flag()

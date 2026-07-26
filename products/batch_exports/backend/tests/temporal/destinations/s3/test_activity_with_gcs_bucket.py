@@ -8,7 +8,7 @@ import pytest_asyncio
 from temporalio.testing._activity import ActivityEnvironment
 
 from insights.batch_exports.service import BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.s3_batch_export import (
     COMPRESSION_EXTENSIONS,
@@ -19,7 +19,7 @@ from products.batch_exports.backend.temporal.destinations.s3_batch_export import
 )
 from products.batch_exports.backend.tests.temporal.destinations.s3.utils import (
     TEST_S3_MODELS,
-    assert_clickhouse_records_in_s3,
+    assert_datastore_records_in_s3,
     has_valid_gcs_credentials,
     run_activity,
 )
@@ -57,7 +57,7 @@ async def gcs_client(bucket_name, s3_key_prefix):
 @pytest.mark.parametrize("model", TEST_S3_MODELS)
 @pytest.mark.parametrize("file_format", FILE_FORMAT_EXTENSIONS.keys())
 async def test_insert_into_s3_activity_puts_data_into_gcs(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     gcs_client,
     activity_environment: ActivityEnvironment,
@@ -72,7 +72,7 @@ async def test_insert_into_s3_activity_puts_data_into_gcs(
 ):
     """Test that the insert_into_s3_activity_from_stage function ends up with data into GCS.
 
-    We use the generate_test_events_in_clickhouse function to generate several sets
+    We use the generate_test_events_in_datastore function to generate several sets
     of events. Some of these sets are expected to be exported, and others not. Expected
     events are those that:
     * Are created for the team_id of the batch export.
@@ -80,7 +80,7 @@ async def test_insert_into_s3_activity_puts_data_into_gcs(
     * Are not duplicates of other events that are in the same batch.
     * Match any filters specified in the batch export model.
 
-    Once we have these events, we pass them to the assert_clickhouse_records_in_s3 function to check
+    Once we have these events, we pass them to the assert_datastore_records_in_s3 function to check
     that they appear in the expected GCS bucket and key.
     """
 
@@ -139,9 +139,9 @@ async def test_insert_into_s3_activity_puts_data_into_gcs(
     elif isinstance(model, BatchExportModel) and model.name == "sessions":
         sort_key = "session_id"
 
-    await assert_clickhouse_records_in_s3(
+    await assert_datastore_records_in_s3(
         s3_compatible_client=gcs_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         bucket_name=bucket_name,
         key_prefix=prefix,
         team_id=ateam.pk,
@@ -162,7 +162,7 @@ async def test_insert_into_s3_activity_puts_data_into_gcs(
 @pytest.mark.parametrize("file_format", FILE_FORMAT_EXTENSIONS.keys())
 @pytest.mark.parametrize("max_file_size_mb", [None, 6])
 async def test_insert_into_s3_activity_puts_splitted_files_into_gcs(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     gcs_client,
     activity_environment,
@@ -191,8 +191,8 @@ async def test_insert_into_s3_activity_puts_splitted_files_into_gcs(
 
     prefix = str(uuid.uuid4())
 
-    events_1, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    events_1, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -203,8 +203,8 @@ async def test_insert_into_s3_activity_puts_splitted_files_into_gcs(
         properties={"$prop1": 123},
     )
 
-    events_2, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    events_2, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,

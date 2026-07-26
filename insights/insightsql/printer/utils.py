@@ -10,7 +10,7 @@ from insights.insightsql.database.database import Database
 from insights.insightsql.errors import InternalInsightsQLError
 from insights.insightsql.modifiers import create_default_modifiers_for_team, set_default_in_cohort_via
 from insights.insightsql.printer.base import InsightsQLPrinter
-from insights.insightsql.printer.clickhouse import ClickHousePrinter
+from insights.insightsql.printer.datastore import DatastorePrinter
 from insights.insightsql.printer.postgres import PostgresPrinter
 from insights.insightsql.resolver import resolve_types
 from insights.insightsql.transforms.in_cohort import resolve_in_cohorts, resolve_in_cohorts_conjoined
@@ -20,7 +20,7 @@ from insights.insightsql.transforms.property_types import PropertySwapper, build
 from insights.insightsql.visitor import clone_expr
 from insights.insightsql.workload import WorkloadCollector
 
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 from insights.models.team import Team
 
 
@@ -107,7 +107,7 @@ def prepare_ast_for_printing(
         with context.timings.measure("resolve_lazy_tables"):
             resolve_lazy_tables(node, dialect, stack, context)
 
-    if dialect == "clickhouse":
+    if dialect == "datastore":
         with context.timings.measure("resolve_property_types"):
             build_property_swapper(node, context)
             if context.property_swapper is None:
@@ -168,8 +168,8 @@ def print_prepared_ast(
         printer_class: type[InsightsQLPrinter]
 
         match dialect:
-            case "clickhouse":
-                printer_class = ClickHousePrinter
+            case "datastore":
+                printer_class = DatastorePrinter
             case "postgres":
                 printer_class = PostgresPrinter
             case "insightsql":

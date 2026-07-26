@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.utils.timezone import now
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Survey
 
 
@@ -38,7 +38,7 @@ def _update_survey_adaptive_sampling(survey: Survey) -> None:
 
 
 def _get_survey_responses_count(survey_id: int) -> int:
-    # nosemgrep: clickhouse-fstring-param-audit - no interpolation, only parameterized values
+    # nosemgrep: datastore-fstring-param-audit - no interpolation, only parameterized values
     data = sync_execute(
         f"""
                 SELECT JSONExtractString(properties, '$survey_id') as survey_id, count()

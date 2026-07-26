@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.person_property_reconciliation import (
     FILTERED_PERSON_UPDATE_PROPERTIES,
     PersonPropertyDiffs,
@@ -23,29 +23,29 @@ from insights.dags.person_property_reconciliation import (
     RawPersonPropertyUpdates,
     SkipReason,
     compare_raw_updates_with_person_state,
-    fetch_person_properties_from_clickhouse,
+    fetch_person_properties_from_datastore,
     filter_event_person_properties,
     format_ch_timestamp,
-    get_affected_person_ids_from_clickhouse,
-    get_person_property_updates_from_clickhouse,
+    get_affected_person_ids_from_datastore,
+    get_person_property_updates_from_datastore,
     get_person_property_updates_windowed,
     get_person_property_updates_windowed_batched,
-    get_raw_person_property_updates_from_clickhouse,
+    get_raw_person_property_updates_from_datastore,
     merge_raw_person_property_updates,
     parse_ch_timestamp,
-    query_team_ids_from_clickhouse,
+    query_team_ids_from_datastore,
     reconcile_person_properties,
     reconcile_with_concurrent_changes,
     update_person_with_version_check,
 )
 
 
-class TestClickHouseResultParsing:
-    """Test that ClickHouse query results are correctly parsed into PersonPropertyDiffs objects."""
+class TestDatastoreResultParsing:
+    """Test that Datastore query results are correctly parsed into PersonPropertyDiffs objects."""
 
     def test_parses_set_diff_tuples(self):
         """Test that set_diff array of tuples is correctly parsed."""
-        # Simulate ClickHouse returning: (person_id, person_version, set_diff, set_once_diff, unset_diff)
+        # Simulate Datastore returning: (person_id, person_version, set_diff, set_once_diff, unset_diff)
         # set_diff is an array of (key, value, timestamp) tuples
         # Values are raw JSON strings that get parsed via json.loads()
         mock_rows: list[
@@ -66,7 +66,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -109,7 +109,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -147,7 +147,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -198,7 +198,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -234,7 +234,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -243,9 +243,9 @@ class TestClickHouseResultParsing:
         assert len(results) == 0
 
     def test_handles_empty_results(self):
-        """Test handling when ClickHouse returns no rows."""
+        """Test handling when Datastore returns no rows."""
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=[]):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -281,7 +281,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -333,7 +333,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -371,7 +371,7 @@ class TestClickHouseResultParsing:
         ]
 
         with patch("insights.dags.person_property_reconciliation.sync_execute", return_value=mock_rows):
-            results = get_person_property_updates_from_clickhouse(
+            results = get_person_property_updates_from_datastore(
                 team_id=1,
                 bug_window_start="2024-01-01T00:00:00Z",
             )
@@ -395,9 +395,9 @@ class TestClickHouseResultParsing:
         assert person_diffs.unset_updates["old_field"].value is None
 
     def test_no_bug_window_end_parameter_regression(self):
-        """Regression test: get_person_property_updates_from_clickhouse should NOT accept bug_window_end.
+        """Regression test: get_person_property_updates_from_datastore should NOT accept bug_window_end.
 
-        The function uses ClickHouse's now() for the upper bound, ensuring all events
+        The function uses Datastore's now() for the upper bound, ensuring all events
         from bug_window_start until the current time are included. This is intentional:
         - bug_window_start/end is used to FIND teams with affected events
         - When processing a team, we read ALL events from bug_window_start to now()
@@ -406,11 +406,11 @@ class TestClickHouseResultParsing:
         """
         import inspect
 
-        sig = inspect.signature(get_person_property_updates_from_clickhouse)
+        sig = inspect.signature(get_person_property_updates_from_datastore)
         param_names = list(sig.parameters.keys())
 
         assert "bug_window_end" not in param_names, (
-            "bug_window_end should not be a parameter. The function should use ClickHouse's now() for the upper bound."
+            "bug_window_end should not be a parameter. The function should use Datastore's now() for the upper bound."
         )
         assert "team_id" in param_names
         assert "bug_window_start" in param_names
@@ -798,7 +798,7 @@ class TestUpdatePersonWithVersionCheck:
         assert result_data is None
         assert skip_reason == SkipReason.NOT_FOUND
 
-    @patch("insights.dags.person_property_reconciliation.fetch_person_properties_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.fetch_person_properties_from_datastore")
     def test_version_mismatch_retry(self, mock_fetch_ch_properties):
         """Test retry on version mismatch (concurrent modification).
 
@@ -1799,7 +1799,7 @@ class TestMergeRawPersonPropertyUpdates:
 class TestCompareRawUpdatesWithPersonState:
     """Test the compare_raw_updates_with_person_state function for windowed query flow.
 
-    This function compares merged raw event updates against current person state in ClickHouse.
+    This function compares merged raw event updates against current person state in Datastore.
     It filters to only return actual differences that need to be applied.
     """
 
@@ -2095,7 +2095,7 @@ class TestCompareRawUpdatesWithPersonState:
 class TestGetPersonPropertyUpdatesWindowed:
     """Test the get_person_property_updates_windowed function."""
 
-    @patch("insights.dags.person_property_reconciliation.get_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_person_property_updates_from_datastore")
     def test_window_seconds_zero_calls_original_once(self, mock_get_updates):
         """Test that window_seconds=0 calls original function once."""
         mock_get_updates.return_value = [
@@ -2117,7 +2117,7 @@ class TestGetPersonPropertyUpdatesWindowed:
         mock_get_updates.assert_called_once_with(1, "2024-01-01 00:00:00")
         assert len(result) == 1
 
-    @patch("insights.dags.person_property_reconciliation.get_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_person_property_updates_from_datastore")
     def test_window_seconds_negative_calls_original_once(self, mock_get_updates):
         """Test that negative window_seconds calls original function once."""
         mock_get_updates.return_value = []
@@ -2132,8 +2132,8 @@ class TestGetPersonPropertyUpdatesWindowed:
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_window_seconds_positive_creates_windows(
         self, mock_get_affected, mock_get_raw, mock_datetime, mock_compare
     ):
@@ -2165,8 +2165,8 @@ class TestGetPersonPropertyUpdatesWindowed:
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_window_merges_results_across_windows(self, mock_get_affected, mock_get_raw, mock_datetime, mock_compare):
         """Test that results are properly merged across windows."""
         mock_now = datetime(2024, 1, 1, 2, 0, 0, tzinfo=UTC)
@@ -2222,8 +2222,8 @@ class TestGetPersonPropertyUpdatesWindowed:
         assert raw_updates_list[0].set_updates["email"].value == "new@example.com"
 
 
-class TestGetAffectedPersonIdsFromClickhouse:
-    """Test the get_affected_person_ids_from_clickhouse function.
+class TestGetAffectedPersonIdsFromDatastore:
+    """Test the get_affected_person_ids_from_datastore function.
 
     This query aggregates event properties within the bug window, compares against
     current person state, and returns only person_ids with actual diffs.
@@ -2238,7 +2238,7 @@ class TestGetAffectedPersonIdsFromClickhouse:
             ("person-3",),
         ]
 
-        result = get_affected_person_ids_from_clickhouse(
+        result = get_affected_person_ids_from_datastore(
             team_id=1,
             bug_window_start="2024-01-01 00:00:00",
             bug_window_end="2024-01-02 00:00:00",
@@ -2258,7 +2258,7 @@ class TestGetAffectedPersonIdsFromClickhouse:
         """Test that empty list is returned when no affected persons."""
         mock_sync_execute.return_value = []
 
-        result = get_affected_person_ids_from_clickhouse(
+        result = get_affected_person_ids_from_datastore(
             team_id=1,
             bug_window_start="2024-01-01 00:00:00",
             bug_window_end="2024-01-02 00:00:00",
@@ -2271,7 +2271,7 @@ class TestGetAffectedPersonIdsFromClickhouse:
         """Detection query must exclude events that only set FILTERED_PERSON_UPDATE_PROPERTIES."""
         mock_sync_execute.return_value = []
 
-        get_affected_person_ids_from_clickhouse(
+        get_affected_person_ids_from_datastore(
             team_id=1,
             bug_window_start="2024-01-01 00:00:00",
             bug_window_end="2024-01-02 00:00:00",
@@ -2286,14 +2286,14 @@ class TestGetAffectedPersonIdsFromClickhouse:
 
 
 class TestGetRawPersonPropertyUpdatesWithPersonIds:
-    """Test the person_ids filter parameter in get_raw_person_property_updates_from_clickhouse."""
+    """Test the person_ids filter parameter in get_raw_person_property_updates_from_datastore."""
 
     @patch("insights.dags.person_property_reconciliation.sync_execute")
     def test_filters_by_person_ids(self, mock_sync_execute):
         """Test that query filters to specific person_ids (required param)."""
         mock_sync_execute.return_value = []
 
-        get_raw_person_property_updates_from_clickhouse(
+        get_raw_person_property_updates_from_datastore(
             team_id=1,
             bug_window_start="2024-01-01 00:00:00",
             bug_window_end="2024-01-02 00:00:00",
@@ -2309,9 +2309,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
     """Test the get_person_property_updates_windowed_batched iterator function."""
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_yields_batches_of_persons(self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare):
         """Test that function yields batches when person count exceeds batch size."""
         # Setup: 3 affected persons, batch size of 2 = 2 batches
@@ -2379,7 +2379,7 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert len(results[1]) == 1  # Second batch has 1 person with diffs
         assert results[1][0].person_id == "person-3"
 
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_yields_nothing_when_no_affected_persons(self, mock_get_affected):
         """Test that function yields nothing when no affected persons."""
         mock_get_affected.return_value = []
@@ -2396,9 +2396,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert results == []
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_filters_raw_queries_by_person_batch(self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare):
         """Test that windowed queries are filtered to the current person batch."""
         mock_get_affected.return_value = ["person-1", "person-2", "person-3"]
@@ -2438,9 +2438,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert third_call[1]["person_ids"] == ("person-3",)
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_uses_bug_window_end_for_affected_persons_query(
         self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare
     ):
@@ -2456,20 +2456,20 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
             )
         )
 
-        # Verify get_affected_person_ids_from_clickhouse was called with bug_window_end
+        # Verify get_affected_person_ids_from_datastore was called with bug_window_end
         mock_get_affected.assert_called_once_with(
             team_id=1,
             bug_window_start="2024-01-01 00:00:00",
             bug_window_end="2024-01-02 00:00:00",
         )
 
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_logs_error_when_affected_persons_query_fails(self, mock_get_affected):
         """Test that errors during affected persons query are logged with context."""
-        mock_get_affected.side_effect = Exception("ClickHouse connection failed")
+        mock_get_affected.side_effect = Exception("Datastore connection failed")
         mock_logger = MagicMock()
 
-        with pytest.raises(Exception, match="ClickHouse connection failed"):
+        with pytest.raises(Exception, match="Datastore connection failed"):
             list(
                 get_person_property_updates_windowed_batched(
                     team_id=1,
@@ -2486,9 +2486,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert "team_id=1" in error_call
         assert "Failed to query affected persons" in error_call
 
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_logs_error_when_window_query_fails(self, mock_get_affected, mock_datetime, mock_get_raw):
         """Test that errors during window queries are logged with batch and window context."""
         mock_get_affected.return_value = ["person-1"]
@@ -2525,9 +2525,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert any("team_id=1" in msg for msg in error_messages)
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_logs_error_when_compare_fails(self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare):
         """Test that errors during person state comparison are logged with context."""
         mock_get_affected.return_value = ["person-1"]
@@ -2564,9 +2564,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert any("1 persons" in msg for msg in error_calls)
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_yields_nothing_when_compare_returns_empty(
         self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare
     ):
@@ -2600,9 +2600,9 @@ class TestGetPersonPropertyUpdatesWindowedBatched:
         assert results == []
 
     @patch("insights.dags.person_property_reconciliation.compare_raw_updates_with_person_state")
-    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_raw_person_property_updates_from_datastore")
     @patch("insights.dags.person_property_reconciliation.datetime")
-    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_clickhouse")
+    @patch("insights.dags.person_property_reconciliation.get_affected_person_ids_from_datastore")
     def test_merges_across_windows_correctly(self, mock_get_affected, mock_datetime, mock_get_raw, mock_compare):
         """Test that $set takes newest timestamp and $set_once takes earliest when merging windows."""
         mock_get_affected.return_value = ["person-1"]
@@ -2665,13 +2665,13 @@ class TestParseFormatChTimestamp:
     """Test the parse_ch_timestamp and format_ch_timestamp helper functions."""
 
     def test_parse_ch_timestamp(self):
-        """Test parsing ClickHouse timestamp string to datetime."""
+        """Test parsing Datastore timestamp string to datetime."""
         result = parse_ch_timestamp("2024-01-15 12:30:45")
         assert result == datetime(2024, 1, 15, 12, 30, 45, tzinfo=UTC)
         assert result.tzinfo == UTC
 
     def test_format_ch_timestamp(self):
-        """Test formatting datetime to ClickHouse timestamp string."""
+        """Test formatting datetime to Datastore timestamp string."""
         dt = datetime(2024, 1, 15, 12, 30, 45, tzinfo=UTC)
         result = format_ch_timestamp(dt)
         assert result == "2024-01-15 12:30:45"
@@ -2749,10 +2749,10 @@ class TestPersonPropertyDiffsDataclass:
 
 
 @pytest.mark.django_db
-class TestClickHouseQueryIntegration:
-    """Integration tests that insert data into ClickHouse and run the actual query."""
+class TestDatastoreQueryIntegration:
+    """Integration tests that insert data into Datastore and run the actual query."""
 
-    def test_unset_uses_latest_timestamp_regression(self, cluster: ClickhouseCluster):
+    def test_unset_uses_latest_timestamp_regression(self, cluster: DatastoreCluster):
         """
         Regression test: $unset should use max(timestamp), not min(timestamp).
 
@@ -2763,7 +2763,7 @@ class TestClickHouseQueryIntegration:
 
         team_id = 99901
         person_id = UUID("11111111-1111-1111-1111-000000000001")
-        # Use naive datetimes since ClickHouse returns naive datetimes
+        # Use naive datetimes since Datastore returns naive datetimes
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
 
@@ -2821,7 +2821,7 @@ class TestClickHouseQueryIntegration:
         cluster.any_host(insert_person).result()
 
         # Run the actual query
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -2847,12 +2847,12 @@ class TestClickHouseQueryIntegration:
             f"Earlier timestamp was {earlier_ts}."
         )
 
-    def test_set_uses_latest_timestamp(self, cluster: ClickhouseCluster):
+    def test_set_uses_latest_timestamp(self, cluster: DatastoreCluster):
         """$set should use max(timestamp) - latest value wins."""
 
         team_id = 99902
         person_id = UUID("22222222-2222-2222-2222-000000000002")
-        # Use naive datetimes since ClickHouse returns naive datetimes
+        # Use naive datetimes since Datastore returns naive datetimes
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
 
@@ -2885,7 +2885,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -2900,12 +2900,12 @@ class TestClickHouseQueryIntegration:
         result_ts = person_diffs.set_updates["name"].timestamp.replace(tzinfo=None)
         assert abs((result_ts - later_ts).total_seconds()) < 1
 
-    def test_set_once_uses_earliest_timestamp(self, cluster: ClickhouseCluster):
+    def test_set_once_uses_earliest_timestamp(self, cluster: DatastoreCluster):
         """$set_once should use min(timestamp) - first value wins."""
 
         team_id = 99903
         person_id = UUID("33333333-3333-3333-3333-000000000003")
-        # Use naive datetimes since ClickHouse returns naive datetimes
+        # Use naive datetimes since Datastore returns naive datetimes
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
 
@@ -2938,7 +2938,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -2953,7 +2953,7 @@ class TestClickHouseQueryIntegration:
         result_ts = person_diffs.set_once_updates["referrer"].timestamp.replace(tzinfo=None)
         assert abs((result_ts - earlier_ts).total_seconds()) < 1
 
-    def test_multiple_operations_same_key_in_batch(self, cluster: ClickhouseCluster):
+    def test_multiple_operations_same_key_in_batch(self, cluster: DatastoreCluster):
         """
         Test multiple operation types on same key: $set then $unset.
 
@@ -2963,7 +2963,7 @@ class TestClickHouseQueryIntegration:
 
         team_id = 99904
         person_id = UUID("44444444-4444-4444-4444-000000000004")
-        # Use naive datetimes since ClickHouse returns naive datetimes
+        # Use naive datetimes since Datastore returns naive datetimes
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
 
@@ -2998,7 +2998,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3015,12 +3015,12 @@ class TestClickHouseQueryIntegration:
         assert "email" in person_diffs.unset_updates
         assert person_diffs.unset_updates["email"].value is None
 
-    def test_mixed_operations_different_keys(self, cluster: ClickhouseCluster):
+    def test_mixed_operations_different_keys(self, cluster: DatastoreCluster):
         """Test $set, $set_once, and $unset on different keys in same event."""
 
         team_id = 99905
         person_id = UUID("55555555-5555-5555-5555-000000000005")
-        # Use naive datetimes since ClickHouse returns naive datetimes
+        # Use naive datetimes since Datastore returns naive datetimes
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
 
@@ -3071,7 +3071,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3091,7 +3091,7 @@ class TestClickHouseQueryIntegration:
         assert "deprecated_field" in person_diffs.unset_updates
         assert person_diffs.unset_updates["deprecated_field"].value is None
 
-    def test_set_with_various_json_types(self, cluster: ClickhouseCluster):
+    def test_set_with_various_json_types(self, cluster: DatastoreCluster):
         """Test $set with various JSON value types: string, number, boolean, null, array, object."""
         team_id = 99906
         person_id = UUID("66666666-6666-6666-6666-000000000006")
@@ -3163,7 +3163,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3199,7 +3199,7 @@ class TestClickHouseQueryIntegration:
         assert updates["object_prop"] == {"nested": "value", "count": 123}
         assert isinstance(updates["object_prop"], dict)
 
-    def test_set_with_null_value_is_filtered_out(self, cluster: ClickhouseCluster):
+    def test_set_with_null_value_is_filtered_out(self, cluster: DatastoreCluster):
         """Test that $set with null value is filtered out (use $unset for removal)."""
         team_id = 99907
         person_id = UUID("77777777-7777-7777-7777-000000000007")
@@ -3260,7 +3260,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3277,7 +3277,7 @@ class TestClickHouseQueryIntegration:
             "$set with null value should be filtered out. Use $unset to remove properties."
         )
 
-    def test_set_once_with_various_json_types(self, cluster: ClickhouseCluster):
+    def test_set_once_with_various_json_types(self, cluster: DatastoreCluster):
         """Test $set_once with various JSON value types: string, number, boolean, array, object."""
         team_id = 99908
         person_id = UUID("88888888-8888-8888-8888-000000000008")
@@ -3339,7 +3339,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3375,7 +3375,7 @@ class TestClickHouseQueryIntegration:
         assert updates["object_prop"] == {"nested": "value", "count": 123}
         assert isinstance(updates["object_prop"], dict)
 
-    def test_set_once_with_null_value_is_filtered_out(self, cluster: ClickhouseCluster):
+    def test_set_once_with_null_value_is_filtered_out(self, cluster: DatastoreCluster):
         """Test that $set_once with null value is filtered out."""
         team_id = 99909
         person_id = UUID("99999999-9999-9999-9999-000000000009")
@@ -3431,7 +3431,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3448,7 +3448,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Person Merge Tests ====================
 
-    def test_person_merge_uses_override_person_id(self, cluster: ClickhouseCluster):
+    def test_person_merge_uses_override_person_id(self, cluster: DatastoreCluster):
         """
         When a distinct_id has an override in person_distinct_id_overrides,
         events should be attributed to the override person_id, not the original.
@@ -3530,7 +3530,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3543,7 +3543,7 @@ class TestClickHouseQueryIntegration:
         assert "existing" in updates
         assert updates["existing"] == "new_value"
 
-    def test_multiple_distinct_ids_same_person(self, cluster: ClickhouseCluster):
+    def test_multiple_distinct_ids_same_person(self, cluster: DatastoreCluster):
         """
         Events from multiple distinct_ids that map to the same person
         should be aggregated together.
@@ -3582,7 +3582,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3592,7 +3592,7 @@ class TestClickHouseQueryIntegration:
         updates = {key: pv.value for key, pv in results[0].set_updates.items()}
         assert updates["name"] == "Latest"
 
-    def test_deleted_override_not_used(self, cluster: ClickhouseCluster):
+    def test_deleted_override_not_used(self, cluster: DatastoreCluster):
         """
         When an override has is_deleted=1, it should not be used.
         Events should use the original person_id from the event.
@@ -3658,7 +3658,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3667,7 +3667,7 @@ class TestClickHouseQueryIntegration:
         assert len(results) == 1
         assert results[0].person_id == str(original_person_id)
 
-    def test_override_version_ordering(self, cluster: ClickhouseCluster):
+    def test_override_version_ordering(self, cluster: DatastoreCluster):
         """
         When multiple override versions exist, the highest version should win.
         """
@@ -3727,7 +3727,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3736,7 +3736,7 @@ class TestClickHouseQueryIntegration:
         assert len(results) == 1
         assert results[0].person_id == str(final_merged_person_id)
 
-    def test_deleted_person_filtered_out(self, cluster: ClickhouseCluster):
+    def test_deleted_person_filtered_out(self, cluster: DatastoreCluster):
         """
         Persons with is_deleted=1 in the person table should be filtered out.
         There's no point updating properties on a deleted person.
@@ -3782,7 +3782,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3790,7 +3790,7 @@ class TestClickHouseQueryIntegration:
         # Deleted persons should NOT be processed
         assert len(results) == 0
 
-    def test_person_multiple_versions_uses_latest(self, cluster: ClickhouseCluster):
+    def test_person_multiple_versions_uses_latest(self, cluster: DatastoreCluster):
         """
         When a person has multiple versions in CH, argMax(properties, version)
         should select the properties from the highest version.
@@ -3837,7 +3837,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3850,7 +3850,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Same Key Operation Tests ====================
 
-    def test_set_and_set_once_on_same_key(self, cluster: ClickhouseCluster):
+    def test_set_and_set_once_on_same_key(self, cluster: DatastoreCluster):
         """
         When $set and $set_once both target the same key, both should be returned
         as separate operations (query doesn't merge them, Python logic handles precedence).
@@ -3894,7 +3894,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3911,7 +3911,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Diff Filtering Tests ====================
 
-    def test_set_with_same_value_not_in_diff(self, cluster: ClickhouseCluster):
+    def test_set_with_same_value_not_in_diff(self, cluster: DatastoreCluster):
         """
         When $set value equals current person property value,
         it should NOT be in set_diff (no change needed).
@@ -3948,7 +3948,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -3956,7 +3956,7 @@ class TestClickHouseQueryIntegration:
         # Should be empty - no diff when values are the same
         assert len(results) == 0
 
-    def test_set_on_missing_property_not_in_diff(self, cluster: ClickhouseCluster):
+    def test_set_on_missing_property_not_in_diff(self, cluster: DatastoreCluster):
         """
         When $set targets a property that doesn't exist in person,
         it should NOT be in set_diff (set_diff only updates existing different values).
@@ -3993,7 +3993,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4001,7 +4001,7 @@ class TestClickHouseQueryIntegration:
         # Should be empty - set_diff doesn't include missing properties
         assert len(results) == 0
 
-    def test_unset_on_missing_property_not_in_diff(self, cluster: ClickhouseCluster):
+    def test_unset_on_missing_property_not_in_diff(self, cluster: DatastoreCluster):
         """
         When $unset targets a property that doesn't exist in person,
         it should NOT be in unset_diff.
@@ -4038,7 +4038,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4048,7 +4048,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Empty Value Tests ====================
 
-    def test_empty_set_object_no_results(self, cluster: ClickhouseCluster):
+    def test_empty_set_object_no_results(self, cluster: DatastoreCluster):
         """Empty $set object should not cause issues or return results."""
         team_id = 99916
         person_id = UUID("11110000-0000-0000-0000-000000000001")
@@ -4081,7 +4081,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4089,7 +4089,7 @@ class TestClickHouseQueryIntegration:
         # Empty $set should produce no results
         assert len(results) == 0
 
-    def test_empty_string_value_is_valid(self, cluster: ClickhouseCluster):
+    def test_empty_string_value_is_valid(self, cluster: DatastoreCluster):
         """Empty string is a valid value in $set - different from null."""
         team_id = 99917
         person_id = UUID("22220000-0000-0000-0000-000000000001")
@@ -4130,7 +4130,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4149,7 +4149,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Window Filtering Tests ====================
 
-    def test_events_before_bug_window_start_filtered(self, cluster: ClickhouseCluster):
+    def test_events_before_bug_window_start_filtered(self, cluster: DatastoreCluster):
         """Events with timestamp before bug_window_start should be filtered.
 
         Events after bug_window_start are included (up to now()).
@@ -4200,7 +4200,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4214,7 +4214,7 @@ class TestClickHouseQueryIntegration:
         # Events before bug_window_start should NOT be included
         assert "before" not in updates
 
-    def test_person_created_before_bug_window_with_events_after_is_included(self, cluster: ClickhouseCluster):
+    def test_person_created_before_bug_window_with_events_after_is_included(self, cluster: DatastoreCluster):
         """Regression test: Person created before bug_window_start with events after should be included.
 
         Scenario:
@@ -4260,7 +4260,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4272,7 +4272,7 @@ class TestClickHouseQueryIntegration:
         assert "email" in results[0].set_updates
         assert results[0].set_updates["email"].value == "new@example.com"
 
-    def test_timestamp_window_filtering_all_permutations(self, cluster: ClickhouseCluster):
+    def test_timestamp_window_filtering_all_permutations(self, cluster: DatastoreCluster):
         """Comprehensive test of all permutations of person _timestamp and event timestamp.
 
         Tests the matrix of:
@@ -4435,13 +4435,13 @@ class TestClickHouseQueryIntegration:
         cluster.any_host(insert_persons_team2).result()
 
         # Query for team 1
-        results_team1 = get_person_property_updates_from_clickhouse(
+        results_team1 = get_person_property_updates_from_datastore(
             team_id=team_id_1,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         # Query for team 2
-        results_team2 = get_person_property_updates_from_clickhouse(
+        results_team2 = get_person_property_updates_from_datastore(
             team_id=team_id_2,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4504,7 +4504,7 @@ class TestClickHouseQueryIntegration:
 
     # ==================== Edge Case Tests ====================
 
-    def test_same_timestamp_deterministic(self, cluster: ClickhouseCluster):
+    def test_same_timestamp_deterministic(self, cluster: DatastoreCluster):
         """
         When multiple events have exact same timestamp,
         argMax/argMin should still produce deterministic results.
@@ -4542,7 +4542,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4552,7 +4552,7 @@ class TestClickHouseQueryIntegration:
         updates = {key: pv.value for key, pv in results[0].set_updates.items()}
         assert updates["name"] in ["Value A", "Value B"]
 
-    def test_special_characters_in_property_keys(self, cluster: ClickhouseCluster):
+    def test_special_characters_in_property_keys(self, cluster: DatastoreCluster):
         """Property keys with special characters should work correctly."""
         team_id = 99925
         person_id = UUID("66660000-0000-0000-0000-000000000001")
@@ -4618,7 +4618,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4632,7 +4632,7 @@ class TestClickHouseQueryIntegration:
         assert updates["key_with_underscores"] == "value4"
         assert updates["キー"] == "unicode value"
 
-    def test_filtered_properties_are_excluded(self, cluster: ClickhouseCluster):
+    def test_filtered_properties_are_excluded(self, cluster: DatastoreCluster):
         """Properties in FILTERED_PERSON_UPDATE_PROPERTIES should be excluded from results.
 
         These are high-frequency properties like $current_url that change often
@@ -4710,7 +4710,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_person).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4735,7 +4735,7 @@ class TestClickHouseQueryIntegration:
             "Filtered property '$referring_domain' should NOT be in results"
         )
 
-    def test_person_ids_filter_only_returns_specified_persons(self, cluster: ClickhouseCluster):
+    def test_person_ids_filter_only_returns_specified_persons(self, cluster: DatastoreCluster):
         """
         Integration test: verify person_ids filter correctly restricts query results.
 
@@ -4773,7 +4773,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_events).result()
 
-        # Insert all 5 persons in ClickHouse with different email (so diff is detected)
+        # Insert all 5 persons in Datastore with different email (so diff is detected)
         person_data = []
         for i, pid in enumerate(person_ids):
             person_data.append(
@@ -4796,7 +4796,7 @@ class TestClickHouseQueryIntegration:
         cluster.any_host(insert_persons).result()
 
         # Query with person_ids filter - should only return the 2 specified persons
-        results = get_raw_person_property_updates_from_clickhouse(
+        results = get_raw_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=now.strftime("%Y-%m-%d %H:%M:%S"),
@@ -4819,7 +4819,7 @@ class TestClickHouseQueryIntegration:
             assert len(result.set_updates) == 1
             assert "email" in result.set_updates
 
-    def test_interleaved_events_multiple_persons_realistic_scenario(self, cluster: ClickhouseCluster):
+    def test_interleaved_events_multiple_persons_realistic_scenario(self, cluster: DatastoreCluster):
         """
         Integration test: realistic scenario with multiple persons and interleaved events.
 
@@ -4907,7 +4907,7 @@ class TestClickHouseQueryIntegration:
         cluster.any_host(insert_persons).result()
 
         # Query and verify
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -4944,7 +4944,7 @@ class TestClickHouseQueryIntegration:
             "Charlie referrer should be google (first)"
         )
 
-    def test_unicode_and_emoji_in_property_keys_and_values(self, cluster: ClickhouseCluster):
+    def test_unicode_and_emoji_in_property_keys_and_values(self, cluster: DatastoreCluster):
         """
         Integration test: verify Unicode and emoji characters work in property keys and values.
 
@@ -5019,7 +5019,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_persons).result()
 
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -5050,7 +5050,7 @@ class TestClickHouseQueryIntegration:
         assert "first_emoji" in person_diffs.set_once_updates
         assert person_diffs.set_once_updates["first_emoji"].value == "👋"
 
-    def test_no_affected_persons_returns_empty_results(self, cluster: ClickhouseCluster):
+    def test_no_affected_persons_returns_empty_results(self, cluster: DatastoreCluster):
         """
         Integration test: verify graceful handling when no persons are affected.
 
@@ -5067,15 +5067,15 @@ class TestClickHouseQueryIntegration:
         bug_window_end = now - timedelta(days=999)
 
         # Query should return empty, not error
-        results = get_person_property_updates_from_clickhouse(
+        results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         assert results == [], f"Expected empty results for team with no data, got {len(results)} results"
 
-        # Also test get_affected_person_ids_from_clickhouse
-        affected_ids = get_affected_person_ids_from_clickhouse(
+        # Also test get_affected_person_ids_from_datastore
+        affected_ids = get_affected_person_ids_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
@@ -5083,7 +5083,7 @@ class TestClickHouseQueryIntegration:
 
         assert affected_ids == [], f"Expected no affected persons, got {len(affected_ids)}"
 
-    def test_rapid_fire_events_within_same_second(self, cluster: ClickhouseCluster):
+    def test_rapid_fire_events_within_same_second(self, cluster: DatastoreCluster):
         """
         Integration test: multiple events for same person within the same second.
 
@@ -5099,7 +5099,7 @@ class TestClickHouseQueryIntegration:
         same_ts = now - timedelta(days=5)
 
         # Multiple rapid-fire $set events for same key with same timestamp
-        # ClickHouse argMax should pick one deterministically
+        # Datastore argMax should pick one deterministically
         events = [
             (team_id, "rapid_1", person_id, same_ts, json.dumps({"$set": {"counter": 1}})),
             (team_id, "rapid_2", person_id, same_ts, json.dumps({"$set": {"counter": 2}})),
@@ -5130,11 +5130,11 @@ class TestClickHouseQueryIntegration:
         cluster.any_host(insert_persons).result()
 
         # Run query multiple times - result should be consistent (deterministic)
-        results_1 = get_person_property_updates_from_clickhouse(
+        results_1 = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
-        results_2 = get_person_property_updates_from_clickhouse(
+        results_2 = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -5153,9 +5153,9 @@ class TestClickHouseQueryIntegration:
         # Value should be one of the inserted values (1-5)
         assert counter_1 in [1, 2, 3, 4, 5], f"Counter should be one of 1-5, got {counter_1}"
 
-    def test_affected_person_ids_excludes_filtered_property_only_events(self, cluster: ClickhouseCluster):
+    def test_affected_person_ids_excludes_filtered_property_only_events(self, cluster: DatastoreCluster):
         """
-        Integration test: get_affected_person_ids_from_clickhouse should exclude persons
+        Integration test: get_affected_person_ids_from_datastore should exclude persons
         whose events only set FILTERED_PERSON_UPDATE_PROPERTIES ($browser, $os, etc.).
 
         Person A: events with ONLY filtered properties -> excluded
@@ -5227,7 +5227,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_persons).result()
 
-        affected_ids = get_affected_person_ids_from_clickhouse(
+        affected_ids = get_affected_person_ids_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
@@ -5236,7 +5236,7 @@ class TestClickHouseQueryIntegration:
         assert str(person_b) in affected_ids, "Person with non-filtered property diff should be detected"
         assert str(person_a) not in affected_ids, "Person with only filtered properties should be excluded"
 
-    def test_affected_person_ids_includes_set_once_and_unset_with_non_filtered_keys(self, cluster: ClickhouseCluster):
+    def test_affected_person_ids_includes_set_once_and_unset_with_non_filtered_keys(self, cluster: DatastoreCluster):
         """
         Integration test: detection covers $set_once and $unset with non-filtered keys
         that produce actual diffs against person state.
@@ -5294,7 +5294,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_persons).result()
 
-        affected_ids = get_affected_person_ids_from_clickhouse(
+        affected_ids = get_affected_person_ids_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
@@ -5303,7 +5303,7 @@ class TestClickHouseQueryIntegration:
         assert str(person_set_once) in affected_ids, "$set_once with non-filtered key should be detected"
         assert str(person_unset) in affected_ids, "$unset with non-filtered key should be detected"
 
-    def test_affected_person_ids_excludes_persons_whose_properties_already_match(self, cluster: ClickhouseCluster):
+    def test_affected_person_ids_excludes_persons_whose_properties_already_match(self, cluster: DatastoreCluster):
         """
         Integration test: persons whose events set non-filtered properties to values
         that already match the current person state should NOT be returned.
@@ -5379,7 +5379,7 @@ class TestClickHouseQueryIntegration:
 
         cluster.any_host(insert_persons).result()
 
-        affected_ids = get_affected_person_ids_from_clickhouse(
+        affected_ids = get_affected_person_ids_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
@@ -5390,7 +5390,7 @@ class TestClickHouseQueryIntegration:
         assert str(person_set_once_exists) not in affected_ids, "$set_once for existing key should be excluded"
         assert str(person_unset_missing) not in affected_ids, "$unset for missing key should be excluded"
 
-    def test_windowed_query_produces_same_result_as_single_query(self, cluster: ClickhouseCluster):
+    def test_windowed_query_produces_same_result_as_single_query(self, cluster: DatastoreCluster):
         """
         Integration test: windowed queries should produce equivalent results to single query.
 
@@ -5486,7 +5486,7 @@ class TestClickHouseQueryIntegration:
         bug_window_start_str = bug_window_start.strftime("%Y-%m-%d %H:%M:%S")
 
         # Run single query (current behavior)
-        single_results = get_person_property_updates_from_clickhouse(
+        single_results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start_str,
         )
@@ -5543,7 +5543,7 @@ class TestClickHouseQueryIntegration:
         assert single_diff.set_updates["name"].value == "Name3", "name should be Name3"
         assert "email" in single_diff.unset_updates, "email should be in unset_updates"
 
-    def test_windowed_batched_produces_same_result_as_single_query(self, cluster: ClickhouseCluster):
+    def test_windowed_batched_produces_same_result_as_single_query(self, cluster: DatastoreCluster):
         """
         Integration test: the production windowed-batched path
         (get_person_property_updates_windowed_batched) must produce identical
@@ -5690,7 +5690,7 @@ class TestClickHouseQueryIntegration:
         bug_window_end_str = bug_window_end.strftime("%Y-%m-%d %H:%M:%S")
 
         # Run non-windowed single query
-        single_results = get_person_property_updates_from_clickhouse(
+        single_results = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start_str,
         )
@@ -5760,7 +5760,7 @@ class TestClickHouseQueryIntegration:
 class TestBatchCommitsEndToEnd:
     """End-to-end integration tests for batch commit functionality.
 
-    These tests use real ClickHouse and Postgres connections to verify
+    These tests use real Datastore and Postgres connections to verify
     that batch commits work correctly in a production-like environment.
     """
 
@@ -5778,17 +5778,17 @@ class TestBatchCommitsEndToEnd:
 
         return Team.objects.create(organization=organization, name="Batch Test Team")
 
-    def test_batch_commits_end_to_end(self, cluster: ClickhouseCluster, team):
+    def test_batch_commits_end_to_end(self, cluster: DatastoreCluster, team):
         """
         End-to-end test that verifies batch commits work with real databases.
 
-        Creates 5 persons in Postgres, inserts events in ClickHouse,
+        Creates 5 persons in Postgres, inserts events in Datastore,
         runs reconciliation with batch_size=2, and verifies:
         1. All persons are updated in Postgres
         2. Commits happen in batches (3 batches: [2, 2, 1])
         """
         from insights.dags.person_property_reconciliation import (
-            get_person_property_updates_from_clickhouse,
+            get_person_property_updates_from_datastore,
             process_persons_in_batches,
         )
         from insights.models import Person
@@ -5819,7 +5819,7 @@ class TestBatchCommitsEndToEnd:
             )
             persons.append(person)
 
-        # Insert events in ClickHouse with new property values
+        # Insert events in Datastore with new property values
         events = []
         for i, person in enumerate(persons):
             events.append(
@@ -5841,7 +5841,7 @@ class TestBatchCommitsEndToEnd:
 
         cluster.any_host(insert_events).result()
 
-        # Insert persons in ClickHouse (required for the query join)
+        # Insert persons in Datastore (required for the query join)
         person_ch_data = []
         for i, person in enumerate(persons):
             person_ch_data.append(
@@ -5864,14 +5864,14 @@ class TestBatchCommitsEndToEnd:
 
         cluster.any_host(insert_persons_ch).result()
 
-        # Get person property updates from ClickHouse
-        person_property_updates = get_person_property_updates_from_clickhouse(
+        # Get person property updates from Datastore
+        person_property_updates = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         assert len(person_property_updates) == num_persons, (
-            f"Expected {num_persons} persons from ClickHouse query, got {len(person_property_updates)}"
+            f"Expected {num_persons} persons from Datastore query, got {len(person_property_updates)}"
         )
 
         # Track batches
@@ -5949,15 +5949,15 @@ class TestBatchCommitsEndToEnd:
                 f"Person {i} counter timestamp changed unexpectedly"
             )
 
-    def test_batch_commits_with_missing_person(self, cluster: ClickhouseCluster, team):
+    def test_batch_commits_with_missing_person(self, cluster: DatastoreCluster, team):
         """
         Test that missing persons in Postgres are skipped gracefully.
 
-        Creates 4 persons in ClickHouse events but only 3 in Postgres.
+        Creates 4 persons in Datastore events but only 3 in Postgres.
         Verifies the missing person is skipped and others are updated.
         """
         from insights.dags.person_property_reconciliation import (
-            get_person_property_updates_from_clickhouse,
+            get_person_property_updates_from_datastore,
             process_persons_in_batches,
         )
         from insights.models import Person
@@ -5983,7 +5983,7 @@ class TestBatchCommitsEndToEnd:
         # Create a 4th UUID that won't exist in Postgres
         missing_uuid = UUID("99999999-9999-9999-9999-999999999999")
 
-        # Insert 4 events in ClickHouse (including one for missing person)
+        # Insert 4 events in Datastore (including one for missing person)
         events = []
         for i, person in enumerate(persons):
             events.append(
@@ -6015,7 +6015,7 @@ class TestBatchCommitsEndToEnd:
 
         cluster.any_host(insert_events).result()
 
-        # Insert 4 persons in ClickHouse (including missing one)
+        # Insert 4 persons in Datastore (including missing one)
         person_ch_data = []
         for i, person in enumerate(persons):
             person_ch_data.append(
@@ -6028,7 +6028,7 @@ class TestBatchCommitsEndToEnd:
                     now - timedelta(days=8),
                 )
             )
-        # Add the missing person to ClickHouse
+        # Add the missing person to Datastore
         person_ch_data.append(
             (
                 team_id,
@@ -6049,8 +6049,8 @@ class TestBatchCommitsEndToEnd:
 
         cluster.any_host(insert_persons_ch).result()
 
-        # Get updates from ClickHouse - should return 4 persons
-        person_property_updates = get_person_property_updates_from_clickhouse(
+        # Get updates from Datastore - should return 4 persons
+        person_property_updates = get_person_property_updates_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
         )
@@ -6115,16 +6115,16 @@ class TestBatchCommitsEndToEnd:
 
 
 @pytest.mark.django_db(transaction=True)
-class TestKafkaClickHouseRoundTrip:
-    """Integration tests that verify person updates flow through Kafka to ClickHouse.
+class TestKafkaDatastoreRoundTrip:
+    """Integration tests that verify person updates flow through Kafka to Datastore.
 
     These tests use real Kafka (not mocked) and verify that:
     1. publish_person_to_kafka produces messages in the correct format
-    2. ClickHouse's Kafka engine consumes the messages
-    3. The person table in ClickHouse has the correct data
+    2. Datastore's Kafka engine consumes the messages
+    3. The person table in Datastore has the correct data
 
     This ensures the reconciliation job's Kafka message format is compatible
-    with ClickHouse's expectations (matching Node.js ingestion format).
+    with Datastore's expectations (matching Node.js ingestion format).
     """
 
     @pytest.fixture
@@ -6141,7 +6141,7 @@ class TestKafkaClickHouseRoundTrip:
 
         return Team.objects.create(organization=organization, name="Kafka Test Team")
 
-    def _wait_for_clickhouse_person(
+    def _wait_for_datastore_person(
         self,
         team_id: int,
         person_uuid: str,
@@ -6150,13 +6150,13 @@ class TestKafkaClickHouseRoundTrip:
         poll_interval_seconds: float = 0.5,
     ) -> dict | None:
         """
-        Poll ClickHouse until the person appears with the expected version.
+        Poll Datastore until the person appears with the expected version.
 
         Returns the person row as a dict, or None if not found within timeout.
         """
         import time
 
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
 
         start_time = time.time()
         while time.time() - start_time < max_wait_seconds:
@@ -6188,15 +6188,15 @@ class TestKafkaClickHouseRoundTrip:
         os.environ.get("KAFKA_ROUNDTRIP_TESTS") != "1",
         reason="Requires real Kafka infrastructure. Set KAFKA_ROUNDTRIP_TESTS=1 to run.",
     )
-    def test_publish_person_to_kafka_updates_clickhouse(self, team):
+    def test_publish_person_to_kafka_updates_datastore(self, team):
         """
-        Test that publish_person_to_kafka produces messages that ClickHouse consumes correctly.
+        Test that publish_person_to_kafka produces messages that Datastore consumes correctly.
 
         This verifies the full round-trip:
         1. Create a person in Postgres
         2. Publish to Kafka using publish_person_to_kafka (with real Kafka, not mocked)
-        3. Wait for ClickHouse to consume the message
-        4. Verify ClickHouse has the correct person data
+        3. Wait for Datastore to consume the message
+        4. Verify Datastore has the correct person data
         """
         from django.test import override_settings
 
@@ -6232,21 +6232,21 @@ class TestKafkaClickHouseRoundTrip:
             finally:
                 producer.close()
 
-        # Wait for ClickHouse to consume the message
-        ch_person = self._wait_for_clickhouse_person(
+        # Wait for Datastore to consume the message
+        ch_person = self._wait_for_datastore_person(
             team_id=team.id,
             person_uuid=str(person.uuid),
             expected_version=1,
             max_wait_seconds=30,
         )
 
-        # Verify ClickHouse received the person
-        assert ch_person is not None, f"Person {person.uuid} not found in ClickHouse after 30 seconds"
+        # Verify Datastore received the person
+        assert ch_person is not None, f"Person {person.uuid} not found in Datastore after 30 seconds"
         assert ch_person["team_id"] == team.id
         assert ch_person["version"] == 1
-        assert ch_person["is_identified"] == 1  # ClickHouse stores as Int8
+        assert ch_person["is_identified"] == 1  # Datastore stores as Int8
 
-        # Parse properties (stored as JSON string in ClickHouse)
+        # Parse properties (stored as JSON string in Datastore)
         ch_properties = json.loads(ch_person["properties"])
         assert ch_properties["email"] == "kafka_test@example.com"
         assert ch_properties["name"] == "Kafka Test User"
@@ -6255,13 +6255,13 @@ class TestKafkaClickHouseRoundTrip:
         os.environ.get("KAFKA_ROUNDTRIP_TESTS") != "1",
         reason="Requires real Kafka infrastructure. Set KAFKA_ROUNDTRIP_TESTS=1 to run.",
     )
-    def test_reconciliation_kafka_message_format_matches_nodejs(self, team, cluster: ClickhouseCluster):
+    def test_reconciliation_kafka_message_format_matches_nodejs(self, team, cluster: DatastoreCluster):
         """
         Test that the reconciliation job's Kafka message format produces the same
-        ClickHouse state as Node.js ingestion would.
+        Datastore state as Node.js ingestion would.
 
         This is important because both systems publish to the same Kafka topic,
-        and ClickHouse must be able to handle messages from both sources.
+        and Datastore must be able to handle messages from both sources.
         """
         from django.test import override_settings
 
@@ -6296,13 +6296,13 @@ class TestKafkaClickHouseRoundTrip:
             finally:
                 producer.close()
 
-        # Wait for version 1 in ClickHouse
-        ch_person_v1 = self._wait_for_clickhouse_person(
+        # Wait for version 1 in Datastore
+        ch_person_v1 = self._wait_for_datastore_person(
             team_id=team.id,
             person_uuid=str(person.uuid),
             expected_version=1,
         )
-        assert ch_person_v1 is not None, "Version 1 not found in ClickHouse"
+        assert ch_person_v1 is not None, "Version 1 not found in Datastore"
 
         # Now simulate reconciliation updating the person to version 2
         person_data_v2 = {
@@ -6323,15 +6323,15 @@ class TestKafkaClickHouseRoundTrip:
             finally:
                 producer.close()
 
-        # Wait for version 2 in ClickHouse
-        ch_person_v2 = self._wait_for_clickhouse_person(
+        # Wait for version 2 in Datastore
+        ch_person_v2 = self._wait_for_datastore_person(
             team_id=team.id,
             person_uuid=str(person.uuid),
             expected_version=2,
         )
 
-        # Verify ClickHouse received the update
-        assert ch_person_v2 is not None, "Version 2 not found in ClickHouse after 30 seconds"
+        # Verify Datastore received the update
+        assert ch_person_v2 is not None, "Version 2 not found in Datastore after 30 seconds"
         assert ch_person_v2["version"] == 2
         assert ch_person_v2["is_identified"] == 1
 
@@ -6343,16 +6343,16 @@ class TestKafkaClickHouseRoundTrip:
         os.environ.get("KAFKA_ROUNDTRIP_TESTS") != "1",
         reason="Requires real Kafka infrastructure. Set KAFKA_ROUNDTRIP_TESTS=1 to run.",
     )
-    def test_full_dagster_job_with_real_kafka(self, team, cluster: ClickhouseCluster):
+    def test_full_dagster_job_with_real_kafka(self, team, cluster: DatastoreCluster):
         """
         Test the full Dagster reconciliation job with real Kafka.
 
         This is the most comprehensive test - it:
         1. Creates persons in Postgres with outdated properties
-        2. Inserts events in ClickHouse with updated properties
+        2. Inserts events in Datastore with updated properties
         3. Runs the actual Dagster job with real Kafka producer
-        4. Waits for ClickHouse to consume the Kafka messages
-        5. Verifies both Postgres AND ClickHouse have the correct data
+        4. Waits for Datastore to consume the Kafka messages
+        5. Verifies both Postgres AND Datastore have the correct data
         """
         from django.test import override_settings
 
@@ -6378,7 +6378,7 @@ class TestKafkaClickHouseRoundTrip:
             version=1,
         )
 
-        # Insert event in ClickHouse with new property value
+        # Insert event in Datastore with new property value
         def insert_event(client: Client) -> None:
             client.execute(
                 """INSERT INTO writable_events (team_id, distinct_id, person_id, timestamp, properties)
@@ -6396,7 +6396,7 @@ class TestKafkaClickHouseRoundTrip:
 
         cluster.any_host(insert_event).result()
 
-        # Insert person in ClickHouse (required for the reconciliation query join)
+        # Insert person in Datastore (required for the reconciliation query join)
         def insert_person_ch(client: Client) -> None:
             client.execute(
                 """INSERT INTO person (team_id, id, properties, version, is_deleted, _timestamp)
@@ -6474,37 +6474,37 @@ class TestKafkaClickHouseRoundTrip:
         assert person.properties["unchanged"] == "value", "Unchanged property was modified"
         assert person.version == 2, f"Postgres version not incremented. Expected 2, got {person.version}"
 
-        # Wait for ClickHouse to consume the Kafka message
-        ch_person = self._wait_for_clickhouse_person(
+        # Wait for Datastore to consume the Kafka message
+        ch_person = self._wait_for_datastore_person(
             team_id=team.id,
             person_uuid=str(person.uuid),
             expected_version=2,
             max_wait_seconds=30,
         )
 
-        # Verify ClickHouse received the update via Kafka
+        # Verify Datastore received the update via Kafka
         assert ch_person is not None, (
-            f"Person {person.uuid} version 2 not found in ClickHouse after 30 seconds. "
-            "This suggests the Kafka message format may not be compatible with ClickHouse."
+            f"Person {person.uuid} version 2 not found in Datastore after 30 seconds. "
+            "This suggests the Kafka message format may not be compatible with Datastore."
         )
         assert ch_person["version"] == 2
 
         ch_properties = json.loads(ch_person["properties"])
         assert ch_properties["email"] == "new@example.com", (
-            f"ClickHouse email not updated. Expected 'new@example.com', got '{ch_properties.get('email')}'"
+            f"Datastore email not updated. Expected 'new@example.com', got '{ch_properties.get('email')}'"
         )
-        assert ch_properties["unchanged"] == "value", "ClickHouse unchanged property was modified"
+        assert ch_properties["unchanged"] == "value", "Datastore unchanged property was modified"
 
     @pytest.mark.skipif(
         os.environ.get("KAFKA_ROUNDTRIP_TESTS") != "1",
         reason="Requires real Kafka infrastructure. Set KAFKA_ROUNDTRIP_TESTS=1 to run.",
     )
-    def test_full_job_timestamp_window_filtering_all_permutations(self, cluster: ClickhouseCluster):
+    def test_full_job_timestamp_window_filtering_all_permutations(self, cluster: DatastoreCluster):
         """End-to-end test of the full Dagster job with all timestamp permutations.
 
         Tests the complete pipeline:
         1. Creates persons in Postgres with different _timestamp values
-        2. Inserts events in ClickHouse with different timestamps
+        2. Inserts events in Datastore with different timestamps
         3. Runs the full Dagster reconciliation job
         4. Verifies only the correct persons were updated in Postgres
 
@@ -6595,7 +6595,7 @@ class TestKafkaClickHouseRoundTrip:
             )
             persons_team2[suffix] = person
 
-        # Insert events in ClickHouse for team 1
+        # Insert events in Datastore for team 1
         events_team1 = []
         for suffix, _person_ts, event_ts, _expected, prop_name in test_cases_team1:
             person = persons_team1[suffix]
@@ -6618,7 +6618,7 @@ class TestKafkaClickHouseRoundTrip:
 
         cluster.any_host(insert_events_team1).result()
 
-        # Insert events in ClickHouse for team 2
+        # Insert events in Datastore for team 2
         events_team2 = []
         for suffix, _person_ts, event_ts, _expected, prop_name in test_cases_team2:
             person = persons_team2[suffix]
@@ -6641,7 +6641,7 @@ class TestKafkaClickHouseRoundTrip:
 
         cluster.any_host(insert_events_team2).result()
 
-        # Insert persons in ClickHouse for team 1 (required for the query join)
+        # Insert persons in Datastore for team 1 (required for the query join)
         persons_ch_team1 = []
         for suffix, person_ts, _event_ts, _expected, prop_name in test_cases_team1:
             person = persons_team1[suffix]
@@ -6665,7 +6665,7 @@ class TestKafkaClickHouseRoundTrip:
 
         cluster.any_host(insert_persons_ch_team1).result()
 
-        # Insert persons in ClickHouse for team 2
+        # Insert persons in Datastore for team 2
         persons_ch_team2 = []
         for suffix, person_ts, _event_ts, _expected, prop_name in test_cases_team2:
             person = persons_team2[suffix]
@@ -6786,10 +6786,10 @@ class TestKafkaClickHouseRoundTrip:
 
 
 @pytest.mark.django_db
-class TestFetchPersonPropertiesFromClickHouse:
-    """Integration tests for fetch_person_properties_from_clickhouse against real ClickHouse."""
+class TestFetchPersonPropertiesFromDatastore:
+    """Integration tests for fetch_person_properties_from_datastore against real Datastore."""
 
-    def test_fetches_oldest_version_gte_min_version(self, cluster: ClickhouseCluster):
+    def test_fetches_oldest_version_gte_min_version(self, cluster: DatastoreCluster):
         """Test that we fetch the oldest available version >= min_version.
 
         The function uses argMin to get the oldest version that's at least as new as
@@ -6827,31 +6827,31 @@ class TestFetchPersonPropertiesFromClickHouse:
         cluster.any_host(insert_v5).result()
 
         # min_version=1 should get v1 (oldest >= 1)
-        props = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=1)
+        props = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=1)
         assert props is not None
         assert props["email"] == "v1@example.com"
 
         # min_version=2 should get v3 (oldest >= 2, since v2 doesn't exist)
-        props = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=2)
+        props = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=2)
         assert props is not None
         assert props["email"] == "v3@example.com"
 
         # min_version=3 should get v3 (oldest >= 3)
-        props = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=3)
+        props = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=3)
         assert props is not None
         assert props["email"] == "v3@example.com"
 
         # min_version=4 should get v5 (oldest >= 4, since v4 doesn't exist)
-        props = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=4)
+        props = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=4)
         assert props is not None
         assert props["email"] == "v5@example.com"
 
         # min_version=5 should get v5
-        props = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=5)
+        props = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=5)
         assert props is not None
         assert props["email"] == "v5@example.com"
 
-    def test_returns_none_when_no_version_gte_min(self, cluster: ClickhouseCluster):
+    def test_returns_none_when_no_version_gte_min(self, cluster: DatastoreCluster):
         """Test that None is returned when no version >= min_version exists."""
         team_id = 99802
         person_id = UUID("bbbbbbbb-bbbb-bbbb-bbbb-000000000002")
@@ -6868,24 +6868,24 @@ class TestFetchPersonPropertiesFromClickHouse:
         cluster.any_host(insert_person).result()
 
         # min_version=5 exists
-        result = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=5)
+        result = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=5)
         assert result is not None
 
         # min_version=6 - no version >= 6 exists
-        assert fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=6) is None
+        assert fetch_person_properties_from_datastore(team_id, str(person_id), min_version=6) is None
 
         # min_version=99 - no version >= 99 exists
-        assert fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=99) is None
+        assert fetch_person_properties_from_datastore(team_id, str(person_id), min_version=99) is None
 
-    def test_returns_none_for_nonexistent_person(self, cluster: ClickhouseCluster):
+    def test_returns_none_for_nonexistent_person(self, cluster: DatastoreCluster):
         """Test that None is returned when the person doesn't exist."""
         team_id = 99803
         nonexistent_person_id = "cccccccc-cccc-cccc-cccc-000000000003"
 
-        result = fetch_person_properties_from_clickhouse(team_id, nonexistent_person_id, min_version=1)
+        result = fetch_person_properties_from_datastore(team_id, nonexistent_person_id, min_version=1)
         assert result is None
 
-    def test_returns_empty_dict_for_empty_properties(self, cluster: ClickhouseCluster):
+    def test_returns_empty_dict_for_empty_properties(self, cluster: DatastoreCluster):
         """Test that empty dict is returned when properties are empty."""
         team_id = 99804
         person_id = UUID("dddddddd-dddd-dddd-dddd-000000000004")
@@ -6903,7 +6903,7 @@ class TestFetchPersonPropertiesFromClickHouse:
 
         cluster.any_host(insert_person).result()
 
-        result = fetch_person_properties_from_clickhouse(team_id, str(person_id), min_version=1)
+        result = fetch_person_properties_from_datastore(team_id, str(person_id), min_version=1)
         assert result == {}
 
 
@@ -7124,10 +7124,10 @@ class TestReconcileWithConcurrentChanges:
 
 
 @pytest.mark.django_db
-class TestQueryTeamIdsFromClickHouse:
-    """Integration tests for query_team_ids_from_clickhouse with team_id filters."""
+class TestQueryTeamIdsFromDatastore:
+    """Integration tests for query_team_ids_from_datastore with team_id filters."""
 
-    def test_returns_teams_with_property_events(self, cluster: ClickhouseCluster):
+    def test_returns_teams_with_property_events(self, cluster: DatastoreCluster):
         """Basic test that teams with $set/$set_once/$unset events are returned."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7180,7 +7180,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=88001,
@@ -7190,7 +7190,7 @@ class TestQueryTeamIdsFromClickHouse:
         # 88005 has no $set/$set_once/$unset so should not be included
         assert result == [88001, 88002, 88003, 88004]
 
-    def test_min_team_id_filter(self, cluster: ClickhouseCluster):
+    def test_min_team_id_filter(self, cluster: DatastoreCluster):
         """Test that min_team_id filters out teams below the threshold."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7228,7 +7228,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=89002,
@@ -7237,7 +7237,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         assert result == [89002, 89003]
 
-    def test_max_team_id_filter(self, cluster: ClickhouseCluster):
+    def test_max_team_id_filter(self, cluster: DatastoreCluster):
         """Test that max_team_id filters out teams above the threshold."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7275,7 +7275,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=90001,
@@ -7284,7 +7284,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         assert result == [90001, 90002]
 
-    def test_both_min_and_max_team_id_filters(self, cluster: ClickhouseCluster):
+    def test_both_min_and_max_team_id_filters(self, cluster: DatastoreCluster):
         """Test that both min and max filters work together."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7336,7 +7336,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=91002,
@@ -7345,7 +7345,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         assert result == [91002, 91003, 91004]
 
-    def test_team_range_returns_all_matching_teams(self, cluster: ClickhouseCluster):
+    def test_team_range_returns_all_matching_teams(self, cluster: DatastoreCluster):
         """Test that team range filter returns all teams with property events within range."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7376,7 +7376,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=92001,
@@ -7386,7 +7386,7 @@ class TestQueryTeamIdsFromClickHouse:
         assert 92001 in result
         assert 92002 in result
 
-    def test_exclude_team_ids_filters_out_specified_teams(self, cluster: ClickhouseCluster):
+    def test_exclude_team_ids_filters_out_specified_teams(self, cluster: DatastoreCluster):
         """Test that exclude_team_ids filters out specified teams from results."""
         now = datetime.now().replace(microsecond=0)
         bug_window_start = now - timedelta(days=10)
@@ -7431,7 +7431,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         cluster.any_host(insert_events).result()
 
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             min_team_id=93001,
@@ -7441,7 +7441,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         assert result == [93001, 93003]
 
-    def test_include_team_ids_filters_to_specified_teams(self, cluster: ClickhouseCluster):
+    def test_include_team_ids_filters_to_specified_teams(self, cluster: DatastoreCluster):
         """Test that include_team_ids only returns teams in the specified list."""
         bug_window_start = datetime.now(UTC) - timedelta(hours=2)
         bug_window_end = datetime.now(UTC) + timedelta(hours=1)
@@ -7495,7 +7495,7 @@ class TestQueryTeamIdsFromClickHouse:
         cluster.any_host(insert_events).result()
 
         # Only include teams 94002 and 94004 - should not return 94001, 94003, 94005
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             include_team_ids=[94002, 94004],
@@ -7503,7 +7503,7 @@ class TestQueryTeamIdsFromClickHouse:
 
         assert result == [94002, 94004]
 
-    def test_include_team_ids_combined_with_other_filters(self, cluster: ClickhouseCluster):
+    def test_include_team_ids_combined_with_other_filters(self, cluster: DatastoreCluster):
         """Test that include_team_ids works as AND with other filters."""
         bug_window_start = datetime.now(UTC) - timedelta(hours=2)
         bug_window_end = datetime.now(UTC) + timedelta(hours=1)
@@ -7550,7 +7550,7 @@ class TestQueryTeamIdsFromClickHouse:
         cluster.any_host(insert_events).result()
 
         # include_team_ids=[95001, 95002, 95003] AND exclude_team_ids=[95002] -> only 95001, 95003
-        result = query_team_ids_from_clickhouse(
+        result = query_team_ids_from_datastore(
             bug_window_start=bug_window_start.strftime("%Y-%m-%d %H:%M:%S"),
             bug_window_end=bug_window_end.strftime("%Y-%m-%d %H:%M:%S"),
             include_team_ids=[95001, 95002, 95003],
@@ -7562,7 +7562,7 @@ class TestQueryTeamIdsFromClickHouse:
     def test_invalid_range_raises_error(self):
         """Test that min_team_id > max_team_id raises ValueError."""
         with pytest.raises(ValueError) as exc_info:
-            query_team_ids_from_clickhouse(
+            query_team_ids_from_datastore(
                 bug_window_start="2024-01-01 00:00:00",
                 bug_window_end="2024-01-02 00:00:00",
                 min_team_id=100,

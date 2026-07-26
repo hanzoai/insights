@@ -5,7 +5,7 @@ from insights.schema import PersonsOnEventsMode
 
 from insights.insightsql.database.database import Database
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.models import Cohort, Filter, Property
 from insights.models.cohort.util import is_precalculated_query
 from insights.models.filters import AnyFilter
@@ -99,7 +99,7 @@ class EventQuery(metaclass=ABCMeta):
             team=self._team, modifiers=self._filter.insightsql_context.modifiers
         )
 
-        # Guards against a ClickHouse bug involving multiple joins against the same table with the same column name.
+        # Guards against a Datastore bug involving multiple joins against the same table with the same column name.
         # This issue manifests for us with formulas, where on queries A and B we join events against itself
         # and both tables end up having $session_id. Without a formula this is not a problem.]
         self._session_id_alias = (

@@ -52,9 +52,9 @@ from insights.models.person.missing_person import MissingPerson
 from insights.models.person.person import PersonDistinctId
 from insights.models.person.util import delete_person, get_persons_by_distinct_ids
 from insights.queries.actor_base_query import ActorBaseQuery, get_serialized_people
-from insights.queries.funnels import ClickhouseFunnelActors, ClickhouseFunnelTrendsActors
-from insights.queries.funnels.funnel_strict_persons import ClickhouseFunnelStrictActors
-from insights.queries.funnels.funnel_unordered_persons import ClickhouseFunnelUnorderedActors
+from insights.queries.funnels import DatastoreFunnelActors, DatastoreFunnelTrendsActors
+from insights.queries.funnels.funnel_strict_persons import DatastoreFunnelStrictActors
+from insights.queries.funnels.funnel_unordered_persons import DatastoreFunnelUnorderedActors
 from insights.queries.insight import insight_sync_execute
 from insights.queries.person_query import PersonQuery
 from insights.queries.properties_timeline import PropertiesTimeline
@@ -63,7 +63,7 @@ from insights.queries.stickiness import Stickiness
 from insights.queries.trends.lifecycle import Lifecycle
 from insights.queries.trends.trends_actors import TrendsActors
 from insights.queries.util import get_earliest_timestamp
-from insights.rate_limit import ClickHouseBurstRateThrottle, PersonalApiKeyRateThrottle, UserOrEmailRateThrottle
+from insights.rate_limit import DatastoreBurstRateThrottle, PersonalApiKeyRateThrottle, UserOrEmailRateThrottle
 from insights.renderers import SafeJSONRenderer
 from insights.tasks.split_person import split_person
 from insights.utils import convert_property_value, format_query_params_absolute_url, is_anonymous_id
@@ -210,14 +210,14 @@ def get_funnel_actor_class(filter: Filter) -> Callable:
     if filter.correlation_person_entity:
         raise ValueError("Funnel Correlations is not available")
     elif filter.funnel_viz_type == FunnelVizType.TRENDS:
-        funnel_actor_class = ClickhouseFunnelTrendsActors
+        funnel_actor_class = DatastoreFunnelTrendsActors
     else:
         if filter.funnel_order_type == "unordered":
-            funnel_actor_class = ClickhouseFunnelUnorderedActors
+            funnel_actor_class = DatastoreFunnelUnorderedActors
         elif filter.funnel_order_type == "strict":
-            funnel_actor_class = ClickhouseFunnelStrictActors
+            funnel_actor_class = DatastoreFunnelStrictActors
         else:
-            funnel_actor_class = ClickhouseFunnelActors
+            funnel_actor_class = DatastoreFunnelActors
 
     return funnel_actor_class
 
@@ -242,7 +242,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             if self.action in ("destroy", "bulk_delete", "delete_events", "delete_recordings"):
                 return [PersonsDeleteBurstThrottle(), PersonsDeleteSustainedThrottle()]
             else:
-                return [ClickHouseBurstRateThrottle()]
+                return [DatastoreBurstRateThrottle()]
 
         # We have seen issues in the past with the app hammering the API so for app authenticated requests
         # we still want some throttle protection
@@ -713,7 +713,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         person = get_pk_or_uuid(self.get_queryset(), request.GET["person_id"]).get()
         cohort_ids = get_all_cohort_ids_by_person_uuid(person.uuid, team.pk)
 
-        # nosemgrep: idor-lookup-without-team, idor-taint-user-input-to-model-get (IDs from team-scoped ClickHouse query)
+        # nosemgrep: idor-lookup-without-team, idor-taint-user-input-to-model-get (IDs from team-scoped Datastore query)
         cohorts = Cohort.objects.filter(pk__in=cohort_ids, deleted=False)
 
         return response.Response({"results": CohortMinimalSerializer(cohorts, many=True).data})
@@ -807,7 +807,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 detail=Detail(changes=[Change(type="Person", action="changed", field="properties")]),
             )
 
-    # PRAGMA: Methods for getting Persons via clickhouse queries
+    # PRAGMA: Methods for getting Persons via datastore queries
     def _respond_with_cached_results(
         self, results_package: dict[str, tuple[builtins.list, Optional[str], Optional[str], int]]
     ):  # noqa: UP006

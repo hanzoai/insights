@@ -4,7 +4,7 @@ from functools import wraps
 
 from prometheus_client import Counter
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 
 
 class Feature(StrEnum):

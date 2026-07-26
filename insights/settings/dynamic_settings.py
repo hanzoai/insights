@@ -10,7 +10,7 @@ CONSTANCE_DATABASE_PREFIX = "constance:insights:"
 CONSTANCE_CONFIG = {
     "RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS": (
         3,
-        "Number of weeks recording performance events will be kept before removing them (for all projects). Storing performance events for a shorter timeframe can help reduce Clickhouse disk usage.",
+        "Number of weeks recording performance events will be kept before removing them (for all projects). Storing performance events for a shorter timeframe can help reduce Datastore disk usage.",
         int,
     ),
     "MATERIALIZED_COLUMNS_ENABLED": (

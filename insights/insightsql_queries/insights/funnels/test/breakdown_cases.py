@@ -13,7 +13,7 @@ from insights.test.base import (
     _create_person,
     also_test_with_materialized_columns,
     also_test_with_person_on_events_v2,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import skip
 
@@ -129,11 +129,11 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                 csv_path=Path(__file__).parent / "funnels_data.csv",
                 table_name="test_table_1",
                 table_columns={
-                    "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                    "user_id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                    "created": {"clickhouse": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
-                    "event_name": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                    "properties": {"insightsql": "StringJSONDatabaseField", "clickhouse": "Nullable(String)"},
+                    "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                    "user_id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                    "created": {"datastore": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
+                    "event_name": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                    "properties": {"insightsql": "StringJSONDatabaseField", "datastore": "Nullable(String)"},
                 },
                 test_bucket=TEST_BUCKET,
                 team=self.team,
@@ -2502,7 +2502,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                 [people["person4"].uuid],
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_step_multiple_breakdown_snapshot(self):
             # No person querying here, so snapshots are more legible
 
@@ -2574,7 +2574,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
 
             self.assertEqual(len(results), 5)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_breakdown_correct_breakdown_props_are_chosen(self):
             # No person querying here, so snapshots are more legible
 
@@ -2651,7 +2651,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                 [["Mac"], ["Chrome"], ["Safari"], [""]],
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_breakdown_correct_breakdown_props_are_chosen_for_step(self):
             # No person querying here, so snapshots are more legible
 
@@ -3283,7 +3283,7 @@ def funnel_breakdown_group_test_factory(funnel_order_type: FunnelOrderType):
 
             assert_funnel_results_equal(result, step_results)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_breakdown_group(self):
             self._create_groups()
 
@@ -3513,7 +3513,7 @@ def funnel_breakdown_group_test_factory(funnel_order_type: FunnelOrderType):
             )
 
         @also_test_with_person_on_events_v2
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_aggregate_by_groups_breakdown_group_person_on_events(self):
             self._create_groups()
 

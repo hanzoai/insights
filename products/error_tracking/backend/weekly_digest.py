@@ -7,7 +7,7 @@ import structlog
 
 from insights.schema import ProductKey
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.models import Team
 
 logger = structlog.get_logger(__name__)
@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 
 def get_exception_counts(team_ids: list[int] | None = None) -> list:
     """Exception counts and ingestion failures for the last 7 days"""
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     tag_queries(product=ProductKey.ERROR_TRACKING, name="weekly_digest:exception_counts")
 
@@ -25,7 +25,7 @@ def get_exception_counts(team_ids: list[int] | None = None) -> list:
         team_filter = "AND team_id IN %(team_ids)s"
         query_params["team_ids"] = team_ids
 
-    # nosemgrep: clickhouse-fstring-param-audit (team_filter is built from trusted code, not user input)
+    # nosemgrep: datastore-fstring-param-audit (team_filter is built from trusted code, not user input)
     exception_counts_query = f"""
     SELECT
         team_id,
@@ -128,7 +128,7 @@ def compute_week_over_week_change(current: float, previous: float | None, higher
 
 def get_daily_exception_counts(team_id: int) -> list[dict]:
     """Get exception counts per day for the last 7 days"""
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     tag_queries(product=ProductKey.ERROR_TRACKING, team_id=team_id, name="weekly_digest:daily_exception_counts")
 

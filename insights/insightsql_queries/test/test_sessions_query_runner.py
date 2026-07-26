@@ -3,12 +3,12 @@ from typing import Any
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_different_timezones,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import CachedSessionsQueryResponse, SessionsQuery
@@ -17,7 +17,7 @@ from insights.insightsql_queries.sessions_query_runner import SessionsQueryRunne
 from insights.models.utils import uuid7
 
 
-class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestSessionsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_test_sessions(self, data: list[tuple[str, str, str, dict[str, Any]]]) -> list:
@@ -64,7 +64,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         return persons
 
     @also_test_with_different_timezones
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_sessions_query(self):
         """Test basic sessions query returns correct number of sessions."""
         self._create_test_sessions(
@@ -89,7 +89,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             assert isinstance(response, CachedSessionsQueryResponse)
             assert len(response.results) == 2
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_with_aggregation(self):
         """Test sessions query can aggregate by distinct_id and count sessions."""
         self._create_test_sessions(
@@ -120,7 +120,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             assert user_sessions["user2"] == 1
 
     @also_test_with_different_timezones
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_date_range(self):
         """Test sessions query filters by date range correctly."""
         self._create_test_sessions(
@@ -147,7 +147,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             assert isinstance(response, CachedSessionsQueryResponse)
             assert len(response.results) == 2
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_with_custom_order_by(self):
         """Test sessions query respects custom orderBy clause."""
         self._create_test_sessions(
@@ -176,7 +176,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             timestamps = [row[1] for row in response.results]
             assert timestamps == sorted(timestamps)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_with_session_duration(self):
         """Test session duration calculation returns correct values."""
         self._create_test_sessions(
@@ -205,7 +205,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             durations = sorted([row[1] for row in response.results])
             assert durations == [300, 600]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_with_where_clause(self):
         """Test sessions query filters by where clause correctly."""
         self._create_test_sessions(
@@ -232,7 +232,7 @@ class TestSessionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             assert isinstance(response, CachedSessionsQueryResponse)
             assert len(response.results) == 1
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_limit_and_offset(self):
         """Test sessions query pagination with limit and offset."""
         self._create_test_sessions(

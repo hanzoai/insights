@@ -17,7 +17,7 @@ from temporalio.testing._activity import ActivityEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.tests.utils.models import afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run, start_batch_export_run
@@ -103,12 +103,12 @@ ExpectedCount = int
 ExpectedMetricsMap = dict[tuple[MetricKind, MetricName], ExpectedCount]
 
 
-async def assert_metrics_in_clickhouse(
-    clickhouse_client: ClickHouseClient,
+async def assert_metrics_in_datastore(
+    datastore_client: DatastoreClient,
     batch_export_id: str,
     expected_metrics: ExpectedMetricsMap,
 ):
-    """Assert metrics are correctly ingested in ClickHouse.
+    """Assert metrics are correctly ingested in Datastore.
 
     We read metrics ingested into `sharded_app_metrics2` and compare them with the
     provided `expected_metrics`.
@@ -121,17 +121,17 @@ async def assert_metrics_in_clickhouse(
             FORMAT JSONEachRow \
             """
 
-    resp = await clickhouse_client.read_query(
+    resp = await datastore_client.read_query(
         query,
-        query_parameters={"batch_export_id": batch_export_id, "cluster_name": settings.CLICKHOUSE_CLUSTER},
+        query_parameters={"batch_export_id": batch_export_id, "cluster_name": settings.DATASTORE_CLUSTER},
     )
 
     iterations = 0
     while not resp and iterations < 10:
         await asyncio.sleep(1)
-        resp = await clickhouse_client.read_query(
+        resp = await datastore_client.read_query(
             query,
-            query_parameters={"batch_export_id": batch_export_id, "cluster_name": settings.CLICKHOUSE_CLUSTER},
+            query_parameters={"batch_export_id": batch_export_id, "cluster_name": settings.DATASTORE_CLUSTER},
         )
 
         iterations += 1
@@ -154,9 +154,9 @@ async def assert_metrics_in_clickhouse(
         )
 
 
-async def assert_clickhouse_records_in_s3(
+async def assert_datastore_records_in_s3(
     s3_compatible_client,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     bucket_name: str,
     key_prefix: str,
     team_id: int,
@@ -171,11 +171,11 @@ async def assert_clickhouse_records_in_s3(
     allow_duplicates: bool = False,
     sort_key: str = "uuid",
 ):
-    """Assert ClickHouse records are written to JSON in key_prefix in S3 bucket_name.
+    """Assert Datastore records are written to JSON in key_prefix in S3 bucket_name.
 
     Arguments:
         s3_compatible_client: An S3 client used to read records; can be MinIO if doing local testing.
-        clickhouse_client: A ClickHouseClient used to read records that are expected to be exported.
+        datastore_client: A DatastoreClient used to read records that are expected to be exported.
         team_id: The ID of the team that we are testing for.
         bucket_name: S3 bucket name where records are exported to.
         key_prefix: S3 key prefix where records are exported to.
@@ -307,7 +307,7 @@ async def run_s3_batch_export_workflow(
     interval,
     data_interval_start,
     data_interval_end,
-    clickhouse_client,
+    datastore_client,
     s3_client,
     backfill_details: BackfillDetails | None = None,
     expect_no_data: bool = False,
@@ -399,15 +399,15 @@ async def run_s3_batch_export_workflow(
     elif isinstance(model, BatchExportModel) and model.name == "sessions":
         sort_key = "session_id"
 
-    await assert_metrics_in_clickhouse(
-        clickhouse_client,
+    await assert_metrics_in_datastore(
+        datastore_client,
         batch_export_id,
         {("success", "succeeded"): 1, ("rows", "rows_exported"): run.records_completed or 0},
     )
 
-    await assert_clickhouse_records_in_s3(
+    await assert_datastore_records_in_s3(
         s3_compatible_client=s3_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         bucket_name=bucket_name,
         key_prefix=expected_key_prefix,
         team_id=ateam.pk,

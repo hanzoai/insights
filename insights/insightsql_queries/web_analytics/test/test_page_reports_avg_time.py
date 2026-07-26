@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 
 import numpy as np
 from parameterized import parameterized
@@ -29,7 +29,7 @@ class PageViewProperties:
     duration: float | None = 0
 
 
-class TestPageReportsTimeOnPage(ClickhouseTestMixin, APIBaseTest):
+class TestPageReportsTimeOnPage(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-12-29"
 
     def _calculate_pageview_statistics(self, groups_of_pageviews: list[list[PageViewProperties]]):
