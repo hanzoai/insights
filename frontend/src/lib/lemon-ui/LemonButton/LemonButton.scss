@@ -46,7 +46,13 @@
 }
 
 @mixin shared-variables {
-    --lemon-button-chrome-depth: 0.1875rem;
+    // 0 = flat. Chrome depth is what drew the raised 3D slab: the ::after face
+    // is inset from the bottom by this much and drops a hard `0 <depth> 0`
+    // shadow onto the ::before frame, so the button read as an embossed key with
+    // a visible lip. Our controls are flat — a hairline border and a radius,
+    // nothing pretending to stick out of the screen. Zeroing it here also
+    // re-centres the label, since the vertical padding is computed from it.
+    --lemon-button-chrome-depth: 0;
     --lemon-button-padding-vertical: 0.25rem;
     --lemon-button-padding-horizontal: 0.75rem;
     --lemon-button-side-action-width: 2rem;
