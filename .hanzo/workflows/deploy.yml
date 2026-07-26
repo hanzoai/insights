@@ -14,10 +14,16 @@ name: deploy
 on:
   push:
     branches: [main]
-  # This repo reaches the forge as a PULL MIRROR of github.com/hanzoai/insights,
-  # and a mirror sync is not a push — it fires no push event, so `on: push`
-  # alone never triggers here. Until the forge is the origin rather than a
-  # mirror, this is how a build is started.
+  # A mirror sync DOES fire push events (verified: run 1289 here has
+  # event=push and was created by a sync, not a push), so `on: push` works even
+  # though the forge holds this repo as a pull mirror of GitHub. This is here
+  # for deliberate rebuilds, not because push is broken.
+  #
+  # The flip side, worth knowing before enabling Actions on any mirror: a sync
+  # fires one push event per REF, tags included. hanzoai/console has ~200 tags
+  # and three tag-triggered workflows, so one sync enqueued ~600 runs of
+  # historical rebuilds and starved the shared FIFO queue for every repo.
+  # Keep triggers scoped to branches.
   workflow_dispatch:
 
 jobs:
