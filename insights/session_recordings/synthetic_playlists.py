@@ -17,8 +17,8 @@ import hanzo_insights
 
 from insights.schema import RecordingOrder, RecordingsQuery
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models import Comment, Team, User
 from insights.models.exported_asset import ExportedAsset
 from insights.models.sharing_configuration import SharingConfiguration
@@ -305,7 +305,7 @@ class FrustrationSignalsPlaylistSource(SyntheticPlaylistSource):
     @staticmethod
     def _get_frustrated_session_ids(team: Team) -> list[str]:
         """
-        Query ClickHouse for sessions with frustration signals in the last 7 days.
+        Query Datastore for sessions with frustration signals in the last 7 days.
         Returns session_ids ordered by composite frustration score (descending).
         Cached for 1 hour.
         """
@@ -470,7 +470,7 @@ class NewUrlsSyntheticPlaylistSource(SyntheticPlaylistSource):
     @staticmethod
     def _get_new_urls_with_sessions(team: Team) -> tuple[dict[str, int], dict[str, list[str]]]:
         """
-        Query ClickHouse to find URL patterns that first appeared in the last 14 days.
+        Query Datastore to find URL patterns that first appeared in the last 14 days.
         Pre-computes BOTH session counts AND session IDs for each pattern in a SINGLE query.
 
         Returns: tuple of (pattern -> count dict, pattern -> session_ids list dict)
@@ -551,7 +551,7 @@ class NewUrlsSyntheticPlaylistSource(SyntheticPlaylistSource):
     @staticmethod
     def _get_new_urls_with_counts(team: Team) -> dict[str, int]:
         """
-        Query ClickHouse to find URL patterns that first appeared in the last 14 days.
+        Query Datastore to find URL patterns that first appeared in the last 14 days.
         Also pre-computes session counts for each pattern in a SINGLE query for performance.
 
         Returns: dict mapping pattern -> session count

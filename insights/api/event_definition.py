@@ -20,7 +20,7 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.tagged_item import TaggedItemSerializerMixin, TaggedItemViewSetMixin
 from insights.api.utils import action
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import EventDefinitionType
 from insights.event_usage import report_user_action
 from insights.filters import TermSearchFilterBackend, term_search_filter_sql
@@ -502,7 +502,7 @@ def fetch_30day_event_queries(
     if cached_result is not None:
         return cached_result
 
-    clickhouse_kwargs: dict[str, Any] = {
+    datastore_kwargs: dict[str, Any] = {
         "team_id": team.pk,
         "app_source": "event_usage",
         "metric_name": "viewed",
@@ -510,7 +510,7 @@ def fetch_30day_event_queries(
         "after": relative_date_parse("30d", team.timezone_info).strftime("%Y-%m-%dT%H:%M:%S"),
     }
 
-    clickhouse_query = f"""
+    datastore_query = f"""
         SELECT
             sum(count) as count
         FROM app_metrics2
@@ -521,10 +521,10 @@ def fetch_30day_event_queries(
         AND metric_name = %(metric_name)s
     """
 
-    results = sync_execute(clickhouse_query, clickhouse_kwargs)
+    results = sync_execute(datastore_query, datastore_kwargs)
 
     if not isinstance(results, list):
-        raise ValueError("Unexpected results from ClickHouse")
+        raise ValueError("Unexpected results from Datastore")
 
     total = results[0][0] if results else 0
 

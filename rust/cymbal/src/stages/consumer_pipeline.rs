@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -26,8 +26,8 @@ impl ConsumerEventPipeline {
 }
 
 impl Stage for ConsumerEventPipeline {
-    type Input = ClickHouseEvent;
-    type Output = Result<ClickHouseEvent, ExceptionEventHandledError>;
+    type Input = DatastoreEvent;
+    type Output = Result<DatastoreEvent, ExceptionEventHandledError>;
     type Error = UnhandledError;
 
     fn name(&self) -> &'static str {
@@ -38,21 +38,21 @@ impl Stage for ConsumerEventPipeline {
         self,
         batch: Batch<Self::Input>,
     ) -> Result<Batch<Self::Output>, UnhandledError> {
-        let clickhouse_events_by_id = Arc::new(Mutex::new(HashMap::new()));
+        let datastore_events_by_id = Arc::new(Mutex::new(HashMap::new()));
         batch
             // Resolve stack traces
-            .apply_func(clickhouse_to_props, clickhouse_events_by_id.clone())
+            .apply_func(datastore_to_props, datastore_events_by_id.clone())
             .await?
             .apply_stage(ExceptionEventPipeline::new(self.app_context.clone()))
             .await?
-            .apply_func(handle_results, clickhouse_events_by_id.clone())
+            .apply_func(handle_results, datastore_events_by_id.clone())
             .await
     }
 }
 
-async fn clickhouse_to_props(
-    evt: ClickHouseEvent,
-    map: Arc<Mutex<HashMap<Uuid, ClickHouseEvent>>>,
+async fn datastore_to_props(
+    evt: DatastoreEvent,
+    map: Arc<Mutex<HashMap<Uuid, DatastoreEvent>>>,
 ) -> Result<Result<ExceptionProperties, ExceptionEventHandledError>, UnhandledError> {
     let event_uuid = evt.uuid;
     map.lock().await.insert(evt.uuid, evt.clone());
@@ -64,8 +64,8 @@ async fn clickhouse_to_props(
 
 async fn handle_results(
     item: Result<ExceptionProperties, ExceptionEventHandledError>,
-    map: Arc<Mutex<HashMap<Uuid, ClickHouseEvent>>>,
-) -> Result<Result<ClickHouseEvent, ExceptionEventHandledError>, UnhandledError> {
+    map: Arc<Mutex<HashMap<Uuid, DatastoreEvent>>>,
+) -> Result<Result<DatastoreEvent, ExceptionEventHandledError>, UnhandledError> {
     let new_item = match item {
         Ok(props) => {
             let mut mutex_guard = map.lock().await;
@@ -92,7 +92,7 @@ async fn handle_results(
     Ok(new_item)
 }
 
-impl PropertiesContainer for ClickHouseEvent {
+impl PropertiesContainer for DatastoreEvent {
     fn set_properties(&mut self, new_props: ExceptionProperties) -> Result<(), UnhandledError> {
         self.properties = Some(serde_json::to_string(&new_props)?);
         Ok(())

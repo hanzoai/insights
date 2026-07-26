@@ -184,7 +184,7 @@ mod test {
 
     use std::sync::Arc;
 
-    use common_types::ClickHouseEvent;
+    use common_types::DatastoreEvent;
     use httpmock::MockServer;
     use mockall::predicate;
     use sqlx::PgPool;
@@ -273,7 +273,7 @@ mod test {
     }
 
     fn get_test_frame(server: &MockServer) -> RawFrame {
-        let exception: ClickHouseEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
+        let exception: DatastoreEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
         let mut props: RawErrProps = serde_json::from_str(&exception.properties.unwrap()).unwrap();
         let Stacktrace::Raw {
             frames: mut test_stack,

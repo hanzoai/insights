@@ -6,13 +6,13 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
     create_person_id_override_by_distinct_id,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import MagicMock, patch
 
@@ -23,7 +23,7 @@ from insights.schema import InsightsQLQueryModifiers, InCohortVia, RetentionQuer
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.constants import (
     RETENTION_FIRST_EVER_OCCURRENCE,
     RETENTION_FIRST_OCCURRENCE_MATCHING_FILTERS,
@@ -90,7 +90,7 @@ def _create_events(team, user_and_timestamps, event="$pageview"):
         i += 1
 
 
-class TestRetention(ClickhouseTestMixin, APIBaseTest):
+class TestRetention(DatastoreTestMixin, APIBaseTest):
     def run_query(self, query):
         if not query.get("retentionFilter"):
             query["retentionFilter"] = {}
@@ -324,7 +324,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
         )
 
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_month_interval_with_person_on_events_v2(self):
         _create_person(
             team=self.team,
@@ -500,7 +500,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_week_interval(self):
         _create_person(
             team=self.team,
@@ -1511,7 +1511,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
             ),
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_event_action(self):
         _create_person(team=self.team, distinct_ids=["person1", "alias1"])
         _create_person(team=self.team, distinct_ids=["person2"])
@@ -2353,7 +2353,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
             pluck(result, "values", "count"),
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_with_user_properties_via_action(self):
         action = Action.objects.create(
             team=self.team,
@@ -3319,7 +3319,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
         # Should contain person2
         self.assertIn("person2", person_ids)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones(self):
         _create_person(team_id=self.team.pk, distinct_ids=["person1", "alias1"])
         _create_person(team_id=self.team.pk, distinct_ids=["person2"])
@@ -3420,7 +3420,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
             ),
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_day_interval_sampled(self):
         _create_person(team_id=self.team.pk, distinct_ids=["person1", "alias1"])
         _create_person(team_id=self.team.pk, distinct_ids=["person2"])
@@ -4818,7 +4818,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
         )
 
 
-class TestClickhouseRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTest):
+class TestDatastoreRetentionGroupAggregation(DatastoreTestMixin, APIBaseTest):
     def run_query(self, query, *, limit_context: Optional[LimitContext] = None):
         if not query.get("retentionFilter"):
             query["retentionFilter"] = {}
@@ -4909,7 +4909,7 @@ class TestClickhouseRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_aggregating(self):
         self._create_groups_and_events()
 
@@ -4999,7 +4999,7 @@ class TestClickhouseRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(actor_result[1][0]["id"], "org:6")
         self.assertEqual(actor_result[1][1], [0, 1, 3, 4, 6])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_aggregating_person_on_events(self):
         self._create_groups_and_events()
 

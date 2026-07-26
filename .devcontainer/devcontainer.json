@@ -15,8 +15,8 @@
         "KAFKA_ENABLED": "true",
         "KAFKA_HOSTS": "kafka:9092",
         "CLICKHOUST_HOST": "localhost",
-        "CLICKHOUSE_DATABASE": "insights_test",
-        "CLICKHOUSE_VERIFY": "False",
+        "DATASTORE_DATABASE": "insights_test",
+        "DATASTORE_VERIFY": "False",
         "REDIS_URL": "redis://localhost:6379",
         "SECRET_KEY": "<randomly generated secret key>"
     },

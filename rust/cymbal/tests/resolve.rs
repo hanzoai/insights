@@ -2,7 +2,7 @@ use core::str;
 use std::sync::Arc;
 
 use axum::async_trait;
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use cymbal::{
     config::Config,
     frames::{Frame, RawFrame},
@@ -81,7 +81,7 @@ async fn end_to_end_resolver_test() {
         then.status(200).body(MAP);
     });
 
-    let exception: ClickHouseEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
+    let exception: DatastoreEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
     let mut props: RawErrProps = serde_json::from_str(&exception.properties.unwrap()).unwrap();
     let Stacktrace::Raw {
         frames: mut test_stack,

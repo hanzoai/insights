@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import (
     DateRange,
@@ -16,7 +16,7 @@ from insights.schema import (
     OrderDirection,
 )
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.insightsql_queries.document_embeddings_query_runner import DocumentEmbeddingsQueryRunner
 
 
@@ -52,7 +52,7 @@ def build_document_similarity_query(
     )
 
 
-class TestDocumentEmbeddingsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestDocumentEmbeddingsQueryRunner(DatastoreTestMixin, APIBaseTest):
     base_timestamp = datetime(2024, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC"))
     product_documents = (
         ("product_a", "document_a", "doc_product_a"),

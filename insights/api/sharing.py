@@ -28,7 +28,7 @@ from insights.api.insight_variable import InsightVariable
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import TeamPublicSerializer
 from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
-from insights.clickhouse.client.async_task_chain import task_chain_context
+from insights.datastore.client.async_task_chain import task_chain_context
 from insights.constants import AvailableFeature
 from insights.exceptions_capture import capture_exception
 from insights.jwt import InsightsJwtAudience, encode_jwt

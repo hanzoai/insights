@@ -1,10 +1,10 @@
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import BreakdownValue, DateRange, ErrorTrackingBreakdownsQuery
@@ -15,7 +15,7 @@ from products.error_tracking.backend.insightsql_queries.error_tracking_breakdown
 from products.error_tracking.backend.models import ErrorTrackingIssue, ErrorTrackingIssueFingerprintV2
 
 
-class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestErrorTrackingBreakdownsQueryRunner(DatastoreTestMixin, APIBaseTest):
     issue_id = "01936e7f-d7ff-7314-b2d4-7627981e34f0"
     fingerprint = "test_fingerprint"
 
@@ -37,7 +37,7 @@ class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2024-01-10T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_with_limit(self):
         self.create_issue(self.issue_id, self.fingerprint)
 
@@ -74,7 +74,7 @@ class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert browser_data.values[2].count == 6
 
     @freeze_time("2024-01-10T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_multiple_breakdown_properties(self):
         self.create_issue(self.issue_id, self.fingerprint)
 
@@ -117,7 +117,7 @@ class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2024-01-10T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_with_null_values(self):
         self.create_issue(self.issue_id, self.fingerprint)
 
@@ -152,7 +152,7 @@ class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert browser_data.values[1].count == 3
 
     @freeze_time("2024-01-10T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_respects_date_range(self):
         self.create_issue(self.issue_id, self.fingerprint)
 

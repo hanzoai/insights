@@ -60,7 +60,7 @@
 
 mod pipeline_builder;
 
-pub mod clickhouse_events;
+pub mod datastore_events;
 pub mod ingestion_events;
 pub mod processor;
 pub mod results;

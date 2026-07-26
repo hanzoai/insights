@@ -4,10 +4,10 @@ from time import time_ns
 import pytest
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import FilterLogicalOperator, InsightsQLQueryModifiers, SessionTableVersion
@@ -24,8 +24,8 @@ from insights.models.property_definition import PropertyType
 from insights.models.utils import uuid7
 
 
-@snapshot_clickhouse_queries
-class TestSessionsV3(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestSessionsV3(DatastoreTestMixin, APIBaseTest):
     snapshot_replace_all_numbers = True
 
     def __execute(
@@ -676,7 +676,7 @@ class TestSessionsV3(ClickhouseTestMixin, APIBaseTest):
         assert response.results == [(1,)]
 
 
-class TestGetLazySessionProperties(ClickhouseTestMixin, APIBaseTest):
+class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
     def test_all(self):
         results = get_lazy_session_table_properties_v3(None)
         self.assertEqual(

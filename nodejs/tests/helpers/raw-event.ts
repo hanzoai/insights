@@ -1,22 +1,22 @@
 import { randomUUID } from 'crypto'
 
-import { ClickHouseTimestamp, ProjectId, RawClickHouseEvent, RawKafkaEvent } from '../../src/types'
+import { DatastoreTimestamp, ProjectId, RawDatastoreEvent, RawKafkaEvent } from '../../src/types'
 
 /**
- * Helper function to create RawClickHouseEvent for tests with sensible defaults.
+ * Helper function to create RawDatastoreEvent for tests with sensible defaults.
  *
- * @param overrides - Partial RawClickHouseEvent to override defaults
- * @returns Complete RawClickHouseEvent object
+ * @param overrides - Partial RawDatastoreEvent to override defaults
+ * @returns Complete RawDatastoreEvent object
  *
  * @example
- * const event = createTestRawClickHouseEvent({
+ * const event = createTestRawDatastoreEvent({
  *     team_id: 123,
  *     event: '$pageview',
  *     distinct_id: 'user-abc'
  * })
  */
-export function createTestRawClickHouseEvent(overrides: Partial<RawClickHouseEvent> = {}): RawClickHouseEvent {
-    const now = new Date().toISOString() as ClickHouseTimestamp
+export function createTestRawDatastoreEvent(overrides: Partial<RawDatastoreEvent> = {}): RawDatastoreEvent {
+    const now = new Date().toISOString() as DatastoreTimestamp
     return {
         uuid: randomUUID(),
         event: 'test_event',
@@ -37,14 +37,14 @@ export function createTestRawClickHouseEvent(overrides: Partial<RawClickHouseEve
 
 /**
  * Helper function to create RawKafkaEvent for tests with sensible defaults.
- * RawKafkaEvent extends RawClickHouseEvent with a project_id field.
+ * RawKafkaEvent extends RawDatastoreEvent with a project_id field.
  *
  * @param overrides - Partial RawKafkaEvent to override defaults
  * @returns Complete RawKafkaEvent object
  */
 export function createTestRawKafkaEvent(overrides: Partial<RawKafkaEvent> = {}): RawKafkaEvent {
     return {
-        ...createTestRawClickHouseEvent(overrides),
+        ...createTestRawDatastoreEvent(overrides),
         project_id: (overrides.project_id ?? overrides.team_id ?? 1) as ProjectId,
     }
 }

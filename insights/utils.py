@@ -1073,7 +1073,7 @@ def get_redis_queue_depth() -> int:
 
 def get_instance_realm() -> str:
     """
-    Returns the realm for the current instance. `cloud` or 'demo' or `hosted-clickhouse`.
+    Returns the realm for the current instance. `cloud` or 'demo' or `hosted-datastore`.
 
     Historically this would also have returned `hosted` for hosted postgresql based installations
     """
@@ -1082,7 +1082,7 @@ def get_instance_realm() -> str:
     elif settings.DEMO:
         return "demo"
     else:
-        return "hosted-clickhouse"
+        return "hosted-datastore"
 
 
 def get_instance_region() -> Optional[str]:
@@ -1470,7 +1470,7 @@ def cast_timestamp_or_now(timestamp: Optional[Union[datetime.datetime, str]]) ->
     if not timestamp:
         timestamp = timezone.now()
 
-    # clickhouse specific formatting
+    # datastore specific formatting
     if isinstance(timestamp, str):
         timestamp = parser.isoparse(timestamp)
     else:

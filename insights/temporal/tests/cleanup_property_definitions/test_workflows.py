@@ -9,7 +9,7 @@ from temporalio.worker import Worker
 
 from insights.temporal.cleanup_property_definitions.types import (
     CleanupPropertyDefinitionsInput,
-    DeleteClickHousePropertyDefinitionsInput,
+    DeleteDatastorePropertyDefinitionsInput,
     DeletePostgresPropertyDefinitionsInput,
     PreviewPropertyDefinitionsInput,
 )
@@ -22,7 +22,7 @@ async def test_cleanup_property_definitions_workflow():
     TEST_PATTERN = "^temp_.*"
     TEST_PROPERTY_TYPE = "person"
     postgres_deleted = 0
-    clickhouse_deleted = False
+    datastore_deleted = False
 
     @activity.defn(name="delete-property-definitions-from-postgres")
     async def delete_postgres_mocked(input: DeletePostgresPropertyDefinitionsInput) -> dict:
@@ -33,13 +33,13 @@ async def test_cleanup_property_definitions_workflow():
         postgres_deleted = 5
         return {"property_definitions_deleted": 5, "event_properties_deleted": 0}
 
-    @activity.defn(name="delete-property-definitions-from-clickhouse")
-    async def delete_clickhouse_mocked(input: DeleteClickHousePropertyDefinitionsInput) -> None:
-        nonlocal clickhouse_deleted
+    @activity.defn(name="delete-property-definitions-from-datastore")
+    async def delete_datastore_mocked(input: DeleteDatastorePropertyDefinitionsInput) -> None:
+        nonlocal datastore_deleted
         assert input.team_id == TEST_TEAM_ID
         assert input.pattern == TEST_PATTERN
         assert input.property_type == 2  # PERSON
-        clickhouse_deleted = True
+        datastore_deleted = True
 
     task_queue_name = str(uuid.uuid4())
     async with await WorkflowEnvironment.start_time_skipping() as env:
@@ -49,7 +49,7 @@ async def test_cleanup_property_definitions_workflow():
             workflows=[CleanupPropertyDefinitionsWorkflow],
             activities=[
                 delete_postgres_mocked,
-                delete_clickhouse_mocked,
+                delete_datastore_mocked,
             ],
             workflow_runner=temporalio.worker.UnsandboxedWorkflowRunner(),
         ):
@@ -72,7 +72,7 @@ async def test_cleanup_property_definitions_workflow():
     assert result["property_definitions_deleted"] == 5
     assert result["event_properties_deleted"] == 0
     assert postgres_deleted == 5
-    assert clickhouse_deleted is True
+    assert datastore_deleted is True
 
 
 @pytest.mark.asyncio
@@ -86,8 +86,8 @@ async def test_cleanup_property_definitions_workflow_dry_run():
     async def delete_postgres_mocked(input: DeletePostgresPropertyDefinitionsInput) -> dict:
         raise AssertionError("Should not be called in dry run mode")
 
-    @activity.defn(name="delete-property-definitions-from-clickhouse")
-    async def delete_clickhouse_mocked(input: DeleteClickHousePropertyDefinitionsInput) -> None:
+    @activity.defn(name="delete-property-definitions-from-datastore")
+    async def delete_datastore_mocked(input: DeleteDatastorePropertyDefinitionsInput) -> None:
         raise AssertionError("Should not be called in dry run mode")
 
     @activity.defn(name="preview-property-definitions")
@@ -105,7 +105,7 @@ async def test_cleanup_property_definitions_workflow_dry_run():
             workflows=[CleanupPropertyDefinitionsWorkflow],
             activities=[
                 delete_postgres_mocked,
-                delete_clickhouse_mocked,
+                delete_datastore_mocked,
                 preview_mocked,
             ],
             workflow_runner=temporalio.worker.UnsandboxedWorkflowRunner(),
@@ -141,8 +141,8 @@ async def test_cleanup_property_definitions_workflow_no_matches():
     async def delete_postgres_mocked(input: DeletePostgresPropertyDefinitionsInput) -> dict:
         return {"property_definitions_deleted": 0, "event_properties_deleted": 0}
 
-    @activity.defn(name="delete-property-definitions-from-clickhouse")
-    async def delete_clickhouse_mocked(input: DeleteClickHousePropertyDefinitionsInput) -> None:
+    @activity.defn(name="delete-property-definitions-from-datastore")
+    async def delete_datastore_mocked(input: DeleteDatastorePropertyDefinitionsInput) -> None:
         pass
 
     task_queue_name = str(uuid.uuid4())
@@ -153,7 +153,7 @@ async def test_cleanup_property_definitions_workflow_no_matches():
             workflows=[CleanupPropertyDefinitionsWorkflow],
             activities=[
                 delete_postgres_mocked,
-                delete_clickhouse_mocked,
+                delete_datastore_mocked,
             ],
             workflow_runner=temporalio.worker.UnsandboxedWorkflowRunner(),
         ):
@@ -184,8 +184,8 @@ async def test_cleanup_property_definitions_workflow_event_type_deletes_event_pr
         assert input.property_type == 1  # EVENT
         return {"property_definitions_deleted": 10, "event_properties_deleted": 25}
 
-    @activity.defn(name="delete-property-definitions-from-clickhouse")
-    async def delete_clickhouse_mocked(input: DeleteClickHousePropertyDefinitionsInput) -> None:
+    @activity.defn(name="delete-property-definitions-from-datastore")
+    async def delete_datastore_mocked(input: DeleteDatastorePropertyDefinitionsInput) -> None:
         pass
 
     task_queue_name = str(uuid.uuid4())
@@ -196,7 +196,7 @@ async def test_cleanup_property_definitions_workflow_event_type_deletes_event_pr
             workflows=[CleanupPropertyDefinitionsWorkflow],
             activities=[
                 delete_postgres_mocked,
-                delete_clickhouse_mocked,
+                delete_datastore_mocked,
             ],
             workflow_runner=temporalio.worker.UnsandboxedWorkflowRunner(),
         ):
@@ -233,8 +233,8 @@ async def test_cleanup_property_definitions_workflow_multiple_batches():
             return {"property_definitions_deleted": BATCH_SIZE, "event_properties_deleted": BATCH_SIZE * 2}
         return {"property_definitions_deleted": 3000, "event_properties_deleted": 6000}
 
-    @activity.defn(name="delete-property-definitions-from-clickhouse")
-    async def delete_clickhouse_mocked(input: DeleteClickHousePropertyDefinitionsInput) -> None:
+    @activity.defn(name="delete-property-definitions-from-datastore")
+    async def delete_datastore_mocked(input: DeleteDatastorePropertyDefinitionsInput) -> None:
         pass
 
     task_queue_name = str(uuid.uuid4())
@@ -245,7 +245,7 @@ async def test_cleanup_property_definitions_workflow_multiple_batches():
             workflows=[CleanupPropertyDefinitionsWorkflow],
             activities=[
                 delete_postgres_mocked,
-                delete_clickhouse_mocked,
+                delete_datastore_mocked,
             ],
             workflow_runner=temporalio.worker.UnsandboxedWorkflowRunner(),
         ):
@@ -324,7 +324,7 @@ def test_cleanup_property_definitions_input_rejects_re2_incompatible_patterns():
 
 
 def test_cleanup_property_definitions_input_accepts_simple_patterns():
-    # These patterns should work in both PostgreSQL and ClickHouse RE2
+    # These patterns should work in both PostgreSQL and Datastore RE2
     valid_patterns = [
         "^temp_.*",
         "_test$",

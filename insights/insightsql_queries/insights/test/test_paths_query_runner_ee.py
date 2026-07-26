@@ -6,12 +6,12 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     create_person_id_override_by_distinct_id,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import MagicMock
 
@@ -31,7 +31,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 ONE_MINUTE = 60_000  # 1 minute in milliseconds
 
 
-class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
+class TestDatastorePaths(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_groups(self):
@@ -104,7 +104,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
         return [row[0]["id"] for row in runner.calculate().model_dump()["results"]]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_step_limit(self):
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["fake"])
 
@@ -223,7 +223,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual([p1.uuid], self._get_people_at_path(filter, "2_/2", "3_/3"))
             self.assertEqual([p1.uuid], self._get_people_at_path(filter, "3_/3", "4_/4"))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_step_conversion_times(self):
         _create_person(team_id=self.team.pk, distinct_ids=["fake"])
@@ -334,7 +334,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_ordering(self):
         # this tests to make sure that paths don't get scrambled when there are several similar variations
         events = []
@@ -644,7 +644,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(["$current_url", "$screen_name"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_end(self):
         _create_person(team_id=self.team.pk, distinct_ids=["person_1"])
         p1 = [
@@ -880,7 +880,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_event_inclusion_exclusion_filters(self):
         # P1 for pageview event
@@ -1103,7 +1103,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_event_exclusion_filters_with_wildcard_groups(self):
         # P1 for pageview event /2/bar/1/foo
@@ -1480,7 +1480,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_respect_session_limits(self):
         _create_person(team_id=self.team.pk, distinct_ids=["fake"])
@@ -1682,7 +1682,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(["$current_url", "$screen_name"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_start_and_end(self):
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["person_1"])
 
@@ -1884,7 +1884,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
         self.assertCountEqual(self._get_people_at_path(paths_query, "3_...", "4_/5"), [p1.uuid])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_properties_queried_using_path_filter(self):
         test_cases = {
             "empty_filter": ({}, (True, True)),
@@ -1924,7 +1924,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
                 )
                 self.assertEqual(result, expected)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_wildcard_groups_across_people(self):
         # P1 for pageview event /2/bar/1/foo
@@ -2055,7 +2055,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2023-05-23T11:00:00.000Z")
     def test_wildcard_groups_evil_input(self):
         evil_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"
@@ -2168,7 +2168,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_dropoffs(self):
         events = []
 
@@ -2283,7 +2283,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             0, len(self._get_people_at_path(filter, path_start="4_step four"))
         )  # 0 total reach after step 4
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_start_dropping_orphaned_edges(self):
         events = []
         for i in range(5):
@@ -2703,7 +2703,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_filtering_person_on_events(self):
         self._create_groups()
         # P1 for pageview event, org:5
@@ -2942,7 +2942,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             )
 
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_on_events_v2(self):
         self._create_groups()
         # P1 for pageview event, org:5
@@ -3045,7 +3045,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2012-01-01T03:21:34.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_recording(self):
         # User with 2 matching paths with recordings
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["p1"])
@@ -3201,7 +3201,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
         self.assertEqual([], matched_recordings[1])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2012-01-01T03:21:34.000Z")
     def test_recording_with_no_window_or_session_id(self):
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["p1"])
@@ -3256,7 +3256,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([p1.uuid], [row[0]["id"] for row in results])
         self.assertEqual([[]], [list(row[3]) for row in results])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2012-01-01T03:21:34.000Z")
     def test_recording_with_start_and_end(self):
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["p1"])
@@ -3360,7 +3360,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
             [list(row[3]) for row in results],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2012-01-01T03:21:34.000Z")
     def test_recording_for_dropoff(self):
         p1 = _create_person(team_id=self.team.pk, distinct_ids=["p1"])
@@ -3493,7 +3493,7 @@ class TestClickhousePaths(ClickhouseTestMixin, APIBaseTest):
         )
 
 
-class TestClickhousePathsEdgeValidation(TestCase):
+class TestDatastorePathsEdgeValidation(TestCase):
     BASIC_PATH = [("1_a", "2_b"), ("2_b", "3_c"), ("3_c", "4_d")]  # a->b->c->d
     BASIC_PATH_2 = [("1_x", "2_y"), ("2_y", "3_z")]  # x->y->z
 

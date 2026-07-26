@@ -12,7 +12,7 @@ insights/temporal/llm_analytics/trace_clustering/
 ├── data.py                  # Data access layer (InsightsQL queries for team-scoped data)
 ├── clustering.py            # HDBSCAN clustering, UMAP reduction, distance calculations
 ├── labeling.py              # Entry point for cluster labeling (calls labeling agent)
-├── event_emission.py        # Event building and emission to ClickHouse
+├── event_emission.py        # Event building and emission to Datastore
 ├── models.py                # Data models (ClusteringInputs, ClusteringResult, etc.)
 ├── constants.py             # Configuration constants (timeouts, defaults, agent config)
 ├── coordinator.py           # Coordinator workflow (processes teams from allowlist)
@@ -38,7 +38,7 @@ This workflow implements trace clustering for LLM analytics:
 4. **Compute distances** - Calculate distance from each trace to cluster centroids
 5. **2D projection** - Generate UMAP 2D coordinates for visualization
 6. **Generate labels** - Use a LangGraph agent with Claude to create distinctive titles and descriptions
-7. **Emit events** - Store results as `$ai_trace_clusters` events in ClickHouse
+7. **Emit events** - Store results as `$ai_trace_clusters` events in Datastore
 
 The workflow is designed to run on a schedule (daily) and is **versioned** - each run creates a fresh clustering that can be tracked over time.
 
@@ -121,7 +121,7 @@ The workflow uses **three separate activities** with independent timeouts and re
 | ------------------------------------- | ------------------------------------ | ------- | --------- | ------- | -------------- |
 | `perform_clustering_compute_activity` | Fetch embeddings, HDBSCAN, distances | 120s    | 60s       | 3       | ~150 KB output |
 | `generate_cluster_labels_activity`    | LLM-based cluster labeling           | 600s    | 120s      | 2       | ~4 KB output   |
-| `emit_cluster_events_activity`        | Write results to ClickHouse          | 60s     | 30s       | 3       | ~150 KB input  |
+| `emit_cluster_events_activity`        | Write results to Datastore          | 60s     | 30s       | 3       | ~150 KB input  |
 
 **Benefits:**
 
@@ -150,7 +150,7 @@ The workflow uses **three separate activities** with independent timeouts and re
 **Activity 3 (Emit)** - Database write:
 
 - Builds cluster data structures
-- Emits `$ai_trace_clusters` event to ClickHouse
+- Emits `$ai_trace_clusters` event to Datastore
 
 ### Module Responsibilities
 
@@ -293,7 +293,7 @@ import django
 django.setup()
 
 import json
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 
 results = sync_execute('''
     SELECT

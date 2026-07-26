@@ -62,7 +62,7 @@ class SessionRecording(UUIDTModel):
     expiry_time: Optional[datetime] = None
     recording_ttl: Optional[int] = None
 
-    # Metadata can be loaded from Clickhouse or S3
+    # Metadata can be loaded from Datastore or S3
     _metadata: Optional[RecordingMetadata] = None
 
     def load_metadata(self) -> bool:
@@ -73,7 +73,7 @@ class SessionRecording(UUIDTModel):
             # Nothing todo as we have all the metadata in the model
             pass
         else:
-            # Try to load from Clickhouse
+            # Try to load from Datastore
             metadata = SessionReplayEvents().get_metadata(
                 team=self.team,
                 session_id=self.session_id,
@@ -159,7 +159,7 @@ class SessionRecording(UUIDTModel):
             return SessionRecording(session_id=session_id, team=team)
 
     @staticmethod
-    def get_or_build_from_clickhouse(team: Team, ch_recordings: list[dict]) -> "list[SessionRecording]":
+    def get_or_build_from_datastore(team: Team, ch_recordings: list[dict]) -> "list[SessionRecording]":
         session_ids = sorted([recording["session_id"] for recording in ch_recordings])
 
         recordings_by_id = {

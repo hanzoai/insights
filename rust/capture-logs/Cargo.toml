@@ -23,7 +23,7 @@ serde = { workspace = true }
 serde_derive = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-clickhouse = { workspace = true }
+datastore = { workspace = true }
 serde_json = { workspace = true }
 metrics = { workspace = true }
 base64 = { workspace = true }

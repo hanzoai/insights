@@ -18,7 +18,7 @@ from insights.insightsql import ast
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query, tracer
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.insightsql_queries.legacy_compatibility.filter_to_query import MathAvailability, legacy_entity_to_node
 from insights.models import Entity, EventProperty, Team
 from insights.session_recordings.queries.sub_queries.base_query import SessionRecordingsListingBaseQuery
@@ -101,7 +101,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         group_by: list[ast.Expr],
         limit_expr: ast.Expr,
     ) -> ast.SelectQuery:
-        # NOTE: ORDER BY can cause incorrect results in globalIn contexts on distributed ClickHouse tables.
+        # NOTE: ORDER BY can cause incorrect results in globalIn contexts on distributed Datastore tables.
         # The ORDER BY was meant to prefer recent sessions when hitting LIMIT, but we saw a
         # with a bad experience filtering out 60% of results incorrectly
         # We use a feature flag to control this behavior for safe rollout.

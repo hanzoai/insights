@@ -12,7 +12,7 @@ import temporalio.activity
 import temporalio.workflow
 from structlog import get_logger
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.models.person import Person
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.heartbeat import Heartbeater

@@ -4,7 +4,7 @@ from uuid import UUID
 import dagster
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.person_overrides import (
     GetExistingDictionaryConfig,
     PersonOverridesSnapshotDictionary,
@@ -18,7 +18,7 @@ from insights.dags.person_overrides import (
 )
 
 
-def test_full_job(cluster: ClickhouseCluster):
+def test_full_job(cluster: DatastoreCluster):
     timestamp = datetime(2025, 1, 1)
 
     def insert_events(client: Client) -> None:
@@ -114,7 +114,7 @@ def test_full_job(cluster: ClickhouseCluster):
     assert cluster.any_host(get_distinct_ids_with_overrides).result() == {"z"}
 
 
-def test_cleanup_job(cluster: ClickhouseCluster) -> None:
+def test_cleanup_job(cluster: DatastoreCluster) -> None:
     timestamp = datetime(2025, 1, 1)
 
     partial_squash_run_result = squash_person_overrides.execute_in_process(

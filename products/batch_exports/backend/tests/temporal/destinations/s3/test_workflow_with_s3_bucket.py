@@ -102,7 +102,7 @@ async def s3_batch_export(
 @pytest.mark.parametrize("file_format", ["JSONLines"], indirect=True)
 async def test_s3_export_workflow_with_s3_bucket_with_various_intervals_and_models(
     s3_client,
-    clickhouse_client,
+    datastore_client,
     interval,
     s3_batch_export,
     bucket_name,
@@ -141,7 +141,7 @@ async def test_s3_export_workflow_with_s3_bucket_with_various_intervals_and_mode
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=s3_client,
     )
 
@@ -155,7 +155,7 @@ async def test_s3_export_workflow_with_s3_bucket_with_various_intervals_and_mode
 @pytest.mark.parametrize("bucket_name", [os.getenv("S3_TEST_BUCKET")], indirect=True)
 async def test_s3_export_workflow_with_s3_bucket_with_various_file_formats(
     s3_client,
-    clickhouse_client,
+    datastore_client,
     interval,
     s3_batch_export,
     bucket_name,
@@ -185,6 +185,6 @@ async def test_s3_export_workflow_with_s3_bucket_with_various_file_formats(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=s3_client,
     )

@@ -287,7 +287,7 @@ if settings.TEST:
     # Used in insights-js e2e tests
     @csrf_exempt
     def delete_events(request):
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
         from insights.models.event.sql import TRUNCATE_EVENTS_TABLE_SQL
 
         sync_execute(TRUNCATE_EVENTS_TABLE_SQL())

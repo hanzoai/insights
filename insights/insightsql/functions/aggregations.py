@@ -151,7 +151,7 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
         signatures=[((UnknownType(),), BooleanType())],
         using_placeholder_arguments=True,
     ),
-    # ClickHouse-specific aggregate functions
+    # Datastore-specific aggregate functions
     "anyHeavy": InsightsQLFunctionMeta("anyHeavy", 1, 1, aggregate=True),
     "anyHeavyIf": InsightsQLFunctionMeta("anyHeavyIf", 2, 2, aggregate=True),
     "anyLast": InsightsQLFunctionMeta("anyLast", 1, 1, aggregate=True),

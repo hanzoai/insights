@@ -11,10 +11,10 @@ from insights.async_migrations.definition import (
     AsyncMigrationOperation,
     AsyncMigrationOperationSQL,
 )
-from insights.async_migrations.utils import execute_op_clickhouse, run_optimize_table
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.kafka_engine import STORAGE_POLICY
-from insights.clickhouse.table_engines import ReplacingMergeTree
+from insights.async_migrations.utils import execute_op_datastore, run_optimize_table
+from insights.datastore.client import sync_execute
+from insights.datastore.kafka_engine import STORAGE_POLICY
+from insights.datastore.table_engines import ReplacingMergeTree
 from insights.constants import AnalyticsDBMS
 from insights.exceptions_capture import capture_exception
 from insights.models.async_migration import AsyncMigration
@@ -54,10 +54,10 @@ Constraints:
 
 REDIS_HIGHWATERMARK_KEY = "insights.async_migrations.0005.highwatermark"
 
-TEMPORARY_TABLE_NAME = f"{settings.CLICKHOUSE_DATABASE}.tmp_person_0005_person_replacing_by_version"
-TEMPORARY_PERSON_MV = f"{settings.CLICKHOUSE_DATABASE}.tmp_person_mv_0005_person_replacing_by_version"
+TEMPORARY_TABLE_NAME = f"{settings.DATASTORE_DATABASE}.tmp_person_0005_person_replacing_by_version"
+TEMPORARY_PERSON_MV = f"{settings.DATASTORE_DATABASE}.tmp_person_mv_0005_person_replacing_by_version"
 PERSON_TABLE = "person"
-PERSON_TABLE_NAME = f"{settings.CLICKHOUSE_DATABASE}.{PERSON_TABLE}"
+PERSON_TABLE_NAME = f"{settings.DATASTORE_DATABASE}.{PERSON_TABLE}"
 BACKUP_TABLE_NAME = f"{PERSON_TABLE_NAME}_backup_0005_person_replacing_by_version"
 FAILED_PERSON_TABLE_NAME = f"{PERSON_TABLE_NAME}_failed_0005_person_replacing_by_version"
 
@@ -76,7 +76,7 @@ class Migration(AsyncMigrationDefinition):
     def is_required(self) -> bool:
         result = sync_execute(
             "SELECT engine_full FROM system.tables WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": "person"},
+            {"database": settings.DATASTORE_DATABASE, "name": "person"},
         )
         if not result:
             # Table doesn't exist (fresh install or CH migrations still running) — not required
@@ -91,19 +91,19 @@ class Migration(AsyncMigrationDefinition):
     def operations(self):
         return [
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=f"""
-                    CREATE TABLE IF NOT EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}' AS {PERSON_TABLE_NAME}
+                    CREATE TABLE IF NOT EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}' AS {PERSON_TABLE_NAME}
                     ENGINE = {self.new_table_engine()}
                     ORDER BY (team_id, id)
                     {STORAGE_POLICY()}
                 """,
-                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=f"""
-                    CREATE MATERIALIZED VIEW {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'
+                    CREATE MATERIALIZED VIEW {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.DATASTORE_CLUSTER}'
                     TO {TEMPORARY_TABLE_NAME}
                     AS SELECT
                         id,
@@ -115,12 +115,12 @@ class Migration(AsyncMigrationDefinition):
                         version,
                         _timestamp,
                         _offset
-                    FROM {settings.CLICKHOUSE_DATABASE}.kafka_person
+                    FROM {settings.DATASTORE_DATABASE}.kafka_person
                 """,
-                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=f"""
                     INSERT INTO {TEMPORARY_TABLE_NAME}
                     SELECT *
@@ -137,35 +137,35 @@ class Migration(AsyncMigrationDefinition):
                     "send_timeout": 2 * 24 * 60 * 60,  # two days,
                     "receive_timeout": 2 * 24 * 60 * 60,  # two days,
                 },
-                rollback=f"TRUNCATE TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+                rollback=f"TRUNCATE TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
-                sql=f"DROP TABLE IF EXISTS {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"DROP TABLE IF EXISTS {TEMPORARY_PERSON_MV} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
                 rollback=None,
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
-                sql=f"DROP TABLE IF EXISTS person_mv ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"DROP TABLE IF EXISTS person_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
                 rollback=None,
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=f"""
                     RENAME TABLE
                         {PERSON_TABLE_NAME} to {BACKUP_TABLE_NAME},
                         {TEMPORARY_TABLE_NAME} to {PERSON_TABLE_NAME}
-                    ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'
+                    ON CLUSTER '{settings.DATASTORE_CLUSTER}'
                 """,
                 rollback=f"""
                     RENAME TABLE
                         {PERSON_TABLE_NAME} to {FAILED_PERSON_TABLE_NAME},
                         {BACKUP_TABLE_NAME} to {PERSON_TABLE_NAME}
-                    ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'
+                    ON CLUSTER '{settings.DATASTORE_CLUSTER}'
                 """,
             ),
             AsyncMigrationOperationSQL(
-                database=AnalyticsDBMS.CLICKHOUSE,
+                database=AnalyticsDBMS.DATASTORE,
                 sql=PERSONS_TABLE_MV_SQL(target_table=PERSON_TABLE),
                 rollback=None,
             ),
@@ -220,7 +220,7 @@ class Migration(AsyncMigrationDefinition):
         highwatermark = self.get_pg_copy_highwatermark()
         if highwatermark > self.pg_copy_target_person_id:
             logger.info(
-                "Finished copying people from postgres to clickhouse",
+                "Finished copying people from postgres to datastore",
                 highwatermark=highwatermark,
                 pg_copy_target_person_id=self.pg_copy_target_person_id,
             )
@@ -229,12 +229,12 @@ class Migration(AsyncMigrationDefinition):
         persons = list(Person.objects.filter(id__gte=highwatermark)[:PG_COPY_BATCH_SIZE])
         sql, params = self._persons_insert_query(persons)
 
-        execute_op_clickhouse(sql, params, query_id=query_id)
+        execute_op_datastore(sql, params, query_id=query_id)
 
         new_highwatermark = (persons[-1].id if len(persons) > 0 else self.pg_copy_target_person_id) + 1
         get_client().set(REDIS_HIGHWATERMARK_KEY, new_highwatermark)
         logger.debug(
-            "Copied batch of people from postgres to clickhouse",
+            "Copied batch of people from postgres to datastore",
             batch_size=len(persons),
             previous_highwatermark=highwatermark,
             new_highwatermark=new_highwatermark,

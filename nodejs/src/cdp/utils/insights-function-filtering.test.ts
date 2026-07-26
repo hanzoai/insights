@@ -1,7 +1,7 @@
-import { ClickHouseTimestamp, ProjectId, RawClickHouseEvent } from '../../types'
+import { DatastoreTimestamp, ProjectId, RawDatastoreEvent } from '../../types'
 import { InsightsFunctionFilterGlobals, InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import {
-    convertClickhouseRawEventToFilterGlobals,
+    convertDatastoreRawEventToFilterGlobals,
     convertToInsightsFunctionFilterGlobal,
     filterFunctionInstrumented,
 } from './insights-function-filtering'
@@ -103,23 +103,23 @@ describe('insights-function-filtering', () => {
             `)
         })
     })
-    describe('convertClickhouseRawEventToFilterGlobals', () => {
-        it('should convert RawClickHouseEvent to InsightsFunctionFilterGlobals with basic event data', () => {
-            const rawEvent: RawClickHouseEvent = {
+    describe('convertDatastoreRawEventToFilterGlobals', () => {
+        it('should convert RawDatastoreEvent to InsightsFunctionFilterGlobals with basic event data', () => {
+            const rawEvent: RawDatastoreEvent = {
                 uuid: 'event_uuid',
                 event: 'test_event',
                 team_id: 1,
                 distinct_id: 'user_123',
                 project_id: 1 as ProjectId,
-                timestamp: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
-                created_at: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
+                timestamp: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
+                created_at: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
                 properties: JSON.stringify({ test_prop: 'test_value' }),
                 elements_chain: 'a:href="https://example.com"',
                 person_mode: 'full',
                 historical_migration: false,
             }
 
-            const result = convertClickhouseRawEventToFilterGlobals(rawEvent)
+            const result = convertDatastoreRawEventToFilterGlobals(rawEvent)
 
             expect(result.event).toBe('test_event')
             expect(result.distinct_id).toBe('user_123')
@@ -132,14 +132,14 @@ describe('insights-function-filtering', () => {
         })
 
         it('should handle person data when person_id is present', () => {
-            const rawEvent: RawClickHouseEvent = {
+            const rawEvent: RawDatastoreEvent = {
                 uuid: 'event_uuid',
                 event: 'test_event',
                 team_id: 1,
                 distinct_id: 'user_123',
                 project_id: 1 as ProjectId,
-                timestamp: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
-                created_at: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
+                timestamp: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
+                created_at: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
                 properties: JSON.stringify({}),
                 elements_chain: '',
                 person_id: 'person_123',
@@ -148,7 +148,7 @@ describe('insights-function-filtering', () => {
                 historical_migration: false,
             }
 
-            const result = convertClickhouseRawEventToFilterGlobals(rawEvent)
+            const result = convertDatastoreRawEventToFilterGlobals(rawEvent)
 
             expect(result.person).toEqual({
                 id: 'person_123',
@@ -164,15 +164,15 @@ describe('insights-function-filtering', () => {
             })
         })
 
-        it('should handle group data from RawClickHouseEvent', () => {
-            const rawEvent: RawClickHouseEvent = {
+        it('should handle group data from RawDatastoreEvent', () => {
+            const rawEvent: RawDatastoreEvent = {
                 uuid: 'event_uuid',
                 event: 'test_event',
                 team_id: 1,
                 distinct_id: 'user_123',
                 project_id: 1 as ProjectId,
-                timestamp: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
-                created_at: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
+                timestamp: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
+                created_at: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
                 properties: JSON.stringify({ $group_0: 'org_123', $group_1: 'proj_456' }),
                 elements_chain: '',
                 group0_properties: JSON.stringify({ name: 'Acme Corp' }),
@@ -181,7 +181,7 @@ describe('insights-function-filtering', () => {
                 historical_migration: false,
             }
 
-            const result = convertClickhouseRawEventToFilterGlobals(rawEvent)
+            const result = convertDatastoreRawEventToFilterGlobals(rawEvent)
 
             expect(result.$group_0).toBe('org_123')
             expect(result.$group_1).toBe('proj_456')
@@ -196,42 +196,42 @@ describe('insights-function-filtering', () => {
             expect(result.group_4).toEqual({ properties: {} })
         })
 
-        it('should handle ClickHouse timestamp conversion', () => {
-            const rawEvent: RawClickHouseEvent = {
+        it('should handle Datastore timestamp conversion', () => {
+            const rawEvent: RawDatastoreEvent = {
                 uuid: 'event_uuid',
                 event: 'test_event',
                 team_id: 1,
                 distinct_id: 'user_123',
                 project_id: 1 as ProjectId,
-                timestamp: '2025-01-01 00:00:00.000000' as ClickHouseTimestamp,
-                created_at: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
+                timestamp: '2025-01-01 00:00:00.000000' as DatastoreTimestamp,
+                created_at: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
                 properties: JSON.stringify({}),
                 elements_chain: '',
                 person_mode: 'full',
                 historical_migration: false,
             }
 
-            const result = convertClickhouseRawEventToFilterGlobals(rawEvent)
+            const result = convertDatastoreRawEventToFilterGlobals(rawEvent)
 
             expect(result.timestamp).toBe('2025-01-01T00:00:00.000Z')
         })
 
         it('should handle elements_chain parsing with lazy evaluation', () => {
-            const rawEvent: RawClickHouseEvent = {
+            const rawEvent: RawDatastoreEvent = {
                 uuid: 'event_uuid',
                 event: 'test_event',
                 team_id: 1,
                 distinct_id: 'user_123',
                 project_id: 1 as ProjectId,
-                timestamp: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
-                created_at: '2025-01-01T00:00:00.000Z' as ClickHouseTimestamp,
+                timestamp: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
+                created_at: '2025-01-01T00:00:00.000Z' as DatastoreTimestamp,
                 properties: JSON.stringify({}),
                 elements_chain: 'a:href="https://example.com":text="Click me":attr_id="button1";button',
                 person_mode: 'full',
                 historical_migration: false,
             }
 
-            const result = convertClickhouseRawEventToFilterGlobals(rawEvent)
+            const result = convertDatastoreRawEventToFilterGlobals(rawEvent)
 
             expect(result.elements_chain_href).toBe('https://example.com')
             expect(result.elements_chain_texts).toEqual(['Click me'])

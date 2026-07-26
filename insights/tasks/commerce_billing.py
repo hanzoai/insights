@@ -22,11 +22,11 @@ COMMERCE_TOKEN = os.getenv("COMMERCE_TOKEN", "")
 
 
 def _get_org_event_counts(period_start: datetime, period_end: datetime) -> list[dict]:
-    """Query ClickHouse for per-org event counts in the given period.
+    """Query Datastore for per-org event counts in the given period.
 
     Returns a list of dicts: [{"org_id": str, "org_slug": str, "event_count": int}, ...]
     """
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     rows = sync_execute(
         """

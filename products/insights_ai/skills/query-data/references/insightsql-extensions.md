@@ -1,6 +1,6 @@
 # InsightsQL syntax extensions
 
-These functions are unique to InsightsQL and not available in standard ClickHouse.
+These functions are unique to InsightsQL and not available in standard Datastore.
 
 ## Visualization
 

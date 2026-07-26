@@ -35,7 +35,7 @@ class TakeEventScreenshotResult(BaseModel):
     content_location: str
 
 
-class ClickHouseResponse(BaseModel):
+class DatastoreResponse(BaseModel):
     meta: list
     data: list
     statistics: dict

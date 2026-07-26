@@ -1,13 +1,13 @@
 import uuid
 import operator
 
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.management.commands.backfill_distinct_id_overrides import Backfill
 
 
-class ExecuteBackfillTestCase(ClickhouseTestMixin, BaseTest):
+class ExecuteBackfillTestCase(DatastoreTestMixin, BaseTest):
     def __run_test_backfill(self, dry_run: bool) -> None:
         distinct_id = "override-me"
 

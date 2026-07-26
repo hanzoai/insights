@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from freezegun import freeze_time
-from insights.test.base import ClickhouseTestMixin, _create_event, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import DatastoreTestMixin, _create_event, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import TestCase
 from django.utils.timezone import now
@@ -13,7 +13,7 @@ from insights.models import FeatureFlag, Organization, Survey, Team, User
 from insights.tasks.stop_surveys_reached_target import stop_surveys_reached_target
 
 
-class TestStopSurveysReachedTarget(TestCase, ClickhouseTestMixin):
+class TestStopSurveysReachedTarget(TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         super().setUp()
 
@@ -51,7 +51,7 @@ class TestStopSurveysReachedTarget(TestCase, ClickhouseTestMixin):
         )
 
     @freeze_time("2022-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_stop_surveys_with_enough_responses(self) -> None:
         surveys = [
             Survey.objects.create(

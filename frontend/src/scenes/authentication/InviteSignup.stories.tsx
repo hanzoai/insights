@@ -46,7 +46,7 @@ export const SelfHosted = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
             },
         },

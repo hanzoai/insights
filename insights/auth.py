@@ -22,7 +22,7 @@ from rest_framework.request import Request
 from webauthn.helpers import base64url_to_bytes
 from zxcvbn import zxcvbn
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.helpers.two_factor_session import enforce_two_factor
 from insights.jwt import InsightsJwtAudience, decode_jwt
 from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthApplicationAuthBrand

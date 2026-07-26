@@ -1,7 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from django.test import override_settings
 from django.utils import timezone
@@ -16,7 +16,7 @@ TEST_BUCKET = "test_storage_bucket-insights.insightsql.experiments.queryrunner"
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class ExperimentQueryRunnerBaseTest(ClickhouseTestMixin, APIBaseTest):
+class ExperimentQueryRunnerBaseTest(DatastoreTestMixin, APIBaseTest):
     def teardown_method(self, method) -> None:
         if getattr(self, "clean_up_data_warehouse_usage_data", None):
             self.clean_up_data_warehouse_usage_data()

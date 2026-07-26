@@ -16,7 +16,7 @@ from temporalio import activity
 
 from insights.schema import RecordingsQuery
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models import Team
 from insights.session_recordings.models.session_recording import SessionRecording
 from insights.session_recordings.models.session_recording_event import SessionRecordingViewed
@@ -31,7 +31,7 @@ from insights.session_recordings.utils import filter_from_params_to_query
 from insights.storage import session_recording_v2_object_storage
 from insights.storage.session_recording_v2_object_storage import FileDeleteError
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
 from insights.temporal.delete_recordings.metrics import (
     get_block_deleted_counter,
@@ -56,7 +56,7 @@ LOGGER = get_write_only_logger()
 
 def _parse_block_listing_response(raw_response: bytes) -> list[tuple]:
     if len(raw_response) == 0:
-        raise DeleteRecordingError("Got empty response from ClickHouse.")
+        raise DeleteRecordingError("Got empty response from Datastore.")
 
     try:
         result = json.loads(raw_response)
@@ -70,11 +70,11 @@ def _parse_block_listing_response(raw_response: bytes) -> list[tuple]:
             )
         ]
     except json.JSONDecodeError as e:
-        raise DeleteRecordingError("Unable to parse JSON response from ClickHouse.") from e
+        raise DeleteRecordingError("Unable to parse JSON response from Datastore.") from e
     except KeyError as e:
-        raise DeleteRecordingError("Got malformed JSON response from ClickHouse.") from e
+        raise DeleteRecordingError("Got malformed JSON response from Datastore.") from e
     except IndexError as e:
-        raise DeleteRecordingError("No rows in response from ClickHouse.") from e
+        raise DeleteRecordingError("No rows in response from Datastore.") from e
 
 
 @activity.defn(name="load-recording-blocks")
@@ -92,7 +92,7 @@ async def load_recording_blocks(input: Recording) -> list[RecordingBlock]:
     }
 
     ch_query_id = str(uuid4())
-    logger.info(f"Querying ClickHouse with query_id: {ch_query_id}")
+    logger.info(f"Querying Datastore with query_id: {ch_query_id}")
     raw_response: bytes = b""
     async with get_client() as client:
         async with client.aget_query(query=query, query_parameters=parameters, query_id=ch_query_id) as ch_response:
@@ -218,16 +218,16 @@ async def delete_recording_blocks(input: RecordingBlockGroup) -> None:
 
 def _parse_session_recording_list_response(raw_response: bytes) -> list[str]:
     if len(raw_response) == 0:
-        raise LoadRecordingError("Got empty response from ClickHouse.")
+        raise LoadRecordingError("Got empty response from Datastore.")
 
     try:
         result = json.loads(raw_response)
         rows = result["data"]
         return [session["session_id"] for session in rows]
     except json.JSONDecodeError as e:
-        raise LoadRecordingError("Unable to parse JSON response from ClickHouse.") from e
+        raise LoadRecordingError("Unable to parse JSON response from Datastore.") from e
     except KeyError as e:
-        raise LoadRecordingError("Got malformed JSON response from ClickHouse.") from e
+        raise LoadRecordingError("Got malformed JSON response from Datastore.") from e
 
 
 @activity.defn(name="load-recordings-with-person")
@@ -245,7 +245,7 @@ async def load_recordings_with_person(input: RecordingsWithPersonInput) -> list[
     }
 
     ch_query_id = str(uuid4())
-    logger.info(f"Querying ClickHouse with query_id: {ch_query_id}")
+    logger.info(f"Querying Datastore with query_id: {ch_query_id}")
     raw_response: bytes = b""
     async with get_client() as client:
         async with client.aget_query(query=query, query_parameters=parameters, query_id=ch_query_id) as ch_response:
@@ -270,7 +270,7 @@ async def load_recordings_with_team_id(input: RecordingsWithTeamInput) -> list[s
     }
 
     ch_query_id = str(uuid4())
-    logger.info(f"Querying ClickHouse with query_id: {ch_query_id}")
+    logger.info(f"Querying Datastore with query_id: {ch_query_id}")
     raw_response: bytes = b""
     async with get_client() as client:
         async with client.aget_query(query=query, query_parameters=parameters, query_id=ch_query_id) as ch_response:
@@ -338,17 +338,17 @@ async def perform_recording_metadata_deletion(input: DeleteRecordingMetadataInpu
     session_id_list = [sid.decode("utf-8") for sid in session_ids]
     logger.info(f"Found {len(session_id_list)} session IDs to delete")
 
-    # Delete from ClickHouse
+    # Delete from Datastore
     query = """
         ALTER TABLE session_replay_events
         DELETE WHERE session_id IN %(session_ids)s
     """
 
     if input.dry_run:
-        logger.info("DRY RUN: Skipping ClickHouse DELETE")
+        logger.info("DRY RUN: Skipping Datastore DELETE")
     else:
         ch_query_id = str(uuid4())
-        logger.info(f"Executing ClickHouse DELETE with query_id: {ch_query_id}")
+        logger.info(f"Executing Datastore DELETE with query_id: {ch_query_id}")
 
         async with get_client() as client:
             await client.execute_query(

@@ -26,7 +26,7 @@ export const NoSMTP = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
                 email_service_available: false,
             },
@@ -41,7 +41,7 @@ export const Initial = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
                 email_service_available: true,
             },
@@ -59,7 +59,7 @@ export const Success = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
                 email_service_available: true,
             },
@@ -82,7 +82,7 @@ export const Throttled = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
                 email_service_available: true,
             },
@@ -106,7 +106,7 @@ export const WithEmailFromQuery = (): JSX.Element => {
             '/_preflight': {
                 ...preflightJson,
                 cloud: false,
-                realm: 'hosted-clickhouse',
+                realm: 'hosted-datastore',
                 available_social_auth_providers: { github: false, gitlab: false, 'google-oauth2': false, saml: false },
                 email_service_available: true,
             },

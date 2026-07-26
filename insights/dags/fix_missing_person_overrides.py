@@ -2,7 +2,7 @@
 
 This job detects distinct_ids where the resolved person_id (using overrides) differs
 from the person_id in person_distinct_id2, indicating that a problem has occurred
-during ingestion, person merges, clickhouse migration, etc. (It has hard to know
+during ingestion, person merges, datastore migration, etc. (It has hard to know
 which, after the fact).
 """
 
@@ -13,7 +13,7 @@ import pydantic
 
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.common import JobOwners
 from insights.models import Team
 
@@ -243,7 +243,7 @@ def fix_missing_person_overrides_op(
         context.log.info(f"Inserted {len(pending_overrides)} overrides")
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def fix_missing_person_overrides_job():
     """Job to automatically fix missing person_id overrides for a team."""
     fix_missing_person_overrides_op()

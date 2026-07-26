@@ -31,8 +31,8 @@ from insights.models.heatmap_saved import SavedHeatmap
 from insights.rate_limit import (
     AIBurstRateThrottle,
     AISustainedRateThrottle,
-    ClickHouseBurstRateThrottle,
-    ClickHouseSustainedRateThrottle,
+    DatastoreBurstRateThrottle,
+    DatastoreSustainedRateThrottle,
 )
 from insights.security.url_validation import is_url_allowed
 from insights.tasks.heatmap_screenshot import generate_heatmap_screenshot
@@ -224,7 +224,7 @@ class HeatmapEventsResponseSerializer(serializers.Serializer):
 class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
     scope_object = "INTERNAL"
 
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     serializer_class = HeatmapsResponseSerializer
 
     authentication_classes = [TemporaryTokenAuthentication]
@@ -490,7 +490,7 @@ class HeatmapScreenshotResponseSerializer(serializers.ModelSerializer):
 
 class HeatmapScreenshotViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
     scope_object = "INTERNAL"
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     serializer_class = HeatmapScreenshotResponseSerializer
     authentication_classes = [TemporaryTokenAuthentication]
     queryset = SavedHeatmap.objects.all()
@@ -568,7 +568,7 @@ class SavedHeatmapRequestSerializer(serializers.ModelSerializer):
 
 class SavedHeatmapViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.GenericViewSet):
     scope_object = "INTERNAL"
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     serializer_class = HeatmapScreenshotResponseSerializer
     authentication_classes = [TemporaryTokenAuthentication]
     queryset = SavedHeatmap.objects.all()

@@ -658,7 +658,7 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
                 [
                     # Using arrays would be more efficient here, _but_ only if there's low cardinality in breakdown_values
                     # If cardinality is high it'd blow up memory
-                    # Clickhouse is reasonably clever not rereading the same data
+                    # Datastore is reasonably clever not rereading the same data
                     parse_expr(
                         "(select {max} from min_max) as max_nums",
                         placeholders={

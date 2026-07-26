@@ -118,7 +118,7 @@ impl ExceptionList {
     }
 }
 
-// Given a Clickhouse Event's properties, we care about the contents
+// Given a Datastore Event's properties, we care about the contents
 // of only a small subset. This struct is used to give us a strongly-typed
 // "view" of those event properties we care about.
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -470,7 +470,7 @@ impl Stacktrace {
 
 #[cfg(test)]
 mod test {
-    use common_types::ClickHouseEvent;
+    use common_types::DatastoreEvent;
     use serde_json::Error;
 
     use crate::{frames::RawFrame, types::Stacktrace};
@@ -481,7 +481,7 @@ mod test {
     fn it_deserialises_error_props() {
         let raw: &'static str = include_str!("../../tests/static/raw_ch_exception_list.json");
 
-        let raw: ClickHouseEvent = serde_json::from_str(raw).unwrap();
+        let raw: DatastoreEvent = serde_json::from_str(raw).unwrap();
 
         let props: RawErrProps = serde_json::from_str(&raw.properties.unwrap()).unwrap();
         let exception_list = &props.exception_list;

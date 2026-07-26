@@ -5,7 +5,7 @@ from datetime import datetime
 from insights.insightsql import ast
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models import Team
 from insights.session_recordings.models.session_recording import SessionRecording
 
@@ -14,7 +14,7 @@ class RecordingsHelper:
     def __init__(self, team: Team):
         self.team = team
 
-    def _matching_clickhouse_recordings(
+    def _matching_datastore_recordings(
         self,
         session_ids: Iterable[str],
     ) -> set[str]:
@@ -77,7 +77,7 @@ class RecordingsHelper:
             mapped_events[event[2]].append(event)
 
         raw_session_ids = mapped_events.keys()
-        valid_session_ids = self._matching_clickhouse_recordings(raw_session_ids) - self._deleted_session_recordings(
+        valid_session_ids = self._matching_datastore_recordings(raw_session_ids) - self._deleted_session_recordings(
             raw_session_ids
         )
 

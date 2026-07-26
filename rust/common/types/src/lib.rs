@@ -10,7 +10,7 @@ pub mod timestamp;
 // Events
 pub use event::CapturedEvent;
 pub use event::CapturedEventHeaders;
-pub use event::ClickHouseEvent;
+pub use event::DatastoreEvent;
 pub use event::EventWithLibraryInfo;
 pub use event::HasEventName;
 pub use event::InternallyCapturedEvent;

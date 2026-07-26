@@ -15,7 +15,7 @@ import pytest
 from django.test import override_settings
 
 from insights.batch_exports.service import BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.snowflake_batch_export import (
     SnowflakeInsertInputs,
@@ -31,11 +31,11 @@ from products.batch_exports.backend.tests.temporal.destinations.snowflake.utils 
     EXPECTED_PERSONS_BATCH_EXPORT_FIELDS,
     SKIP_IF_MISSING_REQUIRED_ENV_VARS,
     TEST_MODELS,
-    assert_clickhouse_records_in_snowflake,
+    assert_datastore_records_in_snowflake,
 )
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 
 pytestmark = [
@@ -48,7 +48,7 @@ pytestmark = [
 async def _run_activity(
     activity_environment,
     snowflake_cursor,
-    clickhouse_client,
+    datastore_client,
     snowflake_config,
     team,
     data_interval_start,
@@ -61,7 +61,7 @@ async def _run_activity(
     expected_fields=None,
     expect_duplicates: bool = False,
     primary_key=None,
-    assert_clickhouse_records: bool = True,
+    assert_datastore_records: bool = True,
     timestamp_columns: collections.abc.Sequence[str] = (),
     uppercase_columns: list[str] | None = None,
     extra_fields: dict[str, t.Any] | None = None,
@@ -100,10 +100,10 @@ async def _run_activity(
     insert_inputs.stage_folder = stage_folder
     result = await activity_environment.run(insert_into_snowflake_activity_from_stage, insert_inputs)
 
-    if assert_clickhouse_records:
-        await assert_clickhouse_records_in_snowflake(
+    if assert_datastore_records:
+        await assert_datastore_records_in_snowflake(
             snowflake_cursor=snowflake_cursor,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             table_name=table_name,
             team_id=team.pk,
             data_interval_start=data_interval_start,
@@ -124,7 +124,7 @@ async def _run_activity(
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_insert_into_snowflake_activity_inserts_data_into_snowflake_table(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -137,7 +137,7 @@ async def test_insert_into_snowflake_activity_inserts_data_into_snowflake_table(
 ):
     """Test that the insert_into_snowflake_activity_from_stage function inserts data into a Snowflake table.
 
-    We use the generate_test_events_in_clickhouse function to generate several sets
+    We use the generate_test_events_in_datastore function to generate several sets
     of events. Some of these sets are expected to be exported, and others not. Expected
     events are those that:
     * Are created for the team_id of the batch export.
@@ -171,7 +171,7 @@ async def test_insert_into_snowflake_activity_inserts_data_into_snowflake_table(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -185,7 +185,7 @@ async def test_insert_into_snowflake_activity_inserts_data_into_snowflake_table(
 
 
 async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -207,7 +207,7 @@ async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_r
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -221,8 +221,8 @@ async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_r
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -231,8 +231,8 @@ async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_r
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -243,7 +243,7 @@ async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_r
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -255,7 +255,7 @@ async def test_insert_into_snowflake_activity_merges_persons_data_in_follow_up_r
 
 
 async def test_insert_into_snowflake_activity_merges_sessions_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -277,7 +277,7 @@ async def test_insert_into_snowflake_activity_merges_sessions_data_in_follow_up_
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -295,8 +295,8 @@ async def test_insert_into_snowflake_activity_merges_sessions_data_in_follow_up_
         data_interval_end + dt.timedelta(hours=1),
     )
 
-    new_events, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    new_events, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=new_data_interval_start,
         end_time=new_data_interval_end,
@@ -314,7 +314,7 @@ async def test_insert_into_snowflake_activity_merges_sessions_data_in_follow_up_
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=new_data_interval_start,
@@ -338,7 +338,7 @@ async def test_insert_into_snowflake_activity_merges_sessions_data_in_follow_up_
 
 
 async def test_insert_into_snowflake_activity_removes_internal_stage_files(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -367,7 +367,7 @@ async def test_insert_into_snowflake_activity_removes_internal_stage_files(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -399,7 +399,7 @@ async def test_insert_into_snowflake_activity_removes_internal_stage_files(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -415,7 +415,7 @@ async def test_insert_into_snowflake_activity_removes_internal_stage_files(
 
 
 async def test_insert_into_snowflake_activity_heartbeats(
-    clickhouse_client,
+    datastore_client,
     ateam,
     snowflake_batch_export,
     snowflake_cursor,
@@ -434,8 +434,8 @@ async def test_insert_into_snowflake_activity_heartbeats(
     for n_expected_file in range(1, n_expected_files + 1):
         part_inserted_at = data_interval_end - snowflake_batch_export.interval_time_delta / n_expected_file
 
-        await generate_test_events_in_clickhouse(
-            client=clickhouse_client,
+        await generate_test_events_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -491,9 +491,9 @@ async def test_insert_into_snowflake_activity_heartbeats(
     # It's not guaranteed we will heartbeat right after every file.
     assert len(captured_details) > 0
 
-    await assert_clickhouse_records_in_snowflake(
+    await assert_datastore_records_in_snowflake(
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         table_name=table_name,
         team_id=ateam.pk,
         data_interval_start=data_interval_start,
@@ -503,7 +503,7 @@ async def test_insert_into_snowflake_activity_heartbeats(
 
 
 async def test_insert_into_snowflake_activity_handles_person_schema_changes(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -529,7 +529,7 @@ async def test_insert_into_snowflake_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -546,8 +546,8 @@ async def test_insert_into_snowflake_activity_handles_person_schema_changes(
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -556,8 +556,8 @@ async def test_insert_into_snowflake_activity_handles_person_schema_changes(
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -570,7 +570,7 @@ async def test_insert_into_snowflake_activity_handles_person_schema_changes(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -583,7 +583,7 @@ async def test_insert_into_snowflake_activity_handles_person_schema_changes(
 
 
 async def test_insert_into_snowflake_activity_from_stage_handles_datetime_to_int(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -595,13 +595,13 @@ async def test_insert_into_snowflake_activity_from_stage_handles_datetime_to_int
     """Test that the `insert_into_snowflake_activity_from_stage` handles columns in the
     destination having INT64 type for DateTime64 columns.
 
-    ClickHouse exports DateTime columns as uint32. Not to be confused with DateTime64
+    Datastore exports DateTime columns as uint32. Not to be confused with DateTime64
     columns which are exported as Arrow's native timestamp type.
 
     This can lead to fields in destination tables corresponding to DateTime types being
     created as Snowflake's INTEGER, as that's how we resolve Arrow's uint32.
 
-    If the ClickHouse type ever changes from DateTime to DateTime64, for example, if the
+    If the Datastore type ever changes from DateTime to DateTime64, for example, if the
     query is updated, we want to ensure we can continue exporting to an INTEGER field,
     even if the field is now DateTime64.
 
@@ -614,7 +614,7 @@ async def test_insert_into_snowflake_activity_from_stage_handles_datetime_to_int
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -631,7 +631,7 @@ async def test_insert_into_snowflake_activity_from_stage_handles_datetime_to_int
     result = await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -650,7 +650,7 @@ async def test_insert_into_snowflake_activity_from_stage_handles_datetime_to_int
     "model", [BatchExportModel(name="events", schema=None), BatchExportModel(name="persons", schema=None)]
 )
 async def test_insert_into_snowflake_activity_handles_uppercased_columns(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -675,7 +675,7 @@ async def test_insert_into_snowflake_activity_handles_uppercased_columns(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -700,7 +700,7 @@ async def test_insert_into_snowflake_activity_handles_uppercased_columns(
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -714,7 +714,7 @@ async def test_insert_into_snowflake_activity_handles_uppercased_columns(
 
 @pytest.mark.parametrize("model", [BatchExportModel(name="events", schema=None)])
 async def test_insert_into_snowflake_activity_handles_extra_columns_in_destination(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     snowflake_cursor,
     snowflake_config,
@@ -736,7 +736,7 @@ async def test_insert_into_snowflake_activity_handles_extra_columns_in_destinati
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,
@@ -752,7 +752,7 @@ async def test_insert_into_snowflake_activity_handles_extra_columns_in_destinati
     await _run_activity(
         activity_environment=activity_environment,
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_config=snowflake_config,
         team=ateam,
         data_interval_start=data_interval_start,

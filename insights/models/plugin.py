@@ -34,7 +34,7 @@ from insights.plugins.utils import (
 from .utils import UUIDTModel, sane_repr
 
 try:
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 except ImportError:
     pass
 
@@ -230,7 +230,7 @@ class PluginConfig(models.Model):
     enabled = models.BooleanField(default=False)
     order = models.IntegerField()
     config = models.JSONField(default=dict)
-    # DEPRECATED: use `plugin_log_entries` or `app_metrics` in ClickHouse instead
+    # DEPRECATED: use `plugin_log_entries` or `app_metrics` in Datastore instead
     # Error when running this plugin on an event (frontend: PluginErrorType)
     # - e.g: "undefined is not a function on index.js line 23"
     # - error = { message: "Exception in processEvent()", time: "iso-string", ...meta }
@@ -500,31 +500,31 @@ def fetch_plugin_log_entries(
 ) -> list[PluginLogEntry]:
     if type_filter is None:
         type_filter = []
-    clickhouse_where_parts: list[str] = []
-    clickhouse_kwargs: dict[str, Any] = {}
+    datastore_where_parts: list[str] = []
+    datastore_kwargs: dict[str, Any] = {}
     if team_id is not None:
-        clickhouse_where_parts.append("team_id = %(team_id)s")
-        clickhouse_kwargs["team_id"] = team_id
+        datastore_where_parts.append("team_id = %(team_id)s")
+        datastore_kwargs["team_id"] = team_id
     if plugin_config_id is not None:
-        clickhouse_where_parts.append("plugin_config_id = %(plugin_config_id)s")
-        clickhouse_kwargs["plugin_config_id"] = plugin_config_id
+        datastore_where_parts.append("plugin_config_id = %(plugin_config_id)s")
+        datastore_kwargs["plugin_config_id"] = plugin_config_id
     if after is not None:
-        clickhouse_where_parts.append("timestamp > toDateTime64(%(after)s, 6)")
-        clickhouse_kwargs["after"] = after.isoformat().replace("+00:00", "")
+        datastore_where_parts.append("timestamp > toDateTime64(%(after)s, 6)")
+        datastore_kwargs["after"] = after.isoformat().replace("+00:00", "")
     if before is not None:
-        clickhouse_where_parts.append("timestamp < toDateTime64(%(before)s, 6)")
-        clickhouse_kwargs["before"] = before.isoformat().replace("+00:00", "")
+        datastore_where_parts.append("timestamp < toDateTime64(%(before)s, 6)")
+        datastore_kwargs["before"] = before.isoformat().replace("+00:00", "")
     if search:
-        clickhouse_where_parts.append("message ILIKE %(search)s")
-        clickhouse_kwargs["search"] = f"%{search}%"
+        datastore_where_parts.append("message ILIKE %(search)s")
+        datastore_kwargs["search"] = f"%{search}%"
     if len(type_filter) > 0:
-        clickhouse_where_parts.append("type in %(types)s")
-        clickhouse_kwargs["types"] = type_filter
-    clickhouse_query = f"""
+        datastore_where_parts.append("type in %(types)s")
+        datastore_kwargs["types"] = type_filter
+    datastore_query = f"""
         SELECT id, team_id, plugin_id, plugin_config_id, timestamp, source, type, message, instance_id FROM plugin_log_entries
-        WHERE {" AND ".join(clickhouse_where_parts)} ORDER BY timestamp DESC {f"LIMIT {limit}" if limit else ""}
+        WHERE {" AND ".join(datastore_where_parts)} ORDER BY timestamp DESC {f"LIMIT {limit}" if limit else ""}
     """
-    return [PluginLogEntry(*result) for result in cast(list, sync_execute(clickhouse_query, clickhouse_kwargs))]
+    return [PluginLogEntry(*result) for result in cast(list, sync_execute(datastore_query, datastore_kwargs))]
 
 
 @receiver(models.signals.post_save, sender=Organization)

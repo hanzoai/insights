@@ -64,7 +64,7 @@ class TestWrapperCohortQuery(CohortQuery):
         cohort_query = CohortQuery(filter=filter, team=team)
         executor = InsightsQLCohortQuery(cohort_query=cohort_query).get_query_executor()
         self.insightsql_result = executor.execute()
-        self.clickhouse_query = executor.clickhouse_sql
+        self.datastore_query = executor.datastore_sql
         super().__init__(filter=filter, team=team)
 
 
@@ -133,7 +133,7 @@ class InsightsQLCohortQuery:
     def get_query(self) -> SelectQuery | SelectSetQuery:
         return self._get_conditions()
 
-    def query_str(self, dialect: Literal["insightsql", "clickhouse"]):
+    def query_str(self, dialect: Literal["insightsql", "datastore"]):
         return prepare_and_print_ast(self.get_query(), self.insightsql_context, dialect, pretty=True)[0]
 
     def _get_series(self, prop: Property, math=None):

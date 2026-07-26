@@ -198,14 +198,14 @@ The aggregation task emits events to Insights's internal analytics instance.
 
 ### Storage location
 
-Events are stored in ClickHouse under a specific team based on region:
+Events are stored in Datastore under a specific team based on region:
 
 - **EU region**: team_id = 1
 - **Other regions**: team_id = 2
 
 ## Step 4: Usage report generation
 
-The usage report task queries ClickHouse for aggregated billing data.
+The usage report task queries Datastore for aggregated billing data.
 
 **Source file:** `insights/tasks/usage_report.py`
 

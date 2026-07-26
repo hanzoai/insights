@@ -13,7 +13,7 @@ import { PluginEvent } from '@hanzo/plugin-scaffold/src/types'
 
 import { KAFKA_GROUPS } from '~/config/kafka-topics'
 import { createRedisFromConfig } from '~/utils/db/redis'
-import { parseRawClickHouseEvent } from '~/utils/event'
+import { parseRawDatastoreEvent } from '~/utils/event'
 import { captureTeamEvent } from '~/utils/insights'
 import { BatchWritingGroupStore } from '~/worker/ingestion/groups/batch-writing-group-store'
 import { BatchWritingPersonsStore } from '~/worker/ingestion/persons/batch-writing-person-store'
@@ -22,7 +22,7 @@ import { PersonsStore } from '~/worker/ingestion/persons/persons-store'
 import { createCreateEventStep } from '../../src/ingestion/event-processing/create-event-step'
 import { createEmitEventStep } from '../../src/ingestion/event-processing/emit-event-step'
 import { isOkResult } from '../../src/ingestion/pipelines/results'
-import { ClickHouseEvent, Hub, Person, PluginsServerConfig, Team } from '../../src/types'
+import { DatastoreEvent, Hub, Person, PluginsServerConfig, Team } from '../../src/types'
 import { closeHub, createHub } from '../../src/utils/db/hub'
 import { PostgresUse } from '../../src/utils/db/postgres'
 import { UUIDT } from '../../src/utils/utils'
@@ -116,7 +116,7 @@ describe('processEvent', () => {
         const groupStoreForBatch = new BatchWritingGroupStore({
             kafkaProducer: hub.kafkaProducer,
             groupRepository: hub.groupRepository,
-            clickhouseGroupRepository: hub.clickhouseGroupRepository,
+            datastoreGroupRepository: hub.datastoreGroupRepository,
         })
         const runner = new EventPipelineRunner(
             {
@@ -220,7 +220,7 @@ describe('processEvent', () => {
     const getEventsFromKafka = (): Record<string, any>[] => {
         const events = mockProducerObserver
             .getProducedKafkaMessagesForTopic(hub.DATASTORE_JSON_EVENTS_KAFKA_TOPIC)
-            .map((x) => parseRawClickHouseEvent(x.value as any))
+            .map((x) => parseRawDatastoreEvent(x.value as any))
 
         return events
     }
@@ -241,7 +241,7 @@ describe('processEvent', () => {
 
                     return [
                         distinctIds,
-                        (events as ClickHouseEvent[])
+                        (events as DatastoreEvent[])
                             .filter((event) => distinctIds.includes(event.distinct_id))
                             .sort((e1, e2) => e1.timestamp.diff(e2.timestamp).toMillis())
                             .map((event) => event.event),
@@ -275,7 +275,7 @@ describe('processEvent', () => {
         const groupStoreForBatch = new BatchWritingGroupStore({
             kafkaProducer: hub.kafkaProducer,
             groupRepository: hub.groupRepository,
-            clickhouseGroupRepository: hub.clickhouseGroupRepository,
+            datastoreGroupRepository: hub.datastoreGroupRepository,
         })
         const runner = new EventPipelineRunner(
             {

@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from parameterized import parameterized
 
@@ -40,7 +40,7 @@ class TestSafeFloat(APIBaseTest):
         self.assertEqual(result, expected)
 
 
-class TestEndpointsUsageOverviewQueryRunner(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
+class TestEndpointsUsageOverviewQueryRunner(DatastoreTestMixin, QueryMatchingTest, APIBaseTest):
     @freeze_time("2024-01-15T12:00:00Z")
     def test_overview_query_sql(self):
         query = EndpointsUsageOverviewQuery(
@@ -123,7 +123,7 @@ class TestEndpointsUsageOverviewQueryRunner(ClickhouseTestMixin, QueryMatchingTe
         assert result == expected
 
 
-class TestEndpointsUsageTrendsQueryRunner(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
+class TestEndpointsUsageTrendsQueryRunner(DatastoreTestMixin, QueryMatchingTest, APIBaseTest):
     @freeze_time("2024-01-15T12:00:00Z")
     def test_trends_query_requests_metric_sql(self):
         query = EndpointsUsageTrendsQuery(
@@ -247,7 +247,7 @@ class TestEndpointsUsageTrendsQueryRunner(ClickhouseTestMixin, QueryMatchingTest
         self.assertQueryMatchesSnapshot(insightsql)
 
 
-class TestEndpointsUsageTableQueryRunner(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
+class TestEndpointsUsageTableQueryRunner(DatastoreTestMixin, QueryMatchingTest, APIBaseTest):
     @freeze_time("2024-01-15T12:00:00Z")
     def test_table_query_by_endpoint_sql(self):
         query = EndpointsUsageTableQuery(

@@ -3,10 +3,10 @@ from typing import Optional, Union
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -22,8 +22,8 @@ from insights.insightsql_queries.web_analytics.external_clicks import WebExterna
 from insights.models.utils import uuid7
 
 
-@snapshot_clickhouse_queries
-class TestExternalClicksTableQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestExternalClicksTableQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _create_events(self, data, event="$autocapture"):
         person_result = []
         for id, timestamps in data:

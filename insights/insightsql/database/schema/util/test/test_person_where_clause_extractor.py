@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import PersonsArgMaxVersion, PersonsOnEventsMode
 
@@ -39,7 +39,7 @@ class RemoveHiddenAliases(CloningVisitor):
         return super().visit_alias(node)
 
 
-class TestPersonWhereClauseExtractor(ClickhouseTestMixin, APIBaseTest):
+class TestPersonWhereClauseExtractor(DatastoreTestMixin, APIBaseTest):
     def prep_context(self):
         team = self.team
         modifiers = create_default_modifiers_for_team(team)
@@ -56,7 +56,7 @@ class TestPersonWhereClauseExtractor(ClickhouseTestMixin, APIBaseTest):
     def get_clause(self, query: str):
         context = self.prep_context()
         select = _select(query)
-        new_select = prepare_ast_for_printing(select, context, "clickhouse")
+        new_select = prepare_ast_for_printing(select, context, "datastore")
 
         assert isinstance(new_select, ast.SelectQuery)
         assert isinstance(new_select.select_from, ast.JoinExpr)
@@ -78,7 +78,7 @@ class TestPersonWhereClauseExtractor(ClickhouseTestMixin, APIBaseTest):
 
     def print_query(self, query: str):
         context = self.prep_context()
-        return prepare_and_print_ast(node=_select(query), context=context, dialect="clickhouse", pretty=False)[0]
+        return prepare_and_print_ast(node=_select(query), context=context, dialect="datastore", pretty=False)[0]
 
     def test_person_properties(self):
         actual = self.get_clause("SELECT * FROM events WHERE person.properties.email = 'jimmy@hanzo.ai'")

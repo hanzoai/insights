@@ -1,7 +1,7 @@
 from datetime import timedelta
 from uuid import uuid4
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from django.utils import timezone
 
@@ -23,7 +23,7 @@ def _days_ago(n: int) -> str:
     return (timezone.now() - timedelta(days=n)).isoformat()
 
 
-class TestWeeklyDigest(ClickhouseTestMixin, APIBaseTest):
+class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

@@ -195,7 +195,7 @@ export const convertTableValue = (
     return value
 }
 
-const toFriendlyClickhouseTypeName = (type: string | undefined): ColumnScalar => {
+const toFriendlyDatastoreTypeName = (type: string | undefined): ColumnScalar => {
     if (!type) {
         return 'UNKNOWN'
     }
@@ -660,13 +660,13 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
 
                 return columns.map((column, index) => {
                     const type = types[index]?.[1]
-                    const friendlyClickhouseTypeName = toFriendlyClickhouseTypeName(type)
+                    const friendlyDatastoreTypeName = toFriendlyDatastoreTypeName(type)
 
                     return {
                         name: column,
                         type: {
-                            name: friendlyClickhouseTypeName,
-                            isNumerical: isNumericalType(friendlyClickhouseTypeName),
+                            name: friendlyDatastoreTypeName,
+                            isNumerical: isNumericalType(friendlyDatastoreTypeName),
                         },
                         label: `${column} - ${type}`,
                         dataIndex: index,

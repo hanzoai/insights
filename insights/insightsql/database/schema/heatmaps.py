@@ -24,7 +24,7 @@ class HeatmapsTable(Table):
         "type": StringDatabaseField(name="type", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "heatmaps"
 
     def to_printed_insightsql(self):

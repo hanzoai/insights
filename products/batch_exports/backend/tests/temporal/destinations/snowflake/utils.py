@@ -17,7 +17,7 @@ import snowflake.connector
 from requests.models import PreparedRequest
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.snowflake_batch_export import snowflake_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
@@ -364,9 +364,9 @@ def add_mock_snowflake_api(rsps: responses.RequestsMock, fail: bool | str = Fals
     return queries, staged_files
 
 
-async def assert_clickhouse_records_in_snowflake(
+async def assert_datastore_records_in_snowflake(
     snowflake_cursor: snowflake.connector.cursor.SnowflakeCursor,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     table_name: str,
     team_id: int,
     data_interval_start: dt.datetime,
@@ -383,11 +383,11 @@ async def assert_clickhouse_records_in_snowflake(
     uppercase_columns: list[str] | None = None,
     extra_fields: dict[str, t.Any] | None = None,
 ):
-    """Assert ClickHouse records are written to Snowflake table.
+    """Assert Datastore records are written to Snowflake table.
 
     Arguments:
         snowflake_cursor: A SnowflakeCursor used to read records.
-        clickhouse_client: A ClickHouseClient used to read records that are expected to be exported.
+        datastore_client: A DatastoreClient used to read records that are expected to be exported.
         team_id: The ID of the team that we are testing for.
         table_name: Snowflake table name where records are exported to.
         data_interval_start: Start of the batch period for exported records.
@@ -397,7 +397,7 @@ async def assert_clickhouse_records_in_snowflake(
         batch_export_model: The model, or custom schema, used in the batch export.
         expected_fields: List of fields expected to be in the destination table.
         expect_duplicates: Whether duplicates are expected (e.g. when testing retrying logic).
-        extra_fields: Additional fields present in the Snowflake table (that are not present in the ClickHouse table).
+        extra_fields: Additional fields present in the Snowflake table (that are not present in the Datastore table).
     """
     snowflake_cursor.execute(f'SELECT * FROM "{table_name}"')
 

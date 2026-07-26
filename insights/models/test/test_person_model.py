@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from insights.test.base import BaseTest
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Person, PersonDistinctId
 from insights.models.event.util import create_event
 from insights.models.person.util import delete_person

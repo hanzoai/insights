@@ -20,8 +20,8 @@ from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import ClickHouseClient
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.common.datastore import DatastoreClient
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import (
@@ -69,9 +69,9 @@ class MockServer:
         self.records.extend(data["batch"])
 
 
-async def assert_clickhouse_records_in_mock_server(
+async def assert_datastore_records_in_mock_server(
     mock_server,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     team_id: int,
     data_interval_start: dt.datetime,
     data_interval_end: dt.datetime,
@@ -95,7 +95,7 @@ async def assert_clickhouse_records_in_mock_server(
 
     expected_records = []
     for records in iter_records(
-        client=clickhouse_client,
+        client=datastore_client,
         team_id=team_id,
         interval_start=data_interval_start.isoformat(),
         interval_end=data_interval_end.isoformat(),
@@ -140,11 +140,11 @@ async def assert_clickhouse_records_in_mock_server(
 
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
-    clickhouse_client, activity_environment, http_config, exclude_events
+    datastore_client, activity_environment, http_config, exclude_events
 ):
     """Test that the insert_into_http_activity function POSTs data to an HTTP Endpoint.
 
-    We use the generate_test_events_in_clickhouse function to generate several sets
+    We use the generate_test_events_in_datastore function to generate several sets
     of events. Some of these sets are expected to be exported, and others not. Expected
     events are those that:
     * Are created for the team_id of the batch export.
@@ -159,8 +159,8 @@ async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
     # but it's very small.
     team_id = randint(1, 1000000)
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -173,8 +173,8 @@ async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
         table="sharded_events",
     )
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -189,8 +189,8 @@ async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
 
     if exclude_events:
         for event_name in exclude_events:
-            await generate_test_events_in_clickhouse(
-                client=clickhouse_client,
+            await generate_test_events_in_datastore(
+                client=datastore_client,
                 team_id=team_id,
                 start_time=data_interval_start,
                 end_time=data_interval_end,
@@ -217,15 +217,15 @@ async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
 
     mock_server = MockServer()
     with (
-        aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+        aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
         override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
     ):
         m.post(TEST_URL, status=200, callback=mock_server.post, repeat=True)
         await activity_environment.run(insert_into_http_activity, insert_inputs)
 
-    await assert_clickhouse_records_in_mock_server(
+    await assert_datastore_records_in_mock_server(
         mock_server=mock_server,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team_id=team_id,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
@@ -235,7 +235,7 @@ async def test_insert_into_http_activity_inserts_data_into_http_endpoint(
 
 
 async def test_insert_into_http_activity_throws_on_bad_http_status(
-    clickhouse_client, activity_environment, http_config, exclude_events
+    datastore_client, activity_environment, http_config, exclude_events
 ):
     """Test that the insert_into_http_activity function throws on status >= 400"""
     data_interval_start = dt.datetime(2023, 4, 20, 14, 0, 0, tzinfo=dt.UTC)
@@ -245,8 +245,8 @@ async def test_insert_into_http_activity_throws_on_bad_http_status(
     # but it's very small.
     team_id = randint(1, 1000000)
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -275,7 +275,7 @@ async def test_insert_into_http_activity_throws_on_bad_http_status(
 
     # this is a non-retryable error, so should not raise an exception but should return a BatchExportResult with the error
     with (
-        aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+        aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
         override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
     ):
         m.post(TEST_URL, status=400, body="A useful error message", repeat=True)
@@ -289,7 +289,7 @@ async def test_insert_into_http_activity_throws_on_bad_http_status(
         )
 
     with (
-        aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+        aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
         override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
     ):
         m.post(TEST_URL, status=429, repeat=True)
@@ -297,7 +297,7 @@ async def test_insert_into_http_activity_throws_on_bad_http_status(
             await activity_environment.run(insert_into_http_activity, insert_inputs)
 
     with (
-        aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+        aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
         override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
     ):
         m.post(TEST_URL, status=500, repeat=True)
@@ -332,7 +332,7 @@ async def http_batch_export(ateam, http_config, interval, exclude_events, tempor
 @pytest.mark.parametrize("interval", ["hour", "day"], indirect=True)
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 async def test_http_export_workflow(
-    clickhouse_client,
+    datastore_client,
     http_batch_export,
     interval,
     exclude_events,
@@ -347,8 +347,8 @@ async def test_http_export_workflow(
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - http_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -362,8 +362,8 @@ async def test_http_export_workflow(
 
     if exclude_events:
         for event_name in exclude_events:
-            await generate_test_events_in_clickhouse(
-                client=clickhouse_client,
+            await generate_test_events_in_datastore(
+                client=datastore_client,
                 team_id=ateam.pk,
                 start_time=data_interval_start,
                 end_time=data_interval_end,
@@ -397,7 +397,7 @@ async def test_http_export_workflow(
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with (
-                aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+                aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
                 override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
             ):
                 m.post(TEST_URL, status=200, callback=mock_server.post, repeat=True)
@@ -418,9 +418,9 @@ async def test_http_export_workflow(
     assert run.status == "Completed"
     assert run.records_completed == 100
 
-    await assert_clickhouse_records_in_mock_server(
+    await assert_datastore_records_in_mock_server(
         mock_server=mock_server,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team_id=ateam.pk,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
@@ -469,7 +469,7 @@ async def test_http_export_workflow(
     ],
 )
 async def test_http_export_workflow_with_model(
-    clickhouse_client,
+    datastore_client,
     http_batch_export,
     interval,
     exclude_events,
@@ -485,8 +485,8 @@ async def test_http_export_workflow_with_model(
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - http_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -500,8 +500,8 @@ async def test_http_export_workflow_with_model(
 
     if exclude_events:
         for event_name in exclude_events:
-            await generate_test_events_in_clickhouse(
-                client=clickhouse_client,
+            await generate_test_events_in_datastore(
+                client=datastore_client,
                 team_id=ateam.pk,
                 start_time=data_interval_start,
                 end_time=data_interval_end,
@@ -542,7 +542,7 @@ async def test_http_export_workflow_with_model(
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with (
-                aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+                aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
                 override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
             ):
                 m.post(TEST_URL, status=200, callback=mock_server.post, repeat=True)
@@ -580,9 +580,9 @@ async def test_http_export_workflow_with_model(
         run = runs[0]
         assert run.status == "Completed"
 
-        await assert_clickhouse_records_in_mock_server(
+        await assert_datastore_records_in_mock_server(
             mock_server=mock_server,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             team_id=ateam.pk,
             data_interval_start=data_interval_start,
             data_interval_end=data_interval_end,
@@ -740,7 +740,7 @@ async def test_http_export_workflow_handles_cancellation(ateam, http_batch_expor
 
 
 async def test_insert_into_http_activity_heartbeats(
-    clickhouse_client,
+    datastore_client,
     ateam,
     http_batch_export,
     activity_environment,
@@ -758,8 +758,8 @@ async def test_insert_into_http_activity_heartbeats(
     for i in range(1, num_expected_parts + 1):
         part_inserted_at = data_interval_end - http_batch_export.interval_time_delta / i
 
-        await generate_test_events_in_clickhouse(
-            client=clickhouse_client,
+        await generate_test_events_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -795,7 +795,7 @@ async def test_insert_into_http_activity_heartbeats(
 
     mock_server = MockServer()
     with (
-        aioresponses(passthrough=[settings.CLICKHOUSE_HTTP_URL]) as m,
+        aioresponses(passthrough=[settings.DATASTORE_HTTP_URL]) as m,
         override_settings(BATCH_EXPORT_HTTP_UPLOAD_CHUNK_SIZE_BYTES=5 * 1024**2),
     ):
         m.post(TEST_URL, status=200, callback=mock_server.post, repeat=True)
@@ -804,9 +804,9 @@ async def test_insert_into_http_activity_heartbeats(
     # This checks that the assert_heartbeat_details function was actually called.
     assert heartbeat_count == num_expected_parts
 
-    await assert_clickhouse_records_in_mock_server(
+    await assert_datastore_records_in_mock_server(
         mock_server=mock_server,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team_id=ateam.pk,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,

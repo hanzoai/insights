@@ -1,7 +1,7 @@
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import CollapsingMergeTree
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import CollapsingMergeTree
 from insights.models.person.sql import PERSON_STATIC_COHORT_TABLE
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.settings import DATASTORE_CLUSTER
 
 CALCULATE_COHORT_PEOPLE_SQL = """
 SELECT {id_column} FROM ({GET_TEAM_PERSON_DISTINCT_IDS}) WHERE {query}
@@ -31,7 +31,7 @@ Order By (team_id, cohort_id, person_id, version)
     )
 )
 
-TRUNCATE_COHORTPEOPLE_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS cohortpeople ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+TRUNCATE_COHORTPEOPLE_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS cohortpeople ON CLUSTER '{DATASTORE_CLUSTER}'"
 
 GET_COHORT_SIZE_SQL = """
 SELECT count(DISTINCT person_id)

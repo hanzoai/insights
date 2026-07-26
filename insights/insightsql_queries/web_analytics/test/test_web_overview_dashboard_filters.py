@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import DashboardFilter, DateRange, EventPropertyFilter, WebOverviewQuery
 
@@ -7,7 +7,7 @@ from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQu
 from insights.models.utils import uuid7
 
 
-class TestWebOverviewDashboardFilters(ClickhouseTestMixin, APIBaseTest):
+class TestWebOverviewDashboardFilters(DatastoreTestMixin, APIBaseTest):
     def test_dashboard_filter_applies_when_no_existing_properties(self):
         query = WebOverviewQuery(dateRange=DateRange(date_from="-30d"), properties=[])
         runner = WebOverviewQueryRunner(team=self.team, query=query)

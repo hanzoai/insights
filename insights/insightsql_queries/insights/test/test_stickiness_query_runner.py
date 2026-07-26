@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 from unittest.mock import MagicMock, patch
 
 from django.test import override_settings
@@ -37,7 +37,7 @@ from insights.schema import (
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.insights.stickiness_query_runner import StickinessQueryRunner
 from insights.insightsql_queries.query_runner import get_query_runner
 from insights.models.action.action import Action
@@ -80,7 +80,7 @@ StickinessProperties = Union[
 ]
 
 
-class TestStickinessQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestStickinessQueryRunner(DatastoreTestMixin, APIBaseTest):
     default_date_from = "2020-01-11"
     default_date_to = "2020-01-20"
 

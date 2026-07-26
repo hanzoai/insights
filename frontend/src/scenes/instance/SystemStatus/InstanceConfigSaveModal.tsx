@@ -97,7 +97,7 @@ export function InstanceConfigSaveModal({ onClose, isOpen }: { onClose: () => vo
                 {Object.keys(instanceConfigEditingState).includes('RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS') && (
                     <LemonBanner type="warning">
                         <>
-                            Changing your performance events TTL requires ClickHouse to have enough free space to
+                            Changing your performance events TTL requires Datastore to have enough free space to
                             perform the operation (even when reducing this value). In addition, please mind that
                             removing old recordings will be removed asynchronously, not immediately.
                         </>

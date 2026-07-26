@@ -315,7 +315,7 @@ async def insert_into_azure_blob_activity_from_stage(inputs: AzureBlobInsertInpu
 
 @workflow.defn(name="azure-blob-export", failure_exception_types=[workflow.NondeterminismError])
 class AzureBlobBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into Azure Blob Storage."""
+    """A Temporal Workflow to export Datastore data into Azure Blob Storage."""
 
     @staticmethod
     def parse_inputs(inputs: list[str]) -> AzureBlobBatchExportInputs:

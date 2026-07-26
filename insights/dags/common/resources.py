@@ -14,23 +14,23 @@ import psycopg2.extras
 import hanzo_insights
 from clickhouse_driver.errors import Error, ErrorCodes
 
-from insights.clickhouse.cluster import ClickhouseCluster, ExponentialBackoff, RetryPolicy, get_cluster
+from insights.datastore.cluster import DatastoreCluster, ExponentialBackoff, RetryPolicy, get_cluster
 from insights.kafka_client.client import _KafkaProducer
 from insights.redis import get_client, redis
 from insights.utils import initialize_self_capture_api_token
 
 
-def _is_retryable_clickhouse_exception(e: Exception) -> bool:
-    """Check if a ClickHouse-related exception should be retried.
+def _is_retryable_datastore_exception(e: Exception) -> bool:
+    """Check if a Datastore-related exception should be retried.
 
-    Handles both ClickHouse driver errors (with specific error codes) and
+    Handles both Datastore driver errors (with specific error codes) and
     network-level exceptions like socket timeouts.
     """
     # Network-level exceptions (socket timeouts, connection errors)
     if isinstance(e, (TimeoutError, socket.timeout, OSError, ConnectionError)):
         return True
 
-    # ClickHouse driver-specific errors
+    # Datastore driver-specific errors
     return isinstance(e, Error) and (
         (
             e.code
@@ -48,9 +48,9 @@ def _is_retryable_clickhouse_exception(e: Exception) -> bool:
     )
 
 
-class ClickhouseClusterResource(dagster.ConfigurableResource):
+class DatastoreClusterResource(dagster.ConfigurableResource):
     """
-    The ClickHouse cluster used to run the job.
+    The Datastore cluster used to run the job.
     """
 
     client_settings: dict[str, str] = {
@@ -61,14 +61,14 @@ class ClickhouseClusterResource(dagster.ConfigurableResource):
         "receive_timeout": f"{15 * 60}",  # some synchronous queries like dictionary checksumming can be very slow to return
     }
 
-    def create_resource(self, context: dagster.InitResourceContext) -> ClickhouseCluster:
+    def create_resource(self, context: dagster.InitResourceContext) -> DatastoreCluster:
         return get_cluster(
             context.log,
             client_settings=self.client_settings,
             retry_policy=RetryPolicy(
                 max_attempts=8,
                 delay=ExponentialBackoff(20),
-                exceptions=_is_retryable_clickhouse_exception,
+                exceptions=_is_retryable_datastore_exception,
             ),
         )
 

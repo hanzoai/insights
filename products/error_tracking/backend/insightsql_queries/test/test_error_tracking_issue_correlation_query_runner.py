@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.schema import ErrorTrackingIssueCorrelationQuery
 
@@ -8,7 +8,7 @@ from products.error_tracking.backend.insightsql_queries.error_tracking_issue_cor
 )
 
 
-class TestErrorTrackingIssueCorrelationQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestErrorTrackingIssueCorrelationQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _calculate(
         self,
     ):
@@ -25,7 +25,7 @@ class TestErrorTrackingIssueCorrelationQueryRunner(ClickhouseTestMixin, APIBaseT
         )
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_column_names(self):
         columns = self._calculate()["columns"]
         self.assertEqual(

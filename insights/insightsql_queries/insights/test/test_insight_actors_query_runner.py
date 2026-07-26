@@ -4,10 +4,10 @@ from typing import Any, Optional
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -33,7 +33,7 @@ from insights.models.team import WeekStartDay
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 
-class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestInsightActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_test_groups(self):
@@ -99,7 +99,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             modifiers=InsightsQLQueryModifiers(**modifiers) if modifiers else None,
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_lifecycle_query(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"
@@ -182,7 +182,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual([("p1",), ("p2",)], response.results)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_stickiness_query(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"
@@ -205,7 +205,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual([("p2",)], response.results)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_stickiness_groups_query(self):
         self._create_test_groups()
         self._create_test_events()
@@ -278,7 +278,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert "in(id," in queries[0]
         self.assertEqual(2, queries[0].count("toTimeZone(e.timestamp, 'US/Pacific') AS timestamp"))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_trends_query_with_argmaxV1(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"
@@ -306,7 +306,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert "in(id," in queries[0]
         self.assertEqual(2, queries[0].count("toTimeZone(e.timestamp, 'US/Pacific') AS timestamp"))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_trends_query_with_argmaxV2(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"
@@ -334,7 +334,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert "in(person.id" in queries[0]
         self.assertEqual(2, queries[0].count("toTimeZone(e.timestamp, 'US/Pacific') AS timestamp"))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_events_trends_query(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"
@@ -358,7 +358,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
         self.assertCountEqual(["p1", "p2", "p3"], [x[0] for x in response.results])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_trends_groups_query(self):
         self._create_test_groups()
         self._create_test_events()
@@ -382,7 +382,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual([("org1",)], response.results)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_persons_funnels_query(self):
         self._create_test_events()
         self.team.timezone = "US/Pacific"

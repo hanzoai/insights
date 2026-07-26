@@ -194,8 +194,8 @@ export const endpointSceneLogic = kea<endpointSceneLogicType>([
             loadEndpointResult: async ({ name, data }: { name: string; data: EndpointRunRequest }) => {
                 try {
                     const result = await api.endpoint.run(name, data)
-                    if (result && typeof result === 'object' && 'clickhouse' in result) {
-                        const { clickhouse, ...rest } = result as any
+                    if (result && typeof result === 'object' && 'datastore' in result) {
+                        const { datastore, ...rest } = result as any
                         return JSON.stringify(rest, null, 2)
                     }
                     return JSON.stringify(result, null, 2)

@@ -1,7 +1,7 @@
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -22,7 +22,7 @@ from insights.insightsql_queries.experiments.test.experiment_query_runner.base i
 @override_settings(IN_UNIT_TESTING=True)
 class TestFrequentistMethod(ExperimentQueryRunnerBaseTest):
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_frequentist_property_sum_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)

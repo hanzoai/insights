@@ -1,5 +1,5 @@
 from psycopg2 import sql
-from insights.insightsql.escape_sql import escape_clickhouse_identifier
+from insights.insightsql.escape_sql import escape_datastore_identifier
 
 # === sql-injection-user-input: SHOULD BE CAUGHT (ruleid) ===
 
@@ -81,7 +81,7 @@ def safe_int_cast(request, cursor):
 
 def safe_escape_identifier(request, cursor):
     table_name = request.GET.get("table")
-    safe_table = escape_clickhouse_identifier(table_name)
+    safe_table = escape_datastore_identifier(table_name)
     # ok: sql-injection-user-input
     cursor.execute("SELECT * FROM {} WHERE active = true".format(safe_table))
 

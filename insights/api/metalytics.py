@@ -6,7 +6,7 @@ from rest_framework.serializers import BaseSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.kafka_client.client import KafkaProducer
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.models.plugin import PluginConfig
 from insights.utils import cast_timestamp_or_now
 
@@ -34,7 +34,7 @@ class MetalyticsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             "app_source_id": self.request.user.pk,
             "app_source": "metalytics",
             "count": 1,
-            "timestamp": format_clickhouse_timestamp(cast_timestamp_or_now(None)),
+            "timestamp": format_datastore_timestamp(cast_timestamp_or_now(None)),
         }
 
         KafkaProducer().produce(topic=KAFKA_APP_METRICS2, data=payload)

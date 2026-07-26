@@ -10,8 +10,8 @@ from insights.insightsql.printer import prepare_ast_for_printing, print_prepared
 from insights.insightsql.visitor import clone_expr
 
 from insights.batch_exports.service import BatchExportModel, BatchExportSchema
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import Product
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import Product
 from insights.models import Team
 from insights.sync import database_sync_to_async
 
@@ -35,7 +35,7 @@ class RecordBatchModel(abc.ABC):
         self.batch_export_id = batch_export_id
 
     async def get_insightsql_context(self) -> InsightsQLContext:
-        """Return a InsightsQLContext to generate a ClickHouse query."""
+        """Return a InsightsQLContext to generate a Datastore query."""
         team = await Team.objects.aget(id=self.team_id)
         context = InsightsQLContext(
             team=team,
@@ -63,7 +63,7 @@ class RecordBatchModel(abc.ABC):
     async def as_query_with_parameters(
         self, data_interval_start: dt.datetime | None, data_interval_end: dt.datetime
     ) -> tuple[Query, QueryParameters]:
-        """Produce a printed query and any necessary ClickHouse query parameters."""
+        """Produce a printed query and any necessary Datastore query parameters."""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -76,7 +76,7 @@ class RecordBatchModel(abc.ABC):
         s3_secret: str | None,
         num_partitions: int,
     ) -> tuple[Query, QueryParameters]:
-        """Produce a printed query and any necessary ClickHouse query parameters."""
+        """Produce a printed query and any necessary Datastore query parameters."""
         raise NotImplementedError
 
 
@@ -133,19 +133,19 @@ class SessionsRecordBatchModel(RecordBatchModel):
     async def as_query_with_parameters(
         self, data_interval_start: dt.datetime | None, data_interval_end: dt.datetime
     ) -> tuple[Query, QueryParameters]:
-        """Produce a printed query and any necessary ClickHouse query parameters."""
+        """Produce a printed query and any necessary Datastore query parameters."""
         insightsql_query = self.get_insightsql_query(data_interval_start, data_interval_end)
         context = await self.get_insightsql_context()
 
         prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-            insightsql_query, context=context, dialect="clickhouse", stack=[]
+            insightsql_query, context=context, dialect="datastore", stack=[]
         )
         assert prepared_insightsql_query is not None
         context.output_format = "ArrowStream"
         printed = print_prepared_ast(
             prepared_insightsql_query,
             context=context,
-            dialect="clickhouse",
+            dialect="datastore",
             stack=[],
         )
         return printed, context.values
@@ -159,18 +159,18 @@ class SessionsRecordBatchModel(RecordBatchModel):
         s3_secret: str | None,
         num_partitions: int,
     ) -> tuple[Query, QueryParameters]:
-        """Produce a printed query and any necessary ClickHouse query parameters."""
+        """Produce a printed query and any necessary Datastore query parameters."""
         insightsql_query = self.get_insightsql_query(data_interval_start, data_interval_end)
         context = await self.get_insightsql_context()
 
         prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-            insightsql_query, context=context, dialect="clickhouse", stack=[]
+            insightsql_query, context=context, dialect="datastore", stack=[]
         )
         assert prepared_insightsql_query is not None
         printed = print_prepared_ast(
             prepared_insightsql_query,
             context=context,
-            dialect="clickhouse",
+            dialect="datastore",
             stack=[],
         )
 

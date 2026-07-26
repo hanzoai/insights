@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.kafka_client.client import KafkaProducer
 
 from products.error_tracking.backend.models import (
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             GROUP BY 1, 2) e
         ON e.fingerprint = fo.fingerprint AND e.team_id = fo.team_id
         """
-        logger.info("executing clickhouse query")
+        logger.info("executing datastore query")
         fingerprints = sync_execute(
             query,
             {"exception_start_date": exception_start_date, "fingerprint_start_date": fingerprint_start_date},
@@ -77,7 +77,7 @@ class Command(BaseCommand):
         fingerprint_rows = [
             {"fingerprint": row[0], "team_id": row[1], "version": row[2], "timestamp": row[3]} for row in fingerprints
         ]
-        logger.info(f"clickhouse query executed. {len(fingerprint_rows)} fingerprints found")
+        logger.info(f"datastore query executed. {len(fingerprint_rows)} fingerprints found")
         found_issues_count = 0
         not_found_fingerprints = []
 
@@ -103,7 +103,7 @@ class Command(BaseCommand):
                     postgres_fingerprint.version = new_version
                     logger.info("overriding postgres fingerprint ", override)
                     postgres_fingerprint.save()
-                    logger.info("sending fingerprint override to clickhouse ", override)
+                    logger.info("sending fingerprint override to datastore ", override)
                     override_error_tracking_issue_fingerprint(**override)
                 found_issues_count += 1
             else:

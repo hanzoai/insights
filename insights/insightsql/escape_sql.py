@@ -33,7 +33,7 @@ def safe_identifier(identifier: str) -> str:
 
 
 # Copied from clickhouse_driver.util.escape_param
-def escape_param_clickhouse(value: str) -> str:
+def escape_param_datastore(value: str) -> str:
     return "'{}'".format("".join(singlequote_escape_chars_map.get(c, c) for c in str(value)))
 
 
@@ -171,7 +171,7 @@ def escape_postgres_identifier(v: str) -> str:
 
 
 # Copied from clickhouse_driver.util.escape, adapted from single quotes to backquotes.
-def escape_clickhouse_identifier(identifier: str) -> str:
+def escape_datastore_identifier(identifier: str) -> str:
     if "%" in identifier:
         raise QueryError(f'The InsightsQL identifier "{identifier}" is not permitted as it contains the "%" character')
     if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", identifier):
@@ -186,18 +186,18 @@ def escape_insightsql_string(
     return SQLValueEscaper(timezone=timezone, dialect="insightsql").visit(name)
 
 
-def escape_clickhouse_string(
+def escape_datastore_string(
     name: Optional[float | int | str | list | tuple | date | datetime | UUID | UUIDT],
     timezone: Optional[str] = None,
 ) -> str:
-    return SQLValueEscaper(timezone=timezone, dialect="clickhouse").visit(name)
+    return SQLValueEscaper(timezone=timezone, dialect="datastore").visit(name)
 
 
 class SQLValueEscaper:
     def __init__(
         self,
         timezone: Optional[str] = None,
-        dialect: Literal["insightsql", "clickhouse"] = "clickhouse",
+        dialect: Literal["insightsql", "datastore"] = "datastore",
     ):
         self._timezone = timezone or "UTC"
         self._dialect = dialect
@@ -213,10 +213,10 @@ class SQLValueEscaper:
         return "NULL"
 
     def visit_str(self, value: str):
-        return escape_param_clickhouse(value)
+        return escape_param_datastore(value)
 
     def visit_bool(self, value: bool):
-        if self._dialect == "clickhouse":
+        if self._dialect == "datastore":
             return "1" if value is True else "0"
         return "true" if value is True else "false"
 

@@ -132,7 +132,7 @@ class ActorBaseQuery:
             and session_id in %(session_ids)s
         """
 
-        # constrain by date range to help limit the work ClickHouse has to do scanning these tables
+        # constrain by date range to help limit the work Datastore has to do scanning these tables
         # really we should constrain by TTL too
         # but, we're already not doing that, and this adds the benefit without needing too much change
         if date_from:

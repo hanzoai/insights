@@ -32,19 +32,19 @@ def build_function_call(postgres_table_name: str, context: Optional[InsightsQLCo
         db_name = "persons_db_writer" if model_name in PERSONS_DB_MODELS else "default"
         database = databases[db_name]
 
-        address = add_param("db:5432")  # docker container for postgres from clickhouse
+        address = add_param("db:5432")  # docker container for postgres from datastore
         db = add_param(database["NAME"])
         user = add_param(database["USER"])
         password = add_param(database["PASSWORD"])
     else:
-        host_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_HOST
-        port_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_PORT
-        database_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_DATABASE
-        user_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_USER
-        password_var = settings.CLICKHOUSE_INSIGHTSQL_RDSPROXY_READ_PASSWORD
+        host_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_HOST
+        port_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_PORT
+        database_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_DATABASE
+        user_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_USER
+        password_var = settings.DATASTORE_INSIGHTSQL_RDSPROXY_READ_PASSWORD
 
         if not host_var or not port_var or not database_var or not user_var or not password_var:
-            raise ValueError("CLICKHOUSE_INSIGHTSQL_RDSPROXY env vars missing to create postgresql link from clickhouse")
+            raise ValueError("DATASTORE_INSIGHTSQL_RDSPROXY env vars missing to create postgresql link from datastore")
 
         address = add_param(f"{host_var}:{port_var}")
         db = add_param(database_var)
@@ -61,5 +61,5 @@ class PostgresTable(FunctionCallTable):
     def to_printed_insightsql(self):
         return escape_insightsql_identifier(self.name)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return build_function_call(self.postgres_table_name, context)

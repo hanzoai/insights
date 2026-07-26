@@ -37,7 +37,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT $group_0 FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         self.assertIn(
             "SELECT if(less(toTimeZone(events.timestamp, %(insightsql_val_0)s), %(insightsql_val_1)s), %(insightsql_val_2)s, events.`$group_0`) AS `$group_0` FROM events WHERE equals(events.team_id,",
@@ -52,7 +52,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT $group_0 FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         # Should return an empty string constant (parameterized)
         self.assertIn("SELECT events.`$group_0` AS `$group_0` FROM events", sql)
@@ -81,7 +81,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT $group_0, $group_1, $group_2 FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         # Should have conditional logic for groups 0 and 1, empty string for group 2
         self.assertIn("if(less(toTimeZone(events.timestamp,", sql)
@@ -104,7 +104,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT event FROM events WHERE $group_0 = 'acme'"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         # Should use the conditional logic in WHERE clause
         self.assertIn("equals(if(less(toTimeZone(events.timestamp,", sql)
@@ -125,7 +125,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT group_1.properties FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         self.assertIn("ON equals(if(less(toTimeZone(events.timestamp,", sql)
         self.assertIn("events.`$group_1`), events__group_1.key)", sql)
@@ -147,14 +147,14 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT group_0.properties, group_1.properties FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         self.assertIn("ON equals(if(less(toTimeZone(events.timestamp,", sql)
         self.assertIn("events.`$group_0`), events__group_0.key)", sql)
         self.assertIn("ON equals(events.`$group_1`, events__group_1.key)", sql)
 
-    def test_non_clickhouse_dialect_no_filtering(self):
-        """Test that non-ClickHouse dialects don't get filtering"""
+    def test_non_datastore_dialect_no_filtering(self):
+        """Test that non-Datastore dialects don't get filtering"""
         GroupTypeMapping.objects.create(
             team=self.team,
             project=self.team.project,
@@ -187,7 +187,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT company.properties.name FROM events"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         self.assertIn(
             "ON equals(if(less(toTimeZone(events.timestamp, %(insightsql_val_2)s), %(insightsql_val_3)s), %(insightsql_val_4)s, events.`$group_0`), events__group_0.key)",
@@ -209,7 +209,7 @@ class TestGroupKeyFiltering(APIBaseTest):
         query = "SELECT event FROM events WHERE company.properties.name = 'acme'"
         parsed = parse_select(query)
 
-        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="clickhouse")
+        sql, _ = prepare_and_print_ast(parsed, context=self.context, dialect="datastore")
 
         self.assertIn("ON equals(if(less(toTimeZone(events.timestamp,", sql)
         self.assertIn("), %(insightsql_val_3)s), %(insightsql_val_4)s, events.`$group_0`), events__group_0.key)", sql)

@@ -3,7 +3,7 @@ from typing import cast
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 from unittest.mock import patch
 
 from django.test import override_settings
@@ -38,7 +38,7 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.insightsql.test.utils import pretty_print_in_tests
 from insights.insightsql.visitor import clear_locations
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
 from insights.models.group.util import create_group
 from insights.models.property_definition import PropertyDefinition, PropertyType
@@ -46,7 +46,7 @@ from insights.models.utils import UUIDT
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 
-class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestActorsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
     random_uuid: str
 
@@ -767,7 +767,7 @@ class TestActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
         flush_persons_and_events()
 
-        # Simulate property deletion by directly inserting a newer version in ClickHouse
+        # Simulate property deletion by directly inserting a newer version in Datastore
         # This mimics what happens when a person property is deleted via the API
 
         # Insert a newer version without the email property (simulating deletion)

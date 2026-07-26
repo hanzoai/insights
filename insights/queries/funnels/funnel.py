@@ -1,9 +1,9 @@
 from typing import cast
 
-from insights.queries.funnels.base import ClickhouseFunnelBase
+from insights.queries.funnels.base import DatastoreFunnelBase
 
 
-class ClickhouseFunnel(ClickhouseFunnelBase):
+class DatastoreFunnel(DatastoreFunnelBase):
     """
     A basic ordered funnel.
 

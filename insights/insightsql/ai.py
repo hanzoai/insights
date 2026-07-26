@@ -27,7 +27,7 @@ openai_client = (
 
 UNCLEAR_PREFIX = "UNCLEAR:"
 
-IDENTITY_MESSAGE = """You are an expert in writing InsightsQL. InsightsQL is Insights's variant of SQL. It supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
+IDENTITY_MESSAGE = """You are an expert in writing InsightsQL. InsightsQL is Insights's variant of SQL. It supports most of Datastore SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
 
 Important InsightsQL differences versus other SQL dialects:
 - JSON properties are accessed using `properties.foo.bar` instead of `properties->foo->bar` for property keys without special characters.
@@ -79,7 +79,7 @@ TECHNICAL CAUSE:
 The person_id fields are ExpressionFields that expand to expressions referencing override tables
 (e.g., e_all__override). However, these expressions are resolved during type resolution (in printer.py)
 BEFORE lazy table processing begins. This creates forward references to override tables that don't
-exist yet, causing ClickHouse errors like:
+exist yet, causing Datastore errors like:
 "Missing columns: '_--e__override.person_id' '_--e__override.distinct_id'"
 
 PROBLEMATIC PATTERNS:
@@ -192,7 +192,7 @@ def write_sql_from_prompt(prompt: str, *, current_query: Optional[str] = None, t
             break
         candidate_sql = content
         try:
-            prepare_and_print_ast(parse_select(candidate_sql), context=context, dialect="clickhouse")
+            prepare_and_print_ast(parse_select(candidate_sql), context=context, dialect="datastore")
         except ExposedInsightsQLError as e:
             messages.append({"role": "assistant", "content": candidate_sql})
             messages.append(
@@ -323,7 +323,7 @@ fromUnixTimestampMilli(input: integer | float): DateTime
 toTimeZone(input: DateTime, zone: string): DateTime | Date
 toDate(input: string | integer | float): Date
 toDateTime(input: string | integer | float, zone?: string): DateTime
-formatDateTime(input: DateTime, format: string, zone?: string): string - we use use the ClickHouse formatDateTime syntax.
+formatDateTime(input: DateTime, format: string, zone?: string): string - we use use the Datastore formatDateTime syntax.
 toInt(arg: any): integer - Converts arg to a 64-bit integer. Converts Dates into days from epoch, and DateTimes into seconds from epoch
 toFloat(arg: any): float - Converts arg to a 64-bit float. Converts Dates into days from epoch, and DateTimes into seconds from epoch
 toDate(arg: string | integer): Date - arg must be a string YYYY-MM-DD or a Unix timestamp in seconds
@@ -974,7 +974,7 @@ withExpr
     // NOTE: asterisk and subquery goes before |columnExpr| so that we can mark them as multi-column expressions.
     | columnExpr AS identifier                       # WithExprColumn
     ;
-// This is slightly different in InsightsQL compared to ClickHouse SQL
+// This is slightly different in InsightsQL compared to Datastore SQL
 // InsightsQL allows unlimited ("*") nestedIdentifier-s "properties.b.a.a.w.a.s".
 // We parse and convert "databaseIdentifier.tableIdentifier.columnIdentifier.nestedIdentifier.*"
 // to just one ast.Field(chain=['a','b','columnIdentifier','on','and','on']).

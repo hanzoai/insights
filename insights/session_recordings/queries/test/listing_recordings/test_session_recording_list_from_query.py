@@ -7,13 +7,13 @@ from uuid import uuid4
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import ANY
 
@@ -29,8 +29,8 @@ from insights.insightsql.ast import SelectQuery
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.printer import prepare_and_print_ast
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models import Person
 from insights.models.action import Action
 from insights.models.cohort import Cohort
@@ -53,7 +53,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 @parameterized_class([{"allow_event_property_expansion": True}, {"allow_event_property_expansion": False}])
 @freeze_time("2021-01-01T13:46:23")
-class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsListFromQuery(DatastoreTestMixin, APIBaseTest):
     # set by parameterized_class decorator
     allow_event_property_expansion: bool
 
@@ -156,7 +156,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
         return sessions[0], sessions[1]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_query(self):
         user = "test_basic_query-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -257,7 +257,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
         assert more_recordings_available is False
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_query_active_sessions(
         self,
     ):
@@ -344,7 +344,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             (session_id_inactive_is_61, 61, 61.0)
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sessions_with_current_data(
         self,
     ):
@@ -391,7 +391,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             (session_id_inactive, 0),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_query_with_paging(self):
         user = "test_basic_query_with_paging-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -501,7 +501,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
         self._assert_query_matches_session_ids({"limit": 1, "offset": 2}, [])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_query_with_ordering(self):
         user = "test_basic_query_with_ordering-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -730,7 +730,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             {"session": session_id_two, "user": user}
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter(self):
         user = "test_event_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -782,7 +782,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_has_ttl_applied_too(self):
         user = "test_event_filter_has_ttl_applied_too-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -822,7 +822,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         # we want this to limit the amount of event data we query
         self._assert_query_matches_session_ids({}, [session_id_one])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_listing_ignores_future_replays(self):
         with freeze_time("2023-08-29T12:00:01Z"):
             produce_replay_summary(team_id=self.team.id, session_id="29th Aug")
@@ -844,7 +844,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             # recordings in the future don't show
             self._assert_query_matches_session_ids(None, ["29th Aug"])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_on_session_ids(self):
         user = "test_session_ids-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -909,7 +909,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_active_sessions(
         self,
     ):
@@ -1002,7 +1002,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         ]
 
     @also_test_with_materialized_columns(["$current_url", "$browser"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_properties(self):
         user = "test_event_filter_with_properties-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -1129,7 +1129,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_one],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_multiple_event_filters(self):
         session_id = f"test_multiple_event_filters-{str(uuid4())}"
         user = "test_multiple_event_filters-user"
@@ -1295,7 +1295,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(["$session_id", "$browser"], person_properties=["email"])
     @freeze_time("2023-01-04")
     def test_action_filter(self):
@@ -1486,7 +1486,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             }
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_duration_filter(self):
         user = "test_duration_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -1519,7 +1519,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_one],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_operand_or_person_filters(self):
         user = "test_operand_or_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@hanzo.ai"})
@@ -1587,7 +1587,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_one, session_id_two],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_operand_or_event_filters(self):
         user = "test_operand_or_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "test@hanzo.ai"})
@@ -1716,7 +1716,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             ),
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_operand_or_filters(
         self,
         console_log_filters: str,
@@ -1751,7 +1751,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             {"console_log_filters": console_log_filters, "operand": operand}, expected_session_ids
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_operand_or_mandatory_filters(self):
         user = "test_operand_or_filter-user"
         person = Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -1851,7 +1851,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_date_from_filter(self):
         user = "test_date_from_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -1894,7 +1894,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             ),
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_date_from_filter_respects_ttl(self, _name: str, days_ago: int):
         with freeze_time(self.an_hour_ago):
             user = "test_date_from_filter_cannot_search_before_ttl-user"
@@ -1924,7 +1924,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                 ["storage is not past ttl"],
             )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_date_to_filter(self):
         user = "test_date_to_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -1976,7 +1976,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             {"session_id": sr["session_id"], "duration": sr["duration"]} for sr in session_recordings
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_id_filter(self):
         three_user_ids = [str(uuid4()) for _ in range(3)]
         session_id_one = f"test_person_id_filter-{str(uuid4())}"
@@ -2004,7 +2004,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
         self._assert_query_matches_session_ids({"person_uuid": str(p.uuid)}, [session_id_two, session_id_one])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_all_filters_at_once(self):
         three_user_ids = [str(uuid4()) for _ in range(3)]
         target_session_id = f"test_all_filters_at_once-{str(uuid4())}"
@@ -2118,7 +2118,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["email"])
     def test_filter_with_person_properties_exact(self):
         session_id_one, session_id_two = self._two_sessions_two_persons(
@@ -2141,7 +2141,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_one],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["email"])
     def test_filter_with_person_properties_not_contains(self):
         session_id_one, session_id_two = self._two_sessions_two_persons(
@@ -2155,7 +2155,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_two],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(["$current_url"])
     def test_event_filter_with_matching_on_session_id(self):
         user_distinct_id = "test_event_filter_with_matching_on_session_id-user"
@@ -2219,7 +2219,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(event_properties=["$current_url", "$browser"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_insightsql_properties(self):
         user = "test_event_filter_with_insightsql_properties-user"
 
@@ -2282,7 +2282,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_insightsql_person_properties(self):
         user = "test_event_filter_with_insightsql_properties-user"
 
@@ -2354,7 +2354,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(["$current_url", "$browser"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_any_event_filter_with_properties(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
@@ -2486,7 +2486,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_filter_for_recordings_with_console_logs(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
@@ -2542,7 +2542,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_filter_for_recordings_with_console_warns(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
@@ -2594,7 +2594,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_filter_for_recordings_with_console_errors(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
@@ -2646,7 +2646,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_filter_for_recordings_with_mixed_console_counts(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
@@ -2774,7 +2774,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             ),
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_filter_for_recordings_by_console_text(
         self,
@@ -2864,7 +2864,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             {"console_log_filters": console_log_filters, "operand": operand}, expected_session_ids
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_for_recordings_by_snapshot_source(self):
         user = "test_duration_filter-user"
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
@@ -2933,7 +2933,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             [session_id_two],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_for_recordings_by_lib_event_property_converts_to_snapshot_library(self):
         """
         Test that $lib event property filters are automatically converted to snapshot_library
@@ -3045,7 +3045,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         verify_no_jsonextract=False,
     )
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_test_accounts_excluded(self):
         self.team.test_account_filters = [
             {
@@ -3127,7 +3127,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         verify_no_jsonextract=False,
     )
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_insightsql_event_properties_test_accounts_excluded(self):
         self.team.test_account_filters = [
             {"key": "properties.$browser == 'Chrome'", "type": "insightsql"},
@@ -3228,7 +3228,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     # due to RAM usage issues on the EU cluster
     @also_test_with_materialized_columns(event_properties=["is_internal_user"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_event_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
@@ -3321,7 +3321,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     # due to RAM usage issues on the EU cluster
     @also_test_with_materialized_columns(event_properties=["is_internal_user"], verify_no_jsonextract=True)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_event_property_test_account_filter_allowing_denormalized_props(self):
         """
         This is a duplicate of the test test_top_level_event_property_test_account_filter
@@ -3412,7 +3412,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["is_internal_user"])
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_insightsql_event_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
@@ -3498,7 +3498,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(person_properties=["email"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_insightsql_person_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
@@ -3584,7 +3584,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(person_properties=["email"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_person_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
@@ -3680,7 +3680,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_two_events_and_multiple_teams(self):
         another_team = Team.objects.create(organization=self.organization)
 
@@ -3713,7 +3713,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_group_filter(self):
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
         session_id = f"test_event_filter_with_group_filter-ONE-{uuid4()}"
@@ -3829,7 +3829,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ordering(self):
         session_id_one = f"test_ordering-one"
         session_id_two = f"test_ordering-two"
@@ -3868,7 +3868,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["$host"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_top_level_event_host_property_test_account_filter(self):
         """
         This is a regression test. See: https://insightshelp.zendesk.com/agent/tickets/18059
@@ -3995,7 +3995,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
             ("empty_distinct_ids", [], ["session1", "session2"]),
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_by_distinct_ids(self, name: str, distinct_ids: list[str], expected_sessions: list[str]):
         # Create two users with different distinct_ids
         user1 = "test-user-1"
@@ -4031,7 +4031,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(person_properties=["email"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_users_from_excluded_cohort(self):
         """
         Test that sessions from users in a cohort marked as excluded in team test account filters are properly filtered out.
@@ -4130,7 +4130,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(person_properties=["email"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_users_from_excluded_cohort_no_events(self):
         """
         Test that sessions from users in a cohort marked as excluded in team test account filters are properly filtered out,
@@ -4198,12 +4198,12 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestDatastoreSessionRecordingsListFromQuery(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def _print_query(self, query: SelectQuery) -> str:
         return prepare_and_print_ast(
             query,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
             pretty=True,
         )[0]
 
@@ -4343,7 +4343,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
     ]
 
     @parameterized.expand(test_case_combinations)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_filter_with_person_properties_materialized(
         self,
         _name: str,
@@ -4440,7 +4440,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         )
 
     @parameterized.expand(test_case_combinations)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_id_filter(
         self,
         _name: str,

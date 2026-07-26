@@ -10,7 +10,7 @@ from insights.test.base import _create_event, flush_persons_and_events
 
 from django.utils import timezone
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Group, Person, PersonDistinctId, Team
 from insights.models.event.sql import EVENTS_DATA_TABLE
 

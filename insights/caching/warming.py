@@ -15,7 +15,7 @@ from insights.insightsql.constants import LimitContext
 
 from insights.api.services.query import process_query_dict
 from insights.caching.utils import largest_teams
-from insights.clickhouse.query_tagging import Feature, tag_queries
+from insights.datastore.query_tagging import Feature, tag_queries
 from insights.errors import CHQueryErrorTooManySimultaneousQueries
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_cache_base import QueryCacheManagerBase
@@ -188,7 +188,7 @@ def schedule_warming_for_teams_task():
 
 
 @shared_task(
-    queue=CeleryQueue.ANALYTICS_LIMITED.value,  # Important! Prevents Clickhouse from being overwhelmed
+    queue=CeleryQueue.ANALYTICS_LIMITED.value,  # Important! Prevents Datastore from being overwhelmed
     ignore_result=True,
     expires=60 * 60,
     autoretry_for=(CHQueryErrorTooManySimultaneousQueries,),

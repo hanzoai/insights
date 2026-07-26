@@ -14,7 +14,7 @@ from temporalio.testing import ActivityEnvironment
 
 from insights.models import Organization, Team
 from insights.models.user import User
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.common.client import connect
 from insights.temporal.common.logger import configure_logger
 
@@ -79,13 +79,13 @@ def activity_environment():
 
 
 @pytest_asyncio.fixture(scope="module", loop_scope="module")
-async def clickhouse_client():
-    """Provide a ClickHouseClient to use in tests."""
-    async with ClickHouseClient(
-        url=settings.CLICKHOUSE_HTTP_URL,
-        user=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        database=settings.CLICKHOUSE_DATABASE,
+async def datastore_client():
+    """Provide a DatastoreClient to use in tests."""
+    async with DatastoreClient(
+        url=settings.DATASTORE_HTTP_URL,
+        user=settings.DATASTORE_USER,
+        password=settings.DATASTORE_PASSWORD,
+        database=settings.DATASTORE_DATABASE,
         output_format_arrow_string_as_string="true",
         # This parameter is disabled (0) in production.
         # Durting testing, it's useful to enable it to wait for mutations.

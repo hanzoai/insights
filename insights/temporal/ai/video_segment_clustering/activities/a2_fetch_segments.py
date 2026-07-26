@@ -1,6 +1,6 @@
 """
 Activity 2 of the video segment clustering workflow:
-Fetch unprocessed video segments from ClickHouse.
+Fetch unprocessed video segments from Datastore.
 """
 
 import json
@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 @activity.defn
 async def fetch_segments_activity(inputs: FetchSegmentsActivityInputs) -> FetchSegmentsResult:
-    """Fetch video segments from ClickHouse.
+    """Fetch video segments from Datastore.
 
     Queries document_embeddings for video segments within the lookback window.
     Uses a configurable lookback period (default 7 days) to ensure idempotent

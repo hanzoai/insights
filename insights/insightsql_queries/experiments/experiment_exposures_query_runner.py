@@ -20,7 +20,7 @@ from insights.insightsql.constants import InsightsQLGlobalSettings
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.insightsql_queries.experiments import MULTIPLE_VARIANT_KEY
 from insights.insightsql_queries.experiments.error_handling import experiment_error_handler
 from insights.insightsql_queries.experiments.experiment_query_builder import (

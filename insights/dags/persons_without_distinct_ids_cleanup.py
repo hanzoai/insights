@@ -8,8 +8,8 @@ import psycopg2
 import psycopg2.errors
 from dagster_k8s import k8s_job_executor
 
-from insights.clickhouse.cluster import ClickhouseCluster
-from insights.clickhouse.custom_metrics import MetricsClient
+from insights.datastore.cluster import DatastoreCluster
+from insights.datastore.custom_metrics import MetricsClient
 from insights.dags.common import JobOwners
 
 MAX_RETRY_ATTEMPTS = 5
@@ -138,7 +138,7 @@ def scan_delete_chunk_for_pwdc(
     config: PersonsNoDistinctIdsCleanupConfig,
     chunk: tuple[int, int],
     database: dagster.ResourceParam[psycopg2.extensions.connection],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dict[str, Any]:
     """
     Scan insights_person_new table for records that have no associated insights_persondistinctid row,

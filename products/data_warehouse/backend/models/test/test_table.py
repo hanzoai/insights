@@ -4,7 +4,7 @@ from unittest.mock import patch
 from insights.insightsql.database.models import DateTimeDatabaseField, IntegerDatabaseField, StringDatabaseField
 
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
-from products.data_warehouse.backend.models.table import SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING
+from products.data_warehouse.backend.models.table import SERIALIZED_FIELD_TO_DATASTORE_MAPPING
 
 
 class TestTable(BaseTest):
@@ -17,7 +17,7 @@ class TestTable(BaseTest):
         with patch("products.data_warehouse.backend.models.table.sync_execute") as sync_execute_results:
             sync_execute_results.return_value = [["id", "Int64"]]
             columns = table.get_columns()
-            assert columns == {"id": {"clickhouse": "Int64", "insightsql": "IntegerDatabaseField", "valid": True}}
+            assert columns == {"id": {"datastore": "Int64", "insightsql": "IntegerDatabaseField", "valid": True}}
 
     def test_get_columns_with_nullable(self):
         credential = DataWarehouseCredential.objects.create(access_key="key", access_secret="secret", team=self.team)
@@ -28,7 +28,7 @@ class TestTable(BaseTest):
         with patch("products.data_warehouse.backend.models.table.sync_execute") as sync_execute_results:
             sync_execute_results.return_value = [["id", "Nullable(Int64)"]]
             columns = table.get_columns()
-            assert columns == {"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField", "valid": True}}
+            assert columns == {"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField", "valid": True}}
 
     def test_get_columns_with_unknown_field(self):
         credential = DataWarehouseCredential.objects.create(access_key="key", access_secret="secret", team=self.team)
@@ -39,7 +39,7 @@ class TestTable(BaseTest):
         with patch("products.data_warehouse.backend.models.table.sync_execute") as sync_execute_results:
             sync_execute_results.return_value = [["id", "Nothing"]]
             columns = table.get_columns()
-            assert columns == {"id": {"clickhouse": "Nothing", "insightsql": "UnknownDatabaseField", "valid": True}}
+            assert columns == {"id": {"datastore": "Nothing", "insightsql": "UnknownDatabaseField", "valid": True}}
 
     def test_get_columns_with_type_args(self):
         credential = DataWarehouseCredential.objects.create(access_key="key", access_secret="secret", team=self.team)
@@ -51,7 +51,7 @@ class TestTable(BaseTest):
             sync_execute_results.return_value = [["id", "DateTime(6, 'UTC')"]]
             columns = table.get_columns()
             assert columns == {
-                "id": {"clickhouse": "DateTime(6, 'UTC')", "insightsql": "DateTimeDatabaseField", "valid": True}
+                "id": {"datastore": "DateTime(6, 'UTC')", "insightsql": "DateTimeDatabaseField", "valid": True}
             }
 
     def test_get_columns_with_array(self):
@@ -64,7 +64,7 @@ class TestTable(BaseTest):
             sync_execute_results.return_value = [["id", "Array(String)"]]
             columns = table.get_columns()
             assert columns == {
-                "id": {"clickhouse": "Array(String)", "insightsql": "StringArrayDatabaseField", "valid": True}
+                "id": {"datastore": "Array(String)", "insightsql": "StringArrayDatabaseField", "valid": True}
             }
 
     def test_get_columns_with_nullable_and_args(self):
@@ -77,7 +77,7 @@ class TestTable(BaseTest):
             sync_execute_results.return_value = [["id", "Nullable(DateTime(6, 'UTC'))"]]
             columns = table.get_columns()
             assert columns == {
-                "id": {"clickhouse": "Nullable(DateTime(6, 'UTC'))", "insightsql": "DateTimeDatabaseField", "valid": True}
+                "id": {"datastore": "Nullable(DateTime(6, 'UTC'))", "insightsql": "DateTimeDatabaseField", "valid": True}
             }
 
     def test_get_columns_with_complex_tuples(self):
@@ -91,7 +91,7 @@ class TestTable(BaseTest):
             columns = table.get_columns()
             assert columns == {
                 "id": {
-                    "clickhouse": "Map(String, Map(String, Array(UInt64)))",
+                    "datastore": "Map(String, Map(String, Array(UInt64)))",
                     "insightsql": "StringJSONDatabaseField",
                     "valid": True,
                 }
@@ -103,14 +103,14 @@ class TestTable(BaseTest):
             name="test_table", url_pattern="", credential=credential, format="Parquet", team=self.team
         )
 
-        clickhouse_type = "Tuple(data Tuple(`$event_schema` Tuple(version Nullable(String)), client_id Nullable(String), client_name Nullable(String), connection Nullable(String), connection_id Nullable(String), date Nullable(String), details Tuple(actions Tuple(executions Array(Nullable(String))), completedAt Nullable(Int64), elapsedTime Nullable(Int64), initiatedAt Nullable(Int64), prompts Array(Tuple(completedAt Nullable(Int64), connection Nullable(String), connection_id Nullable(String), elapsedTime Nullable(Int64), flow Nullable(String), identity Nullable(String), initiatedAt Nullable(Int64), name Nullable(String), stats Tuple(loginsCount Nullable(Int64)), strategy Nullable(String), timers Tuple(rules Nullable(Int64)), url Nullable(String), user_id Nullable(String), user_name Nullable(String))), session_id Nullable(String), stats Tuple(loginsCount Nullable(Int64))), hostname Nullable(String), ip Nullable(String), log_id Nullable(String), strategy Nullable(String), strategy_type Nullable(String), type Nullable(String), user_agent Nullable(String), user_id Nullable(String), user_name Nullable(String)), log_id Nullable(String))"
+        datastore_type = "Tuple(data Tuple(`$event_schema` Tuple(version Nullable(String)), client_id Nullable(String), client_name Nullable(String), connection Nullable(String), connection_id Nullable(String), date Nullable(String), details Tuple(actions Tuple(executions Array(Nullable(String))), completedAt Nullable(Int64), elapsedTime Nullable(Int64), initiatedAt Nullable(Int64), prompts Array(Tuple(completedAt Nullable(Int64), connection Nullable(String), connection_id Nullable(String), elapsedTime Nullable(Int64), flow Nullable(String), identity Nullable(String), initiatedAt Nullable(Int64), name Nullable(String), stats Tuple(loginsCount Nullable(Int64)), strategy Nullable(String), timers Tuple(rules Nullable(Int64)), url Nullable(String), user_id Nullable(String), user_name Nullable(String))), session_id Nullable(String), stats Tuple(loginsCount Nullable(Int64))), hostname Nullable(String), ip Nullable(String), log_id Nullable(String), strategy Nullable(String), strategy_type Nullable(String), type Nullable(String), user_agent Nullable(String), user_id Nullable(String), user_name Nullable(String)), log_id Nullable(String))"
 
         with patch("products.data_warehouse.backend.models.table.sync_execute") as sync_execute_results:
-            sync_execute_results.return_value = [["id", clickhouse_type]]
+            sync_execute_results.return_value = [["id", datastore_type]]
             columns = table.get_columns()
             assert columns == {
                 "id": {
-                    "clickhouse": clickhouse_type,
+                    "datastore": datastore_type,
                     "insightsql": "StringJSONDatabaseField",
                     "valid": True,
                 }
@@ -127,7 +127,7 @@ class TestTable(BaseTest):
             columns = table.get_columns()
             assert columns == {
                 "id-hype": {
-                    "clickhouse": "String",
+                    "datastore": "String",
                     "insightsql": "StringDatabaseField",
                     "valid": True,
                 }
@@ -171,10 +171,10 @@ class TestTable(BaseTest):
             format=DataWarehouseTable.TableFormat.Parquet,
             team=self.team,
             columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "timestamp": {"clickhouse": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
-                "mrr": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"},
-                "offset": {"clickhouse": "UInt32", "insightsql": "IntegerDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "timestamp": {"datastore": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
+                "mrr": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"},
+                "offset": {"datastore": "UInt32", "insightsql": "IntegerDatabaseField"},
             },
             credential=credential,
         )
@@ -201,8 +201,8 @@ class TestTable(BaseTest):
             format=DataWarehouseTable.TableFormat.Parquet,
             team=self.team,
             columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "timestamp-dash": {"clickhouse": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "timestamp-dash": {"datastore": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
             },
             credential=credential,
         )
@@ -218,9 +218,9 @@ class TestTable(BaseTest):
             format=DataWarehouseTable.TableFormat.Parquet,
             team=self.team,
             columns={
-                "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
                 "nested": {
-                    "clickhouse": "Array(Tuple(url Nullable(String), date Tuple(member0 Nullable(DateTime64(6, 'UTC')), member1 Nullable(String)), text Nullable(String), type Nullable(String), email Nullable(String), field Tuple(id Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))), choice Tuple(id Nullable(String), label Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))), number Nullable(Float64), boolean Nullable(Bool), choices Tuple(ids Array(Nullable(String)), labels Array(Nullable(String)), _airbyte_additional_properties Map(String, Nullable(String))), payment Tuple(name Nullable(String), last4 Nullable(String), amount Nullable(String), success Nullable(Bool), _airbyte_additional_properties Map(String, Nullable(String))), file_url Nullable(String), phone_number Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))))",
+                    "datastore": "Array(Tuple(url Nullable(String), date Tuple(member0 Nullable(DateTime64(6, 'UTC')), member1 Nullable(String)), text Nullable(String), type Nullable(String), email Nullable(String), field Tuple(id Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))), choice Tuple(id Nullable(String), label Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))), number Nullable(Float64), boolean Nullable(Bool), choices Tuple(ids Array(Nullable(String)), labels Array(Nullable(String)), _airbyte_additional_properties Map(String, Nullable(String))), payment Tuple(name Nullable(String), last4 Nullable(String), amount Nullable(String), success Nullable(Bool), _airbyte_additional_properties Map(String, Nullable(String))), file_url Nullable(String), phone_number Nullable(String), _airbyte_additional_properties Map(String, Nullable(String))))",
                     "insightsql": "StringArrayDatabaseField",
                     "valid": True,
                 },
@@ -269,8 +269,8 @@ class TestTable(BaseTest):
             format=DataWarehouseTable.TableFormat.Parquet,
             team=self.team,
             columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "mrr": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "mrr": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"},
             },
             credential=credential,
         )
@@ -294,25 +294,25 @@ class TestTable(BaseTest):
 
     def test_comprehensive_table_definition(self):
         base_columns = {
-            "int64": {"clickhouse": "Int64", "insightsql": "IntegerDatabaseField"},
-            "float64": {"clickhouse": "Float64", "insightsql": "FloatDatabaseField"},
-            "decimal": {"clickhouse": "Decimal(10, 2)", "insightsql": "DecimalDatabaseField"},
-            "string": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-            "datetime": {"clickhouse": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
-            "date": {"clickhouse": "Date", "insightsql": "DateDatabaseField"},
-            "boolean": {"clickhouse": "Bool", "insightsql": "BooleanDatabaseField"},
-            "array": {"clickhouse": "Array(String)", "insightsql": "StringArrayDatabaseField"},
-            "map": {"clickhouse": "Map(String, String)", "insightsql": "StringJSONDatabaseField"},
+            "int64": {"datastore": "Int64", "insightsql": "IntegerDatabaseField"},
+            "float64": {"datastore": "Float64", "insightsql": "FloatDatabaseField"},
+            "decimal": {"datastore": "Decimal(10, 2)", "insightsql": "DecimalDatabaseField"},
+            "string": {"datastore": "String", "insightsql": "StringDatabaseField"},
+            "datetime": {"datastore": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
+            "date": {"datastore": "Date", "insightsql": "DateDatabaseField"},
+            "boolean": {"datastore": "Bool", "insightsql": "BooleanDatabaseField"},
+            "array": {"datastore": "Array(String)", "insightsql": "StringArrayDatabaseField"},
+            "map": {"datastore": "Map(String, String)", "insightsql": "StringJSONDatabaseField"},
         }
 
-        # Assert this is a comprehensive list of all possible ClickHouse types
-        assert len({val["clickhouse"] for key, val in base_columns.items()}) == len(
-            SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING
+        # Assert this is a comprehensive list of all possible Datastore types
+        assert len({val["datastore"] for key, val in base_columns.items()}) == len(
+            SERIALIZED_FIELD_TO_DATASTORE_MAPPING
         )
 
         # Create a nullable copy for each of the above
         nullable_columns = {
-            f"{key}_nullable": {"clickhouse": f"Nullable({val['clickhouse']})", "insightsql": val["insightsql"]}
+            f"{key}_nullable": {"datastore": f"Nullable({val['datastore']})", "insightsql": val["insightsql"]}
             for key, val in base_columns.items()
         }
 
@@ -350,7 +350,7 @@ class TestTable(BaseTest):
             format=DataWarehouseTable.TableFormat.Parquet,
             team=self.team,
             columns={
-                "id": {"clickhouse": column_type, "insightsql": "RandomUnknownDatabaseField"},
+                "id": {"datastore": column_type, "insightsql": "RandomUnknownDatabaseField"},
             },
             credential=credential,
         )

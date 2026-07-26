@@ -6,7 +6,7 @@ from typing import Optional
 import structlog
 from temporalio import activity
 
-from insights.clickhouse.cluster import get_cluster
+from insights.datastore.cluster import get_cluster
 from insights.models import MaterializedColumnSlot
 from insights.models.activity_logging.activity_log import Change, Detail, log_activity
 from insights.models.property_definition import PropertyType
@@ -69,7 +69,7 @@ def _generate_property_extraction_sql(property_type: str) -> str:
 
     elif property_type == PropertyType.Datetime:
         # Match InsightsQL's toDateTime() -> parseDateTime64BestEffortOrNull with precision 6
-        # See insights/insightsql/printer.py L1391-1392 and insights/insightsql/functions/clickhouse/conversions.py L112-127
+        # See insights/insightsql/printer.py L1391-1392 and insights/insightsql/functions/datastore/conversions.py L112-127
         # Timezone param omitted - uses server default (UTC). Most datetime strings have explicit
         # timezone info anyway, and for ambiguous strings UTC is a reasonable default.
         return f"parseDateTime64BestEffortOrNull({base_extract}, 6)"

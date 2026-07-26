@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.constants import TRENDS_TABLE
 from insights.models import Filter
@@ -15,7 +15,7 @@ from insights.queries.trends.trends import Trends
 from insights.test.test_journeys import journeys_for
 
 
-class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
+class TestBreakdowns(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         journey = {
@@ -131,7 +131,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         )
         return response
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_session_duration_of_events(self):
         response = self._run(
             {
@@ -158,7 +158,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_session_duration_of_events_with_bucketing(self):
         response = self._run(
             {
@@ -196,7 +196,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_session_duration_of_events_single_aggregate(self):
         response = self._run(
             {
@@ -212,7 +212,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             [("[0.0,69.92]", 3), ("[69.92,110.72]", 1), ("[110.72,180.01]", 5)],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_session_duration_of_unique_sessions(self):
         response = self._run(
             {"breakdown": "$session_duration", "breakdown_type": "session"},
@@ -230,7 +230,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_session_duration_of_unique_sessions_with_bucketing(self):
         response = self._run(
             {
@@ -261,7 +261,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_event_property_with_bucketing(self):
         response = self._run(
             {
@@ -292,7 +292,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_event_property_of_unique_sessions_with_bucketing(self):
         response = self._run(
             {
@@ -444,7 +444,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_event_property_with_entity_session_filter(self):
         response = self._run(
             {"breakdown": "$current_url", "breakdown_type": "event"},
@@ -477,7 +477,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_histogram_by_missing_property_regression(self):
         response = self._run(
             {
@@ -498,7 +498,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_numeric_insightsql(self):
         response = self._run(
             {
@@ -516,7 +516,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_numeric_insightsql_hide_other(self):
         response = self._run(
             {
@@ -550,7 +550,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_string_insightsql(self):
         response = self._run(
             {
@@ -568,7 +568,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_string_insightsql_hide_other(self):
         response = self._run(
             {

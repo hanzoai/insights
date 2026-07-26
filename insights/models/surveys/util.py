@@ -1,7 +1,7 @@
 from enum import StrEnum
 from uuid import UUID
 
-from insights.insightsql.escape_sql import escape_clickhouse_string
+from insights.insightsql.escape_sql import escape_datastore_string
 
 from insights.models.surveys.survey_response_archive import SurveyResponseArchive
 
@@ -24,11 +24,11 @@ class SurveyEventProperties(StrEnum):
     SURVEY_LAST_SEEN_DATE = "$last_seen_survey_date"
 
 
-def get_survey_response_clickhouse_query(
+def get_survey_response_datastore_query(
     question_index: int, question_id: str | None = None, is_multiple_choice: bool = False
 ) -> str:
     """
-    Generate a ClickHouse query to extract survey response based on question index or ID
+    Generate a Datastore query to extract survey response based on question index or ID
 
     Args:
         question_index: Index of the question
@@ -48,10 +48,10 @@ def get_survey_response_clickhouse_query(
 
 def _build_id_based_key(question_index: int, question_id: str | None = None) -> str:
     if question_id:
-        return escape_clickhouse_string(f"{SurveyEventProperties.SURVEY_RESPONSE}_{question_id}")
+        return escape_datastore_string(f"{SurveyEventProperties.SURVEY_RESPONSE}_{question_id}")
 
     # Extract the ID from the question at the given index in the questions array
-    return f"CONCAT({escape_clickhouse_string(SurveyEventProperties.SURVEY_RESPONSE + '_')}, JSONExtractString(JSONExtractArrayRaw(properties, '$survey_questions')[{int(question_index) + 1}], 'id'))"
+    return f"CONCAT({escape_datastore_string(SurveyEventProperties.SURVEY_RESPONSE + '_')}, JSONExtractString(JSONExtractArrayRaw(properties, '$survey_questions')[{int(question_index) + 1}], 'id'))"
 
 
 def _build_index_based_key(question_index: int) -> str:
@@ -63,7 +63,7 @@ def _build_index_based_key(question_index: int) -> str:
 def _build_coalesce_query(_DANGEROUS_id_based_key: str, index_based_key: str) -> str:
     return f"""COALESCE(
         NULLIF(JSONExtractString(properties, {_DANGEROUS_id_based_key}), ''),
-        NULLIF(JSONExtractString(properties, {escape_clickhouse_string(index_based_key)}), '')
+        NULLIF(JSONExtractString(properties, {escape_datastore_string(index_based_key)}), '')
     )"""
 
 
@@ -71,7 +71,7 @@ def _build_multiple_choice_query(_DANGEROUS_id_based_key: str, index_based_key: 
     return f"""if(
         JSONHas(properties, {_DANGEROUS_id_based_key}) AND length(JSONExtractArrayRaw(properties, {_DANGEROUS_id_based_key})) > 0,
         JSONExtractArrayRaw(properties, {_DANGEROUS_id_based_key}),
-        JSONExtractArrayRaw(properties, {escape_clickhouse_string(index_based_key)})
+        JSONExtractArrayRaw(properties, {escape_datastore_string(index_based_key)})
     )"""
 
 
@@ -112,7 +112,7 @@ def filter_survey_sent_events_by_unique_submission(survey_id: str, team_id: int 
             argMax(uuid, timestamp) -- Selects the UUID of the event with the latest timestamp within each group
         FROM events
         WHERE event = '{SurveyEventName.SENT}' -- Filter for 'survey sent' events
-          AND JSONExtractString(properties, '{SurveyEventProperties.SURVEY_ID}') = {escape_clickhouse_string(survey_id)} -- Filter for the specific survey
+          AND JSONExtractString(properties, '{SurveyEventProperties.SURVEY_ID}') = {escape_datastore_string(survey_id)} -- Filter for the specific survey
           {extra_filters}
           -- Date range filters from the outer query are intentionally NOT included here.
           -- This ensures we find the globally latest unique submission, which is then

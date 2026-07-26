@@ -932,13 +932,13 @@ def send_insights_functions_digest_email(digest_data: dict, test_email_override:
 def send_insights_functions_daily_digest() -> None:
     """
     Send daily digest email to teams with InsightsFunctions that have failures.
-    Queries ClickHouse first to find failures, then fans out to team-specific tasks.
+    Queries Datastore first to find failures, then fans out to team-specific tasks.
     """
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     logger.info("Starting InsightsFunctions daily digest task")
 
-    # Query ClickHouse to find all teams with failures and their insights_function_ids
+    # Query Datastore to find all teams with failures and their insights_function_ids
     failures_query = """
     SELECT DISTINCT team_id, app_source_id as insights_function_id
     FROM app_metrics2
@@ -998,12 +998,12 @@ def send_team_insights_functions_digest(team_id: int, insights_function_ids: lis
         team_id: The team ID to process
         insights_function_ids: Optional list of specific custom function IDs to process
     """
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
     from insights.models.insights_functions.insights_function import InsightsFunction
 
     logger.info(f"Processing InsightsFunctions digest for team {team_id}")
 
-    # Get metrics data from ClickHouse for all functions in the team
+    # Get metrics data from Datastore for all functions in the team
     metrics_query = """
     SELECT
         app_source_id as insights_function_id,
@@ -1387,7 +1387,7 @@ def send_organization_deleted_email(
 def send_error_tracking_weekly_digest() -> None:
     """
     Send weekly digest email to teams with exception events.
-    Queries ClickHouse for all teams with exceptions, then fans out per-team email tasks.
+    Queries Datastore for all teams with exceptions, then fans out per-team email tasks.
     """
     from products.error_tracking.backend.weekly_digest import get_exception_counts
 

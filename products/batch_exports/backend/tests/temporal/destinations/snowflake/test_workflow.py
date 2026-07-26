@@ -22,7 +22,7 @@ from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from insights.batch_exports.models import BatchExport, BatchExportRun
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 from insights.temporal.tests.utils.models import afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run, start_batch_export_run
@@ -112,7 +112,7 @@ def mock_snowflake_connection():
 @pytest.mark.parametrize("interval", ["hour"], indirect=True)
 async def test_snowflake_export_workflow_exports_events(
     ateam,
-    clickhouse_client,
+    datastore_client,
     database,
     schema,
     snowflake_batch_export,
@@ -129,8 +129,8 @@ async def test_snowflake_export_workflow_exports_events(
     data_interval_end_str = data_interval_end.strftime("%Y-%m-%d_%H-%M-%S")
     data_interval_start = data_interval_end - snowflake_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -198,13 +198,13 @@ async def test_snowflake_export_workflow_without_events(ateam, snowflake_batch_e
 
 
 async def test_snowflake_export_workflow_raises_error_on_put_fail(
-    clickhouse_client, ateam, snowflake_batch_export, interval
+    datastore_client, ateam, snowflake_batch_export, interval
 ):
     data_interval_end = TEST_TIME
     data_interval_start = data_interval_end - snowflake_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -249,13 +249,13 @@ async def test_snowflake_export_workflow_raises_error_on_put_fail(
 
 
 async def test_snowflake_export_workflow_raises_error_on_copy_fail(
-    clickhouse_client, ateam, snowflake_batch_export, interval
+    datastore_client, ateam, snowflake_batch_export, interval
 ):
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - snowflake_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,

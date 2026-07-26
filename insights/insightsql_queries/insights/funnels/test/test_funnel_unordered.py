@@ -3,10 +3,10 @@ from typing import cast
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from rest_framework.exceptions import ValidationError
@@ -32,7 +32,7 @@ FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
 class TestFunnelUnorderedStepsBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(FunnelOrderType.UNORDERED),  # type: ignore
 ):
     maxDiff = None
@@ -435,7 +435,7 @@ class TestFunnelUnorderedStepsBreakdown(
             # We don't actually support non step 0 attribution in unordered funnels. Test is vestigial.
             self.assertRaises(ValidationError, runner.calculate)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_breakdown_correct_breakdown_props_are_chosen_for_step(self):
         # No person querying here, so snapshots are more legible
         # overridden from factory, since we need to add `funnel_order_type`
@@ -519,20 +519,20 @@ class TestFunnelUnorderedStepsBreakdown(
 
 
 class TestFunnelUnorderedGroupBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_group_test_factory(FunnelOrderType.UNORDERED),  # type: ignore
 ):
     maxDiff = None
 
 
 class TestFunnelUnorderedStepsConversionTime(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_conversion_time_test_factory(FunnelOrderType.UNORDERED),  # type: ignore
 ):
     maxDiff = None
 
 
-class TestFunnelUnorderedSteps(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelUnorderedSteps(DatastoreTestMixin, APIBaseTest):
     def _get_actor_ids_at_step(self, filter, funnel_step, breakdown_value=None):
         actors = get_actors_legacy_filters(
             filter,

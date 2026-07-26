@@ -334,7 +334,7 @@ class PlaylistCount(BaseModel):
     errored_at: Optional[datetime]
 
 
-class ClickHouseResponse(BaseModel):
+class DatastoreResponse(BaseModel):
     meta: list
     data: list
     statistics: dict

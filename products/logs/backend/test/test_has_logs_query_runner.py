@@ -1,19 +1,19 @@
 import os
 import json
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import patch
 
 from django.core.cache import cache
 
 from rest_framework import status
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 from products.logs.backend.has_logs_query_runner import HasLogsQueryRunner
 
 
-class TestHasLogsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestHasLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod
@@ -62,7 +62,7 @@ class TestHasLogsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertFalse(runner.run())
 
 
-class TestHasLogsAPI(ClickhouseTestMixin, APIBaseTest):
+class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod

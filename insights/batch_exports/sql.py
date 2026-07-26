@@ -2,7 +2,7 @@ from django.conf import settings
 
 # TODO: this can now be removed
 CREATE_PERSONS_BATCH_EXPORT_VIEW = f"""
-CREATE OR REPLACE VIEW persons_batch_export ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW persons_batch_export ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     with new_persons as (
         select
             id,
@@ -135,7 +135,7 @@ CREATE OR REPLACE VIEW persons_batch_export ON CLUSTER {settings.CLICKHOUSE_CLUS
 
 # TODO: this can now be removed
 CREATE_PERSONS_BATCH_EXPORT_VIEW_BACKFILL = f"""
-CREATE OR REPLACE VIEW persons_batch_export_backfill ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW persons_batch_export_backfill ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     SELECT
         pd.team_id AS team_id,
         pd.distinct_id AS distinct_id,
@@ -197,7 +197,7 @@ CREATE OR REPLACE VIEW persons_batch_export_backfill ON CLUSTER {settings.CLICKH
 """
 
 CREATE_EVENTS_BATCH_EXPORT_VIEW = f"""
-CREATE OR REPLACE VIEW events_batch_export ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW events_batch_export ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     SELECT DISTINCT ON (team_id, event, cityHash64(events.distinct_id), cityHash64(events.uuid))
         team_id AS team_id,
         timestamp AS timestamp,
@@ -230,7 +230,7 @@ CREATE OR REPLACE VIEW events_batch_export ON CLUSTER {settings.CLICKHOUSE_CLUST
 """
 
 CREATE_EVENTS_BATCH_EXPORT_VIEW_UNBOUNDED = f"""
-CREATE OR REPLACE VIEW events_batch_export_unbounded ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW events_batch_export_unbounded ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     SELECT DISTINCT ON (team_id, event, cityHash64(events.distinct_id), cityHash64(events.uuid))
         team_id AS team_id,
         timestamp AS timestamp,
@@ -261,7 +261,7 @@ CREATE OR REPLACE VIEW events_batch_export_unbounded ON CLUSTER {settings.CLICKH
 """
 
 CREATE_EVENTS_BATCH_EXPORT_VIEW_RECENT = f"""
-CREATE OR REPLACE VIEW events_batch_export_recent ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW events_batch_export_recent ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     SELECT DISTINCT ON (team_id, event, cityHash64(events_recent.distinct_id), cityHash64(events_recent.uuid))
         team_id AS team_id,
         timestamp AS timestamp,
@@ -292,7 +292,7 @@ CREATE OR REPLACE VIEW events_batch_export_recent ON CLUSTER {settings.CLICKHOUS
 """
 
 CREATE_EVENTS_BATCH_EXPORT_VIEW_BACKFILL = f"""
-CREATE OR REPLACE VIEW events_batch_export_backfill ON CLUSTER {settings.CLICKHOUSE_CLUSTER} AS (
+CREATE OR REPLACE VIEW events_batch_export_backfill ON CLUSTER {settings.DATASTORE_CLUSTER} AS (
     SELECT DISTINCT ON (team_id, event, cityHash64(events.distinct_id), cityHash64(events.uuid))
         team_id AS team_id,
         timestamp AS timestamp,

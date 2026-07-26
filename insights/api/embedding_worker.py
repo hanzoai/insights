@@ -77,7 +77,7 @@ def emit_embedding_request(
 ) -> FutureRecordMetadata:
     """
     Emit an embedding request to Kafka for processing by the embedding worker.
-    The worker will generate embeddings and emit them to clickhouse_document_embeddings.
+    The worker will generate embeddings and emit them to datastore_document_embeddings.
 
     Args:
         content: Text content to embed

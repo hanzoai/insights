@@ -9,7 +9,7 @@ The `SessionRecordingIngester` consumes session recording events from Kafka and:
 - **Validates and filters** messages (team checks, rate limiting, restrictions)
 - **Batches events** by session for efficient storage
 - **Writes session data** to object storage (S3) as compressed blocks
-- **Publishes metadata** to ClickHouse for querying and playback
+- **Publishes metadata** to Datastore for querying and playback
 - **Extracts console logs** for separate storage and search
 - **Handles failures** via dead letter queue and overflow topics
 
@@ -22,7 +22,7 @@ The `SessionRecordingIngester` consumes session recording events from Kafka and:
 
 ### Setup
 
-1. Start the required services (Kafka, MinIO, Postgres, Redis, ClickHouse):
+1. Start the required services (Kafka, MinIO, Postgres, Redis, Datastore):
 
    ```bash
    insightscli dev:setup
@@ -62,7 +62,7 @@ The E2E tests validate the full pipeline by:
 
 - Producing test messages to the input Kafka topic
 - Verifying data is correctly written to S3
-- Verifying metadata is correctly aggregated in ClickHouse
+- Verifying metadata is correctly aggregated in Datastore
 - Using snapshot testing to capture and verify behavior
 
 ### Adding New Test Cases

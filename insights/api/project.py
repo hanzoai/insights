@@ -335,7 +335,7 @@ class ProjectBackwardCompatSerializer(ProjectBackwardCompatBasicSerializer, User
             if country_code:
                 week_start_day_for_user_ip_location = get_week_start_for_country_code(country_code)
                 # get_week_start_for_country_code() also returns 6 for countries where the week starts on Saturday,
-                # but ClickHouse doesn't support Saturday as the first day of the week, so we fall back to Sunday
+                # but Datastore doesn't support Saturday as the first day of the week, so we fall back to Sunday
                 validated_data["week_start_day"] = 1 if week_start_day_for_user_ip_location == 1 else 0
 
         team_fields: dict[str, Any] = {}
@@ -627,7 +627,7 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         team_ids = [team.id for team in teams]
 
         # Queue background task to handle all deletion
-        # bulky postgres, batch exports, project/team records, ClickHouse, email
+        # bulky postgres, batch exports, project/team records, Datastore, email
         delete_project_data_and_notify_task.delay(
             team_ids=team_ids,
             project_id=project_id,

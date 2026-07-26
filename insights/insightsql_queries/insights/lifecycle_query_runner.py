@@ -346,7 +346,7 @@ class LifecycleQueryRunner(AnalyticsQueryRunner[LifecycleQueryResponse]):
     @cached_property
     def events_query(self):
         with self.timings.measure("events_query"):
-            # :TRICKY: Timezone in clickhouse is represented as metadata on a column.
+            # :TRICKY: Timezone in datastore is represented as metadata on a column.
             # When we group the array, the timezone information is lost.
             # When DST changes, this causes an issue where after we add or subtract one_interval_period from the timestamp, we get a off by an hour error
             def timezone_wrapper(var: str) -> str:

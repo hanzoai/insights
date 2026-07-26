@@ -4,8 +4,8 @@ from itertools import groupby
 from django.db.models import Q
 from django.utils import timezone
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
 from insights.models import Survey
 from insights.models.utils import UUIDT
 

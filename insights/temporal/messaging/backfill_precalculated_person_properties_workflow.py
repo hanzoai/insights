@@ -9,11 +9,11 @@ import temporalio.activity
 import temporalio.workflow
 from structlog.contextvars import bind_contextvars
 
-from insights.clickhouse.query_tagging import Feature, Product, tags_context
+from insights.datastore.query_tagging import Feature, Product, tags_context
 from insights.kafka_client.client import KafkaProducer
 from insights.kafka_client.topics import KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
@@ -26,10 +26,10 @@ LOGGER = get_logger(__name__)
 
 
 def parse_person_properties(properties_raw: Any, person_id: str) -> dict[str, Any]:
-    """Parse person properties from ClickHouse, handling both string and dict formats.
+    """Parse person properties from Datastore, handling both string and dict formats.
 
     Args:
-        properties_raw: The raw properties value from ClickHouse (can be string, dict, or None)
+        properties_raw: The raw properties value from Datastore (can be string, dict, or None)
         person_id: The person ID for logging purposes
 
     Returns:

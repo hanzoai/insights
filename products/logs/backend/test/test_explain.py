@@ -4,12 +4,12 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from rest_framework import exceptions, status
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 from products.logs.backend.explain import (
     LogExplanationResponse,
@@ -159,7 +159,7 @@ class TestExplainLogWithOpenAI:
             assert call_kwargs["model"] == "gpt-4.1"
 
 
-class TestFetchLogByUuid(ClickhouseTestMixin, APIBaseTest):
+class TestFetchLogByUuid(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod
@@ -210,7 +210,7 @@ class TestFetchLogByUuid(ClickhouseTestMixin, APIBaseTest):
         assert result is None
 
 
-class TestLogExplainAPI(ClickhouseTestMixin, APIBaseTest):
+class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod

@@ -9,7 +9,7 @@ from celery.schedules import crontab
 
 from insights.approvals.tasks import expire_old_change_requests, validate_pending_change_requests
 from insights.caching.warming import schedule_warming_for_teams_task
-from insights.clickhouse.client.execute_async import QueryStatusManager
+from insights.datastore.client.execute_async import QueryStatusManager
 from insights.tasks.alerts.checks import (
     alerts_backlog_task,
     check_alerts_task,
@@ -36,13 +36,13 @@ from insights.tasks.tasks import (
     calculate_decide_usage,
     check_async_migration_health,
     clean_stale_partials,
-    clear_clickhouse_deleted_person,
+    clear_datastore_deleted_person,
     clear_expired_sessions,
-    clickhouse_clear_removed_data,
-    clickhouse_errors_count,
-    clickhouse_mutation_count,
-    clickhouse_part_count,
-    clickhouse_row_count,
+    datastore_clear_removed_data,
+    datastore_errors_count,
+    datastore_mutation_count,
+    datastore_part_count,
+    datastore_row_count,
     ingestion_lag,
     pg_plugin_server_query_timing,
     pg_row_count,
@@ -295,7 +295,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="calculate decide usage",
     )
 
-    # Sync feature flag last_called_at timestamps from ClickHouse every 30 minutes
+    # Sync feature flag last_called_at timestamps from Datastore every 30 minutes
     sender.add_periodic_task(
         crontab(minute="*/30"),
         sync_feature_flag_last_called.s(),
@@ -304,7 +304,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     )
 
     # Reset primary project data every Monday and Thursday at 5 AM UTC. Mon and Thu because doing this every day
-    # would be too hard on ClickHouse, and those days ensure most users will have data at most 3 days old.
+    # would be too hard on Datastore, and those days ensure most users will have data at most 3 days old.
     # sender.add_periodic_task(crontab(day_of_week="mon,thu", hour="5", minute="0"), demo_reset_primary_team.s())
 
     sender.add_periodic_task(crontab(day_of_week="fri", hour="0", minute="0"), clean_stale_partials.s())
@@ -327,26 +327,26 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
-        clickhouse_row_count.s(),
-        name="clickhouse events table row count",
+        datastore_row_count.s(),
+        name="datastore events table row count",
     )
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
-        clickhouse_part_count.s(),
-        name="clickhouse table parts count",
+        datastore_part_count.s(),
+        name="datastore table parts count",
     )
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
-        clickhouse_mutation_count.s(),
-        name="clickhouse table mutations count",
+        datastore_mutation_count.s(),
+        name="datastore table mutations count",
     )
     add_periodic_task_with_expiry(
         sender,
         crontab(minute="*/2"),
-        clickhouse_errors_count.s(),
-        name="clickhouse instance errors count",
+        datastore_errors_count.s(),
+        name="datastore instance errors count",
     )
 
     add_periodic_task_with_expiry(
@@ -397,18 +397,18 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="replay_count_metrics",
     )
 
-    if clear_clickhouse_crontab := get_crontab(settings.CLEAR_CLICKHOUSE_REMOVED_DATA_SCHEDULE_CRON):
+    if clear_datastore_crontab := get_crontab(settings.CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON):
         sender.add_periodic_task(
-            clear_clickhouse_crontab,
-            clickhouse_clear_removed_data.s(),
-            name="clickhouse clear removed data",
+            clear_datastore_crontab,
+            datastore_clear_removed_data.s(),
+            name="datastore clear removed data",
         )
 
-    if clear_clickhouse_deleted_person_crontab := get_crontab(settings.CLEAR_CLICKHOUSE_DELETED_PERSON_SCHEDULE_CRON):
+    if clear_datastore_deleted_person_crontab := get_crontab(settings.CLEAR_DATASTORE_DELETED_PERSON_SCHEDULE_CRON):
         sender.add_periodic_task(
-            clear_clickhouse_deleted_person_crontab,
-            clear_clickhouse_deleted_person.s(),
-            name="clickhouse clear deleted person data",
+            clear_datastore_deleted_person_crontab,
+            clear_datastore_deleted_person.s(),
+            name="datastore clear deleted person data",
         )
 
     sender.add_periodic_task(

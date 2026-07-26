@@ -8,7 +8,7 @@ from insights.insightsql.ast import AST, AST_CLASSES, Constant, Expr, InsightsQL
 
 def like_matches(pattern: str, text: str) -> bool:
     """
-    Python implementation of ClickHouse LIKE pattern matching (case-sensitive).
+    Python implementation of Datastore LIKE pattern matching (case-sensitive).
     See https://github.com/hanzoai/datastore/blob/main/src/Functions/MatchImpl.h
 
     LIKE is case-sensitive matching where:

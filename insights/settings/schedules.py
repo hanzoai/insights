@@ -43,10 +43,10 @@ TEAM_CACHE_SIZE_LIMIT_BYTES = get_from_env("TEAM_CACHE_SIZE_LIMIT_BYTES", 500 * 
 
 # Schedule to run asynchronous data deletion on. Follows crontab syntax.
 # Use empty string to prevent this
-CLEAR_CLICKHOUSE_REMOVED_DATA_SCHEDULE_CRON = get_from_env(
+CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON = get_from_env(
     "CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON",
     get_from_env(
-        "CLEAR_CLICKHOUSE_REMOVED_DATA_SCHEDULE_CRON",
+        "CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON",
         # Defaults to 5AM UTC on Sunday
         "0 5 * * SUN",
     ),
@@ -54,10 +54,10 @@ CLEAR_CLICKHOUSE_REMOVED_DATA_SCHEDULE_CRON = get_from_env(
 
 # Schedule to delete redundant datastore data on. Follows crontab syntax.
 # Use empty string to prevent this
-CLEAR_CLICKHOUSE_DELETED_PERSON_SCHEDULE_CRON = get_from_env(
+CLEAR_DATASTORE_DELETED_PERSON_SCHEDULE_CRON = get_from_env(
     "CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON",
     get_from_env(
-        "CLEAR_CLICKHOUSE_REMOVED_DATA_SCHEDULE_CRON",
+        "CLEAR_DATASTORE_REMOVED_DATA_SCHEDULE_CRON",
         # Every third month 5AM UTC on 1st of the month
         "0 5 1 */3 *",
     ),

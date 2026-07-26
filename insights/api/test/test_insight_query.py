@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from rest_framework import status
 
@@ -7,7 +7,7 @@ from insights.models.insight import Insight
 
 
 
-class TestInsight(ClickhouseTestMixin, LicensedTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsight(DatastoreTestMixin, LicensedTestMixin, APIBaseTest, QueryMatchingTest):
     maxDiff = None
 
     def setUp(self) -> None:

@@ -2,7 +2,7 @@
 
 Lazy computation speeds up queries by saving and reusing intermediate computed results. Instead of scanning the raw events table on every query, we compute aggregated data once and reuse it for subsequent queries with the same shape.
 
-This is intended to be used for our most important queries by our biggest customers. It runs against our ClickHouse and Postgres databases — some of the largest in the world — and the design takes that into account.
+This is intended to be used for our most important queries by our biggest customers. It runs against our Datastore and Postgres databases — some of the largest in the world — and the design takes that into account.
 
 ## How it works
 
@@ -16,7 +16,7 @@ There are two ways that this can work:
 1. **Pattern detection**: Traverse the AST, check if any SELECT clause matches a supported pattern (e.g., daily unique persons for pageviews)
 2. **Hash the query**: Compute a stable hash from the query structure, timezone, and other settings (excluding the time range for the query)
 3. **Find existing jobs**: Look up which time ranges already have lazy-computed data in Postgres
-4. **Compute missing ranges**: For any missing date ranges, run INSERT queries to populate the lazy-computed table in ClickHouse
+4. **Compute missing ranges**: For any missing date ranges, run INSERT queries to populate the lazy-computed table in Datastore
 5. **Transform the query**: Rewrite the original query to read from the lazy-computed table using aggregate merge functions
 
 The transformation is invisible to the caller. A query like:
@@ -160,11 +160,11 @@ Each waiter tracks their own failure count locally. After a configurable number 
 
 ### Stale pending jobs
 
-If an executor crashes while a job is PENDING, other waiters detect this via Redis-based ClickHouse liveness checks (no PG queries needed). The detection has two stages:
+If an executor crashes while a job is PENDING, other waiters detect this via Redis-based Datastore liveness checks (no PG queries needed). The detection has two stages:
 
 1. **CH INSERT not started**: Each executor sets a Redis key (`preagg:ch_started:{job_id}`) before running the INSERT. If this key doesn't exist and the job is older than the grace period (default 60s), it's considered stale — the executor likely crashed before reaching the INSERT.
 
-2. **CH INSERT started but heartbeat expired**: `poll_query_performance` sets a heartbeat key with a 60s TTL for every active ClickHouse query. If the CH start marker exists but the heartbeat key has expired and the job is older than the stale threshold (default 60s), the query is no longer running and the job is stale.
+2. **CH INSERT started but heartbeat expired**: `poll_query_performance` sets a heartbeat key with a 60s TTL for every active Datastore query. If the CH start marker exists but the heartbeat key has expired and the job is older than the stale threshold (default 60s), the query is no longer running and the job is stale.
 
 Stale jobs are marked FAILED and the normal replacement flow kicks in. This means we can recover from crashes of the process we were waiting for.
 

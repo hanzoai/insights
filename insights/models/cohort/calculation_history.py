@@ -22,7 +22,7 @@ class CohortCalculationHistory(RootTeamMixin, UUIDModel):
     started_at = models.DateTimeField(default=timezone.now, help_text="When calculation started")
     finished_at = models.DateTimeField(null=True, blank=True, help_text="When calculation finished")
 
-    # ClickHouse query information (stored as array for future chunking support)
+    # Datastore query information (stored as array for future chunking support)
     queries = models.JSONField(
         blank=True,
         default=None,

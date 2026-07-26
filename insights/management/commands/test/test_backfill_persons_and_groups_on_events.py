@@ -2,12 +2,12 @@ from time import sleep
 from uuid import UUID, uuid4
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
 from django.conf import settings
 
-from insights.clickhouse.client import sync_execute
-from insights.conftest import create_clickhouse_tables
+from insights.datastore.client import sync_execute
+from insights.conftest import create_datastore_tables
 from insights.management.commands.backfill_persons_and_groups_on_events import run_backfill
 from insights.models.event.sql import EVENTS_DATA_TABLE
 
@@ -24,15 +24,15 @@ def create_test_events(properties=""):
 
 
 @pytest.mark.ee
-class TestBackfillPersonsAndGroupsOnEvents(BaseTest, ClickhouseTestMixin):
+class TestBackfillPersonsAndGroupsOnEvents(BaseTest, DatastoreTestMixin):
     def tearDown(self):
         self.recreate_database()
         super().tearDown()
 
     def recreate_database(self):
-        sync_execute(f"DROP DATABASE {settings.CLICKHOUSE_DATABASE} SYNC")
-        sync_execute(f"CREATE DATABASE {settings.CLICKHOUSE_DATABASE}")
-        create_clickhouse_tables()
+        sync_execute(f"DROP DATABASE {settings.DATASTORE_DATABASE} SYNC")
+        sync_execute(f"CREATE DATABASE {settings.DATASTORE_DATABASE}")
+        create_datastore_tables()
 
     def test_person_backfill(self):
         self.recreate_database()

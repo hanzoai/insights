@@ -1,6 +1,6 @@
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES, kafka_engine
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.datastore.kafka_engine import CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES, kafka_engine
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.settings import DATASTORE_CLUSTER
 
 PRECALCULATED_PERSON_PROPERTIES_TABLE = "precalculated_person_properties"
 PRECALCULATED_PERSON_PROPERTIES_WRITABLE_TABLE = f"writable_{PRECALCULATED_PERSON_PROPERTIES_TABLE}"
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
         table_name=table_name,
         engine=Distributed(
             data_table=PRECALCULATED_PERSON_PROPERTIES_SHARDED_TABLE,
-            cluster=CLICKHOUSE_CLUSTER,
+            cluster=DATASTORE_CLUSTER,
             sharding_key="sipHash64(distinct_id)",
         ),
     )
@@ -124,7 +124,7 @@ SETTINGS kafka_max_block_size = 1000000, kafka_poll_max_batch_size = 100000, kaf
 """.format(
         table_name=PRECALCULATED_PERSON_PROPERTIES_KAFKA_TABLE,
         engine=kafka_engine(
-            topic="clickhouse_precalculated_person_properties", group=CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES
+            topic="datastore_precalculated_person_properties", group=CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES
         ),
     )
 

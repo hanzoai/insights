@@ -1,9 +1,9 @@
 from django.conf import settings
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree
 from insights.kafka_client.topics import (
     KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT,
     KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_EMBEDDINGS,
@@ -66,7 +66,7 @@ KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE_SQL = (
         table_name=ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_KAFKA_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
         engine=kafka_engine(
-            KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT, group="clickhouse-error-tracking-issue-fingerprint-overrides"
+            KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT, group="datastore-error-tracking-issue-fingerprint-overrides"
         ),
         extra_fields="",
     )
@@ -95,7 +95,7 @@ WHERE version > 0 -- only store updated rows, not newly inserted ones
         target_table=target_table,
         kafka_table=ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_KAFKA_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 
 
@@ -105,7 +105,7 @@ WRITABLE_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE_SQL = (
         on_cluster_clause=ON_CLUSTER_CLAUSE(False),
         engine=Distributed(
             data_table=ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE,
-            cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER,
+            cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS_WITH_PARTITION,
     )
@@ -113,7 +113,7 @@ WRITABLE_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE_SQL = (
 
 
 def TRUNCATE_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE_SQL():
-    return f"TRUNCATE TABLE IF EXISTS {ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"TRUNCATE TABLE IF EXISTS {ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 INSERT_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES = """
@@ -172,7 +172,7 @@ def ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_WRITABLE_TABLE_SQL():
         table_name=ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_WRITABLE_TABLE,
         engine=Distributed(
             data_table=ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_TABLE,
-            cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER,
+            cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS_WITH_PARTITION,
     )
@@ -182,7 +182,7 @@ def KAFKA_ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_TABLE_SQL():
     return ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_TABLE_BASE_SQL.format(
         table_name=KAFKA_ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_TABLE,
         engine=kafka_engine(
-            KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_EMBEDDINGS, group="clickhouse_error_tracking_fingerprint_embeddings"
+            KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_EMBEDDINGS, group="datastore_error_tracking_fingerprint_embeddings"
         ),
         extra_fields="",
     )
@@ -209,5 +209,5 @@ FROM {database}.{kafka_table}
         mv_name=ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_MV,
         target_table=target_table,
         kafka_table=KAFKA_ERROR_TRACKING_FINGERPRINT_EMBEDDINGS_TABLE,
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )

@@ -521,7 +521,7 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
 
                 if (response.results.length > 0) {
                     // the live_logs_checkpoint is the latest known timestamp for which we know we have all logs up to that point
-                    // it's returned from clickhouse as a value on every log row - but the value is fixed per query
+                    // it's returned from datastore as a value on every log row - but the value is fixed per query
                     actions.setLiveLogsCheckpoint(response.results[0].live_logs_checkpoint ?? null)
                 }
 

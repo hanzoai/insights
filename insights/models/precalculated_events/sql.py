@@ -1,6 +1,6 @@
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_PRECALCULATED_EVENTS, kafka_engine
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.datastore.kafka_engine import CONSUMER_GROUP_PRECALCULATED_EVENTS, kafka_engine
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.settings import DATASTORE_CLUSTER
 
 PRECALCULATED_EVENTS_TABLE = "precalculated_events"
 PRECALCULATED_EVENTS_WRITABLE_TABLE = f"writable_{PRECALCULATED_EVENTS_TABLE}"
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
         table_name=table_name,
         engine=Distributed(
             data_table=PRECALCULATED_EVENTS_SHARDED_TABLE,
-            cluster=CLICKHOUSE_CLUSTER,
+            cluster=DATASTORE_CLUSTER,
             sharding_key="sipHash64(distinct_id)",
         ),
     )
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 SETTINGS kafka_max_block_size = 1000000, kafka_poll_max_batch_size = 100000, kafka_poll_timeout_ms = 1000, kafka_flush_interval_ms = 7500, kafka_skip_broken_messages = 100, kafka_num_consumers = 1
 """.format(
         table_name=PRECALCULATED_EVENTS_KAFKA_TABLE,
-        engine=kafka_engine(topic="clickhouse_prefiltered_events", group=CONSUMER_GROUP_PRECALCULATED_EVENTS),
+        engine=kafka_engine(topic="datastore_prefiltered_events", group=CONSUMER_GROUP_PRECALCULATED_EVENTS),
     )
 
 

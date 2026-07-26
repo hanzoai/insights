@@ -2,7 +2,7 @@
 
 Three cleanup phases, all required:
   1. Postgres — delete insights_persondistinctid row (stops future ingestion lookups).
-  2. Kafka  — publish is_deleted to person_distinct_id2 (stops ClickHouse lookups).
+  2. Kafka  — publish is_deleted to person_distinct_id2 (stops Datastore lookups).
   3. Override — insert into person_distinct_id_overrides so the InsightsQL query layer
      immediately re-attributes historical events whose person_id was baked in at
      ingestion time (Person-on-Events). squash_person_overrides later makes it
@@ -33,7 +33,7 @@ import dagster
 import pydantic
 import psycopg2.extensions
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.common import JobOwners
 from insights.kafka_client.client import _KafkaProducer
 from insights.kafka_client.topics import KAFKA_PERSON_DISTINCT_ID
@@ -139,7 +139,7 @@ def _publish_deletion_to_kafka(
     person_uuid: str,
     version: int,
 ) -> None:
-    """Publish an is_deleted message so ClickHouse person_distinct_id2 drops the mapping.
+    """Publish an is_deleted message so Datastore person_distinct_id2 drops the mapping.
 
     Uses version + 100, matching _delete_ch_distinct_id in insights/models/person/util.py.
     """
@@ -183,7 +183,7 @@ def detach_distinct_id_op(
     persons_database: dagster.ResourceParam[psycopg2.extensions.connection],
     kafka_producer: dagster.ResourceParam[_KafkaProducer],
 ) -> None:
-    """Detach a distinct_id from its person in Postgres and ClickHouse."""
+    """Detach a distinct_id from its person in Postgres and Datastore."""
     log = context.log
 
     log.info(f"team_id={config.team_id} distinct_id={config.distinct_id!r}")
@@ -234,7 +234,7 @@ def detach_distinct_id_op(
         persons_database.commit()
         log.info(f"Deleted insights_persondistinctid id={info['pdi_id']} (version={version})")
 
-    # --- 4. Sync deletion to ClickHouse via Kafka ---
+    # --- 4. Sync deletion to Datastore via Kafka ---
     _publish_deletion_to_kafka(
         kafka_producer,
         team_id=config.team_id,
@@ -261,14 +261,14 @@ def detach_distinct_id_op(
         f"WHERE team_id = {config.team_id} AND distinct_id = {escaped_did}"
     )
     log.info(
-        f"ClickHouse (pdi2): SELECT distinct_id, argMax(person_id, version), "
+        f"Datastore (pdi2): SELECT distinct_id, argMax(person_id, version), "
         f"argMax(is_deleted, version), max(version) "
         f"FROM person_distinct_id2 "
         f"WHERE team_id = {config.team_id} AND distinct_id = {escaped_did} "
         f"GROUP BY distinct_id"
     )
     log.info(
-        f"ClickHouse (overrides): SELECT distinct_id, argMax(person_id, version), max(version) "
+        f"Datastore (overrides): SELECT distinct_id, argMax(person_id, version), max(version) "
         f"FROM person_distinct_id_overrides "
         f"WHERE team_id = {config.team_id} AND distinct_id = {escaped_did} "
         f"GROUP BY distinct_id"
@@ -277,5 +277,5 @@ def detach_distinct_id_op(
 
 @dagster.job(tags={"owner": JobOwners.TEAM_INGESTION.value})
 def detach_distinct_id_job():
-    """Job to detach a distinct_id from its person in Postgres and ClickHouse."""
+    """Job to detach a distinct_id from its person in Postgres and Datastore."""
     detach_distinct_id_op()

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from insights.clickhouse.client import query_with_columns
+from insights.datastore.client import query_with_columns
 from insights.queries.time_to_see_data.hierarchy import construct_hierarchy
 from insights.queries.time_to_see_data.serializers import (
     SessionEventsQuerySerializer,

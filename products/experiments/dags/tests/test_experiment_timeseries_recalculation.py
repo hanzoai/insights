@@ -64,7 +64,7 @@ class TestExperimentRecalculation(BaseTest):
             ],
         )
 
-        # Mock ClickHouse query results since we're only testing the recalculation processing logic
+        # Mock Datastore query results since we're only testing the recalculation processing logic
         with patch(
             "products.experiments.dags.experiment_timeseries_recalculation.ExperimentQueryRunner"
         ) as mock_query_runner_class:

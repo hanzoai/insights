@@ -68,7 +68,7 @@ SDK_FETCH_FUNCTIONS: dict[SdkTypes, Callable[[], dict[str, Any]]] = {
 
 
 def fetch_github_data_for_sdk(lib_name: str) -> Optional[dict[str, Any]]:
-    """Fetch GitHub data for specific SDK type using ClickHouse $lib value."""
+    """Fetch GitHub data for specific SDK type using Datastore $lib value."""
     fetch_fn = SDK_FETCH_FUNCTIONS.get(cast(SdkTypes, lib_name))
     if fetch_fn:
         return fetch_fn()

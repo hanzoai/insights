@@ -18,7 +18,7 @@ import temporalio.exceptions
 from asgiref.sync import sync_to_async
 
 from insights.temporal.tests.utils.datetimes import date_range
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 from insights.temporal.tests.utils.models import (
     acreate_batch_export,
     adelete_batch_export,
@@ -766,7 +766,7 @@ async def failing_s3_batch_export(ateam, temporal_client):
 
 
 async def test_backfill_batch_export_workflow_is_cancelled_on_repeated_failures(
-    temporal_worker, failing_s3_batch_export, temporal_client, ateam, clickhouse_client
+    temporal_worker, failing_s3_batch_export, temporal_client, ateam, datastore_client
 ):
     """Test BackfillBatchExportWorkflow will be cancelled on repeated failures."""
     start_at = dt.datetime(2023, 1, 1, 0, 0, 0, tzinfo=dt.UTC)
@@ -774,8 +774,8 @@ async def test_backfill_batch_export_workflow_is_cancelled_on_repeated_failures(
 
     # We need some data otherwise the S3 batch export will not fail as it short-circuits.
     for d in date_range(start_at, end_at, dt.timedelta(minutes=5)):
-        await generate_test_events_in_clickhouse(
-            client=clickhouse_client,
+        await generate_test_events_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=start_at,
             end_time=end_at,

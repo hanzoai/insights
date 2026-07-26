@@ -2050,7 +2050,7 @@ class Migration(migrations.Migration):
             name='SurveyResponseArchive',
             fields=[
                 ('id', models.UUIDField(default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False)),
-                ('response_uuid', models.UUIDField(help_text='UUID of the ClickHouse event representing the survey response')),
+                ('response_uuid', models.UUIDField(help_text='UUID of the Datastore event representing the survey response')),
                 ('archived_at', models.DateTimeField(auto_now_add=True)),
                 ('survey', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='response_archives', related_query_name='response_archive', to='insights.survey')),
                 ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='survey_response_archives', related_query_name='survey_response_archive', to='insights.team')),

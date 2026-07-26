@@ -189,7 +189,7 @@ async def summarize_and_save_activity(input: SummarizeAndSaveInput) -> Summariza
             model=input.model,
         )
 
-        # Step 3: Save event to ClickHouse
+        # Step 3: Save event to Datastore
         team = await database_sync_to_async(Team.objects.get, thread_sensitive=False)(id=input.team_id)
         t0 = time.monotonic()
         if is_generation:

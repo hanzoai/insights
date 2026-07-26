@@ -4,7 +4,7 @@ import logging
 import redis as redis_lib
 
 from insights import redis
-from insights.clickhouse.client.execute_async import QueryStatusManager
+from insights.datastore.client.execute_async import QueryStatusManager
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 logger = logging.getLogger(__name__)

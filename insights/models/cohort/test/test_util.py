@@ -12,11 +12,11 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from insights.insightsql.insightsql import InsightsQLContext
 
 from insights.exceptions import (
-    ClickHouseAtCapacity,
-    ClickHouseEstimatedQueryExecutionTimeTooLong,
-    ClickHouseQueryMemoryLimitExceeded,
-    ClickHouseQuerySizeExceeded,
-    ClickHouseQueryTimeOut,
+    DatastoreAtCapacity,
+    DatastoreEstimatedQueryExecutionTimeTooLong,
+    DatastoreQueryMemoryLimitExceeded,
+    DatastoreQuerySizeExceeded,
+    DatastoreQueryTimeOut,
 )
 from insights.models.cohort import Cohort, CohortOrEmpty
 from insights.models.cohort.util import (
@@ -874,19 +874,19 @@ class TestSortCohortsTopologically(BaseTest):
 class TestParseErrorCode(BaseTest):
     @parameterized.expand(
         [
-            ("capacity", "ClickHouseAtCapacity", CohortErrorCode.CAPACITY),
+            ("capacity", "DatastoreAtCapacity", CohortErrorCode.CAPACITY),
             ("socket_timeout", "SocketTimeoutError", CohortErrorCode.INTERRUPTED),
-            ("query_timeout", "ClickHouseQueryTimeOut", CohortErrorCode.TIMEOUT),
+            ("query_timeout", "DatastoreQueryTimeOut", CohortErrorCode.TIMEOUT),
             ("estimated_timeout", "EstimatedQueryExecutionTimeTooLong", CohortErrorCode.TIMEOUT),
-            ("memory_limit", "ClickHouseQueryMemoryLimitExceeded", CohortErrorCode.MEMORY_LIMIT),
+            ("memory_limit", "DatastoreQueryMemoryLimitExceeded", CohortErrorCode.MEMORY_LIMIT),
             ("query_size", "QuerySizeExceeded", CohortErrorCode.QUERY_SIZE),
             ("pydantic_validation", "PydanticValidationError", CohortErrorCode.VALIDATION_ERROR),
             ("drf_validation", "DRFValidationError", CohortErrorCode.VALIDATION_ERROR),
             ("value_error", "ValueError", CohortErrorCode.UNKNOWN),
-            ("clickhouse_regex", "ClickHouseRegexError", CohortErrorCode.INVALID_REGEX),
-            ("clickhouse_memory", "ClickHouseMemoryError", CohortErrorCode.MEMORY_LIMIT),
-            ("clickhouse_timeout", "ClickHouseTimeoutError", CohortErrorCode.TIMEOUT),
-            ("clickhouse_type", "ClickHouseTypeError", CohortErrorCode.INCOMPATIBLE_TYPES),
+            ("datastore_regex", "DatastoreRegexError", CohortErrorCode.INVALID_REGEX),
+            ("datastore_memory", "DatastoreMemoryError", CohortErrorCode.MEMORY_LIMIT),
+            ("datastore_timeout", "DatastoreTimeoutError", CohortErrorCode.TIMEOUT),
+            ("datastore_type", "DatastoreTypeError", CohortErrorCode.INCOMPATIBLE_TYPES),
             ("generic_exception", "Exception", CohortErrorCode.UNKNOWN),
         ]
     )
@@ -897,11 +897,11 @@ class TestParseErrorCode(BaseTest):
 
     def _create_exception(self, exception_type: str) -> Exception:
         simple_exceptions: dict[str, type[Exception]] = {
-            "ClickHouseAtCapacity": ClickHouseAtCapacity,
+            "DatastoreAtCapacity": DatastoreAtCapacity,
             "SocketTimeoutError": SocketTimeoutError,
-            "ClickHouseQueryTimeOut": ClickHouseQueryTimeOut,
-            "ClickHouseQueryMemoryLimitExceeded": ClickHouseQueryMemoryLimitExceeded,
-            "QuerySizeExceeded": ClickHouseQuerySizeExceeded,
+            "DatastoreQueryTimeOut": DatastoreQueryTimeOut,
+            "DatastoreQueryMemoryLimitExceeded": DatastoreQueryMemoryLimitExceeded,
+            "QuerySizeExceeded": DatastoreQuerySizeExceeded,
             "DRFValidationError": DRFValidationError,
             "ValueError": ValueError,
             "Exception": Exception,
@@ -911,7 +911,7 @@ class TestParseErrorCode(BaseTest):
             return simple_exceptions[exception_type]("test")
 
         if exception_type == "EstimatedQueryExecutionTimeTooLong":
-            return ClickHouseEstimatedQueryExecutionTimeTooLong()
+            return DatastoreEstimatedQueryExecutionTimeTooLong()
 
         if exception_type == "PydanticValidationError":
             try:
@@ -924,16 +924,16 @@ class TestParseErrorCode(BaseTest):
                 return e
             raise AssertionError("Expected PydanticValidationError")
 
-        clickhouse_code_names = {
-            "ClickHouseRegexError": "CANNOT_COMPILE_REGEXP",
-            "ClickHouseMemoryError": "MEMORY_LIMIT_EXCEEDED",
-            "ClickHouseTimeoutError": "TIMEOUT_EXCEEDED",
-            "ClickHouseTypeError": "NO_COMMON_TYPE",
+        datastore_code_names = {
+            "DatastoreRegexError": "CANNOT_COMPILE_REGEXP",
+            "DatastoreMemoryError": "MEMORY_LIMIT_EXCEEDED",
+            "DatastoreTimeoutError": "TIMEOUT_EXCEEDED",
+            "DatastoreTypeError": "NO_COMMON_TYPE",
         }
 
-        if exception_type in clickhouse_code_names:
+        if exception_type in datastore_code_names:
             exc = Exception("test")
-            exc.code_name = clickhouse_code_names[exception_type]  # type: ignore
+            exc.code_name = datastore_code_names[exception_type]  # type: ignore
             return exc
 
         raise ValueError(f"Unknown exception type: {exception_type}")

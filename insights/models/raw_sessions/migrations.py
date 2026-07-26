@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from insights.clickhouse.client.connection import NodeRole
-from insights.clickhouse.client.migration_tools import run_sql_with_exceptions
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.client.connection import NodeRole
+from insights.datastore.client.migration_tools import run_sql_with_exceptions
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
 from insights.models.raw_sessions.sessions_v2 import (
     RAW_SESSION_TABLE_UPDATE_SQL,
     RAW_SESSIONS_CREATE_OR_REPLACE_VIEW_SQL,
@@ -58,21 +58,21 @@ AFTER maybe_has_session_replay
 BASE_RAW_SESSIONS_ADD_PAGEVIEW_AUTOCAPTURE_SCREEN_UP_TO_2_COLUMN_SQL = (
     lambda: ADD_PAGEVIEW_AUTOCAPTURE_SCREEN_UP_TO_2_COLUMN_SQL.format(
         table_name=TABLE_BASE_NAME,
-        cluster=settings.CLICKHOUSE_CLUSTER,
+        cluster=settings.DATASTORE_CLUSTER,
     )
 )
 
 WRITABLE_RAW_SESSIONS_ADD_PAGEVIEW_AUTOCAPTURE_SCREEN_UP_TO_2_COLUMN_SQL = (
     lambda: ADD_PAGEVIEW_AUTOCAPTURE_SCREEN_UP_TO_2_COLUMN_SQL.format(
         table_name=WRITABLE_RAW_SESSIONS_DATA_TABLE(),
-        cluster=settings.CLICKHOUSE_CLUSTER,
+        cluster=settings.DATASTORE_CLUSTER,
     )
 )
 
 DISTRIBUTED_RAW_SESSIONS_ADD_EVENT_COUNT_SESSION_REPLAY_EVENTS_TABLE_SQL = (
     lambda: ADD_PAGEVIEW_AUTOCAPTURE_SCREEN_UP_TO_2_COLUMN_SQL.format(
         table_name=SHARDED_RAW_SESSIONS_DATA_TABLE(),
-        cluster=settings.CLICKHOUSE_CLUSTER,
+        cluster=settings.DATASTORE_CLUSTER,
     )
 )
 
@@ -87,17 +87,17 @@ AFTER page_screen_autocapture_uniq_up_to
 
 BASE_RAW_SESSIONS_ADD_VITALS_LCP_COLUMN_SQL = lambda: ADD_VITALS_LCP_COLUMN_SQL.format(
     table_name=TABLE_BASE_NAME,
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 WRITABLE_RAW_SESSIONS_ADD_VITALS_LCP_COLUMN_SQL = lambda: ADD_VITALS_LCP_COLUMN_SQL.format(
     table_name="writable_raw_sessions",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 DISTRIBUTED_RAW_SESSIONS_ADD_VITALS_LCP_COLUMN_SQL = lambda: ADD_VITALS_LCP_COLUMN_SQL.format(
     table_name=SHARDED_RAW_SESSIONS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # irclid and _kx

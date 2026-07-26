@@ -92,7 +92,7 @@ class TestLazyJoins(BaseTest):
                 enable_select_queries=True,
                 modifiers=modifiers if modifiers is not None else InsightsQLQueryModifiers(),
             ),
-            "clickhouse",
+            "datastore",
         )
         return pretty_print_in_tests(query, self.team.pk)
 

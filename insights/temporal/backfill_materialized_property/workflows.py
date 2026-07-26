@@ -40,7 +40,7 @@ class BackfillMaterializedPropertyWorkflow(InsightsWorkflow):
     Flow:
     1. Wait 3 minutes for plugin-server ingestion cache to refresh
        (ensures no gap between backfill and future new events being materialized)
-    2. Run ClickHouse ALTER TABLE UPDATE to backfill historical events
+    2. Run Datastore ALTER TABLE UPDATE to backfill historical events
     3. Update slot state to READY (or ERROR if failed)
     """
 

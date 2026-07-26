@@ -10,8 +10,8 @@ import psycopg2
 import psycopg2.errors
 from dagster_k8s import k8s_job_executor
 
-from insights.clickhouse.cluster import ClickhouseCluster
-from insights.clickhouse.custom_metrics import MetricsClient
+from insights.datastore.cluster import DatastoreCluster
+from insights.datastore.custom_metrics import MetricsClient
 from insights.dags.common import JobOwners
 
 MAX_RETRY_ATTEMPTS = 5
@@ -96,7 +96,7 @@ def scan_delete_chunk_for_dpft(
     config: DeletePersonsFromTriggerLogConfig,
     chunk: int,
     database: dagster.ResourceParam[psycopg2.extensions.connection],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dict[str, Any]:
     """
     Scan insights_person_deletes_log table for all records of a specific team_id

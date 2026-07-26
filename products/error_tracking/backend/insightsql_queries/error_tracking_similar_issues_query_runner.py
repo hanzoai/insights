@@ -238,7 +238,7 @@ class ErrorTrackingSimilarIssuesQueryRunner(AnalyticsQueryRunner[ErrorTrackingQu
 
         if len(matched_fingerprints) == 0:
             raise NotFound("No matching fingerprints found")
-        ## Avoid edge cases because of clickhouse timestamp precision
+        ## Avoid edge cases because of datastore timestamp precision
         time_window = timedelta(minutes=1)
         min_timestamp = min(
             cast(datetime, fingerprint["first_seen"]) - time_window for fingerprint in matched_fingerprints

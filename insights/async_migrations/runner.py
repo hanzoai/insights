@@ -46,7 +46,7 @@ def start_async_migration(
     2. The migration can be run with the current Insights version
     3. The migration is not already running
     4. The migration is required given the instance configuration
-    5. The service version requirements are met (e.g. X < ClickHouse version < Y)
+    5. The service version requirements are met (e.g. X < Datastore version < Y)
     6. The migration's healthcheck passes
     7. The migration's dependency has been completed
     """

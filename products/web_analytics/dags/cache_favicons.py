@@ -6,7 +6,7 @@ import httpx
 import dagster
 from dagster_aws.s3 import S3Resource
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.common import JobOwners
 from insights.models.team import Team
 

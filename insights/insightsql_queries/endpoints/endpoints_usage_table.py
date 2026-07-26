@@ -100,7 +100,7 @@ class EndpointsUsageTableQueryRunner(EndpointsUsageQueryRunner[EndpointsUsageTab
         return [ast.OrderExpr(expr=ast.Field(chain=[column]), order=cast(Literal["ASC", "DESC"], order_direction))]
 
     def _calculate(self) -> EndpointsUsageTableQueryResponse:
-        from insights.clickhouse.query_tagging import tag_queries
+        from insights.datastore.query_tagging import tag_queries
 
         tag_queries(name="endpoints_usage_table")
         response = execute_insightsql_query(

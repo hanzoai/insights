@@ -191,10 +191,10 @@ class TestUserAPI(APIBaseTest):
                 },
             )
 
-    @patch("insights.rate_limit.ClickHouseBurstRateThrottle.rate", new="5/minute")
+    @patch("insights.rate_limit.DatastoreBurstRateThrottle.rate", new="5/minute")
     @patch("insights.rate_limit.statsd.incr")
     @patch("insights.rate_limit.is_rate_limit_enabled", return_value=True)
-    def test_clickhouse_burst_rate_limit(self, rate_limit_enabled_mock, incr_mock):
+    def test_datastore_burst_rate_limit(self, rate_limit_enabled_mock, incr_mock):
         # Does nothing on /feature_flags endpoint
         for _ in range(10):
             response = self.client.get(
@@ -224,7 +224,7 @@ class TestUserAPI(APIBaseTest):
             "rate_limit_exceeded",
             tags={
                 "team_id": self.team.pk,
-                "scope": "clickhouse_burst",
+                "scope": "datastore_burst",
                 "rate": "5/minute",
                 "route": "/api/projects/TEAM_ID/events/",
                 "hashed_personal_api_key": self.hashed_personal_api_key,

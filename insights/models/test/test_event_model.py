@@ -8,7 +8,7 @@ def _create_action(team, steps):
     return Action.objects.create(team=team, steps_json=steps)
 
 
-# :TODO: Move ee/clickhouse/models/test/test_action.py here
+# :TODO: Move ee/datastore/models/test/test_action.py here
 def filter_by_actions_factory(_create_event, _create_person, _get_events_for_action):
     class TestFilterByActions(BaseTest):
         def test_filter_with_selector_direct_decendant_ordering(self):

@@ -1,9 +1,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.fix_missing_person_overrides import (
     fix_missing_person_overrides_job,
     get_existing_override,
@@ -44,7 +44,7 @@ def get_all_overrides(team_id: int) -> list[tuple[str, str]]:
     return [(row[0], str(row[1])) for row in result]
 
 
-class TestGetMismatchedDistinctIds(ClickhouseTestMixin, BaseTest):
+class TestGetMismatchedDistinctIds(DatastoreTestMixin, BaseTest):
     def test_finds_distinct_ids_where_override_differs_from_pdi2(self):
         """When an override exists, person_id on events differs from pdi.person_id."""
         old_person_id = uuid4()
@@ -173,7 +173,7 @@ class TestGetMismatchedDistinctIds(ClickhouseTestMixin, BaseTest):
         assert len(result) == 1
 
 
-class TestInsertOverrideBatch(ClickhouseTestMixin, BaseTest):
+class TestInsertOverrideBatch(DatastoreTestMixin, BaseTest):
     def test_inserts_batch_of_overrides(self):
         person_id_1 = uuid4()
         person_id_2 = uuid4()
@@ -202,7 +202,7 @@ class TestInsertOverrideBatch(ClickhouseTestMixin, BaseTest):
         insert_override_batch([])
 
 
-class TestGetMissingOverridesForDistinctIds(ClickhouseTestMixin, BaseTest):
+class TestGetMissingOverridesForDistinctIds(DatastoreTestMixin, BaseTest):
     def test_returns_empty_for_empty_distinct_ids(self):
         result = get_missing_overrides_for_distinct_ids(self.team.id, [])
         assert len(result) == 0
@@ -246,7 +246,7 @@ class TestGetMissingOverridesForDistinctIds(ClickhouseTestMixin, BaseTest):
         assert result[0][1] == str(pdi2_person_id)
 
 
-class TestIntegration(ClickhouseTestMixin, BaseTest):
+class TestIntegration(DatastoreTestMixin, BaseTest):
     def test_full_flow_creates_correct_override(self):
         """
         Integration test: verify that chaining get_mismatched_distinct_ids and
@@ -295,7 +295,7 @@ class TestIntegration(ClickhouseTestMixin, BaseTest):
         assert override[0] == str(new_person_id)
 
 
-class TestFixMissingPersonOverridesJob(ClickhouseTestMixin, BaseTest):
+class TestFixMissingPersonOverridesJob(DatastoreTestMixin, BaseTest):
     def test_inserts_overrides_for_mismatched_distinct_ids(self):
         """Job inserts overrides for distinct_ids where event person_id != pdi2 person_id."""
         old_person_id = uuid4()

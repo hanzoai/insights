@@ -4,7 +4,7 @@ Batch trace summarization workflow for LLMA.
 This workflow runs on a schedule (e.g., hourly) to:
 1. Query recent traces from a time window
 2. Generate text representations and summaries for each trace
-3. Store summaries as $ai_trace_summary events in ClickHouse
+3. Store summaries as $ai_trace_summary events in Datastore
 4. Queue embeddings for summaries via Kafka for async processing
 
 The summaries and embeddings serve as inputs for clustering and semantic search.

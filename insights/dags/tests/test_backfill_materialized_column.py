@@ -11,7 +11,7 @@ import dagster
 import pydantic
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster, Query
+from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.backfill_materialized_column import (
     MaterializationConfig,
     PartitionRange,
@@ -58,7 +58,7 @@ def test_materialization_config_force_default():
 
 
 @contextlib.contextmanager
-def override_mergetree_settings(cluster: ClickhouseCluster, table: str, settings: Mapping[str, str]) -> Iterator[None]:
+def override_mergetree_settings(cluster: DatastoreCluster, table: str, settings: Mapping[str, str]) -> Iterator[None]:
     def alter_table_add_settings(client: Client) -> None:
         client.execute(f"ALTER TABLE {table} MODIFY SETTING " + ", ".join(" = ".join(i) for i in settings.items()))
 
@@ -72,7 +72,7 @@ def override_mergetree_settings(cluster: ClickhouseCluster, table: str, settings
         cluster.map_all_hosts(alter_table_reset_settings).result()
 
 
-def test_sharded_table_job(cluster: ClickhouseCluster):
+def test_sharded_table_job(cluster: DatastoreCluster):
     partitions = PartitionRange(lower="202401", upper="202403")
 
     def populate_test_data(client: Client) -> None:

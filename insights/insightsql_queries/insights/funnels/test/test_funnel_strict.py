@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_action, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_action, _create_event, _create_person
 
 from insights.schema import BreakdownAttributionType, BreakdownFilter, EventsNode, FunnelsFilter, FunnelsQuery
 
@@ -27,7 +27,7 @@ FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
 class TestFunnelStrictStepsBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(FunnelOrderType.STRICT),  # type: ignore
 ):
     maxDiff = None
@@ -162,20 +162,20 @@ class TestFunnelStrictStepsBreakdown(
 
 
 class TestStrictFunnelGroupBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_group_test_factory(FunnelOrderType.STRICT),  # type: ignore
 ):
     maxDiff = None
 
 
 class TestFunnelStrictStepsConversionTime(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_conversion_time_test_factory(FunnelOrderType.ORDERED),  # type: ignore
 ):
     maxDiff = None
 
 
-class TestFunnelStrictSteps(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelStrictSteps(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actor_ids_at_step(self, filter, funnel_step, breakdown_value=None):

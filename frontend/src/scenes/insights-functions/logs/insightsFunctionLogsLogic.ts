@@ -42,7 +42,7 @@ async function runWithParallelism<T, R>(
     return results
 }
 
-const loadClickhouseEvents = async (
+const loadDatastoreEvents = async (
     eventIds: string[],
     { date_from, date_to }: { date_from?: string; date_to?: string }
 ): Promise<any[]> => {
@@ -236,7 +236,7 @@ export const insightsFunctionLogsLogic = kea<insightsFunctionLogsLogicType>([
                     )
 
                     // Load all events by ID using the date range to speed up the query (we add time either side to account for processing delays)
-                    const events = await loadClickhouseEvents(Object.values(values.eventIdByInvocationId ?? {}), {
+                    const events = await loadDatastoreEvents(Object.values(values.eventIdByInvocationId ?? {}), {
                         date_from: timestampRangeStart?.subtract(1, 'day').toISOString(),
                         date_to: timestampRangeEnd?.add(1, 'day').toISOString(),
                     })
@@ -257,7 +257,7 @@ export const insightsFunctionLogsLogic = kea<insightsFunctionLogsLogicType>([
                             }
 
                             const res = await api.insightsFunctions.createTestInvocation(props.sourceId, {
-                                clickhouse_event: event,
+                                datastore_event: event,
                                 mock_async_functions: false,
                                 configuration: {
                                     // For retries we don't care about filters

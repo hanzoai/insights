@@ -4,11 +4,11 @@ from pathlib import Path
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import ANY
 
@@ -39,8 +39,8 @@ CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.mrr_views.
 SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.mrr_views.stripe_subscriptions"
 
 
-@snapshot_clickhouse_queries
-class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
+@snapshot_datastore_queries
+class TestMRRViewsE2E(DatastoreTestMixin, QueryMatchingTest, APIBaseTest):
     """E2E tests for MRR views that execute actual queries and assert on output values."""
 
     QUERY_TIMESTAMP = "2025-05-31"

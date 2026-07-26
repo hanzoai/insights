@@ -3,10 +3,10 @@ from decimal import Decimal
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import patch
 
@@ -50,8 +50,8 @@ REVENUE_ANALYTICS_CONFIG_SAMPLE_EVENT_REVENUE_CURRENCY_PROPERTY = [
 ]
 
 
-@snapshot_clickhouse_queries
-class TestRevenueExampleEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestRevenueExampleEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-01-29"
 
     def _create_managed_viewsets(self):

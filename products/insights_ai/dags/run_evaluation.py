@@ -16,9 +16,9 @@ from insights.dags.common import JobOwners
 
 from products.llm_analytics.backend.models import Dataset, DatasetItem
 from products.insights_ai.dags.snapshot_team_data import (
-    ClickhouseTeamDataSnapshot,
+    DatastoreTeamDataSnapshot,
     PostgresTeamDataSnapshot,
-    snapshot_clickhouse_team_data,
+    snapshot_datastore_team_data,
     snapshot_postgres_team_data,
 )
 from products.insights_ai.dags.utils import EvaluationResults, format_results
@@ -151,7 +151,7 @@ def spawn_evaluation_container(
     prepared_dataset: PreparedDataset,
     team_ids: list[int],
     postgres_snapshots: list[PostgresTeamDataSnapshot],
-    clickhouse_snapshots: list[ClickhouseTeamDataSnapshot],
+    datastore_snapshots: list[DatastoreTeamDataSnapshot],
 ):
     # Validate the evaluation module
     if not config.evaluation_module.endswith(".py"):
@@ -164,8 +164,8 @@ def spawn_evaluation_container(
         aws_endpoint_url=get_object_storage_endpoint(),
         aws_bucket_name=settings.OBJECT_STORAGE_BUCKET,
         team_snapshots=[
-            TeamEvaluationSnapshot(team_id=team_id, postgres=postgres, clickhouse=clickhouse).model_dump()
-            for team_id, postgres, clickhouse in zip(team_ids, postgres_snapshots, clickhouse_snapshots)
+            TeamEvaluationSnapshot(team_id=team_id, postgres=postgres, datastore=datastore).model_dump()
+            for team_id, postgres, datastore in zip(team_ids, postgres_snapshots, datastore_snapshots)
         ],
         experiment_id=context.run_id,
         experiment_name=f"dataset-{prepared_dataset.dataset_id}",
@@ -252,10 +252,10 @@ def run_evaluation():
     prepared_dataset = prepare_dataset()
     team_ids = prepare_evaluation(prepared_dataset)
     postgres_snapshots = team_ids.map(snapshot_postgres_team_data)
-    clickhouse_snapshots = team_ids.map(snapshot_clickhouse_team_data)
+    datastore_snapshots = team_ids.map(snapshot_datastore_team_data)
     spawn_evaluation_container(
         prepared_dataset,
         team_ids.collect(),
         postgres_snapshots.collect(),
-        clickhouse_snapshots.collect(),
+        datastore_snapshots.collect(),
     )

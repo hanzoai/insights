@@ -25,7 +25,7 @@ class NonRetryableException(Exception):
         return self.__cause__
 
 
-# 10 mins buffer to avoid deleting files Clickhouse may be reading
+# 10 mins buffer to avoid deleting files Datastore may be reading
 S3_DELETE_TIME_BUFFER = 600
 
 

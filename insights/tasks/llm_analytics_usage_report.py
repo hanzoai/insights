@@ -11,9 +11,9 @@ from retry import retry
 
 from insights.schema import AIEventType
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
+from insights.datastore.query_tagging import Product, tags_context
 from insights.exceptions_capture import capture_exception
 from insights.logging.timing import timed_log
 from insights.models.property.util import get_property_string_expr
@@ -39,7 +39,7 @@ LLM_PROMPT_FETCHED_EVENT = "$llm_prompt_fetched"
 # Keep this list broader than AI_EVENTS when a non-AI event should still trigger reporting.
 LLM_ANALYTICS_REPORT_TRIGGER_EVENTS = [*AI_EVENTS, LLM_PROMPT_FETCHED_EVENT]
 
-# ClickHouse query settings for LLM Analytics queries
+# Datastore query settings for LLM Analytics queries
 CH_LLM_ANALYTICS_SETTINGS = {
     "max_execution_time": 5 * 60,  # 5 minutes
 }
@@ -468,7 +468,7 @@ def get_all_ai_dimension_breakdowns(
     """
     Get all dimension breakdowns (model, provider, framework, etc.) in a single query.
 
-    Uses ClickHouse's sumMap() to aggregate dimension values efficiently.
+    Uses Datastore's sumMap() to aggregate dimension values efficiently.
 
     Returns:
         dict mapping team_id to TeamDimensionBreakdowns dataclass

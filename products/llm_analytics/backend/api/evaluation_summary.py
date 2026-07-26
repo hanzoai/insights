@@ -28,7 +28,7 @@ from insights.insightsql.query import execute_insightsql_query
 
 from insights.api.monitoring import monitor
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.event_usage import report_user_action
 from insights.models import Team, User
 from insights.permissions import AccessControlPermission
@@ -101,7 +101,7 @@ def _fetch_evaluation_runs(
     limit: int = EVALUATION_SUMMARY_MAX_RUNS,
 ) -> list[dict]:
     """
-    Fetch evaluation runs from ClickHouse using InsightsQL.
+    Fetch evaluation runs from Datastore using InsightsQL.
 
     Args:
         team: Team object to query for
@@ -368,7 +368,7 @@ Data is fetched server-side by evaluation ID to ensure data integrity.
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Fetch evaluation runs from ClickHouse using InsightsQL
+            # Fetch evaluation runs from Datastore using InsightsQL
             runs = _fetch_evaluation_runs(
                 team=self.team,
                 evaluation_id=evaluation_id,
