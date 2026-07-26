@@ -1,0 +1,190 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hanzo Insights — product analytics, web analytics, errors, replay, LLM</title>
+<meta name="description" content="One warehouse behind every lens: product analytics, web analytics, error tracking, session replay and LLM observability. Hosted by Hanzo or run it yourself.">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon.png' %}">
+<meta property="og:title" content="Hanzo Insights">
+<meta property="og:description" content="One warehouse behind every lens. Hosted by Hanzo, or run it yourself.">
+<meta property="og:type" content="website">
+<style nonce="{{ request.csp_nonce }}">
+/* Self-hosted. Third-party CDNs are refused in prod and fail silently, so every
+   asset on this page ships from our own origin. */
+@font-face {
+  font-family: 'Geist';
+  src: url('{% static "fonts/Geist-Variable.woff2" %}') format('woff2-variations');
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+
+/* The app's own tokens, so the marketing surface and the product agree. */
+:root {
+  --ground: #f5f5f5; --raised: #fff; --ink: #111; --ink-dim: rgb(17 17 17 / 70%);
+  --edge: #e0e0e0; --solid: #111; --solid-ink: #fff;
+  --radius: 0.625rem; --radius-card: 0.5rem; --radius-lg: 0.75rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #000; --raised: #0c0c0c; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
+    --edge: #373737; --solid: #fff; --solid-ink: #000;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px; line-height: 1.6; letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+.wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── controls: 10px radius, never blocky ─────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .75rem 1.25rem; border-radius: var(--radius); border: 1px solid transparent;
+  font: inherit; font-weight: 550; line-height: 1.2; text-decoration: none;
+  cursor: pointer; white-space: nowrap; transition: opacity .15s, background .15s;
+}
+.btn-solid { background: var(--solid); color: var(--solid-ink); }
+.btn-solid:hover { opacity: .85; }
+.btn-ghost { border-color: var(--edge); color: var(--ink); }
+.btn-ghost:hover { background: var(--raised); }
+.btn:focus-visible { outline: 2px solid var(--solid); outline-offset: 2px; }
+
+/* ── header ──────────────────────────────────────────────────────────── */
+header { border-bottom: 1px solid var(--edge); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; }
+.mark { display: flex; align-items: center; gap: .625rem; font-weight: 600; letter-spacing: -.02em; text-decoration: none; }
+.mark span { width: 1.5rem; height: 1.5rem; border-radius: var(--radius-card); background: var(--solid); color: var(--solid-ink); display: grid; place-items: center; font-size: .8125rem; font-weight: 700; }
+
+/* ── hero ────────────────────────────────────────────────────────────── */
+.hero { padding: 5rem 0 4rem; }
+.hero h1 { margin: 0 0 1.25rem; font-size: clamp(2.25rem, 6vw, 3.75rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 620; max-width: 20ch; }
+.hero p { margin: 0 0 2rem; font-size: clamp(1.0625rem, 2vw, 1.1875rem); color: var(--ink-dim); max-width: 56ch; }
+.cta { display: flex; flex-wrap: wrap; gap: .75rem; }
+.note { margin-top: 1.25rem; font-size: .875rem; color: var(--ink-dim); }
+
+/* ── lenses ──────────────────────────────────────────────────────────── */
+section { padding: 4rem 0; border-top: 1px solid var(--edge); }
+h2 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.025em; font-weight: 600; }
+.lede { margin: 0 0 2.5rem; color: var(--ink-dim); max-width: 60ch; }
+.grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 40rem) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 64rem) { .grid { grid-template-columns: repeat(3, 1fr); } }
+.card { padding: 1.375rem; border: 1px solid var(--edge); border-radius: var(--radius-lg); background: var(--raised); }
+.card h3 { margin: 0 0 .375rem; font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+.card p { margin: 0; font-size: .9375rem; color: var(--ink-dim); }
+
+/* ── two-up ──────────────────────────────────────────────────────────── */
+.two { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 48rem) { .two { grid-template-columns: repeat(2, 1fr); } }
+.panel { padding: 1.75rem; border: 1px solid var(--edge); border-radius: var(--radius-lg); background: var(--raised); display: flex; flex-direction: column; }
+.panel h3 { margin: 0 0 .5rem; font-size: 1.125rem; font-weight: 600; }
+.panel p { margin: 0 0 1.5rem; color: var(--ink-dim); font-size: .9375rem; flex: 1; }
+
+footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--ink-dim); font-size: .875rem; }
+.links { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: .75rem; }
+.links a { text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="mark" href="/"><span>H</span>Insights</a>
+    <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>Every lens, one warehouse.</h1>
+    <p>
+      Product analytics, web analytics, error tracking, session replay and LLM
+      observability read the same events out of the same store — so a spike in
+      one view is the same event you can open in every other one.
+    </p>
+    <div class="cta">
+      <a class="btn btn-solid" href="{{ login_url }}">Sign in</a>
+      <a class="btn btn-ghost" href="{{ plans_url }}">View plans</a>
+    </div>
+    <p class="note">Hosted by Hanzo, or run the same image yourself.</p>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>One event, many lenses</h2>
+      <p class="lede">
+        Each of these is a view over the same warehouse, not a separate product
+        with its own pipeline to install and reconcile.
+      </p>
+      <div class="grid">
+        <div class="card"><h3>Product analytics</h3><p>Trends, funnels, retention and paths over the events your apps already send.</p></div>
+        <div class="card"><h3>Web analytics</h3><p>Traffic, sources and campaigns, with UTM attribution kept on every event.</p></div>
+        <div class="card"><h3>Error tracking</h3><p>Exceptions grouped by cause, with the session that produced them one click away.</p></div>
+        <div class="card"><h3>Session replay</h3><p>Watch the actual session behind a funnel drop-off or a stack trace.</p></div>
+        <div class="card"><h3>LLM analytics</h3><p>Traces, token spend and evaluation scores for the models in your product.</p></div>
+        <div class="card"><h3>SQL editor</h3><p>The warehouse is not sealed. Query the raw tables, or build a dashboard on the result.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Ecommerce without instrumenting twice</h2>
+      <p class="lede">
+        If your storefront annotates its markup for search engines — JSON-LD or
+        microdata, which every commerce framework emits — it has already declared
+        its SKU, price and currency. We read that. Revenue, product and quantity
+        arrive as first-class columns with no per-site tracking code.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Two ways to run it</h2>
+      <p class="lede">Same code either way. The difference is who holds the keys.</p>
+      <div class="two">
+        <div class="panel">
+          <h3>Hosted</h3>
+          <p>
+            We run the warehouse, the ingest and the upgrades. Your organization
+            signs in with Hanzo ID and its data stays scoped to it. Attach as many
+            projects as you need.
+          </p>
+          <a class="btn btn-solid" href="{{ plans_url }}">View plans</a>
+        </div>
+        <div class="panel">
+          <h3>Self-hosted</h3>
+          <p>
+            The same image, on your infrastructure, with your own keys. Open
+            source — nothing is held back for the hosted build.
+          </p>
+          <a class="btn btn-ghost" href="{{ source_url }}">Read the source</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <a href="{{ login_url }}">Sign in</a>
+      <a href="{{ plans_url }}">Plans</a>
+      <a href="{{ docs_url }}">Docs</a>
+      <a href="{{ source_url }}">Source</a>
+    </div>
+    <div>Hanzo Insights</div>
+  </div>
+</footer>
+
+</body>
+</html>
