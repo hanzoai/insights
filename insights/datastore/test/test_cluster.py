@@ -8,7 +8,7 @@ import pytest
 from insights.test.base import materialized
 from unittest.mock import Mock, patch, sentinel
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.client.connection import NodeRole, Workload
 from insights.datastore.cluster import (

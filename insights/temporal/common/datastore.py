@@ -866,7 +866,7 @@ async def get_client(
     explicitly use `aiohttp` to create the client session with an ssl_context
     and pass that to `aiochclient`.
     """
-    # Set up SSL context, roughly based on how `clickhouse_driver` does it.
+    # Set up SSL context, roughly based on how `datastore_driver` does it.
     # TODO: figure out why this is not working when we set CERT_REQUIRED. We
     # include a custom CA cert in the Docker image and set the path to it in
     # the settings, but I can't get this to work as expected.

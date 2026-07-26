@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 import dagster
 import pydantic
 import dagster_slack
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights import settings
 from insights.datastore.cluster import DatastoreCluster

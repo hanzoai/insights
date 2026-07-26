@@ -21,7 +21,7 @@ import requests
 import structlog
 import hanzo_insights
 from asgiref.sync import async_to_sync
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
 from openai.types.chat import (

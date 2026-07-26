@@ -7,7 +7,7 @@ from unittest.mock import ANY, MagicMock, patch
 from django.test import override_settings
 
 import boto3
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from parameterized import parameterized
 
 from insights.settings import settings

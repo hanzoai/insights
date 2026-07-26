@@ -3,7 +3,7 @@ from ssl import SSLError
 from django.db import OperationalError
 
 from billiard.exceptions import SoftTimeLimitExceeded
-from clickhouse_driver.errors import SocketTimeoutError
+from datastore_driver.errors import SocketTimeoutError
 from selenium.common import TimeoutException
 from urllib3.exceptions import MaxRetryError, ProtocolError, ReadTimeoutError
 

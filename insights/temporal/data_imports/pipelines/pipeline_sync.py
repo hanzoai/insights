@@ -15,7 +15,7 @@ import dlt.common.libs
 import dlt.common.libs.pyarrow
 import dlt.extract.incremental
 import dlt.extract.incremental.transform
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from dlt.common.normalizers.naming.snake_case import NamingConvention
 
 from insights.exceptions_capture import capture_exception

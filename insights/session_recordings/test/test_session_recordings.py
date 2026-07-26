@@ -19,7 +19,7 @@ from unittest.mock import ANY, MagicMock, call, patch
 
 from django.utils.timezone import now
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from dateutil.relativedelta import relativedelta
 from parameterized import parameterized
 from rest_framework import status
