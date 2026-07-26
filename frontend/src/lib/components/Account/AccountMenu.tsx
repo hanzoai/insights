@@ -3,7 +3,6 @@ import { useActions, useValues } from 'kea'
 
 import {
     IconCake,
-    IconConfetti,
     IconCopy,
     IconDatabase,
     IconDay,
@@ -453,20 +452,6 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                                 </DropdownMenuItem>
                             ) : null}
                         </>
-                    )}
-                    {!isCloud && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                to={urls.moveToInsightsCloud()}
-                                buttonProps={{
-                                    menuItem: true,
-                                }}
-                                data-attr="top-menu-item-upgrade-to-cloud"
-                            >
-                                <IconConfetti />
-                                Try Insights Cloud
-                            </Link>
-                        </DropdownMenuItem>
                     )}
 
                     <DropdownMenuSeparator />

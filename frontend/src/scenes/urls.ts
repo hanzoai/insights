@@ -200,7 +200,6 @@ export const urls = {
         combineUrl('/debug', {}, query ? { q: typeof query === 'string' ? query : JSON.stringify(query) } : {}).url,
     debugFn: (): string => '/debug/fn',
     signalsDebug: (): string => '/debug/signals',
-    moveToInsightsCloud: (): string => '/move-to-cloud',
     heatmaps: (params?: string): string =>
         `/heatmaps${params ? `?${params.startsWith('?') ? params.slice(1) : params}` : ''}`,
     heatmapNew: (params?: string): string =>

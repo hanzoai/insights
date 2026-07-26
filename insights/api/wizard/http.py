@@ -95,7 +95,7 @@ class SetupWizardViewSet(viewsets.ViewSet):
 
         raise NotImplementedError()
 
-    def dangerously_get_required_scopes(self):
+    def dangerously_get_required_scopes(self, request, view):
         if self.action == "authenticate":
             return ["project:read"]
 
