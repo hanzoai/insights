@@ -56,32 +56,78 @@ restored so CI builds the monolith `Dockerfile` and pushes to
    formally **sunset**, not migrated. If any is still required, it must be
    re-platformed deliberately.
 
-## What is retained (NOT Django — separate concerns)
+## Ingest is NATIVE — the capture/kafka tier is GONE (verified 2026-07-26)
 
-Event **ingestion** substrate is LIVE and proven end-to-end (it is not the
-Django app): `insights-capture` (Rust), `insights-plugin` (Node),
-`insights-kafka`, `insights-kv`, `insights-sql`, `datastore` (Datastore).
-Proven path: `POST https://insights.hanzo.ai/v1/e` → `200` → capture → kafka →
-plugin → Datastore `events`.
+Do not go looking for `insights-capture`, `insights-plugin`, `insights-kafka` or
+`insights-kv`. **Those CRs and pods no longer exist.** The only insights
+workloads in ns `hanzo` are `insights-web`, `insights-worker`, `insights-sql`.
+Events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
-### Ingest is clean `/v1/*`
+```
+insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
+  → middleware insights-cloud-ingest-rewrite (fixed replacePath)
+  → service api-hanzo-ai → cloud.hanzo.svc:8000
+  → POST /v1/insights/e → cloud/clients/analytics insightsIngest → hanzo.events
+```
 
-We own capture AND the SDK, so ingest is `/v1/*` like every other Hanzo API.
-The Rust capture router serves exactly (forward-only; the legacy
-`/i/v0/e`,`/e`,`/batch`,`/track`,`/engage`,`/capture`,`/s`,`/i/v0/ai` paths were
-REMOVED — do not re-add):
+Tenant is resolved SERVER-SIDE by `captureTenant`, in this order: validated
+principal → presented project key (`cloud.OrgForKey`) → brand host. It fails
+**CLOSED** on a presented-but-unresolvable key, and deliberately does NOT fall
+back to the brand host in that case, so a bogus key cannot borrow the host's
+org. Consequence when testing: verify anonymously (no `api_key`) to exercise the
+brand-host path, or a valid-looking key will make a working route look broken.
 
-- `POST /v1/e`  — events (single OR batch array; 20MB body limit)
-- `POST /v1/s`  — session recordings
-- `POST /v1/ai` — AI/LLM events
+`/v1/e` was NOT on this router until 2026-07-26 — it fell to the Django
+catch-all, which answers **403 HTML**, so every event sent to the path our own
+SDK posts to was discarded silently. When debugging a 403 here, read the BODY:
+Django answers HTML, cloud answers
+`{"status":403,"error":"valid bearer or a recognized brand host required"}`.
 
-Ingress: `insights.hanzo.ai` + `insights-app.hanzo.ai` route `PathPrefix(/v1)`
-(priority 100) → capture service; catch-all (priority 1) → Django web. ONE
-`/v1` router per host in `universe infra/k8s/ingress/routes.yaml` (the old
-per-path `-batch`/`-capture`/`-e` routers are gone; a couple of dead *service*
-defs may linger at the bottom of routes.yaml — harmless, sweep on next pass).
+`POST /v1/ai` is likewise unrouted and falls through to Django.
+
+**`POST /v1/s` (session recordings) is BROKEN and losing data.** It still points
+at `insights-hanzo-ai-capture` → `insights-capture.hanzo.svc`, which has no
+pods, so it 502s — ~16 real posts per 3h are being dropped.
+`insights.session_replay_events` has **0 rows**; replay has never worked in this
+deploy. Reviving it is a project, not a config fix: that Distributed table is
+fed by `kafka_session_replay_events` + `session_replay_events_mv`, and with the
+Kafka tier deleted **nothing can write the index** even if snapshot blobs landed
+in S3. It needs a new writer path in cloud, or the Kafka tier back. Do not "fix"
+the route alone — pointing it somewhere that returns 200 would only lose the
+data more quietly.
+
+Relatedly, `insights` still carries **23 Kafka-engine tables** pointing at
+`kafka:9092`, which does not resolve. They error in the background forever and
+are why `preflight.kafka` is `false`.
+
 The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
-`rollout restart deploy/ingress` (ACME/TLS outage).
+`rollout restart deploy/ingress` (ACME/TLS outage). Routes live in
+`universe infra/k8s/ingress/routes.yaml`; change them by pushing to universe
+main, never by `kubectl patch` (Hanzo CD selfHeal reverts within ~90s).
+
+## `/` is the marketing landing page when signed out
+
+Anonymous `/` used to bounce straight to SSO, so the product had no public face.
+`insights/urls.py:root` now branches: `home` (the SPA, unchanged) for an
+authenticated user, `templates/landing.html` for everyone else.
+
+Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /api/billing` is
+404 in this deployment**, so an in-app upgrade funnel would dead-end. There is
+also no Insights SKU in `@hanzo/plans` (its 11 tiers are compute), so no plan
+copy is written in the template; minting that SKU is a pricing decision, not a
+template edit. Tests in `insights/test/test_landing.py` fail the build if
+`/api/billing` or any third-party asset host reappears on the page (prod refuses
+third-party CDNs and fails SILENTLY).
+
+## `preflight.cloud` is FALSE here — and that drove a real bug
+
+`is_cloud()` is `CLOUD_DEPLOYMENT in (EU, US, DEV, E2E)`, an upstream
+multi-region SaaS concept we do not have, so it reads false on our own hosted
+deploy. Upstream's `move-to-cloud` PayGateMini variant keys off exactly that, so
+insights.hanzo.ai advertised "Move to Insights Cloud" **to its own paying
+users**. That variant is deleted: the paywall now has one path
+(add-card / contact-sales) regardless of who hosts. Before adding any behaviour
+behind `is_cloud()`, check it is not this same trap.
 
 ### Clean single-`insights_` table names (double `insights_insights*` dropped)
 
@@ -96,19 +142,27 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 
 ## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
-- `ghcr.io/hanzoai/insights:<VERSION>` (served monolith) — published by
-  `container-images-cd.yml` on a `v*` tag push (e.g. `v1.51.4`), also
-  `:sha-<sha>`. Deploy pins `kubernetes.io/arch: amd64`.
+- `ghcr.io/hanzoai/insights:<FULL-40-CHAR-SHA>` — built by the NATIVE pipeline
+  in `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
+  docker build → GHCR), tagged by **commit sha only**, never semver: a re-pushed
+  tag means two digests behind one name. `container-images-cd.yml` is
+  neutralized; GitHub Actions is a mirror and builds nothing.
 - `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
-  `insights.hanzo.ai` (v1.51.8). Operator App CRs in `hanzoai/universe`
-  (`infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`) point at
-  the ghcr image. Env: `DATABASE_URL` (`insights-sql`), `KV_URL`
-  (`kv://insights-kv:6379`, never `REDIS_URL`), the `hanzoai/stream` shim,
-  Datastore. Migrations run current on boot (1018/1018 postgres). Probes are
+  `insights.hanzo.ai`. Operator App CRs in `hanzoai/universe`
+  (`infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`) pin the
+  sha. Env: `DATABASE_URL` (`insights-sql`), `KV_URL` (`kv://kv.hanzo.svc:6379`
+  — the SHARED fleet KV; the dedicated `insights-kv` is gone), the
+  `hanzoai/stream` shim, Datastore (`DATASTORE_DATABASE=insights`). Probes are
   `tcpSocket:8000` (Django rejects kubelet `httpGet` Host under restricted
   `ALLOWED_HOSTS`; the CRD probe schema has no `httpHeaders`).
-- Retained operator `Service` CRs: `insights-capture`, `insights-kafka`,
-  `insights-kv`, `insights-plugin`, `insights-sql`.
+- **Only three insights workloads exist**: `insights-web`, `insights-worker`,
+  `insights-sql`. The `insights-capture` / `-kafka` / `-kv` / `-plugin` CRs were
+  deleted — earlier revisions of this file listed them as retained, which is no
+  longer true. See the ingest section above.
+- Rollout is verified BY IMAGE, never by `readyReplicas` alone: gate on
+  `updatedReplicas == replicas` with the old ReplicaSet at zero, and exec a pod
+  selected by its image. Reading a pod mid-rollout returns the OLD build and
+  makes a shipped fix look absent (or an absent one look shipped).
 
 ## Auth / tenancy
 
