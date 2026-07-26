@@ -1,24 +1,40 @@
+# insights — the ONE build, on Hanzo's own forge.
+#
+#   git.hanzo.ai push → act_runner (in-cluster git-runner, privileged dind)
+#   → docker build → ghcr.io/hanzoai/insights:<sha> → operator App CR
+#
+# GitHub Actions is disabled account-wide, so `.github/workflows/*` cannot
+# build. This is the real pipeline. No GitHub builders.
+#
+# The image is tagged by COMMIT SHA only. A semver tag that gets re-pushed means
+# two digests behind one name, and with imagePullPolicy: IfNotPresent the node
+# keeps whichever it cached first. A SHA cannot move.
 name: deploy
+
 on:
   push:
     branches: [main]
+
 jobs:
-  deploy:
-    runs-on: hanzo-linux-amd64
+  build:
+    # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
+    # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
+    # which is why the deployed image sat at 1.52.2 while main moved on.
+    runs-on: hanzo-build-linux-amd64
     steps:
       - uses: actions/checkout@v4
-      - name: Build + push image
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+      # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
+      # ships a docker client against the privileged dind sidecar and carries no
+      # buildctl-daemonless.sh, so the previous step could not have run even with
+      # a matching label. Same shape as platform's build, which is proven green.
+      - name: Build + push
         run: |
-          SHA="${GITHUB_SHA::8}"
-          buildctl-daemonless.sh build --frontend=dockerfile.v0 \
-            --opt context="${{ github.server_url }}/${{ github.repository }}.git#${GITHUB_SHA}" \
-            --opt filename=Dockerfile --opt platform=linux/amd64 \
-            --secret id=GIT_AUTH_TOKEN,env=GIT_AUTH_TOKEN \
-            --output "type=image,name=ghcr.io/hanzoai/insights:${SHA},push=true" --progress=plain
-        env:
-          GIT_AUTH_TOKEN: ${{ secrets.GIT_CLONE_TOKEN }}
-      - name: Deploy — declare tag to operator
-        run: |
-          for app in insights-web insights-worker; do
-            kubectl -n hanzo patch app "$app" --type=merge -p "{\"spec\":{\"image\":{\"repository\":\"ghcr.io/hanzoai/insights\",\"tag\":\"${GITHUB_SHA::8}\"}}}"
-          done
+          set -euo pipefail
+          IMAGE="ghcr.io/hanzoai/insights:${GITHUB_SHA}"
+          docker build -f Dockerfile -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "built $IMAGE"

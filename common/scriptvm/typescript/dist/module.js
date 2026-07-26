@@ -1,78 +1,78 @@
-import {Buffer as $62dAA$Buffer} from "buffer";
-import {DateTime as $62dAA$DateTime} from "luxon";
+import {Buffer as $cUKEk$Buffer} from "buffer";
+import {DateTime as $cUKEk$DateTime} from "luxon";
 
 
 function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
-var $d6c46379019a9f14$exports = {};
+var $571704b9c96081fb$exports = {};
 
-$parcel$export($d6c46379019a9f14$exports, "DEFAULT_MAX_ASYNC_STEPS", () => $d6c46379019a9f14$export$2a71946d1fd66654);
-$parcel$export($d6c46379019a9f14$exports, "DEFAULT_MAX_MEMORY", () => $d6c46379019a9f14$export$802abc67201653ab);
-$parcel$export($d6c46379019a9f14$exports, "DEFAULT_TIMEOUT_MS", () => $d6c46379019a9f14$export$dcf22dd285f74f3d);
-$parcel$export($d6c46379019a9f14$exports, "MAX_FUNCTION_ARGS_LENGTH", () => $d6c46379019a9f14$export$a6ea10a37f8d5abe);
-$parcel$export($d6c46379019a9f14$exports, "CALLSTACK_LENGTH", () => $d6c46379019a9f14$export$b3e3f74739b6f9fd);
-const $d6c46379019a9f14$export$2a71946d1fd66654 = 100;
-const $d6c46379019a9f14$export$802abc67201653ab = 67108864 // 64 MB
+$parcel$export($571704b9c96081fb$exports, "DEFAULT_MAX_ASYNC_STEPS", () => $571704b9c96081fb$export$2a71946d1fd66654);
+$parcel$export($571704b9c96081fb$exports, "DEFAULT_MAX_MEMORY", () => $571704b9c96081fb$export$802abc67201653ab);
+$parcel$export($571704b9c96081fb$exports, "DEFAULT_TIMEOUT_MS", () => $571704b9c96081fb$export$dcf22dd285f74f3d);
+$parcel$export($571704b9c96081fb$exports, "MAX_FUNCTION_ARGS_LENGTH", () => $571704b9c96081fb$export$a6ea10a37f8d5abe);
+$parcel$export($571704b9c96081fb$exports, "CALLSTACK_LENGTH", () => $571704b9c96081fb$export$b3e3f74739b6f9fd);
+const $571704b9c96081fb$export$2a71946d1fd66654 = 100;
+const $571704b9c96081fb$export$802abc67201653ab = 67108864 // 64 MB
 ;
-const $d6c46379019a9f14$export$dcf22dd285f74f3d = 5000 // ms
+const $571704b9c96081fb$export$dcf22dd285f74f3d = 5000 // ms
 ;
-const $d6c46379019a9f14$export$a6ea10a37f8d5abe = 300;
-const $d6c46379019a9f14$export$b3e3f74739b6f9fd = 1000;
+const $571704b9c96081fb$export$a6ea10a37f8d5abe = 300;
+const $571704b9c96081fb$export$b3e3f74739b6f9fd = 1000;
 
 
-var $46c45dfd262302d4$exports = {};
+var $13418e1e9b9813ef$exports = {};
 
-$parcel$export($46c45dfd262302d4$exports, "execSync", () => $46c45dfd262302d4$export$fa77af024d7e00a8);
-$parcel$export($46c45dfd262302d4$exports, "exec", () => $46c45dfd262302d4$export$78e3044358792147);
-$parcel$export($46c45dfd262302d4$exports, "execAsync", () => $46c45dfd262302d4$export$cf47dcd3447a7197);
+$parcel$export($13418e1e9b9813ef$exports, "execSync", () => $13418e1e9b9813ef$export$fa77af024d7e00a8);
+$parcel$export($13418e1e9b9813ef$exports, "exec", () => $13418e1e9b9813ef$export$78e3044358792147);
+$parcel$export($13418e1e9b9813ef$exports, "execAsync", () => $13418e1e9b9813ef$export$cf47dcd3447a7197);
 
-var $27b25c9e0700770a$exports = {};
+var $03bad8e4eb3d3c3b$exports = {};
 
-$parcel$export($27b25c9e0700770a$exports, "isHogDate", () => $27b25c9e0700770a$export$bd8197d5a05a4a7e);
-$parcel$export($27b25c9e0700770a$exports, "isHogDateTime", () => $27b25c9e0700770a$export$36cb9320e67ccd70);
-$parcel$export($27b25c9e0700770a$exports, "isHogError", () => $27b25c9e0700770a$export$6a076491ad0da05d);
-$parcel$export($27b25c9e0700770a$exports, "newHogError", () => $27b25c9e0700770a$export$c2d752b32b9bf15c);
-$parcel$export($27b25c9e0700770a$exports, "isHogCallable", () => $27b25c9e0700770a$export$3bbfc8b03361d8b7);
-$parcel$export($27b25c9e0700770a$exports, "isHogClosure", () => $27b25c9e0700770a$export$2fad4bf1d8756816);
-$parcel$export($27b25c9e0700770a$exports, "newHogClosure", () => $27b25c9e0700770a$export$42bb9ce6d451c81e);
-$parcel$export($27b25c9e0700770a$exports, "newHogCallable", () => $27b25c9e0700770a$export$4160dcabb869144f);
-$parcel$export($27b25c9e0700770a$exports, "isHogUpValue", () => $27b25c9e0700770a$export$30222d8f8abbf3d0);
-$parcel$export($27b25c9e0700770a$exports, "isHogAST", () => $27b25c9e0700770a$export$c1885639c9f11133);
-function $27b25c9e0700770a$export$bd8197d5a05a4a7e(obj) {
-    return obj && typeof obj === 'object' && '__hogDate__' in obj && 'year' in obj && 'month' in obj && 'day' in obj;
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLDate", () => $03bad8e4eb3d3c3b$export$99165c7c774db4d5);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLDateTime", () => $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLError", () => $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8);
+$parcel$export($03bad8e4eb3d3c3b$exports, "newIQLError", () => $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLCallable", () => $03bad8e4eb3d3c3b$export$1f40b61924af6aa6);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLClosure", () => $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375);
+$parcel$export($03bad8e4eb3d3c3b$exports, "newIQLClosure", () => $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18);
+$parcel$export($03bad8e4eb3d3c3b$exports, "newIQLCallable", () => $03bad8e4eb3d3c3b$export$48cfb2b057120036);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLUpValue", () => $03bad8e4eb3d3c3b$export$9cd2962d6d2d4f5f);
+$parcel$export($03bad8e4eb3d3c3b$exports, "isIQLAST", () => $03bad8e4eb3d3c3b$export$c47844ae799791e5);
+function $03bad8e4eb3d3c3b$export$99165c7c774db4d5(obj) {
+    return obj && typeof obj === 'object' && '__iqlDate__' in obj && 'year' in obj && 'month' in obj && 'day' in obj;
 }
-function $27b25c9e0700770a$export$36cb9320e67ccd70(obj) {
-    return obj && typeof obj === 'object' && '__hogDateTime__' in obj && 'dt' in obj && 'zone' in obj;
+function $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe(obj) {
+    return obj && typeof obj === 'object' && '__iqlDateTime__' in obj && 'dt' in obj && 'zone' in obj;
 }
-function $27b25c9e0700770a$export$6a076491ad0da05d(obj) {
-    return obj && typeof obj === 'object' && '__hogError__' in obj && 'type' in obj && 'message' in obj;
+function $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8(obj) {
+    return obj && typeof obj === 'object' && '__iqlError__' in obj && 'type' in obj && 'message' in obj;
 }
-function $27b25c9e0700770a$export$c2d752b32b9bf15c(type, message, payload) {
+function $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca(type, message, payload) {
     return {
-        __hogError__: true,
+        __iqlError__: true,
         type: type || 'Error',
         message: message || 'An error occurred',
         payload: payload
     };
 }
-function $27b25c9e0700770a$export$3bbfc8b03361d8b7(obj) {
-    return obj && typeof obj === 'object' && '__hogCallable__' in obj && 'argCount' in obj && 'ip' in obj && // 'chunk' in obj &&  // TODO: enable after this has been live for some hours
+function $03bad8e4eb3d3c3b$export$1f40b61924af6aa6(obj) {
+    return obj && typeof obj === 'object' && '__iqlCallable__' in obj && 'argCount' in obj && 'ip' in obj && // 'chunk' in obj &&  // TODO: enable after this has been live for some hours
     'upvalueCount' in obj;
 }
-function $27b25c9e0700770a$export$2fad4bf1d8756816(obj) {
-    return obj && typeof obj === 'object' && '__hogClosure__' in obj && 'callable' in obj && 'upvalues' in obj;
+function $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375(obj) {
+    return obj && typeof obj === 'object' && '__iqlClosure__' in obj && 'callable' in obj && 'upvalues' in obj;
 }
-function $27b25c9e0700770a$export$42bb9ce6d451c81e(callable, upvalues) {
+function $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18(callable, upvalues) {
     return {
-        __hogClosure__: true,
+        __iqlClosure__: true,
         callable: callable,
         upvalues: upvalues ?? []
     };
 }
-function $27b25c9e0700770a$export$4160dcabb869144f(type, { name: name, chunk: chunk, argCount: argCount, upvalueCount: upvalueCount, ip: ip }) {
+function $03bad8e4eb3d3c3b$export$48cfb2b057120036(type, { name: name, chunk: chunk, argCount: argCount, upvalueCount: upvalueCount, ip: ip }) {
     return {
-        __hogCallable__: type,
+        __iqlCallable__: type,
         name: name,
         chunk: chunk,
         argCount: argCount,
@@ -80,19 +80,19 @@ function $27b25c9e0700770a$export$4160dcabb869144f(type, { name: name, chunk: ch
         ip: ip
     };
 }
-function $27b25c9e0700770a$export$30222d8f8abbf3d0(obj) {
-    return obj && typeof obj === 'object' && '__hogUpValue__' in obj && 'location' in obj && 'closed' in obj && 'value' in obj;
+function $03bad8e4eb3d3c3b$export$9cd2962d6d2d4f5f(obj) {
+    return obj && typeof obj === 'object' && '__iqlUpValue__' in obj && 'location' in obj && 'closed' in obj && 'value' in obj;
 }
-function $27b25c9e0700770a$export$c1885639c9f11133(obj) {
+function $03bad8e4eb3d3c3b$export$c47844ae799791e5(obj) {
     return obj && (typeof obj === 'object' && '__hx_ast' in obj || obj instanceof Map && obj.get('__hx_ast'));
 }
 
 
-var $66bfafebb155a286$exports = {};
+var $9efbfe31fe198de1$exports = {};
 
-$parcel$export($66bfafebb155a286$exports, "Operation", () => $66bfafebb155a286$export$ab5aad00225c5662);
-$parcel$export($66bfafebb155a286$exports, "operations", () => $66bfafebb155a286$export$59894c102379d64a);
-var $66bfafebb155a286$export$ab5aad00225c5662 = /*#__PURE__*/ function(Operation) {
+$parcel$export($9efbfe31fe198de1$exports, "Operation", () => $9efbfe31fe198de1$export$ab5aad00225c5662);
+$parcel$export($9efbfe31fe198de1$exports, "operations", () => $9efbfe31fe198de1$export$59894c102379d64a);
+var $9efbfe31fe198de1$export$ab5aad00225c5662 = /*#__PURE__*/ function(Operation) {
     Operation[Operation["GET_GLOBAL"] = 1] = "GET_GLOBAL";
     Operation[Operation["CALL_GLOBAL"] = 2] = "CALL_GLOBAL";
     Operation[Operation["AND"] = 3] = "AND";
@@ -152,7 +152,7 @@ var $66bfafebb155a286$export$ab5aad00225c5662 = /*#__PURE__*/ function(Operation
     Operation[Operation["CLOSE_UPVALUE"] = 57] = "CLOSE_UPVALUE";
     return Operation;
 }({});
-const $66bfafebb155a286$export$59894c102379d64a = [
+const $9efbfe31fe198de1$export$59894c102379d64a = [
     '',
     'GET_GLOBAL',
     'CALL_GLOBAL',
@@ -215,7 +215,7 @@ const $66bfafebb155a286$export$59894c102379d64a = [
 
 
 // This file is generated by common/scriptvm/stl/compile.py
-const $afd1cc5cb2d921da$export$5477e8cd2355fadb = {
+const $9a45f201ddb77472$export$5477e8cd2355fadb = {
     "arrayCount": [
         [
             "func",
@@ -566,36 +566,38 @@ const $afd1cc5cb2d921da$export$5477e8cd2355fadb = {
 };
 
 
-var $23fc6ca6b1cb5ed8$exports = {};
+var $f4b746eecdc74db5$exports = {};
 
-$parcel$export($23fc6ca6b1cb5ed8$exports, "STL", () => $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575);
-$parcel$export($23fc6ca6b1cb5ed8$exports, "ASYNC_STL", () => $23fc6ca6b1cb5ed8$export$daf23d78d6f53989);
-
-
-var $ddbbfac842d2b47e$exports = {};
-
-$parcel$export($ddbbfac842d2b47e$exports, "ScriptVMException", () => $ddbbfac842d2b47e$export$abb9271b33b89c57);
-$parcel$export($ddbbfac842d2b47e$exports, "UncaughtScriptVMException", () => $ddbbfac842d2b47e$export$21c2d8f6d56a9f14);
-$parcel$export($ddbbfac842d2b47e$exports, "like", () => $ddbbfac842d2b47e$export$e94e5ec04a02879c);
-$parcel$export($ddbbfac842d2b47e$exports, "getNestedValue", () => $ddbbfac842d2b47e$export$2516322ffbb7f3fb);
-$parcel$export($ddbbfac842d2b47e$exports, "setNestedValue", () => $ddbbfac842d2b47e$export$c52c7e952af52ee2);
-$parcel$export($ddbbfac842d2b47e$exports, "convertJSToHog", () => $ddbbfac842d2b47e$export$f0c387fc4f006d51);
-$parcel$export($ddbbfac842d2b47e$exports, "convertHogToJS", () => $ddbbfac842d2b47e$export$8353e27c009c56d3);
-$parcel$export($ddbbfac842d2b47e$exports, "calculateCost", () => $ddbbfac842d2b47e$export$ccac9139013839fb);
-$parcel$export($ddbbfac842d2b47e$exports, "unifyComparisonTypes", () => $ddbbfac842d2b47e$export$13d90b9b2a99ed13);
+$parcel$export($f4b746eecdc74db5$exports, "STL", () => $f4b746eecdc74db5$export$ef8a2f3c50755575);
+$parcel$export($f4b746eecdc74db5$exports, "ASYNC_STL", () => $f4b746eecdc74db5$export$daf23d78d6f53989);
 
 
-function $4d6f6365495b63e6$export$96c0bff854cee350(year, month, day) {
+var $baf5cb126ee7af7a$exports = {};
+
+$parcel$export($baf5cb126ee7af7a$exports, "ScriptVMException", () => $baf5cb126ee7af7a$export$ff53d37181b7da19);
+$parcel$export($baf5cb126ee7af7a$exports, "UncaughtScriptVMException", () => $baf5cb126ee7af7a$export$67b2cf55ba1871a2);
+$parcel$export($baf5cb126ee7af7a$exports, "like", () => $baf5cb126ee7af7a$export$e94e5ec04a02879c);
+$parcel$export($baf5cb126ee7af7a$exports, "getNestedValue", () => $baf5cb126ee7af7a$export$2516322ffbb7f3fb);
+$parcel$export($baf5cb126ee7af7a$exports, "setNestedValue", () => $baf5cb126ee7af7a$export$c52c7e952af52ee2);
+$parcel$export($baf5cb126ee7af7a$exports, "convertJSToHog", () => $baf5cb126ee7af7a$export$f0c387fc4f006d51);
+$parcel$export($baf5cb126ee7af7a$exports, "convertHogToJS", () => $baf5cb126ee7af7a$export$8353e27c009c56d3);
+$parcel$export($baf5cb126ee7af7a$exports, "convertJSToIQL", () => $baf5cb126ee7af7a$export$d3a62b7c494d2d21);
+$parcel$export($baf5cb126ee7af7a$exports, "convertIQLToJS", () => $baf5cb126ee7af7a$export$324ead8d30ea4ecf);
+$parcel$export($baf5cb126ee7af7a$exports, "calculateCost", () => $baf5cb126ee7af7a$export$ccac9139013839fb);
+$parcel$export($baf5cb126ee7af7a$exports, "unifyComparisonTypes", () => $baf5cb126ee7af7a$export$13d90b9b2a99ed13);
+
+
+function $543e0a83f32f0446$export$e366269d19c8b04a(year, month, day) {
     return {
-        __hogDate__: true,
+        __iqlDate__: true,
         year: year,
         month: month,
         day: day
     };
 }
-function $4d6f6365495b63e6$export$3f140f12059184aa(timestamp, zone) {
-    if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(timestamp)) {
-        const dateTime = (0, $62dAA$DateTime).fromObject({
+function $543e0a83f32f0446$export$d227b45051727ff2(timestamp, zone) {
+    if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(timestamp)) {
+        const dateTime = (0, $cUKEk$DateTime).fromObject({
             year: timestamp.year,
             month: timestamp.month,
             day: timestamp.day
@@ -603,63 +605,63 @@ function $4d6f6365495b63e6$export$3f140f12059184aa(timestamp, zone) {
             zone: zone || 'UTC'
         });
         return {
-            __hogDateTime__: true,
+            __iqlDateTime__: true,
             dt: dateTime.toSeconds(),
             zone: dateTime.zoneName || 'UTC'
         };
     }
     return {
-        __hogDateTime__: true,
+        __iqlDateTime__: true,
         dt: timestamp,
         zone: zone || 'UTC'
     };
 }
-function $4d6f6365495b63e6$export$461939dd4422153(zone) {
-    return $4d6f6365495b63e6$export$3f140f12059184aa(Date.now() / 1000, zone);
+function $543e0a83f32f0446$export$461939dd4422153(zone) {
+    return $543e0a83f32f0446$export$d227b45051727ff2(Date.now() / 1000, zone);
 }
-function $4d6f6365495b63e6$export$89d19b307eaa5b00(input, zone) {
-    if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(input)) return input.dt;
-    if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(input)) return $4d6f6365495b63e6$export$3f140f12059184aa(input).dt;
-    return (0, $62dAA$DateTime).fromISO(input, {
+function $543e0a83f32f0446$export$89d19b307eaa5b00(input, zone) {
+    if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(input)) return input.dt;
+    if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(input)) return $543e0a83f32f0446$export$d227b45051727ff2(input).dt;
+    return (0, $cUKEk$DateTime).fromISO(input, {
         zone: zone || 'UTC'
     }).toSeconds();
 }
-function $4d6f6365495b63e6$export$2eae39828437ef9(input) {
-    return $4d6f6365495b63e6$export$3f140f12059184aa(input);
+function $543e0a83f32f0446$export$2eae39828437ef9(input) {
+    return $543e0a83f32f0446$export$d227b45051727ff2(input);
 }
-function $4d6f6365495b63e6$export$3c767e1cce0f2443(input, zone) {
-    return $4d6f6365495b63e6$export$89d19b307eaa5b00(input, zone) * 1000;
+function $543e0a83f32f0446$export$3c767e1cce0f2443(input, zone) {
+    return $543e0a83f32f0446$export$89d19b307eaa5b00(input, zone) * 1000;
 }
-function $4d6f6365495b63e6$export$477f0894d0f48f23(input) {
-    return $4d6f6365495b63e6$export$3f140f12059184aa(input / 1000);
+function $543e0a83f32f0446$export$477f0894d0f48f23(input) {
+    return $543e0a83f32f0446$export$d227b45051727ff2(input / 1000);
 }
-function $4d6f6365495b63e6$export$538b00033cc11c75(input, zone) {
-    if (!(0, $27b25c9e0700770a$export$36cb9320e67ccd70)(input)) throw new Error('Expected a DateTime');
+function $543e0a83f32f0446$export$538b00033cc11c75(input, zone) {
+    if (!(0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(input)) throw new Error('Expected a DateTime');
     return {
         ...input,
         zone: zone
     };
 }
-function $4d6f6365495b63e6$export$e67a095c620b86fe(input) {
-    const dt = typeof input === 'number' ? (0, $62dAA$DateTime).fromSeconds(input) : (0, $62dAA$DateTime).fromISO(input);
+function $543e0a83f32f0446$export$e67a095c620b86fe(input) {
+    const dt = typeof input === 'number' ? (0, $cUKEk$DateTime).fromSeconds(input) : (0, $cUKEk$DateTime).fromISO(input);
     return {
-        __hogDate__: true,
+        __iqlDate__: true,
         year: dt.year,
         month: dt.month,
         day: dt.day
     };
 }
-function $4d6f6365495b63e6$export$c2dea5c02f48568d(input, zone) {
-    const dt = typeof input === 'number' ? input : (0, $62dAA$DateTime).fromISO(input, {
+function $543e0a83f32f0446$export$c2dea5c02f48568d(input, zone) {
+    const dt = typeof input === 'number' ? input : (0, $cUKEk$DateTime).fromISO(input, {
         zone: zone || 'UTC'
     }).toSeconds();
     return {
-        __hogDateTime__: true,
+        __iqlDateTime__: true,
         dt: dt,
         zone: zone || 'UTC'
     };
 }
-/** Convert from ClickHouse format string to Luxon format string */ const $4d6f6365495b63e6$var$tokenTranslations = {
+/** Convert from ClickHouse format string to Luxon format string */ const $543e0a83f32f0446$var$tokenTranslations = {
     a: 'EEE',
     b: 'MMM',
     c: 'MM',
@@ -698,8 +700,8 @@ function $4d6f6365495b63e6$export$c2dea5c02f48568d(input, zone) {
     z: 'ZZZ',
     '%': '%'
 };
-function $4d6f6365495b63e6$export$8b492ed8828f789c(input, format, zone) {
-    if (!(0, $27b25c9e0700770a$export$36cb9320e67ccd70)(input)) throw new Error('Expected a DateTime');
+function $543e0a83f32f0446$export$8b492ed8828f789c(input, format, zone) {
+    if (!(0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(input)) throw new Error('Expected a DateTime');
     if (!format) throw new Error('formatDateTime requires at least 2 arguments');
     let formatString = '';
     let acc = '';
@@ -709,22 +711,22 @@ function $4d6f6365495b63e6$export$8b492ed8828f789c(input, format, zone) {
             acc = '';
         }
         i += 1;
-        if (i < format.length && $4d6f6365495b63e6$var$tokenTranslations[format[i]]) formatString += $4d6f6365495b63e6$var$tokenTranslations[format[i]];
+        if (i < format.length && $543e0a83f32f0446$var$tokenTranslations[format[i]]) formatString += $543e0a83f32f0446$var$tokenTranslations[format[i]];
     } else acc += format[i];
     if (acc.length > 0) formatString += `'${acc}'`;
-    return (0, $62dAA$DateTime).fromSeconds(input.dt, {
+    return (0, $cUKEk$DateTime).fromSeconds(input.dt, {
         zone: zone || input.zone
     }).toFormat(formatString);
 }
 
 
-class $ddbbfac842d2b47e$export$abb9271b33b89c57 extends Error {
+class $baf5cb126ee7af7a$export$ff53d37181b7da19 extends Error {
     constructor(message){
         super(message);
         this.name = 'ScriptVMException';
     }
 }
-class $ddbbfac842d2b47e$export$21c2d8f6d56a9f14 extends $ddbbfac842d2b47e$export$abb9271b33b89c57 {
+class $baf5cb126ee7af7a$export$67b2cf55ba1871a2 extends $baf5cb126ee7af7a$export$ff53d37181b7da19 {
     constructor(type, message, payload = null){
         super(message);
         this.name = 'UncaughtScriptVMException';
@@ -736,13 +738,13 @@ class $ddbbfac842d2b47e$export$21c2d8f6d56a9f14 extends $ddbbfac842d2b47e$export
         return `${this.type}('${msg}')`;
     }
 }
-/** Fixed cost per object in memory */ const $ddbbfac842d2b47e$var$COST_PER_UNIT = 8;
-function $ddbbfac842d2b47e$export$e94e5ec04a02879c(string, pattern, caseInsensitive = false, match) {
+/** Fixed cost per object in memory */ const $baf5cb126ee7af7a$var$COST_PER_UNIT = 8;
+function $baf5cb126ee7af7a$export$e94e5ec04a02879c(string, pattern, caseInsensitive = false, match) {
     pattern = String(pattern).replaceAll(/[-/\\^$*+?.()|[\]{}]/g, '\\$&').replaceAll('%', '.*').replaceAll('_', '.');
     if (match) return match((caseInsensitive ? '(?i)' : '') + pattern, string);
     return new RegExp(pattern, caseInsensitive ? 'i' : undefined).test(string);
 }
-function $ddbbfac842d2b47e$export$2516322ffbb7f3fb(obj, chain, nullish = false) {
+function $baf5cb126ee7af7a$export$2516322ffbb7f3fb(obj, chain, nullish = false) {
     if (typeof obj === 'object' && obj !== null) {
         for (const key of chain){
             if (nullish && obj === null) return null;
@@ -758,7 +760,7 @@ function $ddbbfac842d2b47e$export$2516322ffbb7f3fb(obj, chain, nullish = false) 
     }
     return null;
 }
-function $ddbbfac842d2b47e$export$c52c7e952af52ee2(obj, chain, value) {
+function $baf5cb126ee7af7a$export$c52c7e952af52ee2(obj, chain, value) {
     if (typeof obj !== 'object' || obj === null) throw new Error(`Can not set ${chain} on non-object: ${typeof obj}`);
     for(let i = 0; i < chain.length - 1; i++){
         const key = chain[i];
@@ -775,70 +777,72 @@ function $ddbbfac842d2b47e$export$c52c7e952af52ee2(obj, chain, value) {
         obj[lastKey - 1] = value;
     } else throw new Error(`Can not set ${chain} on element of type ${typeof obj}`);
 }
-function $ddbbfac842d2b47e$export$f0c387fc4f006d51(x, found) {
+function $baf5cb126ee7af7a$export$f0c387fc4f006d51(x, found) {
     if (!found) found = new Map();
     if (found.has(x)) return found.get(x);
     if (Array.isArray(x)) {
         const obj = [];
         found.set(x, obj);
-        x.forEach((v)=>obj.push($ddbbfac842d2b47e$export$f0c387fc4f006d51(v, found)));
+        x.forEach((v)=>obj.push($baf5cb126ee7af7a$export$f0c387fc4f006d51(v, found)));
         found.delete(x);
         return obj;
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__) return (0, $4d6f6365495b63e6$export$3f140f12059184aa)(x.dt, x.zone);
-        else if (x.__hogDate__) return (0, $4d6f6365495b63e6$export$96c0bff854cee350)(x.year, x.month, x.day);
-        else if (x.__hogClosure__ || x.__hogCallable__) return x;
+        if (x.__iqlDateTime__) return (0, $543e0a83f32f0446$export$d227b45051727ff2)(x.dt, x.zone);
+        else if (x.__iqlDate__) return (0, $543e0a83f32f0446$export$e366269d19c8b04a)(x.year, x.month, x.day);
+        else if (x.__iqlClosure__ || x.__iqlCallable__) return x;
         const map = new Map();
         found.set(x, map);
-        for(const key in x)map.set(key, $ddbbfac842d2b47e$export$f0c387fc4f006d51(x[key], found));
+        for(const key in x)map.set(key, $baf5cb126ee7af7a$export$f0c387fc4f006d51(x[key], found));
         found.delete(x);
         return map;
     }
     return x;
 }
-function $ddbbfac842d2b47e$export$8353e27c009c56d3(x, found) {
+function $baf5cb126ee7af7a$export$8353e27c009c56d3(x, found) {
     if (!found) found = new Map();
     if (found.has(x)) return found.get(x);
     if (x instanceof Map) {
         const obj = {};
         found.set(x, obj);
         x.forEach((value, key)=>{
-            obj[key] = $ddbbfac842d2b47e$export$8353e27c009c56d3(value, found);
+            obj[key] = $baf5cb126ee7af7a$export$8353e27c009c56d3(value, found);
         });
         found.delete(x);
         return obj;
     } else if (typeof x === 'object' && Array.isArray(x)) {
         const obj = [];
         found.set(x, obj);
-        x.forEach((v)=>obj.push($ddbbfac842d2b47e$export$8353e27c009c56d3(v, found)));
+        x.forEach((v)=>obj.push($baf5cb126ee7af7a$export$8353e27c009c56d3(v, found)));
         found.delete(x);
         return obj;
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__ || x.__hogDate__ || x.__hogClosure__ || x.__hogCallable__) return x;
+        if (x.__iqlDateTime__ || x.__iqlDate__ || x.__iqlClosure__ || x.__iqlCallable__) return x;
         const obj = {};
         found.set(x, obj);
-        for(const key in x)obj[key] = $ddbbfac842d2b47e$export$8353e27c009c56d3(x[key], found);
+        for(const key in x)obj[key] = $baf5cb126ee7af7a$export$8353e27c009c56d3(x[key], found);
         found.delete(x);
         return obj;
     }
     return x;
 }
-function $ddbbfac842d2b47e$export$ccac9139013839fb(object, marked) {
+const $baf5cb126ee7af7a$export$d3a62b7c494d2d21 = $baf5cb126ee7af7a$export$f0c387fc4f006d51;
+const $baf5cb126ee7af7a$export$324ead8d30ea4ecf = $baf5cb126ee7af7a$export$8353e27c009c56d3;
+function $baf5cb126ee7af7a$export$ccac9139013839fb(object, marked) {
     if (!marked) marked = new Set();
     if (typeof object === 'object' && object !== null) {
-        if (marked.has(object)) return $ddbbfac842d2b47e$var$COST_PER_UNIT;
+        if (marked.has(object)) return $baf5cb126ee7af7a$var$COST_PER_UNIT;
         marked.add(object);
         try {
-            if (object instanceof Map) return $ddbbfac842d2b47e$var$COST_PER_UNIT + Array.from(object.keys()).reduce((acc, key)=>acc + $ddbbfac842d2b47e$export$ccac9139013839fb(key, marked) + $ddbbfac842d2b47e$export$ccac9139013839fb(object.get(key), marked), 0);
-            else if (Array.isArray(object)) return $ddbbfac842d2b47e$var$COST_PER_UNIT + object.reduce((acc, val)=>acc + $ddbbfac842d2b47e$export$ccac9139013839fb(val, marked), 0);
-            return $ddbbfac842d2b47e$var$COST_PER_UNIT + Object.keys(object).reduce((acc, key)=>acc + $ddbbfac842d2b47e$export$ccac9139013839fb(key, marked) + $ddbbfac842d2b47e$export$ccac9139013839fb(object[key], marked), 0);
+            if (object instanceof Map) return $baf5cb126ee7af7a$var$COST_PER_UNIT + Array.from(object.keys()).reduce((acc, key)=>acc + $baf5cb126ee7af7a$export$ccac9139013839fb(key, marked) + $baf5cb126ee7af7a$export$ccac9139013839fb(object.get(key), marked), 0);
+            else if (Array.isArray(object)) return $baf5cb126ee7af7a$var$COST_PER_UNIT + object.reduce((acc, val)=>acc + $baf5cb126ee7af7a$export$ccac9139013839fb(val, marked), 0);
+            return $baf5cb126ee7af7a$var$COST_PER_UNIT + Object.keys(object).reduce((acc, key)=>acc + $baf5cb126ee7af7a$export$ccac9139013839fb(key, marked) + $baf5cb126ee7af7a$export$ccac9139013839fb(object[key], marked), 0);
         } finally{
             marked.delete(object);
         }
-    } else if (typeof object === 'string') return $ddbbfac842d2b47e$var$COST_PER_UNIT + object.length;
-    return $ddbbfac842d2b47e$var$COST_PER_UNIT;
+    } else if (typeof object === 'string') return $baf5cb126ee7af7a$var$COST_PER_UNIT + object.length;
+    return $baf5cb126ee7af7a$var$COST_PER_UNIT;
 }
-function $ddbbfac842d2b47e$export$13d90b9b2a99ed13(left, right) {
+function $baf5cb126ee7af7a$export$13d90b9b2a99ed13(left, right) {
     if (typeof left === 'number' && typeof right === 'string') return [
         left,
         Number(right)
@@ -870,19 +874,19 @@ function $ddbbfac842d2b47e$export$13d90b9b2a99ed13(left, right) {
 }
 
 
-function $cd98dbf3206987a7$export$bced8d2aada2d1c9(data, encoding = 'hex', options) {
+function $ffcc80cbcbf135bb$export$bced8d2aada2d1c9(data, encoding = 'hex', options) {
     if (data === null) return null;
     const crypto = options?.external?.crypto;
     if (!crypto) throw new Error('The crypto module is required for "sha256Hex" to work.');
     return crypto.createHash('sha256').update(data).digest(encoding);
 }
-function $cd98dbf3206987a7$export$a58ec6a60c09ca72(data, encoding = 'hex', options) {
+function $ffcc80cbcbf135bb$export$a58ec6a60c09ca72(data, encoding = 'hex', options) {
     if (data === null) return null;
     const crypto = options?.external?.crypto;
     if (!crypto) throw new Error('The crypto module is required for "md5Hex" to work.');
     return crypto.createHash('md5').update(data).digest(encoding);
 }
-function $cd98dbf3206987a7$export$60c7719ba3f4dd3e(data, encoding = 'hex', options) {
+function $ffcc80cbcbf135bb$export$60c7719ba3f4dd3e(data, encoding = 'hex', options) {
     const crypto = options?.external?.crypto;
     if (!crypto) throw new Error('The crypto module is required for "sha256HmacChainHex" to work.');
     if (data.length < 2) throw new Error('Data array must contain at least two elements.');
@@ -897,16 +901,16 @@ function $cd98dbf3206987a7$export$60c7719ba3f4dd3e(data, encoding = 'hex', optio
 
 
 
-var $054a234da6c04610$exports = {};
+var $1164bc623fd45eb4$exports = {};
 
-$parcel$export($054a234da6c04610$exports, "escapeString", () => $054a234da6c04610$export$4148cf4a40af9f34);
-$parcel$export($054a234da6c04610$exports, "escapeIdentifier", () => $054a234da6c04610$export$56fe274825607f4a);
-$parcel$export($054a234da6c04610$exports, "printHogValue", () => $054a234da6c04610$export$49c4ba04cdb4c4d4);
-$parcel$export($054a234da6c04610$exports, "InsightsQLPrinter", () => $054a234da6c04610$export$4c46226ec729a3dc);
-$parcel$export($054a234da6c04610$exports, "printHogStringOutput", () => $054a234da6c04610$export$ed243cb9e89db69e);
+$parcel$export($1164bc623fd45eb4$exports, "escapeString", () => $1164bc623fd45eb4$export$4148cf4a40af9f34);
+$parcel$export($1164bc623fd45eb4$exports, "escapeIdentifier", () => $1164bc623fd45eb4$export$56fe274825607f4a);
+$parcel$export($1164bc623fd45eb4$exports, "printIQLValue", () => $1164bc623fd45eb4$export$4b4cc7872ca29d6f);
+$parcel$export($1164bc623fd45eb4$exports, "InsightsQLPrinter", () => $1164bc623fd45eb4$export$4c46226ec729a3dc);
+$parcel$export($1164bc623fd45eb4$exports, "printIQLStringOutput", () => $1164bc623fd45eb4$export$a95699d673286b58);
 
 
-const $054a234da6c04610$var$escapeCharsMap = {
+const $1164bc623fd45eb4$var$escapeCharsMap = {
     '\b': '\\b',
     '\f': '\\f',
     '\r': '\\r',
@@ -916,59 +920,59 @@ const $054a234da6c04610$var$escapeCharsMap = {
     '\v': '\\v',
     '\\': '\\\\'
 };
-const $054a234da6c04610$var$singlequoteEscapeCharsMap = {
-    ...$054a234da6c04610$var$escapeCharsMap,
+const $1164bc623fd45eb4$var$singlequoteEscapeCharsMap = {
+    ...$1164bc623fd45eb4$var$escapeCharsMap,
     "'": "\\'"
 };
-const $054a234da6c04610$var$backquoteEscapeCharsMap = {
-    ...$054a234da6c04610$var$escapeCharsMap,
+const $1164bc623fd45eb4$var$backquoteEscapeCharsMap = {
+    ...$1164bc623fd45eb4$var$escapeCharsMap,
     '`': '\\`'
 };
-function $054a234da6c04610$export$4148cf4a40af9f34(value) {
-    return `'${value.split('').map((c)=>$054a234da6c04610$var$singlequoteEscapeCharsMap[c] || c).join('')}'`;
+function $1164bc623fd45eb4$export$4148cf4a40af9f34(value) {
+    return `'${value.split('').map((c)=>$1164bc623fd45eb4$var$singlequoteEscapeCharsMap[c] || c).join('')}'`;
 }
-function $054a234da6c04610$export$56fe274825607f4a(identifier) {
+function $1164bc623fd45eb4$export$56fe274825607f4a(identifier) {
     if (typeof identifier === 'number') return identifier.toString();
     if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(identifier)) return identifier;
-    return `\`${identifier.split('').map((c)=>$054a234da6c04610$var$backquoteEscapeCharsMap[c] || c).join('')}\``;
+    return `\`${identifier.split('').map((c)=>$1164bc623fd45eb4$var$backquoteEscapeCharsMap[c] || c).join('')}\``;
 }
-function $054a234da6c04610$export$49c4ba04cdb4c4d4(obj, marked) {
+function $1164bc623fd45eb4$export$4b4cc7872ca29d6f(obj, marked) {
     if (!marked) marked = new Set();
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !(0, $27b25c9e0700770a$export$36cb9320e67ccd70)(obj) && !(0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(obj) && !(0, $27b25c9e0700770a$export$6a076491ad0da05d)(obj) && !(0, $27b25c9e0700770a$export$2fad4bf1d8756816)(obj) && !(0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(obj) && !(0, $27b25c9e0700770a$export$c1885639c9f11133)(obj)) return 'null';
+        if (marked.has(obj) && !(0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(obj) && !(0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(obj) && !(0, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8)(obj) && !(0, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375)(obj) && !(0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(obj) && !(0, $03bad8e4eb3d3c3b$export$c47844ae799791e5)(obj)) return 'null';
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isHogTuple) {
-                    if (obj.length < 2) return `tuple(${obj.map((o)=>$054a234da6c04610$export$49c4ba04cdb4c4d4(o, marked)).join(', ')})`;
-                    return `(${obj.map((o)=>$054a234da6c04610$export$49c4ba04cdb4c4d4(o, marked)).join(', ')})`;
+                if (obj.__isIQLTuple) {
+                    if (obj.length < 2) return `tuple(${obj.map((o)=>$1164bc623fd45eb4$export$4b4cc7872ca29d6f(o, marked)).join(', ')})`;
+                    return `(${obj.map((o)=>$1164bc623fd45eb4$export$4b4cc7872ca29d6f(o, marked)).join(', ')})`;
                 }
-                return `[${obj.map((o)=>$054a234da6c04610$export$49c4ba04cdb4c4d4(o, marked)).join(', ')}]`;
+                return `[${obj.map((o)=>$1164bc623fd45eb4$export$4b4cc7872ca29d6f(o, marked)).join(', ')}]`;
             }
-            if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(obj)) {
+            if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(obj)) {
                 const millis = String(obj.dt);
-                return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${$054a234da6c04610$export$4148cf4a40af9f34(obj.zone)})`;
+                return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${$1164bc623fd45eb4$export$4148cf4a40af9f34(obj.zone)})`;
             }
-            if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if ((0, $27b25c9e0700770a$export$6a076491ad0da05d)(obj)) return `${String(obj.type)}(${$054a234da6c04610$export$4148cf4a40af9f34(obj.message)}${obj.payload ? `, ${$054a234da6c04610$export$49c4ba04cdb4c4d4(obj.payload, marked)}` : ''})`;
-            if ((0, $27b25c9e0700770a$export$2fad4bf1d8756816)(obj)) return $054a234da6c04610$export$49c4ba04cdb4c4d4(obj.callable, marked);
-            if ((0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(obj)) return `fn<${$054a234da6c04610$export$56fe274825607f4a(obj.name ?? 'lambda')}(${$054a234da6c04610$export$49c4ba04cdb4c4d4(obj.argCount)})>`;
-            if ((0, $27b25c9e0700770a$export$c1885639c9f11133)(obj)) return `sql(${new $054a234da6c04610$export$4c46226ec729a3dc(false, marked).print(obj)})`;
-            if (obj instanceof Map) return `{${Array.from(obj.entries()).map(([key, value])=>`${$054a234da6c04610$export$49c4ba04cdb4c4d4(key, marked)}: ${$054a234da6c04610$export$49c4ba04cdb4c4d4(value, marked)}`).join(', ')}}`;
-            return `{${Object.entries(obj).map(([key, value])=>`${$054a234da6c04610$export$49c4ba04cdb4c4d4(key, marked)}: ${$054a234da6c04610$export$49c4ba04cdb4c4d4(value, marked)}`).join(', ')}}`;
+            if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if ((0, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8)(obj)) return `${String(obj.type)}(${$1164bc623fd45eb4$export$4148cf4a40af9f34(obj.message)}${obj.payload ? `, ${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(obj.payload, marked)}` : ''})`;
+            if ((0, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375)(obj)) return $1164bc623fd45eb4$export$4b4cc7872ca29d6f(obj.callable, marked);
+            if ((0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(obj)) return `fn<${$1164bc623fd45eb4$export$56fe274825607f4a(obj.name ?? 'lambda')}(${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(obj.argCount)})>`;
+            if ((0, $03bad8e4eb3d3c3b$export$c47844ae799791e5)(obj)) return `sql(${new $1164bc623fd45eb4$export$4c46226ec729a3dc(false, marked).print(obj)})`;
+            if (obj instanceof Map) return `{${Array.from(obj.entries()).map(([key, value])=>`${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(key, marked)}: ${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(value, marked)}`).join(', ')}}`;
+            return `{${Object.entries(obj).map(([key, value])=>`${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(key, marked)}: ${$1164bc623fd45eb4$export$4b4cc7872ca29d6f(value, marked)}`).join(', ')}}`;
         } finally{
             marked.delete(obj);
         }
     } else if (typeof obj === 'boolean') return obj ? 'true' : 'false';
     else if (obj === null || obj === undefined) return 'null';
-    else if (typeof obj === 'string') return $054a234da6c04610$export$4148cf4a40af9f34(obj);
+    else if (typeof obj === 'string') return $1164bc623fd45eb4$export$4148cf4a40af9f34(obj);
     return obj.toString();
 }
-function $054a234da6c04610$export$ed243cb9e89db69e(obj) {
+function $1164bc623fd45eb4$export$a95699d673286b58(obj) {
     if (typeof obj === 'string') return obj;
-    return $054a234da6c04610$export$49c4ba04cdb4c4d4(obj);
+    return $1164bc623fd45eb4$export$4b4cc7872ca29d6f(obj);
 }
-class $054a234da6c04610$export$4c46226ec729a3dc {
+class $1164bc623fd45eb4$export$4c46226ec729a3dc {
     constructor(pretty = false, marked){
         this.stack = [];
         this.indentLevel = -1;
@@ -985,7 +989,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
     visit(node) {
         if (!node) return '';
         if (!(node instanceof Map)) {
-            if ((0, $27b25c9e0700770a$export$c1885639c9f11133)(node)) node = (0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)(node);
+            if ((0, $03bad8e4eb3d3c3b$export$c47844ae799791e5)(node)) node = (0, $baf5cb126ee7af7a$export$f0c387fc4f006d51)(node);
             else return this.escapeValue(node);
         }
         this.stack.push(node);
@@ -1119,7 +1123,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         if (node.has('window_exprs')) {
             const windowExprs = node.get('window_exprs');
             if (windowExprs) {
-                const windowExpressions = Array.from(windowExprs.entries()).map(([name, expr])=>`${$054a234da6c04610$export$56fe274825607f4a(name)} AS (${this.visit(expr)})`).join(comma);
+                const windowExpressions = Array.from(windowExprs.entries()).map(([name, expr])=>`${$1164bc623fd45eb4$export$56fe274825607f4a(name)} AS (${this.visit(expr)})`).join(comma);
                 if (windowExpressions) clauses.push(`WINDOW${space}${windowExpressions}`);
             }
         }
@@ -1161,7 +1165,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         // Handle the initial table or subquery
         const initialTable = this.visit(node.get('table'));
         // Add alias if present
-        if (node.has('alias') && node.get('alias') !== initialTable) joinParts.push(`${initialTable} AS ${$054a234da6c04610$export$56fe274825607f4a(node.get('alias'))}`);
+        if (node.has('alias') && node.get('alias') !== initialTable) joinParts.push(`${initialTable} AS ${$1164bc623fd45eb4$export$56fe274825607f4a(node.get('alias'))}`);
         else joinParts.push(initialTable);
         // Process the chain of joins via next_join
         let currentJoin = node.get('next_join');
@@ -1172,7 +1176,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
             const constraintClause = constraint ? `${constraint.get('constraint_type')} ${this.visit(constraint)}` : '';
             // Add alias if present
             let tableWithAlias = table;
-            if (currentJoin.has('alias') && currentJoin.get('alias') !== table) tableWithAlias = `${table} AS ${$054a234da6c04610$export$56fe274825607f4a(currentJoin.get('alias'))}`;
+            if (currentJoin.has('alias') && currentJoin.get('alias') !== table) tableWithAlias = `${table} AS ${$1164bc623fd45eb4$export$56fe274825607f4a(currentJoin.get('alias'))}`;
             joinParts.push(`${joinType} ${tableWithAlias} ${constraintClause}`.trim());
             currentJoin = currentJoin.get('next_join');
         }
@@ -1205,7 +1209,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         let expr = node.get('expr');
         while(expr && expr instanceof Map && expr.get('__hx_ast') === 'Alias' && expr.get('hidden'))expr = expr.get('expr');
         const inside = this.visit(expr);
-        const alias = $054a234da6c04610$export$56fe274825607f4a(node.get('alias'));
+        const alias = $1164bc623fd45eb4$export$56fe274825607f4a(node.get('alias'));
         return `${inside} AS ${alias}`;
     }
     visitAnd(node) {
@@ -1275,7 +1279,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         if (!node) return '';
         const args = node.get('args');
         if (!args || args.length === 0) throw new Error('Lambdas require at least one argument');
-        const escapedArgs = args.map((arg)=>$054a234da6c04610$export$56fe274825607f4a(arg));
+        const escapedArgs = args.map((arg)=>$1164bc623fd45eb4$export$56fe274825607f4a(arg));
         const argList = escapedArgs.length === 1 ? escapedArgs[0] : `(${escapedArgs.join(', ')})`;
         return `${argList} -> ${this.visit(node.get('expr'))}`;
     }
@@ -1332,7 +1336,7 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         const args = node.has('args') ? `(${node.get('args').map((arg)=>this.visit(arg)).join(', ')})` : '';
         let over = '';
         if (node.has('over_expr')) over = `(${this.visit(node.get('over_expr'))})`;
-        else if (node.has('over_identifier')) over = $054a234da6c04610$export$56fe274825607f4a(node.get('over_identifier'));
+        else if (node.has('over_identifier')) over = $1164bc623fd45eb4$export$56fe274825607f4a(node.get('over_identifier'));
         else over = '()';
         return `${name}(${exprs})${args} OVER ${over}`;
     }
@@ -1359,8 +1363,8 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
         if (!node) return '';
         const name = node.get('name');
         const value = this.visit(node.get('value'));
-        if (typeof node.get('value') === 'string') return `${$054a234da6c04610$export$56fe274825607f4a(name)}=${value}`;
-        return `${$054a234da6c04610$export$56fe274825607f4a(name)}={${value}}`;
+        if (typeof node.get('value') === 'string') return `${$1164bc623fd45eb4$export$56fe274825607f4a(name)}=${value}`;
+        return `${$1164bc623fd45eb4$export$56fe274825607f4a(name)}={${value}}`;
     }
     visitRatioExpr(node) {
         if (!node) return '';
@@ -1369,15 +1373,15 @@ class $054a234da6c04610$export$4c46226ec729a3dc {
     }
     escapeIdentifierOrIndex(name) {
         if (typeof name === 'number' && /^\d+$/.test(name.toString())) return name.toString();
-        return $054a234da6c04610$export$56fe274825607f4a(name.toString());
+        return $1164bc623fd45eb4$export$56fe274825607f4a(name.toString());
     }
     escapeValue(value) {
-        return $054a234da6c04610$export$49c4ba04cdb4c4d4(value, this.marked);
+        return $1164bc623fd45eb4$export$4b4cc7872ca29d6f(value, this.marked);
     }
 }
 
 
-function $081f56eebceb920b$export$d37f750fa547bf8b(address, prefix) {
+function $97731a93425cb85d$export$d37f750fa547bf8b(address, prefix) {
     try {
         if (!address || !prefix) return false;
         const [net, mask] = prefix.split('/');
@@ -1388,8 +1392,8 @@ function $081f56eebceb920b$export$d37f750fa547bf8b(address, prefix) {
         const v6 = !v4 && address.includes(':') && net.includes(':');
         if (!v4 && !v6) return false;
         if (v4 && cidr > 32 || v6 && cidr > 128) return false;
-        const aBytes = $081f56eebceb920b$var$toBytes(address, v4);
-        const nBytes = $081f56eebceb920b$var$toBytes(net, v4);
+        const aBytes = $97731a93425cb85d$var$toBytes(address, v4);
+        const nBytes = $97731a93425cb85d$var$toBytes(net, v4);
         if (!aBytes || !nBytes) return false;
         const fullBytes = cidr >> 3;
         for(let i = 0; i < fullBytes; i++)if (aBytes[i] !== nBytes[i]) return false;
@@ -1403,7 +1407,7 @@ function $081f56eebceb920b$export$d37f750fa547bf8b(address, prefix) {
         return false;
     }
 }
-function $081f56eebceb920b$var$toBytes(ip, isV4) {
+function $97731a93425cb85d$var$toBytes(ip, isV4) {
     if (isV4) {
         const p = ip.split('.');
         if (p.length !== 4) return null;
@@ -1444,39 +1448,39 @@ function $081f56eebceb920b$var$toBytes(ip, isV4) {
 
 
 
-var $23fc6ca6b1cb5ed8$require$Buffer = $62dAA$Buffer;
+var $f4b746eecdc74db5$require$Buffer = $cUKEk$Buffer;
 // TODO: this file should be generated from or mergred with insights/insightsql/compiler/javascript_stl.py
-function $23fc6ca6b1cb5ed8$var$STLToString(args) {
-    if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(args[0])) {
+function $f4b746eecdc74db5$var$STLToString(args) {
+    if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(args[0])) {
         const month = args[0].month;
         const day = args[0].day;
         return `${args[0].year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
     }
-    if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(args[0])) return (0, $62dAA$DateTime).fromSeconds(args[0].dt, {
+    if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(args[0])) return (0, $cUKEk$DateTime).fromSeconds(args[0].dt, {
         zone: args[0].zone
     }).toISO();
-    return (0, $054a234da6c04610$export$ed243cb9e89db69e)(args[0]);
+    return (0, $1164bc623fd45eb4$export$a95699d673286b58)(args[0]);
 }
-// Helper: HogInterval
-// function isHogInterval(obj: any): obj is HogInterval {
-//     return obj && obj.__hogInterval__ === true
+// Helper: IQLInterval
+// function isIQLInterval(obj: any): obj is IQLInterval {
+//     return obj && obj.__iqlInterval__ === true
 // }
-function $23fc6ca6b1cb5ed8$var$toHogInterval(value, unit) {
+function $f4b746eecdc74db5$var$toIQLInterval(value, unit) {
     return {
-        __hogInterval__: true,
+        __iqlInterval__: true,
         value: value,
         unit: unit
     };
 }
-function $23fc6ca6b1cb5ed8$var$applyIntervalToDateTime(base, interval) {
+function $f4b746eecdc74db5$var$applyIntervalToDateTime(base, interval) {
     let dt;
     let zone = 'UTC';
-    if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(base)) {
+    if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(base)) {
         zone = base.zone;
-        dt = (0, $62dAA$DateTime).fromSeconds(base.dt, {
+        dt = (0, $cUKEk$DateTime).fromSeconds(base.dt, {
             zone: zone
         });
-    } else dt = (0, $62dAA$DateTime).fromObject({
+    } else dt = (0, $cUKEk$DateTime).fromObject({
         year: base.year,
         month: base.month,
         day: base.day
@@ -1526,29 +1530,29 @@ function $23fc6ca6b1cb5ed8$var$applyIntervalToDateTime(base, interval) {
         default:
             throw new Error(`Unsupported interval unit: ${unit}`);
     }
-    if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(base)) return {
-        __hogDateTime__: true,
+    if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(base)) return {
+        __iqlDateTime__: true,
         dt: newDt.toSeconds(),
         zone: newDt.zoneName || 'UTC'
     };
     return {
-        __hogDate__: true,
+        __iqlDate__: true,
         year: newDt.year,
         month: newDt.month,
         day: newDt.day
     };
 }
 // dateAdd(unit, amount, datetime)
-function $23fc6ca6b1cb5ed8$var$dateAddFn([unit, amount, datetime]) {
-    return $23fc6ca6b1cb5ed8$var$applyIntervalToDateTime(datetime, $23fc6ca6b1cb5ed8$var$toHogInterval(amount, unit));
+function $f4b746eecdc74db5$var$dateAddFn([unit, amount, datetime]) {
+    return $f4b746eecdc74db5$var$applyIntervalToDateTime(datetime, $f4b746eecdc74db5$var$toIQLInterval(amount, unit));
 }
 // dateDiff(unit, start, end)
-function $23fc6ca6b1cb5ed8$var$dateDiffFn([unit, startVal, endVal]) {
+function $f4b746eecdc74db5$var$dateDiffFn([unit, startVal, endVal]) {
     function toDT(obj) {
-        if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(obj)) return (0, $62dAA$DateTime).fromSeconds(obj.dt, {
+        if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(obj)) return (0, $cUKEk$DateTime).fromSeconds(obj.dt, {
             zone: obj.zone
         });
-        else if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(obj)) return (0, $62dAA$DateTime).fromObject({
+        else if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(obj)) return (0, $cUKEk$DateTime).fromObject({
             year: obj.year,
             month: obj.month,
             day: obj.day
@@ -1556,7 +1560,7 @@ function $23fc6ca6b1cb5ed8$var$dateDiffFn([unit, startVal, endVal]) {
             zone: 'UTC'
         });
         // try parse ISO string
-        return (0, $62dAA$DateTime).fromISO(obj, {
+        return (0, $cUKEk$DateTime).fromISO(obj, {
             zone: 'UTC'
         });
     }
@@ -1592,22 +1596,22 @@ function $23fc6ca6b1cb5ed8$var$dateDiffFn([unit, startVal, endVal]) {
     }
 }
 // dateTrunc(unit, datetime)
-function $23fc6ca6b1cb5ed8$var$dateTruncFn([unit, val]) {
-    if (!(0, $27b25c9e0700770a$export$36cb9320e67ccd70)(val)) throw new Error('Expected a DateTime for dateTrunc');
-    const dt = (0, $62dAA$DateTime).fromSeconds(val.dt, {
+function $f4b746eecdc74db5$var$dateTruncFn([unit, val]) {
+    if (!(0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(val)) throw new Error('Expected a DateTime for dateTrunc');
+    const dt = (0, $cUKEk$DateTime).fromSeconds(val.dt, {
         zone: val.zone
     });
     let truncated;
     switch(unit){
         case 'year':
-            truncated = (0, $62dAA$DateTime).fromObject({
+            truncated = (0, $cUKEk$DateTime).fromObject({
                 year: dt.year
             }, {
                 zone: dt.zoneName
             });
             break;
         case 'month':
-            truncated = (0, $62dAA$DateTime).fromObject({
+            truncated = (0, $cUKEk$DateTime).fromObject({
                 year: dt.year,
                 month: dt.month
             }, {
@@ -1615,7 +1619,7 @@ function $23fc6ca6b1cb5ed8$var$dateTruncFn([unit, val]) {
             });
             break;
         case 'day':
-            truncated = (0, $62dAA$DateTime).fromObject({
+            truncated = (0, $cUKEk$DateTime).fromObject({
                 year: dt.year,
                 month: dt.month,
                 day: dt.day
@@ -1624,7 +1628,7 @@ function $23fc6ca6b1cb5ed8$var$dateTruncFn([unit, val]) {
             });
             break;
         case 'hour':
-            truncated = (0, $62dAA$DateTime).fromObject({
+            truncated = (0, $cUKEk$DateTime).fromObject({
                 year: dt.year,
                 month: dt.month,
                 day: dt.day,
@@ -1634,7 +1638,7 @@ function $23fc6ca6b1cb5ed8$var$dateTruncFn([unit, val]) {
             });
             break;
         case 'minute':
-            truncated = (0, $62dAA$DateTime).fromObject({
+            truncated = (0, $cUKEk$DateTime).fromObject({
                 year: dt.year,
                 month: dt.month,
                 day: dt.day,
@@ -1648,64 +1652,64 @@ function $23fc6ca6b1cb5ed8$var$dateTruncFn([unit, val]) {
             throw new Error(`Unsupported unit for dateTrunc: ${unit}`);
     }
     return {
-        __hogDateTime__: true,
+        __iqlDateTime__: true,
         dt: truncated.toSeconds(),
         zone: truncated.zoneName || 'UTC'
     };
 }
-function $23fc6ca6b1cb5ed8$var$coalesceFn(args) {
+function $f4b746eecdc74db5$var$coalesceFn(args) {
     for (const a of args){
         if (a !== null && a !== undefined) return a;
     }
     return null;
 }
-function $23fc6ca6b1cb5ed8$var$assumeNotNullFn([val]) {
+function $f4b746eecdc74db5$var$assumeNotNullFn([val]) {
     if (val === null || val === undefined) throw new Error('Value is null in assumeNotNull');
     return val;
 }
-function $23fc6ca6b1cb5ed8$var$equalsFn([a, b]) {
+function $f4b746eecdc74db5$var$equalsFn([a, b]) {
     return a === b;
 }
-function $23fc6ca6b1cb5ed8$var$greaterFn([a, b]) {
+function $f4b746eecdc74db5$var$greaterFn([a, b]) {
     return a > b;
 }
-function $23fc6ca6b1cb5ed8$var$greaterOrEqualsFn([a, b]) {
+function $f4b746eecdc74db5$var$greaterOrEqualsFn([a, b]) {
     return a >= b;
 }
-function $23fc6ca6b1cb5ed8$var$lessFn([a, b]) {
+function $f4b746eecdc74db5$var$lessFn([a, b]) {
     return a < b;
 }
-function $23fc6ca6b1cb5ed8$var$lessOrEqualsFn([a, b]) {
+function $f4b746eecdc74db5$var$lessOrEqualsFn([a, b]) {
     return a <= b;
 }
-function $23fc6ca6b1cb5ed8$var$notEqualsFn([a, b]) {
+function $f4b746eecdc74db5$var$notEqualsFn([a, b]) {
     return a !== b;
 }
-function $23fc6ca6b1cb5ed8$var$notFn([a]) {
+function $f4b746eecdc74db5$var$notFn([a]) {
     return !a;
 }
-function $23fc6ca6b1cb5ed8$var$andFn(args) {
+function $f4b746eecdc74db5$var$andFn(args) {
     return args.every(Boolean);
 }
-function $23fc6ca6b1cb5ed8$var$orFn(args) {
+function $f4b746eecdc74db5$var$orFn(args) {
     return args.some(Boolean);
 }
-function $23fc6ca6b1cb5ed8$var$ifFn([cond, thenVal, elseVal]) {
+function $f4b746eecdc74db5$var$ifFn([cond, thenVal, elseVal]) {
     return cond ? thenVal : elseVal;
 }
-function $23fc6ca6b1cb5ed8$var$inFn([val, arr]) {
-    return Array.isArray(arr) || arr && arr.__isHogTuple ? arr.includes(val) : false;
+function $f4b746eecdc74db5$var$inFn([val, arr]) {
+    return Array.isArray(arr) || arr && arr.__isIQLTuple ? arr.includes(val) : false;
 }
-function $23fc6ca6b1cb5ed8$var$min2Fn([a, b]) {
+function $f4b746eecdc74db5$var$min2Fn([a, b]) {
     return a < b ? a : b;
 }
-function $23fc6ca6b1cb5ed8$var$plusFn([a, b]) {
+function $f4b746eecdc74db5$var$plusFn([a, b]) {
     return a + b;
 }
-function $23fc6ca6b1cb5ed8$var$minusFn([a, b]) {
+function $f4b746eecdc74db5$var$minusFn([a, b]) {
     return a - b;
 }
-function $23fc6ca6b1cb5ed8$var$multiIfFn(args) {
+function $f4b746eecdc74db5$var$multiIfFn(args) {
     // multiIf(cond1, val1, cond2, val2, ..., default)
     const last = args[args.length - 1];
     const pairs = args.slice(0, -1);
@@ -1716,23 +1720,23 @@ function $23fc6ca6b1cb5ed8$var$multiIfFn(args) {
     }
     return last;
 }
-function $23fc6ca6b1cb5ed8$var$floorFn([a]) {
+function $f4b746eecdc74db5$var$floorFn([a]) {
     return Math.floor(a);
 }
 // extract(part, datetime)
-function $23fc6ca6b1cb5ed8$var$extractFn([part, val]) {
+function $f4b746eecdc74db5$var$extractFn([part, val]) {
     function toDT(obj) {
-        if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(obj)) return (0, $62dAA$DateTime).fromSeconds(obj.dt, {
+        if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(obj)) return (0, $cUKEk$DateTime).fromSeconds(obj.dt, {
             zone: obj.zone
         });
-        else if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(obj)) return (0, $62dAA$DateTime).fromObject({
+        else if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(obj)) return (0, $cUKEk$DateTime).fromObject({
             year: obj.year,
             month: obj.month,
             day: obj.day
         }, {
             zone: 'UTC'
         });
-        return (0, $62dAA$DateTime).fromISO(obj, {
+        return (0, $cUKEk$DateTime).fromISO(obj, {
             zone: 'UTC'
         });
     }
@@ -1754,13 +1758,13 @@ function $23fc6ca6b1cb5ed8$var$extractFn([part, val]) {
             throw new Error(`Unknown extract part: ${part}`);
     }
 }
-function $23fc6ca6b1cb5ed8$var$roundFn([a]) {
+function $f4b746eecdc74db5$var$roundFn([a]) {
     return Math.round(a);
 }
-function $23fc6ca6b1cb5ed8$var$startsWithFn([str, prefix]) {
+function $f4b746eecdc74db5$var$startsWithFn([str, prefix]) {
     return typeof str === 'string' && typeof prefix === 'string' && str.startsWith(prefix);
 }
-function $23fc6ca6b1cb5ed8$var$substringFn([s, start, optionalLength]) {
+function $f4b746eecdc74db5$var$substringFn([s, start, optionalLength]) {
     if (typeof s !== 'string') return '';
     const startIdx = start - 1;
     const length = typeof optionalLength === 'number' ? optionalLength : s.length - startIdx;
@@ -1768,55 +1772,55 @@ function $23fc6ca6b1cb5ed8$var$substringFn([s, start, optionalLength]) {
     const endIdx = startIdx + length;
     return startIdx < s.length ? s.slice(startIdx, endIdx) : '';
 }
-function $23fc6ca6b1cb5ed8$var$addDaysFn([dateOrDt, days]) {
-    return $23fc6ca6b1cb5ed8$var$applyIntervalToDateTime(dateOrDt, $23fc6ca6b1cb5ed8$var$toHogInterval(days, 'day'));
+function $f4b746eecdc74db5$var$addDaysFn([dateOrDt, days]) {
+    return $f4b746eecdc74db5$var$applyIntervalToDateTime(dateOrDt, $f4b746eecdc74db5$var$toIQLInterval(days, 'day'));
 }
-function $23fc6ca6b1cb5ed8$var$toIntervalDayFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$toHogInterval(val, 'day');
+function $f4b746eecdc74db5$var$toIntervalDayFn([val]) {
+    return $f4b746eecdc74db5$var$toIQLInterval(val, 'day');
 }
-function $23fc6ca6b1cb5ed8$var$toIntervalHourFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$toHogInterval(val, 'hour');
+function $f4b746eecdc74db5$var$toIntervalHourFn([val]) {
+    return $f4b746eecdc74db5$var$toIQLInterval(val, 'hour');
 }
-function $23fc6ca6b1cb5ed8$var$toIntervalMinuteFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$toHogInterval(val, 'minute');
+function $f4b746eecdc74db5$var$toIntervalMinuteFn([val]) {
+    return $f4b746eecdc74db5$var$toIQLInterval(val, 'minute');
 }
-function $23fc6ca6b1cb5ed8$var$toIntervalMonthFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$toHogInterval(val, 'month');
+function $f4b746eecdc74db5$var$toIntervalMonthFn([val]) {
+    return $f4b746eecdc74db5$var$toIQLInterval(val, 'month');
 }
-function $23fc6ca6b1cb5ed8$var$toYearFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$extractFn([
+function $f4b746eecdc74db5$var$toYearFn([val]) {
+    return $f4b746eecdc74db5$var$extractFn([
         'year',
         val
     ]);
 }
-function $23fc6ca6b1cb5ed8$var$toMonthFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$extractFn([
+function $f4b746eecdc74db5$var$toMonthFn([val]) {
+    return $f4b746eecdc74db5$var$extractFn([
         'month',
         val
     ]);
 }
-function $23fc6ca6b1cb5ed8$var$toStartOfDayFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$dateTruncFn([
+function $f4b746eecdc74db5$var$toStartOfDayFn([val]) {
+    return $f4b746eecdc74db5$var$dateTruncFn([
         'day',
-        (0, $27b25c9e0700770a$export$36cb9320e67ccd70)(val) ? val : $23fc6ca6b1cb5ed8$var$toDateTimeFromDate(val)
+        (0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(val) ? val : $f4b746eecdc74db5$var$toDateTimeFromDate(val)
     ]);
 }
-function $23fc6ca6b1cb5ed8$var$toStartOfHourFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$dateTruncFn([
+function $f4b746eecdc74db5$var$toStartOfHourFn([val]) {
+    return $f4b746eecdc74db5$var$dateTruncFn([
         'hour',
-        (0, $27b25c9e0700770a$export$36cb9320e67ccd70)(val) ? val : $23fc6ca6b1cb5ed8$var$toDateTimeFromDate(val)
+        (0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(val) ? val : $f4b746eecdc74db5$var$toDateTimeFromDate(val)
     ]);
 }
-function $23fc6ca6b1cb5ed8$var$toStartOfMonthFn([val]) {
-    return $23fc6ca6b1cb5ed8$var$dateTruncFn([
+function $f4b746eecdc74db5$var$toStartOfMonthFn([val]) {
+    return $f4b746eecdc74db5$var$dateTruncFn([
         'month',
-        (0, $27b25c9e0700770a$export$36cb9320e67ccd70)(val) ? val : $23fc6ca6b1cb5ed8$var$toDateTimeFromDate(val)
+        (0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(val) ? val : $f4b746eecdc74db5$var$toDateTimeFromDate(val)
     ]);
 }
-function $23fc6ca6b1cb5ed8$var$toStartOfWeekFn([val]) {
-    const dt = (0, $27b25c9e0700770a$export$36cb9320e67ccd70)(val) ? (0, $62dAA$DateTime).fromSeconds(val.dt, {
+function $f4b746eecdc74db5$var$toStartOfWeekFn([val]) {
+    const dt = (0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(val) ? (0, $cUKEk$DateTime).fromSeconds(val.dt, {
         zone: val.zone
-    }) : (0, $62dAA$DateTime).fromObject({
+    }) : (0, $cUKEk$DateTime).fromObject({
         year: val.year,
         month: val.month,
         day: val.day
@@ -1829,31 +1833,31 @@ function $23fc6ca6b1cb5ed8$var$toStartOfWeekFn([val]) {
         days: weekday - 1
     }).startOf('day');
     return {
-        __hogDateTime__: true,
+        __iqlDateTime__: true,
         dt: startOfWeek.toSeconds(),
         zone: startOfWeek.zoneName || 'UTC'
     };
 }
-function $23fc6ca6b1cb5ed8$var$toYYYYMMFn([val]) {
-    const y = $23fc6ca6b1cb5ed8$var$toYearFn([
+function $f4b746eecdc74db5$var$toYYYYMMFn([val]) {
+    const y = $f4b746eecdc74db5$var$toYearFn([
         val
     ]);
-    const m = $23fc6ca6b1cb5ed8$var$toMonthFn([
+    const m = $f4b746eecdc74db5$var$toMonthFn([
         val
     ]);
     return y * 100 + m;
 }
-function $23fc6ca6b1cb5ed8$var$todayFn() {
-    const now = (0, $62dAA$DateTime).now().setZone('UTC');
+function $f4b746eecdc74db5$var$todayFn() {
+    const now = (0, $cUKEk$DateTime).now().setZone('UTC');
     return {
-        __hogDate__: true,
+        __iqlDate__: true,
         year: now.year,
         month: now.month,
         day: now.day
     };
 }
-function $23fc6ca6b1cb5ed8$var$toDateTimeFromDate(date) {
-    const dt = (0, $62dAA$DateTime).fromObject({
+function $f4b746eecdc74db5$var$toDateTimeFromDate(date) {
+    const dt = (0, $cUKEk$DateTime).fromObject({
         year: date.year,
         month: date.month,
         day: date.day
@@ -1861,12 +1865,12 @@ function $23fc6ca6b1cb5ed8$var$toDateTimeFromDate(date) {
         zone: 'UTC'
     });
     return {
-        __hogDateTime__: true,
+        __iqlDateTime__: true,
         dt: dt.toSeconds(),
         zone: 'UTC'
     };
 }
-function $23fc6ca6b1cb5ed8$var$rangeFn(args) {
+function $f4b746eecdc74db5$var$rangeFn(args) {
     if (args.length === 1) return Array.from({
         length: args[0]
     }, (_, i)=>i);
@@ -1875,7 +1879,7 @@ function $23fc6ca6b1cb5ed8$var$rangeFn(args) {
     }, (_, i)=>args[0] + i);
 }
 // JSON extraction
-function $23fc6ca6b1cb5ed8$var$JSONExtractArrayRawFn(args) {
+function $f4b746eecdc74db5$var$JSONExtractArrayRawFn(args) {
     let [obj, ...path] = args // eslint-disable-line prefer-const
     ;
     try {
@@ -1883,10 +1887,10 @@ function $23fc6ca6b1cb5ed8$var$JSONExtractArrayRawFn(args) {
     } catch  {
         return null;
     }
-    const val = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+    const val = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
     return Array.isArray(val) ? val : null;
 }
-function $23fc6ca6b1cb5ed8$var$JSONExtractFloatFn(args) {
+function $f4b746eecdc74db5$var$JSONExtractFloatFn(args) {
     let [obj, ...path] = args // eslint-disable-line prefer-const
     ;
     try {
@@ -1894,11 +1898,11 @@ function $23fc6ca6b1cb5ed8$var$JSONExtractFloatFn(args) {
     } catch  {
         return null;
     }
-    const val = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+    const val = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
     const f = parseFloat(val);
     return isNaN(f) ? null : f;
 }
-function $23fc6ca6b1cb5ed8$var$JSONExtractIntFn(args) {
+function $f4b746eecdc74db5$var$JSONExtractIntFn(args) {
     let [obj, ...path] = args // eslint-disable-line prefer-const
     ;
     try {
@@ -1906,11 +1910,11 @@ function $23fc6ca6b1cb5ed8$var$JSONExtractIntFn(args) {
     } catch  {
         return null;
     }
-    const val = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+    const val = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
     const i = parseInt(val);
     return isNaN(i) ? null : i;
 }
-function $23fc6ca6b1cb5ed8$var$JSONExtractStringFn(args) {
+function $f4b746eecdc74db5$var$JSONExtractStringFn(args) {
     let [obj, ...path] = args // eslint-disable-line prefer-const
     ;
     try {
@@ -1918,13 +1922,13 @@ function $23fc6ca6b1cb5ed8$var$JSONExtractStringFn(args) {
     } catch  {
         return null;
     }
-    const val = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+    const val = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
     return val != null ? String(val) : null;
 }
-const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
+const $f4b746eecdc74db5$export$ef8a2f3c50755575 = {
     concat: {
         fn: (args)=>{
-            return args.map((arg)=>arg === null ? '' : $23fc6ca6b1cb5ed8$var$STLToString([
+            return args.map((arg)=>arg === null ? '' : $f4b746eecdc74db5$var$STLToString([
                     arg
                 ])).join('');
         },
@@ -1944,42 +1948,42 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
         maxArgs: 2
     },
     like: {
-        fn: ([str, pattern], _name, options)=>(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(str, pattern, false, options?.external?.regex?.match),
+        fn: ([str, pattern], _name, options)=>(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(str, pattern, false, options?.external?.regex?.match),
         description: 'Checks if a string matches a SQL LIKE pattern',
         example: 'like($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     ilike: {
-        fn: ([str, pattern], _name, options)=>(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(str, pattern, true, options?.external?.regex?.match),
+        fn: ([str, pattern], _name, options)=>(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(str, pattern, true, options?.external?.regex?.match),
         description: 'Case-insensitive SQL LIKE pattern matching',
         example: 'ilike($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     notLike: {
-        fn: ([str, pattern], _name, options)=>!(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(str, pattern, false, options?.external?.regex?.match),
+        fn: ([str, pattern], _name, options)=>!(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(str, pattern, false, options?.external?.regex?.match),
         description: 'Negated SQL LIKE pattern matching',
         example: 'notLike($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     notILike: {
-        fn: ([str, pattern], _name, options)=>!(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(str, pattern, true, options?.external?.regex?.match),
+        fn: ([str, pattern], _name, options)=>!(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(str, pattern, true, options?.external?.regex?.match),
         description: 'Case-insensitive negated SQL LIKE pattern matching',
         example: 'notILike($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     toString: {
-        fn: $23fc6ca6b1cb5ed8$var$STLToString,
+        fn: $f4b746eecdc74db5$var$STLToString,
         description: 'Converts a value to its string representation',
         example: 'toString($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toUUID: {
-        fn: $23fc6ca6b1cb5ed8$var$STLToString,
+        fn: $f4b746eecdc74db5$var$STLToString,
         description: 'Converts a value to a UUID string',
         example: 'toUUID($1)',
         minArgs: 1,
@@ -1987,14 +1991,14 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toInt: {
         fn: (args)=>{
-            if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(args[0])) return Math.floor(args[0].dt);
-            else if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(args[0])) {
-                const day = (0, $62dAA$DateTime).fromObject({
+            if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(args[0])) return Math.floor(args[0].dt);
+            else if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(args[0])) {
+                const day = (0, $cUKEk$DateTime).fromObject({
                     year: args[0].year,
                     month: args[0].month,
                     day: args[0].day
                 });
-                const epoch = (0, $62dAA$DateTime).fromObject({
+                const epoch = (0, $cUKEk$DateTime).fromObject({
                     year: 1970,
                     month: 1,
                     day: 1
@@ -2010,14 +2014,14 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toFloat: {
         fn: (args)=>{
-            if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(args[0])) return args[0].dt;
-            else if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(args[0])) {
-                const day = (0, $62dAA$DateTime).fromObject({
+            if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(args[0])) return args[0].dt;
+            else if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(args[0])) {
+                const day = (0, $cUKEk$DateTime).fromObject({
                     year: args[0].year,
                     month: args[0].month,
                     day: args[0].day
                 });
-                const epoch = (0, $62dAA$DateTime).fromObject({
+                const epoch = (0, $cUKEk$DateTime).fromObject({
                     year: 1970,
                     month: 1,
                     day: 1
@@ -2085,7 +2089,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     notEmpty: {
         fn: (args)=>{
-            return !$23fc6ca6b1cb5ed8$export$ef8a2f3c50755575.empty.fn(args, 'empty');
+            return !$f4b746eecdc74db5$export$ef8a2f3c50755575.empty.fn(args, 'empty');
         },
         description: 'Checks if a value is not empty',
         example: 'notEmpty($1)',
@@ -2095,7 +2099,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     tuple: {
         fn: (args)=>{
             const tuple = args.slice();
-            tuple.__isHogTuple = true;
+            tuple.__isIQLTuple = true;
             return tuple;
         },
         description: 'Creates a tuple from multiple values',
@@ -2134,7 +2138,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     print: {
         fn: (args)=>{
             // eslint-disable-next-line no-console
-            console.log(...args.map((0, $054a234da6c04610$export$ed243cb9e89db69e)));
+            console.log(...args.map((0, $1164bc623fd45eb4$export$a95699d673286b58)));
         },
         description: 'Prints values to console',
         example: 'print($1, $2)',
@@ -2148,9 +2152,9 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
                 if (Array.isArray(x)) return x.map(convert);
                 else if (typeof x === 'object' && x !== null) {
                     // DateTime and other objects will be sanitized and not converted to a map
-                    if (x.__hogDateTime__) return (0, $4d6f6365495b63e6$export$3f140f12059184aa)(x.dt, x.zone);
-                    else if (x.__hogDate__) return (0, $4d6f6365495b63e6$export$96c0bff854cee350)(x.year, x.month, x.day);
-                    else if (x.__hogError__) return (0, $27b25c9e0700770a$export$c2d752b32b9bf15c)(x.type, x.message, x.payload);
+                    if (x.__iqlDateTime__) return (0, $543e0a83f32f0446$export$d227b45051727ff2)(x.dt, x.zone);
+                    else if (x.__iqlDate__) return (0, $543e0a83f32f0446$export$e366269d19c8b04a)(x.year, x.month, x.day);
+                    else if (x.__iqlError__) return (0, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca)(x.type, x.message, x.payload);
                     // All other objects will
                     const map = new Map();
                     for(const key in x)map.set(key, convert(x[key]));
@@ -2182,10 +2186,10 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
                             return obj;
                         }
                         if (Array.isArray(x)) return x.map((v)=>convert(v, marked));
-                        if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(x) || (0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(x) || (0, $27b25c9e0700770a$export$6a076491ad0da05d)(x) || (0, $27b25c9e0700770a$export$c1885639c9f11133)(x)) return x;
-                        if ((0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(x) || (0, $27b25c9e0700770a$export$2fad4bf1d8756816)(x)) {
+                        if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(x) || (0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(x) || (0, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8)(x) || (0, $03bad8e4eb3d3c3b$export$c47844ae799791e5)(x)) return x;
+                        if ((0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(x) || (0, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375)(x)) {
                             // we don't support serializing callables
-                            const callable = (0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(x) ? x : x.callable;
+                            const callable = (0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(x) ? x : x.callable;
                             return `fn<${callable.name || 'lambda'}(${callable.argCount})>`;
                         }
                         const obj = {};
@@ -2264,7 +2268,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
                 return 0;
             }
             if (typeof obj === 'object') {
-                const value = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+                const value = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
                 if (Array.isArray(value)) return value.length;
                 else if (value instanceof Map) return value.size;
                 else if (typeof value === 'object') return Object.keys(value).length;
@@ -2282,7 +2286,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
             } catch  {
                 return false;
             }
-            if (path.length > 0) obj = (0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(obj, path, true);
+            if (path.length > 0) obj = (0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(obj, path, true);
             if (typeof obj === 'boolean') return obj;
             return false;
         },
@@ -2292,7 +2296,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     base64Encode: {
         fn: (args)=>{
-            return $23fc6ca6b1cb5ed8$require$Buffer.from(args[0]).toString('base64');
+            return $f4b746eecdc74db5$require$Buffer.from(args[0]).toString('base64');
         },
         description: 'Encodes a string to base64',
         example: 'base64Encode($1)',
@@ -2301,7 +2305,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     base64Decode: {
         fn: (args)=>{
-            return $23fc6ca6b1cb5ed8$require$Buffer.from(args[0], 'base64').toString();
+            return $f4b746eecdc74db5$require$Buffer.from(args[0], 'base64').toString();
         },
         description: 'Decodes a base64 string',
         example: 'base64Decode($1)',
@@ -2311,7 +2315,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     tryBase64Decode: {
         fn: (args)=>{
             try {
-                return $23fc6ca6b1cb5ed8$require$Buffer.from(args[0], 'base64').toString();
+                return $f4b746eecdc74db5$require$Buffer.from(args[0], 'base64').toString();
             } catch  {
                 return '';
             }
@@ -2439,49 +2443,49 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
         maxArgs: 0
     },
     sha256Hex: {
-        fn: ([str], _, options)=>(0, $cd98dbf3206987a7$export$bced8d2aada2d1c9)(str, 'hex', options),
+        fn: ([str], _, options)=>(0, $ffcc80cbcbf135bb$export$bced8d2aada2d1c9)(str, 'hex', options),
         description: 'Computes SHA-256 hash of a string',
         example: 'sha256($1)',
         minArgs: 1,
         maxArgs: 1
     },
     sha256: {
-        fn: ([str, encoding], _, options)=>(0, $cd98dbf3206987a7$export$bced8d2aada2d1c9)(str, encoding, options),
+        fn: ([str, encoding], _, options)=>(0, $ffcc80cbcbf135bb$export$bced8d2aada2d1c9)(str, encoding, options),
         description: 'Computes SHA-256 hash of a string',
         example: 'sha256($1, $2)',
         minArgs: 1,
         maxArgs: 2
     },
     md5Hex: {
-        fn: ([str], _, options)=>(0, $cd98dbf3206987a7$export$a58ec6a60c09ca72)(str, 'hex', options),
+        fn: ([str], _, options)=>(0, $ffcc80cbcbf135bb$export$a58ec6a60c09ca72)(str, 'hex', options),
         description: 'Computes MD5 hash of a string',
         example: 'md5($1)',
         minArgs: 1,
         maxArgs: 1
     },
     md5: {
-        fn: ([str, encoding], _, options)=>(0, $cd98dbf3206987a7$export$a58ec6a60c09ca72)(str, encoding, options),
+        fn: ([str, encoding], _, options)=>(0, $ffcc80cbcbf135bb$export$a58ec6a60c09ca72)(str, encoding, options),
         description: 'Computes MD5 hash of a string',
         example: 'md5($1, $2)',
         minArgs: 1,
         maxArgs: 2
     },
     sha256HmacChainHex: {
-        fn: ([data], _, options)=>(0, $cd98dbf3206987a7$export$60c7719ba3f4dd3e)(data, 'hex', options),
+        fn: ([data], _, options)=>(0, $ffcc80cbcbf135bb$export$60c7719ba3f4dd3e)(data, 'hex', options),
         description: 'Computes SHA-256 HMAC chain hash',
         example: 'sha256HmacChainHex($1)',
         minArgs: 1,
         maxArgs: 1
     },
     sha256HmacChain: {
-        fn: ([data, encoding], _, options)=>(0, $cd98dbf3206987a7$export$60c7719ba3f4dd3e)(data, encoding, options),
+        fn: ([data, encoding], _, options)=>(0, $ffcc80cbcbf135bb$export$60c7719ba3f4dd3e)(data, encoding, options),
         description: 'Computes SHA-256 HMAC chain hash',
         example: 'sha256HmacChainHex($1, $2)',
         minArgs: 1,
         maxArgs: 2
     },
     isIPAddressInRange: {
-        fn: ([address, prefix])=>(0, $081f56eebceb920b$export$d37f750fa547bf8b)(address, prefix),
+        fn: ([address, prefix])=>(0, $97731a93425cb85d$export$d37f750fa547bf8b)(address, prefix),
         description: 'Checks if IP address is in CIDR range',
         example: 'isIPAddressInRange($1, $2)',
         minArgs: 2,
@@ -2635,7 +2639,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     now: {
         fn: ()=>{
-            return (0, $4d6f6365495b63e6$export$461939dd4422153)();
+            return (0, $543e0a83f32f0446$export$461939dd4422153)();
         },
         description: 'Returns current datetime',
         example: 'now()',
@@ -2644,7 +2648,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toUnixTimestamp: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$89d19b307eaa5b00)(args[0], args[1]);
+            return (0, $543e0a83f32f0446$export$89d19b307eaa5b00)(args[0], args[1]);
         },
         description: 'Converts datetime to Unix timestamp',
         example: 'toUnixTimestamp($1, $2)',
@@ -2653,7 +2657,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     fromUnixTimestamp: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$2eae39828437ef9)(args[0]);
+            return (0, $543e0a83f32f0446$export$2eae39828437ef9)(args[0]);
         },
         description: 'Converts Unix timestamp to datetime',
         example: 'fromUnixTimestamp($1)',
@@ -2662,7 +2666,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toUnixTimestampMilli: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$3c767e1cce0f2443)(args[0], args[1]);
+            return (0, $543e0a83f32f0446$export$3c767e1cce0f2443)(args[0], args[1]);
         },
         description: 'Converts datetime to Unix timestamp in milliseconds',
         example: 'toUnixTimestampMilli($1, $2)',
@@ -2671,7 +2675,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     fromUnixTimestampMilli: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$477f0894d0f48f23)(args[0]);
+            return (0, $543e0a83f32f0446$export$477f0894d0f48f23)(args[0]);
         },
         description: 'Converts Unix timestamp in milliseconds to datetime',
         example: 'fromUnixTimestampMilli($1)',
@@ -2680,7 +2684,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toTimeZone: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$538b00033cc11c75)(args[0], args[1]);
+            return (0, $543e0a83f32f0446$export$538b00033cc11c75)(args[0], args[1]);
         },
         description: 'Converts datetime to specified timezone',
         example: 'toTimeZone($1, $2)',
@@ -2689,7 +2693,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toDate: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$e67a095c620b86fe)(args[0]);
+            return (0, $543e0a83f32f0446$export$e67a095c620b86fe)(args[0]);
         },
         description: 'Converts value to date',
         example: 'toDate($1)',
@@ -2698,7 +2702,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     toDateTime: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$c2dea5c02f48568d)(args[0], args[1]);
+            return (0, $543e0a83f32f0446$export$c2dea5c02f48568d)(args[0], args[1]);
         },
         description: 'Converts value to datetime',
         example: 'toDateTime($1, $2)',
@@ -2707,36 +2711,36 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     },
     formatDateTime: {
         fn: (args)=>{
-            return (0, $4d6f6365495b63e6$export$8b492ed8828f789c)(args[0], args[1], args[2]);
+            return (0, $543e0a83f32f0446$export$8b492ed8828f789c)(args[0], args[1], args[2]);
         },
         description: 'Formats datetime with pattern',
         example: 'formatDateTime($1, $2, $3)',
         minArgs: 2,
         maxArgs: 3
     },
-    HogError: {
-        fn: (args)=>(0, $27b25c9e0700770a$export$c2d752b32b9bf15c)(args[0], args[1], args[2]),
+    IQLError: {
+        fn: (args)=>(0, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca)(args[0], args[1], args[2]),
         description: 'Creates a Script error',
-        example: 'HogError($1, $2, $3)',
+        example: 'IQLError($1, $2, $3)',
         minArgs: 1,
         maxArgs: 3
     },
     Error: {
-        fn: (args, name)=>(0, $27b25c9e0700770a$export$c2d752b32b9bf15c)(name, args[0], args[1]),
+        fn: (args, name)=>(0, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca)(name, args[0], args[1]),
         description: 'Creates a generic error',
         example: 'Error($1, $2)',
         minArgs: 0,
         maxArgs: 2
     },
     RetryError: {
-        fn: (args, name)=>(0, $27b25c9e0700770a$export$c2d752b32b9bf15c)(name, args[0], args[1]),
+        fn: (args, name)=>(0, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca)(name, args[0], args[1]),
         description: 'Creates a retry error',
         example: 'RetryError($1, $2)',
         minArgs: 0,
         maxArgs: 2
     },
     NotImplementedError: {
-        fn: (args, name)=>(0, $27b25c9e0700770a$export$c2d752b32b9bf15c)(name, args[0], args[1]),
+        fn: (args, name)=>(0, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca)(name, args[0], args[1]),
         description: 'Creates a not implemented error',
         example: 'NotImplementedError($1, $2)',
         minArgs: 0,
@@ -2745,13 +2749,13 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
     typeof: {
         fn: (args)=>{
             if (args[0] === null || args[0] === undefined) return 'null';
-            else if ((0, $27b25c9e0700770a$export$36cb9320e67ccd70)(args[0])) return 'datetime';
-            else if ((0, $27b25c9e0700770a$export$bd8197d5a05a4a7e)(args[0])) return 'date';
-            else if ((0, $27b25c9e0700770a$export$6a076491ad0da05d)(args[0])) return 'error';
-            else if ((0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(args[0]) || (0, $27b25c9e0700770a$export$2fad4bf1d8756816)(args[0])) return 'function';
-            else if ((0, $27b25c9e0700770a$export$c1885639c9f11133)(args[0])) return 'sql';
+            else if ((0, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe)(args[0])) return 'datetime';
+            else if ((0, $03bad8e4eb3d3c3b$export$99165c7c774db4d5)(args[0])) return 'date';
+            else if ((0, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8)(args[0])) return 'error';
+            else if ((0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(args[0]) || (0, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375)(args[0])) return 'function';
+            else if ((0, $03bad8e4eb3d3c3b$export$c47844ae799791e5)(args[0])) return 'sql';
             else if (Array.isArray(args[0])) {
-                if (args[0].__isHogTuple) return 'tuple';
+                if (args[0].__isIQLTuple) return 'tuple';
                 return 'array';
             } else if (typeof args[0] === 'object') return 'object';
             else if (typeof args[0] === 'number') return Number.isInteger(args[0]) ? 'integer' : 'float';
@@ -2765,295 +2769,295 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
         maxArgs: 1
     },
     JSONExtractArrayRaw: {
-        fn: $23fc6ca6b1cb5ed8$var$JSONExtractArrayRawFn,
+        fn: $f4b746eecdc74db5$var$JSONExtractArrayRawFn,
         description: 'Extracts array from JSON path',
         example: 'JSONExtractArrayRaw($1, $2)',
         minArgs: 1
     },
     JSONExtractFloat: {
-        fn: $23fc6ca6b1cb5ed8$var$JSONExtractFloatFn,
+        fn: $f4b746eecdc74db5$var$JSONExtractFloatFn,
         description: 'Extracts float from JSON path',
         example: 'JSONExtractFloat($1, $2)',
         minArgs: 1
     },
     JSONExtractInt: {
-        fn: $23fc6ca6b1cb5ed8$var$JSONExtractIntFn,
+        fn: $f4b746eecdc74db5$var$JSONExtractIntFn,
         description: 'Extracts integer from JSON path',
         example: 'JSONExtractInt($1, $2)',
         minArgs: 1
     },
     JSONExtractString: {
-        fn: $23fc6ca6b1cb5ed8$var$JSONExtractStringFn,
+        fn: $f4b746eecdc74db5$var$JSONExtractStringFn,
         description: 'Extracts string from JSON path',
         example: 'JSONExtractString($1, $2)',
         minArgs: 1
     },
     addDays: {
-        fn: $23fc6ca6b1cb5ed8$var$addDaysFn,
+        fn: $f4b746eecdc74db5$var$addDaysFn,
         description: 'Adds days to date/datetime',
         example: 'addDays($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     assumeNotNull: {
-        fn: $23fc6ca6b1cb5ed8$var$assumeNotNullFn,
+        fn: $f4b746eecdc74db5$var$assumeNotNullFn,
         description: 'Asserts value is not null',
         example: 'assumeNotNull($1)',
         minArgs: 1,
         maxArgs: 1
     },
     coalesce: {
-        fn: $23fc6ca6b1cb5ed8$var$coalesceFn,
+        fn: $f4b746eecdc74db5$var$coalesceFn,
         description: 'Returns first non-null value',
         example: 'coalesce($1, $2, $3)',
         minArgs: 1
     },
     dateAdd: {
-        fn: $23fc6ca6b1cb5ed8$var$dateAddFn,
+        fn: $f4b746eecdc74db5$var$dateAddFn,
         description: 'Adds interval to date/datetime',
         example: 'dateAdd($1, $2, $3)',
         minArgs: 3,
         maxArgs: 3
     },
     dateDiff: {
-        fn: $23fc6ca6b1cb5ed8$var$dateDiffFn,
+        fn: $f4b746eecdc74db5$var$dateDiffFn,
         description: 'Returns difference between dates',
         example: 'dateDiff($1, $2, $3)',
         minArgs: 3,
         maxArgs: 3
     },
     dateTrunc: {
-        fn: $23fc6ca6b1cb5ed8$var$dateTruncFn,
+        fn: $f4b746eecdc74db5$var$dateTruncFn,
         description: 'Truncates datetime to unit',
         example: 'dateTrunc($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     equals: {
-        fn: $23fc6ca6b1cb5ed8$var$equalsFn,
+        fn: $f4b746eecdc74db5$var$equalsFn,
         description: 'Checks if values are equal',
         example: 'equals($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     extract: {
-        fn: $23fc6ca6b1cb5ed8$var$extractFn,
+        fn: $f4b746eecdc74db5$var$extractFn,
         description: 'Extracts part from date/datetime',
         example: 'extract($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     floor: {
-        fn: $23fc6ca6b1cb5ed8$var$floorFn,
+        fn: $f4b746eecdc74db5$var$floorFn,
         description: 'Rounds number down to integer',
         example: 'floor($1)',
         minArgs: 1,
         maxArgs: 1
     },
     greater: {
-        fn: $23fc6ca6b1cb5ed8$var$greaterFn,
+        fn: $f4b746eecdc74db5$var$greaterFn,
         description: 'Checks if first value is greater',
         example: 'greater($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     greaterOrEquals: {
-        fn: $23fc6ca6b1cb5ed8$var$greaterOrEqualsFn,
+        fn: $f4b746eecdc74db5$var$greaterOrEqualsFn,
         description: 'Checks if first value is greater or equal',
         example: 'greaterOrEquals($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     if: {
-        fn: $23fc6ca6b1cb5ed8$var$ifFn,
+        fn: $f4b746eecdc74db5$var$ifFn,
         description: 'Returns value based on condition',
         example: 'if($1, $2, $3)',
         minArgs: 3,
         maxArgs: 3
     },
     in: {
-        fn: $23fc6ca6b1cb5ed8$var$inFn,
+        fn: $f4b746eecdc74db5$var$inFn,
         description: 'Checks if value is in array/tuple',
         example: 'in($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     less: {
-        fn: $23fc6ca6b1cb5ed8$var$lessFn,
+        fn: $f4b746eecdc74db5$var$lessFn,
         description: 'Checks if first value is less',
         example: 'less($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     lessOrEquals: {
-        fn: $23fc6ca6b1cb5ed8$var$lessOrEqualsFn,
+        fn: $f4b746eecdc74db5$var$lessOrEqualsFn,
         description: 'Checks if first value is less or equal',
         example: 'lessOrEquals($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     min2: {
-        fn: $23fc6ca6b1cb5ed8$var$min2Fn,
+        fn: $f4b746eecdc74db5$var$min2Fn,
         description: 'Returns minimum of two values',
         example: 'min2($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     minus: {
-        fn: $23fc6ca6b1cb5ed8$var$minusFn,
+        fn: $f4b746eecdc74db5$var$minusFn,
         description: 'Subtracts second value from first',
         example: 'minus($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     multiIf: {
-        fn: $23fc6ca6b1cb5ed8$var$multiIfFn,
+        fn: $f4b746eecdc74db5$var$multiIfFn,
         description: 'Returns value based on multiple conditions',
         example: 'multiIf($1, $2, $3, $4, $5)',
         minArgs: 3
     },
     not: {
-        fn: $23fc6ca6b1cb5ed8$var$notFn,
+        fn: $f4b746eecdc74db5$var$notFn,
         description: 'Logical NOT operation',
         example: 'not($1)',
         minArgs: 1,
         maxArgs: 1
     },
     notEquals: {
-        fn: $23fc6ca6b1cb5ed8$var$notEqualsFn,
+        fn: $f4b746eecdc74db5$var$notEqualsFn,
         description: 'Checks if values are not equal',
         example: 'notEquals($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     and: {
-        fn: $23fc6ca6b1cb5ed8$var$andFn,
+        fn: $f4b746eecdc74db5$var$andFn,
         description: 'Logical AND operation',
         example: 'and($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     or: {
-        fn: $23fc6ca6b1cb5ed8$var$orFn,
+        fn: $f4b746eecdc74db5$var$orFn,
         description: 'Logical OR operation',
         example: 'or($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     plus: {
-        fn: $23fc6ca6b1cb5ed8$var$plusFn,
+        fn: $f4b746eecdc74db5$var$plusFn,
         description: 'Adds two values',
         example: 'plus($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     range: {
-        fn: $23fc6ca6b1cb5ed8$var$rangeFn,
+        fn: $f4b746eecdc74db5$var$rangeFn,
         description: 'Creates array of numbers',
         example: 'range($1, $2)',
         minArgs: 1,
         maxArgs: 2
     },
     round: {
-        fn: $23fc6ca6b1cb5ed8$var$roundFn,
+        fn: $f4b746eecdc74db5$var$roundFn,
         description: 'Rounds number to nearest integer',
         example: 'round($1)',
         minArgs: 1,
         maxArgs: 1
     },
     startsWith: {
-        fn: $23fc6ca6b1cb5ed8$var$startsWithFn,
+        fn: $f4b746eecdc74db5$var$startsWithFn,
         description: 'Checks if string starts with prefix',
         example: 'startsWith($1, $2)',
         minArgs: 2,
         maxArgs: 2
     },
     substring: {
-        fn: $23fc6ca6b1cb5ed8$var$substringFn,
+        fn: $f4b746eecdc74db5$var$substringFn,
         description: 'Extracts substring from string',
         example: 'substring($1, $2, $3)',
         minArgs: 2,
         maxArgs: 3
     },
     toIntervalDay: {
-        fn: $23fc6ca6b1cb5ed8$var$toIntervalDayFn,
+        fn: $f4b746eecdc74db5$var$toIntervalDayFn,
         description: 'Creates day interval',
         example: 'toIntervalDay($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toIntervalHour: {
-        fn: $23fc6ca6b1cb5ed8$var$toIntervalHourFn,
+        fn: $f4b746eecdc74db5$var$toIntervalHourFn,
         description: 'Creates hour interval',
         example: 'toIntervalHour($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toIntervalMinute: {
-        fn: $23fc6ca6b1cb5ed8$var$toIntervalMinuteFn,
+        fn: $f4b746eecdc74db5$var$toIntervalMinuteFn,
         description: 'Creates minute interval',
         example: 'toIntervalMinute($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toIntervalMonth: {
-        fn: $23fc6ca6b1cb5ed8$var$toIntervalMonthFn,
+        fn: $f4b746eecdc74db5$var$toIntervalMonthFn,
         description: 'Creates month interval',
         example: 'toIntervalMonth($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toMonth: {
-        fn: $23fc6ca6b1cb5ed8$var$toMonthFn,
+        fn: $f4b746eecdc74db5$var$toMonthFn,
         description: 'Extracts month from date/datetime',
         example: 'toMonth($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toStartOfDay: {
-        fn: $23fc6ca6b1cb5ed8$var$toStartOfDayFn,
+        fn: $f4b746eecdc74db5$var$toStartOfDayFn,
         description: 'Truncates datetime to start of day',
         example: 'toStartOfDay($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toStartOfHour: {
-        fn: $23fc6ca6b1cb5ed8$var$toStartOfHourFn,
+        fn: $f4b746eecdc74db5$var$toStartOfHourFn,
         description: 'Truncates datetime to start of hour',
         example: 'toStartOfHour($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toStartOfMonth: {
-        fn: $23fc6ca6b1cb5ed8$var$toStartOfMonthFn,
+        fn: $f4b746eecdc74db5$var$toStartOfMonthFn,
         description: 'Truncates datetime to start of month',
         example: 'toStartOfMonth($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toStartOfWeek: {
-        fn: $23fc6ca6b1cb5ed8$var$toStartOfWeekFn,
+        fn: $f4b746eecdc74db5$var$toStartOfWeekFn,
         description: 'Truncates datetime to start of week',
         example: 'toStartOfWeek($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toYYYYMM: {
-        fn: $23fc6ca6b1cb5ed8$var$toYYYYMMFn,
+        fn: $f4b746eecdc74db5$var$toYYYYMMFn,
         description: 'Converts date to YYYYMM format',
         example: 'toYYYYMM($1)',
         minArgs: 1,
         maxArgs: 1
     },
     toYear: {
-        fn: $23fc6ca6b1cb5ed8$var$toYearFn,
+        fn: $f4b746eecdc74db5$var$toYearFn,
         description: 'Extracts year from date/datetime',
         example: 'toYear($1)',
         minArgs: 1,
         maxArgs: 1
     },
     today: {
-        fn: $23fc6ca6b1cb5ed8$var$todayFn,
+        fn: $f4b746eecdc74db5$var$todayFn,
         description: 'Returns current date',
         example: 'today()',
         minArgs: 0,
@@ -3072,7 +3076,7 @@ const $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 = {
         maxArgs: 2
     }
 };
-const $23fc6ca6b1cb5ed8$export$daf23d78d6f53989 = {
+const $f4b746eecdc74db5$export$daf23d78d6f53989 = {
     sleep: {
         fn: async (args)=>{
             await new Promise((resolve)=>setTimeout(resolve, args[0] * 1000));
@@ -3084,16 +3088,16 @@ const $23fc6ca6b1cb5ed8$export$daf23d78d6f53989 = {
 
 
 
-function $46c45dfd262302d4$export$fa77af024d7e00a8(bytecode, options) {
-    const response = $46c45dfd262302d4$export$78e3044358792147(bytecode, options);
+function $13418e1e9b9813ef$export$fa77af024d7e00a8(bytecode, options) {
+    const response = $13418e1e9b9813ef$export$78e3044358792147(bytecode, options);
     if (response.finished) return response.result;
     if (response.error) throw response.error;
-    throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Unexpected async function call: ' + response.asyncFunctionName);
+    throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Unexpected async function call: ' + response.asyncFunctionName);
 }
-async function $46c45dfd262302d4$export$cf47dcd3447a7197(bytecode, options) {
+async function $13418e1e9b9813ef$export$cf47dcd3447a7197(bytecode, options) {
     let vmState = undefined;
     while(true){
-        const response = $46c45dfd262302d4$export$78e3044358792147(vmState ?? bytecode, options);
+        const response = $13418e1e9b9813ef$export$78e3044358792147(vmState ?? bytecode, options);
         if (response.finished) return response;
         if (response.error) throw response.error;
         if (response.state && response.asyncFunctionName && response.asyncFunctionArgs) {
@@ -3101,14 +3105,14 @@ async function $46c45dfd262302d4$export$cf47dcd3447a7197(bytecode, options) {
             if (options?.asyncFunctions && response.asyncFunctionName in options.asyncFunctions) {
                 const result = await options?.asyncFunctions[response.asyncFunctionName](...response.asyncFunctionArgs);
                 vmState.stack.push(result);
-            } else if (response.asyncFunctionName in (0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989)) {
-                const result = await (0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989)[response.asyncFunctionName].fn(response.asyncFunctionArgs, response.asyncFunctionName, options);
+            } else if (response.asyncFunctionName in (0, $f4b746eecdc74db5$export$daf23d78d6f53989)) {
+                const result = await (0, $f4b746eecdc74db5$export$daf23d78d6f53989)[response.asyncFunctionName].fn(response.asyncFunctionArgs, response.asyncFunctionName, options);
                 vmState.stack.push(result);
-            } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Invalid async function call: ' + response.asyncFunctionName);
-        } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Invalid async function call');
+            } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Invalid async function call: ' + response.asyncFunctionName);
+        } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Invalid async function call');
     }
 }
-function $46c45dfd262302d4$export$78e3044358792147(input, options) {
+function $13418e1e9b9813ef$export$78e3044358792147(input, options) {
     const startTime = Date.now();
     let vmState = undefined;
     let bytecodes;
@@ -3125,7 +3129,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         }
     };
     const rootBytecode = bytecodes.root.bytecode;
-    if (!rootBytecode || rootBytecode.length === 0 || rootBytecode[0] !== '_h' && rootBytecode[0] !== '_H') throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)("Invalid InsightsQL bytecode, must start with '_H'");
+    if (!rootBytecode || rootBytecode.length === 0 || rootBytecode[0] !== '_h' && rootBytecode[0] !== '_H') throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)("Invalid InsightsQL bytecode, must start with '_H'");
     const version = rootBytecode[0] === '_H' ? rootBytecode[1] ?? 0 : 0;
     let temp;
     let temp2;
@@ -3135,24 +3139,24 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
     const syncDuration = vmState ? vmState.syncDuration : 0;
     const sortedUpValues = vmState ? vmState.upvalues.map((v)=>({
             ...v,
-            value: (0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)(v.value)
+            value: (0, $baf5cb126ee7af7a$export$d3a62b7c494d2d21)(v.value)
         })) : [];
     const upvaluesById = {};
     for (const upvalue of sortedUpValues)upvaluesById[upvalue.id] = upvalue;
-    const stack = vmState ? vmState.stack.map((v)=>(0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)(v)) : [];
-    const memStack = stack.map((s)=>(0, $ddbbfac842d2b47e$export$ccac9139013839fb)(s));
+    const stack = vmState ? vmState.stack.map((v)=>(0, $baf5cb126ee7af7a$export$d3a62b7c494d2d21)(v)) : [];
+    const memStack = stack.map((s)=>(0, $baf5cb126ee7af7a$export$ccac9139013839fb)(s));
     const callStack = vmState ? vmState.callStack.map((v)=>({
             ...v,
-            closure: (0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)(v.closure)
+            closure: (0, $baf5cb126ee7af7a$export$d3a62b7c494d2d21)(v.closure)
         })) : [];
     const throwStack = vmState ? vmState.throwStack : [];
     const declaredFunctions = vmState ? vmState.declaredFunctions : {};
     let memUsed = memStack.reduce((acc, val)=>acc + val, 0);
     let maxMemUsed = Math.max(vmState ? vmState.maxMemUsed : 0, memUsed);
-    const memLimit = options?.memoryLimit ?? (0, $d6c46379019a9f14$export$802abc67201653ab);
+    const memLimit = options?.memoryLimit ?? (0, $571704b9c96081fb$export$802abc67201653ab);
     let ops = vmState ? vmState.ops : 0;
-    const timeout = options?.timeout ?? (0, $d6c46379019a9f14$export$dcf22dd285f74f3d);
-    const maxAsyncSteps = options?.maxAsyncSteps ?? (0, $d6c46379019a9f14$export$2a71946d1fd66654);
+    const timeout = options?.timeout ?? (0, $571704b9c96081fb$export$dcf22dd285f74f3d);
+    const maxAsyncSteps = options?.maxAsyncSteps ?? (0, $571704b9c96081fb$export$2a71946d1fd66654);
     const rootGlobals = bytecodes.root?.globals && options?.globals ? {
         ...bytecodes.root.globals,
         ...options.globals
@@ -3162,7 +3166,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         chunk: 'root',
         stackStart: 0,
         argCount: 0,
-        closure: (0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('local', {
+        closure: (0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('local', {
             name: '',
             argCount: 0,
             upvalueCount: 0,
@@ -3188,8 +3192,8 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         if (!frame.chunk || frame.chunk === 'root') {
             chunkBytecode = rootBytecode;
             chunkGlobals = rootGlobals;
-        } else if (frame.chunk.startsWith('stl/') && frame.chunk.substring(4) in (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb)) {
-            chunkBytecode = (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb)[frame.chunk.substring(4)][1];
+        } else if (frame.chunk.startsWith('stl/') && frame.chunk.substring(4) in (0, $9a45f201ddb77472$export$5477e8cd2355fadb)) {
+            chunkBytecode = (0, $9a45f201ddb77472$export$5477e8cd2355fadb)[frame.chunk.substring(4)][1];
             chunkGlobals = {};
         } else if (bytecodes[frame.chunk]) {
             chunkBytecode = bytecodes[frame.chunk].bytecode;
@@ -3201,8 +3205,8 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                 ;
                 chunkBytecode = chunk.bytecode;
                 chunkGlobals = chunk.globals ?? {};
-            } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unknown chunk: ${frame.chunk}`);
-        } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unknown chunk: ${frame.chunk}`);
+            } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unknown chunk: ${frame.chunk}`);
+        } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unknown chunk: ${frame.chunk}`);
         if (frame.ip === 0 && (chunkBytecode[0] === '_H' || chunkBytecode[0] === '_h')) // TODO: store chunkVersion
         frame.ip += chunkBytecode[0] === '_H' ? 2 : 1;
     };
@@ -3210,16 +3214,16 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
     function popStack() {
         if (stack.length === 0) {
             logTelemetry();
-            throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Invalid InsightsQL bytecode, stack is empty, can not pop');
+            throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Invalid InsightsQL bytecode, stack is empty, can not pop');
         }
         memUsed -= memStack.pop() ?? 0;
         return stack.pop();
     }
     function pushStack(value) {
-        memStack.push((0, $ddbbfac842d2b47e$export$ccac9139013839fb)(value));
+        memStack.push((0, $baf5cb126ee7af7a$export$ccac9139013839fb)(value));
         memUsed += memStack[memStack.length - 1];
         maxMemUsed = Math.max(maxMemUsed, memUsed);
-        if (memUsed > memLimit && memLimit > 0) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`);
+        if (memUsed > memLimit && memLimit > 0) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`);
         return stack.push(value);
     }
     function spliceStack2(start, deleteCount) {
@@ -3227,7 +3231,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         return stack.splice(start, deleteCount);
     }
     function stackKeepFirstElements(count) {
-        if (count < 0 || stack.length < count) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Stack underflow');
+        if (count < 0 || stack.length < count) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Stack underflow');
         for(let i = sortedUpValues.length - 1; i >= 0; i--){
             if (sortedUpValues[i].location >= count) {
                 if (!sortedUpValues[i].closed) {
@@ -3240,23 +3244,23 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         return stack.splice(count);
     }
     function next() {
-        if (frame.ip >= chunkBytecode.length - 1) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Unexpected end of bytecode');
+        if (frame.ip >= chunkBytecode.length - 1) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Unexpected end of bytecode');
         return chunkBytecode[++frame.ip];
     }
     function checkTimeout() {
-        if (syncDuration + Date.now() - startTime > timeout) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Execution timed out after ${timeout / 1000} seconds. Performed ${ops} ops.`);
+        if (syncDuration + Date.now() - startTime > timeout) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Execution timed out after ${timeout / 1000} seconds. Performed ${ops} ops.`);
     }
     function getVMState() {
         return {
             bytecodes: bytecodes,
-            stack: stack.map((v)=>(0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v)),
+            stack: stack.map((v)=>(0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v)),
             upvalues: sortedUpValues.map((v)=>({
                     ...v,
-                    value: (0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v.value)
+                    value: (0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v.value)
                 })),
             callStack: callStack.map((v)=>({
                     ...v,
-                    closure: (0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v.closure)
+                    closure: (0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v.closure)
                 })),
             throwStack: throwStack,
             declaredFunctions: declaredFunctions,
@@ -3273,7 +3277,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
             if (sortedUpValues[i].location === index) return sortedUpValues[i];
         }
         const createdUpValue = {
-            __hogUpValue__: true,
+            __iqlUpValue__: true,
             id: sortedUpValues.length + 1,
             location: index,
             closed: false,
@@ -3285,20 +3289,20 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
         return createdUpValue;
     }
     function regexMatch() {
-        if (!options?.external?.regex?.match) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Set options.external.regex.match for RegEx support');
+        if (!options?.external?.regex?.match) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Set options.external.regex.match for RegEx support');
         return (regex, value)=>regex && value ? !!options.external?.regex?.match(regex, value) : false;
     }
     const logTelemetry = ()=>{
         const op = chunkBytecode[frame.ip];
         const newTime = new Date().getTime();
         let debug = '';
-        if (op === (0, $66bfafebb155a286$export$ab5aad00225c5662).CALL_LOCAL || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_PROPERTY || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_PROPERTY_NULLISH) debug = String(stack[stack.length - 1]);
-        else if (op === (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_GLOBAL || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).CALL_GLOBAL || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).STRING || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).INTEGER || op === (0, $66bfafebb155a286$export$ab5aad00225c5662).FLOAT) debug = String(chunkBytecode[frame.ip + 1]);
+        if (op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CALL_LOCAL || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_PROPERTY || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_PROPERTY_NULLISH) debug = String(stack[stack.length - 1]);
+        else if (op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_GLOBAL || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CALL_GLOBAL || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).STRING || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).INTEGER || op === (0, $9efbfe31fe198de1$export$ab5aad00225c5662).FLOAT) debug = String(chunkBytecode[frame.ip + 1]);
         telemetry.push([
             newTime !== lastTime ? newTime - lastTime : 0,
             frame.chunk !== lastChunk ? frame.chunk : '',
             frame.ip,
-            typeof chunkBytecode[frame.ip] === 'number' ? String(chunkBytecode[frame.ip]) + ((0, $66bfafebb155a286$export$59894c102379d64a)[chunkBytecode[frame.ip]] ? `/${(0, $66bfafebb155a286$export$59894c102379d64a)[chunkBytecode[frame.ip]]}` : '') : '???',
+            typeof chunkBytecode[frame.ip] === 'number' ? String(chunkBytecode[frame.ip]) + ((0, $9efbfe31fe198de1$export$59894c102379d64a)[chunkBytecode[frame.ip]] ? `/${(0, $9efbfe31fe198de1$export$59894c102379d64a)[chunkBytecode[frame.ip]]}` : '') : '???',
             debug
         ]);
         lastChunk = frame.chunk;
@@ -3333,158 +3337,158 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
             switch(chunkBytecode[frame.ip]){
                 case null:
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).STRING:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).STRING:
                     pushStack(next());
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).FLOAT:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).FLOAT:
                     pushStack(next());
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).INTEGER:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).INTEGER:
                     pushStack(next());
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).TRUE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).TRUE:
                     pushStack(true);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).FALSE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).FALSE:
                     pushStack(false);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NULL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NULL:
                     pushStack(null);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT:
                     pushStack(!popStack());
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).AND:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).AND:
                     temp = next();
                     temp2 = true;
                     for(let i = 0; i < temp; i++)temp2 = !!popStack() && temp2;
                     pushStack(temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).OR:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).OR:
                     temp = next();
                     temp2 = false;
                     for(let i = 0; i < temp; i++)temp2 = !!popStack() || temp2;
                     pushStack(temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).PLUS:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).PLUS:
                     pushStack(Number(popStack()) + Number(popStack()));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).MINUS:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).MINUS:
                     pushStack(Number(popStack()) - Number(popStack()));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).DIVIDE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).DIVIDE:
                     pushStack(Number(popStack()) / Number(popStack()));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).MULTIPLY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).MULTIPLY:
                     pushStack(Number(popStack()) * Number(popStack()));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).MOD:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).MOD:
                     pushStack(Number(popStack()) % Number(popStack()));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).EQ:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).EQ:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp === temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_EQ:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_EQ:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp !== temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GT:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GT:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp > temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GT_EQ:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GT_EQ:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp >= temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).LT:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).LT:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp < temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).LT_EQ:
-                    [temp, temp2] = (0, $ddbbfac842d2b47e$export$13d90b9b2a99ed13)(popStack(), popStack());
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).LT_EQ:
+                    [temp, temp2] = (0, $baf5cb126ee7af7a$export$13d90b9b2a99ed13)(popStack(), popStack());
                     pushStack(temp <= temp2);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).LIKE:
-                    pushStack((0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(popStack(), popStack(), false, options?.external?.regex?.match));
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).LIKE:
+                    pushStack((0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(popStack(), popStack(), false, options?.external?.regex?.match));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).ILIKE:
-                    pushStack((0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(popStack(), popStack(), true, options?.external?.regex?.match));
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).ILIKE:
+                    pushStack((0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(popStack(), popStack(), true, options?.external?.regex?.match));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_LIKE:
-                    pushStack(!(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(popStack(), popStack(), false, options?.external?.regex?.match));
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_LIKE:
+                    pushStack(!(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(popStack(), popStack(), false, options?.external?.regex?.match));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_ILIKE:
-                    pushStack(!(0, $ddbbfac842d2b47e$export$e94e5ec04a02879c)(popStack(), popStack(), true, options?.external?.regex?.match));
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_ILIKE:
+                    pushStack(!(0, $baf5cb126ee7af7a$export$e94e5ec04a02879c)(popStack(), popStack(), true, options?.external?.regex?.match));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).IN:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).IN:
                     temp = popStack();
                     pushStack(popStack().includes(temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_IN:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_IN:
                     temp = popStack();
                     pushStack(!popStack().includes(temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).REGEX:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).REGEX:
                     temp = popStack();
                     pushStack(regexMatch()(popStack(), temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_REGEX:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_REGEX:
                     temp = popStack();
                     pushStack(!regexMatch()(popStack(), temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).IREGEX:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).IREGEX:
                     temp = popStack();
                     pushStack(regexMatch()('(?i)' + popStack(), temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).NOT_IREGEX:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).NOT_IREGEX:
                     temp = popStack();
                     pushStack(!regexMatch()('(?i)' + popStack(), temp));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_GLOBAL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_GLOBAL:
                     {
                         const count = next();
                         const chain = [];
                         for(let i = 0; i < count; i++)chain.push(popStack());
-                        if (chunkGlobals && chain[0] in chunkGlobals && Object.hasOwn(chunkGlobals, chain[0])) pushStack((0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)((0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(chunkGlobals, chain, true)));
-                        else if (options?.asyncFunctions && chain.length == 1 && Object.hasOwn(options.asyncFunctions, chain[0]) && options.asyncFunctions[chain[0]]) pushStack((0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('async', {
+                        if (chunkGlobals && chain[0] in chunkGlobals && Object.hasOwn(chunkGlobals, chain[0])) pushStack((0, $baf5cb126ee7af7a$export$d3a62b7c494d2d21)((0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(chunkGlobals, chain, true)));
+                        else if (options?.asyncFunctions && chain.length == 1 && Object.hasOwn(options.asyncFunctions, chain[0]) && options.asyncFunctions[chain[0]]) pushStack((0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('async', {
                             name: chain[0],
                             argCount: 0,
                             upvalueCount: 0,
                             ip: -1,
                             chunk: 'async'
                         })));
-                        else if (chain.length == 1 && chain[0] in (0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989) && Object.hasOwn((0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989), chain[0])) pushStack((0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('async', {
+                        else if (chain.length == 1 && chain[0] in (0, $f4b746eecdc74db5$export$daf23d78d6f53989) && Object.hasOwn((0, $f4b746eecdc74db5$export$daf23d78d6f53989), chain[0])) pushStack((0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('async', {
                             name: chain[0],
-                            argCount: (0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989)[chain[0]].maxArgs ?? 0,
+                            argCount: (0, $f4b746eecdc74db5$export$daf23d78d6f53989)[chain[0]].maxArgs ?? 0,
                             upvalueCount: 0,
                             ip: -1,
                             chunk: 'async'
                         })));
-                        else if (chain.length == 1 && chain[0] in (0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575) && Object.hasOwn((0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575), chain[0])) pushStack((0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('stl', {
+                        else if (chain.length == 1 && chain[0] in (0, $f4b746eecdc74db5$export$ef8a2f3c50755575) && Object.hasOwn((0, $f4b746eecdc74db5$export$ef8a2f3c50755575), chain[0])) pushStack((0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('stl', {
                             name: chain[0],
-                            argCount: (0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575)[chain[0]].maxArgs ?? 0,
+                            argCount: (0, $f4b746eecdc74db5$export$ef8a2f3c50755575)[chain[0]].maxArgs ?? 0,
                             upvalueCount: 0,
                             ip: -1,
                             chunk: 'stl'
                         })));
-                        else if (chain.length == 1 && chain[0] in (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb) && Object.hasOwn((0, $afd1cc5cb2d921da$export$5477e8cd2355fadb), chain[0])) pushStack((0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('stl', {
+                        else if (chain.length == 1 && chain[0] in (0, $9a45f201ddb77472$export$5477e8cd2355fadb) && Object.hasOwn((0, $9a45f201ddb77472$export$5477e8cd2355fadb), chain[0])) pushStack((0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('stl', {
                             name: chain[0],
-                            argCount: (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb)[chain[0]][0].length,
+                            argCount: (0, $9a45f201ddb77472$export$5477e8cd2355fadb)[chain[0]][0].length,
                             upvalueCount: 0,
                             ip: 0,
                             chunk: `stl/${chain[0]}`
                         })));
-                        else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Global variable not found: ${chain.join('.')}`);
+                        else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Global variable not found: ${chain.join('.')}`);
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).POP:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).POP:
                     popStack();
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).CLOSE_UPVALUE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CLOSE_UPVALUE:
                     stackKeepFirstElements(stack.length - 1);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).RETURN:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).RETURN:
                     {
                         const result = popStack();
                         const lastCallFrame = callStack.pop();
@@ -3506,42 +3510,42 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                         setChunkBytecode();
                         continue; // resume the loop without incrementing frame.ip
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_LOCAL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_LOCAL:
                     temp = callStack.length > 0 ? callStack[callStack.length - 1].stackStart : 0;
                     pushStack(stack[next() + temp]);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).SET_LOCAL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).SET_LOCAL:
                     temp = (callStack.length > 0 ? callStack[callStack.length - 1].stackStart : 0) + next();
                     stack[temp] = popStack();
                     temp2 = memStack[temp];
-                    memStack[temp] = (0, $ddbbfac842d2b47e$export$ccac9139013839fb)(stack[temp]);
+                    memStack[temp] = (0, $baf5cb126ee7af7a$export$ccac9139013839fb)(stack[temp]);
                     memUsed += memStack[temp] - temp2;
                     maxMemUsed = Math.max(maxMemUsed, memUsed);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_PROPERTY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_PROPERTY:
                     temp = popStack() // property
                     ;
-                    pushStack((0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(popStack(), [
+                    pushStack((0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(popStack(), [
                         temp
                     ]));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_PROPERTY_NULLISH:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_PROPERTY_NULLISH:
                     temp = popStack() // property
                     ;
-                    pushStack((0, $ddbbfac842d2b47e$export$2516322ffbb7f3fb)(popStack(), [
+                    pushStack((0, $baf5cb126ee7af7a$export$2516322ffbb7f3fb)(popStack(), [
                         temp
                     ], true));
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).SET_PROPERTY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).SET_PROPERTY:
                     temp = popStack() // value
                     ;
                     temp2 = popStack() // field
                     ;
-                    (0, $ddbbfac842d2b47e$export$c52c7e952af52ee2)(popStack(), [
+                    (0, $baf5cb126ee7af7a$export$c52c7e952af52ee2)(popStack(), [
                         temp2
                     ], temp);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).DICT:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).DICT:
                     temp = next() * 2 // number of elements to remove from the stack
                     ;
                     tempArray = spliceStack2(stack.length - temp, temp);
@@ -3549,30 +3553,30 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                     for(let i = 0; i < tempArray.length; i += 2)tempMap.set(tempArray[i], tempArray[i + 1]);
                     pushStack(tempMap);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).ARRAY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).ARRAY:
                     temp = next();
                     tempArray = spliceStack2(stack.length - temp, temp);
                     pushStack(tempArray);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).TUPLE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).TUPLE:
                     temp = next();
                     tempArray = spliceStack2(stack.length - temp, temp);
-                    tempArray.__isHogTuple = true;
+                    tempArray.__isIQLTuple = true;
                     pushStack(tempArray);
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).JUMP:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).JUMP:
                     temp = next();
                     frame.ip += temp;
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).JUMP_IF_FALSE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).JUMP_IF_FALSE:
                     temp = next();
                     if (!popStack()) frame.ip += temp;
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).JUMP_IF_STACK_NOT_NULL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).JUMP_IF_STACK_NOT_NULL:
                     temp = next();
                     if (stack.length > 0 && stack[stack.length - 1] !== null) frame.ip += temp;
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).DECLARE_FN:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).DECLARE_FN:
                     {
                         // DEPRECATED
                         const name = next();
@@ -3585,13 +3589,13 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                         frame.ip += bodyLength;
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).CALLABLE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CALLABLE:
                     {
                         const name = next();
                         const argCount = next();
                         const upvalueCount = next();
                         const bodyLength = next();
-                        const callable = (0, $27b25c9e0700770a$export$4160dcabb869144f)('local', {
+                        const callable = (0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('local', {
                             name: name,
                             argCount: argCount,
                             upvalueCount: upvalueCount,
@@ -3602,13 +3606,13 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                         frame.ip += bodyLength;
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).CLOSURE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CLOSURE:
                     {
                         const callable = popStack();
-                        if (!(0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(callable)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid callable: ${JSON.stringify(callable)}`);
+                        if (!(0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(callable)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid callable: ${JSON.stringify(callable)}`);
                         const upvalueCount = next();
                         const closureUpValues = [];
-                        if (upvalueCount !== callable.upvalueCount) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid upvalue count. Expected ${callable.upvalueCount}, got ${upvalueCount}`);
+                        if (upvalueCount !== callable.upvalueCount) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid upvalue count. Expected ${callable.upvalueCount}, got ${upvalueCount}`);
                         const stackStart = frame.stackStart;
                         for(let i = 0; i < callable.upvalueCount; i++){
                             const [isLocal, index] = [
@@ -3618,30 +3622,30 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                             if (isLocal) closureUpValues.push(captureUpValue(stackStart + index).id);
                             else closureUpValues.push(frame.closure.upvalues[index]);
                         }
-                        pushStack((0, $27b25c9e0700770a$export$42bb9ce6d451c81e)(callable, closureUpValues));
+                        pushStack((0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)(callable, closureUpValues));
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).GET_UPVALUE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).GET_UPVALUE:
                     {
                         const index = next();
-                        if (index >= frame.closure.upvalues.length) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid upvalue index: ${index}`);
+                        if (index >= frame.closure.upvalues.length) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid upvalue index: ${index}`);
                         const upvalue = upvaluesById[frame.closure.upvalues[index]];
-                        if (!(0, $27b25c9e0700770a$export$30222d8f8abbf3d0)(upvalue)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid upvalue: ${upvalue}`);
+                        if (!(0, $03bad8e4eb3d3c3b$export$9cd2962d6d2d4f5f)(upvalue)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid upvalue: ${upvalue}`);
                         if (upvalue.closed) pushStack(upvalue.value);
                         else pushStack(stack[upvalue.location]);
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).SET_UPVALUE:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).SET_UPVALUE:
                     {
                         const index = next();
-                        if (index >= frame.closure.upvalues.length) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid upvalue index: ${index}`);
+                        if (index >= frame.closure.upvalues.length) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid upvalue index: ${index}`);
                         const upvalue = upvaluesById[frame.closure.upvalues[index]];
-                        if (!(0, $27b25c9e0700770a$export$30222d8f8abbf3d0)(upvalue)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid upvalue: ${upvalue}`);
+                        if (!(0, $03bad8e4eb3d3c3b$export$9cd2962d6d2d4f5f)(upvalue)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid upvalue: ${upvalue}`);
                         if (upvalue.closed) upvalue.value = popStack();
                         else stack[upvalue.location] = popStack();
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).CALL_GLOBAL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CALL_GLOBAL:
                     {
                         checkTimeout();
                         const name = next();
@@ -3658,7 +3662,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                 chunk: frame.chunk,
                                 stackStart: stack.length - argLen,
                                 argCount: argLen,
-                                closure: (0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('local', {
+                                closure: (0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('local', {
                                     name: name,
                                     argCount: argLen,
                                     upvalueCount: 0,
@@ -3670,11 +3674,11 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                             callStack.push(frame);
                             continue; // resume the loop without incrementing frame.ip
                         } else {
-                            if (temp > stack.length) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Not enough arguments on the stack');
-                            if (temp > (0, $d6c46379019a9f14$export$a6ea10a37f8d5abe)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Too many arguments');
+                            if (temp > stack.length) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Not enough arguments on the stack');
+                            if (temp > (0, $571704b9c96081fb$export$a6ea10a37f8d5abe)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Too many arguments');
                             if (name === 'import') {
                                 const args = version === 0 ? Array(temp).fill(null).map(()=>popStack()) : stackKeepFirstElements(stack.length - temp);
-                                if (args.length !== 1) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Function ${name} requires exactly 1 argument`);
+                                if (args.length !== 1) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Function ${name} requires exactly 1 argument`);
                                 frame.ip += 1 // advance for when we return
                                 ;
                                 frame = {
@@ -3682,7 +3686,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                     chunk: args[0],
                                     stackStart: stack.length,
                                     argCount: 0,
-                                    closure: (0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('local', {
+                                    closure: (0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('local', {
                                         name: args[0],
                                         argCount: 0,
                                         upvalueCount: 0,
@@ -3695,9 +3699,9 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                 continue; // resume the loop without incrementing frame.ip
                             } else if (options?.functions && Object.hasOwn(options.functions, name) && options.functions[name]) {
                                 const args = version === 0 ? Array(temp).fill(null).map(()=>popStack()) : stackKeepFirstElements(stack.length - temp);
-                                pushStack((0, $ddbbfac842d2b47e$export$f0c387fc4f006d51)(options.functions[name](...args.map((v)=>(0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v)))));
-                            } else if (name !== 'toString' && (options?.asyncFunctions && Object.hasOwn(options.asyncFunctions, name) && options.asyncFunctions[name] || name in (0, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989))) {
-                                if (asyncSteps >= maxAsyncSteps) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Exceeded maximum number of async steps: ${maxAsyncSteps}`);
+                                pushStack((0, $baf5cb126ee7af7a$export$d3a62b7c494d2d21)(options.functions[name](...args.map((v)=>(0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v)))));
+                            } else if (name !== 'toString' && (options?.asyncFunctions && Object.hasOwn(options.asyncFunctions, name) && options.asyncFunctions[name] || name in (0, $f4b746eecdc74db5$export$daf23d78d6f53989))) {
+                                if (asyncSteps >= maxAsyncSteps) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Exceeded maximum number of async steps: ${maxAsyncSteps}`);
                                 const args = version === 0 ? Array(temp).fill(null).map(()=>popStack()) : stackKeepFirstElements(stack.length - temp);
                                 frame.ip += 1 // resume at the next address after async returns
                                 ;
@@ -3705,18 +3709,18 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                     result: undefined,
                                     finished: false,
                                     asyncFunctionName: name,
-                                    asyncFunctionArgs: args.map((v)=>(0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v)),
+                                    asyncFunctionArgs: args.map((v)=>(0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v)),
                                     state: {
                                         ...getVMState(),
                                         asyncSteps: asyncSteps + 1
                                     }
                                 };
-                            } else if (name in (0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575)) {
+                            } else if (name in (0, $f4b746eecdc74db5$export$ef8a2f3c50755575)) {
                                 const args = version === 0 ? Array(temp).fill(null).map(()=>popStack()) : stackKeepFirstElements(stack.length - temp);
-                                pushStack((0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575)[name].fn(args, name, options));
-                            } else if (name in (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb)) {
-                                const argNames = (0, $afd1cc5cb2d921da$export$5477e8cd2355fadb)[name][0];
-                                if (argNames.length !== temp) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Function ${name} requires exactly ${argNames.length} arguments`);
+                                pushStack((0, $f4b746eecdc74db5$export$ef8a2f3c50755575)[name].fn(args, name, options));
+                            } else if (name in (0, $9a45f201ddb77472$export$5477e8cd2355fadb)) {
+                                const argNames = (0, $9a45f201ddb77472$export$5477e8cd2355fadb)[name][0];
+                                if (argNames.length !== temp) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Function ${name} requires exactly ${argNames.length} arguments`);
                                 frame.ip += 1 // advance for when we return
                                 ;
                                 frame = {
@@ -3724,7 +3728,7 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                     chunk: `stl/${name}`,
                                     stackStart: stack.length - temp,
                                     argCount: temp,
-                                    closure: (0, $27b25c9e0700770a$export$42bb9ce6d451c81e)((0, $27b25c9e0700770a$export$4160dcabb869144f)('stl', {
+                                    closure: (0, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18)((0, $03bad8e4eb3d3c3b$export$48cfb2b057120036)('stl', {
                                         name: name,
                                         argCount: temp,
                                         upvalueCount: 0,
@@ -3734,25 +3738,25 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                                 };
                                 setChunkBytecode();
                                 callStack.push(frame);
-                                if (callStack.length > (0, $d6c46379019a9f14$export$b3e3f74739b6f9fd)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Call stack exceeded maximum length of ${(0, $d6c46379019a9f14$export$b3e3f74739b6f9fd)}`);
+                                if (callStack.length > (0, $571704b9c96081fb$export$b3e3f74739b6f9fd)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Call stack exceeded maximum length of ${(0, $571704b9c96081fb$export$b3e3f74739b6f9fd)}`);
                                 continue; // resume the loop without incrementing frame.ip
-                            } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unsupported function call: ${name}`);
+                            } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unsupported function call: ${name}`);
                         }
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).CALL_LOCAL:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).CALL_LOCAL:
                     {
                         checkTimeout();
                         const closure = popStack();
-                        if (!(0, $27b25c9e0700770a$export$2fad4bf1d8756816)(closure)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid closure: ${JSON.stringify(closure)}`);
-                        if (!(0, $27b25c9e0700770a$export$3bbfc8b03361d8b7)(closure.callable)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Invalid callable: ${JSON.stringify(closure.callable)}`);
+                        if (!(0, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375)(closure)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid closure: ${JSON.stringify(closure)}`);
+                        if (!(0, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6)(closure.callable)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Invalid callable: ${JSON.stringify(closure.callable)}`);
                         temp = next() // args.length
                         ;
-                        if (temp > stack.length) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Not enough arguments on the stack');
-                        if (temp > (0, $d6c46379019a9f14$export$a6ea10a37f8d5abe)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Too many arguments');
-                        if (closure.callable.__hogCallable__ === 'local') {
+                        if (temp > stack.length) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Not enough arguments on the stack');
+                        if (temp > (0, $571704b9c96081fb$export$a6ea10a37f8d5abe)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Too many arguments');
+                        if (closure.callable.__iqlCallable__ === 'local') {
                             if (closure.callable.argCount > temp) for(let i = temp; i < closure.callable.argCount; i++)pushStack(null);
-                            else if (closure.callable.argCount < temp) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Too many arguments. Passed ${temp}, expected ${closure.callable.argCount}`);
+                            else if (closure.callable.argCount < temp) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Too many arguments. Passed ${temp}, expected ${closure.callable.argCount}`);
                             frame.ip += 1 // advance for when we return
                             ;
                             frame = {
@@ -3764,48 +3768,48 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                             };
                             setChunkBytecode();
                             callStack.push(frame);
-                            if (callStack.length > (0, $d6c46379019a9f14$export$b3e3f74739b6f9fd)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Call stack exceeded maximum length of ${(0, $d6c46379019a9f14$export$b3e3f74739b6f9fd)}`);
+                            if (callStack.length > (0, $571704b9c96081fb$export$b3e3f74739b6f9fd)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Call stack exceeded maximum length of ${(0, $571704b9c96081fb$export$b3e3f74739b6f9fd)}`);
                             continue; // resume the loop without incrementing frame.ip
-                        } else if (closure.callable.__hogCallable__ === 'stl') {
-                            if (!closure.callable.name || !(closure.callable.name in (0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575))) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unsupported function call: ${closure.callable.name}`);
-                            const stlFn = (0, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575)[closure.callable.name];
-                            if (stlFn.minArgs !== undefined && temp < stlFn.minArgs) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Function ${closure.callable.name} requires at least ${stlFn.minArgs} arguments`);
-                            if (stlFn.maxArgs !== undefined && temp > stlFn.maxArgs) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Function ${closure.callable.name} requires at most ${stlFn.maxArgs} arguments`);
+                        } else if (closure.callable.__iqlCallable__ === 'stl') {
+                            if (!closure.callable.name || !(closure.callable.name in (0, $f4b746eecdc74db5$export$ef8a2f3c50755575))) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unsupported function call: ${closure.callable.name}`);
+                            const stlFn = (0, $f4b746eecdc74db5$export$ef8a2f3c50755575)[closure.callable.name];
+                            if (stlFn.minArgs !== undefined && temp < stlFn.minArgs) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Function ${closure.callable.name} requires at least ${stlFn.minArgs} arguments`);
+                            if (stlFn.maxArgs !== undefined && temp > stlFn.maxArgs) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Function ${closure.callable.name} requires at most ${stlFn.maxArgs} arguments`);
                             const args = Array(temp).fill(null).map(()=>popStack());
                             if (version > 0) args.reverse();
                             if (stlFn.maxArgs !== undefined && args.length < stlFn.maxArgs) for(let i = args.length; i < stlFn.maxArgs; i++)args.push(null);
                             pushStack(stlFn.fn(args, closure.callable.name, options));
-                        } else if (closure.callable.__hogCallable__ === 'async') {
-                            if (asyncSteps >= maxAsyncSteps) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Exceeded maximum number of async steps: ${maxAsyncSteps}`);
+                        } else if (closure.callable.__iqlCallable__ === 'async') {
+                            if (asyncSteps >= maxAsyncSteps) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Exceeded maximum number of async steps: ${maxAsyncSteps}`);
                             const args = Array(temp).fill(null).map(()=>popStack());
                             return {
                                 result: undefined,
                                 finished: false,
                                 asyncFunctionName: closure.callable.name,
-                                asyncFunctionArgs: args.map((v)=>(0, $ddbbfac842d2b47e$export$8353e27c009c56d3)(v)),
+                                asyncFunctionArgs: args.map((v)=>(0, $baf5cb126ee7af7a$export$324ead8d30ea4ecf)(v)),
                                 state: {
                                     ...getVMState(),
                                     asyncSteps: asyncSteps + 1
                                 }
                             };
-                        } else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unsupported function call: ${closure.callable.name}`);
+                        } else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unsupported function call: ${closure.callable.name}`);
                         break;
                     }
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).TRY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).TRY:
                     throwStack.push({
                         callStackLen: callStack.length,
                         stackLen: stack.length,
                         catchIp: frame.ip + 1 + next()
                     });
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).POP_TRY:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).POP_TRY:
                     if (throwStack.length > 0) throwStack.pop();
-                    else throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Invalid operation POP_TRY: no try block to pop');
+                    else throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Invalid operation POP_TRY: no try block to pop');
                     break;
-                case (0, $66bfafebb155a286$export$ab5aad00225c5662).THROW:
+                case (0, $9efbfe31fe198de1$export$ab5aad00225c5662).THROW:
                     {
                         const exception = popStack();
-                        if (!(0, $27b25c9e0700770a$export$6a076491ad0da05d)(exception)) throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)('Can not throw: value is not of type Error');
+                        if (!(0, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8)(exception)) throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)('Can not throw: value is not of type Error');
                         if (throwStack.length > 0) {
                             const { callStackLen: callStackLen, stackLen: stackLen, catchIp: catchIp } = throwStack.pop();
                             stackKeepFirstElements(stackLen);
@@ -3816,10 +3820,10 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
                             setChunkBytecode();
                             frame.ip = catchIp;
                             continue; // resume the loop without incrementing frame.ip
-                        } else throw new (0, $ddbbfac842d2b47e$export$21c2d8f6d56a9f14)(exception.type, exception.message, exception.payload);
+                        } else throw new (0, $baf5cb126ee7af7a$export$67b2cf55ba1871a2)(exception.type, exception.message, exception.payload);
                     }
                 default:
-                    throw new (0, $ddbbfac842d2b47e$export$abb9271b33b89c57)(`Unexpected node while running bytecode in chunk "${frame.chunk}": ${chunkBytecode[frame.ip]}`);
+                    throw new (0, $baf5cb126ee7af7a$export$ff53d37181b7da19)(`Unexpected node while running bytecode in chunk "${frame.chunk}": ${chunkBytecode[frame.ip]}`);
             }
             // use "continue" to skip this frame.ip auto-increment
             frame.ip++;
@@ -3839,11 +3843,11 @@ function $46c45dfd262302d4$export$78e3044358792147(input, options) {
 
 
 
-var $88a0eb6d24c62822$exports = {};
+var $24d729c22a7cde9a$exports = {};
 
 
 
 
 
-export {$d6c46379019a9f14$export$2a71946d1fd66654 as DEFAULT_MAX_ASYNC_STEPS, $d6c46379019a9f14$export$802abc67201653ab as DEFAULT_MAX_MEMORY, $d6c46379019a9f14$export$dcf22dd285f74f3d as DEFAULT_TIMEOUT_MS, $d6c46379019a9f14$export$a6ea10a37f8d5abe as MAX_FUNCTION_ARGS_LENGTH, $d6c46379019a9f14$export$b3e3f74739b6f9fd as CALLSTACK_LENGTH, $46c45dfd262302d4$export$fa77af024d7e00a8 as execSync, $46c45dfd262302d4$export$78e3044358792147 as exec, $46c45dfd262302d4$export$cf47dcd3447a7197 as execAsync, $27b25c9e0700770a$export$bd8197d5a05a4a7e as isHogDate, $27b25c9e0700770a$export$36cb9320e67ccd70 as isHogDateTime, $27b25c9e0700770a$export$6a076491ad0da05d as isHogError, $27b25c9e0700770a$export$c2d752b32b9bf15c as newHogError, $27b25c9e0700770a$export$3bbfc8b03361d8b7 as isHogCallable, $27b25c9e0700770a$export$2fad4bf1d8756816 as isHogClosure, $27b25c9e0700770a$export$42bb9ce6d451c81e as newHogClosure, $27b25c9e0700770a$export$4160dcabb869144f as newHogCallable, $27b25c9e0700770a$export$30222d8f8abbf3d0 as isHogUpValue, $27b25c9e0700770a$export$c1885639c9f11133 as isHogAST, $66bfafebb155a286$export$ab5aad00225c5662 as Operation, $66bfafebb155a286$export$59894c102379d64a as operations, $23fc6ca6b1cb5ed8$export$ef8a2f3c50755575 as STL, $23fc6ca6b1cb5ed8$export$daf23d78d6f53989 as ASYNC_STL, $054a234da6c04610$export$4148cf4a40af9f34 as escapeString, $054a234da6c04610$export$56fe274825607f4a as escapeIdentifier, $054a234da6c04610$export$49c4ba04cdb4c4d4 as printHogValue, $054a234da6c04610$export$4c46226ec729a3dc as InsightsQLPrinter, $054a234da6c04610$export$ed243cb9e89db69e as printHogStringOutput, $ddbbfac842d2b47e$export$abb9271b33b89c57 as ScriptVMException, $ddbbfac842d2b47e$export$21c2d8f6d56a9f14 as UncaughtScriptVMException, $ddbbfac842d2b47e$export$e94e5ec04a02879c as like, $ddbbfac842d2b47e$export$2516322ffbb7f3fb as getNestedValue, $ddbbfac842d2b47e$export$c52c7e952af52ee2 as setNestedValue, $ddbbfac842d2b47e$export$f0c387fc4f006d51 as convertJSToHog, $ddbbfac842d2b47e$export$8353e27c009c56d3 as convertHogToJS, $ddbbfac842d2b47e$export$ccac9139013839fb as calculateCost, $ddbbfac842d2b47e$export$13d90b9b2a99ed13 as unifyComparisonTypes};
+export {$baf5cb126ee7af7a$export$8353e27c009c56d3 as convertScriptToJS, $baf5cb126ee7af7a$export$8353e27c009c56d3 as convertHogToJS, $571704b9c96081fb$export$2a71946d1fd66654 as DEFAULT_MAX_ASYNC_STEPS, $571704b9c96081fb$export$802abc67201653ab as DEFAULT_MAX_MEMORY, $571704b9c96081fb$export$dcf22dd285f74f3d as DEFAULT_TIMEOUT_MS, $571704b9c96081fb$export$a6ea10a37f8d5abe as MAX_FUNCTION_ARGS_LENGTH, $571704b9c96081fb$export$b3e3f74739b6f9fd as CALLSTACK_LENGTH, $13418e1e9b9813ef$export$fa77af024d7e00a8 as execSync, $13418e1e9b9813ef$export$78e3044358792147 as exec, $13418e1e9b9813ef$export$cf47dcd3447a7197 as execAsync, $03bad8e4eb3d3c3b$export$99165c7c774db4d5 as isIQLDate, $03bad8e4eb3d3c3b$export$d6b6724c2085fcfe as isIQLDateTime, $03bad8e4eb3d3c3b$export$87fe85a5b831f0b8 as isIQLError, $03bad8e4eb3d3c3b$export$ce2b3d0f6b89d6ca as newIQLError, $03bad8e4eb3d3c3b$export$1f40b61924af6aa6 as isIQLCallable, $03bad8e4eb3d3c3b$export$6fe5c8ee6e51e375 as isIQLClosure, $03bad8e4eb3d3c3b$export$30b7e402b7cc3c18 as newIQLClosure, $03bad8e4eb3d3c3b$export$48cfb2b057120036 as newIQLCallable, $03bad8e4eb3d3c3b$export$9cd2962d6d2d4f5f as isIQLUpValue, $03bad8e4eb3d3c3b$export$c47844ae799791e5 as isIQLAST, $9efbfe31fe198de1$export$ab5aad00225c5662 as Operation, $9efbfe31fe198de1$export$59894c102379d64a as operations, $f4b746eecdc74db5$export$ef8a2f3c50755575 as STL, $f4b746eecdc74db5$export$daf23d78d6f53989 as ASYNC_STL, $1164bc623fd45eb4$export$4148cf4a40af9f34 as escapeString, $1164bc623fd45eb4$export$56fe274825607f4a as escapeIdentifier, $1164bc623fd45eb4$export$4b4cc7872ca29d6f as printIQLValue, $1164bc623fd45eb4$export$4c46226ec729a3dc as InsightsQLPrinter, $1164bc623fd45eb4$export$a95699d673286b58 as printIQLStringOutput, $baf5cb126ee7af7a$export$ff53d37181b7da19 as ScriptVMException, $baf5cb126ee7af7a$export$67b2cf55ba1871a2 as UncaughtScriptVMException, $baf5cb126ee7af7a$export$e94e5ec04a02879c as like, $baf5cb126ee7af7a$export$2516322ffbb7f3fb as getNestedValue, $baf5cb126ee7af7a$export$c52c7e952af52ee2 as setNestedValue, $baf5cb126ee7af7a$export$f0c387fc4f006d51 as convertJSToHog, $baf5cb126ee7af7a$export$d3a62b7c494d2d21 as convertJSToIQL, $baf5cb126ee7af7a$export$324ead8d30ea4ecf as convertIQLToJS, $baf5cb126ee7af7a$export$ccac9139013839fb as calculateCost, $baf5cb126ee7af7a$export$13d90b9b2a99ed13 as unifyComparisonTypes};
 //# sourceMappingURL=module.js.map
