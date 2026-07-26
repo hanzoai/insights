@@ -67,7 +67,10 @@ header { border-bottom: 1px solid var(--edge); }
 .hero h1 { margin: 0 0 1.25rem; font-size: clamp(2.25rem, 6vw, 3.75rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 620; max-width: 20ch; }
 .hero p { margin: 0 0 2rem; font-size: clamp(1.0625rem, 2vw, 1.1875rem); color: var(--ink-dim); max-width: 56ch; }
 .cta { display: flex; flex-wrap: wrap; gap: .75rem; }
-.note { margin-top: 1.25rem; font-size: .875rem; color: var(--ink-dim); }
+/* `.hero p` also matches this element and outranks a bare `.note`, so the
+   top margin has to be set at equal-or-higher specificity or it is silently
+   dropped and the note sits flush against the buttons. */
+.hero .note { margin: 1.25rem 0 0; font-size: .875rem; color: var(--ink-dim); }
 
 /* ── lenses ──────────────────────────────────────────────────────────── */
 section { padding: 4rem 0; border-top: 1px solid var(--edge); }
