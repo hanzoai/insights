@@ -272,7 +272,6 @@ const pathPrefixesOnboardingNotRequiredFor = [
     urls.billingAuthorizationStatus(),
     urls.wizard(),
     '/instance',
-    urls.moveToInsightsCloud(),
     urls.unsubscribe(),
     urls.debugFn(),
     urls.debugQuery(),
@@ -1124,10 +1123,6 @@ export const sceneLogic = kea<sceneLogicType>([
             if (sceneId === Scene.Login && preflight?.demo) {
                 // In the demo environment, there's only passwordless "login" via the signup scene
                 router.actions.replace(urls.signup())
-                return
-            }
-            if (sceneId === Scene.MoveToInsightsCloud && preflight?.cloud) {
-                router.actions.replace(urls.projectRoot())
                 return
             }
 

@@ -1,8 +1,15 @@
-# AccessControlViewSetMixin removed (was in ee/)
-# This module is kept as a stub to avoid import errors.
+from typing import Optional
 
 
 class AccessControlViewSetMixin:
-    """No-op mixin. Access control was in ee/ which has been removed."""
+    """Object-level access control hooks for viewsets.
 
-    pass
+    The scope-derivation hook is part of the contract: `APIScopePermission`
+    calls `view.dangerously_get_required_scopes(request, view)` whenever the
+    view defines it, and subclasses (`TeamViewSet`, `ProjectViewSet`) delegate
+    upward with `super()`. Returning `None` means "this mixin imposes no scope
+    requirement" — callers then fall through to their own derivation.
+    """
+
+    def dangerously_get_required_scopes(self, request, view) -> Optional[list[str]]:
+        return None

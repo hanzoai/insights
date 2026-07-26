@@ -89,7 +89,6 @@ export enum Scene {
     MaterializedColumns = 'MaterializedColumns',
     Max = 'Max',
     Models = 'Models',
-    MoveToInsightsCloud = 'MoveToInsightsCloud',
     NewTab = 'NewTab',
     Notebook = 'Notebook',
     Notebooks = 'Notebooks',
