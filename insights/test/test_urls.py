@@ -23,9 +23,12 @@ class TestUrls(APIBaseTest):
     def test_logged_out_user_is_redirected_to_login(self):
         self.client.logout()
 
-        # Root path should redirect to /login without ?next=/ since "/" is the default destination
+        # Root is the exception: it serves the marketing landing page rather
+        # than bouncing to SSO, so the product has a public face. Every OTHER
+        # path still redirects. See TestLandingPage in test_landing.py.
         response = self.client.get("/")
-        self.assertRedirects(response, "/login")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("landing.html", [t.name for t in response.templates])
 
         response = self.client.get("/events")
         self.assertRedirects(response, "/login?next=/events")
