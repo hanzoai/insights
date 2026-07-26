@@ -14,6 +14,11 @@ name: deploy
 on:
   push:
     branches: [main]
+  # This repo reaches the forge as a PULL MIRROR of github.com/hanzoai/insights,
+  # and a mirror sync is not a push — it fires no push event, so `on: push`
+  # alone never triggers here. Until the forge is the origin rather than a
+  # mirror, this is how a build is started.
+  workflow_dispatch:
 
 jobs:
   build:
