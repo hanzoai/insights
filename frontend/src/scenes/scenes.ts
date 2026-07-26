@@ -345,7 +345,6 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         defaultDocsPath: '/docs/data-warehouse/views/materialize',
         iconType: 'sql_editor',
     },
-    [Scene.MoveToInsightsCloud]: { name: 'Move to Insights Cloud', hideProjectNotice: true },
     [Scene.NewTab]: {
         projectBased: true,
         name: 'Search',
@@ -922,7 +921,6 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.notebooks()]: [Scene.Notebooks, 'notebooks'],
     [urls.canvas()]: [Scene.Canvas, 'canvas'],
     [urls.settings(':section' as any)]: [Scene.Settings, 'settings'],
-    [urls.moveToInsightsCloud()]: [Scene.MoveToInsightsCloud, 'moveToInsightsCloud'],
     [urls.advancedActivityLogs()]: [Scene.AdvancedActivityLogs, 'advancedActivityLogs'],
     [urls.heatmaps()]: [Scene.Heatmaps, 'heatmaps'],
     [urls.heatmapNew()]: [Scene.HeatmapNew, 'heatmapNew'],
