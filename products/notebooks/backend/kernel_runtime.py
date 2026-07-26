@@ -557,8 +557,8 @@ class KernelRuntimeService:
                     response_payload = response.model_dump(exclude_none=True)
                 else:
                     response_payload = response.dict(exclude_none=True)
-                if "clickhouse" in response_payload:
-                    del response_payload["clickhouse"]
+                if "datastore" in response_payload:
+                    del response_payload["datastore"]
                 if "insightsql" in response_payload:
                     del response_payload["insightsql"]
                 if "timings" in response_payload:

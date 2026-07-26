@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from insights.schema import PropertyOperator
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.models.filters import Filter
 from insights.models.property import GroupTypeIndex, Property
 from insights.models.team.team import Team
@@ -13,7 +13,7 @@ from insights.queries.base import relative_date_parse_for_feature_flag_matching
 
 def _normalize_property_value(prop: Property) -> None:
     """
-    Normalize property values to strings to match JSON-stored properties in ClickHouse.
+    Normalize property values to strings to match JSON-stored properties in Datastore.
     Skip special properties like $group_key which refer to columns, not JSON properties.
     """
     if prop.key == "$group_key":

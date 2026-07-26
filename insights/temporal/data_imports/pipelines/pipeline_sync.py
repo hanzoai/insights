@@ -163,7 +163,7 @@ async def validate_schema_and_update_table(
                 assert isinstance(table_created, DataWarehouseTable) and table_created is not None
 
                 raw_db_columns: dict[str, dict[str, str]] = table_created.get_columns()
-                db_columns = {key: column.get("clickhouse", "") for key, column in raw_db_columns.items()}
+                db_columns = {key: column.get("datastore", "") for key, column in raw_db_columns.items()}
 
                 columns = {}
                 for column_name, db_column_type in db_columns.items():
@@ -174,7 +174,7 @@ async def validate_schema_and_update_table(
                         continue
 
                     columns[column_name] = {
-                        "clickhouse": db_column_type,
+                        "datastore": db_column_type,
                         "insightsql": insightsql_type,
                     }
                 table_created.columns = columns

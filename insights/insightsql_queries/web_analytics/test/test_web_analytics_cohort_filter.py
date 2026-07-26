@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 
 from parameterized import parameterized
 
@@ -20,7 +20,7 @@ from insights.models import Action, Cohort
 from insights.models.utils import uuid7
 
 
-class TestWebAnalyticsCohortFilter(ClickhouseTestMixin, APIBaseTest):
+class TestWebAnalyticsCohortFilter(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2026-01-29"
 
     def _create_cohort_with_person(self, person_id: str, cohort_name: str = "Test Cohort"):

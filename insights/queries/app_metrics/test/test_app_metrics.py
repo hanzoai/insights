@@ -3,12 +3,12 @@ from datetime import datetime
 from typing import Optional
 
 from freezegun.api import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
-from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_APP_METRICS
 from insights.models.app_metrics.sql import INSERT_APP_METRICS_SQL
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.models.utils import UUIDT
 from insights.queries.app_metrics.app_metrics import (
     AppMetricsErrorDetailsQuery,
@@ -35,7 +35,7 @@ def create_app_metric(
 ):
     timestamp = cast_timestamp_or_now(timestamp)
     data = {
-        "timestamp": format_clickhouse_timestamp(timestamp),
+        "timestamp": format_datastore_timestamp(timestamp),
         "team_id": team_id,
         "plugin_config_id": plugin_config_id,
         "category": category,
@@ -47,7 +47,7 @@ def create_app_metric(
         "error_type": error_type or "",
         "error_details": json.dumps(error_details) if error_details else "",
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_APP_METRICS, sql=INSERT_APP_METRICS_SQL, data=data)
 
 
@@ -57,9 +57,9 @@ def make_filter(serializer_klass=AppMetricsRequestSerializer, **kwargs) -> AppMe
     return filter
 
 
-class TestTeamPluginsDeliveryRateQuery(ClickhouseTestMixin, BaseTest):
+class TestTeamPluginsDeliveryRateQuery(DatastoreTestMixin, BaseTest):
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_delivery_rate(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -117,9 +117,9 @@ class TestTeamPluginsDeliveryRateQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results, {})
 
 
-class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
+class TestAppMetricsQuery(DatastoreTestMixin, BaseTest):
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_app_metrics(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -173,7 +173,7 @@ class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results["totals"], {"successes": 13, "successes_on_retry": 5, "failures": 3})
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_by_job_id(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -206,7 +206,7 @@ class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results["totals"], {"successes": 0, "successes_on_retry": 2, "failures": 0})
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_by_hourly_date_range(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -252,7 +252,7 @@ class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results["totals"], {"successes": 6, "successes_on_retry": 0, "failures": 0})
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ignores_unrelated_data(self):
         # Positive examples: testing time bounds
         create_app_metric(
@@ -318,7 +318,7 @@ class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results["totals"], {"successes": 3, "successes_on_retry": 0, "failures": 0})
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_composeWebhook_sums_all_failures_but_only_webhook_successes(self):
         # Positive examples: testing time bounds
         create_app_metric(
@@ -386,9 +386,9 @@ class TestAppMetricsQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual(results["totals"], {"successes": 30, "successes_on_retry": 0, "failures": 3300})
 
 
-class TestAppMetricsErrorsQuery(ClickhouseTestMixin, BaseTest):
+class TestAppMetricsErrorsQuery(DatastoreTestMixin, BaseTest):
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_errors_query(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -447,7 +447,7 @@ class TestAppMetricsErrorsQuery(ClickhouseTestMixin, BaseTest):
         )
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_errors_query_filter_by_job_id(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -504,7 +504,7 @@ class TestAppMetricsErrorsQuery(ClickhouseTestMixin, BaseTest):
         )
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ignores_unrelated_data(self):
         # Positive examples: testing time bounds
         create_app_metric(
@@ -592,11 +592,11 @@ class TestAppMetricsErrorsQuery(ClickhouseTestMixin, BaseTest):
         )
 
 
-class TestAppMetricsErrorDetailsQuery(ClickhouseTestMixin, BaseTest):
+class TestAppMetricsErrorDetailsQuery(DatastoreTestMixin, BaseTest):
     UUIDS = [UUIDT() for _ in range(2)]
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_error_details_query(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -645,7 +645,7 @@ class TestAppMetricsErrorDetailsQuery(ClickhouseTestMixin, BaseTest):
         )
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_error_details_query_filter_by_job_id(self):
         create_app_metric(
             team_id=self.team.pk,
@@ -701,7 +701,7 @@ class TestAppMetricsErrorDetailsQuery(ClickhouseTestMixin, BaseTest):
         )
 
     @freeze_time("2021-12-05T13:23:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ignores_unrelated_data(self):
         create_app_metric(
             team_id=self.team.pk,

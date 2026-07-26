@@ -13,14 +13,14 @@ from products.revenue_analytics.dags.exchange_rate import (
     OPEN_EXCHANGE_RATES_API_BASE_URL,
     ExchangeRateConfig,
     daily_exchange_rates,
-    daily_exchange_rates_in_clickhouse,
+    daily_exchange_rates_in_datastore,
     daily_exchange_rates_schedule,
     fetch_exchange_rates,
     get_date_partition_from_hourly_partition,
     hourly_exchange_rates,
-    hourly_exchange_rates_in_clickhouse,
+    hourly_exchange_rates_in_datastore,
     hourly_exchange_rates_schedule,
-    store_exchange_rates_in_clickhouse,
+    store_exchange_rates_in_datastore,
 )
 
 # Sample exchange rate data for testing
@@ -179,21 +179,21 @@ class TestExchangeRateAssets:
             hourly_exchange_rates(context=context, config=config)
 
 
-class TestExchangeRateClickhouse:
+class TestExchangeRateDatastore:
     @pytest.fixture
-    def mock_clickhouse_cluster(self):
+    def mock_datastore_cluster(self):
         mock_cluster = mock.MagicMock()
         mock_cluster.map_all_hosts.return_value.result.return_value = {"host1": True}
         return mock_cluster
 
-    def test_store_exchange_rates_in_clickhouse(self, mock_clickhouse_cluster):
+    def test_store_exchange_rates_in_datastore(self, mock_datastore_cluster):
         # Create context
         context = build_op_context()
         date_str = "2023-01-15"
 
         # Call the op
-        rows, values = store_exchange_rates_in_clickhouse(
-            context=context, date_str=date_str, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_clickhouse_cluster
+        rows, values = store_exchange_rates_in_datastore(
+            context=context, date_str=date_str, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_datastore_cluster
         )
 
         # Verify results
@@ -206,15 +206,15 @@ class TestExchangeRateClickhouse:
         assert [(date_str, currency, rate) for currency, rate in SAMPLE_EXCHANGE_RATES.items()] == values
 
         # Verify cluster calls
-        assert mock_clickhouse_cluster.map_all_hosts.call_count == 2
+        assert mock_datastore_cluster.map_all_hosts.call_count == 2
 
-    def test_daily_exchange_rates_in_clickhouse(self, mock_clickhouse_cluster):
+    def test_daily_exchange_rates_in_datastore(self, mock_datastore_cluster):
         # Create context
         context = dagster.build_asset_context(partition_key="2023-01-15")
 
         # Call the asset
-        result = daily_exchange_rates_in_clickhouse(
-            context=context, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_clickhouse_cluster
+        result = daily_exchange_rates_in_datastore(
+            context=context, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_datastore_cluster
         )
 
         # Verify result is a MaterializeResult with correct metadata
@@ -226,13 +226,13 @@ class TestExchangeRateClickhouse:
         assert metadata["min_rate"].value == min(SAMPLE_EXCHANGE_RATES.values())
         assert metadata["max_rate"].value == max(SAMPLE_EXCHANGE_RATES.values())
 
-    def test_hourly_exchange_rates_in_clickhouse(self, mock_clickhouse_cluster):
+    def test_hourly_exchange_rates_in_datastore(self, mock_datastore_cluster):
         # Create context
         context = dagster.build_asset_context(partition_key="2023-01-15-10:00")
 
         # Call the asset
-        result: Any = hourly_exchange_rates_in_clickhouse(
-            context=context, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_clickhouse_cluster
+        result: Any = hourly_exchange_rates_in_datastore(
+            context=context, exchange_rates=SAMPLE_EXCHANGE_RATES, cluster=mock_datastore_cluster
         )
 
         # Verify result is a MaterializeResult with correct metadata

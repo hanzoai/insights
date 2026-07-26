@@ -3,7 +3,7 @@ from typing import Any, Optional
 from insights.exceptions_capture import capture_exception
 from insights.kafka_client.client import KafkaProducer
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.utils import cast_timestamp_or_now
 
 
@@ -32,7 +32,7 @@ def log_event_usage(
         "app_source_id": str(user_id) if user_id else "anonymous",
         "app_source": "event_usage",
         "count": 1,
-        "timestamp": format_clickhouse_timestamp(cast_timestamp_or_now(None)),
+        "timestamp": format_datastore_timestamp(cast_timestamp_or_now(None)),
     }
     KafkaProducer().produce(topic=KAFKA_APP_METRICS2, data=payload)
 

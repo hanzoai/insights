@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from insights.schema import WebAnalyticsAssistantFilters
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.models import Team, User
 from insights.queries.property_values import get_person_property_values_for_key, get_property_values_for_key
 from insights.sync import database_sync_to_async

@@ -6,10 +6,10 @@ __all__ = ["django_db_setup"]
 from collections.abc import Iterator
 
 import pytest
-from insights.test.base import reset_clickhouse_database
+from insights.test.base import reset_datastore_database
 from unittest.mock import patch
 
-from insights.clickhouse.cluster import ClickhouseCluster, get_cluster
+from insights.datastore.cluster import DatastoreCluster, get_cluster
 
 
 def _patched_get_cluster_hosts(self, client, cluster, retry_policy=None):
@@ -18,7 +18,7 @@ def _patched_get_cluster_hosts(self, client, cluster, retry_policy=None):
 
     On macOS with Docker Desktop, system.clusters returns Docker-internal IPs
     (192.168.x.x) which aren't routable from the host. Using host_name returns
-    "clickhouse" which resolves via /etc/hosts (set up by flox) to 127.0.0.1.
+    "datastore" which resolves via /etc/hosts (set up by flox) to 127.0.0.1.
     """
     return client.execute(
         """
@@ -32,18 +32,18 @@ def _patched_get_cluster_hosts(self, client, cluster, retry_policy=None):
 
 
 @pytest.fixture
-def cluster(django_db_setup) -> Iterator[ClickhouseCluster]:
+def cluster(django_db_setup) -> Iterator[DatastoreCluster]:
     """
     Cluster fixture with macOS Docker-compatible hostname resolution.
-    Patches ClickhouseCluster to use host_name instead of host_address.
+    Patches DatastoreCluster to use host_name instead of host_address.
     """
-    reset_clickhouse_database()
+    reset_datastore_database()
     try:
         with patch.object(
-            ClickhouseCluster,
-            "_ClickhouseCluster__get_cluster_hosts",
+            DatastoreCluster,
+            "_DatastoreCluster__get_cluster_hosts",
             _patched_get_cluster_hosts,
         ):
             yield get_cluster()
     finally:
-        reset_clickhouse_database()
+        reset_datastore_database()

@@ -49,7 +49,7 @@ export const CurrentUserIsOwner: Story = {
                 '/_preflight': {
                     ...preflightJson,
                     cloud: false,
-                    realm: 'hosted-clickhouse',
+                    realm: 'hosted-datastore',
                     available_social_auth_providers: {
                         github: false,
                         gitlab: false,
@@ -69,7 +69,7 @@ export const CurrentUserIsAdmin: Story = {
                 '/_preflight': {
                     ...preflightJson,
                     cloud: false,
-                    realm: 'hosted-clickhouse',
+                    realm: 'hosted-datastore',
                     available_social_auth_providers: {
                         github: false,
                         gitlab: false,
@@ -93,7 +93,7 @@ export const CurrentUserIsMember: Story = {
                 '/_preflight': {
                     ...preflightJson,
                     cloud: false,
-                    realm: 'hosted-clickhouse',
+                    realm: 'hosted-datastore',
                     available_social_auth_providers: {
                         github: false,
                         gitlab: false,

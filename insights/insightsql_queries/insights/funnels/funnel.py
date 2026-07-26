@@ -86,7 +86,7 @@ class FunnelUDF(FunnelUDFMixin, FunnelBase):
     # We remove an event if it matches one or zero steps and there was already the same type of event before and after it (that don't have the same timestamp)
     # arrayRotateRight turns [1,2,3] into [3,1,2]
     # arrayRotateLeft turns [1,2,3] into [2,3,1]
-    # For some reason, using these uses much less memory than using indexing in clickhouse to check the previous and next element
+    # For some reason, using these uses much less memory than using indexing in datastore to check the previous and next element
     def event_array_filter(self):
         TIMESTAMP_INDEX = 1
         PROP_VAL_INDEX = 3

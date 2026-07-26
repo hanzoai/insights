@@ -5,7 +5,7 @@ from django.db import router, transaction
 import structlog
 from rest_framework.exceptions import NotFound
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.person import Person, PersonDistinctId
 from insights.models.person.util import create_person, create_person_distinct_id
 
@@ -75,7 +75,7 @@ def _updated_distinct_ids(team_id: int, distinct_id_versions: list[tuple[str, in
         with transaction.atomic(using=db_alias):
             person_distinct_id = _update_distinct_id_in_postgres(distinct_id, version, team_id)
 
-        # Update ClickHouse via Kafka message
+        # Update Datastore via Kafka message
         if person_distinct_id:
             person_uuid = str(person_distinct_id.person.uuid)
 
@@ -87,12 +87,12 @@ def _updated_distinct_ids(team_id: int, distinct_id_versions: list[tuple[str, in
                 is_deleted=False,
             )
 
-            # Also reset the person record in ClickHouse — the soft-deleted person row
+            # Also reset the person record in Datastore — the soft-deleted person row
             # has a high version that causes ReplacingMergeTree to keep the deleted state,
             # making the person invisible to analytics queries
             if person_uuid not in reset_person_uuids:
                 reset_person_uuids.add(person_uuid)
-                _reset_person_in_clickhouse(team_id, person_distinct_id.person, db_alias)
+                _reset_person_in_datastore(team_id, person_distinct_id.person, db_alias)
 
 
 def _update_distinct_id_in_postgres(distinct_id: str, version: int, team_id: int) -> Optional[PersonDistinctId]:
@@ -108,7 +108,7 @@ def _update_distinct_id_in_postgres(distinct_id: str, version: int, team_id: int
 
 
 def _get_person_version_if_deleted(team_id: int, person_uuid: str) -> Optional[int]:
-    """Returns the max version if the person is soft-deleted in ClickHouse, None otherwise."""
+    """Returns the max version if the person is soft-deleted in Datastore, None otherwise."""
     rows = sync_execute(
         """
             SELECT max(version), argMax(is_deleted, version)
@@ -125,17 +125,17 @@ def _get_person_version_if_deleted(team_id: int, person_uuid: str) -> Optional[i
     return max_version
 
 
-def _reset_person_in_clickhouse(team_id: int, person: Person, db_alias: str) -> None:
+def _reset_person_in_datastore(team_id: int, person: Person, db_alias: str) -> None:
     person_uuid = str(person.uuid)
     max_version = _get_person_version_if_deleted(team_id, person_uuid)
     if max_version is None:
         return
 
     new_version = max_version + 100
-    logger.info(f"Resetting person {person_uuid} in ClickHouse to version {new_version}")
+    logger.info(f"Resetting person {person_uuid} in Datastore to version {new_version}")
 
     # Update Postgres version so future updates from the plugin-server
-    # (which reads version from Postgres) won't be ignored by ClickHouse
+    # (which reads version from Postgres) won't be ignored by Datastore
     Person.objects.using(db_alias).filter(pk=person.pk, version__lt=new_version).update(version=new_version)
 
     create_person(

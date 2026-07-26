@@ -19,7 +19,7 @@ from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 from insights.temporal.tests.utils.models import afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run, start_batch_export_run
@@ -33,7 +33,7 @@ from products.batch_exports.backend.tests.temporal.destinations.snowflake.utils 
     SKIP_IF_MISSING_REQUIRED_ENV_VARS,
     TEST_MODELS,
     TEST_TIME,
-    assert_clickhouse_records_in_snowflake,
+    assert_datastore_records_in_snowflake,
 )
 
 pytestmark = [
@@ -44,7 +44,7 @@ pytestmark = [
 
 
 async def _run_workflow(
-    clickhouse_client,
+    datastore_client,
     snowflake_cursor,
     snowflake_batch_export,
     team,
@@ -117,9 +117,9 @@ async def _run_workflow(
         elif batch_export_model.name == "sessions":
             sort_key = "session_id"
 
-    await assert_clickhouse_records_in_snowflake(
+    await assert_datastore_records_in_snowflake(
         snowflake_cursor=snowflake_cursor,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         table_name=snowflake_batch_export.destination.config["table_name"],
         team_id=team.pk,
         data_interval_start=data_interval_start,
@@ -135,7 +135,7 @@ async def _run_workflow(
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_snowflake_export_workflow(
-    clickhouse_client,
+    datastore_client,
     snowflake_cursor,
     interval,
     snowflake_batch_export,
@@ -162,7 +162,7 @@ async def test_snowflake_export_workflow(
         batch_export_schema = model
 
     await _run_workflow(
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_cursor=snowflake_cursor,
         snowflake_batch_export=snowflake_batch_export,
         team=ateam,
@@ -178,7 +178,7 @@ async def test_snowflake_export_workflow(
 @pytest.mark.parametrize("exclude_events", [None], indirect=True)
 @pytest.mark.parametrize("model", [BatchExportModel(name="events", schema=None)])
 async def test_snowflake_export_workflow_with_many_files(
-    clickhouse_client,
+    datastore_client,
     snowflake_cursor,
     interval,
     snowflake_batch_export,
@@ -207,7 +207,7 @@ async def test_snowflake_export_workflow_with_many_files(
         batch_export_schema = model
 
     await _run_workflow(
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_cursor=snowflake_cursor,
         snowflake_batch_export=snowflake_batch_export,
         team=ateam,
@@ -232,7 +232,7 @@ async def test_snowflake_export_workflow_with_many_files(
 @pytest.mark.parametrize("model", [BatchExportModel(name="persons", schema=None)])
 async def test_snowflake_export_workflow_backfill_earliest_persons(
     ateam,
-    clickhouse_client,
+    datastore_client,
     data_interval_start,
     data_interval_end,
     generate_test_data,
@@ -261,7 +261,7 @@ async def test_snowflake_export_workflow_backfill_earliest_persons(
     )
 
     await _run_workflow(
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         snowflake_cursor=snowflake_cursor,
         snowflake_batch_export=snowflake_batch_export,
         team=ateam,
@@ -277,7 +277,7 @@ async def test_snowflake_export_workflow_backfill_earliest_persons(
 
 
 async def test_snowflake_export_workflow_handles_cancellation(
-    clickhouse_client,
+    datastore_client,
     ateam,
     snowflake_batch_export,
     interval,
@@ -287,8 +287,8 @@ async def test_snowflake_export_workflow_handles_cancellation(
     data_interval_end = dt.datetime.now(dt.UTC)
     data_interval_start = data_interval_end - snowflake_batch_export.interval_time_delta
 
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,

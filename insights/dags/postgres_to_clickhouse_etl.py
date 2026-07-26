@@ -1,4 +1,4 @@
-"""ETL pipeline for syncing insights_organization and insights_team tables from Postgres to ClickHouse."""
+"""ETL pipeline for syncing insights_organization and insights_team tables from Postgres to Datastore."""
 
 import json
 import uuid
@@ -25,13 +25,13 @@ from dagster import (
 )
 from dagster._core.definitions.backfill_policy import BackfillPolicy
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import Query, get_cluster
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import Query, get_cluster
 from insights.dags.common import JobOwners
 
 
-class PostgresToClickHouseETLConfig(Config):
-    """Configuration for the Postgres to ClickHouse ETL job."""
+class PostgresToDatastoreETLConfig(Config):
+    """Configuration for the Postgres to Datastore ETL job."""
 
     full_refresh: bool = False
     batch_size: int = 10000
@@ -107,7 +107,7 @@ def get_organization_table_sql() -> str:
             is_platform Nullable(UInt8),
             _inserted_at DateTime64(6) DEFAULT now64(6)
         )
-        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/insights_organization', '{shard}-{replica}', _inserted_at)
+        ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights_organization', '{shard}-{replica}', _inserted_at)
         ORDER BY (id, updated_at)
         SETTINGS index_granularity = 8192
     """
@@ -198,14 +198,14 @@ def get_team_table_sql() -> str:
             base_currency Nullable(String),
             _inserted_at DateTime64(6) DEFAULT now64(6)
         )
-        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/insights_team', '{shard}-{replica}', _inserted_at)
+        ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights_team', '{shard}-{replica}', _inserted_at)
         ORDER BY (organization_id, id, updated_at)
         SETTINGS index_granularity = 8192
     """
 
 
 def create_database_if_not_exists(context: Optional[Union[OpExecutionContext, AssetExecutionContext]] = None) -> None:
-    """Create the models database in ClickHouse if it doesn't exist on all nodes."""
+    """Create the models database in Datastore if it doesn't exist on all nodes."""
     if context:
         context.log.info("Creating database 'models' if it doesn't exist...")
     create_db_sql = "CREATE DATABASE IF NOT EXISTS models"
@@ -222,10 +222,10 @@ def create_database_if_not_exists(context: Optional[Union[OpExecutionContext, As
         raise
 
 
-def create_clickhouse_tables(
+def create_datastore_tables(
     context: Optional[Union[OpExecutionContext, AssetExecutionContext]] = None, force_recreate: bool = False
 ) -> None:
-    """Create the organization and team tables in ClickHouse on all nodes.
+    """Create the organization and team tables in Datastore on all nodes.
 
     Args:
         context: Execution context for logging
@@ -481,8 +481,8 @@ def handle_array_fields(row: dict, array_fields: list[str]) -> None:
 
 
 def transform_organization_row(row: dict) -> dict:
-    """Transform a Postgres organization row for ClickHouse insertion."""
-    # Convert UUID fields to strings for ClickHouse
+    """Transform a Postgres organization row for Datastore insertion."""
+    # Convert UUID fields to strings for Datastore
     uuid_fields = ["id", "logo_media_id"]
     for field in uuid_fields:
         if row.get(field) is not None:
@@ -521,8 +521,8 @@ def transform_organization_row(row: dict) -> dict:
 
 
 def transform_team_row(row: dict) -> dict:
-    """Transform a Postgres team row for ClickHouse insertion."""
-    # Convert UUID fields to strings for ClickHouse
+    """Transform a Postgres team row for Datastore insertion."""
+    # Convert UUID fields to strings for Datastore
     uuid_fields = ["uuid", "organization_id"]
     for field in uuid_fields:
         if row.get(field) is not None:
@@ -600,8 +600,8 @@ def transform_team_row(row: dict) -> dict:
     return row
 
 
-def insert_organizations_to_clickhouse(organizations: list[dict], batch_size: int = 10000) -> int:
-    """Insert organizations into ClickHouse."""
+def insert_organizations_to_datastore(organizations: list[dict], batch_size: int = 10000) -> int:
+    """Insert organizations into Datastore."""
     if not organizations:
         return 0
 
@@ -616,7 +616,7 @@ def insert_organizations_to_clickhouse(organizations: list[dict], batch_size: in
     for i in range(0, len(transformed), batch_size):
         batch = transformed[i : i + batch_size]
 
-        # ClickHouse requires passing data as list of tuples
+        # Datastore requires passing data as list of tuples
         data = [tuple(row.get(col) for col in columns) for row in batch]
 
         query = f"INSERT INTO models.insights_organization ({', '.join(columns)}) VALUES"
@@ -627,8 +627,8 @@ def insert_organizations_to_clickhouse(organizations: list[dict], batch_size: in
     return total_inserted
 
 
-def insert_teams_to_clickhouse(teams: list[dict], batch_size: int = 10000) -> int:
-    """Insert teams into ClickHouse."""
+def insert_teams_to_datastore(teams: list[dict], batch_size: int = 10000) -> int:
+    """Insert teams into Datastore."""
     if not teams:
         return 0
 
@@ -643,7 +643,7 @@ def insert_teams_to_clickhouse(teams: list[dict], batch_size: int = 10000) -> in
     for i in range(0, len(transformed), batch_size):
         batch = transformed[i : i + batch_size]
 
-        # ClickHouse requires passing data as list of tuples
+        # Datastore requires passing data as list of tuples
         data = [tuple(row.get(col) for col in columns) for row in batch]
 
         query = f"INSERT INTO models.insights_team ({', '.join(columns)}) VALUES"
@@ -657,17 +657,17 @@ def insert_teams_to_clickhouse(teams: list[dict], batch_size: int = 10000) -> in
 @op(retry_policy=etl_retry_policy)
 def sync_organizations(
     context: OpExecutionContext,
-    config: PostgresToClickHouseETLConfig,
+    config: PostgresToDatastoreETLConfig,
 ) -> ETLState:
-    """Sync organizations from Postgres to ClickHouse."""
+    """Sync organizations from Postgres to Datastore."""
     state = ETLState()
 
     context.log.info(f"Starting organization sync (full_refresh={config.full_refresh})")
 
     # Create tables if they don't exist
-    create_clickhouse_tables(context)
+    create_datastore_tables(context)
 
-    # Get last sync timestamp from ClickHouse (if incremental)
+    # Get last sync timestamp from Datastore (if incremental)
     last_sync = None
     if not config.full_refresh:
         result = sync_execute("SELECT max(updated_at) FROM models.insights_organization")
@@ -698,8 +698,8 @@ def sync_organizations(
             if batch:
                 context.log.info(f"Processing batch {batch_num} with {len(batch)} organizations")
 
-                # Insert this batch into ClickHouse
-                rows_inserted = insert_organizations_to_clickhouse(batch, batch_size=config.batch_size)
+                # Insert this batch into Datastore
+                rows_inserted = insert_organizations_to_datastore(batch, batch_size=config.batch_size)
                 total_rows += rows_inserted
 
                 # Track the latest timestamp for state
@@ -711,7 +711,7 @@ def sync_organizations(
 
         state.rows_synced = total_rows
         state.last_sync_timestamp = last_updated
-        context.log.info(f"Completed sync: inserted {total_rows} organizations into ClickHouse")
+        context.log.info(f"Completed sync: inserted {total_rows} organizations into Datastore")
 
     except Exception as e:
         state.errors.append(f"Error syncing organizations: {str(e)}")
@@ -737,17 +737,17 @@ def sync_organizations(
 @op(retry_policy=etl_retry_policy)
 def sync_teams(
     context: OpExecutionContext,
-    config: PostgresToClickHouseETLConfig,
+    config: PostgresToDatastoreETLConfig,
 ) -> ETLState:
-    """Sync teams from Postgres to ClickHouse."""
+    """Sync teams from Postgres to Datastore."""
     state = ETLState()
 
     context.log.info(f"Starting team sync (full_refresh={config.full_refresh})")
 
     # Create tables if they don't exist
-    create_clickhouse_tables(context)
+    create_datastore_tables(context)
 
-    # Get last sync timestamp from ClickHouse (if incremental)
+    # Get last sync timestamp from Datastore (if incremental)
     last_sync = None
     if not config.full_refresh:
         result = sync_execute("SELECT max(updated_at) FROM models.insights_team")
@@ -778,8 +778,8 @@ def sync_teams(
             if batch:
                 context.log.info(f"Processing batch {batch_num} with {len(batch)} teams")
 
-                # Insert this batch into ClickHouse
-                rows_inserted = insert_teams_to_clickhouse(batch, batch_size=config.batch_size)
+                # Insert this batch into Datastore
+                rows_inserted = insert_teams_to_datastore(batch, batch_size=config.batch_size)
                 total_rows += rows_inserted
 
                 # Track the latest timestamp for state
@@ -791,7 +791,7 @@ def sync_teams(
 
         state.rows_synced = total_rows
         state.last_sync_timestamp = last_updated
-        context.log.info(f"Completed sync: inserted {total_rows} teams into ClickHouse")
+        context.log.info(f"Completed sync: inserted {total_rows} teams into Datastore")
 
     except Exception as e:
         state.errors.append(f"Error syncing teams: {str(e)}")
@@ -821,7 +821,7 @@ def verify_sync(
     team_state: ETLState,
 ) -> dict[str, Any]:
     """Verify the sync was successful by checking row counts."""
-    # Get counts from ClickHouse
+    # Get counts from Datastore
     org_count_result = sync_execute("SELECT count(*) FROM models.insights_organization")
     team_count_result = sync_execute("SELECT count(*) FROM models.insights_team")
 
@@ -830,12 +830,12 @@ def verify_sync(
 
     verification = {
         "organizations": {
-            "clickhouse_count": org_count,
+            "datastore_count": org_count,
             "rows_synced": org_state.rows_synced,
             "last_sync": str(org_state.last_sync_timestamp) if org_state.last_sync_timestamp else None,
         },
         "teams": {
-            "clickhouse_count": team_count,
+            "datastore_count": team_count,
             "rows_synced": team_state.rows_synced,
             "last_sync": str(team_state.last_sync_timestamp) if team_state.last_sync_timestamp else None,
         },
@@ -863,11 +863,11 @@ hourly_partition = HourlyPartitionsDefinition(
 
 
 @job(
-    tags={"owner": JobOwners.TEAM_CLICKHOUSE.value},
+    tags={"owner": JobOwners.TEAM_DATASTORE.value},
     partitions_def=hourly_partition,
 )
-def postgres_to_clickhouse_etl_job():
-    """Hourly ETL job to sync organization and team data from Postgres to ClickHouse."""
+def postgres_to_datastore_etl_job():
+    """Hourly ETL job to sync organization and team data from Postgres to Datastore."""
     org_state = sync_organizations()
     team_state = sync_teams()
     verify_sync(org_state, team_state)
@@ -879,14 +879,14 @@ def postgres_to_clickhouse_etl_job():
     partitions_def=hourly_partition,
     backfill_policy=BackfillPolicy(max_partitions_per_run=24),  # Allow up to 24 hours backfill at once
 )
-def organizations_in_clickhouse(
+def organizations_in_datastore(
     context: AssetExecutionContext,
 ) -> None:
-    """Asset representing organizations data in ClickHouse."""
-    config = PostgresToClickHouseETLConfig(full_refresh=False)
+    """Asset representing organizations data in Datastore."""
+    config = PostgresToDatastoreETLConfig(full_refresh=False)
 
     # Create tables if they don't exist
-    create_clickhouse_tables(context)
+    create_datastore_tables(context)
 
     # Determine the time window for this partition
     partition_key = context.partition_key
@@ -938,10 +938,10 @@ def organizations_in_clickhouse(
         organizations = cursor.fetchall()
         context.log.info(f"Fetched {len(organizations)} organizations for partition {partition_key}")
 
-        # Insert into ClickHouse
+        # Insert into Datastore
         if organizations:
-            rows_inserted = insert_organizations_to_clickhouse(organizations, batch_size=config.batch_size)
-            context.log.info(f"Inserted {rows_inserted} organizations into ClickHouse")
+            rows_inserted = insert_organizations_to_datastore(organizations, batch_size=config.batch_size)
+            context.log.info(f"Inserted {rows_inserted} organizations into Datastore")
 
         cursor.close()
 
@@ -954,14 +954,14 @@ def organizations_in_clickhouse(
     partitions_def=hourly_partition,
     backfill_policy=BackfillPolicy(max_partitions_per_run=24),  # Allow up to 24 hours backfill at once
 )
-def teams_in_clickhouse(
+def teams_in_datastore(
     context: AssetExecutionContext,
 ) -> None:
-    """Asset representing teams data in ClickHouse."""
-    config = PostgresToClickHouseETLConfig(full_refresh=False)
+    """Asset representing teams data in Datastore."""
+    config = PostgresToDatastoreETLConfig(full_refresh=False)
 
     # Create tables if they don't exist
-    create_clickhouse_tables(context)
+    create_datastore_tables(context)
 
     # Determine the time window for this partition
     partition_key = context.partition_key
@@ -1066,10 +1066,10 @@ def teams_in_clickhouse(
         teams = cursor.fetchall()
         context.log.info(f"Fetched {len(teams)} teams for partition {partition_key}")
 
-        # Insert into ClickHouse
+        # Insert into Datastore
         if teams:
-            rows_inserted = insert_teams_to_clickhouse(teams, batch_size=config.batch_size)
-            context.log.info(f"Inserted {rows_inserted} teams into ClickHouse")
+            rows_inserted = insert_teams_to_datastore(teams, batch_size=config.batch_size)
+            context.log.info(f"Inserted {rows_inserted} teams into Datastore")
 
         cursor.close()
 
@@ -1078,9 +1078,9 @@ def teams_in_clickhouse(
 
 
 # Create an hourly schedule for the job
-postgres_to_clickhouse_hourly_schedule = ScheduleDefinition(
-    job=postgres_to_clickhouse_etl_job,
+postgres_to_datastore_hourly_schedule = ScheduleDefinition(
+    job=postgres_to_datastore_etl_job,
     cron_schedule="0 * * * *",  # Run at the top of every hour
-    name="postgres_to_clickhouse_hourly",
+    name="postgres_to_datastore_hourly",
     execution_timezone="UTC",
 )

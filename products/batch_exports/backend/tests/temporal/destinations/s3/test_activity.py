@@ -7,7 +7,7 @@ from django.conf import settings
 from temporalio.testing._activity import ActivityEnvironment
 
 from insights.batch_exports.service import BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.s3_batch_export import (
     COMPRESSION_EXTENSIONS,
@@ -18,7 +18,7 @@ from products.batch_exports.backend.temporal.destinations.s3_batch_export import
 )
 from products.batch_exports.backend.tests.temporal.destinations.s3.utils import (
     TEST_S3_MODELS,
-    assert_clickhouse_records_in_s3,
+    assert_datastore_records_in_s3,
     run_activity,
 )
 from products.batch_exports.backend.tests.temporal.utils.s3 import assert_files_in_s3, read_json_file_from_s3
@@ -30,7 +30,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.django_db]
 @pytest.mark.parametrize("model", TEST_S3_MODELS)
 @pytest.mark.parametrize("file_format", FILE_FORMAT_EXTENSIONS.keys())
 async def test_insert_into_s3_activity_puts_data_into_s3(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     minio_client,
     activity_environment: ActivityEnvironment,
@@ -45,7 +45,7 @@ async def test_insert_into_s3_activity_puts_data_into_s3(
 ):
     """Test that the insert_into_s3_activity_from_stage function ends up with data into S3.
 
-    We use the generate_test_events_in_clickhouse function to generate several sets
+    We use the generate_test_events_in_datastore function to generate several sets
     of events. Some of these sets are expected to be exported, and others not. Expected
     events are those that:
     * Are created for the team_id of the batch export.
@@ -53,7 +53,7 @@ async def test_insert_into_s3_activity_puts_data_into_s3(
     * Are not duplicates of other events that are in the same batch.
     * Match any filters specified in the batch export model.
 
-    Once we have these events, we pass them to the assert_clickhouse_records_in_s3 function to check
+    Once we have these events, we pass them to the assert_datastore_records_in_s3 function to check
     that they appear in the expected S3 bucket and key.
     """
 
@@ -112,9 +112,9 @@ async def test_insert_into_s3_activity_puts_data_into_s3(
     elif isinstance(model, BatchExportModel) and model.name == "sessions":
         sort_key = "session_id"
 
-    await assert_clickhouse_records_in_s3(
+    await assert_datastore_records_in_s3(
         s3_compatible_client=minio_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         bucket_name=bucket_name,
         key_prefix=prefix,
         team_id=ateam.pk,
@@ -135,7 +135,7 @@ async def test_insert_into_s3_activity_puts_data_into_s3(
 @pytest.mark.parametrize("compression", [None], indirect=True)
 @pytest.mark.parametrize("file_format", ["Parquet"], indirect=True)
 async def test_insert_into_s3_activity_with_exclude_events(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     minio_client,
     activity_environment: ActivityEnvironment,
@@ -204,9 +204,9 @@ async def test_insert_into_s3_activity_with_exclude_events(
     elif isinstance(model, BatchExportModel) and model.name == "sessions":
         sort_key = "session_id"
 
-    await assert_clickhouse_records_in_s3(
+    await assert_datastore_records_in_s3(
         s3_compatible_client=minio_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         bucket_name=bucket_name,
         key_prefix=prefix,
         team_id=ateam.pk,
@@ -227,7 +227,7 @@ async def test_insert_into_s3_activity_with_exclude_events(
 @pytest.mark.parametrize("file_format", FILE_FORMAT_EXTENSIONS.keys())
 @pytest.mark.parametrize("max_file_size_mb", [None, 6])
 async def test_insert_into_s3_activity_puts_splitted_files_into_s3(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     minio_client,
     activity_environment,
@@ -256,8 +256,8 @@ async def test_insert_into_s3_activity_puts_splitted_files_into_s3(
 
     prefix = str(uuid.uuid4())
 
-    events_1, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    events_1, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -268,8 +268,8 @@ async def test_insert_into_s3_activity_puts_splitted_files_into_s3(
         properties={"$prop1": 123},
     )
 
-    events_2, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    events_2, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -374,7 +374,7 @@ async def test_insert_into_s3_activity_puts_splitted_files_into_s3(
 @pytest.mark.parametrize("model", [BatchExportModel(name="events", schema=None)])
 @pytest.mark.parametrize("file_format", ["invalid"])
 async def test_insert_into_s3_activity_fails_on_invalid_file_format(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     minio_client,
     activity_environment,
@@ -418,7 +418,7 @@ async def test_insert_into_s3_activity_fails_on_invalid_file_format(
 @pytest.mark.parametrize("model", [BatchExportModel(name="events", schema=None)])
 @pytest.mark.parametrize("compression", ["invalid"])
 async def test_insert_into_s3_activity_fails_on_invalid_compression(
-    clickhouse_client,
+    datastore_client,
     bucket_name,
     minio_client,
     activity_environment,

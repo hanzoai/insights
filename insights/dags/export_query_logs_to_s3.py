@@ -5,9 +5,9 @@ import dagster
 import pydantic
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import settings_with_log_comment
-from insights.dags.common.resources import ClickhouseClusterResource
+from insights.dags.common.resources import DatastoreClusterResource
 from insights.settings.base_variables import DEBUG
 from insights.settings.dagster import DAGSTER_DATA_EXPORT_S3_BUCKET
 from insights.settings.object_storage import (
@@ -49,10 +49,10 @@ class QueryLogsExportConfig(dagster.Config):
 def export_query_logs(
     context: dagster.OpExecutionContext,
     config: QueryLogsExportConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ):
     """
-    Export ClickHouse query logs to S3 using ClickHouse's native S3 export functionality.
+    Export Datastore query logs to S3 using Datastore's native S3 export functionality.
     Exports all columns from the system.query_log table for the specified date range.
     """
     # If date_range is not provided, use yesterday's date
@@ -216,7 +216,7 @@ def export_query_logs(
     context.log.info(f"Query logs export completed successfully on all hosts")
 
 
-@dagster.job(resource_defs={"cluster": ClickhouseClusterResource()})
+@dagster.job(resource_defs={"cluster": DatastoreClusterResource()})
 def export_query_logs_to_s3():
     export_query_logs()
 

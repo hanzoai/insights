@@ -6,11 +6,11 @@ import pytest
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     FuzzyInt,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
     snapshot_postgres_queries_context,
 )
 from unittest.mock import patch
@@ -70,7 +70,7 @@ class TestExtractEtagFromHeader:
         assert extract_etag_from_header(header_value) == expected
 
 
-class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
+class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     feature_flag: FeatureFlag = None  # type: ignore
 
     maxDiff = None
@@ -5480,7 +5480,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         self.assertEqual(len(response_json["analytics_dashboards"]), 1)
 
     @freeze_time("2021-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_creating_static_cohort(self):
         flag = FeatureFlag.objects.create(
             team=self.team,
@@ -6860,7 +6860,7 @@ class TestFeatureFlag(APIBaseTest, ClickhouseTestMixin):
             self.assertEqual(response.headers["ETag"], etag)
 
 
-class TestCohortGenerationForFeatureFlag(APIBaseTest, ClickhouseTestMixin):
+class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_creating_static_cohort_with_deleted_flag(self):
         FeatureFlag.objects.create(
             team=self.team,
@@ -7375,8 +7375,8 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, ClickhouseTestMixin):
         self.assertEqual(cohort.count, 4)
 
 
-class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_user_blast_radius(self):
         for i in range(10):
             _create_person(
@@ -7509,7 +7509,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
         response_json = response.json()
         self.assertLessEqual({"users_affected": 5, "total_users": 5}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_single_cohort(self):
         # Just to shake things up, we're using integers for the group property
         for i in range(10):
@@ -7576,7 +7576,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
             response_json = response.json()
             self.assertLessEqual({"users_affected": 3, "total_users": 10}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_multiple_precalculated_cohorts(self):
         for i in range(10):
             _create_person(
@@ -7653,7 +7653,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
             response_json = response.json()
             self.assertLessEqual({"users_affected": 2, "total_users": 10}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_multiple_static_cohorts(self):
         for i in range(10):
             _create_person(
@@ -7728,7 +7728,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
             response_json = response.json()
             self.assertLessEqual({"users_affected": 2, "total_users": 10}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_groups(self):
         create_group_type_mapping_without_created_at(
             team=self.team,
@@ -7847,7 +7847,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
         response_json = response.json()
         self.assertLessEqual({"users_affected": 5, "total_users": 5}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_groups_multiple_queries(self):
         create_group_type_mapping_without_created_at(
             team=self.team,
@@ -7901,7 +7901,7 @@ class TestBlastRadius(ClickhouseTestMixin, APIBaseTest):
         response_json = response.json()
         self.assertLessEqual({"users_affected": 3, "total_users": 10}.items(), response_json.items())
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_blast_radius_with_group_key_property(self):
         """Test that $group_key property correctly identifies groups by their key"""
         GroupTypeMapping.objects.create(
@@ -9103,7 +9103,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         self.assertEqual(cached_flag.evaluation_tag_names, ["app"])
 
 
-class TestFeatureFlagStatus(APIBaseTest, ClickhouseTestMixin):
+class TestFeatureFlagStatus(APIBaseTest, DatastoreTestMixin):
     def setUp(self):
         cache.clear()
 

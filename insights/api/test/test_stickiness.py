@@ -4,14 +4,14 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional, Union
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, create_person_id_override_by_distinct_id, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, create_person_id_override_by_distinct_id, snapshot_datastore_queries
 
 from django.test import override_settings
 from django.test.client import Client
 
 from dateutil.relativedelta import relativedelta
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import ENTITY_ID, ENTITY_TYPE
 from insights.models.team import Team
 from insights.utils import encode_get_request_params
@@ -195,7 +195,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["data"][6], 0)
 
         @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_with_person_on_events_v2(self):
             # KLUDGE: We need to do this to ensure create_person_id_override_by_distinct_id
             # works correctly. Worth considering other approaches as we generally avoid
@@ -229,7 +229,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["labels"][6], "7 days")
             self.assertEqual(response[0]["data"][6], 0)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_all_time(self):
             self._create_multiple_people()
 
@@ -255,7 +255,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["labels"][6], "7 days")
             self.assertEqual(response[0]["data"][6], 0)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_hours(self):
             self._create_multiple_people(period=timedelta(hours=1))
 
@@ -512,7 +512,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["count"], 4)
             self.assertEqual(response[0]["labels"][0], "1 day")
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_people_endpoint(self):
             person1, _, _, person4 = self._create_multiple_people()
 
@@ -562,7 +562,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(len(people), 1)
             self.assertEqual(str(people[0]["id"]), str(person1.uuid))
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_people_paginated(self):
             for i in range(150):
                 person_name = f"person{i}"
@@ -598,7 +598,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             second_result = self.client.get(result["next"]).json()
             self.assertEqual(len(second_result["results"][0]["people"]), 50)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_compare(self):
             self._create_multiple_people()
 
@@ -663,7 +663,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             self.assertEqual(response[0]["labels"][6], "7 days")
             self.assertEqual(response[0]["data"][6], 0)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_stickiness_all_time_with_sampling(self):
             self._create_multiple_people()
 

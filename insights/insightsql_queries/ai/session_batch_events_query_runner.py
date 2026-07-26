@@ -8,7 +8,7 @@ from insights.schema import (
     SessionEventsItem,
 )
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.insightsql_queries.events_query_runner import EventsQueryRunner
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.insightsql_queries.query_runner import QueryRunner

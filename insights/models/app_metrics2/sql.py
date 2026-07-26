@@ -1,10 +1,10 @@
-from insights.clickhouse.kafka_engine import (
+from insights.datastore.kafka_engine import (
     CONSUMER_GROUP_APP_METRICS2,
     KAFKA_COLUMNS_WITH_PARTITION,
     kafka_engine,
     ttl_period,
 )
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
 
 APP_METRICS2_TTL_DAYS = 90

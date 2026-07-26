@@ -146,30 +146,30 @@ class TestIlikeMatches(BaseTest):
             ("_%_%", "a", False),
         ]
     )
-    def test_ilike_matches_against_clickhouse(self, pattern: str, text: str, expected: bool) -> None:
-        # Run actual ClickHouse query
+    def test_ilike_matches_against_datastore(self, pattern: str, text: str, expected: bool) -> None:
+        # Run actual Datastore query
         result = execute_insightsql_query(
             team=self.team,
             query="SELECT ilike({text}, {pattern})",
             placeholders={"text": ast.Constant(value=text), "pattern": ast.Constant(value=pattern)},
         )
-        clickhouse_result = result.results[0][0] == 1
+        datastore_result = result.results[0][0] == 1
 
-        # Verify our expectation matches ClickHouse
+        # Verify our expectation matches Datastore
         self.assertEqual(
-            clickhouse_result,
+            datastore_result,
             expected,
-            f"ClickHouse ilike({text!r}, {pattern!r}) returned {clickhouse_result}, expected {expected}",
+            f"Datastore ilike({text!r}, {pattern!r}) returned {datastore_result}, expected {expected}",
         )
 
-        # Verify our Python implementation matches ClickHouse
+        # Verify our Python implementation matches Datastore
         python_result = ilike_matches(pattern, text)
 
         self.assertEqual(
             python_result,
-            clickhouse_result,
+            datastore_result,
             f"Python ilike_matches({pattern!r}, {text!r}) returned {python_result}, "
-            f"but ClickHouse returned {clickhouse_result}",
+            f"but Datastore returned {datastore_result}",
         )
 
 
@@ -319,27 +319,27 @@ class TestLikeMatches(BaseTest):
             ("_%_%", "a", False),
         ]
     )
-    def test_like_matches_against_clickhouse(self, pattern: str, text: str, expected: bool) -> None:
+    def test_like_matches_against_datastore(self, pattern: str, text: str, expected: bool) -> None:
         result = execute_insightsql_query(
             team=self.team,
             query="SELECT like({text}, {pattern})",
             placeholders={"text": ast.Constant(value=text), "pattern": ast.Constant(value=pattern)},
         )
-        clickhouse_result = result.results[0][0] == 1
+        datastore_result = result.results[0][0] == 1
 
         self.assertEqual(
-            clickhouse_result,
+            datastore_result,
             expected,
-            f"ClickHouse like({text!r}, {pattern!r}) returned {clickhouse_result}, expected {expected}",
+            f"Datastore like({text!r}, {pattern!r}) returned {datastore_result}, expected {expected}",
         )
 
         python_result = like_matches(pattern, text)
 
         self.assertEqual(
             python_result,
-            clickhouse_result,
+            datastore_result,
             f"Python like_matches({pattern!r}, {text!r}) returned {python_result}, "
-            f"but ClickHouse returned {clickhouse_result}",
+            f"but Datastore returned {datastore_result}",
         )
 
 

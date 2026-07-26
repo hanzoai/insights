@@ -67,7 +67,7 @@ describe('emit-event-step', () => {
             groupId: 'test-group-id',
         }
 
-        const testTimestamp = castTimestampOrNow('2023-01-01T00:00:00.000Z', TimestampFormat.ClickHouse)
+        const testTimestamp = castTimestampOrNow('2023-01-01T00:00:00.000Z', TimestampFormat.Datastore)
 
         mockRawEvent = {
             uuid: 'test-uuid',

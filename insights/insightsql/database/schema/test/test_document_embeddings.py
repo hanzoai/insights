@@ -12,7 +12,7 @@ class TestDocumentEmbeddingsOrderByPushdown(BaseTest):
     def _get_inner_query(self, query_str: str) -> ast.SelectQuery:
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
         query = parse_select(query_str)
-        prepared = prepare_ast_for_printing(query, context, dialect="clickhouse")
+        prepared = prepare_ast_for_printing(query, context, dialect="datastore")
         assert prepared is not None
         assert isinstance(prepared, ast.SelectQuery)
         assert prepared.select_from is not None

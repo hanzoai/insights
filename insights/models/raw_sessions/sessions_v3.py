@@ -2,16 +2,16 @@ from typing import Optional
 
 from django.conf import settings
 
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 
 """Raw sessions table v3
 
-This is a clickhouse materialized view that aggregates events into sessions, based on the session ID.
+This is a datastore materialized view that aggregates events into sessions, based on the session ID.
 
 All events with the same session ID will be aggregated into approximately one row per session ID, which can greatly
 reduce the amount of data that needs to be read from disk for session-based queries.
 
-It's not guaranteed that clickhouse will merge all events for a session into a single row, so any queries against this
+It's not guaranteed that datastore will merge all events for a session into a single row, so any queries against this
 table should always aggregate again on session_id (the InsightsQL session table will do this automatically, so InsightsQL users
 don't need to consider this).
 
@@ -83,16 +83,16 @@ CREATE TABLE IF NOT EXISTS {table_name}
     team_id Int64,
 
     -- Both UInt128 and UUID are imperfect choices here
-    -- see https://michcioperz.com/wiki/clickhouse-uuid-ordering/
+    -- see https://michcioperz.com/wiki/datastore-uuid-ordering/
     -- but also see https://github.com/hanzoai/datastore/issues/77226 and hope
     -- right now choose UInt128 as that's the type of events.$session_id_uuid, but in the future we will probably want to switch everything to the new CH UUID type (when it's released)
     session_id_v7 UInt128,
     -- Ideally we would not need to store this separately, as the ID *is* the timestamp
-    -- Unfortunately for now, chaining clickhouse functions to extract the timestamp will break indexes / partition pruning, so do this workaround
+    -- Unfortunately for now, chaining datastore functions to extract the timestamp will break indexes / partition pruning, so do this workaround
     -- again, when the new CH UUID type is released, we should try to switch to that and remove the separate timestamp column
     session_timestamp DateTime64 {session_timestamp_modifier} fromUnixTimestamp64Milli(toUInt64(bitShiftRight(session_id_v7, 80))),
 
-    -- ClickHouse will pick the latest value of distinct_id for the session
+    -- Datastore will pick the latest value of distinct_id for the session
     -- this is fine since even if the distinct_id changes during a session
     -- it will still (or should still) map to the same person
     distinct_id AggregateFunction(argMax, String, DateTime64(6, 'UTC')),
@@ -405,11 +405,11 @@ AS
 """.format(
         table_name=RAW_SESSIONS_MV_V3(),
         target_table=WRITABLE_RAW_SESSIONS_TABLE_V3(),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         select_sql=RAW_SESSION_TABLE_MV_SELECT_SQL_V3(
             where=where,
             # use sharded_events, this means that the mv MUST be created on every data node
-            source_table=f"{settings.CLICKHOUSE_DATABASE}.sharded_events",
+            source_table=f"{settings.DATASTORE_DATABASE}.sharded_events",
         ),
     )
 
@@ -422,7 +422,7 @@ MODIFY QUERY
 """.format(
         table_name=RAW_SESSIONS_MV_V3(),
         select_sql=RAW_SESSION_TABLE_MV_SELECT_SQL_V3(
-            where=where, source_table=f"{settings.CLICKHOUSE_DATABASE}.sharded_events"
+            where=where, source_table=f"{settings.DATASTORE_DATABASE}.sharded_events"
         ),
     )
 
@@ -530,11 +530,11 @@ AS
 """.format(
         table_name=RAW_SESSIONS_MV_RECORDINGS_V3(),
         target_table=WRITABLE_RAW_SESSIONS_TABLE_V3(),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         select_sql=RAW_SESSION_TABLE_MV_RECORDINGS_SELECT_SQL_V3(
             where=where,
             # use sharded_session_replay_events, this means that the mv MUST be created on every data node
-            source_table=f"{settings.CLICKHOUSE_DATABASE}.sharded_session_replay_events",
+            source_table=f"{settings.DATASTORE_DATABASE}.sharded_session_replay_events",
             include_session_timestamp=True,
         ),
     )
@@ -568,11 +568,11 @@ def RAW_SESSION_TABLE_BACKFILL_SQL_V3(
 INSERT INTO {database}.{target_table}
 {select_sql}
 """.format(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         target_table=target_table,
         select_sql=RAW_SESSION_TABLE_MV_SELECT_SQL_V3(
             where=combined_where,
-            source_table=f"{settings.CLICKHOUSE_DATABASE}.events",
+            source_table=f"{settings.DATASTORE_DATABASE}.events",
             include_session_timestamp=include_session_timestamp,
         ),
     )
@@ -606,17 +606,17 @@ def RAW_SESSION_TABLE_BACKFILL_RECORDINGS_SQL_V3(
 INSERT INTO {database}.{target_table}
 {select_sql}
 """.format(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         target_table=target_table,
         select_sql=RAW_SESSION_TABLE_MV_RECORDINGS_SELECT_SQL_V3(
             where=combined_where,
-            source_table=f"{settings.CLICKHOUSE_DATABASE}.session_replay_events",
+            source_table=f"{settings.DATASTORE_DATABASE}.session_replay_events",
             include_session_timestamp=include_session_timestamp,
         ),
     )
 
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_sessions based on a sharding key.
 
@@ -724,7 +724,7 @@ SELECT
 
     -- replay
     max(has_replay_events) as has_replay_events
-FROM {settings.CLICKHOUSE_DATABASE}.{DISTRIBUTED_RAW_SESSIONS_TABLE_V3()}
+FROM {settings.DATASTORE_DATABASE}.{DISTRIBUTED_RAW_SESSIONS_TABLE_V3()}
 GROUP BY session_id_v7, session_timestamp, team_id
 """
 )
@@ -786,8 +786,8 @@ def GET_NUM_SHARDED_RAW_SESSIONS_ACTIVE_PARTS(partitions: list[str]) -> str:
         SELECT coalesce(max(parts_count), 0), argMax(partition, parts_count), argMax(host, parts_count)
         FROM (
             SELECT hostName() as host, count() as parts_count, partition
-            FROM clusterAllReplicas('{settings.CLICKHOUSE_CLUSTER}', system.parts)
-            WHERE database = '{settings.CLICKHOUSE_DATABASE}'
+            FROM clusterAllReplicas('{settings.DATASTORE_CLUSTER}', system.parts)
+            WHERE database = '{settings.DATASTORE_DATABASE}'
               AND table = '{SHARDED_RAW_SESSIONS_TABLE_V3()}'
               AND partition IN ({partitions_sql})
               AND active = 1

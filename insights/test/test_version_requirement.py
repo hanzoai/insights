@@ -11,11 +11,11 @@ from insights.version_requirement import ServiceVersionRequirement
 class TestServiceVersionRequirement(TestCase):
     def test_accepted_services(self):
         v1 = ServiceVersionRequirement(service="postgresql", supported_version="==14.0.0")
-        v2 = ServiceVersionRequirement(service="clickhouse", supported_version="==22.3.0")
+        v2 = ServiceVersionRequirement(service="datastore", supported_version="==22.3.0")
         v3 = ServiceVersionRequirement(service="redis", supported_version="==6.2.6")
 
         self.assertEqual(v1.service, "postgresql")
-        self.assertEqual(v2.service, "clickhouse")
+        self.assertEqual(v2.service, "datastore")
         self.assertEqual(v3.service, "redis")
 
         self.assertEqual(type(v1.supported_version), SimpleSpec)
@@ -31,7 +31,7 @@ class TestServiceVersionRequirement(TestCase):
         except Exception as e:
             self.assertEqual(
                 str(e),
-                "service kea cannot be used to specify a version requirement. service should be one of clickhouse, postgresql, redis",
+                "service kea cannot be used to specify a version requirement. service should be one of datastore, postgresql, redis",
             )
 
     def test_service_versions(self):

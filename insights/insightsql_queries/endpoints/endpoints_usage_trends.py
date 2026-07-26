@@ -118,7 +118,7 @@ class EndpointsUsageTrendsQueryRunner(EndpointsUsageQueryRunner[EndpointsUsageTr
             return self._get_requests_count_expression()
 
     def _calculate(self) -> EndpointsUsageTrendsQueryResponse:
-        from insights.clickhouse.query_tagging import tag_queries
+        from insights.datastore.query_tagging import tag_queries
 
         tag_queries(name="endpoints_usage_trends")
         response = execute_insightsql_query(

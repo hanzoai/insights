@@ -138,7 +138,7 @@ export const searchLogic = kea<searchLogicType>([
 
                     const results = await Promise.allSettled(
                         groupTypesList.map((groupType) =>
-                            api.groups.listClickhouse({
+                            api.groups.listDatastore({
                                 group_type_index: groupType.group_type_index,
                                 search: trimmed,
                                 limit: SEARCH_LIMIT,

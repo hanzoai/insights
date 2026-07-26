@@ -21,7 +21,7 @@ class EventsSessionSubTable(VirtualTable):
         "duration": IntegerDatabaseField(name="session_duration", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "events"
 
     def to_printed_insightsql(self):

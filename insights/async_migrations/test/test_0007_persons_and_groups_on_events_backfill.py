@@ -2,12 +2,12 @@ import json
 from uuid import uuid4
 
 import pytest
-from insights.test.base import ClickhouseTestMixin, run_clickhouse_statement_in_parallel
+from insights.test.base import DatastoreTestMixin, run_datastore_statement_in_parallel
 
 from insights.async_migrations.runner import start_async_migration
 from insights.async_migrations.setup import get_async_migration_definition, setup_async_migrations
 from insights.async_migrations.test.util import AsyncMigrationBaseTest
-from insights.clickhouse.client import query_with_columns, sync_execute
+from insights.datastore.client import query_with_columns, sync_execute
 from insights.models import Person
 from insights.models.async_migration import AsyncMigration, AsyncMigrationError, MigrationStatus
 from insights.models.event.util import create_event
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.async_migrations
 MIGRATION_NAME = "0007_persons_and_groups_on_events_backfill"
 
 uuid1, uuid2, uuid3 = (UUIDT() for _ in range(3))
-# Clickhouse leaves behind blank/zero values for non-filled columns, these are checked against these constants
+# Datastore leaves behind blank/zero values for non-filled columns, these are checked against these constants
 ZERO_UUID = UUIDT(uuid_str="00000000-0000-0000-0000-000000000000")
 ZERO_DATE = "1970-01-01T00:00:00Z"
 
@@ -63,7 +63,7 @@ def query_events() -> list[dict]:
     )
 
 
-class Test0007PersonsAndGroupsOnEventsBackfill(AsyncMigrationBaseTest, ClickhouseTestMixin):
+class Test0007PersonsAndGroupsOnEventsBackfill(AsyncMigrationBaseTest, DatastoreTestMixin):
     def setUp(self):
         MIGRATION_DEFINITION.parameters["TEAM_ID"] = (None, "", int)
 
@@ -75,7 +75,7 @@ class Test0007PersonsAndGroupsOnEventsBackfill(AsyncMigrationBaseTest, Clickhous
         super().tearDown()
 
     def clear_tables(self):
-        run_clickhouse_statement_in_parallel(
+        run_datastore_statement_in_parallel(
             [
                 "TRUNCATE TABLE sharded_events",
                 "TRUNCATE TABLE person",

@@ -21,7 +21,7 @@ class PgEmbeddingsTable(Table):
         "is_deleted": IntegerDatabaseField(name="is_deleted", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "pg_embeddings"
 
     def to_printed_insightsql(self):

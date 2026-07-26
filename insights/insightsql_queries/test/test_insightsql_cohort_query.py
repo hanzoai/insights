@@ -1,11 +1,11 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import MagicMock, patch
 
 from insights.insightsql_queries.insightsql_cohort_query import InsightsQLCohortQuery, InsightsQLRealtimeCohortQuery
 from insights.models import Cohort
 
 
-class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
+class TestInsightsQLCohortQuery(DatastoreTestMixin, APIBaseTest):
     """Tests for InsightsQLCohortQuery, particularly the optimization for multiple person property filters."""
 
     @patch("hanzo_insights.feature_enabled", return_value=True)
@@ -53,7 +53,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # If the optimization worked, there should be no INTERSECT in the query
         self.assertNotIn("INTERSECT DISTINCT", query_str)
@@ -100,7 +100,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # With the feature flag off, should use INTERSECT DISTINCT
         self.assertIn("INTERSECT DISTINCT", query_str)
@@ -145,7 +145,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should use INTERSECT DISTINCT because properties are mixed
         self.assertIn("INTERSECT DISTINCT", query_str)
@@ -188,7 +188,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should use EXCEPT because one property is negated
         self.assertIn("EXCEPT", query_str)
@@ -199,7 +199,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         Test that multiple person property filters in an OR group are combined into a single query.
 
         This optimization prevents generating N separate queries with N-1 UNION DISTINCT operations,
-        which causes ClickHouse to materialize IN subqueries during query planning, leading to
+        which causes Datastore to materialize IN subqueries during query planning, leading to
         OOM and timeout issues for large person tables.
         """
         cohort_filters = {
@@ -246,7 +246,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # If the optimization worked, there should be no UNION DISTINCT in the query
         self.assertNotIn("UNION DISTINCT", query_str)
@@ -291,7 +291,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # With the feature flag off, should use UNION DISTINCT
         self.assertIn("UNION DISTINCT", query_str)
@@ -336,7 +336,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should use UNION DISTINCT because properties are mixed
         self.assertIn("UNION DISTINCT", query_str)
@@ -391,7 +391,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # OR with all negated properties doesn't get optimized and uses INTERSECT DISTINCT
         # (because all_children_negated = True)
@@ -424,10 +424,10 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
 
         insightsql_query = InsightsQLCohortQuery(cohort=cohort)
         with self.assertRaises(Cohort.DoesNotExist):
-            insightsql_query.query_str("clickhouse")
+            insightsql_query.query_str("datastore")
 
 
-class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
+class TestInsightsQLRealtimeCohortQuery(DatastoreTestMixin, APIBaseTest):
     """Tests for InsightsQLRealtimeCohortQuery which uses precalculated_events for behavioral filters."""
 
     def test_person_property_query(self) -> None:
@@ -459,7 +459,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should query precalculated_person_properties table for person properties
         self.assertIn("precalculated_person_properties", query_str)
@@ -497,7 +497,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
 
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should query precalculated_events table
         self.assertIn("precalculated_events", query_str)
@@ -535,7 +535,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # Print the AST to string
         from insights.insightsql.printer import prepare_and_print_ast
 
-        query_str = prepare_and_print_ast(query_ast, insightsql_query.insightsql_context, "clickhouse", pretty=True)[0]
+        query_str = prepare_and_print_ast(query_ast, insightsql_query.insightsql_context, "datastore", pretty=True)[0]
 
         # Should query cohort_membership table
         self.assertIn("cohort_membership", query_str)
@@ -576,7 +576,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         query_ast = insightsql_query._get_condition_for_property(prop)
 
         # Print the AST to string
-        query_str = prepare_and_print_ast(query_ast, insightsql_query.insightsql_context, "clickhouse", pretty=True)[0]
+        query_str = prepare_and_print_ast(query_ast, insightsql_query.insightsql_context, "datastore", pretty=True)[0]
 
         # Should still query cohort_membership table
         self.assertIn("cohort_membership", query_str)
@@ -615,7 +615,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should query precalculated_events
         self.assertIn("precalculated_events", query_str)
@@ -656,7 +656,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
 
         # Should raise ValueError when trying to generate query
         with self.assertRaises(ValueError) as context:
-            insightsql_query.query_str("clickhouse")
+            insightsql_query.query_str("datastore")
 
         self.assertIn("static cohort", str(context.exception).lower())
 
@@ -845,7 +845,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # The 3 mergeable email icontains should be in a single merged query with IN clause
         # Looking at the IN clause specifically
@@ -984,7 +984,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # All 3 nested single-property groups should be unwrapped and merged
         # Should have exactly 1 IN clause for all 3 conditions
@@ -1099,7 +1099,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should use IN clause to fetch all conditions at once
         self.assertIn("in(precalculated_person_properties.condition,", query_str.lower())
@@ -1279,7 +1279,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should have 1 IN clause for ALL merged email properties (yahoo + protonmail + live = 3 hashes)
         in_clause_count = query_str.lower().count("in(precalculated_person_properties.condition,")
@@ -1341,7 +1341,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
 
         # Should raise ValueError because realtime cohorts require conditionHash
         with self.assertRaises(ValueError) as context:
-            insightsql_query.query_str("clickhouse")
+            insightsql_query.query_str("datastore")
 
         self.assertIn("conditionhash", str(context.exception).lower())
 
@@ -1514,7 +1514,7 @@ class TestInsightsQLRealtimeCohortQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         insightsql_query = InsightsQLRealtimeCohortQuery(cohort=cohort)
-        query_str = insightsql_query.query_str("clickhouse")
+        query_str = insightsql_query.query_str("datastore")
 
         # Should have been deduplicated to a single condition
         # The IN clause should contain only one hash, not three

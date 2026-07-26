@@ -4,10 +4,10 @@ from pathlib import Path
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import patch
 
@@ -44,8 +44,8 @@ INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_
 CUSTOMERS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_customers"
 
 
-@snapshot_clickhouse_queries
-class TestGroupsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestGroupsRevenueAnalytics(DatastoreTestMixin, APIBaseTest):
     PURCHASE_EVENT_NAME = "purchase"
     REVENUE_PROPERTY = "revenue"
     SUBSCRIPTION_PROPERTY = "subscription_id"

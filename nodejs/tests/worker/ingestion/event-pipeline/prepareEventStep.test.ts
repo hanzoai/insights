@@ -95,7 +95,7 @@ describe('prepareEventStep()', () => {
         groupStoreForBatch = new BatchWritingGroupStore({
             kafkaProducer: hub.kafkaProducer,
             groupRepository: hub.groupRepository,
-            clickhouseGroupRepository: hub.clickhouseGroupRepository,
+            datastoreGroupRepository: hub.datastoreGroupRepository,
         })
     })
 

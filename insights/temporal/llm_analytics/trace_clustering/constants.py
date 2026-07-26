@@ -32,7 +32,7 @@ GENERATION_CHILD_WORKFLOW_ID_PREFIX = "llma-generation-clustering-team"
 # Activity timeouts (per activity type, per single attempt)
 COMPUTE_ACTIVITY_TIMEOUT = timedelta(seconds=120)  # Fetch + clustering + distances
 LLM_ACTIVITY_TIMEOUT = timedelta(seconds=600)  # 10 minutes for full labeling agent run (LangGraph multi-turn)
-EMIT_ACTIVITY_TIMEOUT = timedelta(seconds=60)  # ClickHouse write
+EMIT_ACTIVITY_TIMEOUT = timedelta(seconds=60)  # Datastore write
 
 # Heartbeat timeouts - allows Temporal to detect dead workers faster than
 # waiting for the full start_to_close_timeout to expire. Activities must
@@ -40,7 +40,7 @@ EMIT_ACTIVITY_TIMEOUT = timedelta(seconds=60)  # ClickHouse write
 # and schedule a retry on another worker.
 COMPUTE_HEARTBEAT_TIMEOUT = timedelta(seconds=60)  # 1 minute - compute is mostly CPU-bound
 LLM_HEARTBEAT_TIMEOUT = timedelta(seconds=120)  # 2 minutes - agent runs can have long pauses between LLM calls
-EMIT_HEARTBEAT_TIMEOUT = timedelta(seconds=30)  # 30 seconds - ClickHouse writes are fast
+EMIT_HEARTBEAT_TIMEOUT = timedelta(seconds=30)  # 30 seconds - Datastore writes are fast
 
 # Schedule-to-close timeouts - caps total time including all retry attempts,
 # backoff intervals, and queue time. Prevents runaway retries from blocking

@@ -175,7 +175,7 @@ const MOCK_SURVEY_WITH_RELEASE_CONS: Survey = {
 }
 
 const MOCK_SURVEY_SHOWN = {
-    clickhouse:
+    datastore:
         "SELECT count() AS `survey shown` FROM events WHERE and(equals(events.team_id, 1), equals(events.event, %(insightsql_val_0)s), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', ''), %(insightsql_val_2)s), 0)) LIMIT 100 SETTINGS readonly=2, max_execution_time=60",
     columns: ['survey shown'],
     insightsql: "SELECT count() AS `survey shown` FROM events WHERE and(equals(event, 'survey shown'), equals(properties.$survey_id, '0188e637-3b72-0000-f407-07a338652af9')) LIMIT 100",

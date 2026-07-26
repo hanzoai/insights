@@ -93,7 +93,7 @@ class FetchSignalTypeExamplesOutput:
 
 @temporalio.activity.defn
 async def fetch_signal_type_examples_activity(input: FetchSignalTypeExamplesInput) -> FetchSignalTypeExamplesOutput:
-    """Fetch one example signal per unique (source_product, source_type) pair from ClickHouse."""
+    """Fetch one example signal per unique (source_product, source_type) pair from Datastore."""
     try:
         team = await Team.objects.aget(pk=input.team_id)
 
@@ -291,7 +291,7 @@ class RunSignalSemanticSearchOutput:
 
 @temporalio.activity.defn
 async def run_signal_semantic_search_activity(input: RunSignalSemanticSearchInput) -> RunSignalSemanticSearchOutput:
-    """Run a nearest neighbor query against the signal embeddings in ClickHouse."""
+    """Run a nearest neighbor query against the signal embeddings in Datastore."""
     try:
         team = await Team.objects.aget(pk=input.team_id)
 

@@ -202,7 +202,7 @@ class BaseDestinationTest(ABC):
         return run
 
 
-async def _get_records_from_clickhouse(
+async def _get_records_from_datastore(
     team_id: int,
     data_interval_start: dt.datetime,
     data_interval_end: dt.datetime,
@@ -214,7 +214,7 @@ async def _get_records_from_clickhouse(
     destination_default_fields: list[BatchExportField],
     json_columns: list[str] | None = None,
 ):
-    """Get records from ClickHouse."""
+    """Get records from Datastore."""
     json_columns = json_columns or []
     if batch_export_model is not None:
         if isinstance(batch_export_model, BatchExportModel):
@@ -289,7 +289,7 @@ async def _get_records_from_clickhouse(
     return records
 
 
-async def assert_clickhouse_records_in_destination(
+async def assert_datastore_records_in_destination(
     destination_test: BaseDestinationTest,
     team_id: int,
     data_interval_start: dt.datetime,
@@ -307,7 +307,7 @@ async def assert_clickhouse_records_in_destination(
 ):
     """Assert that the expected data was written to the destination."""
     json_columns = destination_test.get_json_columns(inputs)
-    records_from_clickhouse = await _get_records_from_clickhouse(
+    records_from_datastore = await _get_records_from_datastore(
         team_id=team_id,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
@@ -342,14 +342,14 @@ async def assert_clickhouse_records_in_destination(
     records_from_destination = [
         {k: v for k, v in record.items() if k not in fields_to_exclude} for record in records_from_destination
     ]
-    records_from_clickhouse = [
-        {k: v for k, v in record.items() if k not in fields_to_exclude} for record in records_from_clickhouse
+    records_from_datastore = [
+        {k: v for k, v in record.items() if k not in fields_to_exclude} for record in records_from_datastore
     ]
     records_from_destination = destination_test.preprocess_records_before_comparison(records_from_destination)
-    records_from_clickhouse = destination_test.preprocess_records_before_comparison(records_from_clickhouse)
+    records_from_datastore = destination_test.preprocess_records_before_comparison(records_from_datastore)
 
     inserted_column_names = list(records_from_destination[0].keys())
-    expected_column_names = list(records_from_clickhouse[0].keys())
+    expected_column_names = list(records_from_datastore[0].keys())
     inserted_column_names.sort()
     expected_column_names.sort()
     assert len(inserted_column_names) > 0
@@ -357,11 +357,11 @@ async def assert_clickhouse_records_in_destination(
 
     # Ordering is not guaranteed, so we sort before comparing.
     records_from_destination.sort(key=operator.itemgetter(sort_key))
-    records_from_clickhouse.sort(key=operator.itemgetter(sort_key))
+    records_from_datastore.sort(key=operator.itemgetter(sort_key))
 
-    assert len(records_from_destination) == len(records_from_clickhouse)
-    assert records_from_destination[0] == records_from_clickhouse[0]
-    assert records_from_destination == records_from_clickhouse
+    assert len(records_from_destination) == len(records_from_datastore)
+    assert records_from_destination[0] == records_from_datastore[0]
+    assert records_from_destination == records_from_datastore
 
 
 class CommonWorkflowTests:
@@ -530,7 +530,7 @@ class CommonWorkflowTests:
             or (isinstance(model, BatchExportModel) and model.name == "sessions" and run.records_completed <= 1)
         )
 
-        await assert_clickhouse_records_in_destination(
+        await assert_datastore_records_in_destination(
             destination_test=destination_test,
             team_id=ateam.pk,
             data_interval_start=data_interval_start,

@@ -31,7 +31,7 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.tagged_item import TaggedItemSerializerMixin, TaggedItemViewSetMixin
 from insights.api.utils import action
-from insights.clickhouse.client.async_task_chain import task_chain_context
+from insights.datastore.client.async_task_chain import task_chain_context
 from insights.constants import GENERATED_DASHBOARD_PREFIX
 from insights.event_usage import report_user_action
 from insights.helpers import create_dashboard_from_template

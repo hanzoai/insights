@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
@@ -50,9 +50,9 @@ impl PropertiesContainer for AnyEvent {
     }
 }
 
-impl TryFrom<ClickHouseEvent> for AnyEvent {
+impl TryFrom<DatastoreEvent> for AnyEvent {
     type Error = EventError;
-    fn try_from(value: ClickHouseEvent) -> Result<Self, Self::Error> {
+    fn try_from(value: DatastoreEvent) -> Result<Self, Self::Error> {
         let properties = match &value.properties {
             Some(p) => serde_json::from_str(p)
                 .map_err(|e| EventError::InvalidProperties(value.uuid, e.to_string()))?,
@@ -65,7 +65,7 @@ impl TryFrom<ClickHouseEvent> for AnyEvent {
             team_id: value.team_id,
             timestamp: value.timestamp,
             properties,
-            // We don't preserve all properties from ClickhouseEvent
+            // We don't preserve all properties from DatastoreEvent
             others: HashMap::new(),
         })
     }
@@ -78,14 +78,14 @@ mod test {
     use super::*;
     use uuid::Uuid;
 
-    fn make_exception_event(exception_value: &str) -> ClickHouseEvent {
+    fn make_exception_event(exception_value: &str) -> DatastoreEvent {
         let props = serde_json::json!({
             "$exception_list": [{
                 "type": "Error",
                 "value": exception_value
             }]
         });
-        ClickHouseEvent {
+        DatastoreEvent {
             uuid: Uuid::now_v7(),
             team_id: 1,
             project_id: Some(1),

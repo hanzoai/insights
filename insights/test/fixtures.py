@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_APP_METRICS2
 from insights.models.app_metrics2.sql import INSERT_APP_METRICS2_SQL
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 
 
 def create_app_metric2(
@@ -18,7 +18,7 @@ def create_app_metric2(
     count: int = 1,
 ):
     data = {
-        "timestamp": format_clickhouse_timestamp(timestamp or datetime.now()),
+        "timestamp": format_datastore_timestamp(timestamp or datetime.now()),
         "team_id": team_id,
         "app_source": app_source,
         "app_source_id": app_source_id,
@@ -27,5 +27,5 @@ def create_app_metric2(
         "metric_name": metric_name,
         "count": count,
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_APP_METRICS2, sql=INSERT_APP_METRICS2_SQL, data=data)

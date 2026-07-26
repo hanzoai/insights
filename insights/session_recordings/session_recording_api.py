@@ -56,9 +56,9 @@ from insights.schema import (
 
 from insights.api.person import MinimalPersonSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.api.utils import ServerTimingsGathered, action, safe_clickhouse_string
+from insights.api.utils import ServerTimingsGathered, action, safe_datastore_string
 from insights.auth import PersonalAPIKeyAuthentication, SharingAccessTokenAuthentication
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.cloud_utils import is_cloud
 from insights.errors import CHQueryErrorCannotScheduleTask, CHQueryErrorTooManySimultaneousQueries
 from insights.event_usage import report_user_action
@@ -67,7 +67,7 @@ from insights.models import Team, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.comment import Comment
 from insights.models.person.person import READ_DB_FOR_PERSONS, PersonDistinctId
-from insights.rate_limit import ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle, PersonalApiKeyRateThrottle
+from insights.rate_limit import DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle, PersonalApiKeyRateThrottle
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.rbac.user_access_control import UserAccessControlSerializerMixin
 from insights.renderers import ServerSentEventRenderer
@@ -201,7 +201,7 @@ class AiFilterRequest(BaseModel):
 
 class SurrogatePairSafeJSONEncoder(JSONEncoder):
     def encode(self, o):
-        return safe_clickhouse_string(super().encode(o), with_counter=False)
+        return safe_datastore_string(super().encode(o), with_counter=False)
 
 
 class SurrogatePairSafeJSONRenderer(JSONRenderer):
@@ -231,7 +231,7 @@ class SessionRecordingSerializer(serializers.ModelSerializer, UserAccessControlS
     activity_score = serializers.SerializerMethodField()
 
     def get_ongoing(self, obj: SessionRecording) -> bool:
-        # ongoing is a custom field that we add if loading from ClickHouse
+        # ongoing is a custom field that we add if loading from Datastore
         return getattr(obj, "ongoing", False)
 
     def get_viewed(self, obj: SessionRecording) -> bool:
@@ -511,7 +511,7 @@ class SessionRecordingViewSet(
 ):
     scope_object = "session_recording"
     scope_object_read_actions = ["list", "retrieve", "snapshots"]
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     serializer_class = SessionRecordingSerializer
     # We don't use this
     queryset = SessionRecording.objects.none()
@@ -759,7 +759,7 @@ class SessionRecordingViewSet(
     def bulk_delete(self, request: request.Request, *args: Any, **kwargs: Any) -> Response:
         """Bulk soft delete recordings by providing a list of recording IDs.
 
-        Accepts optional date_from parameter to optimize ClickHouse query performance by limiting the search range.
+        Accepts optional date_from parameter to optimize Datastore query performance by limiting the search range.
         If not provided, defaults to the team's retention period to ensure all recordings can be found.
         """
 
@@ -774,7 +774,7 @@ class SessionRecordingViewSet(
                 f"Cannot process more than {MAX_RECORDINGS_PER_BULK_ACTION} recordings at once"
             )
 
-        # Load recordings from ClickHouse to get distinct_ids for ones that don't exist in Postgres
+        # Load recordings from Datastore to get distinct_ids for ones that don't exist in Postgres
         # Use date_from from UI if provided (optimization for when UI knows the filter range)
         # Otherwise fall back to retention period (handles direct links where no filter context exists)
         if not date_from:
@@ -1086,7 +1086,7 @@ class SessionRecordingViewSet(
             is_ch_error = isinstance(e, CHQueryErrorCannotScheduleTask)
 
             message = (
-                "ClickHouse over capacity. Please retry"
+                "Datastore over capacity. Please retry"
                 if is_ch_error
                 else "An unexpected error has occurred. Please try again later."
             )
@@ -1636,7 +1636,7 @@ def _load_recording_if_matches_filters(
     if s3_persisted_recording:
         return s3_persisted_recording
 
-    prepend_recordings = SessionRecording.get_or_build_from_clickhouse(team, ch_query_result.results)
+    prepend_recordings = SessionRecording.get_or_build_from_datastore(team, ch_query_result.results)
     if prepend_recordings and not prepend_recordings[0].deleted:
         return prepend_recordings[0]
 
@@ -1648,12 +1648,12 @@ def list_recordings_from_query(
     query: RecordingsQuery, user: User | None, team: Team, allow_event_property_expansion: bool = False
 ) -> tuple[list[SessionRecording], bool, str, str | None]:
     """
-    As we can store recordings in S3 or in Clickhouse we need to do a few things here
+    As we can store recordings in S3 or in Datastore we need to do a few things here
 
     A. If filter.session_ids is specified:
       1. We first try to load them directly from Postgres if they have been persisted to S3 (they might have fell out of CH)
-      2. Any that couldn't be found are then loaded from Clickhouse
-    B. Otherwise we just load all values from Clickhouse
+      2. Any that couldn't be found are then loaded from Datastore
+    B. Otherwise we just load all values from Datastore
       2. Once loaded we convert them to SessionRecording objects in case we have any other persisted data
 
       In the context of an API call we'll always have user, but from Celery we might be processing arbitrary filters for a team and there won't be a user
@@ -1703,10 +1703,10 @@ def list_recordings_from_query(
     else:
         remaining_session_ids = None
 
-    # Determine if we need to query ClickHouse
-    should_query_clickhouse = (all_session_ids and remaining_session_ids) or not all_session_ids
+    # Determine if we need to query Datastore
+    should_query_datastore = (all_session_ids and remaining_session_ids) or not all_session_ids
 
-    if should_query_clickhouse:
+    if should_query_datastore:
         with (
             timer("load_recordings_from_insightsql"),
             hanzo_insights.new_context(),
@@ -1733,8 +1733,8 @@ def list_recordings_from_query(
             next_cursor = query_result.next_cursor
 
         with timer("build_recordings"), tracer.start_as_current_span("build_recordings"):
-            recordings_from_clickhouse = SessionRecording.get_or_build_from_clickhouse(team, ch_session_recordings)
-            recordings = recordings + recordings_from_clickhouse
+            recordings_from_datastore = SessionRecording.get_or_build_from_datastore(team, ch_session_recordings)
+            recordings = recordings + recordings_from_datastore
 
             recordings = [x for x in recordings if not x.deleted]
 

@@ -3,13 +3,13 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from dateutil.parser import isoparse
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Team
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.queries.app_metrics.serializers import AppMetricsRequestSerializer
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
@@ -29,8 +29,8 @@ class SessionReplaySummaryQuery:
     def list_all(self):
         params = {
             "team_id": self.team.pk,
-            "start_time": format_clickhouse_timestamp(isoparse(self.reference_date) - timedelta(hours=48)),
-            "end_time": format_clickhouse_timestamp(isoparse(self.reference_date) + timedelta(hours=48)),
+            "start_time": format_datastore_timestamp(isoparse(self.reference_date) - timedelta(hours=48)),
+            "end_time": format_datastore_timestamp(isoparse(self.reference_date) + timedelta(hours=48)),
             "session_ids": (self.session_id,),
         }
 
@@ -60,8 +60,8 @@ class SessionReplaySummaryQuery:
         return results
 
 
-class TestReceiveSummarizedSessionReplays(ClickhouseTestMixin, BaseTest):
-    @snapshot_clickhouse_queries
+class TestReceiveSummarizedSessionReplays(DatastoreTestMixin, BaseTest):
+    @snapshot_datastore_queries
     @freeze_time("2023-01-04T12:34")
     def test_session_replay_summaries_can_be_queried(self):
         session_id = "test_session_replay_summaries_can_be_queried-session-id"

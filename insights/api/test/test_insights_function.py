@@ -2,7 +2,7 @@ import json
 from typing import Any, Optional
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 from unittest.mock import ANY, MagicMock, patch
 
 from django.db import connection
@@ -79,7 +79,7 @@ def get_db_field_value(field, model_id):
     return cursor.fetchone()[0]
 
 
-class TestInsightsFunctionAPIWithoutAvailableFeature(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def setUp(self):
         super().setUp()
         # Create slack template in DB
@@ -181,7 +181,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(ClickhouseTestMixin, APIBas
         self.assertEqual(delete_response.status_code, status.HTTP_200_OK, delete_response.json())
 
 
-class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 

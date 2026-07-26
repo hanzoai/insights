@@ -8,11 +8,11 @@ from zoneinfo import ZoneInfo
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Survey, Team, User
 from insights.models.event.sql import BULK_INSERT_EVENT_SQL
 from insights.models.person.person import Person, PersonDistinctId
-from insights.settings.data_stores import CLICKHOUSE_CLUSTER
+from insights.settings.data_stores import DATASTORE_CLUSTER
 
 
 class MultipleChoiceTemplate(TypedDict):
@@ -805,7 +805,7 @@ class Command(BaseCommand):
     ) -> tuple[int, int, int]:
         """Generate survey response events for a survey.
 
-        Inserts directly into ClickHouse for immediate availability.
+        Inserts directly into Datastore for immediate availability.
         Returns tuple of (sent_count, shown_count, dismissed_count).
         """
         if not persons_data:
@@ -928,7 +928,7 @@ class Command(BaseCommand):
                 event_index += 1
                 dismissed_count += 1
 
-        # Bulk insert all events directly into ClickHouse
+        # Bulk insert all events directly into Datastore
         if inserts:
             sql = BULK_INSERT_EVENT_SQL() + ",".join(inserts)
             sync_execute(sql, params)
@@ -942,15 +942,15 @@ class Command(BaseCommand):
         Survey.objects.filter(team_id=team.id).delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {survey_count} surveys from Django"))
 
-        # Delete survey events from ClickHouse (must use sharded_events table, not the distributed table)
+        # Delete survey events from Datastore (must use sharded_events table, not the distributed table)
         survey_events = ["survey shown", "survey sent", "survey dismissed"]
         for event_name in survey_events:
             delete_query = f"""
-            DELETE FROM sharded_events ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+            DELETE FROM sharded_events ON CLUSTER '{DATASTORE_CLUSTER}'
             WHERE team_id = %(team_id)s AND event = %(event_name)s
             """
             sync_execute(delete_query, {"team_id": team.id, "event_name": event_name})
-            self.stdout.write(self.style.SUCCESS(f"Deleted '{event_name}' events from ClickHouse"))
+            self.stdout.write(self.style.SUCCESS(f"Deleted '{event_name}' events from Datastore"))
 
         self.stdout.write(self.style.SUCCESS("Wipe complete!"))
 

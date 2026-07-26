@@ -45,12 +45,12 @@ from insights.insightsql.printer.types import (
 from insights.insightsql.resolver_utils import lookup_field_by_name
 from insights.insightsql.visitor import Visitor, clone_expr
 
-from insights.clickhouse.materialized_columns import (
+from insights.datastore.materialized_columns import (
     MaterializedColumn,
     TablesWithMaterializedColumns,
     get_materialized_column_for_property,
 )
-from insights.clickhouse.property_groups import property_groups
+from insights.datastore.property_groups import property_groups
 from insights.models.exchange_rate.sql import EXCHANGE_RATE_DICTIONARY_NAME
 from insights.models.property import PropertyName, TableColumn
 from insights.models.team.team import WeekStartDay
@@ -62,7 +62,7 @@ MAX_PLACEHOLDER_MACRO_EXPANSION_DEPTH = 8
 def get_channel_definition_dict():
     """Get the channel definition dictionary name with the correct database.
     Evaluated at call time to work with test databases in Python 3.12."""
-    return f"{django_settings.CLICKHOUSE_DATABASE}.channel_definition_dict"
+    return f"{django_settings.DATASTORE_DATABASE}.channel_definition_dict"
 
 
 def resolve_field_type(expr: ast.Expr) -> ast.Type | None:
@@ -580,7 +580,7 @@ class InsightsQLPrinter(Visitor[str]):
             if func_meta.using_placeholder_arguments and self.dialect != "insightsql":
                 return self._render_placeholder_macro(
                     node=node,
-                    clickhouse_name=func_meta.clickhouse_name,
+                    datastore_name=func_meta.datastore_name,
                     using_positional_arguments=func_meta.using_positional_arguments,
                 )
 
@@ -631,7 +631,7 @@ class InsightsQLPrinter(Visitor[str]):
             params_part = f"({', '.join(params)})" if params is not None else ""
             args_part = f"({'DISTINCT ' if node.distinct else ''}{', '.join(arg_strings)})"
 
-            return f"{node.name if self.dialect == 'insightsql' else func_meta.clickhouse_name}{params_part}{args_part}"
+            return f"{node.name if self.dialect == 'insightsql' else func_meta.datastore_name}{params_part}{args_part}"
 
         elif func_meta := find_insightsql_function(node.name):
             validate_function_args(
@@ -652,7 +652,7 @@ class InsightsQLPrinter(Visitor[str]):
                     argument_term="parameter",
                 )
 
-            if self.dialect == "clickhouse":
+            if self.dialect == "datastore":
                 args_count = len(node.args) - func_meta.passthrough_suffix_args_count
                 node_args, passthrough_suffix_args = node.args[:args_count], node.args[args_count:]
 
@@ -712,7 +712,7 @@ class InsightsQLPrinter(Visitor[str]):
                                 )
                         args.append(self.visit(suffix_arg))
 
-                relevant_clickhouse_name = func_meta.clickhouse_name
+                relevant_datastore_name = func_meta.datastore_name
                 if func_meta.overloads:
                     first_arg_constant_type = (
                         node.args[0].type.resolve_constant_type(self.context)
@@ -723,10 +723,10 @@ class InsightsQLPrinter(Visitor[str]):
                     if first_arg_constant_type is not None:
                         for (
                             overload_types,
-                            overload_clickhouse_name,
+                            overload_datastore_name,
                         ) in func_meta.overloads:
                             if isinstance(first_arg_constant_type, overload_types):
-                                relevant_clickhouse_name = overload_clickhouse_name
+                                relevant_datastore_name = overload_datastore_name
                                 break  # Found an overload matching the first function org
 
                 if func_meta.tz_aware:
@@ -738,25 +738,25 @@ class InsightsQLPrinter(Visitor[str]):
                     # If the datetime is in correct format, use optimal toDateTime, it's stricter but faster
                     # and it allows CH to use index efficiently.
                     if (
-                        relevant_clickhouse_name == "parseDateTime64BestEffortOrNull"
+                        relevant_datastore_name == "parseDateTime64BestEffortOrNull"
                         and len(node.args) == 1
                         and isinstance(node.args[0], Constant)
                         and isinstance(node.args[0].type, StringType)
                     ):
-                        relevant_clickhouse_name = "parseDateTime64BestEffort"
+                        relevant_datastore_name = "parseDateTime64BestEffort"
                         pattern_with_microseconds_str = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6}$"
                         pattern_mysql_str = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
                         if re.match(pattern_with_microseconds_str, node.args[0].value):
-                            relevant_clickhouse_name = "toDateTime64"
+                            relevant_datastore_name = "toDateTime64"
                         elif re.match(pattern_mysql_str, node.args[0].value) or re.match(
                             r"^\d{4}-\d{2}-\d{2}$", node.args[0].value
                         ):
-                            relevant_clickhouse_name = "toDateTime"
+                            relevant_datastore_name = "toDateTime"
                     if (
-                        relevant_clickhouse_name == "now64"
+                        relevant_datastore_name == "now64"
                         and (len(node.args) == 0 or (has_tz_override and len(node.args) == 1))
                     ) or (
-                        relevant_clickhouse_name
+                        relevant_datastore_name
                         in (
                             "parseDateTime64BestEffortOrNull",
                             "parseDateTime64BestEffortUSOrNull",
@@ -771,7 +771,7 @@ class InsightsQLPrinter(Visitor[str]):
                 if node.name == "toStartOfWeek" and len(node.args) == 1:
                     # If week mode hasn't been specified, use the project's default.
                     # For Monday-based weeks mode 3 is used (which is ISO 8601), for Sunday-based mode 0 (CH default)
-                    args.insert(1, WeekStartDay(self._get_week_start_day()).clickhouse_mode)
+                    args.insert(1, WeekStartDay(self._get_week_start_day()).datastore_mode)
 
                 if node.name == "trimLeft" and len(args) == 2:
                     return f"trim(LEADING {args[1]} FROM {args[0]})"
@@ -783,7 +783,7 @@ class InsightsQLPrinter(Visitor[str]):
                 params = [self.visit(param) for param in node.params] if node.params is not None else None
                 params_part = f"({', '.join(params)})" if params is not None else ""
                 args_part = f"({', '.join(args)})"
-                return f"{relevant_clickhouse_name}{params_part}{args_part}"
+                return f"{relevant_datastore_name}{params_part}{args_part}"
             else:
                 return f"{node.name}({', '.join([self.visit(arg) for arg in node.args])})"
         elif func_meta := find_insightsql_postinsights_function(node.name):
@@ -796,7 +796,7 @@ class InsightsQLPrinter(Visitor[str]):
 
             args = [self.visit(arg) for arg in node.args]
 
-            if self.dialect == "clickhouse":
+            if self.dialect == "datastore":
                 if node.name == "embedText":
                     return self.visit_constant(resolve_embed_text(self.context.team, node))
                 elif node.name == "lookupDomainType":
@@ -818,7 +818,7 @@ class InsightsQLPrinter(Visitor[str]):
                     # convertCurrency(from_currency, to_currency, amount, timestamp?)
                     from_currency, to_currency, amount, *_rest = args
                     date = args[3] if len(args) > 3 and args[3] else "today()"
-                    db = django_settings.CLICKHOUSE_DATABASE
+                    db = django_settings.DATASTORE_DATABASE
                     # Build rate lookup expressions
                     from_rate = f"dictGetOrDefault(`{db}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', {from_currency}, {date}, toDecimal64(0, 10))"
                     to_rate = f"dictGetOrDefault(`{db}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', {to_currency}, {date}, toDecimal64(0, 10))"
@@ -827,16 +827,16 @@ class InsightsQLPrinter(Visitor[str]):
                     safe_from_rate = f"if({from_rate} = 0, toDecimal64(1, 10), {from_rate})"
                     return f"if(equals({from_currency}, {to_currency}), toDecimal64({amount}, 10), if({from_rate} = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64({amount}, 10), {safe_from_rate}), {to_rate})))"
 
-                relevant_clickhouse_name = func_meta.clickhouse_name
-                if "{}" in relevant_clickhouse_name:
+                relevant_datastore_name = func_meta.datastore_name
+                if "{}" in relevant_datastore_name:
                     if len(args) != 1:
                         raise QueryError(f"Function '{node.name}' requires exactly one argument")
-                    return relevant_clickhouse_name.format(args[0])
+                    return relevant_datastore_name.format(args[0])
 
                 params = [self.visit(param) for param in node.params] if node.params is not None else None
                 params_part = f"({', '.join(params)})" if params is not None else ""
                 args_part = f"({', '.join(args)})"
-                return f"{relevant_clickhouse_name}{params_part}{args_part}"
+                return f"{relevant_datastore_name}{params_part}{args_part}"
 
             # If insightsql dialect, just keep it as is
             return f"{node.name}({', '.join(args)})"
@@ -853,7 +853,7 @@ class InsightsQLPrinter(Visitor[str]):
             raise QueryError("You can not use placeholders here")
         raise QueryError(f"Unresolved placeholder: {{{node.field}}}")
 
-    def _render_placeholder_macro(self, node: ast.Call, clickhouse_name: str, using_positional_arguments: bool) -> str:
+    def _render_placeholder_macro(self, node: ast.Call, datastore_name: str, using_positional_arguments: bool) -> str:
         self._placeholder_macro_expansion_depth += 1
         try:
             if self._placeholder_macro_expansion_depth > MAX_PLACEHOLDER_MACRO_EXPANSION_DEPTH:
@@ -864,16 +864,16 @@ class InsightsQLPrinter(Visitor[str]):
             if using_positional_arguments:
                 arg_arr = [self.visit(arg) for arg in node.args]
                 try:
-                    rendered = clickhouse_name.format(*arg_arr)
+                    rendered = datastore_name.format(*arg_arr)
                 except (KeyError, IndexError) as e:
                     raise QueryError(f"Invalid argument reference in function '{node.name}': {str(e)}")
             else:
-                placeholder_count = clickhouse_name.count("{}")
+                placeholder_count = datastore_name.count("{}")
                 if len(node.args) != placeholder_count:
                     raise QueryError(
                         f"Function '{node.name}' requires exactly {placeholder_count} argument{'s' if placeholder_count != 1 else ''}"
                     )
-                rendered = clickhouse_name.format(*[self.visit(arg) for arg in node.args])
+                rendered = datastore_name.format(*[self.visit(arg) for arg in node.args])
 
             return rendered
         finally:
@@ -1045,7 +1045,7 @@ class InsightsQLPrinter(Visitor[str]):
                     has_bloom_filter_index=False,
                 )
 
-            if self.dialect == "clickhouse" and self.context.modifiers.propertyGroupsMode in (
+            if self.dialect == "datastore" and self.context.modifiers.propertyGroupsMode in (
                 PropertyGroupsMode.ENABLED,
                 PropertyGroupsMode.OPTIMIZED,
             ):
@@ -1208,7 +1208,7 @@ class InsightsQLPrinter(Visitor[str]):
         exprs = [self.visit(expr) for expr in node.exprs or []]
         cloned_node = cast(ast.WindowFunction, clone_expr(node))
 
-        # For compatibility with ClickHouse syntax, convert lag/lead to lagInFrame/leadInFrame and add default window frame if needed
+        # For compatibility with Datastore syntax, convert lag/lead to lagInFrame/leadInFrame and add default window frame if needed
         if identifier in ("lag", "lead") and self.dialect != "postgres":
             identifier = f"{identifier}InFrame"
             # Wrap the first expression (value) and third expression (default) in toNullable()

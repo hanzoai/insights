@@ -56,9 +56,9 @@ export function InternalMetricsTab(): JSX.Element {
                             </>
                         ),
                     },
-                    queries?.clickhouse_running != undefined && {
+                    queries?.datastore_running != undefined && {
                         key: '2',
-                        header: 'Clickhouse - currently running queries',
+                        header: 'Datastore - currently running queries',
                         content: (
                             <>
                                 <div className="flex mb-4 float-right">
@@ -71,13 +71,13 @@ export function InternalMetricsTab(): JSX.Element {
                                         Reload Queries
                                     </LemonButton>
                                 </div>
-                                <QueryTable queries={queries?.clickhouse_running} loading={queriesLoading} />
+                                <QueryTable queries={queries?.datastore_running} loading={queriesLoading} />
                             </>
                         ),
                     },
-                    queries?.clickhouse_slow_log != undefined && {
+                    queries?.datastore_slow_log != undefined && {
                         key: '3',
-                        header: 'Clickhouse - slow query log (past 6 hours)',
+                        header: 'Datastore - slow query log (past 6 hours)',
                         content: (
                             <>
                                 <div className="flex mb-4 float-right">
@@ -90,7 +90,7 @@ export function InternalMetricsTab(): JSX.Element {
                                         Reload Queries
                                     </LemonButton>
                                 </div>
-                                <QueryTable queries={queries?.clickhouse_slow_log} loading={queriesLoading} />
+                                <QueryTable queries={queries?.datastore_slow_log} loading={queriesLoading} />
                             </>
                         ),
                     },

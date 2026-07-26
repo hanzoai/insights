@@ -2,7 +2,7 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     BaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     events_cache_tests,
@@ -50,7 +50,7 @@ def _create_action(**kwargs):
 def flush_persons_and_events_in_batches(batch_size: int = 25):
     """
     Custom flush function that processes events in smaller batches to avoid memory limits.
-    This helps prevent ClickHouse memory exceeded errors during bulk inserts.
+    This helps prevent Datastore memory exceeded errors during bulk inserts.
     """
     person_mapping = {}
     if len(persons_cache_tests) > 0:
@@ -65,7 +65,7 @@ def flush_persons_and_events_in_batches(batch_size: int = 25):
         events_cache_tests.clear()
 
 
-class TestConversionGoalProcessor(ClickhouseTestMixin, BaseTest):
+class TestConversionGoalProcessor(DatastoreTestMixin, BaseTest):
     """
     Comprehensive test suite for ConversionGoalProcessor.
 
@@ -98,7 +98,7 @@ class TestConversionGoalProcessor(ClickhouseTestMixin, BaseTest):
     """
 
     maxDiff = None
-    CLASS_DATA_LEVEL_SETUP = False  # Prevents test contamination in ClickHouse
+    CLASS_DATA_LEVEL_SETUP = False  # Prevents test contamination in Datastore
 
     def setUp(self):
         super().setUp()

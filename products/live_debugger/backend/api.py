@@ -122,7 +122,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
     @extend_schema(
         summary="Get breakpoint hits",
         description=(
-            "Retrieve breakpoint hit events from ClickHouse with optional filtering and pagination. "
+            "Retrieve breakpoint hit events from Datastore with optional filtering and pagination. "
             "Returns hit events containing stack traces, local variables, and execution context from your application's runtime. "
             "\n\nSecurity: Breakpoint IDs are filtered to only include those belonging to the current team."
         ),
@@ -157,7 +157,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
     @action(methods=["GET"], detail=False)
     def breakpoint_hits(self, request, *args, **kwargs) -> Response:
         """
-        Get breakpoint hit events from ClickHouse.
+        Get breakpoint hit events from Datastore.
 
         Query parameters:
         - breakpoint_ids (optional): Filter hits for specific breakpoints (repeat parameter for multiple, e.g., ?breakpoint_ids=uuid1&breakpoint_ids=uuid2)

@@ -246,7 +246,7 @@ export enum Realm {
     Cloud = 'cloud',
     Demo = 'demo',
     SelfHostedPostgres = 'hosted',
-    SelfHostedClickHouse = 'hosted-clickhouse',
+    SelfHostedDatastore = 'hosted-datastore',
 }
 
 export enum Region {
@@ -890,7 +890,7 @@ export enum ExperimentProgressStatus {
 }
 
 export enum PropertyFilterType {
-    /** Event metadata and fields on the clickhouse events table */
+    /** Event metadata and fields on the datastore events table */
     Meta = 'meta',
     /** Event properties */
     Event = 'event',
@@ -1739,7 +1739,7 @@ export interface SessionRecordingType {
     snapshot_source: 'web' | 'mobile' | 'unknown'
     snapshot_library?: string
     /** whether we have received data for this recording in the last 5 minutes
-     * (assumes the recording was loaded from ClickHouse)
+     * (assumes the recording was loaded from Datastore)
      * **/
     ongoing?: boolean
     /**
@@ -1795,7 +1795,7 @@ export type Body =
  * This is our base type for tracking network requests.
  * It sticks relatively closely to the spec for the web
  * see https://developer.mozilla.org/en-US/docs/Web/API/Performance_API
- * we have renamed/added a few fields for the benefit of ClickHouse
+ * we have renamed/added a few fields for the benefit of Datastore
  * but don't yet clash with the spec
  */
 export interface PerformanceEvent {
@@ -1890,7 +1890,7 @@ export interface PerformanceEvent {
     // but they may be absent in which case the SDK may have sent start and end time
     end_time?: number
 
-    //rrweb/network@1 - i.e. not in ClickHouse table
+    //rrweb/network@1 - i.e. not in Datastore table
     is_initial?: boolean
     raw?: Record<string, any>
 
@@ -2240,7 +2240,7 @@ export interface EndpointType extends WithAccessControl {
     versions_count: number
     /** Purely local value to determine whether the query endpoint should be highlighted, e.g. as a fresh duplicate. */
     _highlight?: boolean
-    /** Last execution time from ClickHouse query_log table */
+    /** Last execution time from Datastore query_log table */
     last_executed_at?: string
     materialization?: EndpointVersionMaterializationType
     columns?: { name: string; type: string }[]
@@ -2938,8 +2938,8 @@ export type QuerySummary = { duration: string } & Record<string, string>
 
 export interface SystemStatusQueriesResult {
     postgres_running: QuerySummary[]
-    clickhouse_running?: QuerySummary[]
-    clickhouse_slow_log?: QuerySummary[]
+    datastore_running?: QuerySummary[]
+    datastore_slow_log?: QuerySummary[]
 }
 
 export interface SystemStatusAnalyzeResult {
@@ -3972,7 +3972,7 @@ export interface PreflightStatus {
     plugins: boolean
     redis: boolean
     db: boolean
-    clickhouse: boolean
+    datastore: boolean
     kafka: boolean
     /** An initiated instance is one that already has any organization(s). */
     initiated: boolean

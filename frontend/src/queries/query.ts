@@ -249,7 +249,7 @@ export async function performQuery<N extends DataNode>(
                 limitContext
             )
             if (isInsightsQLQuery(queryNode) && response && typeof response === 'object') {
-                logParams.clickhouse_sql = (response as InsightsQLQueryResponse)?.clickhouse
+                logParams.datastore_sql = (response as InsightsQLQueryResponse)?.datastore
             }
         }
         insights.capture('query completed', {

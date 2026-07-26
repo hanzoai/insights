@@ -24,7 +24,7 @@ from insights.dags.events_backfill_to_duckling import (
     delete_persons_partition_data,
     duckling_events_full_backfill_sensor,
     get_months_in_range,
-    get_s3_url_for_clickhouse,
+    get_s3_url_for_datastore,
     is_full_export_partition,
     parse_partition_key,
     parse_partition_key_dates,
@@ -61,7 +61,7 @@ class TestParsePartitionKey:
         assert expected_error_substr in str(exc_info.value)
 
 
-class TestGetS3UrlForClickhouse:
+class TestGetS3UrlForDatastore:
     @parameterized.expand(
         [
             ("bucket", "us-east-1", "path/file.parquet", "https://bucket.s3.us-east-1.amazonaws.com/path/file.parquet"),
@@ -80,7 +80,7 @@ class TestGetS3UrlForClickhouse:
         ]
     )
     def test_url_format(self, bucket, region, path, expected):
-        assert get_s3_url_for_clickhouse(bucket, region, path) == expected
+        assert get_s3_url_for_datastore(bucket, region, path) == expected
 
 
 class TestValidateIdentifier:
@@ -672,7 +672,7 @@ class TestDeletePersonsRetry:
 class TestFullBackfillSensorEarliestDate:
     @parameterized.expand(
         [
-            # (earliest_dt_from_clickhouse, expected_first_month)
+            # (earliest_dt_from_datastore, expected_first_month)
             ("pre-2015 clamped to 2015-01", datetime(2010, 3, 1), "2015-01"),
             ("exactly 2015-01-01 unchanged", datetime(2015, 1, 1), "2015-01"),
             ("post-2015 unchanged", datetime(2020, 6, 15), "2020-06"),

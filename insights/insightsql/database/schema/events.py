@@ -35,7 +35,7 @@ class EventsPersonSubTable(VirtualTable):
         ),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "events"
 
     def to_printed_insightsql(self):
@@ -55,7 +55,7 @@ class EventsGroupSubTable(VirtualTable):
     def avoid_asterisk_fields(self):
         return []
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "events"
 
     def to_printed_insightsql(self):
@@ -133,7 +133,7 @@ class EventsTable(Table):
         "elements_chain_elements": StringArrayDatabaseField(name="elements_chain_elements", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "events"
 
     def to_printed_insightsql(self):

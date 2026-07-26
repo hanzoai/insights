@@ -21,7 +21,7 @@ from insights.insightsql import ast
 from insights.insightsql.constants import get_breakdown_limit_for_context
 from insights.insightsql.parser import parse_expr, parse_select
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.insightsql_queries.insights.funnels.funnel_event_query import FunnelEventQuery
 from insights.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
 from insights.insightsql_queries.insights.funnels.utils import funnel_window_interval_unit_to_sql

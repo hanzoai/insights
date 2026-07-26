@@ -6,14 +6,14 @@ import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { KAFKA_INGESTION_WARNINGS, KAFKA_PERSON, KAFKA_PERSON_DISTINCT_ID } from '~/config/kafka-topics'
 import { PipelineResultType, isDlqResult, isOkResult, isRedirectResult } from '~/ingestion/pipelines/results'
-import { Clickhouse } from '~/tests/helpers/clickhouse'
+import { Datastore } from '~/tests/helpers/datastore'
 import { fromInternalPerson } from '~/worker/ingestion/persons/person-update-batch'
 import { PersonsStore } from '~/worker/ingestion/persons/persons-store'
 
 import { TopicMessage } from '../../../src/kafka/producer'
 import {
-    ClickHousePerson,
-    ClickHousePersonDistinctId2,
+    DatastorePerson,
+    DatastorePersonDistinctId2,
     Hub,
     InternalPerson,
     PropertiesLastOperation,
@@ -92,7 +92,7 @@ async function flushPersonStoreToKafka(hub: Hub, personStore: PersonsStore, kafk
 
 describe('PersonState.processEvent()', () => {
     let hub: Hub
-    let clickhouse: Clickhouse
+    let datastore: Datastore
     let personRepository: PostgresPersonRepository
     let mockProducerObserver: KafkaProducerObserver
 
@@ -119,8 +119,8 @@ describe('PersonState.processEvent()', () => {
         mockProducerObserver = new KafkaProducerObserver(hub.kafkaProducer)
         mockProducerObserver.resetKafkaProducer()
 
-        clickhouse = Clickhouse.create()
-        await clickhouse.exec('SYSTEM STOP MERGES')
+        datastore = Datastore.create()
+        await datastore.exec('SYSTEM STOP MERGES')
 
         organizationId = await createOrganization(hub.postgres)
     })
@@ -154,8 +154,8 @@ describe('PersonState.processEvent()', () => {
 
     afterAll(async () => {
         await closeHub(hub)
-        await clickhouse.exec('SYSTEM START MERGES')
-        clickhouse.close()
+        await datastore.exec('SYSTEM START MERGES')
+        datastore.close()
     })
 
     function personProcessor(
@@ -273,38 +273,38 @@ describe('PersonState.processEvent()', () => {
 
     async function fetchPersonsRows() {
         const query = `SELECT * FROM person FINAL WHERE team_id = ${teamId} ORDER BY _offset`
-        return await clickhouse.query<ClickHousePerson>(query)
+        return await datastore.query<DatastorePerson>(query)
     }
 
     async function fetchOverridesForDistinctId(distinctId: string) {
         const query = `SELECT * FROM person_distinct_id_overrides_mv FINAL WHERE team_id = ${teamId} AND distinct_id = '${distinctId}'`
-        return await clickhouse.query(query)
+        return await datastore.query(query)
     }
 
     async function fetchPersonsRowsWithVersionHigerEqualThan(version = 1) {
         const query = `SELECT * FROM person FINAL WHERE team_id = ${teamId} AND version >= ${version}`
-        return await clickhouse.query(query)
+        return await datastore.query(query)
     }
 
-    async function fetchDistinctIdsClickhouse(person: InternalPerson) {
-        return clickhouse.fetchDistinctIdValues(person)
+    async function fetchDistinctIdsDatastore(person: InternalPerson) {
+        return datastore.fetchDistinctIdValues(person)
     }
 
-    async function fetchDistinctIdsClickhouseVersion1() {
+    async function fetchDistinctIdsDatastoreVersion1() {
         const query = `SELECT distinct_id FROM person_distinct_id2 FINAL WHERE team_id = ${teamId} AND version = 1`
-        return await clickhouse.query(query)
+        return await datastore.query(query)
     }
 
-    const getPersonEventsFromKafka = (): ClickHousePerson[] => {
+    const getPersonEventsFromKafka = (): DatastorePerson[] => {
         return mockProducerObserver
             .getProducedKafkaMessagesForTopic(KAFKA_PERSON)
-            .map((x) => x.value as unknown as ClickHousePerson)
+            .map((x) => x.value as unknown as DatastorePerson)
     }
 
-    const getDistinctIdEventsFromKafka = (): ClickHousePersonDistinctId2[] => {
+    const getDistinctIdEventsFromKafka = (): DatastorePersonDistinctId2[] => {
         return mockProducerObserver
             .getProducedKafkaMessagesForTopic(KAFKA_PERSON_DISTINCT_ID)
-            .map((x) => x.value as unknown as ClickHousePersonDistinctId2)
+            .map((x) => x.value as unknown as DatastorePersonDistinctId2)
     }
 
     describe('on person creation', () => {
@@ -390,7 +390,7 @@ describe('PersonState.processEvent()', () => {
             await kafkaAcks2
 
             // new2 has an override, because it was in insights_personlessdistinctid
-            await clickhouse.delayUntilEventIngested(() => fetchOverridesForDistinctId('new2'))
+            await datastore.delayUntilEventIngested(() => fetchOverridesForDistinctId('new2'))
             const chOverrides = await fetchOverridesForDistinctId('new2')
             expect(chOverrides.length).toEqual(1)
             expect(chOverrides).toEqual(
@@ -1785,12 +1785,12 @@ describe('PersonState.processEvent()', () => {
             expect(distinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
 
             expect(getPersonEventsFromKafka().filter((x) => x.version >= 1).length).toEqual(2)
-            // verify ClickHouse persons
-            const clickhousePersons = getPersonEventsFromKafka()
+            // verify Datastore persons
+            const datastorePersons = getPersonEventsFromKafka()
                 .filter((x) => x.version >= 1)
                 .sort((a, b) => a.version - b.version) // but verify full state
-            expect(clickhousePersons.length).toEqual(2)
-            expect(clickhousePersons).toEqual(
+            expect(datastorePersons.length).toEqual(2)
+            expect(datastorePersons).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
@@ -1804,14 +1804,14 @@ describe('PersonState.processEvent()', () => {
                     }),
                 ])
             )
-            expect(new Set(clickhousePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
+            expect(new Set(datastorePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
 
-            // verify ClickHouse distinct_ids
-            const clickhouseDistinctIds = getDistinctIdEventsFromKafka()
+            // verify Datastore distinct_ids
+            const datastoreDistinctIds = getDistinctIdEventsFromKafka()
                 .filter((x) => x.person_id === persons[0].uuid)
                 .map((x) => x.distinct_id)
 
-            expect(clickhouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
+            expect(datastoreDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
 
         it(`merge into distinct_id person and marks user as is_identified when distinct_id user is identified and $anon_distinct_id user is not`, async () => {
@@ -1867,11 +1867,11 @@ describe('PersonState.processEvent()', () => {
             const distinctIds = await fetchDistinctIdValues(hub.postgres, persons[0])
             expect(distinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
 
-            // verify ClickHouse persons
-            await clickhouse.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
-            const clickhousePersons = await fetchPersonsRows() // but verify full state
-            expect(clickhousePersons.length).toEqual(2)
-            expect(clickhousePersons).toEqual(
+            // verify Datastore persons
+            await datastore.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
+            const datastorePersons = await fetchPersonsRows() // but verify full state
+            expect(datastorePersons.length).toEqual(2)
+            expect(datastorePersons).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
@@ -1887,11 +1887,11 @@ describe('PersonState.processEvent()', () => {
                     }),
                 ])
             )
-            expect(new Set(clickhousePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
+            expect(new Set(datastorePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
 
-            // verify ClickHouse distinct_ids
-            await clickhouse.delayUntilEventIngested(() => fetchDistinctIdsClickhouseVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsClickhouse(persons[0])
+            // verify Datastore distinct_ids
+            await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
+            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
             expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
 
@@ -2067,11 +2067,11 @@ describe('PersonState.processEvent()', () => {
             const distinctIds = await fetchDistinctIdValues(hub.postgres, persons[0])
             expect(distinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
 
-            // verify ClickHouse persons
-            await clickhouse.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
-            const clickhousePersons = await fetchPersonsRows() // but verify full state
-            expect(clickhousePersons.length).toEqual(2)
-            expect(clickhousePersons).toEqual(
+            // verify Datastore persons
+            await datastore.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
+            const datastorePersons = await fetchPersonsRows() // but verify full state
+            expect(datastorePersons.length).toEqual(2)
+            expect(datastorePersons).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
@@ -2087,11 +2087,11 @@ describe('PersonState.processEvent()', () => {
                     }),
                 ])
             )
-            expect(new Set(clickhousePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
+            expect(new Set(datastorePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
 
-            // verify ClickHouse distinct_ids
-            await clickhouse.delayUntilEventIngested(() => fetchDistinctIdsClickhouseVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsClickhouse(persons[0])
+            // verify Datastore distinct_ids
+            await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
+            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
             expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
 
@@ -2292,11 +2292,11 @@ describe('PersonState.processEvent()', () => {
             const distinctIds = await fetchDistinctIdValues(hub.postgres, persons[0])
             expect(distinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
 
-            // verify ClickHouse persons
-            await clickhouse.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
-            const clickhousePersons = await fetchPersonsRows() // but verify full state
-            expect(clickhousePersons.length).toEqual(2)
-            expect(clickhousePersons).toEqual(
+            // verify Datastore persons
+            await datastore.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
+            const datastorePersons = await fetchPersonsRows() // but verify full state
+            expect(datastorePersons.length).toEqual(2)
+            expect(datastorePersons).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
                         id: expect.any(String),
@@ -2312,11 +2312,11 @@ describe('PersonState.processEvent()', () => {
                     }),
                 ])
             )
-            expect(new Set(clickhousePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
+            expect(new Set(datastorePersons.map((p) => p.id))).toEqual(new Set([newUserUuid, oldUserUuid]))
 
-            // verify ClickHouse distinct_ids
-            await clickhouse.delayUntilEventIngested(() => fetchDistinctIdsClickhouseVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsClickhouse(persons[0])
+            // verify Datastore distinct_ids
+            await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
+            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
             expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
     })
@@ -2741,7 +2741,7 @@ describe('PersonState.processEvent()', () => {
             expect(hub.kafkaProducer.queueMessages).not.toHaveBeenCalled()
         })
 
-        it(`postgres and clickhouse get updated`, async () => {
+        it(`postgres and datastore get updated`, async () => {
             const first = await createPerson(hub, timestamp, {}, {}, {}, teamId, null, false, firstUserUuid, {
                 distinctId: firstUserDistinctId,
             })
@@ -2797,10 +2797,10 @@ describe('PersonState.processEvent()', () => {
             const distinctIds = await fetchDistinctIdValues(hub.postgres, person!)
             expect(distinctIds).toEqual(expect.arrayContaining([firstUserDistinctId, secondUserDistinctId]))
 
-            // verify ClickHouse persons
-            await clickhouse.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
-            const clickhousePersons = await fetchPersonsRows() // but verify full state
-            expect(clickhousePersons).toEqual(
+            // verify Datastore persons
+            await datastore.delayUntilEventIngested(() => fetchPersonsRowsWithVersionHigerEqualThan(), 2) // wait until merge and delete processed
+            const datastorePersons = await fetchPersonsRows() // but verify full state
+            expect(datastorePersons).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
                         id: firstUserUuid,
@@ -2817,9 +2817,9 @@ describe('PersonState.processEvent()', () => {
                 ])
             )
 
-            // verify ClickHouse distinct_ids
-            await clickhouse.delayUntilEventIngested(() => fetchDistinctIdsClickhouseVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsClickhouse(person!)
+            // verify Datastore distinct_ids
+            await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
+            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(person!)
             expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([firstUserDistinctId, secondUserDistinctId]))
         })
 

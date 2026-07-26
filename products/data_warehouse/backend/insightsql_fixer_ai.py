@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.database import Database
 from insights.insightsql.errors import ExposedInsightsQLError, ResolutionError
-from insights.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
+from insights.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_DATASTORE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
 from insights.insightsql.metadata import get_table_names
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast
@@ -21,11 +21,11 @@ def get_insightsql_functions() -> str:
     if _insightsql_functions is not None:
         return _insightsql_functions
 
-    ch_functions = list(INSIGHTSQL_CLICKHOUSE_FUNCTIONS.keys())
+    ch_functions = list(INSIGHTSQL_DATASTORE_FUNCTIONS.keys())
     ch_aggregations = list(INSIGHTSQL_AGGREGATIONS.keys())
     ph_functions = list(INSIGHTSQL_POSTINSIGHTS_FUNCTIONS.keys())
 
-    _insightsql_functions = f"""InsightsQL defines what functions are available with most (but not all) having a 1:1 mapping to ClickHouse functions.
+    _insightsql_functions = f"""InsightsQL defines what functions are available with most (but not all) having a 1:1 mapping to Datastore functions.
 These are the non-aggregated InsightsQL functions:
 ```
 {str(ch_functions)}
@@ -56,11 +56,11 @@ NOTE: When calling the `fix_insightsql_query` tool, do not provide any response 
 """
 
 SYSTEM_PROMPT = f"""
-InsightsQL is Insights's variant of SQL. InsightsQL is based on Clickhouse SQL with a few small adjustments.
+InsightsQL is Insights's variant of SQL. InsightsQL is based on Datastore SQL with a few small adjustments.
 
 {get_insightsql_functions()}
 
-You fix InsightsQL errors that may come from either InsightsQL resolver errors or clickhouse execution errors. You don't help with other knowledge.
+You fix InsightsQL errors that may come from either InsightsQL resolver errors or datastore execution errors. You don't help with other knowledge.
 
 Important InsightsQL differences versus other SQL dialects:
 - JSON properties are accessed like `properties.foo.bar` instead of `properties->foo->bar`
@@ -104,7 +104,7 @@ Note: "persons" means "users" here - instead of a "users" table, we have a "pers
 USER_PROMPT = """
 Fix the errors in the InsightsQL query below and only return the new updated query in your response.
 
-- Don't update any other part of the query if it's not relevant to the error, including rewriting shorthand clickhouse SQL to the full version.
+- Don't update any other part of the query if it's not relevant to the error, including rewriting shorthand datastore SQL to the full version.
 - Don't change the capitalisation of the query if it's not relevant to the error, such as rewriting `select` as `SELECT` or `from` as `FROM`
 - Don't convert syntax to an alternative if it's not relevant to the error, such as changing `toIntervalDay(1)` to `INTERVAL 1 DAY`
 - There may also be more than one error in the syntax.
@@ -249,7 +249,7 @@ The newly updated query gave us this error:
         assert result.query is not None
         try:
             result.query = result.query.rstrip(";").strip()
-            prepare_and_print_ast(parse_select(result.query), context=insightsql_context, dialect="clickhouse")
+            prepare_and_print_ast(parse_select(result.query), context=insightsql_context, dialect="datastore")
         except (ExposedInsightsQLError, ResolutionError) as err:
             err_msg = str(err)
             if err_msg.startswith("no viable alternative"):

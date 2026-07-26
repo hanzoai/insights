@@ -3,11 +3,11 @@ from rest_framework.exceptions import ValidationError
 from insights.constants import FUNNEL_TO_STEP
 from insights.models.filters.filter import Filter
 from insights.models.team import Team
-from insights.queries.funnels.base import ClickhouseFunnelBase
+from insights.queries.funnels.base import DatastoreFunnelBase
 from insights.queries.funnels.utils import get_funnel_order_class
 
 
-class ClickhouseFunnelTimeToConvert(ClickhouseFunnelBase):
+class DatastoreFunnelTimeToConvert(DatastoreFunnelBase):
     QUERY_TYPE = "funnel_time_to_convert"
 
     def __init__(self, filter: Filter, team: Team) -> None:

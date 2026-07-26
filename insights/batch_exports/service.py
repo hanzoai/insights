@@ -28,7 +28,7 @@ from insights.insightsql.database.database import Database
 from insights.insightsql.insightsql import InsightsQLContext
 
 from insights.batch_exports.models import BatchExport, BatchExportBackfill, BatchExportDestination, BatchExportRun
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.kafka_client.topics import KAFKA_CDP_BACKFILL_EVENTS
 from insights.temporal.common.client import sync_connect
 from insights.temporal.common.schedule import (
@@ -44,10 +44,10 @@ logger = structlog.get_logger(__name__)
 
 
 class BatchExportField(typing.TypedDict):
-    """A field to be queried from ClickHouse.
+    """A field to be queried from Datastore.
 
     Attributes:
-        expression: A ClickHouse SQL expression that declares the field required.
+        expression: A Datastore SQL expression that declares the field required.
         alias: An alias to apply to the expression (after an 'AS' keyword).
     """
 
@@ -1073,9 +1073,9 @@ def fetch_earliest_backfill_start_at(
             "interval_seconds": interval_seconds,
         }
         result = sync_execute(query, query_args)[0][0]
-        # if no data, ClickHouse returns 1970-01-01 00:00:00
+        # if no data, Datastore returns 1970-01-01 00:00:00
         # (we just compare the year rather than the whole object because in some cases the timestamp returned by
-        # ClickHouse has a timezone and sometimes it doesn't)
+        # Datastore has a timezone and sometimes it doesn't)
         if result.year == 1970:
             return None
         return result
@@ -1100,9 +1100,9 @@ def fetch_earliest_backfill_start_at(
             "interval_seconds": interval_seconds,
         }
         results = sync_execute(query, query_args)
-        # if no data, ClickHouse returns 1970-01-01 00:00:00
+        # if no data, Datastore returns 1970-01-01 00:00:00
         # (we just compare the year rather than the whole object because in some cases the timestamp returned by
-        # ClickHouse has a timezone and sometimes it doesn't)
+        # Datastore has a timezone and sometimes it doesn't)
         results = [result[0] for result in results if result[0].year != 1970]
         if not results:
             return None

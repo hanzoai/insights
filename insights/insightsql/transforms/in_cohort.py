@@ -5,7 +5,7 @@ from insights.insightsql.base import _T_AST
 from insights.insightsql.constants import InsightsQLDialect
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.errors import QueryError
-from insights.insightsql.escape_sql import escape_clickhouse_string
+from insights.insightsql.escape_sql import escape_datastore_string
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.resolver import resolve_types
 from insights.insightsql.visitor import TraversingVisitor, clone_expr
@@ -298,8 +298,8 @@ class InCohortResolver(TraversingVisitor):
                     self.context.add_notice(
                         start=arg.start,
                         end=arg.end,
-                        message=f"Cohort #{cohorts[0][0]} can also be specified as {escape_clickhouse_string(cohorts[0][3])}",
-                        fix=escape_clickhouse_string(cohorts[0][3]),
+                        message=f"Cohort #{cohorts[0][0]} can also be specified as {escape_datastore_string(cohorts[0][3])}",
+                        fix=escape_datastore_string(cohorts[0][3]),
                     )
                     self._add_join_for_cohort(
                         cohort_id=cohorts[0][0],

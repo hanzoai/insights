@@ -4,11 +4,11 @@ from typing import Any, Optional, cast
 from rest_framework.exceptions import ValidationError
 
 from insights.models.entity.entity import Entity
-from insights.queries.funnels.base import ClickhouseFunnelBase
+from insights.queries.funnels.base import DatastoreFunnelBase
 from insights.queries.util import correct_result_for_sampling
 
 
-class ClickhouseFunnelUnordered(ClickhouseFunnelBase):
+class DatastoreFunnelUnordered(DatastoreFunnelBase):
     """
     Unordered Funnel is a funnel where the order of steps doesn't matter.
 
@@ -134,7 +134,7 @@ class ClickhouseFunnelUnordered(ClickhouseFunnelBase):
                 f"if(isNotNull(conversion_times[{i + 1}]) AND conversion_times[{i + 1}] <= conversion_times[{i}] + INTERVAL {self._filter.funnel_window_interval} {self._filter.funnel_window_interval_unit_ch()}, "
                 f"dateDiff('second', conversion_times[{i}], conversion_times[{i + 1}]), NULL) step_{i}_conversion_time"
             )
-            # array indices in ClickHouse are 1-based :shrug:
+            # array indices in Datastore are 1-based :shrug:
 
         formatted = ", ".join(conditions)
         return f", {formatted}" if formatted else ""

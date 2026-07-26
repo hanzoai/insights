@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from django.utils.timezone import now
 
@@ -8,14 +8,14 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.api.test.test_team import create_team
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Person, SessionRecording
 from insights.models.utils import uuid7
 from insights.session_recordings.models.session_recording_event import SessionRecordingViewed
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
 
-class TestSessionRecordingsSharing(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest):
+class TestSessionRecordingsSharing(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 

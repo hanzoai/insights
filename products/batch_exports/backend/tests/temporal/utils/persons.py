@@ -6,10 +6,10 @@ import random
 import typing
 import datetime as dt
 
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.tests.utils.datetimes import date_range
 
-from products.batch_exports.backend.tests.temporal.utils.clickhouse import execute_query
+from products.batch_exports.backend.tests.temporal.utils.datastore import execute_query
 
 
 class PersonValues(typing.TypedDict):
@@ -61,7 +61,7 @@ def generate_test_persons(
     return persons
 
 
-async def insert_person_values_in_clickhouse(client: ClickHouseClient, persons: list[PersonValues]):
+async def insert_person_values_in_datastore(client: DatastoreClient, persons: list[PersonValues]):
     """Execute an insert query to insert provided PersonValues into person."""
     await execute_query(
         client,
@@ -94,8 +94,8 @@ async def insert_person_values_in_clickhouse(client: ClickHouseClient, persons: 
     )
 
 
-async def generate_test_persons_in_clickhouse(
-    client: ClickHouseClient,
+async def generate_test_persons_in_datastore(
+    client: DatastoreClient,
     team_id: int,
     start_time: dt.datetime,
     end_time: dt.datetime,
@@ -123,7 +123,7 @@ async def generate_test_persons_in_clickhouse(
             start=len(persons),
         )
 
-        await insert_person_values_in_clickhouse(client=client, persons=persons_to_insert)
+        await insert_person_values_in_datastore(client=client, persons=persons_to_insert)
 
         persons.extend(persons_to_insert)
 
@@ -140,7 +140,7 @@ async def generate_test_persons_in_clickhouse(
         start=len(persons),
     )
 
-    await insert_person_values_in_clickhouse(client=client, persons=persons_from_other_team)
+    await insert_person_values_in_datastore(client=client, persons=persons_from_other_team)
     return (persons, persons_from_other_team)
 
 
@@ -177,8 +177,8 @@ def generate_test_person_distinct_id2(
     return person
 
 
-async def insert_person_distinct_id2_values_in_clickhouse(
-    client: ClickHouseClient, persons: list[PersonDistinctId2Values]
+async def insert_person_distinct_id2_values_in_datastore(
+    client: DatastoreClient, persons: list[PersonDistinctId2Values]
 ):
     """Execute an insert query to insert provided PersonDistinctId2Values into person."""
     await execute_query(
@@ -208,8 +208,8 @@ async def insert_person_distinct_id2_values_in_clickhouse(
     )
 
 
-async def generate_test_person_distinct_id2_in_clickhouse(
-    client: ClickHouseClient,
+async def generate_test_person_distinct_id2_in_datastore(
+    client: DatastoreClient,
     team_id: int,
     distinct_id: str,
     timestamp: dt.datetime,
@@ -227,7 +227,7 @@ async def generate_test_person_distinct_id2_in_clickhouse(
         version=version,
     )
 
-    await insert_person_distinct_id2_values_in_clickhouse(client=client, persons=[person])
+    await insert_person_distinct_id2_values_in_datastore(client=client, persons=[person])
 
     person_from_other_team = generate_test_person_distinct_id2(
         count=1,
@@ -239,5 +239,5 @@ async def generate_test_person_distinct_id2_in_clickhouse(
         version=version,
     )
 
-    await insert_person_distinct_id2_values_in_clickhouse(client=client, persons=[person_from_other_team])
+    await insert_person_distinct_id2_values_in_datastore(client=client, persons=[person_from_other_team])
     return (person, person_from_other_team)

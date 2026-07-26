@@ -106,7 +106,7 @@ class EndpointsUsageOverviewQueryRunner(EndpointsUsageQueryRunner[EndpointsUsage
         return False
 
     def _calculate(self) -> EndpointsUsageOverviewQueryResponse:
-        from insights.clickhouse.query_tagging import tag_queries
+        from insights.datastore.query_tagging import tag_queries
 
         # Execute current period query
         tag_queries(name="endpoints_usage_overview")

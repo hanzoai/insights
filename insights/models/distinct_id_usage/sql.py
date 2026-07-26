@@ -1,7 +1,7 @@
 from django.conf import settings
 
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_DISTINCT_ID_USAGE, kafka_engine, ttl_period
-from insights.clickhouse.table_engines import Distributed, ReplicationScheme, SummingMergeTree
+from insights.datastore.kafka_engine import CONSUMER_GROUP_DISTINCT_ID_USAGE, kafka_engine, ttl_period
+from insights.datastore.table_engines import Distributed, ReplicationScheme, SummingMergeTree
 from insights.kafka_client.topics import KAFKA_DISTINCT_ID_USAGE_EVENTS_JSON
 
 DISTINCT_ID_USAGE_TTL_DAYS = 7
@@ -89,7 +89,7 @@ def KAFKA_DISTINCT_ID_USAGE_TABLE_SQL():
         engine=kafka_engine(
             topic=KAFKA_DISTINCT_ID_USAGE_EVENTS_JSON,
             group=CONSUMER_GROUP_DISTINCT_ID_USAGE,
-            named_collection=settings.CLICKHOUSE_KAFKA_WARPSTREAM_NAMED_COLLECTION,
+            named_collection=settings.DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION,
         ),
     )
 

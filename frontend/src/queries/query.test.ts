@@ -19,7 +19,7 @@ describe('query', () => {
                     if (data.query?.kind === 'InsightsQLQuery') {
                         return [
                             200,
-                            { results: [], clickhouse: 'clickhouse string', insightsql: 'insightsql string', is_cached: false },
+                            { results: [], datastore: 'datastore string', insightsql: 'insightsql string', is_cached: false },
                         ]
                     }
                     if (data.query?.kind === 'EventsQuery' && data.query.select[0] === 'error') {
@@ -105,7 +105,7 @@ describe('query', () => {
         expect(queryCompletedCalls[0][1]).toMatchObject({
             query: q,
             duration: expect.any(Number),
-            clickhouse_sql: expect.any(String),
+            datastore_sql: expect.any(String),
             is_cached: false,
         })
     })

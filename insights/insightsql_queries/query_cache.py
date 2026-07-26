@@ -16,7 +16,7 @@ from insights.caching.query_cache_routing import (
     get_query_cache_selection,
     use_cluster_cache,
 )
-from insights.clickhouse.query_tagging import get_query_tag_value
+from insights.datastore.query_tagging import get_query_tag_value
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_cache_base import QueryCacheManagerBase
 from insights.metrics import LABEL_TEAM_ID, pushed_metrics_registry

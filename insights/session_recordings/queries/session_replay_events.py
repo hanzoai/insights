@@ -7,8 +7,8 @@ import pytz
 
 from insights.schema import InsightsQLQuery
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models.team import Team
 from insights.session_recordings.models.metadata import RecordingBlockListing, RecordingMetadata
 
@@ -43,7 +43,7 @@ class SessionReplayEvents:
 
         if existence:
             # let's be cautious and not cache non-existence
-            # in case we manage to check existence just before the first event hits ClickHouse
+            # in case we manage to check existence just before the first event hits Datastore
             # that should be impossible but cache invalidation is hard etc etc
             cache.set(cache_key, existence, timeout=seconds_until_midnight())
         return existence
@@ -72,7 +72,7 @@ class SessionReplayEvents:
         if not uncached_session_ids:
             return results
 
-        # Query ClickHouse for uncached session IDs
+        # Query Datastore for uncached session IDs
         found_sessions = self._find_with_timestamps(uncached_session_ids, team)
         # Build a mapping from session_id to expiry_time (tuple is: session_id, min_ts, max_ts, expiry_time)
         session_expiry_map = {session_id: expiry_time for session_id, _, _, expiry_time in found_sessions}

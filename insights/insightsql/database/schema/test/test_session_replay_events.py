@@ -3,11 +3,11 @@ from datetime import timedelta
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils.timezone import now
@@ -18,7 +18,7 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.event.sql import TRUNCATE_EVENTS_TABLE_SQL
 from insights.models.utils import uuid7
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
@@ -26,7 +26,7 @@ from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SE
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestFilterSessionReplaysBySessions(ClickhouseTestMixin, APIBaseTest):
+class TestFilterSessionReplaysBySessions(DatastoreTestMixin, APIBaseTest):
     session_with_one_hour = str(uuid7("2021-01-01T10"))
     session_with_different_session_and_replay_duration = str(uuid7("2021-01-01T11"))
     session_with_no_events = str(uuid7("2021-01-01T12"))
@@ -92,7 +92,7 @@ class TestFilterSessionReplaysBySessions(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk, distinct_id="d1", session_id=self.session_with_no_events, log_messages=None
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_duration_without_session_filter(self):
         response = execute_insightsql_query(
             parse_select(
@@ -113,7 +113,7 @@ class TestFilterSessionReplaysBySessions(ClickhouseTestMixin, APIBaseTest):
             (self.session_with_no_events,),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_duration_with_session_duration_filter(self):
         response = execute_insightsql_query(
             parse_select(
@@ -135,7 +135,7 @@ class TestFilterSessionReplaysBySessions(ClickhouseTestMixin, APIBaseTest):
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
+class TestFilterSessionReplaysByEvents(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
 
@@ -176,7 +176,7 @@ class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
             ensure_analytics_event_in_session=False,  # Handling events ourselves in this suite
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_event(self):
         response = execute_insightsql_query(
             parse_select(
@@ -191,7 +191,7 @@ class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
             ("session_with_example_com_pageview",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_event_property(self):
         response = execute_insightsql_query(
             parse_select(
@@ -205,9 +205,9 @@ class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
             ("session_with_example_com_pageview",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_subquery_on_event_property_without_join(self):
-        # regression test: so we can manually check the clickhouse snapshot
+        # regression test: so we can manually check the datastore snapshot
         # to assert that a subquery like this
         # doesn't accidentally become a join
         response = execute_insightsql_query(
@@ -234,7 +234,7 @@ class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
             ("session_with_example_com_pageview",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_event_property(self):
         response = execute_insightsql_query(
             parse_select(
@@ -256,7 +256,7 @@ class TestFilterSessionReplaysByEvents(ClickhouseTestMixin, APIBaseTest):
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
+class TestFilterSessionReplaysByPerson(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
 
@@ -297,7 +297,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
 
         flush_persons_and_events()
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_replay_person(self):
         response = execute_insightsql_query(
             parse_select(
@@ -311,7 +311,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
             ("session_for_person_p1",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_person_distinct_id(self):
         response = execute_insightsql_query(
             parse_select(
@@ -325,7 +325,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
             ("session_for_person_p1",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_event_person(self):
         response = execute_insightsql_query(
             parse_select(
@@ -339,7 +339,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
             ("session_with_person_with_person_property",),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_person_property(self):
         response = execute_insightsql_query(
             parse_select(
@@ -354,7 +354,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
             ("session_with_person_with_person_property", "true"),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_where_person_property_without_join_optimization(self):
         response = execute_insightsql_query(
             parse_select(
@@ -373,7 +373,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
             ("session_with_person_with_person_property", "true"),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_where_person_property_with_join_optimization(self):
         response = execute_insightsql_query(
             parse_select(
@@ -394,7 +394,7 @@ class TestFilterSessionReplaysByPerson(ClickhouseTestMixin, APIBaseTest):
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestFilterSessionReplaysByConsoleLogs(ClickhouseTestMixin, APIBaseTest):
+class TestFilterSessionReplaysByConsoleLogs(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
 
@@ -423,7 +423,7 @@ class TestFilterSessionReplaysByConsoleLogs(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk, distinct_id="d1", session_id="session_with_no_log_messages", log_messages=None
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_console_log_text(self):
         response = execute_insightsql_query(
             parse_select(
@@ -435,7 +435,7 @@ class TestFilterSessionReplaysByConsoleLogs(ClickhouseTestMixin, APIBaseTest):
 
         assert response.results == [("session_with_info_and_error_messages",), ("session_with_only_info_messages",)]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_by_console_log_text_and_level(self):
         response = execute_insightsql_query(
             parse_select(
@@ -450,7 +450,7 @@ class TestFilterSessionReplaysByConsoleLogs(ClickhouseTestMixin, APIBaseTest):
 
         assert response.results == [("session_with_info_and_error_messages",)]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_log_text(self):
         response = execute_insightsql_query(
             parse_select(

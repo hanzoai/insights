@@ -5,7 +5,7 @@ import pytest
 from temporalio.testing import ActivityEnvironment
 
 from insights.batch_exports.service import BatchExportModel
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.azure_blob_batch_export import (
     SUPPORTED_COMPRESSIONS,
@@ -19,7 +19,7 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
 )
 from products.batch_exports.backend.tests.temporal.destinations.azure_blob.utils import (
     TEST_AZURE_BLOB_MODELS,
-    assert_clickhouse_records_in_azure_blob,
+    assert_datastore_records_in_azure_blob,
     list_blobs,
     read_manifest,
 )
@@ -107,7 +107,7 @@ async def test_activity_exports_model_to_azure_blob(
     assert result.records_completed > 0
     assert result.bytes_exported > 0
 
-    await assert_clickhouse_records_in_azure_blob(
+    await assert_datastore_records_in_azure_blob(
         container=azurite_container,
         key_prefix=blob_prefix,
         team_id=ateam.pk,
@@ -155,7 +155,7 @@ async def test_activity_handles_empty_data_interval(
 
 async def test_activity_creates_multiple_files_when_splitting(
     activity_environment: ActivityEnvironment,
-    clickhouse_client,
+    datastore_client,
     ateam,
     azure_integration,
     azurite_container,
@@ -165,8 +165,8 @@ async def test_activity_creates_multiple_files_when_splitting(
     data_interval_end,
 ):
     """Test that max_file_size_mb creates multiple blobs + manifest.json."""
-    await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -209,7 +209,7 @@ async def test_activity_creates_multiple_files_when_splitting(
     assert manifest is not None, "Expected manifest.json when splitting files"
     assert len(manifest["files"]) == len(data_blobs)
 
-    await assert_clickhouse_records_in_azure_blob(
+    await assert_datastore_records_in_azure_blob(
         container=azurite_container,
         key_prefix=blob_prefix,
         team_id=ateam.pk,

@@ -33,6 +33,6 @@ def create_materialized_columns_op(
     )
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def create_materialized_column():
     create_materialized_columns_op()

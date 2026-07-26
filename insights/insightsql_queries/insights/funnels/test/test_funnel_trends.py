@@ -5,10 +5,10 @@ from zoneinfo import ZoneInfo
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from parameterized import parameterized
@@ -33,20 +33,20 @@ from insights.insightsql_queries.insights.funnels.funnels_query_runner import Fu
 from insights.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
 from insights.models.cohort.cohort import Cohort
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_trends_persons import ClickhouseFunnelTrendsActors
+from insights.queries.funnels.funnel_trends_persons import DatastoreFunnelTrendsActors
 from insights.test.test_journeys import journeys_for
 
 FORMAT_TIME = "%Y-%m-%d %H:%M:%S"
 FORMAT_TIME_DAY_END = "%Y-%m-%d 23:59:59"
 
 
-class TestFunnelTrendsUDF(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelTrendsUDF(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actors_at_step(self, filter, entrance_period_start, drop_off):
         filter = Filter(data=filter, team=self.team)
         person_filter = filter.shallow_clone({"entrance_period_start": entrance_period_start, "drop_off": drop_off})
-        funnel_query_builder = ClickhouseFunnelTrendsActors(person_filter, self.team)
+        funnel_query_builder = DatastoreFunnelTrendsActors(person_filter, self.team)
         _, serialized_result, _ = funnel_query_builder.get_actors()
 
         return serialized_result
@@ -106,7 +106,7 @@ class TestFunnelTrendsUDF(ClickhouseTestMixin, APIBaseTest):
             ],
         }
 
-        # funnel_trends = ClickhouseFunnelTrends(filter, self.team)
+        # funnel_trends = DatastoreFunnelTrends(filter, self.team)
         # results = funnel_trends._exec_query()
         # formatted_results = funnel_trends._format_results(results)
         query = cast(FunnelsQuery, filter_to_query(filters))
@@ -276,7 +276,7 @@ class TestFunnelTrendsUDF(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual([person["distinct_ids"] for person in persons], [["user_one"]])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_week_interval(self):
         filters = {
             "insight": INSIGHT_FUNNELS,
@@ -1482,7 +1482,7 @@ class TestFunnelTrendsUDF(ClickhouseTestMixin, APIBaseTest):
             [100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones_trends(self):
         journeys_for(
             {

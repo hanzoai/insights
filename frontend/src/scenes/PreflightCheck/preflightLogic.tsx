@@ -78,9 +78,9 @@ export const preflightLogic = kea<preflightLogicType>([
                         status: preflight?.db ? 'validated' : 'error',
                     },
                     {
-                        id: 'clickhouse',
-                        name: 'Analytics database · ClickHouse',
-                        status: preflight?.clickhouse ? 'validated' : 'error',
+                        id: 'datastore',
+                        name: 'Analytics database · Datastore',
+                        status: preflight?.datastore ? 'validated' : 'error',
                     },
                     {
                         id: 'kafka',

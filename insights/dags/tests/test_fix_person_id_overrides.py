@@ -1,9 +1,9 @@
 from datetime import datetime
 from uuid import UUID
 
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.fix_person_id_overrides import (
     fix_person_id_overrides_job,
     get_all_distinct_ids_for_person,
@@ -44,7 +44,7 @@ def get_all_overrides(team_id: int) -> list[tuple[str, str]]:
     return [(row[0], str(row[1])) for row in result]
 
 
-class TestGetPersonIdFromPdi2(ClickhouseTestMixin, BaseTest):
+class TestGetPersonIdFromPdi2(DatastoreTestMixin, BaseTest):
     def test_returns_person_id_and_version(self):
         person_id = UUID(int=1)
         insert_pdi2_records([(self.team.id, "user_123", person_id, 1, 0)])
@@ -88,7 +88,7 @@ class TestGetPersonIdFromPdi2(ClickhouseTestMixin, BaseTest):
         assert result[1] == 2
 
 
-class TestGetAllDistinctIdsForPerson(ClickhouseTestMixin, BaseTest):
+class TestGetAllDistinctIdsForPerson(DatastoreTestMixin, BaseTest):
     def test_returns_all_distinct_ids_for_person(self):
         person_id = UUID(int=100)
         insert_pdi2_records(
@@ -124,7 +124,7 @@ class TestGetAllDistinctIdsForPerson(ClickhouseTestMixin, BaseTest):
         assert result == []
 
 
-class TestGetExistingOverride(ClickhouseTestMixin, BaseTest):
+class TestGetExistingOverride(DatastoreTestMixin, BaseTest):
     def test_returns_override_when_exists(self):
         person_id = UUID(int=200)
         insert_override_records([(self.team.id, "override_user", person_id, 1, 0)])
@@ -152,7 +152,7 @@ class TestGetExistingOverride(ClickhouseTestMixin, BaseTest):
         assert result is None
 
 
-class TestInsertOverrideBatch(ClickhouseTestMixin, BaseTest):
+class TestInsertOverrideBatch(DatastoreTestMixin, BaseTest):
     def test_inserts_batch_of_overrides(self):
         person_id_1 = UUID(int=300)
         person_id_2 = UUID(int=301)
@@ -181,7 +181,7 @@ class TestInsertOverrideBatch(ClickhouseTestMixin, BaseTest):
         insert_override_batch([])
 
 
-class TestFixPersonIdOverridesJob(ClickhouseTestMixin, BaseTest):
+class TestFixPersonIdOverridesJob(DatastoreTestMixin, BaseTest):
     def test_inserts_overrides_for_all_distinct_ids_of_person(self):
         person_id = UUID(int=400)
         insert_pdi2_records(

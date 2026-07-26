@@ -4,14 +4,14 @@ import unittest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     also_test_with_person_on_events_v2,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import skip
 
@@ -44,7 +44,7 @@ from insights.test.test_journeys import journeys_for
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 
-class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
+class TestDatastoreFunnelCorrelation(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_events_for_filters(
@@ -230,7 +230,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
         )
         self.assertEqual(len(self._get_actors_for_event(filters, "negatively_related")), 0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_action_events_are_excluded_from_correlations(self):
         journey = {}
 
@@ -308,7 +308,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_person_on_events_v2
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_correlation_with_events_and_groups(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -498,7 +498,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
         event_properties=[], person_properties=["$browser"], verify_no_jsonextract=False
     )
     @freeze_time("2019-12-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_funnel_correlation_with_properties(self):
         filters = {
             "events": [
@@ -665,7 +665,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
     @also_test_with_materialized_columns(
         event_properties=[], person_properties=["$browser"], verify_no_jsonextract=False
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_correlation_with_properties_and_groups(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -869,7 +869,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
         verify_no_jsonextract=False,
     )
     @also_test_with_person_on_events_v2
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_correlation_with_properties_and_groups_person_on_events(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -1724,7 +1724,7 @@ class TestClickhouseFunnelCorrelation(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(["blah", "signup_source"], verify_no_jsonextract=False)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_correlation_with_event_properties_and_groups(self):
         # same test as test_funnel_correlation_with_event_properties but with events attached to groups
         create_group_type_mapping_without_created_at(
@@ -2173,7 +2173,7 @@ class TestCorrelationFunctions(unittest.TestCase):
         self.assertEqual(len(result), 0)
 
 
-class TestFunnelCorrelationSQLInjection(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelCorrelationSQLInjection(DatastoreTestMixin, APIBaseTest):
     """
     Security tests to verify SQL injection payloads in funnelCorrelationNames
     and related parameters are safely escaped.

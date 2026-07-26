@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 import hanzo_insights
 from dateutil.parser import isoparse, parser
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.cloud_utils import is_cloud
 from insights.models.filters.filter import Filter
 from insights.models.filters.path_filter import PathFilter
@@ -56,7 +56,7 @@ def active_teams() -> set[int]:
     all_teams: list[tuple[bytes, float]] = redis.zrange(RECENTLY_ACCESSED_TEAMS_REDIS_KEY, 0, -1, withscores=True)
     if not all_teams:
         # NOTE: `active_teams()` doesn't cooperate with freezegun (aka `freeze_time()`), because of
-        # the ClickHouse `now()` function being used below
+        # the Datastore `now()` function being used below
         teams_by_recency = sync_execute(
             """
             SELECT team_id, date_diff('second', max(timestamp), now()) AS age

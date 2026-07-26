@@ -17,7 +17,7 @@ class StaticCohortPeople(Table):
     def avoid_asterisk_fields(self):
         return ["_timestamp", "_offset"]
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_static_cohort"
 
     def to_printed_insightsql(self):

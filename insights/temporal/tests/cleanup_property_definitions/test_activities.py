@@ -8,12 +8,12 @@ from parameterized import parameterized_class
 from insights.models import PropertyDefinition
 from insights.models.event_property import EventProperty
 from insights.temporal.cleanup_property_definitions.activities import (
-    delete_property_definitions_from_clickhouse,
+    delete_property_definitions_from_datastore,
     delete_property_definitions_from_postgres,
 )
 from insights.temporal.cleanup_property_definitions.types import (
     CleanupPropertyDefinitionsError,
-    DeleteClickHousePropertyDefinitionsInput,
+    DeleteDatastorePropertyDefinitionsInput,
     DeletePostgresPropertyDefinitionsInput,
 )
 from insights.temporal.tests.cleanup_property_definitions.conftest import (
@@ -372,7 +372,7 @@ class TestDeleteEventPropertiesFromPostgres:
     ],
 )
 @pytest.mark.django_db(transaction=True)
-class TestDeletePropertyDefinitionsFromClickHouse:
+class TestDeletePropertyDefinitionsFromDatastore:
     property_type: int
     property_type_int: int
 
@@ -385,7 +385,7 @@ class TestDeletePropertyDefinitionsFromClickHouse:
 
         yield
 
-        # Cleanup ClickHouse
+        # Cleanup Datastore
         cleanup_ch_property_definitions(self.team.id, self.created_property_names)
 
     @pytest.mark.asyncio
@@ -402,8 +402,8 @@ class TestDeletePropertyDefinitionsFromClickHouse:
         assert len(matching_before) == 3
 
         await self.activity_environment.run(
-            delete_property_definitions_from_clickhouse,
-            DeleteClickHousePropertyDefinitionsInput(
+            delete_property_definitions_from_datastore,
+            DeleteDatastorePropertyDefinitionsInput(
                 team_id=self.team.id,
                 pattern=f"^{self.prefix}_temp_.*",
                 property_type=self.property_type,
@@ -428,8 +428,8 @@ class TestDeletePropertyDefinitionsFromClickHouse:
         insert_property_definition_to_ch(self.team.id, other_prop, property_type=other_type)
 
         await self.activity_environment.run(
-            delete_property_definitions_from_clickhouse,
-            DeleteClickHousePropertyDefinitionsInput(
+            delete_property_definitions_from_datastore,
+            DeleteDatastorePropertyDefinitionsInput(
                 team_id=self.team.id,
                 pattern=f"^{self.prefix}_.*",
                 property_type=self.property_type,
@@ -451,8 +451,8 @@ class TestDeletePropertyDefinitionsFromClickHouse:
     async def test_handles_no_matching_properties(self):
         # Should not raise an error
         await self.activity_environment.run(
-            delete_property_definitions_from_clickhouse,
-            DeleteClickHousePropertyDefinitionsInput(
+            delete_property_definitions_from_datastore,
+            DeleteDatastorePropertyDefinitionsInput(
                 team_id=self.team.id,
                 pattern="^nonexistent_pattern_.*",
                 property_type=self.property_type,
@@ -476,8 +476,8 @@ class TestDeletePropertyDefinitionsFromClickHouse:
         insert_property_definition_to_ch(other_team.id, prop_name, property_type=self.property_type_int)
 
         await self.activity_environment.run(
-            delete_property_definitions_from_clickhouse,
-            DeleteClickHousePropertyDefinitionsInput(
+            delete_property_definitions_from_datastore,
+            DeleteDatastorePropertyDefinitionsInput(
                 team_id=self.team.id,
                 pattern=f"^{self.prefix}_.*",
                 property_type=self.property_type,

@@ -201,7 +201,7 @@ class TestGetTeamIdsForLlmAnalytics:
 
     @patch("insights.tasks.llm_analytics_usage_report.get_teams_with_ai_events")
     async def test_fallback_on_exception(self, mock_get_teams, _mock_ff):
-        mock_get_teams.side_effect = Exception("ClickHouse down")
+        mock_get_teams.side_effect = Exception("Datastore down")
         inputs = TeamDiscoveryInput()
 
         result = await get_team_ids_for_llm_analytics(inputs)
@@ -258,7 +258,7 @@ class TestGetTeamIdsForLlmAnalytics:
             "guaranteed_team_ids": [1, 2, 3],
             "skip_team_ids": [2],
         }
-        mock_get_teams.side_effect = Exception("ClickHouse down")
+        mock_get_teams.side_effect = Exception("Datastore down")
         inputs = TeamDiscoveryInput()
 
         result = await get_team_ids_for_llm_analytics(inputs)

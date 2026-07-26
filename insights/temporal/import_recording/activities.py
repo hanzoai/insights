@@ -6,9 +6,9 @@ from uuid import uuid4
 
 from temporalio import activity
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.storage import session_recording_v2_object_storage
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
 from insights.temporal.import_recording.types import ImportContext, ImportRecordingInput
 
@@ -41,7 +41,7 @@ async def build_import_context(input: ImportRecordingInput) -> ImportContext:
     s3_prefix = s3_prefix_file.read_text().strip()
     logger.info(f"Found S3 prefix: {s3_prefix}")
 
-    replay_events_file = import_dir / "clickhouse" / "session-replay-events.json"
+    replay_events_file = import_dir / "datastore" / "session-replay-events.json"
     if not replay_events_file.exists():
         raise RuntimeError("Missing session-replay-events.json")
 
@@ -149,12 +149,12 @@ FORMAT JSONEachRow
 
 
 @activity.defn
-async def import_replay_clickhouse_rows(input: ImportContext) -> None:
+async def import_replay_datastore_rows(input: ImportContext) -> None:
     tag_queries(product=Product.REPLAY, team_id=input.team_id)
     logger = LOGGER.bind()
-    logger.info(f"Importing replay ClickHouse rows for session {input.session_id}")
+    logger.info(f"Importing replay Datastore rows for session {input.session_id}")
 
-    replay_events_file = Path("/tmp") / str(input.import_id) / "clickhouse" / "session-replay-events.json"
+    replay_events_file = Path("/tmp") / str(input.import_id) / "datastore" / "session-replay-events.json"
     with replay_events_file.open("r") as f:
         replay_data = json.load(f)
 
@@ -202,12 +202,12 @@ async def import_replay_clickhouse_rows(input: ImportContext) -> None:
 
 
 @activity.defn
-async def import_event_clickhouse_rows(input: ImportContext) -> None:
+async def import_event_datastore_rows(input: ImportContext) -> None:
     tag_queries(product=Product.REPLAY, team_id=input.team_id)
     logger = LOGGER.bind()
-    logger.info(f"Importing event ClickHouse rows for session {input.session_id}")
+    logger.info(f"Importing event Datastore rows for session {input.session_id}")
 
-    events_file = Path("/tmp") / str(input.import_id) / "clickhouse" / "events.json"
+    events_file = Path("/tmp") / str(input.import_id) / "datastore" / "events.json"
     if not events_file.exists():
         logger.warning("No events.json found, skipping")
         return

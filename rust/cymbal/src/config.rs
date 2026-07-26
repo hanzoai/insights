@@ -34,13 +34,13 @@ pub struct Config {
     #[envconfig(default = "cdp_internal_events")]
     pub internal_events_topic: String,
 
-    #[envconfig(default = "clickhouse_events_json")]
+    #[envconfig(default = "datastore_events_json")]
     pub events_topic: String,
 
-    #[envconfig(default = "clickhouse_error_tracking_issue_fingerprint")]
+    #[envconfig(default = "datastore_error_tracking_issue_fingerprint")]
     pub issue_overrides_topic: String,
 
-    #[envconfig(default = "clickhouse_ingestion_warnings")]
+    #[envconfig(default = "datastore_ingestion_warnings")]
     pub ingestion_warnings_topic: String,
 
     #[envconfig(default = "document_embeddings_input")]

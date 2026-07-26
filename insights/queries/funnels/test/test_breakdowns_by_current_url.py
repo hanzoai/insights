@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.models import Filter
-from insights.queries.funnels import ClickhouseFunnel
+from insights.queries.funnels import DatastoreFunnel
 from insights.test.test_journeys import journeys_for
 
 
-class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
+class TestBreakdownsByCurrentURL(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         journey = {
@@ -117,7 +117,7 @@ class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
             events_extra = {}
         if extra is None:
             extra = {}
-        response = ClickhouseFunnel(
+        response = DatastoreFunnel(
             Filter(
                 data={
                     "events": [
@@ -148,7 +148,7 @@ class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
         ).run()
         return response
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_pathname(self) -> None:
         response = self._run(
             {
@@ -178,7 +178,7 @@ class TestBreakdownsByCurrentURL(ClickhouseTestMixin, APIBaseTest):
         key_func = lambda x: (x[2][0], x[0])
         assert sorted(want, key=key_func) == sorted(actual, key=key_func)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_by_current_url(self) -> None:
         response = self._run(
             {

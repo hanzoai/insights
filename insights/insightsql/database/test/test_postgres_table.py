@@ -37,7 +37,7 @@ class TestPostgresTable(BaseTest):
             modifiers=create_default_modifiers_for_team(self.team),
         )
 
-    def _select(self, query: str, dialect: Literal["insightsql", "clickhouse"] = "clickhouse") -> str:
+    def _select(self, query: str, dialect: Literal["insightsql", "datastore"] = "datastore") -> str:
         return prepare_and_print_ast(parse_select(query), self.context, dialect=dialect)[0]
 
     def test_postgres_table_select(self):
@@ -49,9 +49,9 @@ class TestPostgresTable(BaseTest):
             "SELECT id, team_id, name FROM postgres_table LIMIT 10",
         )
 
-        clickhouse = self._select(query="SELECT * FROM postgres_table LIMIT 10", dialect="clickhouse")
+        datastore = self._select(query="SELECT * FROM postgres_table LIMIT 10", dialect="datastore")
 
         self.assertEqual(
-            clickhouse,
+            datastore,
             f"SELECT postgres_table.id AS id, postgres_table.team_id AS team_id, postgres_table.name AS name FROM postgresql(%(insightsql_val_1_sensitive)s, %(insightsql_val_2_sensitive)s, %(insightsql_val_0_sensitive)s, %(insightsql_val_3_sensitive)s, %(insightsql_val_4_sensitive)s) AS postgres_table WHERE equals(postgres_table.team_id, {self.team.id}) LIMIT 10",
         )

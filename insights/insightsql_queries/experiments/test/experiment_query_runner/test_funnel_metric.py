@@ -9,7 +9,7 @@ from insights.test.base import (
     _create_person,
     create_person_id_override_by_distinct_id,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from pytest import mark
 
@@ -41,7 +41,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_funnel_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -157,7 +157,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(sorted(control_success_events), sorted(control_sampled_success_events))
 
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_group_aggregation_funnel_metric(self):
         feature_flag = self.create_feature_flag()
         feature_flag.filters["aggregation_group_type_index"] = 0
@@ -431,7 +431,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
             ],
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2020-01-01T12:00:00Z")
     def test_query_runner_with_persons_on_events_mode(self, name, persons_on_events_mode, filters, expected_results):
         feature_flag = self.create_feature_flag()
@@ -633,7 +633,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
             )
 
     @mark.skip("Funnel metrics on data warehouse tables are not supported yet")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_funnel_metric(self):
         # table_name = self.create_data_warehouse_table_with_usage()
 
@@ -703,7 +703,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_result.number_of_samples - test_result.sum, 6)  # failure_count
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_conversion_window(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -814,7 +814,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # failure_count
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_custom_conversion_window(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -938,7 +938,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures outside window
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_action(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1045,7 +1045,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_duplicate_events(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1156,7 +1156,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_events_out_of_order(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1266,7 +1266,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_many_steps(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1370,7 +1370,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_step_property_filter(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1495,7 +1495,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_multiple_similar_steps(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1641,7 +1641,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_with_unordered_steps(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1749,7 +1749,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples - test_variant.sum, 7)  # 7 failures
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_ordered_vs_unordered_comparison(self):
         """Test that ordered and unordered funnels behave differently when events are out of order"""
         feature_flag = self.create_feature_flag()
@@ -1940,7 +1940,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(unordered_test.number_of_samples - unordered_test.sum, 4)  # 4 incomplete (only pageview)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_excludes_different_feature_flags(self):
         """Test that users with $feature_flag_called events for different flags are excluded"""
         # Create two different feature flags
@@ -2129,7 +2129,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         # Total exposures should be 31 (13 control + 13 test + 5 both), NOT 41 (if other_flag users were included)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_excludes_events_after_experiment_end_date(self):
         """Test that funnel metric events after experiment end_date are excluded from results"""
         feature_flag = self.create_feature_flag()
@@ -2248,7 +2248,7 @@ class TestExperimentFunnelMetric(ExperimentQueryRunnerBaseTest):
         ]
     )
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_metric_events_after_exposure(self, name, funnel_order_type):
         """Test that funnel metric events are only counted if they occur AFTER experiment exposure"""
         feature_flag = self.create_feature_flag()

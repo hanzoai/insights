@@ -258,7 +258,7 @@ sources/test/
 **1. Core Base Test (`sources/test/base.py`)**
 
 - `RevenueAnalyticsViewSourceBaseTest`: Provides fundamental testing infrastructure
-- Includes ClickHouse query testing capabilities
+- Includes Datastore query testing capabilities
 - Query snapshot testing with `assertQueryMatchesSnapshot`
 - API testing infrastructure
 - Common assertion helpers for query structure validation

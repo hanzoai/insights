@@ -7,7 +7,7 @@ from insights.models.filters.mixins.utils import cached_property, include_dict
 
 
 class IntervalMixin(DateMixin):  # Interval doesn't make sense without a date range
-    """See https://clickhouse.tech/docs/en/sql-reference/data-types/special-data-types/interval/."""
+    """See https://datastore.tech/docs/en/sql-reference/data-types/special-data-types/interval/."""
 
     SUPPORTED_INTERVAL_TYPES = ["hour", "day", "week", "month"]
 

@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
@@ -6,7 +6,7 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.models import Cohort, Person
 
 
-class TestCohortPeopleTable(ClickhouseTestMixin, APIBaseTest):
+class TestCohortPeopleTable(DatastoreTestMixin, APIBaseTest):
     def test_select_star(self):
         Person.objects.create(
             team_id=self.team.pk,

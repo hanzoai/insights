@@ -8,7 +8,7 @@ Some selected examples of subprojects homed in the Rust workspace.
 
 ### capture
 
-This is the microservice that receives HTTP event capture requests and extracts the event payloads, lightly preprocesses the events, and passes well-formed events along as Kafka messages for downstream validation, CDP processing, and ingestion into Postgres and ClickHouse.
+This is the microservice that receives HTTP event capture requests and extracts the event payloads, lightly preprocesses the events, and passes well-formed events along as Kafka messages for downstream validation, CDP processing, and ingestion into Postgres and Datastore.
 
 ### feature-flags
 

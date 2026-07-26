@@ -175,7 +175,7 @@ jobs:
 
             - name: Run clickhouse migrations
               run: |
-                  python manage.py migrate_clickhouse
+                  python manage.py migrate_datastore
 
             - name: Run Dagster tests
               run: |

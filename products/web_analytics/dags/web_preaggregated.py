@@ -5,9 +5,9 @@ from datetime import UTC, datetime, timedelta
 import dagster
 from dagster import BackfillPolicy, DailyPartitionsDefinition
 
-from insights.clickhouse import query_tagging
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore import query_tagging
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, dagster_tags
 from insights.models.web_preaggregated.sql import (
     REPLACE_WEB_BOUNCES_V2_STAGING_SQL,
@@ -22,10 +22,10 @@ from products.web_analytics.dags.web_preaggregated_utils import (
     HISTORICAL_DAILY_CRON_SCHEDULE,
     INTRA_DAY_HOURLY_CRON_SCHEDULE,
     WEB_ANALYTICS_CONFIG_SCHEMA,
-    WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS,
+    WEB_PRE_AGGREGATED_DATASTORE_SETTINGS,
     check_for_concurrent_runs,
     clear_all_staging_partitions,
-    merge_clickhouse_settings,
+    merge_datastore_settings,
     recreate_staging_table,
     swap_partitions_from_staging,
     sync_partitions_on_replicas,
@@ -47,12 +47,12 @@ def pre_aggregate_web_analytics_data(
     context: dagster.AssetExecutionContext,
     table_name: str,
     sql_generator: Callable,
-    cluster: ClickhouseCluster,
+    cluster: DatastoreCluster,
 ) -> None:
     config = context.op_config
     team_ids = config.get("team_ids")
-    extra_settings = config.get("extra_clickhouse_settings", "")
-    ch_settings = merge_clickhouse_settings(WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS, extra_settings)
+    extra_settings = config.get("extra_datastore_settings", "")
+    ch_settings = merge_datastore_settings(WEB_PRE_AGGREGATED_DATASTORE_SETTINGS, extra_settings)
 
     if not context.partition_time_window:
         raise dagster.Failure("This asset should only be run with a partition_time_window")
@@ -111,7 +111,7 @@ def pre_aggregate_web_analytics_data(
 )
 def web_pre_aggregated_bounces(
     context: dagster.AssetExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> None:
     query_tagging.get_query_tags().with_dagster(dagster_tags(context))
     return pre_aggregate_web_analytics_data(
@@ -135,7 +135,7 @@ def web_pre_aggregated_bounces(
 )
 def web_pre_aggregated_stats(
     context: dagster.AssetExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> None:
     query_tagging.get_query_tags().with_dagster(dagster_tags(context))
     return pre_aggregate_web_analytics_data(
@@ -153,7 +153,7 @@ def web_pre_aggregated_stats(
 )
 def clear_web_staging_partitions(
     context: dagster.AssetExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> None:
     """
     Utility asset to clear all partitions from staging tables.
@@ -247,7 +247,7 @@ def ensure_web_analytics_tables_exist(context: dagster.ScheduleEvaluationContext
 def web_analytics_v2_backfill_schedule(context: dagster.ScheduleEvaluationContext):
     """
     Schedule that materializes web analytics v2 assets for today's partition.
-    Only runs in DEBUG mode so we don't overload ClickHouse in production.
+    Only runs in DEBUG mode so we don't overload Datastore in production.
 
     Triggers materialization if no recent runs in the last 6 hours.
     """

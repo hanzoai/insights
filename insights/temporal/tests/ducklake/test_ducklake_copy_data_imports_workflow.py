@@ -106,9 +106,9 @@ async def test_prepare_data_imports_ducklake_metadata_activity_basic(ateam, monk
         credential=credential,
         external_data_source=source,
         columns={
-            "id": {"clickhouse": "Int64", "insightsql": "IntegerDatabaseField"},
-            "created_at": {"clickhouse": "DateTime64", "insightsql": "DateTimeDatabaseField"},
-            "name": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField"},
+            "id": {"datastore": "Int64", "insightsql": "IntegerDatabaseField"},
+            "created_at": {"datastore": "DateTime64", "insightsql": "DateTimeDatabaseField"},
+            "name": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
         },
     )
     schema = await database_sync_to_async(ExternalDataSchema.objects.create)(
@@ -161,8 +161,8 @@ async def test_prepare_data_imports_ducklake_metadata_activity_no_partition(atea
         credential=credential,
         external_data_source=source,
         columns={
-            "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-            "amount": {"clickhouse": "Nullable(Float64)", "insightsql": "FloatDatabaseField"},
+            "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+            "amount": {"datastore": "Nullable(Float64)", "insightsql": "FloatDatabaseField"},
         },
     )
     schema = await database_sync_to_async(ExternalDataSchema.objects.create)(

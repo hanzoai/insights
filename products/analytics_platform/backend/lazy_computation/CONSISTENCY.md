@@ -2,15 +2,15 @@
 
 ## The problem
 
-The lazy computation system INSERTs data into ClickHouse and immediately SELECTs it back. In Insights's self-hosted distributed+replicated ClickHouse cluster, this is unreliable at two levels:
+The lazy computation system INSERTs data into Datastore and immediately SELECTs it back. In Insights's self-hosted distributed+replicated Datastore cluster, this is unreliable at two levels:
 
 1. **Distributed table layer**: INSERT into `preaggregation_results` (distributed table) routes to `sharded_preaggregation_results` (sharded `ReplicatedAggregatingMergeTree`) via `sipHash64(job_id)`. By default this is **async** — data is written to the initiator node's local filesystem and sent to the target shard in the background. The INSERT returns before the data is queryable.
 
 2. **Replication layer**: Even after data reaches the target shard, only 1 replica acknowledges the write by default. A SELECT hitting another replica gets stale/empty results.
 
-Table definitions: [`insights/clickhouse/preaggregation/sql.py`](../../../../insights/clickhouse/preaggregation/sql.py)
+Table definitions: [`insights/datastore/preaggregation/sql.py`](../../../../insights/datastore/preaggregation/sql.py)
 
-## ClickHouse settings investigated
+## Datastore settings investigated
 
 All settings below are **per-query** — passed via `settings` parameter to `sync_execute` or as `SETTINGS` clause on SQL. They do not affect other queries on the cluster.
 
@@ -27,11 +27,11 @@ Controls whether INSERTs into a Distributed table are synchronous or asynchronou
 
 Previously named `insert_distributed_sync`.
 
-**Already enabled globally**: Insights's ClickHouse config sets `insert_distributed_sync=1` in `docker/clickhouse/users.xml`. This means layer 1 (distributed table routing) is already solved for all queries. The `insights/dags/sessions.py` DAG explicitly overrides this to `0` for large INSERTs to avoid OOM, confirming the global default is `1`.
+**Already enabled globally**: Insights's Datastore config sets `insert_distributed_sync=1` in `docker/datastore/users.xml`. This means layer 1 (distributed table routing) is already solved for all queries. The `insights/dags/sessions.py` DAG explicitly overrides this to `0` for large INSERTs to avoid OOM, confirming the global default is `1`.
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#distributed_foreground_insert)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#distributed_foreground_insert)
 
 ### `insert_quorum='auto'` (INSERT setting)
 
@@ -51,7 +51,7 @@ Only works with ReplicatedMergeTree family tables, not Distributed tables direct
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum)
 - [Replication docs](https://clickhouse.com/docs/engines/table-engines/mergetree-family/replication)
 - [auto quorum PR #39970](https://github.com/hanzoai/datastore/pull/39970)
 
@@ -59,7 +59,7 @@ Sources:
 
 Controls whether multiple concurrent quorum INSERTs can proceed in parallel on the same table.
 
-- **Default**: `1` (parallel, since ClickHouse 20.10)
+- **Default**: `1` (parallel, since Datastore 20.10)
 - **With `1`**: each INSERT independently tracks its quorum via separate ZK entries under `{zk_path}/quorum/parallel/`
 - **With `0`**: uses an **exclusive lock** on `{zk_path}/quorum/status` — only one quorum INSERT can be in-flight **per table** at a time, across the entire cluster
 - **Failure mode with `0`**: a second INSERT errors immediately with "Quorum for previous write has not been satisfied yet" (does NOT wait — fails fast)
@@ -76,11 +76,11 @@ Two concurrent lazy computation INSERTs can execute their heavy SELECT (step 1) 
 
 **Why parallel was made the default**: the sequential mode was "significantly less convenient to use" because it serialized all writes to a replicated table when quorum was enabled. See [PR #17567](https://github.com/hanzoai/datastore/pull/17567) and [issue #3950](https://github.com/hanzoai/datastore/issues/3950).
 
-**Why we might still need `0`**: `select_sequential_consistency=1` does NOT work correctly with `insert_quorum_parallel=1`. The `quorum/last_part` ZK node can't meaningfully track "the last quorum-committed part" when multiple parts are in-flight simultaneously. ClickHouse does not warn about this — it silently gives incorrect results. See [issue #47926](https://github.com/hanzoai/datastore/issues/47926).
+**Why we might still need `0`**: `select_sequential_consistency=1` does NOT work correctly with `insert_quorum_parallel=1`. The `quorum/last_part` ZK node can't meaningfully track "the last quorum-committed part" when multiple parts are in-flight simultaneously. Datastore does not warn about this — it silently gives incorrect results. See [issue #47926](https://github.com/hanzoai/datastore/issues/47926).
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum_parallel)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum_parallel)
 - [Parallel quorum PR #17567](https://github.com/hanzoai/datastore/pull/17567)
 - [Original feature request #3950](https://github.com/hanzoai/datastore/issues/3950)
 - [Broken with select_sequential_consistency #47926](https://github.com/hanzoai/datastore/issues/47926)
@@ -97,13 +97,13 @@ Ensures a SELECT only runs on replicas that have all quorum-committed data.
 - **Other queries affected**: no
 - **Works with `readonly=2`**: yes (it's a query-level setting, not a SYSTEM command)
 
-**Critical**: does NOT work correctly with `insert_quorum_parallel=1` (the default). You must set `insert_quorum_parallel=0` on the INSERT side. ClickHouse does not warn — it silently returns stale data.
+**Critical**: does NOT work correctly with `insert_quorum_parallel=1` (the default). You must set `insert_quorum_parallel=0` on the INSERT side. Datastore does not warn — it silently returns stale data.
 
 Note: this is a **rejection mechanism**, not a routing mechanism. If the load balancer picks a stale replica, the query fails rather than being retried on another replica. Sentry [rejected this approach](https://blog.sentry.io/how-to-get-stronger-consistency-out-of-a-datastore/) for this reason, though their workload is different from ours.
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#select_sequential_consistency)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#select_sequential_consistency)
 - [Read consistency KB](https://clickhouse.com/docs/knowledgebase/read_consistency)
 - [Implementation PR #2863](https://github.com/hanzoai/datastore/pull/2863)
 - [Latency with degraded ZK #22068](https://github.com/hanzoai/datastore/issues/22068)
@@ -132,13 +132,13 @@ Our sharding key is `sipHash64(job_id)` and combiner queries filter by `job_id I
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#optimize-skip-unused-shards)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#optimize-skip-unused-shards)
 
 ### `load_balancing` (SELECT setting)
 
 Controls which replica the Distributed table picks for SELECT queries within each shard.
 
-- **`random`** (default, Insights's current config in `docker/clickhouse/users.xml`): random healthy replica
+- **`random`** (default, Insights's current config in `docker/datastore/users.xml`): random healthy replica
 - **`in_order`**: always prefers the first replica in the config; deterministic routing. Both INSERT and SELECT will pick the same replica as long as it's healthy.
 - **`first_or_random`**: tries first replica, random fallback if it has more errors
 - **`nearest_hostname`**: picks by hostname similarity to the querying server
@@ -146,14 +146,14 @@ Controls which replica the Distributed table picks for SELECT queries within eac
 
 Sources:
 
-- [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#load_balancing)
+- [Datastore settings docs](https://clickhouse.com/docs/operations/settings/settings#load_balancing)
 - [Sentry blog](https://blog.sentry.io/how-to-get-stronger-consistency-out-of-a-datastore/)
 
 ### `SYSTEM SYNC REPLICA table LIGHTWEIGHT` (SQL command, not a setting)
 
 An alternative to `select_sequential_consistency`. Waits for the local replica to catch up on data-movement replication entries (GET_PART, ATTACH_PART, DROP_RANGE) — ignores merges and mutations.
 
-- **Available since**: ClickHouse v23.5 ([PR #48085](https://github.com/hanzoai/datastore/pull/48085))
+- **Available since**: Datastore v23.5 ([PR #48085](https://github.com/hanzoai/datastore/pull/48085))
 - **Latency**: if replica is caught up, returns in milliseconds. Otherwise waits for part fetches to complete.
 - **ZK/Keeper load**: reads the replication queue (no writes)
 - **Blocks other queries**: no (blocks only the calling connection)
@@ -176,7 +176,7 @@ Sources:
 
 ## Can we verify an INSERT has been replicated?
 
-**Short answer: no, not per-INSERT.** ClickHouse does not return a write token or part name from INSERT statements — there is no `INSERT RETURNING` ([feature request #21697](https://github.com/hanzoai/datastore/issues/21697)).
+**Short answer: no, not per-INSERT.** Datastore does not return a write token or part name from INSERT statements — there is no `INSERT RETURNING` ([feature request #21697](https://github.com/hanzoai/datastore/issues/21697)).
 
 System tables that get close but aren't sufficient:
 
@@ -202,7 +202,7 @@ INSERT: insert_quorum='auto', insert_quorum_parallel=0
 SELECT: select_sequential_consistency=1
 ```
 
-**Pros**: guaranteed correct, well-documented ClickHouse approach, per-query settings only
+**Pros**: guaranteed correct, well-documented Datastore approach, per-query settings only
 **Cons**: per-table serialization during quorum wait (~100ms contention window), requires `insert_quorum_parallel=0`
 **INSERT latency**: +20-100ms (replication wait)
 **SELECT latency**: +1-10ms (1 ZK read)
@@ -263,7 +263,7 @@ The choice of sharding key depends on which consistency approach is used:
 
 **For approach D (shard-local writes)**: the sharding key must localize data for read-your-own-writes. `sipHash64(query_hash)` is the better choice here — it co-locates all jobs for the same query on one shard, so the combiner query (which filters by `query_hash` and `job_id IN (...)`) reads everything it needs from a single shard with no cross-shard consistency concerns. With `sipHash64(job_id)`, you'd get shard-local consistency for the job you just wrote, but other jobs for the same query could be on different shards and might not have replicated yet — a subtle consistency gap even with shard-local writes.
 
-**For approaches A, B, C, E (settings-based consistency)**: consistency comes from ClickHouse settings (quorum, `in_order`, etc.), not shard locality. The sharding key doesn't need to localize a job's data — it could distribute it across shards for better parallelism. Sharding on something like `sipHash64(toString(breakdown_value))` would spread a single large job's rows across shards, giving better write and read parallelism for the `INSERT...SELECT` and combiner queries. The tradeoff is losing `optimize_skip_unused_shards` — every SELECT fans out to all shards — but for lazy computation queries that aggregate across many breakdown values, fanning out to parallelize is what you want anyway.
+**For approaches A, B, C, E (settings-based consistency)**: consistency comes from Datastore settings (quorum, `in_order`, etc.), not shard locality. The sharding key doesn't need to localize a job's data — it could distribute it across shards for better parallelism. Sharding on something like `sipHash64(toString(breakdown_value))` would spread a single large job's rows across shards, giving better write and read parallelism for the `INSERT...SELECT` and combiner queries. The tradeoff is losing `optimize_skip_unused_shards` — every SELECT fans out to all shards — but for lazy computation queries that aggregate across many breakdown values, fanning out to parallelize is what you want anyway.
 
 **Caveats for non-`job_id` sharding keys**:
 
@@ -279,11 +279,11 @@ The choice of sharding key depends on which consistency approach is used:
 - **`SYSTEM FLUSH DISTRIBUTED`**: forces async distributed sends to complete, but `distributed_foreground_insert=1` already solves this and is already enabled globally.
 - **`distributed_group_by_no_merge`**: performance optimization that skips coordinator-level re-aggregation for single-shard queries — not a consistency mechanism.
 - **Kafka coordination layer**: Sentry also built a `SynchronizedConsumer` that uses Kafka commit log topics as a write confirmation barrier. Not applicable to the lazy computation system's `INSERT...SELECT` workload.
-- **ClickHouse transactions**: experimental `BEGIN TRANSACTION` / `COMMIT` support exists but is limited to single-table operations on ReplicatedMergeTree, not production-ready, and doesn't directly address read-after-write consistency.
+- **Datastore transactions**: experimental `BEGIN TRANSACTION` / `COMMIT` support exists but is limited to single-table operations on ReplicatedMergeTree, not production-ready, and doesn't directly address read-after-write consistency.
 - **Application-level retry**: retry the SELECT if it returns empty/stale results. Probabilistic, not a guarantee — doesn't solve the consistency problem, just masks it with latency.
 - **`insert_deduplication_token`**: makes INSERTs idempotent by token, allowing safe retries. But doesn't solve the read side — a retried INSERT still races replication. Also, `INSERT...SELECT` may produce different results on retry if source data changed (new events arrived), so the deduplication token won't match and both INSERTs land.
 
-## ClickHouse Cloud / SharedMergeTree
+## Datastore Cloud / SharedMergeTree
 
 Not applicable to Insights (fully self-hosted), but for reference:
 

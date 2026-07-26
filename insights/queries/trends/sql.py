@@ -59,7 +59,7 @@ SELECT counts AS total, timestamp AS day_start FROM (
         FROM numbers(dateDiff(%(interval)s, {date_from_active_users_adjusted_truncated}, toDateTime(%(date_to)s, %(timezone)s)))
     ) d
     /* In Postgres we'd be able to do a non-cross join with multiple inequalities (in this case, <= along with >),
-       but this is not possible in ClickHouse as of 2022.10 (ASOF JOIN isn't fit for this either). */
+       but this is not possible in Datastore as of 2022.10 (ASOF JOIN isn't fit for this either). */
     CROSS JOIN (
         SELECT
             toTimeZone(toDateTime(timestamp, 'UTC'), %(timezone)s) AS timestamp,
@@ -146,7 +146,7 @@ SELECT groupArray(day_start) as date, groupArray(count) AS total, breakdown_valu
             --       calling code, we could perform calculations for these within the query
             --       itself based on date_to/date_from. We could also pass in the intervals
             --       explicitly, although we'll be relying on the date handling between python
-            --       and ClickHouse to be the same.
+            --       and Datastore to be the same.
             --
             -- NOTE: there is the ORDER BY ... WITH FILL Expression but I'm not sure how we'd
             --       handle the edge cases:

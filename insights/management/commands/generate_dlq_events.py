@@ -6,7 +6,7 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.team.team import Team
 
 
@@ -43,8 +43,8 @@ class Command(BaseCommand):
         for _ in range(count):
             event_data = self._generate_dlq_event(team, days_back)
 
-            # Insert into ClickHouse
-            self._insert_event_to_clickhouse(event_data)
+            # Insert into Datastore
+            self._insert_event_to_datastore(event_data)
             events_created += 1
 
             if events_created % 10 == 0:
@@ -327,8 +327,8 @@ class Command(BaseCommand):
         ]
         return random.choice(tag_combinations)
 
-    def _insert_event_to_clickhouse(self, event_data: dict[str, Any]):
-        """Insert event data into ClickHouse"""
+    def _insert_event_to_datastore(self, event_data: dict[str, Any]):
+        """Insert event data into Datastore"""
         query = """
         INSERT INTO events_dead_letter_queue (
             id, event_uuid, event, properties, distinct_id, team_id, elements_chain,

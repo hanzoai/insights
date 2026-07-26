@@ -9,9 +9,9 @@ from insights.models.property_definition import PropertyType
 
 
 def infer_taxonomy_for_team(team_id: int) -> tuple[int, int, int]:
-    """Infer event and property definitions based on ClickHouse data.
+    """Infer event and property definitions based on Datastore data.
 
-    In production, the plugin server is responsible for this - but in demo data we insert directly to ClickHouse.
+    In production, the plugin server is responsible for this - but in demo data we insert directly to Datastore.
     """
     # Event definitions, with `last_seen_at`
     events_last_seen_at = _get_events_last_seen_at(team_id)
@@ -57,7 +57,7 @@ def infer_taxonomy_for_team(team_id: int) -> tuple[int, int, int]:
 
 
 def _get_events_last_seen_at(team_id: int) -> dict[str, datetime.datetime]:
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     return dict(sync_execute(_GET_EVENTS_LAST_SEEN_AT, {"team_id": team_id}))
 
@@ -67,8 +67,8 @@ InferredProperties = dict[InferredPropertyKey, Optional[PropertyType]]
 
 
 def _get_property_types(team_id: int) -> InferredProperties:
-    """Determine property types based on ClickHouse data."""
-    from insights.clickhouse.client import sync_execute
+    """Determine property types based on Datastore data."""
+    from insights.datastore.client import sync_execute
 
     property_types: InferredProperties = {
         (PropertyDefinition.Type.EVENT, property_key, None): _infer_property_type(sample_json_value)
@@ -108,8 +108,8 @@ def _infer_property_type(sample_json_value: str) -> Optional[PropertyType]:
 
 
 def _get_event_property_pairs(team_id: int) -> list[tuple[str, str]]:
-    """Determine which properties have been since with which events based on ClickHouse data."""
-    from insights.clickhouse.client import sync_execute
+    """Determine which properties have been since with which events based on Datastore data."""
+    from insights.datastore.client import sync_execute
 
     return [row[0] for row in sync_execute(_GET_EVENT_PROPERTIES, {"team_id": team_id})]
 

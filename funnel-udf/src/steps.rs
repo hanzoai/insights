@@ -201,7 +201,7 @@ impl AggregateFunnelRow {
         for i in 0..(final_index - optional_count) {
             //if event_uuids[i].len() >= MAX_REPLAY_EVENTS && !event_uuids[i].contains(&final_value.uuids[i]) {
             // Always put the actual event uuids first, we use it to extract timestamps
-            // This might create duplicates, but that's fine (we can remove it in clickhouse)
+            // This might create duplicates, but that's fine (we can remove it in datastore)
             vars.event_uuids[i].insert(0, final_value.uuids[i].clone());
         }
 

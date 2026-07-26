@@ -10,16 +10,16 @@ The reconciliation job fixes person properties that were missed due to a bug whe
 
 The job:
 
-1. Reads events from ClickHouse to find property updates (`$set`, `$set_once`, `$unset`) within a bug window
-2. Compares with current person properties in ClickHouse
+1. Reads events from Datastore to find property updates (`$set`, `$set_once`, `$unset`) within a bug window
+2. Compares with current person properties in Datastore
 3. Applies any missed updates to Postgres
-4. Publishes updated persons to Kafka for ClickHouse ingestion
+4. Publishes updated persons to Kafka for Datastore ingestion
 
 ## Architecture
 
 ### Non-Windowed Mode (Default)
 
-Best for: Smaller teams or short bug windows where a single ClickHouse query can handle the data.
+Best for: Smaller teams or short bug windows where a single Datastore query can handle the data.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -27,9 +27,9 @@ Best for: Smaller teams or short bug windows where a single ClickHouse query can
 └─────────────────────────────────────────────────────────────────────────────┘
 
     ┌──────────────────────────────────────────────────────────────────┐
-    │  ClickHouse: Single Query                                         │
+    │  Datastore: Single Query                                         │
     │  ┌────────────────────────────────────────────────────────────┐  │
-    │  │ get_person_property_updates_from_clickhouse()              │  │
+    │  │ get_person_property_updates_from_datastore()              │  │
     │  │                                                             │  │
     │  │ • Scans events from bug_window_start to now()              │  │
     │  │ • Joins with person_distinct_id_overrides (merge handling) │  │
@@ -66,7 +66,7 @@ Best for: Large teams with millions of persons where a single query would OOM.
     ┌──────────────────────────────────────────────────────────────────┐
     │  Step 1: Identify Affected Persons (BOUNDED)                      │
     │  ┌────────────────────────────────────────────────────────────┐  │
-    │  │ get_affected_person_ids_from_clickhouse()                  │  │
+    │  │ get_affected_person_ids_from_datastore()                  │  │
     │  │                                                             │  │
     │  │ • Aggregates event properties within the bug window        │  │
     │  │ • Compares against current person state in CH              │  │
@@ -92,7 +92,7 @@ Best for: Large teams with millions of persons where a single query would OOM.
     │  ┌────────────────────────────────────────────────────────────┐  │
     │  │  Step 2b: Compare with Person State                        │  │
     │  │                                                             │  │
-    │  │  • Query current person properties from ClickHouse         │  │
+    │  │  • Query current person properties from Datastore         │  │
     │  │  • Filter to actual diffs (set: value differs, etc.)       │  │
     │  └────────────────────────────────────────────────────────────┘  │
     │                          │                                        │
@@ -126,7 +126,7 @@ with property-setting events (regardless of whether they had diffs), causing 100
 
 | Parameter                            | Type                | Default  | Description                                                              |
 | ------------------------------------ | ------------------- | -------- | ------------------------------------------------------------------------ |
-| `bug_window_start`                   | `str`               | Required | Start of bug window (ClickHouse format: "YYYY-MM-DD HH:MM:SS", UTC)      |
+| `bug_window_start`                   | `str`               | Required | Start of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS", UTC)      |
 | `bug_window_end`                     | `str \| None`       | `None`   | End of bug window. Required if `team_ids` not supplied                   |
 | `team_ids`                           | `list[int] \| None` | `None`   | Explicit list of team IDs to process                                     |
 | `min_team_id`                        | `int \| None`       | `None`   | Minimum team_id (inclusive) for range scanning                           |
@@ -381,7 +381,7 @@ Batch {n}: failed to compare {N} persons against current state for team_id={id}
 
 ### Metrics
 
-The job emits these metrics to ClickHouse:
+The job emits these metrics to Datastore:
 
 - `person_property_reconciliation_persons_processed_total`
 - `person_property_reconciliation_persons_updated_total`

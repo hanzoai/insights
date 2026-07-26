@@ -11,11 +11,11 @@ from insights.models.event_property import EventProperty
 from insights.sync import database_sync_to_async
 from insights.temporal.cleanup_property_definitions.types import (
     CleanupPropertyDefinitionsError,
-    DeleteClickHousePropertyDefinitionsInput,
+    DeleteDatastorePropertyDefinitionsInput,
     DeletePostgresPropertyDefinitionsInput,
     PreviewPropertyDefinitionsInput,
 )
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
 
 LOGGER = get_write_only_logger()
@@ -77,14 +77,14 @@ async def delete_property_definitions_from_postgres(
     return result
 
 
-@activity.defn(name="delete-property-definitions-from-clickhouse")
-async def delete_property_definitions_from_clickhouse(
-    input: DeleteClickHousePropertyDefinitionsInput,
+@activity.defn(name="delete-property-definitions-from-datastore")
+async def delete_property_definitions_from_datastore(
+    input: DeleteDatastorePropertyDefinitionsInput,
 ) -> None:
-    """Delete property definitions matching the pattern from ClickHouse using lightweight delete."""
+    """Delete property definitions matching the pattern from Datastore using lightweight delete."""
     bind_contextvars(team_id=input.team_id, pattern=input.pattern, property_type=input.property_type)
     logger = LOGGER.bind()
-    logger.info("Deleting property definitions from ClickHouse")
+    logger.info("Deleting property definitions from Datastore")
 
     # Use lightweight delete (DELETE FROM syntax)
     # Data is marked as deleted immediately (not visible in queries)
@@ -114,7 +114,7 @@ async def delete_property_definitions_from_clickhouse(
             query_id=delete_query_id,
         )
 
-    logger.info("Deleted matching property definitions from ClickHouse")
+    logger.info("Deleted matching property definitions from Datastore")
 
 
 @activity.defn(name="preview-property-definitions")

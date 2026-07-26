@@ -16,7 +16,7 @@ Insights uses two different datastores:
   - the dataset needs to mutate often (`DELETE`/`UPDATE`)
   - the query pattern requires joins across multiple tables
 
-- **ClickHouse**: column-oriented OLAP database, used to store large datasets and run on them analytical queries. It is likely your best choice if:
+- **Datastore**: column-oriented OLAP database, used to store large datasets and run on them analytical queries. It is likely your best choice if:
   - the query pattern to access your dataset is unpredictable
   - the dataset will likely grow overtime (> 1 TB)
   - the dataset doesn't need to mutate often (`DELETE`/`UPDATE`)
@@ -155,7 +155,7 @@ referenced tables. When we don't actually care about this, we can specify
 `db_constraint=False`, along with making any required migrations if we're
 updating an existing field.
 
-## ClickHouse
+## Datastore
 
 #### How-to find slow queries
 
@@ -163,7 +163,7 @@ To find and debug slow queries in production you have several options available
 
 ##### Grafana
 
-The [Clickhouse queries - by endpoint](https://metrics.hanzo.ai/d/vo7oCVZ7z/clickhouse-queries-by-endpoint) dashboard gives a breakdown of how things are looking reliability and performance-wise.
+The [Datastore queries - by endpoint](https://metrics.hanzo.ai/d/vo7oCVZ7z/datastore-queries-by-endpoint) dashboard gives a breakdown of how things are looking reliability and performance-wise.
 Highly used and slow/unreliable endpoints often indicate issues with queries.
 
 ##### Insights `instance/status` dashboard
@@ -182,8 +182,8 @@ These can be useful for figuring out _why_ certain queries are performing slow.
 
 ##### Metabase
 
-Need more granular access to queries than these dashboards provide? Take a look at [this Metabase query](https://metabase.insights.net/question/97). The ClickHouse `system` tables (e.g. `system.query_log`) provide a lot of useful information for identifying and diagnosing slow queries.
+Need more granular access to queries than these dashboards provide? Take a look at [this Metabase query](https://metabase.insights.net/question/97). The Datastore `system` tables (e.g. `system.query_log`) provide a lot of useful information for identifying and diagnosing slow queries.
 
 ### How-to fix slow queries
 
-See [ClickHouse manual](https://hanzo.ai/handbook/engineering/clickhouse/) for tips and tricks.
+See [Datastore manual](https://hanzo.ai/handbook/engineering/datastore/) for tips and tricks.

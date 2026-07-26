@@ -7,7 +7,7 @@ from freezegun import freeze_time
 
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.deletes import (
     AdhocEventDeletesDictionary,
     AdhocEventDeletesTable,
@@ -24,7 +24,7 @@ from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_TABLE
 
 
 @pytest.mark.django_db
-def test_full_job_person_deletes(cluster: ClickhouseCluster):
+def test_full_job_person_deletes(cluster: DatastoreCluster):
     timestamp = (datetime.now() + timedelta(days=31)).replace(
         microsecond=0
     )  # we don't freeze time because we are namespaced by time
@@ -136,7 +136,7 @@ def test_full_job_person_deletes(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_full_job_team_deletes(cluster: ClickhouseCluster):
+def test_full_job_team_deletes(cluster: DatastoreCluster):
     timestamp = (datetime.now() + timedelta(days=31)).replace(
         microsecond=0
     )  # we don't freeze time because we are namespaced by time
@@ -328,7 +328,7 @@ def test_full_job_team_deletes(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_full_job_adhoc_event_deletes(cluster: ClickhouseCluster):
+def test_full_job_adhoc_event_deletes(cluster: DatastoreCluster):
     timestamp = (datetime.now() + timedelta(days=31)).replace(
         microsecond=0
     )  # we don't freeze time because we are namespaced by time
@@ -411,7 +411,7 @@ def test_full_job_adhoc_event_deletes(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_find_partitions_to_cleanup(cluster: ClickhouseCluster):
+def test_find_partitions_to_cleanup(cluster: DatastoreCluster):
     from dagster import build_op_context
 
     now = datetime.now()
@@ -454,7 +454,7 @@ def test_find_partitions_to_cleanup(cluster: ClickhouseCluster):
 
 
 @pytest.mark.django_db
-def test_cleanup_old_events_by_partition(cluster: ClickhouseCluster):
+def test_cleanup_old_events_by_partition(cluster: DatastoreCluster):
     from dagster import build_op_context
 
     now = datetime.now()
@@ -519,12 +519,12 @@ def test_cleanup_old_events_by_partition(cluster: ClickhouseCluster):
 
 @pytest.mark.django_db
 @freeze_time("2025-09-15")
-def test_cleanup_old_events_delete_query_format(cluster: ClickhouseCluster, snapshot):
+def test_cleanup_old_events_delete_query_format(cluster: DatastoreCluster, snapshot):
     from unittest.mock import patch
 
     from dagster import build_op_context
 
-    from insights.clickhouse.cluster import LightweightDeleteMutationRunner
+    from insights.datastore.cluster import LightweightDeleteMutationRunner
 
     now = datetime.now()
     old_timestamp = now - timedelta(days=400)
@@ -570,7 +570,7 @@ def test_cleanup_old_events_delete_query_format(cluster: ClickhouseCluster, snap
 
 
 @pytest.mark.django_db
-def test_monthly_old_events_cleanup_job(cluster: ClickhouseCluster):
+def test_monthly_old_events_cleanup_job(cluster: DatastoreCluster):
     now = datetime.now()
     old_timestamp = now - timedelta(days=400)
     recent_timestamp = now - timedelta(days=30)

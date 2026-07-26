@@ -38,7 +38,7 @@ from insights.api.feature_flag import (
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import action, get_token
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.cloud_utils import is_cloud
 from insights.constants import SURVEY_TARGETING_FLAG_PREFIX, AvailableFeature
 from insights.event_usage import report_user_action
@@ -1109,7 +1109,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         """Process raw survey event results into stats format.
 
         Args:
-            results: Raw results from ClickHouse query containing event stats
+            results: Raw results from Datastore query containing event stats
 
         Returns:
             Dictionary containing processed stats for each event type
@@ -1200,7 +1200,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
     def _get_survey_stats(
         self, date_from: str | None, date_to: str | None, survey_id: str | None = None, exclude_archived: bool = False
     ) -> dict:
-        """Get survey statistics from ClickHouse.
+        """Get survey statistics from Datastore.
 
         Args:
             date_from: Optional ISO timestamp for start date with timezone info

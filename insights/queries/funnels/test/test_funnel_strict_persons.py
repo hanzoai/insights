@@ -4,24 +4,24 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_strict_persons import ClickhouseFunnelStrictActors
+from insights.queries.funnels.funnel_strict_persons import DatastoreFunnelStrictActors
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.test.test_journeys import journeys_for
 
 FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
-class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelStrictStepsPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         events_by_person = {}
         for i in range(5):
@@ -59,7 +59,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(35, len(serialized_results))
 
     def test_second_step(self):
@@ -78,7 +78,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(10, len(serialized_results))
 
     def test_second_step_dropoff(self):
@@ -97,7 +97,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(25, len(serialized_results))
 
     def test_third_step(self):
@@ -116,10 +116,10 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(0, len(serialized_results))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_strict_funnel_person_recordings(self):
         p1 = _create_person(distinct_ids=[f"user_1"], team=self.team)
@@ -182,7 +182,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0]["matched_recordings"], [])
 
@@ -203,7 +203,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(
             results[0]["matched_recordings"],
@@ -238,7 +238,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelStrictActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelStrictActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(
             results[0]["matched_recordings"],

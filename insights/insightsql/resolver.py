@@ -20,7 +20,7 @@ from insights.insightsql.functions.action import matches_action
 from insights.insightsql.functions.cohort import cohort_query_node
 from insights.insightsql.functions.core import compare_types, validate_function_args
 from insights.insightsql.functions.explain_csp_report import explain_csp_report
-from insights.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS
+from insights.insightsql.functions.mapping import INSIGHTSQL_DATASTORE_FUNCTIONS
 from insights.insightsql.functions.recording_button import recording_button
 from insights.insightsql.functions.sparkline import sparkline
 from insights.insightsql.functions.survey import get_survey_response, unique_survey_submissions_filter
@@ -112,7 +112,7 @@ class Resolver(CloningVisitor):
     def __init__(
         self,
         context: InsightsQLContext,
-        dialect: InsightsQLDialect = "clickhouse",
+        dialect: InsightsQLDialect = "datastore",
         scopes: Optional[list[ast.SelectQueryType]] = None,
     ):
         super().__init__()
@@ -639,7 +639,7 @@ class Resolver(CloningVisitor):
 
         return_type = None
 
-        if func_meta := INSIGHTSQL_CLICKHOUSE_FUNCTIONS.get(node.name, None):
+        if func_meta := INSIGHTSQL_DATASTORE_FUNCTIONS.get(node.name, None):
             if signatures := func_meta.signatures:
                 for sig_arg_types, sig_return_type in signatures:
                     if sig_arg_types is None or compare_types(arg_types, sig_arg_types, args=node.args):
@@ -708,7 +708,7 @@ class Resolver(CloningVisitor):
         node = super().visit_field(node)
 
         # Only look for fields in the last SELECT scope, instead of all previous select queries.
-        # That's because ClickHouse does not support subqueries accessing "x.event". This is forbidden:
+        # That's because Datastore does not support subqueries accessing "x.event". This is forbidden:
         # - "SELECT event, (select count() from events where event = x.event) as c FROM events x where event = '$pageview'",
         # But this is supported:
         # - "SELECT t.big_count FROM (select count() + 100 as big_count from events) as t JOIN events e ON (e.event = t.event)",
@@ -797,7 +797,7 @@ class Resolver(CloningVisitor):
                     )
                 return ast.Constant(value=value, type=global_type)
 
-            if self.dialect == "clickhouse":
+            if self.dialect == "datastore":
                 # To debug, add a breakpoint() here and print self.context.database
                 #
                 # from rich.pretty import pprint
@@ -844,8 +844,8 @@ class Resolver(CloningVisitor):
         node.type = loop_type
 
         if isinstance(node.type, ast.ExpressionFieldType):
-            # only swap out expression fields in ClickHouse
-            if self.dialect == "clickhouse":
+            # only swap out expression fields in Datastore
+            if self.dialect == "datastore":
                 new_expr = clone_expr(node.type.expr)
                 new_node: ast.Expr = ast.Alias(alias=node.type.name, expr=new_expr, hidden=True)
 
@@ -889,7 +889,7 @@ class Resolver(CloningVisitor):
     def visit_array_access(self, node: ast.ArrayAccess):
         node = super().visit_array_access(node)
 
-        if self.dialect == "clickhouse" and isinstance(node.property, ast.Constant) and node.property.value == 0:
+        if self.dialect == "datastore" and isinstance(node.property, ast.Constant) and node.property.value == 0:
             raise QueryError("SQL indexes start from one, not from zero. E.g: array[1]")
 
         array = node.array
@@ -920,7 +920,7 @@ class Resolver(CloningVisitor):
     def visit_tuple_access(self, node: ast.TupleAccess):
         node = super().visit_tuple_access(node)
 
-        if self.dialect == "clickhouse" and node.index == 0:
+        if self.dialect == "datastore" and node.index == 0:
             raise QueryError("SQL indexes start from one, not from zero. E.g: array.1")
 
         tuple = node.tuple

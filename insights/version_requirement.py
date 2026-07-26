@@ -4,7 +4,7 @@ from insights import redis
 
 
 class ServiceVersionRequirement:
-    accepted_services = ("clickhouse", "postgresql", "redis")
+    accepted_services = ("datastore", "postgresql", "redis")
 
     def __init__(self, service, supported_version):
         if service not in self.accepted_services:
@@ -30,8 +30,8 @@ class ServiceVersionRequirement:
         if self.service == "postgresql":
             return get_postgres_version()
 
-        if self.service == "clickhouse":
-            return get_clickhouse_version()
+        if self.service == "datastore":
+            return get_datastore_version()
 
         if self.service == "redis":
             return get_redis_version()
@@ -49,8 +49,8 @@ def get_postgres_version() -> Version:
     return version_string_to_semver(version)
 
 
-def get_clickhouse_version() -> Version:
-    from insights.clickhouse.client.connection import default_client
+def get_datastore_version() -> Version:
+    from insights.datastore.client.connection import default_client
 
     client = default_client()
     rows = client.execute("SELECT version()")

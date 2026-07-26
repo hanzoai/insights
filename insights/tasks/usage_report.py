@@ -26,9 +26,9 @@ from insights.schema import AIEventType
 
 from insights import version_requirement
 from insights.batch_exports.models import BatchExportDestination, BatchExportRun
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
+from insights.datastore.query_tagging import Product, tags_context
 from insights.cloud_utils import get_cached_instance_license
 from insights.constants import FlagRequestType
 from insights.exceptions_capture import capture_exception
@@ -44,7 +44,7 @@ from insights.models.surveys.survey import Survey
 from insights.models.surveys.util import get_unique_survey_event_uuids_sql_subquery
 from insights.models.team.team import Team
 from insights.models.utils import namedtuplefetchall
-from insights.settings import CLICKHOUSE_CLUSTER, INSTANCE_TAG
+from insights.settings import DATASTORE_CLUSTER, INSTANCE_TAG
 from insights.tasks.report_utils import capture_event
 from insights.tasks.utils import CeleryQueue
 from insights.utils import get_helm_info_env, get_instance_realm, get_instance_region, get_previous_day
@@ -235,7 +235,7 @@ class InstanceMetadata:
     site_url: str
     product: str
     helm: Optional[dict]
-    clickhouse_version: Optional[str]
+    datastore_version: Optional[str]
     users_who_logged_in: Optional[list[dict[str, Union[str, int]]]]
     users_who_logged_in_count: Optional[int]
     users_who_signed_up: Optional[list[dict[str, Union[str, int]]]]
@@ -275,7 +275,7 @@ def fetch_sql(sql_: str, params: tuple[Any, ...]) -> list[Any]:
 def get_product_name(realm: str, has_license: bool) -> str:
     if realm == "cloud":
         return "cloud"
-    elif realm in {"hosted", "hosted-clickhouse"}:
+    elif realm in {"hosted", "hosted-datastore"}:
         return "scale" if has_license else "open source"
     else:
         return "unknown"
@@ -298,7 +298,7 @@ def get_instance_metadata(period: tuple[datetime, datetime]) -> InstanceMetadata
         product=get_product_name(realm, has_license),
         # Non-cloud vars
         helm=None,
-        clickhouse_version=None,
+        datastore_version=None,
         users_who_logged_in=None,
         users_who_logged_in_count=None,
         users_who_signed_up=None,
@@ -311,7 +311,7 @@ def get_instance_metadata(period: tuple[datetime, datetime]) -> InstanceMetadata
 
     if realm != "cloud":
         metadata.helm = get_helm_info_env()
-        metadata.clickhouse_version = str(version_requirement.get_clickhouse_version())
+        metadata.datastore_version = str(version_requirement.get_datastore_version())
 
         metadata.users_who_logged_in = [
             (
@@ -467,7 +467,7 @@ def get_teams_with_billable_event_count_in_period(
     begin: datetime, end: datetime, count_distinct: bool = False
 ) -> list[tuple[int, int]]:
     # count only unique events
-    # Duplicate events will be eventually removed by ClickHouse and likely came from our library or pipeline.
+    # Duplicate events will be eventually removed by Datastore and likely came from our library or pipeline.
     # We shouldn't bill for these. However counting unique events is more expensive, and likely to fail on longer time ranges.
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
@@ -505,7 +505,7 @@ def get_teams_with_billable_enhanced_persons_event_count_in_period(
     begin: datetime, end: datetime, count_distinct: bool = False
 ) -> list[tuple[int, int]]:
     # count only unique events
-    # Duplicate events will be eventually removed by ClickHouse and likely came from our library or pipeline.
+    # Duplicate events will be eventually removed by Datastore and likely came from our library or pipeline.
     # We shouldn't bill for these. However counting unique events is more expensive, and likely to fail on longer time ranges.
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
@@ -773,7 +773,7 @@ def get_teams_with_api_queries_metrics(
     # the former is part of primary key, the latter not.
     query = f"""
         SELECT JSONExtractInt(log_comment, 'team_id') team_id, count(1) cnt, sum(read_bytes) read_bytes
-        FROM clusterAllReplicas({CLICKHOUSE_CLUSTER}, system.query_log)
+        FROM clusterAllReplicas({DATASTORE_CLUSTER}, system.query_log)
         WHERE type = 'QueryFinish'
         AND is_initial_query
         AND event_time >= %(begin)s AND event_time < %(end)s
@@ -819,7 +819,7 @@ def get_teams_with_query_metric(
             JSONExtractString(log_comment, 'query_type') as query_type,
             JSONExtractString(log_comment, 'access_method') as access_method
         SELECT team_id, sum({metric}) as count
-        FROM clusterAllReplicas({CLICKHOUSE_CLUSTER}, system.query_log)
+        FROM clusterAllReplicas({DATASTORE_CLUSTER}, system.query_log)
         WHERE (type = 'QueryFinish' OR type = 'ExceptionWhileProcessing')
         AND is_initial_query = 1
         {query_types_clause}
@@ -1320,7 +1320,7 @@ def get_teams_with_exceptions_captured_in_period(
     # Check if $lib is materialized
     lib_expression, _ = get_property_string_expr("events", "$lib", "'$lib'", "properties")
 
-    # nosemgrep: clickhouse-fstring-param-audit - lib_expression from internal materialized column helper
+    # nosemgrep: datastore-fstring-param-audit - lib_expression from internal materialized column helper
     results = sync_execute(
         f"""
         SELECT
@@ -1736,7 +1736,7 @@ def convert_team_usage_rows_to_dict(
 
 def _get_all_usage_data(period_start: datetime, period_end: datetime) -> dict[str, Any]:
     """
-    Gets all usage data for the specified period. Clickhouse is good at counting things so
+    Gets all usage data for the specified period. Datastore is good at counting things so
     we count across all teams rather than doing it one by one
     """
 

@@ -89,7 +89,7 @@ export function toDateTime(input: string | number, zone?: string): IQLDateTime {
     }
 }
 
-/** Convert from ClickHouse format string to Luxon format string */
+/** Convert from Datastore format string to Luxon format string */
 const tokenTranslations: Record<string, string> = {
     a: 'EEE',
     b: 'MMM',

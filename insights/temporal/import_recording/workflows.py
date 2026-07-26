@@ -8,9 +8,9 @@ from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.import_recording.activities import (
     build_import_context,
     cleanup_import_data,
-    import_event_clickhouse_rows,
+    import_event_datastore_rows,
     import_recording_data,
-    import_replay_clickhouse_rows,
+    import_replay_datastore_rows,
 )
 from insights.temporal.import_recording.types import ImportRecordingInput
 
@@ -37,7 +37,7 @@ class ImportRecordingWorkflow(InsightsWorkflow):
         async with asyncio.TaskGroup() as import_tasks:
             import_tasks.create_task(
                 workflow.execute_activity(
-                    import_replay_clickhouse_rows,
+                    import_replay_datastore_rows,
                     import_context,
                     start_to_close_timeout=timedelta(minutes=30),
                     schedule_to_close_timeout=timedelta(hours=3),
@@ -49,7 +49,7 @@ class ImportRecordingWorkflow(InsightsWorkflow):
             )
             import_tasks.create_task(
                 workflow.execute_activity(
-                    import_event_clickhouse_rows,
+                    import_event_datastore_rows,
                     import_context,
                     start_to_close_timeout=timedelta(minutes=30),
                     schedule_to_close_timeout=timedelta(hours=3),

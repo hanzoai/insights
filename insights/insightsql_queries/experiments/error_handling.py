@@ -13,14 +13,14 @@ from rest_framework.exceptions import ValidationError
 from insights.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
 
 from insights.errors import ExposedCHQueryError
-from insights.exceptions import ClickHouseQueryMemoryLimitExceeded
+from insights.exceptions import DatastoreQueryMemoryLimitExceeded
 from insights.exceptions_capture import capture_exception
 
 from products.experiments.stats.shared.statistics import StatisticError
 
 # Map error types to their error codes for the API response
 ERROR_TYPE_TO_CODE: dict[type, str] = {
-    ClickHouseQueryMemoryLimitExceeded: "memory_limit_exceeded",
+    DatastoreQueryMemoryLimitExceeded: "memory_limit_exceeded",
 }
 
 logger = structlog.get_logger(__name__)
@@ -36,8 +36,8 @@ ERROR_TYPE_MESSAGES: dict[type, str] = {
     # InsightsQL/Query errors
     InternalInsightsQLError: "Unable to process your experiment query. Please check your metric configuration and try again.",
     ExposedCHQueryError: "Unable to retrieve experiment data. Please try refreshing the page.",
-    # ClickHouse resource errors
-    ClickHouseQueryMemoryLimitExceeded: "This experiment query is using too much memory. Try viewing a shorter time period or contact support for help.",
+    # Datastore resource errors
+    DatastoreQueryMemoryLimitExceeded: "This experiment query is using too much memory. Try viewing a shorter time period or contact support for help.",
     # Python built-in errors that can occur during calculation
     ZeroDivisionError: "Unable to calculate results due to insufficient data. Please wait for more experiment data.",
 }

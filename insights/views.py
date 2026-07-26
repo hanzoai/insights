@@ -28,7 +28,7 @@ from insights.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_
 from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
 from insights.exceptions_capture import capture_exception
-from insights.health import is_clickhouse_connected, is_kafka_connected
+from insights.health import is_datastore_connected, is_kafka_connected
 from insights.models import Organization, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.integration import SlackIntegration
@@ -170,7 +170,7 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "redis": is_cloud() or is_redis_alive() or settings.TEST,
         "plugins": is_cloud() or is_plugin_server_alive() or settings.TEST,
         "celery": is_cloud() or is_celery_alive() or settings.TEST,
-        "clickhouse": is_cloud() or is_clickhouse_connected() or settings.TEST,
+        "datastore": is_cloud() or is_datastore_connected() or settings.TEST,
         "kafka": is_cloud() or is_kafka_connected() or settings.TEST,
         "db": is_cloud() or is_postgres_alive(),
         "initiated": is_cloud() or Organization.objects.exists(),

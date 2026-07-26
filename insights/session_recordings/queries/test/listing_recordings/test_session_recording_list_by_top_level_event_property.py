@@ -1,15 +1,15 @@
 from datetime import timedelta
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 from parameterized import parameterized, parameterized_class
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models import EventProperty, Person
 from insights.models.action import Action
 from insights.models.team import Team
@@ -26,7 +26,7 @@ from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SE
 
 @parameterized_class([{"allow_event_property_expansion": True}, {"allow_event_property_expansion": False}])
 @freeze_time("2021-01-01T13:46:23")
-class TestSessionRecordingsListByTopLevelEventProperty(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsListByTopLevelEventProperty(DatastoreTestMixin, APIBaseTest):
     # set by parameterized_class decorator
     allow_event_property_expansion: bool
 
@@ -156,7 +156,7 @@ class TestSessionRecordingsListByTopLevelEventProperty(ClickhouseTestMixin, APIB
         ]
     )
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_for_flags(self, _name: str, properties: dict, expected: list[str]) -> None:
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
 
@@ -242,7 +242,7 @@ class TestSessionRecordingsListByTopLevelEventProperty(ClickhouseTestMixin, APIB
         self._assert_query_matches_session_ids({"properties": properties}, expected)
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_for_two_is_not_event_properties(self) -> None:
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
 
@@ -320,7 +320,7 @@ class TestSessionRecordingsListByTopLevelEventProperty(ClickhouseTestMixin, APIB
         )
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_for_does_not_match_regex_event_properties(self) -> None:
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
 
@@ -397,7 +397,7 @@ class TestSessionRecordingsListByTopLevelEventProperty(ClickhouseTestMixin, APIB
         )
 
     @freeze_time("2021-01-21T20:00:00.000Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_for_does_not_contain_event_properties(self) -> None:
         Person.objects.create(team=self.team, distinct_ids=["user"], properties={"email": "bla"})
 

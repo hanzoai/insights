@@ -1,7 +1,7 @@
 import uuid
 from urllib.parse import parse_qs, urlparse
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import CustomChannelCondition, CustomChannelRule, FilterLogicalOperator, InsightsQLQueryModifiers
 
@@ -12,7 +12,7 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.models.utils import uuid7
 
 
-class TestReferringDomainType(ClickhouseTestMixin, APIBaseTest):
+class TestReferringDomainType(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_initial_referring_domain_type(self, initial_referring_domain: str):
@@ -83,7 +83,7 @@ class TestReferringDomainType(ClickhouseTestMixin, APIBaseTest):
         )
 
 
-class TestChannelType(ClickhouseTestMixin, APIBaseTest):
+class TestChannelType(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_person_initial_channel_type(self, properties=None):

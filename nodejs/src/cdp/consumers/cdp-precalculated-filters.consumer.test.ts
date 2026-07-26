@@ -4,7 +4,7 @@ import { resetKafka } from '~/tests/helpers/kafka'
 
 import { buildInlineFiltersForCohorts, createCohort, getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS } from '../../config/kafka-topics'
-import { Hub, RawClickHouseEvent, Team } from '../../types'
+import { Hub, RawDatastoreEvent, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import { CdpPrecalculatedFiltersConsumer } from './cdp-precalculated-filters.consumer'
 
@@ -222,7 +222,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             properties: JSON.stringify({ $browser: 'Chrome' }),
                             timestamp,
                             uuid: eventUuid,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -283,7 +283,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             properties: JSON.stringify({ $browser: 'Firefox' }), // Different browser
                             timestamp: '2025-03-03T10:15:46.319000-08:00',
                             uuid: 'test-uuid-2',
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -328,7 +328,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             properties: JSON.stringify({}),
                             timestamp: '2025-03-03T10:15:46.319000-08:00',
                             uuid: eventUuid,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -423,7 +423,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             properties: JSON.stringify({ $browser: 'Chrome' }),
                             timestamp: '2025-03-03T10:15:46.319000-08:00',
                             uuid: eventUuid,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -537,7 +537,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             }),
                             timestamp: timestamp1,
                             uuid: eventUuid1,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -603,7 +603,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             }),
                             timestamp,
                             uuid: eventUuid,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]
@@ -678,7 +678,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
                             }),
                             timestamp,
                             uuid: eventUuid,
-                        } as RawClickHouseEvent)
+                        } as RawDatastoreEvent)
                     ),
                 } as any,
             ]

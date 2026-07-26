@@ -3,7 +3,7 @@ from typing import Optional
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.errors import QueryError
-from insights.insightsql.escape_sql import escape_clickhouse_string
+from insights.insightsql.escape_sql import escape_datastore_string
 from insights.insightsql.parser import parse_expr
 
 
@@ -38,8 +38,8 @@ def cohort(node: ast.Expr, args: list[ast.Expr], context: InsightsQLContext) -> 
             context.add_notice(
                 start=arg.start,
                 end=arg.end,
-                message=f"Cohort #{cohorts1[0][0]} can also be specified as {escape_clickhouse_string(cohorts1[0][3])}",
-                fix=escape_clickhouse_string(cohorts1[0][3]),
+                message=f"Cohort #{cohorts1[0][0]} can also be specified as {escape_datastore_string(cohorts1[0][3])}",
+                fix=escape_datastore_string(cohorts1[0][3]),
             )
             return cohort_subquery(cohorts1[0][0], cohorts1[0][1], cohorts1[0][2])
         raise QueryError(f"Could not find cohort with ID {arg.value}", node=arg)

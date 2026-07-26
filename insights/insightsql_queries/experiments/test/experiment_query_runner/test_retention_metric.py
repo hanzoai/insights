@@ -1,7 +1,7 @@
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -26,7 +26,7 @@ from insights.test.test_journeys import journeys_for
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_retention_calculation(self):
         """
         Test basic retention metric: users who signed up and returned within 7 days.
@@ -173,7 +173,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 6)  # 6 completed
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_window_boundaries(self):
         """
         Test that retention window boundaries are enforced correctly.
@@ -300,7 +300,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 5)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_first_seen_vs_last_seen(self):
         """
         Test start_handling: FIRST_SEEN vs LAST_SEEN for recurring start events.
@@ -461,7 +461,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_last.numerator_denominator_sum_product, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_with_conversion_window(self):
         """
         Test retention metric with conversion window limiting start event search.
@@ -594,7 +594,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_no_completion_events(self):
         """
         Test retention when users never complete (0% retention rate).
@@ -694,7 +694,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 0)  # 0 completed
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_multiple_variants(self):
         """
         Test retention metric with multiple experiment variants (control + multiple tests).
@@ -837,7 +837,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_b_variant.numerator_denominator_sum_product, 5)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_day_zero_same_day_as_start(self):
         """
         Test Day 0 retention (same day as start event).
@@ -970,7 +970,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_hour_based_same_hour(self):
         """
         Test Hour-based retention with [0, 0] window (same hour as start).
@@ -1117,7 +1117,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.numerator_denominator_sum_product, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_multiple_completions_in_window(self):
         """
         Test that multiple completion events within the retention window are handled correctly.
@@ -1246,7 +1246,7 @@ class TestExperimentRetentionMetric(ExperimentQueryRunnerBaseTest):
 
     @parameterized.expand([("disable_new_query_builder", False), ("enable_new_query_builder", True)])
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retention_same_start_and_end_window(self, name, use_new_query_builder):
         """
         Test that retention window [N, N] captures events exactly on day N.

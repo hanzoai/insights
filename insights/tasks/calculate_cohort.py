@@ -13,8 +13,8 @@ from dateutil.relativedelta import relativedelta
 from prometheus_client import Counter, Gauge, Histogram
 
 from insights.api.monitoring import Feature
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import QueryTags, update_tags
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import QueryTags, update_tags
 from insights.exceptions_capture import capture_exception
 from insights.models import Cohort
 from insights.models.cohort import CohortOrEmpty
@@ -23,7 +23,7 @@ from insights.models.cohort.util import (
     COHORT_STATS_COLLECTION_DELAY_SECONDS,
     get_all_cohort_dependencies,
     get_all_cohort_dependents,
-    get_clickhouse_query_stats,
+    get_datastore_query_stats,
     sort_cohorts_topologically,
 )
 from insights.models.team.team import Team
@@ -78,7 +78,7 @@ COHORT_CALCULATION_COMPLETED_COUNTER = Counter(
 COHORT_CALCULATION_FAILURES_COUNTER = Counter(
     "cohort_calculation_failures_total",
     "Cohort calculation failures by type",
-    ["failure_type"],  # labels: "exception", "clickhouse_error", etc.
+    ["failure_type"],  # labels: "exception", "datastore_error", etc.
 )
 
 COHORT_CALCULATION_DURATION_SECONDS = Histogram(
@@ -119,7 +119,7 @@ def reset_stuck_cohorts() -> None:
     # the field was never set back to false. These cohorts will never get pick up again for
     # recalculation by our periodic celery task and need to be reset.
     # After resetting, these cohorts will be picked up by the next cohort calculation but we need to limit the number
-    # of stuck cohorts that are reset at once to avoid overwhelming ClickHouse with too many
+    # of stuck cohorts that are reset at once to avoid overwhelming Datastore with too many
     # calculations for stuck cohorts
     reset_cohort_ids = []
     for cohort in get_stuck_cohort_calculation_candidates_queryset().order_by(
@@ -248,7 +248,7 @@ def increment_version_and_enqueue_calculate_cohort(cohort: Cohort, *, initiating
             return
 
         # Create a chain of tasks to ensure sequential execution.
-        # Non-first tasks get a 2s countdown to mitigate ClickHouse replica lag:
+        # Non-first tasks get a 2s countdown to mitigate Datastore replica lag:
         # the preceding cohort's new rows may not have replicated yet. See #47618.
         task_chain: list = []
         for cohort_id in sorted_cohort_ids:
@@ -414,7 +414,7 @@ def _collect_cohort_calculation_metrics(history: CohortCalculationHistory, start
         )
         return
 
-    # Get actual query duration from ClickHouse query_log (most accurate)
+    # Get actual query duration from Datastore query_log (most accurate)
     # Fallback to wall-clock time if query stats aren't available
     duration_seconds = None
     if history.total_query_ms:
@@ -432,8 +432,8 @@ def _collect_cohort_calculation_metrics(history: CohortCalculationHistory, start
         # Categorize failure type
         failure_type = "exception"
         error_lower = history.error.lower()
-        if "clickhouse" in error_lower or "code:" in error_lower:
-            failure_type = "clickhouse_error"
+        if "datastore" in error_lower or "code:" in error_lower:
+            failure_type = "datastore_error"
         elif "memory" in error_lower or "oom" in error_lower:
             failure_type = "memory_error"
         elif "timeout" in error_lower or "timed out" in error_lower:
@@ -485,7 +485,7 @@ def collect_cohort_query_stats(
             return
 
         start_time = parser.parse(start_time_iso)
-        query_stats = get_clickhouse_query_stats(tag_matcher, cohort_id, start_time, history.team.id)
+        query_stats = get_datastore_query_stats(tag_matcher, cohort_id, start_time, history.team.id)
 
         if query_stats:  # Skip if stats already collected (check if queries field is non-empty)
             if history.queries:

@@ -9,7 +9,7 @@ import dagster_slack
 from clickhouse_driver import Client
 
 from insights import settings
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, settings_with_log_comment
 from insights.models.distinct_id_usage.sql import TABLE_BASE_NAME
 
@@ -98,7 +98,7 @@ def get_last_successful_run_time(context: dagster.OpExecutionContext) -> datetim
 def query_distinct_id_usage(
     context: dagster.OpExecutionContext,
     config: DistinctIdUsageMonitoringConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> MonitoringResults:
     """Query the distinct_id_usage table to find problematic patterns."""
 
@@ -120,7 +120,7 @@ def query_distinct_id_usage(
             SELECT
                 team_id,
                 sum(event_count) as total_events
-            FROM {settings.CLICKHOUSE_DATABASE}.{TABLE_BASE_NAME}
+            FROM {settings.DATASTORE_DATABASE}.{TABLE_BASE_NAME}
             WHERE minute >= %(lookback_start)s
             GROUP BY team_id
             HAVING total_events >= %(min_events_threshold)s
@@ -130,7 +130,7 @@ def query_distinct_id_usage(
                 team_id,
                 distinct_id,
                 sum(event_count) as event_count
-            FROM {settings.CLICKHOUSE_DATABASE}.{TABLE_BASE_NAME}
+            FROM {settings.DATASTORE_DATABASE}.{TABLE_BASE_NAME}
             WHERE minute >= %(lookback_start)s
             GROUP BY team_id, distinct_id
         )
@@ -175,7 +175,7 @@ def query_distinct_id_usage(
         SELECT
             team_id,
             uniq(distinct_id) as distinct_id_count
-        FROM {settings.CLICKHOUSE_DATABASE}.{TABLE_BASE_NAME}
+        FROM {settings.DATASTORE_DATABASE}.{TABLE_BASE_NAME}
         WHERE minute >= %(lookback_start)s
         GROUP BY team_id
         HAVING distinct_id_count >= %(threshold)s
@@ -205,7 +205,7 @@ def query_distinct_id_usage(
             distinct_id,
             minute,
             event_count
-        FROM {settings.CLICKHOUSE_DATABASE}.{TABLE_BASE_NAME}
+        FROM {settings.DATASTORE_DATABASE}.{TABLE_BASE_NAME}
         WHERE minute >= %(lookback_start)s
           AND event_count >= %(threshold)s
         ORDER BY event_count DESC

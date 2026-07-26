@@ -12,10 +12,10 @@ from insights.temporal.export_recording.activities import (
     _redis_url,
     build_recording_export_context,
     cleanup_export_data,
-    export_event_clickhouse_rows,
+    export_event_datastore_rows,
     export_recording_data,
     export_recording_data_prefix,
-    export_replay_clickhouse_rows,
+    export_replay_datastore_rows,
     store_export_data,
 )
 from insights.temporal.export_recording.types import ExportContext, ExportRecordingInput, RedisConfig
@@ -84,7 +84,7 @@ async def test_build_recording_export_context_success():
 
 
 @pytest.mark.asyncio
-async def test_export_replay_clickhouse_rows_success():
+async def test_export_replay_datastore_rows_success():
     export_id = uuid4()
     export_context = ExportContext(
         export_id=export_id,
@@ -115,7 +115,7 @@ async def test_export_replay_clickhouse_rows_success():
         mock_query.return_value = "SELECT * FROM session_replay_events"
         mock_get_async_client.return_value = mock_redis
 
-        await export_replay_clickhouse_rows(export_context)
+        await export_replay_datastore_rows(export_context)
 
         mock_client.aget_query.assert_called_once()
         mock_redis.setex.assert_called_once()
@@ -126,7 +126,7 @@ async def test_export_replay_clickhouse_rows_success():
 
 
 @pytest.mark.asyncio
-async def test_export_event_clickhouse_rows_success():
+async def test_export_event_datastore_rows_success():
     export_id = uuid4()
     export_context = ExportContext(
         export_id=export_id,
@@ -155,7 +155,7 @@ async def test_export_event_clickhouse_rows_success():
         mock_get_client.return_value.__aenter__.return_value = mock_client
         mock_get_async_client.return_value = mock_redis
 
-        await export_event_clickhouse_rows(export_context)
+        await export_event_datastore_rows(export_context)
 
         mock_client.aget_query.assert_called_once()
         mock_redis.setex.assert_called_once()
@@ -430,7 +430,7 @@ async def test_store_export_data_success(tmp_path):
         mock_get_async_client.return_value = mock_redis
 
         mock_export_dir = MagicMock()
-        mock_clickhouse_dir = MagicMock()
+        mock_datastore_dir = MagicMock()
         mock_data_dir = MagicMock()
         mock_zip_path = MagicMock()
         mock_zip_path.with_suffix.return_value = tmp_path / f"{export_id}"
@@ -444,8 +444,8 @@ async def test_store_export_data_success(tmp_path):
 
         mock_path_cls.return_value.__truediv__ = MagicMock(side_effect=truediv_side_effect)
         mock_export_dir.__truediv__ = MagicMock(
-            side_effect=lambda p: mock_clickhouse_dir
-            if p == "clickhouse"
+            side_effect=lambda p: mock_datastore_dir
+            if p == "datastore"
             else mock_data_dir
             if p == "data"
             else MagicMock()
@@ -490,7 +490,7 @@ async def test_store_export_data_s3_upload_failure():
         mock_get_async_client.return_value = mock_redis
 
         mock_export_dir = MagicMock()
-        mock_clickhouse_dir = MagicMock()
+        mock_datastore_dir = MagicMock()
         mock_zip_path = MagicMock()
 
         def truediv_side_effect(path):
@@ -501,7 +501,7 @@ async def test_store_export_data_s3_upload_failure():
             return MagicMock()
 
         mock_path_cls.return_value.__truediv__ = MagicMock(side_effect=truediv_side_effect)
-        mock_export_dir.__truediv__ = MagicMock(return_value=mock_clickhouse_dir)
+        mock_export_dir.__truediv__ = MagicMock(return_value=mock_datastore_dir)
         mock_storage_client.return_value.__aenter__.return_value = mock_storage
 
         with pytest.raises(session_recording_v2_object_storage.FileUploadError):

@@ -7,7 +7,7 @@ ALLOWED_TEAM_IDS. This job deletes any rows for teams not in that list.
 
 import dagster
 
-from insights.clickhouse.cluster import AlterTableMutationRunner, ClickhouseCluster, MutationWaiter
+from insights.datastore.cluster import AlterTableMutationRunner, DatastoreCluster, MutationWaiter
 from insights.dags.common import JobOwners
 from insights.models.sessions.sql import ALLOWED_TEAM_IDS, SESSIONS_DATA_TABLE
 
@@ -15,7 +15,7 @@ from insights.models.sessions.sql import ALLOWED_TEAM_IDS, SESSIONS_DATA_TABLE
 @dagster.op
 def delete_sessions_not_in_allowed_teams(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dict[int, MutationWaiter]:
     """Delete sessions v1 rows for teams not in ALLOWED_TEAM_IDS using ALTER TABLE DELETE."""
 
@@ -53,7 +53,7 @@ def delete_sessions_not_in_allowed_teams(
 @dagster.op
 def wait_for_sessions_delete_mutations(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     shard_mutations: dict[int, MutationWaiter],
 ) -> bool:
     """Wait for all deletion mutations to complete across shards."""

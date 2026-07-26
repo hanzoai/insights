@@ -90,16 +90,16 @@ def extract_model_name_from_where(node: Optional[ast.Expr]) -> Optional[str]:
 
 class ModelSpecificEmbeddingTable(Table):
     model_name: str = ""
-    clickhouse_table_name: str = ""
+    datastore_table_name: str = ""
 
     def __init__(self, model_name: str, table_name: str):
         fields = {k: v for k, v in DOCUMENT_EMBEDDINGS_FIELDS.items() if k != "model_name"}
         super().__init__(fields=fields)
         self.model_name = model_name
-        self.clickhouse_table_name = table_name
+        self.datastore_table_name = table_name
 
-    def to_printed_clickhouse(self, context: InsightsQLContext):
-        return self.clickhouse_table_name
+    def to_printed_datastore(self, context: InsightsQLContext):
+        return self.datastore_table_name
 
     def to_printed_insightsql(self):
         return f"document_embeddings_{self.model_name.replace('-', '_')}"
@@ -160,8 +160,8 @@ class DocumentEmbeddingsTable(LazyTable):
         else:
             raise ValueError(f"Invalid model name: {model_name}")
 
-    def to_printed_clickhouse(self, context: InsightsQLContext):
-        raise NotImplementedError("LazyTables cannot be printed to ClickHouse SQL")
+    def to_printed_datastore(self, context: InsightsQLContext):
+        raise NotImplementedError("LazyTables cannot be printed to Datastore SQL")
 
     def to_printed_insightsql(self):
         return "document_embeddings"
@@ -170,7 +170,7 @@ class DocumentEmbeddingsTable(LazyTable):
 class RawDocumentEmbeddingsTable(Table):
     fields: dict[str, FieldOrTable] = DOCUMENT_EMBEDDINGS_FIELDS
 
-    def to_printed_clickhouse(self, context: InsightsQLContext):
+    def to_printed_datastore(self, context: InsightsQLContext):
         return DOCUMENT_EMBEDDINGS_VIEW
 
     def to_printed_insightsql(self):

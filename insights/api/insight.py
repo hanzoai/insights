@@ -49,8 +49,8 @@ from insights.api.tagged_item import TaggedItemSerializerMixin, TaggedItemViewSe
 from insights.api.utils import action, format_paginated_url
 from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
 from insights.caching.fetch_from_cache import InsightResult, fetch_cached_response_by_key
-from insights.clickhouse.cancel import cancel_query_on_cluster
-from insights.clickhouse.client.limit import ConcurrencyLimitExceeded
+from insights.datastore.cancel import cancel_query_on_cluster
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
 from insights.constants import INSIGHT, INSIGHT_FUNNELS, INSIGHT_STICKINESS, TRENDS_STICKINESS, FunnelVizType
 from insights.decorators import cached_by_filters
 from insights.errors import ExposedCHQueryError
@@ -89,14 +89,14 @@ from insights.models.insight_variable import InsightVariable
 from insights.models.organization import Organization
 from insights.models.team.team import Team
 from insights.models.utils import UUIDT
-from insights.queries.funnels import ClickhouseFunnelTimeToConvert, ClickhouseFunnelTrends
+from insights.queries.funnels import DatastoreFunnelTimeToConvert, DatastoreFunnelTrends
 from insights.queries.funnels.utils import get_funnel_order_class
 from insights.queries.stickiness import Stickiness
 from insights.queries.trends.trends import Trends
 from insights.queries.util import get_earliest_timestamp
 from insights.rate_limit import (
-    ClickHouseBurstRateThrottle,
-    ClickHouseSustainedRateThrottle,
+    DatastoreBurstRateThrottle,
+    DatastoreSustainedRateThrottle,
     LLMAnalyticsSummarizationBurstThrottle,
     LLMAnalyticsSummarizationDailyThrottle,
     LLMAnalyticsSummarizationSustainedThrottle,
@@ -977,8 +977,8 @@ class InsightViewSet(
     scope_object = "insight"
     serializer_class = InsightSerializer
     throttle_classes = [
-        ClickHouseBurstRateThrottle,
-        ClickHouseSustainedRateThrottle,
+        DatastoreBurstRateThrottle,
+        DatastoreSustainedRateThrottle,
     ]
     renderer_classes = (*tuple(api_settings.DEFAULT_RENDERER_CLASSES), csvrenderers.CSVRenderer)
     filter_backends = [DjangoFilterBackend]
@@ -1525,12 +1525,12 @@ When set, the specified dashboard's filters and date range override will be appl
 
         if filter.funnel_viz_type == FunnelVizType.TRENDS:
             return {
-                "result": ClickhouseFunnelTrends(team=team, filter=filter).run(),
+                "result": DatastoreFunnelTrends(team=team, filter=filter).run(),
                 "timezone": team.timezone,
             }
         elif filter.funnel_viz_type == FunnelVizType.TIME_TO_CONVERT:
             return {
-                "result": ClickhouseFunnelTimeToConvert(team=team, filter=filter).run(),
+                "result": DatastoreFunnelTimeToConvert(team=team, filter=filter).run(),
                 "timezone": team.timezone,
             }
         else:
@@ -1626,7 +1626,7 @@ When set, the specified dashboard's filters and date range override will be appl
     @action(methods=["POST"], detail=False)
     def timing(self, request: request.Request, **kwargs):
         from insights.kafka_client.client import KafkaProducer
-        from insights.models.event.util import format_clickhouse_timestamp
+        from insights.models.event.util import format_datastore_timestamp
         from insights.utils import cast_timestamp_or_now
 
         if CAPTURE_TIME_TO_SEE_DATA:
@@ -1634,12 +1634,12 @@ When set, the specified dashboard's filters and date range override will be appl
                 **request.data,
                 "team_id": self.team_id,
                 "user_id": self.request.user.pk,
-                "timestamp": format_clickhouse_timestamp(cast_timestamp_or_now(None)),
+                "timestamp": format_datastore_timestamp(cast_timestamp_or_now(None)),
             }
             if "min_last_refresh" in payload:
-                payload["min_last_refresh"] = format_clickhouse_timestamp(payload["min_last_refresh"])
+                payload["min_last_refresh"] = format_datastore_timestamp(payload["min_last_refresh"])
             if "max_last_refresh" in payload:
-                payload["max_last_refresh"] = format_clickhouse_timestamp(payload["max_last_refresh"])
+                payload["max_last_refresh"] = format_datastore_timestamp(payload["max_last_refresh"])
             KafkaProducer().produce(topic=KAFKA_METRICS_TIME_TO_SEE_DATA, data=payload)
 
         return Response(status=status.HTTP_201_CREATED)

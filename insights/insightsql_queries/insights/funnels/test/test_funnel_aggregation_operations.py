@@ -3,7 +3,7 @@ from typing import cast
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import DateRange, EventsNode, FunnelsFilter, FunnelsQuery
 
@@ -14,7 +14,7 @@ from insights.insightsql_queries.insights.funnels.funnel_aggregation_operations 
 from insights.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
 
 
-class TestFunnelAggregationOperations(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelAggregationOperations(DatastoreTestMixin, APIBaseTest):
     def test_first_time_for_user_aggregation_outer_query(self):
         funnels_query = FunnelsQuery(
             series=[EventsNode(event="$pageview")],

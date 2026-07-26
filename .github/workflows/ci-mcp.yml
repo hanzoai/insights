@@ -268,7 +268,7 @@ jobs:
                     sqlx migrate run --source rust/persons_migrations/
                   # Then run Django migrations
                   python manage.py migrate --noinput
-                  python manage.py migrate_clickhouse
+                  python manage.py migrate_datastore
 
             - name: Create logs tables in ClickHouse
               run: |

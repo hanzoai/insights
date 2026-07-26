@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 from django.db.models import Q
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.constants import FlagRequestType
 from insights.exceptions_capture import capture_exception
 from insights.helpers.dashboard_templates import add_enriched_insights_to_feature_flag_dashboard

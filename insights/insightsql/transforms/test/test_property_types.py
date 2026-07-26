@@ -164,7 +164,7 @@ class TestPropertyTypes(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         query = re.sub(r"insightsql_val_\d+", "insightsql_val", query)
         # We're searching for the two subselects and making sure they are exactly the same
@@ -183,9 +183,9 @@ class TestPropertyTypes(BaseTest):
             team=self.team,
             name="extended_properties",
             columns={
-                "string_prop": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)"},
-                "int_prop": {"insightsql": "IntegerDatabaseField", "clickhouse": "Nullable(Int64)"},
-                "bool_prop": {"insightsql": "BooleanDatabaseField", "clickhouse": "Nullable(Bool)"},
+                "string_prop": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)"},
+                "int_prop": {"insightsql": "IntegerDatabaseField", "datastore": "Nullable(Int64)"},
+                "bool_prop": {"insightsql": "BooleanDatabaseField", "datastore": "Nullable(Bool)"},
             },
             credential=credential,
             url_pattern="",
@@ -211,6 +211,6 @@ class TestPropertyTypes(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         return pretty_print_in_tests(query, self.team.pk)

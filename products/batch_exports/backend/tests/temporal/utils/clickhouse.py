@@ -5,26 +5,26 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ra
 
 from insights.models.app_metrics2.sql import APP_METRICS2_DATA_TABLE_SQL, APP_METRICS2_MV_TABLE_SQL
 from insights.temporal.common.asyncpa import InvalidMessageFormat
-from insights.temporal.common.clickhouse import ClickHouseClient, ClickHouseError
+from insights.temporal.common.datastore import DatastoreClient, DatastoreError
 
 from products.batch_exports.backend.temporal.spmc import slice_record_batch
 
 
 @retry(
     retry=retry_if_exception_type(
-        (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError, ClickHouseError)
+        (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError, DatastoreError)
     ),
     # on attempts expired, raise the exception encountered in our code, not tenacity's retry error
     reraise=True,
     wait=wait_random_exponential(multiplier=0.2, max=3),
     stop=stop_after_attempt(3),
 )
-async def execute_query(clickhouse_client: ClickHouseClient, query: str, *data):
+async def execute_query(datastore_client: DatastoreClient, query: str, *data):
     """Try to prevent flakiness in CI by retrying the query if it fails."""
-    return await clickhouse_client.execute_query(query, *data)
+    return await datastore_client.execute_query(query, *data)
 
 
-async def create_clickhouse_tables_and_views(clickhouse_client):
+async def create_datastore_tables_and_views(datastore_client):
     from insights.batch_exports.sql import (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,
         CREATE_EVENTS_BATCH_EXPORT_VIEW_BACKFILL,
@@ -33,7 +33,7 @@ async def create_clickhouse_tables_and_views(clickhouse_client):
         CREATE_PERSONS_BATCH_EXPORT_VIEW,
         CREATE_PERSONS_BATCH_EXPORT_VIEW_BACKFILL,
     )
-    from insights.clickhouse.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
+    from insights.datastore.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
 
     create_view_queries = (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,
@@ -44,13 +44,13 @@ async def create_clickhouse_tables_and_views(clickhouse_client):
         CREATE_PERSONS_BATCH_EXPORT_VIEW_BACKFILL,
     )
 
-    clickhouse_tasks = set()
+    datastore_tasks = set()
     for query in create_view_queries + tuple(map(build_query, CREATE_KAFKA_TABLE_QUERIES)):
-        task = asyncio.create_task(execute_query(clickhouse_client, query))
-        clickhouse_tasks.add(task)
-        task.add_done_callback(clickhouse_tasks.discard)
+        task = asyncio.create_task(execute_query(datastore_client, query))
+        datastore_tasks.add(task)
+        task.add_done_callback(datastore_tasks.discard)
 
-    done, pending = await asyncio.wait(clickhouse_tasks)
+    done, pending = await asyncio.wait(datastore_tasks)
 
     if len(pending) > 0:
         raise ValueError("Not all required tables and views were created in time")
@@ -64,28 +64,28 @@ async def create_clickhouse_tables_and_views(clickhouse_client):
         APP_METRICS2_MV_TABLE_SQL(),
     ):
         # NOTE: Must be executed in order and after Kafka tables
-        await execute_query(clickhouse_client, query)
+        await execute_query(datastore_client, query)
 
     return
 
 
-async def truncate_events(clickhouse_client):
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS sharded_events")
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS distributed_events_recent")
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS events_recent")
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS sharded_events_recent")
+async def truncate_events(datastore_client):
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS sharded_events")
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS distributed_events_recent")
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS events_recent")
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS sharded_events_recent")
 
 
-async def truncate_persons(clickhouse_client):
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS person_distinct_id2")
+async def truncate_persons(datastore_client):
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS person_distinct_id2")
 
 
-async def truncate_sessions(clickhouse_client):
-    await execute_query(clickhouse_client, "TRUNCATE TABLE IF EXISTS raw_sessions")
+async def truncate_sessions(datastore_client):
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS raw_sessions")
 
 
-class FlakyClickHouseClient(ClickHouseClient):
-    """Fake ClickHouseClient that simulates a failure after reading a certain number of records.
+class FlakyDatastoreClient(DatastoreClient):
+    """Fake DatastoreClient that simulates a failure after reading a certain number of records.
 
     Raises a `InvalidMessageFormat` exception after reading a certain number of records.
     This is an error we've seen in production.

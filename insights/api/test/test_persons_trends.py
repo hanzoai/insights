@@ -4,12 +4,12 @@ from datetime import datetime
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.constants import ENTITY_ID, ENTITY_MATH, ENTITY_TYPE, TRENDS_CUMULATIVE
@@ -25,7 +25,7 @@ def _create_cohort(**kwargs):
     return cohort
 
 
-class TestPersonTrends(ClickhouseTestMixin, APIBaseTest):
+class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
     def _create_events(self, use_time=False):
         _create_action(team=self.team, name="no events")
 
@@ -960,7 +960,7 @@ class TestPersonTrends(ClickhouseTestMixin, APIBaseTest):
         ).json()
         self.assertEqual(len(people["results"][0]["people"]), 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_people_endpoint_includes_recordings(self):
         _create_person(team_id=self.team.pk, distinct_ids=["p1"], properties={})
         _create_event(
@@ -1016,7 +1016,7 @@ class TestPersonTrends(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_people_endpoint_filters_search(self):
         _create_person(
             team_id=self.team.pk,

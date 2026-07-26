@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseDestroyTablesMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreDestroyTablesMixin, _create_event, flush_persons_and_events
 from unittest.mock import ANY, MagicMock, call, patch
 
 import pytz
@@ -38,7 +38,7 @@ FROZEN_TIME = dateutil.parser.parse("2024-06-04T08:55:00.000Z")
 @freeze_time(FROZEN_TIME)
 @patch("insights.tasks.alerts.checks.send_notifications_for_errors")
 @patch("insights.tasks.alerts.checks.send_notifications_for_breaches")
-class TestTimeSeriesTrendsRelativeAlerts(APIBaseTest, ClickhouseDestroyTablesMixin):
+class TestTimeSeriesTrendsRelativeAlerts(APIBaseTest, DatastoreDestroyTablesMixin):
     def setUp(self) -> None:
         super().setUp()
 

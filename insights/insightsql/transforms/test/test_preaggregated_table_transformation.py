@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import unittest
-from insights.test.base import APIBaseTest, BaseTest, ClickhouseTestMixin, QueryMatchingTest, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, BaseTest, DatastoreTestMixin, QueryMatchingTest, snapshot_datastore_queries
 
 from parameterized import parameterized
 
@@ -18,7 +18,7 @@ from insights.insightsql.transforms.preaggregated_table_transformation import (
     is_integer_timezone,
 )
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 from insights.insightsql_queries.web_analytics.pre_aggregated.properties import (
     EVENT_PROPERTY_TO_FIELD,
@@ -721,7 +721,7 @@ LIMIT 50000
         assert PREAGGREGATED_TABLE_NAME in query
         self.assertQueryMatchesSnapshot(query)
 
-    def test_full_trends_query_clickhouse(self):
+    def test_full_trends_query_datastore(self):
         original_query = """
 SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2025-07-10 20:59:19')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2025-07-10 20:59:19')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2025-07-17 23:59:59')), toIntervalDay(1)))), 1))) AS date, arrayMap(_match_date -> arraySum(arraySlice(groupArray(ifNull(count, 0)), indexOf(groupArray(day_start) AS _days_for_count, _match_date) AS _index, plus(minus(arrayLastIndex(x -> equals(x, _match_date), _days_for_count), _index), 1))), date) AS total FROM (SELECT sum(total) AS count, day_start FROM (SELECT count() AS total, toStartOfDay(timestamp) AS day_start FROM events AS e SAMPLE 1 WHERE and(greaterOrEquals(timestamp, toStartOfInterval(assumeNotNull(toDateTime('2025-07-10 20:59:19')), toIntervalDay(1))), lessOrEquals(timestamp, assumeNotNull(toDateTime('2025-07-17 23:59:59'))), equals(event, '$pageview')) GROUP BY day_start) GROUP BY day_start ORDER BY day_start ASC) ORDER BY arraySum(total) DESC LIMIT 50000
             """
@@ -803,8 +803,8 @@ GROUP BY date
         assert PREAGGREGATED_TABLE_NAME not in query
 
 
-@snapshot_clickhouse_queries
-class TestPreaggregatedTableTransformationIntegration(APIBaseTest, ClickhouseTestMixin):
+@snapshot_datastore_queries
+class TestPreaggregatedTableTransformationIntegration(APIBaseTest, DatastoreTestMixin):
     CLASS_DATA_LEVEL_SETUP = False
     TEST_DATA_DATE = datetime(2024, 11, 24, tzinfo=UTC)
 

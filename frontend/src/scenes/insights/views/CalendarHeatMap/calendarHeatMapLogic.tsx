@@ -121,7 +121,7 @@ export const calendarHeatMapLogic = kea<calendarHeatMapLogicType>([
                             typeof result.column === 'number' &&
                             typeof result.value === 'number'
                         ) {
-                            // Convert ClickHouse toDayOfWeek (1=Mon, 2=Tue, ..., 7=Sun) to standard format (0=Sun, 1=Mon, ...)
+                            // Convert Datastore toDayOfWeek (1=Mon, 2=Tue, ..., 7=Sun) to standard format (0=Sun, 1=Mon, ...)
                             const standardDay = result.row % 7
                             // Adjust for team's week start day setting
                             const adjustedDay = (standardDay - weekStartDay + 7) % 7
@@ -160,7 +160,7 @@ export const calendarHeatMapLogic = kea<calendarHeatMapLogicType>([
                 if (rowAggregations && rowAggregations.length > 0) {
                     rowAggregations.forEach((result) => {
                         if (typeof result.row === 'number' && typeof result.value === 'number') {
-                            // Convert ClickHouse toDayOfWeek (1=Mon, 2=Tue, ..., 7=Sun) to standard format (0=Sun, 1=Mon, ...)
+                            // Convert Datastore toDayOfWeek (1=Mon, 2=Tue, ..., 7=Sun) to standard format (0=Sun, 1=Mon, ...)
                             const standardDay = result.row % 7
                             // Adjust for team's week start day setting
                             const adjustedDay = (standardDay - weekStartDay + 7) % 7

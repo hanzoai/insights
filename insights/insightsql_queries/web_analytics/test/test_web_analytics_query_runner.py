@@ -3,10 +3,10 @@ from typing import Union
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -25,8 +25,8 @@ from insights.insightsql_queries.web_analytics.web_analytics_query_runner import
 from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 
 
-@snapshot_clickhouse_queries
-class TestWebStatsTableQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestWebStatsTableQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _create_events(self, data, event="$pageview"):
         for id, timestamps in data:
             with freeze_time(timestamps[0][0]):

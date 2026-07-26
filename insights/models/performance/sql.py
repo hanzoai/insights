@@ -1,9 +1,9 @@
 """https://developer.mozilla.org/en-US/docs/Web/API/PerformanceEntry"""
 
 from insights import settings
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, STORAGE_POLICY, kafka_engine, ttl_period
-from insights.clickhouse.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, STORAGE_POLICY, kafka_engine, ttl_period
+from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_PERFORMANCE_EVENTS
 
 """
@@ -190,8 +190,8 @@ FROM {database}.kafka_performance_events
 """.format(
         columns=_column_names_from_column_definitions(PERFORMANCE_EVENT_COLUMNS),
         target_table="writeable_performance_events",
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        database=settings.CLICKHOUSE_DATABASE,
+        cluster=settings.DATASTORE_CLUSTER,
+        database=settings.DATASTORE_DATABASE,
         extra_fields=_column_names_from_column_definitions(KAFKA_COLUMNS_WITH_PARTITION),
     )
 )
@@ -214,4 +214,4 @@ TRUNCATE_PERFORMANCE_EVENTS_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {PERFORMANCE_
 
 
 def UPDATE_PERFORMANCE_EVENTS_TABLE_TTL_SQL():
-    return f"ALTER TABLE {PERFORMANCE_EVENT_DATA_TABLE()} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}' MODIFY TTL toDate(timestamp) + toIntervalWeek(%(weeks)s)"
+    return f"ALTER TABLE {PERFORMANCE_EVENT_DATA_TABLE()} ON CLUSTER '{settings.DATASTORE_CLUSTER}' MODIFY TTL toDate(timestamp) + toIntervalWeek(%(weeks)s)"

@@ -66,7 +66,7 @@ function CategoryPillContent({
                     ) : (
                         totalResultCount
                     )}
-                    {/* This is a workaround. We need to make the logic fetch more results when querying from clickhouse*/}
+                    {/* This is a workaround. We need to make the logic fetch more results when querying from datastore*/}
                     <span aria-label={hasMore ? `${totalResultCount} or more` : `${totalResultCount}`}>
                         {hasMore ? '+' : ''}
                     </span>

@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 import structlog
 from rest_framework import status
@@ -10,7 +10,7 @@ from insights.models.team.team import Team
 logger = structlog.get_logger(__name__)
 
 
-class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_create_link_success(self):
         data = {
             "redirect_url": "https://example.com",

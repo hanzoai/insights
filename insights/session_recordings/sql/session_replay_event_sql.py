@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_SESSION_REPLAY_EVENTS, kafka_engine
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import CONSUMER_GROUP_SESSION_REPLAY_EVENTS, kafka_engine
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_DATASTORE_SESSION_REPLAY_EVENTS
 
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
     session_id VARCHAR,
     -- part of order by so will aggregate correctly
     team_id Int64,
-    -- ClickHouse will pick any value of distinct_id for the session
+    -- Datastore will pick any value of distinct_id for the session
     -- this is fine since even if the distinct_id changes during a session
     -- it will still (or should still) map to the same person
     distinct_id VARCHAR,
@@ -138,9 +138,9 @@ def SESSION_REPLAY_EVENTS_TABLE_MV_SQL(on_cluster=True, exclude_columns=None):
 
     target_table = "writable_session_replay_events"
     on_cluster_clause = ON_CLUSTER_CLAUSE(on_cluster)
-    database = settings.CLICKHOUSE_DATABASE
+    database = settings.DATASTORE_DATABASE
 
-    # ClickHouse is incorrectly expanding the type of the snapshot source column
+    # Datastore is incorrectly expanding the type of the snapshot source column
     # Despite it being a LowCardinality(Nullable(String)) in writable_session_replay_events
     # The column expansion picks only Nullable(String) and so we can't select it
     explictly_specify_columns = f"""(
@@ -176,7 +176,7 @@ max(last_timestamp) AS max_last_timestamp,
 groupArray(if(block_url != '', first_timestamp, NULL)) AS block_first_timestamps,
 groupArray(if(block_url != '', last_timestamp, NULL)) AS block_last_timestamps,
 groupArray(block_url) AS block_urls,
--- TRICKY: ClickHouse will pick a relatively random first_url
+-- TRICKY: Datastore will pick a relatively random first_url
 -- when it collapses the aggregating merge tree
 -- unless we teach it what we want...
 -- argMin ignores null values
@@ -208,7 +208,7 @@ group by session_id, team_id
 """
 
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_session_replay_events based on a sharding key.
 

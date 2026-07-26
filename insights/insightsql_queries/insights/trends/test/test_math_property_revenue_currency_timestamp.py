@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.schema import DataWarehouseNode, DateRange, PropertyMathType, TrendsQuery
 
@@ -13,7 +13,7 @@ TEST_BUCKET = "test_storage_bucket-insights.trends.datawarehouse.timestamp_handl
 
 
 @pytest.mark.django_db
-class TestDataWarehouseTimestampHandling(ClickhouseTestMixin, BaseTest):
+class TestDataWarehouseTimestampHandling(DatastoreTestMixin, BaseTest):
     def teardown_method(self, method) -> None:
         if hasattr(self, "cleanup_dw_table"):
             self.cleanup_dw_table()
@@ -26,10 +26,10 @@ class TestDataWarehouseTimestampHandling(ClickhouseTestMixin, BaseTest):
             csv_path=csv_path,
             table_name="timestamp_test_table",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "timestamp_field": {"clickhouse": "Nullable(DateTime64(3, 'UTC'))", "insightsql": "DateTimeDatabaseField"},
-                "revenue_amount": {"clickhouse": "Float64", "insightsql": "FloatDatabaseField"},
-                "currency_code": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "timestamp_field": {"datastore": "Nullable(DateTime64(3, 'UTC'))", "insightsql": "DateTimeDatabaseField"},
+                "revenue_amount": {"datastore": "Float64", "insightsql": "FloatDatabaseField"},
+                "currency_code": {"datastore": "String", "insightsql": "StringDatabaseField"},
             },
             test_bucket=TEST_BUCKET,
             team=self.team,
@@ -122,7 +122,7 @@ class TestDataWarehouseTimestampHandling(ClickhouseTestMixin, BaseTest):
         assert self_managed_result.results is not None
         assert cloud_result.results is not None
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_string_and_date32_fields(self):
         string_csv_path = Path(__file__).parent / "data" / "string_timestamp_test.csv"
         date32_csv_path = Path(__file__).parent / "data" / "date32_timestamp_test.csv"
@@ -131,10 +131,10 @@ class TestDataWarehouseTimestampHandling(ClickhouseTestMixin, BaseTest):
             csv_path=string_csv_path,
             table_name="string_timestamp_table",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "timestamp_str": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField"},
-                "revenue_amount": {"clickhouse": "Float64", "insightsql": "FloatDatabaseField"},
-                "currency_code": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "timestamp_str": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField"},
+                "revenue_amount": {"datastore": "Float64", "insightsql": "FloatDatabaseField"},
+                "currency_code": {"datastore": "String", "insightsql": "StringDatabaseField"},
             },
             test_bucket=TEST_BUCKET,
             team=self.team,
@@ -144,10 +144,10 @@ class TestDataWarehouseTimestampHandling(ClickhouseTestMixin, BaseTest):
             csv_path=date32_csv_path,
             table_name="date32_timestamp_table",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "timestamp_date32": {"clickhouse": "Date32", "insightsql": "DateDatabaseField"},
-                "revenue_amount": {"clickhouse": "Float64", "insightsql": "FloatDatabaseField"},
-                "currency_code": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "timestamp_date32": {"datastore": "Date32", "insightsql": "DateDatabaseField"},
+                "revenue_amount": {"datastore": "Float64", "insightsql": "FloatDatabaseField"},
+                "currency_code": {"datastore": "String", "insightsql": "StringDatabaseField"},
             },
             test_bucket=TEST_BUCKET,
             team=self.team,

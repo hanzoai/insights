@@ -3,11 +3,11 @@ from datetime import datetime
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -44,7 +44,7 @@ def create_action(**kwargs):
     return action
 
 
-class TestLifecycleQueryRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTest):
+class TestLifecycleQueryRetentionGroupAggregation(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_events(self, data, event="$pageview"):
@@ -699,7 +699,7 @@ class TestLifecycleQueryRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTe
         )
 
 
-class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestLifecycleQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_random_events(self) -> str:
@@ -1917,7 +1917,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones(self):
         self._create_events(
             data=[
@@ -1991,7 +1991,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     # Ensure running the query with sampling works + generate a snapshot that shows sampling in the query
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sampling(self):
         self._create_events(
             data=[
@@ -2022,7 +2022,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ),
         ).calculate()
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_cohort_filter(self):
         self._create_events(
             data=[

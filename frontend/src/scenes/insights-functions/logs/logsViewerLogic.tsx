@@ -77,7 +77,7 @@ const toKey = (log: LogEntry): string => {
     return `${log.instanceId}-${log.level}-${log.timestamp.toISOString()}`
 }
 
-export const toAbsoluteClickhouseTimestamp = (timestamp: Dayjs): string => {
+export const toAbsoluteDatastoreTimestamp = (timestamp: Dayjs): string => {
     // TRICKY: CH query is timezone aware so we dont send iso, and we need to convert to UTC
     // See https://github.com/hanzoai/insights/pull/45651
     return timestamp.tz('UTC').format('YYYY-MM-DD HH:mm:ss.SSS')
@@ -298,7 +298,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
                     }
                     const logParams: LogEntryParams = {
                         ...values.logEntryParams,
-                        dateTo: toAbsoluteClickhouseTimestamp(values.oldestLogTimestamp),
+                        dateTo: toAbsoluteDatastoreTimestamp(values.oldestLogTimestamp),
                         limit: values.unGroupedLogs.length + LOG_VIEWER_LIMIT,
                     }
 
@@ -334,7 +334,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
                     }
                     const logParams: LogEntryParams = {
                         ...values.logEntryParams,
-                        dateTo: toAbsoluteClickhouseTimestamp(values.oldestLogTimestamp),
+                        dateTo: toAbsoluteDatastoreTimestamp(values.oldestLogTimestamp),
                         limit: values.groupedLogs.length + LOG_VIEWER_LIMIT,
                     }
 
@@ -369,7 +369,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
 
                     const logParams: LogEntryParams = {
                         ...values.logEntryParams,
-                        dateFrom: toAbsoluteClickhouseTimestamp(values.newestLogTimestamp),
+                        dateFrom: toAbsoluteDatastoreTimestamp(values.newestLogTimestamp),
                         order: 'ASC',
                     }
 

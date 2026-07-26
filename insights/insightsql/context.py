@@ -7,7 +7,7 @@ from insights.schema import InsightsQLNotice, InsightsQLQueryModifiers
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.timings import InsightsQLTimings
 
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 
 if TYPE_CHECKING:
     from insights.insightsql.database.database import Database
@@ -38,7 +38,7 @@ class InsightsQLContext:
     values: dict = field(default_factory=dict)
     # Are we small part of a non-InsightsQL query? If so, use custom syntax for accessed person properties.
     within_non_insightsql_query: bool = False
-    # Enable full SELECT queries and subqueries in ClickHouse
+    # Enable full SELECT queries and subqueries in Datastore
     enable_select_queries: bool = False
     # Do we apply a limit of MAX_SELECT_RETURNED_ROWS=10000 to the topmost select query?
     limit_top_select: bool = True

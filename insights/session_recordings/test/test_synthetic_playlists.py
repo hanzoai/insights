@@ -296,7 +296,7 @@ class TestNewUrlsSyntheticPlaylists(APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
 
         # Clear replay events table before each test
         sync_execute("TRUNCATE TABLE sharded_session_replay_events")
@@ -818,7 +818,7 @@ class TestUrlNormalization(BaseTest):
         six_months_ago = now - timedelta(days=180)
         today = now - timedelta(days=1)
 
-        # Mock ClickHouse query results
+        # Mock Datastore query results
         mock_results = [
             # Old URL that normalizes to /billing/{id}/summary
             ("https://example.com/billing/1/summary", six_months_ago),
@@ -862,7 +862,7 @@ class TestFrustrationSignalsSyntheticPlaylist(APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
 
         sync_execute("TRUNCATE TABLE sharded_events")
 

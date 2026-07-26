@@ -213,18 +213,18 @@ class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTMod
         return {
             field_name: {
                 "insightsql": type(field_obj).__name__,
-                "clickhouse": DataWarehouseManagedViewSet._get_clickhouse_type(field_obj),
+                "datastore": DataWarehouseManagedViewSet._get_datastore_type(field_obj),
                 "valid": True,
             }
             for field_name, field_obj in fields.items()
         }
 
     @staticmethod
-    def _get_clickhouse_type(field) -> str:
-        """Convert InsightsQL field type to ClickHouse type string."""
+    def _get_datastore_type(field) -> str:
+        """Convert InsightsQL field type to Datastore type string."""
 
         # NOTE: This function has a really bad smell
-        # These types won't usually map appropriately because it's hard to predict what Clickhouse is actually storing
+        # These types won't usually map appropriately because it's hard to predict what Datastore is actually storing
         # but we need these to exist if we want the `SavedQuery` to be saved correctly.
         # We do NOT use these types extensively so it's not a big deal if they aren't 100% accurate,
         # but we should be mindful of this function and consider removing the need for it in the future.

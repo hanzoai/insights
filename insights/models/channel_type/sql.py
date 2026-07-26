@@ -1,10 +1,10 @@
 import os
 import json
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import MergeTreeEngine, ReplicationScheme
-from insights.settings import CLICKHOUSE_CLUSTER, CLICKHOUSE_PASSWORD
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import MergeTreeEngine, ReplicationScheme
+from insights.settings import DATASTORE_CLUSTER, DATASTORE_PASSWORD
 
 CHANNEL_DEFINITION_TABLE_NAME = "channel_definition"
 CHANNEL_DEFINITION_DICTIONARY_NAME = "channel_definition_dict"
@@ -28,12 +28,12 @@ ORDER BY (domain, kind);
 
 
 DROP_CHANNEL_DEFINITION_TABLE_SQL = (
-    f"DROP TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+    f"DROP TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} ON CLUSTER '{DATASTORE_CLUSTER}'"
 )
 
 
 TRUNCATE_CHANNEL_DEFINITION_TABLE_SQL = (
-    f"TRUNCATE TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+    f"TRUNCATE TABLE IF EXISTS {CHANNEL_DEFINITION_TABLE_NAME} ON CLUSTER '{DATASTORE_CLUSTER}'"
 )
 
 with open(os.path.join(os.path.dirname(__file__), "channel_definitions.json")) as f:
@@ -71,14 +71,14 @@ CREATE DICTIONARY IF NOT EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER
     type_if_organic Nullable(String)
 )
 PRIMARY KEY domain, kind
-SOURCE(CLICKHOUSE(TABLE '{CHANNEL_DEFINITION_TABLE_NAME}' PASSWORD '{CLICKHOUSE_PASSWORD}'))
+SOURCE(DATASTORE(TABLE '{CHANNEL_DEFINITION_TABLE_NAME}' PASSWORD '{DATASTORE_PASSWORD}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(COMPLEX_KEY_HASHED())
 """
 )
 
 DROP_CHANNEL_DEFINITION_DICTIONARY_SQL = (
-    f"DROP DICTIONARY IF EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+    f"DROP DICTIONARY IF EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} ON CLUSTER '{DATASTORE_CLUSTER}'"
 )
 
 SELECT_CHANNEL_DEFINITION_SQL = f"SELECT domain, kind, domain_type, type_if_paid, type_if_organic FROM {CHANNEL_DEFINITION_TABLE_NAME} ORDER BY domain, kind"

@@ -2,7 +2,7 @@ import time as time_mod
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event
 from unittest.mock import patch
 
 from django.db import IntegrityError
@@ -17,8 +17,8 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.datastore.client import sync_execute
+from insights.datastore.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 
 from products.analytics_platform.backend.lazy_computation.computation_notifications import (
@@ -30,7 +30,7 @@ from products.analytics_platform.backend.lazy_computation.lazy_computation_execu
     DEFAULT_RETRIES,
     DEFAULT_TTL_SCHEDULE,
     DEFAULT_WAIT_TIMEOUT_SECONDS,
-    NON_RETRYABLE_CLICKHOUSE_ERROR_CODES,
+    NON_RETRYABLE_DATASTORE_ERROR_CODES,
     LazyComputationExecutor,
     LazyComputationResult,
     LazyComputationTable,
@@ -426,7 +426,7 @@ class TestBuildComputationInsertSQL(BaseTest):
         assert len(select_query.select) == original_select_len
 
 
-class TestExecuteComputationJobs(ClickhouseTestMixin, BaseTest):
+class TestExecuteComputationJobs(DatastoreTestMixin, BaseTest):
     def _make_computation_query(self) -> ast.SelectQuery:
         """Create a query that produces columns matching the computation table schema."""
         s = parse_select(
@@ -499,7 +499,7 @@ class TestExecuteComputationJobs(ClickhouseTestMixin, BaseTest):
         assert job.time_range_start == datetime(2024, 1, 1, tzinfo=UTC)
         assert job.time_range_end == datetime(2024, 1, 4, tzinfo=UTC)
 
-        # Verify actual data in ClickHouse
+        # Verify actual data in Datastore
         ch_results = self._query_computation_results(result.job_ids)
         assert len(ch_results) == 3  # 3 days with events
         # Each day has 1 unique user
@@ -604,7 +604,7 @@ class TestExecuteComputationJobs(ClickhouseTestMixin, BaseTest):
         assert postgres_jobs[2].time_range_start == datetime(2024, 1, 3, tzinfo=UTC)
         assert postgres_jobs[2].time_range_end == datetime(2024, 1, 4, tzinfo=UTC)
 
-        # Verify all data in ClickHouse
+        # Verify all data in Datastore
         ch_results = self._query_computation_results(result.job_ids)
         assert len(ch_results) == 3  # 3 days total
         assert ch_results[0][4] == 1  # Jan 1: user1
@@ -612,7 +612,7 @@ class TestExecuteComputationJobs(ClickhouseTestMixin, BaseTest):
         assert ch_results[2][4] == 1  # Jan 3: user3
 
 
-class TestInsightsQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
+class TestInsightsQLQueryWithPrecomputation(DatastoreTestMixin, BaseTest):
     """Test execute_insightsql_query with usePreaggregatedIntermediateResults modifier (lazy computation)."""
 
     def _create_pageview_events(self):
@@ -719,7 +719,7 @@ class TestInsightsQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         assert series_with["days"] == ["2025-01-01", "2025-01-02"]
         assert series_with["data"] == [2, 2]
 
-        # Note: TrendsQueryResponse only has `insightsql` (not `clickhouse`), and `insightsql` is generated
+        # Note: TrendsQueryResponse only has `insightsql` (not `datastore`), and `insightsql` is generated
         # before execute_insightsql_query runs, so it shows the original AST. The transformation happens
         # inside execute_insightsql_query. To verify the transformation worked, we check that
         # lazy-computed rows were created in the table.
@@ -785,7 +785,7 @@ class TestInsightsQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         assert sorted_results[1][0] == 2  # 2 unique users on Jan 2
 
         # Verify the lazy-computed table was used in the generated SQL
-        assert result_with.clickhouse and ("preaggregation_results" in result_with.clickhouse), (
+        assert result_with.datastore and ("preaggregation_results" in result_with.datastore), (
             "Expected preaggregation_results table in generated SQL"
         )
 
@@ -890,7 +890,7 @@ class TestBuildManualInsertSQL(BaseTest):
         assert "$pageleave" in values.values()
 
 
-class TestEnsurePrecomputed(ClickhouseTestMixin, BaseTest):
+class TestEnsurePrecomputed(DatastoreTestMixin, BaseTest):
     MANUAL_INSERT_QUERY = """
         SELECT
             toStartOfDay(timestamp) as time_window_start,
@@ -2232,17 +2232,17 @@ class TestIsNonRetryableError(BaseTest):
             ("too_many_queries", 202, "Too many simultaneous queries"),
         ]
     )
-    def test_clickhouse_non_retryable_error_codes(self, name, code, message):
+    def test_datastore_non_retryable_error_codes(self, name, code, message):
         error = ServerException(message=message, code=code)
         assert is_non_retryable_error(error) is True
-        assert code in NON_RETRYABLE_CLICKHOUSE_ERROR_CODES
+        assert code in NON_RETRYABLE_DATASTORE_ERROR_CODES
 
     @parameterized.expand(
         [
             ("memory_limit", 241, "Memory limit exceeded"),
         ]
     )
-    def test_clickhouse_retryable_error_codes(self, name, code, message):
+    def test_datastore_retryable_error_codes(self, name, code, message):
         error = ServerException(message=message, code=code)
         assert is_non_retryable_error(error) is False
 

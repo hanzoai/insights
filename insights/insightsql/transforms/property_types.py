@@ -12,7 +12,7 @@ from insights.insightsql.database.s3_table import S3Table
 from insights.insightsql.escape_sql import escape_insightsql_identifier
 from insights.insightsql.visitor import CloningVisitor, TraversingVisitor
 
-from insights.clickhouse.materialized_columns import (
+from insights.datastore.materialized_columns import (
     MaterializedColumn,
     TablesWithMaterializedColumns,
     get_materialized_column_for_property,

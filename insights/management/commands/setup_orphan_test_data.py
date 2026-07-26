@@ -1,7 +1,7 @@
 """
 Management command to create test data for sync_person_distinct_ids workflow.
 
-Creates orphaned persons in ClickHouse with various scenarios:
+Creates orphaned persons in Datastore with various scenarios:
 - Fixable: Person in CH + PG, DID only in PG (should be synced)
 - Truly orphaned: Person in CH + PG, no DID anywhere (report only)
 - CH-only orphan: Person only in CH (should be marked deleted)
@@ -16,7 +16,7 @@ import uuid
 
 from django.core.management.base import BaseCommand
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models import Team
 from insights.models.person import Person, PersonDistinctId
 from insights.person_db_router import PERSONS_DB_FOR_WRITE
@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 version=0,
             )
 
-            # Create person in ClickHouse WITHOUT distinct ID
+            # Create person in Datastore WITHOUT distinct ID
             self._insert_person_to_ch(team.id, person_uuid, version=0)
             # Deliberately NOT inserting distinct_id to CH
 
@@ -136,7 +136,7 @@ class Command(BaseCommand):
                 properties={"test_type": "truly_orphaned", "index": i},
             )
 
-            # Create person in ClickHouse WITHOUT distinct ID
+            # Create person in Datastore WITHOUT distinct ID
             self._insert_person_to_ch(team.id, person_uuid, version=0)
 
             created_persons.append(("truly_orphaned", person_uuid, None))
@@ -147,7 +147,7 @@ class Command(BaseCommand):
         for _ in range(ch_only_count):
             person_uuid = str(uuid.uuid4())
 
-            # Create person ONLY in ClickHouse
+            # Create person ONLY in Datastore
             self._insert_person_to_ch(team.id, person_uuid, version=0)
             # Deliberately NOT creating in PostgreSQL
 
@@ -188,7 +188,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  Deleted {deleted_persons[0]} persons from PostgreSQL")
         self.stdout.write(f"  Deleted {deleted_dids[0]} distinct IDs from PostgreSQL")
 
-        # Mark as deleted in ClickHouse (we can't truly delete, but can mark is_deleted=1)
+        # Mark as deleted in Datastore (we can't truly delete, but can mark is_deleted=1)
         if pg_uuids:
             sync_execute(
                 """
@@ -199,7 +199,7 @@ class Command(BaseCommand):
                 """,
                 {"team_id": team.id, "uuid_list": pg_uuids},
             )
-            self.stdout.write(f"  Marked {len(pg_uuids)} persons as deleted in ClickHouse")
+            self.stdout.write(f"  Marked {len(pg_uuids)} persons as deleted in Datastore")
 
         # Also mark any CH-only orphans with test properties
         # (We can identify them by checking for properties.test_type which we didn't set for CH-only,
@@ -214,7 +214,7 @@ class Command(BaseCommand):
         )
 
     def _insert_person_to_ch(self, team_id: int, person_uuid: str, version: int = 0):
-        """Insert a person directly into ClickHouse person table."""
+        """Insert a person directly into Datastore person table."""
         sync_execute(
             """
             INSERT INTO person (id, team_id, properties, is_deleted, is_identified, version, _timestamp, _offset)

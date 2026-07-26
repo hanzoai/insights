@@ -7,11 +7,11 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.test import override_settings
@@ -55,7 +55,7 @@ TEST_BUCKET = "test_storage_bucket-insights.insightsql.datawarehouse.trendquery"
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestExperimentTrendsQueryRunner(DatastoreTestMixin, APIBaseTest):
     def teardown_method(self, method) -> None:
         if hasattr(self, "clean_up_data_warehouse_payments_data"):
             self.clean_up_data_warehouse_payments_data()
@@ -672,7 +672,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(test_result.absolute_exposure, 2)
 
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_with_action(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -1807,7 +1807,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             query=ExperimentTrendsQuery(**experiment.metrics[0]["query"]), team=self.team
         )
         with freeze_time("2023-01-07"):
-            # Build and execute the query to get the ClickHouse SQL
+            # Build and execute the query to get the Datastore SQL
             queries = query_runner.count_query_runner.to_queries()
             response = execute_insightsql_query(
                 query_type="TrendsQuery",
@@ -1817,11 +1817,11 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 limit_context=query_runner.count_query_runner.limit_context,
             )
 
-            # Assert the expected join condition in the clickhouse SQL
+            # Assert the expected join condition in the datastore SQL
             expected_join_condition = f"and(equals(events.team_id, {query_runner.count_query_runner.team.id}), equals(event, %(insightsql_val_9)s), greaterOrEquals(timestamp, assumeNotNull(toDateTime(%(insightsql_val_10)s, %(insightsql_val_11)s))), lessOrEquals(timestamp, assumeNotNull(toDateTime(%(insightsql_val_12)s, %(insightsql_val_13)s))))) AS e__events ON"
             self.assertIn(
                 expected_join_condition,
-                str(response.clickhouse),
+                str(response.datastore),
                 "Please check to make sure the timestamp statements are included in the ASOF LEFT JOIN select statement. This may also fail if the placeholder numbers have changed.",
             )
 
@@ -2051,7 +2051,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             query=ExperimentTrendsQuery(**experiment.metrics[0]["query"]), team=self.team
         )
         with freeze_time("2023-01-07"):
-            # Build and execute the query to get the ClickHouse SQL
+            # Build and execute the query to get the Datastore SQL
             queries = query_runner.count_query_runner.to_queries()
             response = execute_insightsql_query(
                 query_type="TrendsQuery",
@@ -2063,11 +2063,11 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
             materialized_columns = get_enabled_materialized_columns("events")
             self.assertIn("mat_pp_email", [col.name for col in materialized_columns.values()])
-            # Assert the expected email where statement in the clickhouse SQL
+            # Assert the expected email where statement in the datastore SQL
             expected_email_where_statement = "notILike(toString(e__events.poe___properties___email), %(insightsql_val_25)s"
             self.assertIn(
                 expected_email_where_statement,
-                str(response.clickhouse),
+                str(response.datastore),
             )
 
             result = query_runner.calculate()
@@ -2211,7 +2211,7 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             query=ExperimentTrendsQuery(**experiment.metrics[0]["query"]), team=self.team
         )
         with freeze_time("2023-01-07"):
-            # Build and execute the query to get the ClickHouse SQL
+            # Build and execute the query to get the Datastore SQL
             queries = query_runner.count_query_runner.to_queries()
             response = execute_insightsql_query(
                 query_type="TrendsQuery",
@@ -2221,11 +2221,11 @@ class TestExperimentTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 limit_context=query_runner.count_query_runner.limit_context,
             )
 
-            # Assert the expected join condition in the clickhouse SQL
+            # Assert the expected join condition in the datastore SQL
             expected_join_condition = f"and(equals(events.team_id, {query_runner.count_query_runner.team.id}), equals(event, %(insightsql_val_7)s), greaterOrEquals(timestamp, assumeNotNull(toDateTime(%(insightsql_val_8)s, %(insightsql_val_9)s))), lessOrEquals(timestamp, assumeNotNull(toDateTime(%(insightsql_val_10)s, %(insightsql_val_11)s))))) AS e__events ON"
             self.assertIn(
                 expected_join_condition,
-                str(response.clickhouse),
+                str(response.datastore),
                 "Please check to make sure the timestamp statements are included in the ASOF LEFT JOIN select statement. This may also fail if the placeholder numbers have changed.",
             )
 

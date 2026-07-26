@@ -9,7 +9,7 @@ from insights.schema import CacheMissResponse, DashboardFilter
 from insights.insightsql.constants import LimitContext
 
 from insights.api.services.query import ExecutionMode, process_query_dict
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.insightsql_queries.query_runner import get_query_runner_or_none
 from insights.models import Dashboard, DashboardTile, Insight, Team, User
 from insights.models.insight import generate_insight_filters_hash

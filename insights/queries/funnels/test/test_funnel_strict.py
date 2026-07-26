@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_action, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_action, _create_event, _create_person
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.models.filters import Filter
 from insights.models.instance_setting import override_instance_config
-from insights.queries.funnels.funnel_strict import ClickhouseFunnelStrict
-from insights.queries.funnels.funnel_strict_persons import ClickhouseFunnelStrictActors
+from insights.queries.funnels.funnel_strict import DatastoreFunnelStrict
+from insights.queries.funnels.funnel_strict_persons import DatastoreFunnelStrictActors
 from insights.queries.funnels.test.breakdown_cases import assert_funnel_results_equal, funnel_breakdown_test_factory
 from insights.queries.funnels.test.conversion_time_cases import funnel_conversion_time_test_factory
 from insights.test.test_journeys import journeys_for
@@ -15,10 +15,10 @@ FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
 class TestFunnelStrictStepsBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(  # type: ignore
-        ClickhouseFunnelStrict,
-        ClickhouseFunnelStrictActors,
+        DatastoreFunnelStrict,
+        DatastoreFunnelStrictActors,
         _create_event,
         _create_action,
         _create_person,
@@ -48,7 +48,7 @@ class TestFunnelStrictStepsBreakdown(
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelStrict(filter, self.team)
+        funnel = DatastoreFunnelStrict(filter, self.team)
 
         people = journeys_for(
             {
@@ -157,10 +157,10 @@ class TestFunnelStrictStepsBreakdown(
 
 
 class TestFunnelStrictStepsConversionTime(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_conversion_time_test_factory(  # type: ignore
-        ClickhouseFunnelStrict,
-        ClickhouseFunnelStrictActors,
+        DatastoreFunnelStrict,
+        DatastoreFunnelStrictActors,
         _create_event,
         _create_person,
     ),
@@ -169,12 +169,12 @@ class TestFunnelStrictStepsConversionTime(
     pass
 
 
-class TestFunnelStrictSteps(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelStrictSteps(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actor_ids_at_step(self, filter, funnel_step, breakdown_value=None):
         person_filter = filter.shallow_clone({"funnel_step": funnel_step, "funnel_step_breakdown": breakdown_value})
-        _, serialized_result, _ = ClickhouseFunnelStrictActors(person_filter, self.team).get_actors()
+        _, serialized_result, _ = DatastoreFunnelStrictActors(person_filter, self.team).get_actors()
 
         return [val["id"] for val in serialized_result]
 
@@ -190,7 +190,7 @@ class TestFunnelStrictSteps(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel = ClickhouseFunnelStrict(filter, self.team)
+        funnel = DatastoreFunnelStrict(filter, self.team)
 
         person1_stopped_after_signup = _create_person(
             distinct_ids=["stopped_after_signup1"],
@@ -339,7 +339,7 @@ class TestFunnelStrictSteps(ClickhouseTestMixin, APIBaseTest):
         }
 
         filter = Filter(data=filters)
-        funnel = ClickhouseFunnelStrict(filter, self.team)
+        funnel = DatastoreFunnelStrict(filter, self.team)
 
         person1_stopped_after_signup = _create_person(distinct_ids=["stopped_after_signup1"], team_id=self.team.pk)
         _create_event(team=self.team, event="user signed up", distinct_id="stopped_after_signup1")
@@ -519,7 +519,7 @@ class TestFunnelStrictSteps(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        funnel = ClickhouseFunnelStrict(filter, self.team)
+        funnel = DatastoreFunnelStrict(filter, self.team)
 
         person1_stopped_after_signup = _create_person(distinct_ids=["stopped_after_signup1"], team_id=self.team.pk)
         _create_event(

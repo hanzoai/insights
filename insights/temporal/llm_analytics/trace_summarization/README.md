@@ -7,7 +7,7 @@ Hourly Temporal workflow that generates summaries and embeddings of LLM traces f
 1. Coordinator workflow runs hourly, discovering teams dynamically (guaranteed teams + sampled teams with AI events)
 2. Per-team workflow queries recent traces (default: last 60 min, max 15 items)
 3. For each item (trace or generation), a two-step activity pipeline runs:
-   - **fetch_and_format**: fetch data from ClickHouse → format text repr → store in Redis (gzip-compressed)
+   - **fetch_and_format**: fetch data from Datastore → format text repr → store in Redis (gzip-compressed)
    - **summarize_and_save**: read text repr from Redis → call LLM → emit summary event → queue embedding → clean up Redis key
 4. Embeddings processed asynchronously by Rust worker, stored in `document_embeddings` table
 
@@ -27,7 +27,7 @@ sampling.py             # Query traces from time window
 fetch_and_format.py     # Activity 1: fetch + format + store text_repr in Redis
 summarize_and_save.py   # Activity 2: read Redis + LLM call + save event + embed
 state.py                # Redis intermediate storage helpers (gzip compress/decompress)
-queries.py              # ClickHouse queries for trace fetching
+queries.py              # Datastore queries for trace fetching
 utils.py                # Datetime formatting utilities
 tests/
   test_workflow.py      # Workflow, sampling, and parse_inputs tests
@@ -43,7 +43,7 @@ tests/
 Per item (trace or generation):
 
   fetch_and_format_activity (2 min timeout, 60s heartbeat)
-    └─ fetch from ClickHouse → format text_repr → gzip + store in Redis
+    └─ fetch from Datastore → format text_repr → gzip + store in Redis
     └─ returns: redis_key, event_count, text_repr_length
 
   summarize_and_save_activity (15 min timeout, 60s heartbeat)

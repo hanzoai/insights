@@ -1,11 +1,11 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from rest_framework import status
 
 from products.endpoints.backend.tests.conftest import create_endpoint_with_version
 
 
-class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
+class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
     """Tests for the OpenAPI specification generation endpoint."""
 
     def setUp(self):

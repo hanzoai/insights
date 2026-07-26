@@ -73,7 +73,7 @@ class RawPersonDistinctIdsTable(Table):
         "version": IntegerDatabaseField(name="version", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_distinct_id2"
 
     def to_printed_insightsql(self):
@@ -86,7 +86,7 @@ class PersonDistinctIdsTable(LazyTable):
     def lazy_select(self, table_to_add: LazyTableToAdd, context, node):
         return select_from_person_distinct_ids_table(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_distinct_id2"
 
     def to_printed_insightsql(self):

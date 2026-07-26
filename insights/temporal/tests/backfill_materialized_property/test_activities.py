@@ -6,7 +6,7 @@ import pytest
 from insights.test.base import _create_event, flush_persons_and_events
 from unittest.mock import patch
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import MaterializedColumnSlotState
 from insights.models.property_definition import PropertyType
 from insights.temporal.backfill_materialized_property.activities import (
@@ -172,8 +172,8 @@ class TestUpdateSlotState:
 
 
 @pytest.mark.django_db(transaction=True)
-class TestBackfillMaterializedColumnClickHouse:
-    """Integration tests that run against real ClickHouse."""
+class TestBackfillMaterializedColumnDatastore:
+    """Integration tests that run against real Datastore."""
 
     @pytest.mark.parametrize(
         "property_type,property_value,mat_column,expected_value",
@@ -194,7 +194,7 @@ class TestBackfillMaterializedColumnClickHouse:
         expected_value,
     ):
         """
-        Test that backfill activity actually populates dmat columns in ClickHouse.
+        Test that backfill activity actually populates dmat columns in Datastore.
 
         1. Insert event with property (dmat column will be empty)
         2. Run backfill activity
@@ -249,7 +249,7 @@ class TestBackfillMaterializedColumnClickHouse:
         ],
     )
     def test_backfill_handles_special_characters_in_property_name(self, team, activity_environment, property_name):
-        """Test that property names with special characters work correctly in ClickHouse."""
+        """Test that property names with special characters work correctly in Datastore."""
         expected_value = "test_value"
         event_uuid = _create_event(
             team=team,

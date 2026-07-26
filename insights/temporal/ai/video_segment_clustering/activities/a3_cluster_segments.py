@@ -41,7 +41,7 @@ class _ClusteringResultWithCentroids:
 async def cluster_segments_activity(inputs: ClusterSegmentsActivityInputs) -> ClusteringResult:
     """Cluster video segments by semantic similarity.
 
-    Fetches embeddings from ClickHouse, then clusters them using one of two algorithms:
+    Fetches embeddings from Datastore, then clusters them using one of two algorithms:
 
     For small-volume teams (segment count < 200): Agglomerative clustering
     - Builds clusters bottom-up by merging similar pairs

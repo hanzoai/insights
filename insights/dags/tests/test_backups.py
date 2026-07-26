@@ -13,8 +13,8 @@ from clickhouse_driver import Client
 from dagster_aws.s3 import S3Resource
 
 from insights import settings
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.client.connection import Workload
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.backups import (
     Backup,
     BackupConfig,
@@ -179,7 +179,7 @@ def test_get_latest_successful_backup_fails():
 
 
 def run_backup_test(
-    cluster: ClickhouseCluster,
+    cluster: DatastoreCluster,
     job: dagster.JobDefinition,
     job_config: BackupConfig,
     sharded: bool = False,
@@ -207,7 +207,7 @@ def run_backup_test(
             TO S3('http://objectstorage:19000/{bucket_name}/{database}/person_distinct_id_overrides/{shard}/full-{date}')
             """.format(
                 bucket_name=bucket_name,
-                database=settings.CLICKHOUSE_DATABASE,
+                database=settings.DATASTORE_DATABASE,
                 shard="noshard" if not sharded else "1",
                 date=date,
             )
@@ -240,7 +240,7 @@ def run_backup_test(
         aws_secret_access_key="object_storage_root_password",
     )
     with (
-        patch("django.conf.settings.CLICKHOUSE_BACKUPS_BUCKET", bucket_name),
+        patch("django.conf.settings.DATASTORE_BACKUPS_BUCKET", bucket_name),
         patch.object(Backup, "_bucket_base_path", return_value=f"http://objectstorage:19000/{bucket_name}"),
     ):
         # Prepare needed data before running the job
@@ -279,9 +279,9 @@ def run_backup_test(
         assert all(status == "BACKUP_CREATED" for status in statuses), "Backup statuses are not all BACKUP_CREATED"
 
 
-def test_full_non_sharded_backup(cluster: ClickhouseCluster):
+def test_full_non_sharded_backup(cluster: DatastoreCluster):
     config = BackupConfig(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table="person_distinct_id_overrides",
         incremental=False,
         workload=Workload.ONLINE,
@@ -295,9 +295,9 @@ def test_full_non_sharded_backup(cluster: ClickhouseCluster):
     )
 
 
-def test_full_sharded_backup(cluster: ClickhouseCluster):
+def test_full_sharded_backup(cluster: DatastoreCluster):
     config = BackupConfig(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table="person_distinct_id_overrides",
         incremental=False,
         workload=Workload.ONLINE,
@@ -311,9 +311,9 @@ def test_full_sharded_backup(cluster: ClickhouseCluster):
     )
 
 
-def test_incremental_non_sharded_backup(cluster: ClickhouseCluster):
+def test_incremental_non_sharded_backup(cluster: DatastoreCluster):
     config = BackupConfig(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table="person_distinct_id_overrides",
         incremental=True,
         workload=Workload.ONLINE,
@@ -327,9 +327,9 @@ def test_incremental_non_sharded_backup(cluster: ClickhouseCluster):
     )
 
 
-def test_incremental_sharded_backup(cluster: ClickhouseCluster):
+def test_incremental_sharded_backup(cluster: DatastoreCluster):
     config = BackupConfig(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table="person_distinct_id_overrides",
         incremental=True,
         workload=Workload.ONLINE,

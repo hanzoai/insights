@@ -5,7 +5,7 @@ description: 'MANDATORY first step before any Insights data retrieval. Must be i
 
 # Querying data in Insights
 
-Use the `insights:execute-sql` MCP tool to execute InsightsQL queries. InsightsQL is Insights's variant of SQL that supports most of ClickHouse SQL. We use terms "InsightsQL" and "SQL" interchangeably.
+Use the `insights:execute-sql` MCP tool to execute InsightsQL queries. InsightsQL is Insights's variant of SQL that supports most of Datastore SQL. We use terms "InsightsQL" and "SQL" interchangeably.
 
 Do not assume that data exists. Use the SQL tool proactively to find the right data.
 
@@ -173,7 +173,7 @@ SELECT event, timestamp, distinct_id, properties FROM events ORDER BY timestamp 
 
 #### General guidelines
 
-Keep in mind that the right expression is loaded in memory when joining data in ClickHouse, so the joining query or table must always fit in memory. Common strategies:
+Keep in mind that the right expression is loaded in memory when joining data in Datastore, so the joining query or table must always fit in memory. Common strategies:
 
 - Analytical functions and combinators.
 - Subqueries as a source or filter.

@@ -34,7 +34,7 @@ from insights.kafka_client.topics import KAFKA_APP_METRICS2
 from insights.models.team.team import Team
 from insights.settings.base_variables import TEST
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.common.client import connect
 from insights.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -174,7 +174,7 @@ def generate_query_ranges(
 
 
 def iter_records(
-    client: ClickHouseClient,
+    client: DatastoreClient,
     team_id: int,
     interval_start: str | None,
     interval_end: str,
@@ -191,13 +191,13 @@ def iter_records(
     TODO: this can be removed once HTTP batch exports are migrated to new pipeline.
 
     Args:
-        client: The ClickHouse client used to query for the batch records.
+        client: The Datastore client used to query for the batch records.
         team_id: The ID of the team whose data we are querying.
         interval_start: The beginning of the batch export interval.
         interval_end: The end of the batch export interval.
         exclude_events: Optionally, any event names that should be excluded.
         include_events: Optionally, the event names that should only be included in the export.
-        fields: The fields that will be queried from ClickHouse. Will call default_fields if not set.
+        fields: The fields that will be queried from Datastore. Will call default_fields if not set.
         extra_query_parameters: A dictionary of additional query parameters to pass to the query execution.
             Useful if fields contains any fields with placeholders.
 

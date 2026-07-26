@@ -98,7 +98,7 @@ class TestUser(BaseTest):
             self.assertEqual(
                 user_2.get_analytics_metadata(),
                 {
-                    "realm": "hosted-clickhouse",
+                    "realm": "hosted-datastore",
                     "anonymize_data": False,
                     "email": "test_org_2@hanzo.ai",
                     "is_signed_up": True,

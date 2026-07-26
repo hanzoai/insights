@@ -1,6 +1,6 @@
-from insights.clickhouse.kafka_engine import kafka_engine
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree
-from insights.settings.data_stores import CLICKHOUSE_SINGLE_SHARD_CLUSTER
+from insights.datastore.kafka_engine import kafka_engine
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree
+from insights.settings.data_stores import DATASTORE_SINGLE_SHARD_CLUSTER
 
 COHORT_MEMBERSHIP_TABLE = "cohort_membership"
 COHORT_MEMBERSHIP_WRITABLE_TABLE = f"writable_{COHORT_MEMBERSHIP_TABLE}"
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 ) ENGINE = {engine}
 """.format(
         table_name=COHORT_MEMBERSHIP_WRITABLE_TABLE,
-        engine=Distributed(data_table=COHORT_MEMBERSHIP_TABLE, cluster=CLICKHOUSE_SINGLE_SHARD_CLUSTER),
+        engine=Distributed(data_table=COHORT_MEMBERSHIP_TABLE, cluster=DATASTORE_SINGLE_SHARD_CLUSTER),
     )
 
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 ) ENGINE = {engine}
 """.format(
         table_name=COHORT_MEMBERSHIP_KAFKA_TABLE,
-        engine=kafka_engine(topic="cohort_membership_changed", group="clickhouse_cohort_membership_changed"),
+        engine=kafka_engine(topic="cohort_membership_changed", group="datastore_cohort_membership_changed"),
     )
 
 

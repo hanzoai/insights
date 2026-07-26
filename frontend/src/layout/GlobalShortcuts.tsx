@@ -61,9 +61,9 @@ export function GlobalShortcuts(): null {
     })
 
     useAppShortcut({
-        name: 'DebugClickhouseQueries',
+        name: 'DebugDatastoreQueries',
         keybind: [['command', 'option', 'tab']],
-        intent: 'Debug clickhouse queries',
+        intent: 'Debug datastore queries',
         interaction: 'function',
         callback: openCHQueriesDebugModal,
         disabled: !superpowersEnabled,

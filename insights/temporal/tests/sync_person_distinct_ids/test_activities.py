@@ -344,7 +344,7 @@ class TestSyncDistinctIdsToCh:
         assert result.distinct_ids_synced == 2
         assert result.persons_synced == 1
 
-        # Verify each distinct ID has its correct version in ClickHouse
+        # Verify each distinct ID has its correct version in Datastore
         ch_did1 = get_ch_distinct_id(self.team.id, did1)
         ch_did2 = get_ch_distinct_id(self.team.id, did2)
 
@@ -419,7 +419,7 @@ class TestMarkChOnlyOrphansDeleted:
         """Person with high version should still be marked as deleted.
 
         The version used for deletion must be higher than the person's current
-        version, otherwise ClickHouse's ReplacingMergeTree will keep the old
+        version, otherwise Datastore's ReplacingMergeTree will keep the old
         (non-deleted) record.
         """
         person_uuid = str(uuid.uuid4())

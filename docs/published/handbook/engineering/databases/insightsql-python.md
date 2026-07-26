@@ -7,7 +7,7 @@ showTitle: true
 > ❗️ This guide is intended only for development of Insights itself.
 > If you're looking for documentation on writing InsightsQL (or SQL) queries, go to the [SQL](https://hanzo.ai/docs/sql) docs.
 
-InsightsQL is our layer on top of ClickHouse SQL which provides nice features such as:
+InsightsQL is our layer on top of Datastore SQL which provides nice features such as:
 
 - Automatic person/group/etc property joins depending on the team/context
 - Customisable database schema per team
@@ -117,7 +117,7 @@ class EventsTable(Table):
     person_id: FieldTraverser = FieldTraverser(chain=["pdi", "person_id"])
 ```
 
-If you access `pdi.person.properties.$browser`, we make a join via `persons` (this is a InsightsQL table name, not ClickHouse name). We do a bunch of `argmax` magic in the join, and inline all accessed properties within the subquery for performance. For the user, it looks just like simple property access.
+If you access `pdi.person.properties.$browser`, we make a join via `persons` (this is a InsightsQL table name, not Datastore name). We do a bunch of `argmax` magic in the join, and inline all accessed properties within the subquery for performance. For the user, it looks just like simple property access.
 
 If you access `poe.properties.$browser`, we will actually access the field `person_properties` on the events table.
 

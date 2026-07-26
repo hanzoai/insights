@@ -6,7 +6,7 @@ from insights.models.utils import UUIDModel
 class SurveyResponseArchive(UUIDModel):
     """
     Separate table to track archived survey responses, since survey results are
-    stored as ClickHouse events
+    stored as Datastore events
     """
 
     team = models.ForeignKey(
@@ -21,7 +21,7 @@ class SurveyResponseArchive(UUIDModel):
         related_name="response_archives",
         related_query_name="response_archive",
     )
-    response_uuid = models.UUIDField(help_text="UUID of the ClickHouse event representing the survey response")
+    response_uuid = models.UUIDField(help_text="UUID of the Datastore event representing the survey response")
     archived_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

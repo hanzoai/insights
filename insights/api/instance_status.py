@@ -105,7 +105,7 @@ class InstanceStatusViewSet(viewsets.ViewSet):
                     }
                 )
 
-            from insights.clickhouse.system_status import system_status
+            from insights.datastore.system_status import system_status
 
             metrics.extend(list(system_status()))
 
@@ -196,7 +196,7 @@ class InstanceStatusViewSet(viewsets.ViewSet):
     @action(methods=["GET"], detail=False)
     def navigation(self, request: Request) -> Response:
         # Import here to avoid circular import
-        from insights.clickhouse.system_status import dead_letter_queue_ratio_ok_cached
+        from insights.datastore.system_status import dead_letter_queue_ratio_ok_cached
 
         return Response(
             {
@@ -218,10 +218,10 @@ class InstanceStatusViewSet(viewsets.ViewSet):
     def queries(self, request: Request) -> Response:
         queries = {"postgres_running": self.get_postgres_running_queries()}
 
-        from insights.clickhouse.system_status import get_clickhouse_running_queries, get_clickhouse_slow_log
+        from insights.datastore.system_status import get_datastore_running_queries, get_datastore_slow_log
 
-        queries["clickhouse_running"] = get_clickhouse_running_queries()
-        queries["clickhouse_slow_log"] = get_clickhouse_slow_log()
+        queries["datastore_running"] = get_datastore_running_queries()
+        queries["datastore_slow_log"] = get_datastore_slow_log()
 
         return Response({"results": queries})
 

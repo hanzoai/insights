@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use chrono::{DateTime, Duration, Utc};
 use common_types::{
     format::{format_ch_datetime, parse_datetime_assuming_utc},
-    CapturedEvent, ClickHouseEvent, PersonMode, RawEvent, Team,
+    CapturedEvent, DatastoreEvent, PersonMode, RawEvent, Team,
 };
 use serde_json::Value;
 
@@ -24,7 +24,7 @@ pub fn prepare_events(
 
     for (i, event) in events.into_iter().enumerate() {
         match event {
-            IncomingEvent::ClickhouseReady(event) => {
+            IncomingEvent::DatastoreReady(event) => {
                 buffer.push(Ok(event));
             }
             IncomingEvent::Captured(outer) => {
@@ -105,7 +105,7 @@ fn transform_event(
     timestamp: DateTime<Utc>,
     person_mode: PersonMode,
     team: &Team,
-) -> ClickHouseEvent {
+) -> DatastoreEvent {
     if team.anonymize_ips {
         raw_event.properties.remove("$ip");
     } else {
@@ -153,7 +153,7 @@ fn transform_event(
 
     let timestamp = timestamp.unwrap_or(now);
 
-    let mut event = ClickHouseEvent {
+    let mut event = DatastoreEvent {
         uuid: outer.uuid,
         team_id: team.id,
         project_id: team.project_id,

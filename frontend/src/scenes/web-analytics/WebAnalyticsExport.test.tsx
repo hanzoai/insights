@@ -432,7 +432,7 @@ describe('WebAnalyticsExport adapters', () => {
             expect(result[0][25]).toBe('All')
         })
 
-        it('correctly converts ClickHouse day indices (1=Mon, 7=Sun) to standard format (0=Sun, 6=Sat)', () => {
+        it('correctly converts Datastore day indices (1=Mon, 7=Sun) to standard format (0=Sun, 6=Sat)', () => {
             const response: TrendsQueryResponse = {
                 results: [
                     {

@@ -1,7 +1,7 @@
 """This module contains an AST-to-AST transformation that converts queries on the `events` table to queries on predefined pre-aggregated tables.
 
 These tables are populated by a background process (running in dagster) that aggregates data from the `events` table,
-making heavy use of ClickHouse's -state suffix functions, like `uniqState`, to make the calculation at query time much faster.
+making heavy use of Datastore's -state suffix functions, like `uniqState`, to make the calculation at query time much faster.
 
 This is especially useful for queries from very large teams, as the query disk / memory / compute no longer scale linearly with the number of events.
 

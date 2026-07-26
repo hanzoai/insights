@@ -176,8 +176,8 @@ procs:
         shell: 'bin/wait-for-docker && bin/check_ducklake_up && bin/migrate --scope=postgres'
         capability: core_infra
 
-    migrate-clickhouse:
-        shell: 'bin/wait-for-docker && bin/check_ducklake_up && bin/migrate --scope=clickhouse'
+    migrate-datastore:
+        shell: 'bin/wait-for-docker && bin/check_ducklake_up && bin/migrate --scope=datastore'
         capability: core_infra
 
     migrate-cyclotron:

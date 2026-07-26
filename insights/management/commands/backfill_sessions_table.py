@@ -9,8 +9,8 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.connection import Workload
+from insights.datastore.client.execute import sync_execute
 from insights.models.property.util import get_property_string_expr
 
 logger = structlog.get_logger(__name__)

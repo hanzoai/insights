@@ -120,7 +120,7 @@ PreaggregationJob.objects.create(
 
 ---
 
-### Step 6: Run INSERT into ClickHouse
+### Step 6: Run INSERT into Datastore
 
 The lazy computation system wraps the SELECT query in an INSERT and executes it:
 
@@ -247,7 +247,7 @@ GROUP BY variant
 | `experiment_query_builder.py`                                 | Builds the SQL query: `_build_exposure_select_query()` (events scan), `_build_exposure_from_precomputed()` (lazy-computed read), `get_exposure_query_for_precomputation()` (write template) |
 | `lazy_computation_executor.py`                                | Core lazy computation logic: `ensure_precomputed()`, job management                                                                                                                         |
 | `models/preaggregation_job.py`                                | PostgreSQL model for tracking computation jobs                                                                                                                                              |
-| `insightsql/database/schema/experiment_exposures_preaggregated.py` | InsightsQL schema for the lazy-computed ClickHouse table                                                                                                                                         |
+| `insightsql/database/schema/experiment_exposures_preaggregated.py` | InsightsQL schema for the lazy-computed Datastore table                                                                                                                                         |
 
 ---
 
@@ -257,7 +257,7 @@ GROUP BY variant
 
 2. **Query hash determines cache sharing**: Different feature flags, variants, or exposure criteria produce different hashes. Each experiment typically has its own lazy-computed data.
 
-3. **TTL and expiration**: Jobs use variable TTL based on data age (current day: 15 min, yesterday: 1 hour, older: 60 days). This avoids recomputing frozen historical data. The system ignores jobs expiring within 1 hour to avoid race conditions. ClickHouse TTL automatically deletes expired rows.
+3. **TTL and expiration**: Jobs use variable TTL based on data age (current day: 15 min, yesterday: 1 hour, older: 60 days). This avoids recomputing frozen historical data. The system ignores jobs expiring within 1 hour to avoid race conditions. Datastore TTL automatically deletes expired rows.
 
 4. **Fallback**: If precomputation fails or isn't ready, the query falls back to scanning the events table directly.
 

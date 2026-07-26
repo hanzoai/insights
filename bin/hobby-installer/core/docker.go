@@ -236,9 +236,9 @@ func CheckDockerVolumes() (bool, bool) {
 	}
 
 	hasPostgres := strings.Contains(out, "postgres-data")
-	hasClickhouse := strings.Contains(out, "clickhouse-data")
+	hasDatastore := strings.Contains(out, "datastore-data")
 
-	return hasPostgres, hasClickhouse
+	return hasPostgres, hasDatastore
 }
 
 func AddUserToDockerGroup(user string) error {

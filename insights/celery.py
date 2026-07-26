@@ -144,17 +144,17 @@ def on_worker_start(**kwargs) -> None:
     _initialize_worker_metrics()
 
 
-# Set up clickhouse query instrumentation
+# Set up datastore query instrumentation
 @task_prerun.connect
 def prerun_signal_handler(task_id, task, **kwargs):
     from statshog.defaults.django import statsd
 
-    from insights.clickhouse.client.connection import Workload, set_default_clickhouse_workload_type
-    from insights.clickhouse.query_tagging import tag_queries
+    from insights.datastore.client.connection import Workload, set_default_datastore_workload_type
+    from insights.datastore.query_tagging import tag_queries
 
     statsd.incr("celery_tasks_metrics.pre_run", tags={"name": task.name})
     tag_queries(kind="celery", id=task.name)
-    set_default_clickhouse_workload_type(Workload.OFFLINE)
+    set_default_datastore_workload_type(Workload.OFFLINE)
 
     task_timings[task_id] = time.time()
 
@@ -163,7 +163,7 @@ def prerun_signal_handler(task_id, task, **kwargs):
 
 @task_postrun.connect
 def postrun_signal_handler(task_id, task, **kwargs):
-    from insights.clickhouse.query_tagging import reset_query_tags
+    from insights.datastore.query_tagging import reset_query_tags
 
     if task_id in task_timings:
         start_time = task_timings.pop(task_id, None)

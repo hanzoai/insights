@@ -1,6 +1,6 @@
 from freezegun import freeze_time
 from insights.test.base import (
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     NonAtomicBaseTest,
     _create_event,
     _create_person,
@@ -28,7 +28,7 @@ from products.error_tracking.backend.tools.search_issues import SearchErrorTrack
 
 
 @freeze_time("2025-01-15T12:00:00Z")
-class TestSearchErrorTrackingIssuesTool(ClickhouseTestMixin, NonAtomicBaseTest):
+class TestSearchErrorTrackingIssuesTool(DatastoreTestMixin, NonAtomicBaseTest):
     CLASS_DATA_LEVEL_SETUP = False
 
     distinct_id_one = "user_1"

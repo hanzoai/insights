@@ -51,8 +51,8 @@ from insights.caching.insights_api import (
     REAL_TIME_INSIGHT_REFRESH_INTERVAL,
     REDUCED_MINIMUM_INSIGHT_REFRESH_INTERVAL,
 )
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import QueryTags
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import QueryTags
 from insights.insightsql_queries.insights.trends.breakdown import (
     BREAKDOWN_NULL_DISPLAY,
     BREAKDOWN_NULL_STRING_LABEL,
@@ -1018,7 +1018,7 @@ class TrendsQueryRunner(AnalyticsQueryRunner[TrendsQueryResponse]):
             if breakdown_key not in dict(table_or_view.columns):
                 return False
 
-            field_type = dict(table_or_view.columns)[breakdown_key]["clickhouse"]
+            field_type = dict(table_or_view.columns)[breakdown_key]["datastore"]
 
             if field_type.startswith("Nullable("):
                 field_type = field_type.replace("Nullable(", "")[:-1]

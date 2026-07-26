@@ -41,10 +41,10 @@ antlr -Dlanguage=Python3 InsightsQLLexer.g4
 antlr -visitor -Dlanguage=Python3 InsightsQLParser.g4
 ```
 
-Original ClickHouse ANTLR grammar from: https://github.com/hanzoai/datastore/blob/main/utils/antlr/ClickHouseParser.g4
+Original Datastore ANTLR grammar from: https://github.com/hanzoai/datastore/blob/main/utils/antlr/DatastoreParser.g4
 
-Changes with ClickHouse's grammar:
+Changes with Datastore's grammar:
 
 - removed all statements except for "select"
-- raises an error if you run some ClickHouse SQL query features that are not implemented yet (ever changing list, check the code)
+- raises an error if you run some Datastore SQL query features that are not implemented yet (ever changing list, check the code)
 - supports placeholders like "team_id = {val1}"
