@@ -69,7 +69,6 @@ export const appScenes: Record<Scene | string, () => any> = {
     [Scene.MarketingAnalytics]: () => import('./marketing-analytics/MarketingAnalyticsScene'),
     [Scene.Max]: () => import('./max/Max'),
     [Scene.Models]: () => import('./models/ModelsScene'),
-    [Scene.MoveToInsightsCloud]: () => import('./moveToInsightsCloud/MoveToInsightsCloud'),
     [Scene.NewTab]: () => import('./new-tab/NewTabScene'),
     [Scene.Notebook]: () => import('./notebooks/NotebookScene'),
     [Scene.Notebooks]: () => import('./notebooks/NotebooksScene'),
