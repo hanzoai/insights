@@ -68,7 +68,7 @@ describe('aiEventsUtils', () => {
             expect(result).toBe(true)
         })
 
-        it('falls back to ClickHouse when EventDefinition is stale', async () => {
+        it('falls back to Datastore when EventDefinition is stale', async () => {
             const staleDate = dayjs().subtract(60, 'day').toISOString()
 
             useMocks({
@@ -96,7 +96,7 @@ describe('aiEventsUtils', () => {
             expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
-        it('falls back to ClickHouse when no EventDefinition exists', async () => {
+        it('falls back to Datastore when no EventDefinition exists', async () => {
             useMocks({
                 get: {
                     '/api/projects/:team_id/event_definitions/': {
@@ -116,7 +116,7 @@ describe('aiEventsUtils', () => {
             expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
-        it('returns false when neither Postgres nor ClickHouse has AI events', async () => {
+        it('returns false when neither Postgres nor Datastore has AI events', async () => {
             useMocks({
                 get: {
                     '/api/projects/:team_id/event_definitions/': {
@@ -163,7 +163,7 @@ describe('aiEventsUtils', () => {
             expect(insightsqlQuerySpy).toHaveBeenCalled()
         })
 
-        it('handles null results from ClickHouse gracefully', async () => {
+        it('handles null results from Datastore gracefully', async () => {
             useMocks({
                 get: {
                     '/api/projects/:team_id/event_definitions/': {
@@ -182,7 +182,7 @@ describe('aiEventsUtils', () => {
             expect(result).toBe(false)
         })
 
-        it('handles undefined results from ClickHouse gracefully', async () => {
+        it('handles undefined results from Datastore gracefully', async () => {
             useMocks({
                 get: {
                     '/api/projects/:team_id/event_definitions/': {

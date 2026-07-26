@@ -7,7 +7,7 @@ from django.utils.timezone import now
 
 from dateutil.parser import isoparse
 
-from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_GROUPS
 from insights.models.filters.utils import GroupTypeIndex
 from insights.models.group.group import Group
@@ -23,10 +23,10 @@ def raw_create_group_ch(
     timestamp: Optional[datetime.datetime] = None,
     sync: bool = False,
 ):
-    """Create ClickHouse-only Group record.
+    """Create Datastore-only Group record.
 
     DON'T USE DIRECTLY - `create_group` is the correct option,
-    unless you specifically want to sync Postgres state from ClickHouse yourself."""
+    unless you specifically want to sync Postgres state from Datastore yourself."""
     if timestamp is None:
         timestamp = now().astimezone(ZoneInfo("UTC"))
     data = {
@@ -37,7 +37,7 @@ def raw_create_group_ch(
         "created_at": created_at.strftime("%Y-%m-%d %H:%M:%S.%f"),
         "_timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_GROUPS, sql=INSERT_GROUP_SQL, data=data, sync=sync)
 
 
@@ -49,13 +49,13 @@ def create_group(
     timestamp: Optional[Union[datetime.datetime, str]] = None,
     sync: bool = False,
 ) -> Group:
-    """Create proper Group record (ClickHouse + Postgres)."""
+    """Create proper Group record (Datastore + Postgres)."""
     if not properties:
         properties = {}
     if not timestamp:
         timestamp = now()
 
-    # clickhouse specific formatting
+    # datastore specific formatting
     if isinstance(timestamp, str):
         timestamp = isoparse(timestamp)
     else:

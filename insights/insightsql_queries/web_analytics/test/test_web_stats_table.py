@@ -6,11 +6,11 @@ import unittest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 import numpy as np
@@ -73,8 +73,8 @@ class FloatAwareTestCase(unittest.TestCase):
             super().assertEqual(a, b, f"{msg or ''} Mismatch at {path}")
 
 
-@snapshot_clickhouse_queries
-class TestWebStatsTableQueryRunner(ClickhouseTestMixin, APIBaseTest, FloatAwareTestCase):
+@snapshot_datastore_queries
+class TestWebStatsTableQueryRunner(DatastoreTestMixin, APIBaseTest, FloatAwareTestCase):
     QUERY_TIMESTAMP = "2025-01-29"
 
     def _calculate_pageview_statistics(self, groups_of_pageviews: list[list[PageViewProperties]]):

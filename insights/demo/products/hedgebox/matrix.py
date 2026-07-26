@@ -44,7 +44,7 @@ from insights.schema import (
     TrendsQuery,
 )
 
-from insights.clickhouse.client import query_with_columns
+from insights.datastore.client import query_with_columns
 from insights.constants import PAGEVIEW_EVENT
 from insights.demo.matrix.matrix import Cluster, Matrix
 from insights.demo.matrix.randomization import Industry

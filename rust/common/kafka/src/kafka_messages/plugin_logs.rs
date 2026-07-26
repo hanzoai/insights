@@ -69,7 +69,7 @@ where
 {
     if msg.len() > 50_000 {
         return Err(serde::ser::Error::custom(
-            "Message is too long for ClickHouse",
+            "Message is too long for Datastore",
         ));
     }
 
@@ -121,6 +121,6 @@ mod tests {
         };
 
         let err = serde_json::to_string(&log_entry).unwrap_err();
-        assert_eq!(err.to_string(), "Message is too long for ClickHouse");
+        assert_eq!(err.to_string(), "Message is too long for Datastore");
     }
 }

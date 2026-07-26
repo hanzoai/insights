@@ -1,13 +1,13 @@
 import { KafkaProducerWrapper, TopicMessage } from '../../kafka/producer'
-import { ClickHouseTimestamp } from '../../types'
+import { DatastoreTimestamp } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { ConsoleLogLevel } from '../rrweb-types'
 import { SessionBatchMetrics } from './metrics'
 import { ConsoleLogEntry, SessionConsoleLogStore } from './session-console-log-store'
 
-// Helper to create a ClickHouseTimestamp for testing
-const makeTimestamp = (isoString: string): ClickHouseTimestamp => {
-    return isoString as unknown as ClickHouseTimestamp
+// Helper to create a DatastoreTimestamp for testing
+const makeTimestamp = (isoString: string): DatastoreTimestamp => {
+    return isoString as unknown as DatastoreTimestamp
 }
 
 jest.mock('./metrics', () => ({

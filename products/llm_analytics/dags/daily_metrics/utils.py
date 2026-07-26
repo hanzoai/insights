@@ -20,7 +20,7 @@ def get_llma_events_cte(metric_date: str) -> str:
     """
     Generate CTEs that pre-filter events to only relevant teams for a single day.
 
-    This two-step approach (first find teams, then filter events) allows ClickHouse
+    This two-step approach (first find teams, then filter events) allows Datastore
     to use the sorting key (team_id, toDate(timestamp)) more efficiently.
 
     Uses SAMPLE 0.1 (10%) as a safety mechanism to limit query scope.

@@ -21,7 +21,7 @@ from insights.insightsql.constants import InsightsQLGlobalSettings, LimitContext
 from insights.insightsql.parser import parse_expr, parse_order_expr, parse_select
 from insights.insightsql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
@@ -326,11 +326,11 @@ class LogsQueryRunnerMixin(QueryRunner):
             op = ">" if self.query.orderBy == "earliest" else "<"
             ts_op = ">=" if self.query.orderBy == "earliest" else "<="
             # The logs table is sorted by (team_id, time_bucket, ..., timestamp) where
-            # time_bucket = toStartOfDay(timestamp). ClickHouse only prunes efficiently when
+            # time_bucket = toStartOfDay(timestamp). Datastore only prunes efficiently when
             # the WHERE clause matches the sorting key. A tuple comparison like
             # (timestamp, uuid) < (x, y) won't trigger pruning.
             # We add explicit scalar bounds on both time_bucket and timestamp to ensure
-            # ClickHouse can use the primary index and skip irrelevant parts.
+            # Datastore can use the primary index and skip irrelevant parts.
             exprs.append(
                 parse_expr(
                     f"time_bucket {ts_op} toStartOfDay({{cursor_ts}})",

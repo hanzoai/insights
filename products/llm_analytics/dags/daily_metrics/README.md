@@ -1,6 +1,6 @@
 # LLMA Daily Metrics Pipeline
 
-Daily aggregation of AI event metrics into the `llma_metrics_daily` ClickHouse
+Daily aggregation of AI event metrics into the `llma_metrics_daily` Datastore
 table.
 
 ## Overview
@@ -36,7 +36,7 @@ The following CTEs are automatically provided:
 - `llma_events`: AI events pre-filtered to teams with AI activity
 - `llma_pageview_events`: Pageview events pre-filtered to teams viewing LLM analytics pages
 
-This two-step filtering (first find teams, then filter events) allows ClickHouse to
+This two-step filtering (first find teams, then filter events) allows Datastore to
 use the sorting key (team_id, timestamp) efficiently.
 
 Templates have access to these Jinja2 variables:
@@ -145,10 +145,10 @@ Runs daily at 6 AM UTC for the previous day's partition.
 
 ## Local Development
 
-Query results in ClickHouse:
+Query results in Datastore:
 
 ```bash
-docker exec insights-clickhouse-1 clickhouse-client --query \
+docker exec insights-datastore-1 datastore-client --query \
   "SELECT * FROM llma_metrics_daily WHERE date = today() FORMAT Pretty"
 ```
 

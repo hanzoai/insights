@@ -1,11 +1,11 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Person, PersonalAPIKey, SessionRecording
 from insights.models.personal_api_key import hash_key_value
 from insights.models.utils import generate_random_token_personal, uuid7
@@ -14,7 +14,7 @@ from insights.session_recordings.queries.test.session_replay_sql import produce_
 from insights.storage.recordings.errors import RecordingDeletedError
 
 
-class TestSessionRecordingSnapshotsAPI(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest):
+class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 

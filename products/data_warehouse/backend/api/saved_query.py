@@ -50,7 +50,7 @@ from products.data_warehouse.backend.data_load.saved_query_service import (
     unpause_saved_query_schedule,
 )
 from products.data_warehouse.backend.models import (
-    CLICKHOUSE_INSIGHTSQL_MAPPING,
+    DATASTORE_INSIGHTSQL_MAPPING,
     DataModelingJob,
     DataWarehouseJoin,
     DataWarehouseModelPath,
@@ -218,8 +218,8 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
                 else:
                     columns = {
                         str(item[0]): {
-                            "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
-                            "clickhouse": item[1],
+                            "insightsql": DATASTORE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
+                            "datastore": item[1],
                             "valid": True,
                         }
                         for item in client_types
@@ -326,8 +326,8 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
                     else:
                         columns = {
                             str(item[0]): {
-                                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
-                                "clickhouse": item[1],
+                                "insightsql": DATASTORE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
+                                "datastore": item[1],
                                 "valid": True,
                             }
                             for item in client_types
@@ -421,7 +421,7 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
             prepare_and_print_ast(
                 node=select_ast,
                 context=context,
-                dialect="clickhouse",
+                dialect="datastore",
                 stack=None,
                 settings=None,
             )

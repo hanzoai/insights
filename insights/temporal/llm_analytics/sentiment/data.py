@@ -1,6 +1,6 @@
 """Data access for sentiment classification.
 
-Fetches $ai_generation events from ClickHouse via InsightsQL and groups
+Fetches $ai_generation events from Datastore via InsightsQL and groups
 results by trace_id for downstream processing.
 """
 

@@ -1,5 +1,5 @@
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 
 
 def PG_EMBEDDINGS_DATA_TABLE():

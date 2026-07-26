@@ -49,9 +49,9 @@ service_dependencies: dict[ServiceRole, list[str]] = {
         # NOTE: migrations run in a separate job before the version is even deployed. This check is unnecessary
         # "postgres_migrations_uptodate",
         "cache",
-        # NOTE: we do not include clickhouse for web, as even without clickhouse we
+        # NOTE: we do not include datastore for web, as even without datastore we
         # want to be able to display something to the user.
-        # "clickhouse"
+        # "datastore"
         # NOTE: we do not include "celery_broker" as web could still do lot's of
         # useful things
         # "celery_broker"
@@ -64,7 +64,7 @@ service_dependencies: dict[ServiceRole, list[str]] = {
         "postgres",
         # NOTE: migrations run in a separate job before the version is even deployed. This check is unnecessary
         # "postgres_migrations_uptodate",
-        "clickhouse",
+        "datastore",
         "celery_broker",
     ],
     "decide": ["http"],
@@ -135,7 +135,7 @@ def readyz(request: HttpRequest):
         return JsonResponse({"error": "InvalidRole"}, status=400)
 
     available_checks: dict[str, Callable] = {
-        "clickhouse": is_clickhouse_connected,
+        "datastore": is_datastore_connected,
         "postgres": is_postgres_connected,
         "postgres_flags": lambda: is_postgres_connected(DATABASE_FOR_FLAG_MATCHING),
         "postgres_migrations_uptodate": are_postgres_migrations_uptodate,
@@ -224,19 +224,19 @@ def are_postgres_migrations_uptodate() -> bool:
     return not plan
 
 
-def is_clickhouse_connected() -> bool:
+def is_datastore_connected() -> bool:
     """
-    Check we can ping the ClickHouse cluster.
+    Check we can ping the Datastore cluster.
 
     Returns `True` if so, `False` otherwise
     """
-    ping_url = urljoin(settings.CLICKHOUSE_HTTP_URL, "ping")
+    ping_url = urljoin(settings.DATASTORE_HTTP_URL, "ping")
     try:
-        # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation (internal health check to local ClickHouse, cert validation not required)
+        # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation (internal health check to local Datastore, cert validation not required)
         response = requests.get(ping_url, timeout=3, verify=False)
         response.raise_for_status()
     except Exception:
-        logger.debug("clickhouse_connection_failure", exc_info=True)
+        logger.debug("datastore_connection_failure", exc_info=True)
         return False
 
     return True

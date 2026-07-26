@@ -7,8 +7,8 @@ from typing import Optional
 import dagster
 from dagster import Array, Backoff, DagsterRunStatus, Field, Jitter, RetryPolicy, RunsFilter, SkipReason
 
-from insights.clickhouse.client.connection import NodeRole
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.client.connection import NodeRole
+from insights.datastore.cluster import DatastoreCluster
 from insights.settings.base_variables import DEBUG
 
 TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS = os.getenv("TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS", 1 if DEBUG else 2)
@@ -16,9 +16,9 @@ TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS = os.getenv("TEAM_ID_FOR_WEB_ANALYTICS_AS
 INTRA_DAY_HOURLY_CRON_SCHEDULE = os.getenv("WEB_PREAGGREGATED_INTRA_DAY_HOURLY_CRON_SCHEDULE", "*/20 * * * *")
 HISTORICAL_DAILY_CRON_SCHEDULE = os.getenv("WEB_PREAGGREGATED_HISTORICAL_DAILY_CRON_SCHEDULE", "0 1 * * *")
 
-WEB_PRE_AGGREGATED_CLICKHOUSE_TIMEOUT = os.getenv("WEB_PRE_AGGREGATED_CLICKHOUSE_TIMEOUT", "2200")
+WEB_PRE_AGGREGATED_DATASTORE_TIMEOUT = os.getenv("WEB_PRE_AGGREGATED_DATASTORE_TIMEOUT", "2200")
 
-# Dagster execution timeout constants (should be higher than ClickHouse timeouts)
+# Dagster execution timeout constants (should be higher than Datastore timeouts)
 DAGSTER_WEB_JOB_TIMEOUT = int(os.getenv("WEB_PREAGGREGATED_DAGSTER_JOB_TIMEOUT", "2400"))
 
 
@@ -29,9 +29,9 @@ web_analytics_retry_policy_def = RetryPolicy(
     jitter=Jitter.PLUS_MINUS,
 )
 
-# Shared ClickHouse settings for web analytics pre-aggregation
-WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS = {
-    "max_execution_time": WEB_PRE_AGGREGATED_CLICKHOUSE_TIMEOUT,
+# Shared Datastore settings for web analytics pre-aggregation
+WEB_PRE_AGGREGATED_DATASTORE_SETTINGS = {
+    "max_execution_time": WEB_PRE_AGGREGATED_DATASTORE_TIMEOUT,
     "max_bytes_before_external_group_by": "51474836480",
     "max_memory_usage": "107374182400",
     "distributed_aggregation_memory_efficient": "1",
@@ -40,14 +40,14 @@ WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS = {
 
 # Add higher partition limit for development environments (backfills)
 if DEBUG:
-    WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS["max_partitions_per_insert_block"] = "1000"
+    WEB_PRE_AGGREGATED_DATASTORE_SETTINGS["max_partitions_per_insert_block"] = "1000"
 
 
-def format_clickhouse_settings(settings_dict: dict[str, str]) -> str:
+def format_datastore_settings(settings_dict: dict[str, str]) -> str:
     return ",".join([f"{key}={value}" for key, value in settings_dict.items()])
 
 
-def merge_clickhouse_settings(base_settings: dict[str, str], extra_settings: Optional[str] = None) -> str:
+def merge_datastore_settings(base_settings: dict[str, str], extra_settings: Optional[str] = None) -> str:
     settings = base_settings.copy()
 
     if extra_settings:
@@ -57,12 +57,12 @@ def merge_clickhouse_settings(base_settings: dict[str, str], extra_settings: Opt
                 key, value = setting.strip().split("=", 1)
                 settings[key.strip()] = value.strip()
 
-    return format_clickhouse_settings(settings)
+    return format_datastore_settings(settings)
 
 
 def get_partitions(
     context: dagster.AssetExecutionContext,
-    cluster: ClickhouseCluster,
+    cluster: DatastoreCluster,
     table_name: str,
     filter_by_partition_window: bool = False,
 ) -> list[str]:
@@ -82,7 +82,7 @@ def get_partitions(
 
 
 def drop_partitions_for_date_range(
-    context: dagster.AssetExecutionContext, cluster: ClickhouseCluster, table_name: str, start_date: str, end_date: str
+    context: dagster.AssetExecutionContext, cluster: DatastoreCluster, table_name: str, start_date: str, end_date: str
 ) -> None:
     current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
     end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -105,7 +105,7 @@ def drop_partitions_for_date_range(
 
 
 def sync_partitions_on_replicas(
-    context: dagster.AssetExecutionContext, cluster: ClickhouseCluster, target_table: str
+    context: dagster.AssetExecutionContext, cluster: DatastoreCluster, target_table: str
 ) -> None:
     context.log.info(f"Syncing replicas for {target_table} on all hosts")
     cluster.map_hosts_by_roles(
@@ -115,7 +115,7 @@ def sync_partitions_on_replicas(
 
 
 def swap_partitions_from_staging(
-    context: dagster.AssetExecutionContext, cluster: ClickhouseCluster, target_table: str, staging_table: str
+    context: dagster.AssetExecutionContext, cluster: DatastoreCluster, target_table: str, staging_table: str
 ) -> None:
     staging_partitions = get_partitions(context, cluster, staging_table, filter_by_partition_window=True)
     context.log.info(f"Swapping partitions {staging_partitions} from {staging_table} to {target_table}")
@@ -130,7 +130,7 @@ def swap_partitions_from_staging(
 
 
 def clear_all_staging_partitions(
-    context: dagster.AssetExecutionContext, cluster: ClickhouseCluster, staging_table: str
+    context: dagster.AssetExecutionContext, cluster: DatastoreCluster, staging_table: str
 ) -> None:
     all_partitions = get_partitions(context, cluster, staging_table, filter_by_partition_window=False)
 
@@ -155,7 +155,7 @@ def clear_all_staging_partitions(
 
 def recreate_staging_table(
     context: dagster.AssetExecutionContext,
-    cluster: ClickhouseCluster,
+    cluster: DatastoreCluster,
     staging_table: str,
     replace_sql_func: Callable[[], str],
 ) -> None:
@@ -176,12 +176,12 @@ WEB_ANALYTICS_CONFIG_SCHEMA = {
     "team_ids": Field(
         Array(int),
         is_required=False,
-        description="List of team IDs to process - if not provided, uses ClickHouse dictionary configuration",
+        description="List of team IDs to process - if not provided, uses Datastore dictionary configuration",
     ),
-    "extra_clickhouse_settings": Field(
+    "extra_datastore_settings": Field(
         str,
         default_value="",
-        description="Additional ClickHouse execution settings to merge with defaults",
+        description="Additional Datastore execution settings to merge with defaults",
     ),
 }
 

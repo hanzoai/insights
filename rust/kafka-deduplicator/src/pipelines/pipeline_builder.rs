@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use common_kafka::kafka_producer::KafkaContext;
-use common_types::{CapturedEvent, ClickHouseEvent};
+use common_types::{CapturedEvent, DatastoreEvent};
 use rdkafka::producer::FutureProducer;
 use rdkafka::ClientConfig;
 use tokio::sync::oneshot;
@@ -17,7 +17,7 @@ use crate::checkpoint::import::CheckpointImporter;
 use crate::config::PipelineType;
 use crate::kafka::batch_consumer::BatchConsumer;
 use crate::kafka::{OffsetTracker, PartitionRouter, PartitionRouterConfig, RoutingProcessor};
-use crate::pipelines::clickhouse_events::{ClickHouseEventsBatchProcessor, ClickHouseEventsConfig};
+use crate::pipelines::datastore_events::{DatastoreEventsBatchProcessor, DatastoreEventsConfig};
 use crate::pipelines::ingestion_events::{
     DeduplicationConfig, DuplicateEventProducerWrapper, IngestionEventsBatchProcessor,
 };
@@ -31,14 +31,14 @@ use crate::store_manager::StoreManager;
 /// allowing the service to work with either pipeline through a unified interface.
 pub enum PipelineConsumer {
     IngestionEvents(BatchConsumer<CapturedEvent>),
-    ClickHouseEvents(BatchConsumer<ClickHouseEvent>),
+    DatastoreEvents(BatchConsumer<DatastoreEvent>),
 }
 
 impl PipelineConsumer {
     pub async fn start_consumption(self) -> Result<()> {
         match self {
             PipelineConsumer::IngestionEvents(consumer) => consumer.start_consumption().await,
-            PipelineConsumer::ClickHouseEvents(consumer) => consumer.start_consumption().await,
+            PipelineConsumer::DatastoreEvents(consumer) => consumer.start_consumption().await,
         }
     }
 }
@@ -122,8 +122,8 @@ impl PipelineBuilder {
             PipelineType::IngestionEvents => {
                 self.build_ingestion_events(rebalance_tracker, offset_tracker, shutdown_rx)
             }
-            PipelineType::ClickhouseEvents => {
-                self.build_clickhouse_events(rebalance_tracker, offset_tracker, shutdown_rx)
+            PipelineType::DatastoreEvents => {
+                self.build_datastore_events(rebalance_tracker, offset_tracker, shutdown_rx)
             }
         }
     }
@@ -187,19 +187,19 @@ impl PipelineBuilder {
         Ok(PipelineConsumer::IngestionEvents(consumer))
     }
 
-    fn build_clickhouse_events(
+    fn build_datastore_events(
         self,
         rebalance_tracker: Arc<RebalanceTracker>,
         offset_tracker: Arc<OffsetTracker>,
         shutdown_rx: oneshot::Receiver<()>,
     ) -> Result<PipelineConsumer> {
-        info!("Building clickhouse_events pipeline");
+        info!("Building datastore_events pipeline");
 
-        let ch_config = ClickHouseEventsConfig {
+        let ch_config = DatastoreEventsConfig {
             store_config: self.store_manager.config().clone(),
         };
 
-        let processor = Arc::new(ClickHouseEventsBatchProcessor::new(
+        let processor = Arc::new(DatastoreEventsBatchProcessor::new(
             ch_config,
             self.store_manager.clone(),
         ));
@@ -238,6 +238,6 @@ impl PipelineBuilder {
         )
         .with_context(|| format!("Failed to create consumer for topic '{}'", self.topic))?;
 
-        Ok(PipelineConsumer::ClickHouseEvents(consumer))
+        Ok(PipelineConsumer::DatastoreEvents(consumer))
     }
 }

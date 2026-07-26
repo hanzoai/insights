@@ -1,6 +1,6 @@
 # Duckling Backfill System
 
-This document describes the Dagster jobs and sensors for backfilling ClickHouse data to customer-specific "ducklings" - isolated DuckLake instances with their own RDS catalog and S3 bucket.
+This document describes the Dagster jobs and sensors for backfilling Datastore data to customer-specific "ducklings" - isolated DuckLake instances with their own RDS catalog and S3 bucket.
 
 ## Architecture
 
@@ -8,8 +8,8 @@ This document describes the Dagster jobs and sensors for backfilling ClickHouse 
 DuckLakeCatalog (Django model)
     │ lookup by team_id
     ▼
-ClickHouse (events/person tables)
-    │ export via s3() - bucket policy allows ClickHouse EC2 role
+Datastore (events/person tables)
+    │ export via s3() - bucket policy allows Datastore EC2 role
     ▼
 Duckling S3 Bucket (parquet files)
     │ register via ducklake_add_data_files
@@ -19,7 +19,7 @@ Duckling RDS Catalog (PostgreSQL)
 
 ### IAM Access
 
-- **ClickHouse EC2 role**: Allowed in duckling bucket policy for direct S3 writes
+- **Datastore EC2 role**: Allowed in duckling bucket policy for direct S3 writes
 - **Dagster IRSA role**: Can assume duckling cross-account roles for DuckDB registration
 
 ## Jobs and Sensors
@@ -60,7 +60,7 @@ Example: `12345_2024-01-15` for team 12345's data on January 15, 2024.
 ### Full Backfill Sensors (Daily)
 
 - Run once per day (controlled by cursor)
-- Query ClickHouse for earliest event/person date per team
+- Query Datastore for earliest event/person date per team
 - Create up to 100 partitions per evaluation
 - Progress through historical data day by day
 
@@ -97,7 +97,7 @@ To completely reset a duckling's data and re-backfill:
 
 ```python
 class DucklingBackfillConfig:
-    clickhouse_settings: dict | None = None  # Custom ClickHouse settings
+    datastore_settings: dict | None = None  # Custom Datastore settings
     skip_ducklake_registration: bool = False  # Export to S3 only
     skip_schema_validation: bool = False      # Skip pre-flight schema check
     cleanup_existing_partition_data: bool = True  # Delete existing DuckLake data before re-processing
@@ -127,8 +127,8 @@ class DucklingBackfillConfig:
 
 Check the Dagster run logs. Common issues:
 
-- ClickHouse timeout: Increase `max_execution_time` in clickhouse_settings
-- S3 permission denied: Verify bucket policy allows ClickHouse EC2 role
+- Datastore timeout: Increase `max_execution_time` in datastore_settings
+- S3 permission denied: Verify bucket policy allows Datastore EC2 role
 - RDS connection failed: Check VPC peering and security groups
 
 ### Schema mismatch warnings

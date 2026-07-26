@@ -1,14 +1,14 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import MagicMock, patch
 
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.database import Database
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 
-class TestQueryLogTable(ClickhouseTestMixin, APIBaseTest):
+class TestQueryLogTable(DatastoreTestMixin, APIBaseTest):
     """
     Mostly tests for the optimization of pre-filtering before aggregating. See https://github.com/Hanzo Insights/insights/pull/25604
     """

@@ -47,12 +47,12 @@ services:
             - '9009:9009'
         volumes:
             - ./insights/idl:/idl
-            - ./docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
-            - ./docker/clickhouse/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./docker/clickhouse/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/clickhouse/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
-            - ./insights/user_scripts:/var/lib/clickhouse/user_scripts
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/clickhouse-server/config.xml
+            - ./docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
+            - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
         depends_on:
             - kafka
 

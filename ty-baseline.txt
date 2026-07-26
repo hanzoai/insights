@@ -729,7 +729,7 @@ insights/cdp/validation.py:0: error: Invalid override of method `to_representati
 insights/cdp/validation.py:0: error: Invalid override of method `validate`: Definition is incompatible with `Serializer.validate`  [invalid-method-override]
 insights/celery.py:0: error: Cannot subscript object of type `None` with no `__getitem__` method  [non-subscriptable]
 insights/celery.py:0: warning: Attribute `connect` may be missing on object of type `Unknown | None | Signal`  [possibly-missing-attribute]
-insights/clickhouse/client/connection.py:0: error: Cannot assign to a subscript on an object of type `None`  [invalid-assignment]
+insights/datastore/client/connection.py:0: error: Cannot assign to a subscript on an object of type `None`  [invalid-assignment]
 insights/dags/common/resources.py:0: warning: Submodule `extensions` may not be available as an attribute on module `psycopg2`  [possibly-missing-attribute]
 insights/dags/common/resources.py:0: warning: Submodule `extensions` may not be available as an attribute on module `psycopg2`  [possibly-missing-attribute]
 insights/dags/delete_persons_from_trigger_log.py:0: warning: Submodule `extensions` may not be available as an attribute on module `psycopg2`  [possibly-missing-attribute]

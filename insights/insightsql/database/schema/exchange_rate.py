@@ -20,7 +20,7 @@ class ExchangeRateTable(DANGEROUS_NoTeamIdCheckTable):
         "rate": DecimalDatabaseField(name="rate", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "exchange_rate"
 
     def to_printed_insightsql(self):

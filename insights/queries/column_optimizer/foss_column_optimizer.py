@@ -5,7 +5,7 @@ from collections import (
 from collections.abc import Generator
 from typing import Union, cast
 
-from insights.clickhouse.materialized_columns import ColumnName, get_materialized_column_for_property
+from insights.datastore.materialized_columns import ColumnName, get_materialized_column_for_property
 from insights.constants import TREND_FILTER_TYPE_ACTIONS, FunnelCorrelationType
 from insights.models.action.util import get_action_tables_and_properties
 from insights.models.entity import Entity
@@ -25,7 +25,7 @@ class FOSSColumnOptimizer:
     """
     This class is responsible for figuring out what columns can and should be materialized based on the query filter.
 
-    This speeds up queries since clickhouse ends up selecting less data.
+    This speeds up queries since datastore ends up selecting less data.
     """
 
     def __init__(
@@ -103,8 +103,8 @@ class FOSSColumnOptimizer:
         if not isinstance(self.filter, StickinessFilter):
             # Some breakdown types read properties
             #
-            # See ee/clickhouse/queries/trends/breakdown.py#get_query or
-            # ee/clickhouse/queries/breakdown_props.py#get_breakdown_prop_values
+            # See ee/datastore/queries/trends/breakdown.py#get_query or
+            # ee/datastore/queries/breakdown_props.py#get_breakdown_prop_values
             if self.filter.breakdown_type in ["event", "person"]:
                 boxed_breakdown = box_value(self.filter.breakdown)
                 for b in boxed_breakdown:
@@ -140,7 +140,7 @@ class FOSSColumnOptimizer:
 
             # :TRICKY: If action contains property filters, these need to be included
             #
-            # See ee/clickhouse/models/action.py#format_action_filter for an example
+            # See ee/datastore/models/action.py#format_action_filter for an example
             if entity.type == TREND_FILTER_TYPE_ACTIONS:
                 counter += get_action_tables_and_properties(entity.get_action(self.team_id))
 

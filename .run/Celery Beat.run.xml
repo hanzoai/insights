@@ -6,7 +6,7 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="CLICKHOUSE_SECURE" value="False" />
+      <env name="DATASTORE_SECURE" value="False" />
       <env name="DATABASE_URL" value="postgres://insights:insights@localhost:5432/insights" />
       <env name="DEBUG" value="1" />
       <env name="KAFKA_HOSTS" value="localhost" />

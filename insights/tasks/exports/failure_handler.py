@@ -13,7 +13,7 @@ from insights.insightsql.errors import (
     SyntaxError as InsightsQLSyntaxError,
 )
 
-from insights.clickhouse.client.limit import ConcurrencyLimitExceeded
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
 from insights.errors import (
     CHQueryErrorCannotParseUuid,
     CHQueryErrorIllegalAggregation,
@@ -31,10 +31,10 @@ from insights.errors import (
     CHQueryErrorUnsupportedMethod,
 )
 from insights.exceptions import (
-    ClickHouseAtCapacity,
-    ClickHouseQueryMemoryLimitExceeded,
-    ClickHouseQuerySizeExceeded,
-    ClickHouseQueryTimeOut,
+    DatastoreAtCapacity,
+    DatastoreQueryMemoryLimitExceeded,
+    DatastoreQuerySizeExceeded,
+    DatastoreQueryTimeOut,
 )
 
 # =============================================================================
@@ -80,7 +80,7 @@ EXCEPTIONS_TO_RETRY = (
     ConcurrencyLimitExceeded,
     MaxRetryError,  # This is from urllib, e.g. HTTP retries instead of "job retries"
     ReadTimeoutError,  # Network timeout from urllib3
-    ClickHouseAtCapacity,
+    DatastoreAtCapacity,
     SocketTimeoutError,
     SSLError,
 )
@@ -88,8 +88,8 @@ EXCEPTIONS_TO_RETRY = (
 USER_QUERY_ERRORS = (
     QueryError,
     InsightsQLSyntaxError,
-    ClickHouseQueryMemoryLimitExceeded,  # Users should reduce the date range on their query (or materialise)
-    ClickHouseQueryTimeOut,  # Users should switch to materialised queries if they run into this
+    DatastoreQueryMemoryLimitExceeded,  # Users should reduce the date range on their query (or materialise)
+    DatastoreQueryTimeOut,  # Users should switch to materialised queries if they run into this
     CHQueryErrorIllegalTypeOfArgument,
     CHQueryErrorNoCommonType,
     CHQueryErrorNotAnAggregate,
@@ -100,7 +100,7 @@ USER_QUERY_ERRORS = (
     CHQueryErrorUnknownIdentifier,
     CHQueryErrorTooManyBytes,
     CHQueryErrorCannotParseUuid,
-    ClickHouseQuerySizeExceeded,
+    DatastoreQuerySizeExceeded,
     CHQueryErrorUnsupportedMethod,
     ResolutionError,
     CHQueryErrorInvalidJoinOnExpression,

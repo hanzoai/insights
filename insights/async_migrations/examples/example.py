@@ -5,7 +5,7 @@ from insights.async_migrations.definition import (
     AsyncMigrationOperation,
     AsyncMigrationOperationSQL,
 )
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import AnalyticsDBMS
 from insights.models.person.sql import (
     KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL,
@@ -35,27 +35,27 @@ class Migration(AsyncMigrationDefinition):
     insights_max_version = "1.30.0"
 
     service_version_requirements = [
-        ServiceVersionRequirement(service="clickhouse", supported_version=">=21.6.0,<21.7.0")
+        ServiceVersionRequirement(service="datastore", supported_version=">=21.6.0,<21.7.0")
     ]
 
     operations = [
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=PERSONS_DISTINCT_ID_TABLE_SQL().replace(PERSONS_DISTINCT_ID_TABLE, TEMPORARY_TABLE_NAME, 1),
-            rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
-            sql=f"DROP TABLE person_distinct_id_mv ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            database=AnalyticsDBMS.DATASTORE,
+            sql=f"DROP TABLE person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             rollback=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
-            sql=f"DROP TABLE kafka_person_distinct_id ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            database=AnalyticsDBMS.DATASTORE,
+            sql=f"DROP TABLE kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             rollback=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=f"""
                 INSERT INTO {TEMPORARY_TABLE_NAME} (distinct_id, person_id, team_id, _sign, _timestamp, _offset)
                 SELECT
@@ -70,29 +70,29 @@ class Migration(AsyncMigrationDefinition):
             rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME}",
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=f"""
                 RENAME TABLE
-                    {settings.CLICKHOUSE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.CLICKHOUSE_DATABASE}.person_distinct_id_async_migration_backup,
-                    {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_TABLE_NAME} to {settings.CLICKHOUSE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE}
-                ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'
+                    {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.DATASTORE_DATABASE}.person_distinct_id_async_migration_backup,
+                    {settings.DATASTORE_DATABASE}.{TEMPORARY_TABLE_NAME} to {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE}
+                ON CLUSTER '{settings.DATASTORE_CLUSTER}'
             """,
             rollback=f"""
                 RENAME TABLE
-                    {settings.CLICKHOUSE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_TABLE_NAME},
-                    {settings.CLICKHOUSE_DATABASE}.person_distinct_id_async_migration_backup to {settings.CLICKHOUSE_DATABASE}.person_distinct_id,
-                ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'
+                    {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.DATASTORE_DATABASE}.{TEMPORARY_TABLE_NAME},
+                    {settings.DATASTORE_DATABASE}.person_distinct_id_async_migration_backup to {settings.DATASTORE_DATABASE}.person_distinct_id,
+                ON CLUSTER '{settings.DATASTORE_CLUSTER}'
             """,
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
-            rollback=f"DROP TABLE IF EXISTS kafka_person_distinct_id ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            rollback=f"DROP TABLE IF EXISTS kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
         ),
         AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.CLICKHOUSE,
+            database=AnalyticsDBMS.DATASTORE,
             sql=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
-            rollback=f"DROP TABLE IF EXISTS person_distinct_id_mv ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            rollback=f"DROP TABLE IF EXISTS person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
         ),
         AsyncMigrationOperation(fn=example_fn, rollback_fn=example_rollback_fn),
     ]
@@ -104,7 +104,7 @@ class Migration(AsyncMigrationDefinition):
         if free_space > total_space / 3:
             return (True, None)
         else:
-            return (False, "Upgrade your ClickHouse storage.")
+            return (False, "Upgrade your Datastore storage.")
 
     def progress(self, _):
         result = sync_execute(f"SELECT COUNT(1) FROM {TEMPORARY_TABLE_NAME}")

@@ -21,7 +21,7 @@ from insights.models.web_preaggregated.team_selection_strategies import (
 
 from products.web_analytics.dags.web_preaggregated_team_selection import (
     get_team_ids_from_sources,
-    store_team_selection_in_clickhouse,
+    store_team_selection_in_datastore,
     validate_team_ids,
     web_analytics_high_volume_team_candidates,
     web_analytics_team_selection,
@@ -254,7 +254,7 @@ class TestStrategyClasses:
         assert result == set()
 
 
-class TestStoreTeamSelectionInClickhouse:
+class TestStoreTeamSelectionInDatastore:
     def setup_method(self):
         self.mock_context = Mock(spec=dagster.OpExecutionContext)
         self.mock_context.log = Mock()
@@ -272,7 +272,7 @@ class TestStoreTeamSelectionInClickhouse:
             Mock(result=Mock(return_value=reload_results)),
         ]
 
-        result = store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+        result = store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
         assert result == team_ids
         assert self.mock_cluster.map_all_hosts.call_count == 2
@@ -281,7 +281,7 @@ class TestStoreTeamSelectionInClickhouse:
     def test_handles_empty_team_ids_list(self):
         team_ids: list[int] = []
 
-        result = store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+        result = store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
         assert result == []
         self.mock_context.log.warning.assert_called_with("No team IDs to store")
@@ -301,7 +301,7 @@ class TestStoreTeamSelectionInClickhouse:
         ]
 
         with pytest.raises(Exception, match="Failed to insert team selection"):
-            store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+            store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
     def test_raises_exception_on_dictionary_reload_failure(self):
         team_ids = [1, 2, 3]
@@ -316,7 +316,7 @@ class TestStoreTeamSelectionInClickhouse:
         ]
 
         with pytest.raises(Exception, match="Failed to reload dictionary"):
-            store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+            store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
     def test_logs_appropriate_messages(self):
         team_ids = [1, 2, 3]
@@ -330,9 +330,9 @@ class TestStoreTeamSelectionInClickhouse:
             Mock(result=Mock(return_value=reload_results)),
         ]
 
-        store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+        store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
-        self.mock_context.log.info.assert_called_with(f"Storing {len(team_ids)} enabled team IDs in ClickHouse")
+        self.mock_context.log.info.assert_called_with(f"Storing {len(team_ids)} enabled team IDs in Datastore")
 
     def test_calls_cluster_map_all_hosts_twice(self):
         team_ids = [1, 2, 3]
@@ -346,7 +346,7 @@ class TestStoreTeamSelectionInClickhouse:
             Mock(result=Mock(return_value=reload_results)),
         ]
 
-        store_team_selection_in_clickhouse(self.mock_context, team_ids, self.mock_cluster)
+        store_team_selection_in_datastore(self.mock_context, team_ids, self.mock_cluster)
 
         # Verify map_all_hosts was called twice (once for insert, once for reload)
         assert self.mock_cluster.map_all_hosts.call_count == 2
@@ -359,7 +359,7 @@ class TestWebAnalyticsTeamSelectionAsset:
         self.mock_cluster = Mock()
 
     @patch("products.web_analytics.dags.web_preaggregated_team_selection.get_team_ids_from_sources")
-    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_clickhouse")
+    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_datastore")
     def test_asset_execution_success(self, mock_store, mock_get_teams):
         test_teams = [1, 2, 3]
         mock_get_teams.return_value = test_teams
@@ -381,7 +381,7 @@ class TestWebAnalyticsTeamSelectionAsset:
         assert metadata["team_ids"] == str(test_teams)
 
     @patch("products.web_analytics.dags.web_preaggregated_team_selection.get_team_ids_from_sources")
-    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_clickhouse")
+    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_datastore")
     def test_asset_handles_empty_teams(self, mock_store, mock_get_teams):
         empty_teams: list[int] = []
         mock_get_teams.return_value = empty_teams
@@ -397,15 +397,15 @@ class TestWebAnalyticsTeamSelectionAsset:
         assert metadata["team_ids"] == str(empty_teams)
 
     @patch("products.web_analytics.dags.web_preaggregated_team_selection.get_team_ids_from_sources")
-    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_clickhouse")
+    @patch("products.web_analytics.dags.web_preaggregated_team_selection.store_team_selection_in_datastore")
     def test_asset_propagates_store_errors(self, mock_store, mock_get_teams):
         test_teams = [1, 2, 3]
         mock_get_teams.return_value = test_teams
-        mock_store.side_effect = Exception("ClickHouse error")
+        mock_store.side_effect = Exception("Datastore error")
 
         context = dagster.build_asset_context()
 
-        with pytest.raises(Exception, match="ClickHouse error"):
+        with pytest.raises(Exception, match="Datastore error"):
             web_analytics_team_selection(context, self.mock_cluster)
 
 
@@ -562,9 +562,9 @@ class TestWeeklyHighVolumeStrategy:
         assert result == set()
 
     @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
-    def test_handles_clickhouse_errors(self, mock_execute):
+    def test_handles_datastore_errors(self, mock_execute):
         strategy = WeeklyHighVolumeStrategy()
-        mock_execute.side_effect = Exception("ClickHouse timeout")
+        mock_execute.side_effect = Exception("Datastore timeout")
 
         result = strategy.get_teams(self.mock_context)
 

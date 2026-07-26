@@ -118,7 +118,7 @@ class MaterializeViewWorkflow(InsightsWorkflow):
                     dag_id=inputs.dag_id,
                     job_id=job_id,
                 ),
-                # clickhouse timeout is 10mins so start to close is that plus a bit of margin
+                # datastore timeout is 10mins so start to close is that plus a bit of margin
                 start_to_close_timeout=dt.timedelta(minutes=15),
                 heartbeat_timeout=dt.timedelta(minutes=2),
                 retry_policy=temporalio.common.RetryPolicy(

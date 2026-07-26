@@ -30,8 +30,8 @@ rules:
           - pattern: str(int(...))
           - pattern: str(float(...))
           # Explicit escaping functions
-          - pattern: escape_clickhouse_identifier(...)
-          - pattern: escape_clickhouse_string(...)
+          - pattern: escape_datastore_identifier(...)
+          - pattern: escape_datastore_string(...)
           # psycopg2 safe SQL composition
           - pattern: sql.Identifier(...)
           - pattern: sql.Literal(...)
@@ -39,7 +39,7 @@ rules:
       message: |
           SQL injection risk: User input flows to SQL query without parameterization.
           Use parameterized queries: cursor.execute("SELECT * FROM t WHERE id = %s", [id])
-          For identifiers, use escape_clickhouse_identifier() or psycopg2 sql.Identifier().
+          For identifiers, use escape_datastore_identifier() or psycopg2 sql.Identifier().
       languages: [python]
       severity: ERROR
       paths:

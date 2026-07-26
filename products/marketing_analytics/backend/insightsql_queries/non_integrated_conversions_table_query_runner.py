@@ -314,7 +314,7 @@ class NonIntegratedConversionsTableQueryRunner(
             constraint=ast.JoinConstraint(
                 expr=ast.And(
                     exprs=[
-                        # Join on match_key (ClickHouse doesn't support OR in JOIN ON conditions)
+                        # Join on match_key (Datastore doesn't support OR in JOIN ON conditions)
                         # match_key is set by adapters based on team preferences (campaign_name or campaign_id)
                         ast.CompareOperation(
                             left=ast.Field(chain=[UNIFIED_CONVERSION_GOALS_CTE_ALIAS, self.config.match_key_field]),

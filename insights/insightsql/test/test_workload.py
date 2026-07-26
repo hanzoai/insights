@@ -6,7 +6,7 @@ from insights.insightsql.database.schema.logs import LogAttributesTable, LogsKaf
 from insights.insightsql.errors import QueryError
 from insights.insightsql.workload import WorkloadCollector
 
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 
 
 class TestWorkloadCollector:

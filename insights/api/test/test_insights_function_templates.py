@@ -1,7 +1,7 @@
 import os
 import json
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from parameterized import parameterized
 from rest_framework import status
@@ -34,7 +34,7 @@ EXPECTED_FIRST_RESULT = {
 }
 
 
-class TestInsightsFunctionTemplates(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 

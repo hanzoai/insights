@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 
 from django.utils.timezone import now
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.app_metrics.sql import (
     QUERY_APP_METRICS_DELIVERY_RATE,
     QUERY_APP_METRICS_ERROR_DETAILS,
     QUERY_APP_METRICS_ERRORS,
     QUERY_APP_METRICS_TIME_SERIES,
 )
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 from insights.models.filters.mixins.base import IntervalType
 from insights.models.team.team import Team
 from insights.queries.app_metrics.serializers import AppMetricsErrorsRequestSerializer, AppMetricsRequestSerializer
@@ -29,7 +29,7 @@ class TeamPluginsDeliveryRateQuery:
             self.QUERY,
             {
                 "team_id": self.team.pk,
-                "from_date": format_clickhouse_timestamp(datetime.now() - timedelta(hours=24)),
+                "from_date": format_datastore_timestamp(datetime.now() - timedelta(hours=24)),
             },
         )
         return dict(results)

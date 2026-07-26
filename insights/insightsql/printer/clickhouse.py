@@ -11,13 +11,13 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.models import DANGEROUS_NoTeamIdCheckTable, DatabaseField, SavedQuery
 from insights.insightsql.database.s3_table import DataWarehouseTable, S3Table
 from insights.insightsql.errors import ImpossibleASTError, InternalInsightsQLError, QueryError
-from insights.insightsql.escape_sql import escape_clickhouse_identifier, escape_clickhouse_string, safe_identifier
+from insights.insightsql.escape_sql import escape_datastore_identifier, escape_datastore_string, safe_identifier
 from insights.insightsql.printer.base import InsightsQLPrinter, resolve_field_type
 from insights.insightsql.printer.types import PrintableMaterializedColumn, PrintableMaterializedPropertyGroupItem
 from insights.insightsql.utils import ilike_matches, like_matches
 from insights.insightsql.visitor import GetFieldsTraverser, clone_expr
 
-from insights.clickhouse.property_groups import property_groups
+from insights.datastore.property_groups import property_groups
 from insights.models.utils import UUIDT
 
 
@@ -48,11 +48,11 @@ COLUMNS_WITH_HACKY_OPTIMIZED_NULL_HANDLING = {
 }
 
 
-class ClickHousePrinter(InsightsQLPrinter):
+class DatastorePrinter(InsightsQLPrinter):
     def __init__(
         self,
         context: InsightsQLContext,
-        dialect: Literal["clickhouse"],
+        dialect: Literal["datastore"],
         stack: list[AST] | None = None,
         settings: InsightsQLGlobalSettings | None = None,
         pretty: bool = False,
@@ -155,15 +155,15 @@ class ClickHousePrinter(InsightsQLPrinter):
             or isinstance(node.value, datetime)
             or isinstance(node.value, date)
         ):
-            # Inline some permitted types in ClickHouse
+            # Inline some permitted types in Datastore
             value = self._print_escaped_string(node.value)
             if "%" in value:
-                # We don't know if this will be passed on as part of a legacy ClickHouse query or not.
+                # We don't know if this will be passed on as part of a legacy Datastore query or not.
                 # Ban % to be on the safe side. Who knows how it can end up in a UUID or datetime for example.
                 raise QueryError(f"Invalid character '%' in constant: {value}")
             return value
         else:
-            # Strings, lists, tuples, and any other random datatype printed in ClickHouse.
+            # Strings, lists, tuples, and any other random datatype printed in Datastore.
             return self.context.add_value(node.value)
 
     def visit_field(self, node: ast.Field):
@@ -198,7 +198,7 @@ class ClickHousePrinter(InsightsQLPrinter):
         if not isinstance(table, ast.TableType):
             return None
 
-        table_name = table.table.to_printed_clickhouse(self.context)
+        table_name = table.table.to_printed_datastore(self.context)
         if field is None or not isinstance(field, DatabaseField):
             return None
         field_name = cast(Union[Literal["properties"], Literal["person_properties"]], field.name)
@@ -262,7 +262,7 @@ class ClickHousePrinter(InsightsQLPrinter):
         Returns an optimized printed expression for comparisons involving individually materialized columns.
 
         When comparing equality between a materialized column and a non-empty, non-null string constant, we can avoid the
-        nullIf() wrapping that normally happens. This allows ClickHouse to use skip indexes on the materialized column.
+        nullIf() wrapping that normally happens. This allows Datastore to use skip indexes on the materialized column.
 
         For example, instead of:
             ifNull(equals(nullIf(nullIf(events.`mat_$feature_flag`, ''), 'null'), 'some_value'), 0)
@@ -441,7 +441,7 @@ class ClickHousePrinter(InsightsQLPrinter):
 
         For patterns that cannot match sentinels, we use the raw materialized column directly,
         enabling skip index optimization. Unlike ILIKE, LIKE is case-sensitive which allows
-        ClickHouse to use ngrambf_v1 skip indexes.
+        Datastore to use ngrambf_v1 skip indexes.
         """
         if node.op not in (ast.CompareOperationOp.Like, ast.CompareOperationOp.NotLike):
             return None
@@ -523,7 +523,7 @@ class ClickHousePrinter(InsightsQLPrinter):
         if property_source.is_nullable:
             values_sql = ", ".join(self.visit(v) for v in values)
             if node.op == ast.CompareOperationOp.In:
-                # We use transform_null_in=1 which makes it hard to use a skip index with the in() function in ClickHouse.
+                # We use transform_null_in=1 which makes it hard to use a skip index with the in() function in Datastore.
                 # As a workaround, flip the args and use has() - this is safe because we already excluded NULL
                 return f"and(has([{values_sql}], {materialized_column_sql}), {materialized_column_sql} IS NOT NULL)"
             else:
@@ -902,18 +902,18 @@ class ClickHousePrinter(InsightsQLPrinter):
         raise QueryError("Printing InsightsQLX tags is only supported in InsightsQL queries")
 
     def visit_table_type(self, type: ast.TableType):
-        return type.table.to_printed_clickhouse(self.context)
+        return type.table.to_printed_datastore(self.context)
 
     def visit_unresolved_field_type(self, type: ast.UnresolvedFieldType):
         raise QueryError(f"Unable to resolve field: {type.name}")
 
     def _print_identifier(self, name: str) -> str:
-        return escape_clickhouse_identifier(name)
+        return escape_datastore_identifier(name)
 
     def _print_escaped_string(
         self, name: float | int | str | list | tuple | datetime | date | UUID | UUIDT | None
     ) -> str:
-        return escape_clickhouse_string(name, timezone=self._get_timezone())
+        return escape_datastore_string(name, timezone=self._get_timezone())
 
     def _ensure_team_id_where_clause(
         self,
@@ -931,7 +931,7 @@ class ClickHousePrinter(InsightsQLPrinter):
             return team_id_guard_for_table(node_type, self.context)
 
     def _print_table_ref(self, table_type: ast.TableType | ast.LazyTableType, node: ast.JoinExpr) -> str:
-        sql = table_type.table.to_printed_clickhouse(self.context)
+        sql = table_type.table.to_printed_datastore(self.context)
 
         # Edge case. If we are joining an s3 table, we must wrap it in a subquery for the join to work
         if isinstance(table_type.table, S3Table) and (
@@ -1004,4 +1004,4 @@ class ClickHousePrinter(InsightsQLPrinter):
         return clauses
 
     def _get_table_name(self, table: ast.TableType) -> str:
-        return table.table.to_printed_clickhouse(self.context)
+        return table.table.to_printed_datastore(self.context)

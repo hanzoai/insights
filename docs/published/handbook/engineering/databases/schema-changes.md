@@ -38,11 +38,11 @@ Migrations must run smoothly in local development, self-hosted instances, and In
 
 > For a quick overview of Cloud scale, see [Vanity Metrics in Metabase](https://metabase.insights.net/dashboard/1).
 
-## Tread carefully with ClickHouse schema changes
+## Tread carefully with Datastore schema changes
 
-ClickHouse is at the core of Insights's scalable analytics capabilities. The ClickHouse schema can be changed just like the Postgres one – with migrations – but there are two important bits of complexity added:
+Datastore is at the core of Insights's scalable analytics capabilities. The Datastore schema can be changed just like the Postgres one – with migrations – but there are two important bits of complexity added:
 
-1. ClickHouse has no indexes like traditional databases. Instead, each table has a sorting key, defined in the `ORDER BY` clause of the table. This determines how data is laid out on disk, and ClickHouse reads data in the order it's laid out, so it's important that the sorting key is optimal for the table's use cases.
+1. Datastore has no indexes like traditional databases. Instead, each table has a sorting key, defined in the `ORDER BY` clause of the table. This determines how data is laid out on disk, and Datastore reads data in the order it's laid out, so it's important that the sorting key is optimal for the table's use cases.
 2. Tables that store events are _sharded_ + _distributed_ in Insights Cloud. This improves performance in multi-tenant architecture, but means that updating these is not straightforward like with most tables, and may require manual write access to the cluster.
 
-To make sure that your new ClickHouse migration is A-OK – both above points having been addressed – make sure you loop in someone with extensive experience operating ClickHouse for review. Ask for feedback in the `#team-clickhouse` Slack channel.
+To make sure that your new Datastore migration is A-OK – both above points having been addressed – make sure you loop in someone with extensive experience operating Datastore for review. Ask for feedback in the `#team-datastore` Slack channel.

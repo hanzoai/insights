@@ -136,8 +136,8 @@ class TestTable(APIBaseTest):
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
         return_value={
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
         },
     )
     @patch(
@@ -165,8 +165,8 @@ class TestTable(APIBaseTest):
 
         assert table.name == "whatever"
         assert table.columns == {
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
         }
 
         assert table.credential.access_key, "_accesskey"
@@ -175,8 +175,8 @@ class TestTable(APIBaseTest):
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
         return_value={
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
         },
     )
     @patch(
@@ -204,8 +204,8 @@ class TestTable(APIBaseTest):
 
         assert table.name == "whatever"
         assert table.columns == {
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
-            "a_column": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+            "a_column": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
         }
 
         assert table.credential.access_key, "_accesskey"
@@ -247,7 +247,7 @@ class TestTable(APIBaseTest):
         table.refresh_from_db()
 
         assert response.status_code == 200
-        assert table.columns["id"] == {"clickhouse": "Nullable(Float64)", "insightsql": "FloatDatabaseField", "valid": True}
+        assert table.columns["id"] == {"datastore": "Nullable(Float64)", "insightsql": "FloatDatabaseField", "valid": True}
 
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.validate_column_type",
@@ -259,7 +259,7 @@ class TestTable(APIBaseTest):
             format="Parquet",
             team=self.team,
             team_id=self.team.pk,
-            columns={"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}},
+            columns={"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}},
         )
         response = self.client.post(
             f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
@@ -268,10 +268,10 @@ class TestTable(APIBaseTest):
         table.refresh_from_db()
 
         assert response.status_code == 200
-        assert table.columns["id"] == {"clickhouse": "Nullable(Float64)", "insightsql": "FloatDatabaseField", "valid": True}
+        assert table.columns["id"] == {"datastore": "Nullable(Float64)", "insightsql": "FloatDatabaseField", "valid": True}
 
     def test_update_schema_200_no_updates(self):
-        columns = {"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
+        columns = {"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
         table = DataWarehouseTable.objects.create(
             name="test_table",
             format="Parquet",
@@ -296,7 +296,7 @@ class TestTable(APIBaseTest):
         assert table.columns == columns
 
     def test_update_schema_400_with_source(self):
-        columns = {"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
+        columns = {"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
 
         source = ExternalDataSource.objects.create(team=self.team, team_id=self.team.pk)
         table = DataWarehouseTable.objects.create(
@@ -318,7 +318,7 @@ class TestTable(APIBaseTest):
         assert table.columns == columns
 
     def test_update_schema_400_with_non_existing_column(self):
-        columns = {"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
+        columns = {"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
 
         table = DataWarehouseTable.objects.create(
             name="test_table",
@@ -339,7 +339,7 @@ class TestTable(APIBaseTest):
         assert table.columns == columns
 
     def test_update_schema_400_with_invalid_type(self):
-        columns = {"id": {"clickhouse": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
+        columns = {"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}}
 
         table = DataWarehouseTable.objects.create(
             name="test_table",
@@ -362,8 +362,8 @@ class TestTable(APIBaseTest):
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
         return_value={
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
         },
     )
     @patch(
@@ -639,9 +639,9 @@ class TestTable(APIBaseTest):
 
         with patch("products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns") as mock_get_columns:
             mock_get_columns.return_value = {
-                "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-                "name": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-                "value": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "name": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "value": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
             }
 
             with self.settings(
@@ -726,9 +726,9 @@ class TestTable(APIBaseTest):
 
         with patch("products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns") as mock_get_columns:
             mock_get_columns.return_value = {
-                "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-                "new_name": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
-                "value": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "new_name": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
+                "value": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": True},
             }
 
             with self.settings(
@@ -754,9 +754,9 @@ class TestTable(APIBaseTest):
 
         # columns will be false as validation doesn't work for mocked fields
         assert existing_table.columns == {
-            "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
-            "new_name": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
-            "value": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+            "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+            "new_name": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+            "value": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
         }
 
         # Verify S3 client was called to upload the file
@@ -799,9 +799,9 @@ class TestTable(APIBaseTest):
         # Patch get_columns to return test columns
         with patch("products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns") as mock_get_columns:
             mock_get_columns.return_value = {
-                "id": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
-                "name": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
-                "value": {"clickhouse": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+                "id": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+                "name": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
+                "value": {"datastore": "Nullable(String)", "insightsql": "StringDatabaseField", "valid": False},
             }
             # Patch the settings to use our test bucket
             with self.settings(

@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event
 
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
@@ -6,7 +6,7 @@ from insights.insightsql.query import execute_insightsql_query
 from insights.models.utils import uuid7
 
 
-class TestEvents(ClickhouseTestMixin, APIBaseTest):
+class TestEvents(DatastoreTestMixin, APIBaseTest):
     def test_select_star_from_events(self):
         session_id = str(uuid7())
 

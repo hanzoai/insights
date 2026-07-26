@@ -21,7 +21,7 @@ from temporalio.client import WorkflowFailureError
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Action
 from insights.models.ai.pg_embeddings import TRUNCATE_PG_EMBEDDINGS_TABLE_SQL
 from insights.temporal.ai.sync_vectors import (
@@ -39,7 +39,7 @@ from insights.temporal.ai.sync_vectors import (
     get_approximate_actions_count,
     sync_action_vectors,
 )
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 
 
 @pytest.fixture(autouse=True)
@@ -379,7 +379,7 @@ def parse_records(rows: list[tuple]) -> list[PgEmbeddingRecord]:
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_clickhouse_sync_single_batch(summarized_actions, summarized_actions_with_embeddings, ateam):
+async def test_datastore_sync_single_batch(summarized_actions, summarized_actions_with_embeddings, ateam):
     start_dt = timezone.now()
     async with get_client() as client:
         await sync_action_vectors(client, summarized_actions_with_embeddings, 10, start_dt)
@@ -405,14 +405,14 @@ async def test_clickhouse_sync_single_batch(summarized_actions, summarized_actio
             await action.arefresh_from_db()
             assert action.embedding_last_synced_at == start_dt
 
-        with patch("insights.temporal.common.clickhouse.ClickHouseClient.execute_query") as mock:
+        with patch("insights.temporal.common.datastore.DatastoreClient.execute_query") as mock:
             await sync_action_vectors(client, summarized_actions_with_embeddings, 10, start_dt)
             assert mock.call_count == 1
 
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_clickhouse_sync_multiple_batches(summarized_actions, summarized_actions_with_embeddings, ateam):
+async def test_datastore_sync_multiple_batches(summarized_actions, summarized_actions_with_embeddings, ateam):
     start_dt = timezone.now()
     async with get_client() as client:
         await sync_action_vectors(client, summarized_actions_with_embeddings, 1, start_dt)
@@ -438,7 +438,7 @@ async def test_clickhouse_sync_multiple_batches(summarized_actions, summarized_a
             await action.arefresh_from_db()
             assert action.embedding_last_synced_at == start_dt
 
-        with patch("insights.temporal.common.clickhouse.ClickHouseClient.execute_query") as mock:
+        with patch("insights.temporal.common.datastore.DatastoreClient.execute_query") as mock:
             await sync_action_vectors(client, summarized_actions_with_embeddings, 1, start_dt)
             assert mock.call_count == 3
 

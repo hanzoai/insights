@@ -7,7 +7,7 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.helpers.timestamp_visitor import is_simple_timestamp_field_expression
 from insights.insightsql.visitor import CloningVisitor
 
-from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.datastore.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
 from insights.models import Team
 
 from products.analytics_platform.backend.lazy_computation.lazy_computation_executor import (
@@ -544,7 +544,7 @@ class Transformer(CloningVisitor):
             else:
                 select.append(transformed_expr)
 
-        # FROM preaggregation_results (InsightsQL name, maps to sharded_preaggregation_results in ClickHouse)
+        # FROM preaggregation_results (InsightsQL name, maps to sharded_preaggregation_results in Datastore)
         select_from = ast.JoinExpr(
             table=ast.Field(chain=["preaggregation_results"]),
             alias=transformed_node.select_from.alias if transformed_node.select_from else None,

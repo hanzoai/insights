@@ -27,7 +27,7 @@ from insights.insightsql.database.models import (
 from insights.insightsql.parser import parse_expr
 from insights.insightsql.property import action_to_expr, property_to_expr
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.insightsql_queries.insights.funnels.funnel_aggregation_operations import FirstTimeForUserAggregationQuery
 from insights.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
 from insights.insightsql_queries.insights.funnels.utils import (

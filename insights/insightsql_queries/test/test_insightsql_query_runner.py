@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import cast
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 from unittest.mock import patch
 
 from insights.schema import (
@@ -22,7 +22,7 @@ from insights.models.insight_variable import InsightVariable
 from insights.models.utils import UUIDT
 
 
-class TestInsightsQLQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestInsightsQLQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
     random_uuid: str
 

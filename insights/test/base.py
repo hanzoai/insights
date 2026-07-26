@@ -42,13 +42,13 @@ from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.visitor import clone_expr
 
 from insights import rate_limit, redis
-from insights.clickhouse.adhoc_events_deletion import (
+from insights.datastore.adhoc_events_deletion import (
     ADHOC_EVENTS_DELETION_TABLE_SQL,
     DROP_ADHOC_EVENTS_DELETION_TABLE_SQL,
 )
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import get_client_from_pool
-from insights.clickhouse.custom_metrics import (
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import get_client_from_pool
+from insights.datastore.custom_metrics import (
     CREATE_CUSTOM_METRICS_COUNTER_EVENTS_TABLE,
     CREATE_CUSTOM_METRICS_COUNTERS_VIEW,
     CUSTOM_METRICS_EVENTS_RECENT_LAG_VIEW,
@@ -57,15 +57,15 @@ from insights.clickhouse.custom_metrics import (
     CUSTOM_METRICS_VIEW,
     TRUNCATE_CUSTOM_METRICS_COUNTER_EVENTS_TABLE,
 )
-from insights.clickhouse.materialized_columns import MaterializedColumn
-from insights.clickhouse.plugin_log_entries import TRUNCATE_PLUGIN_LOG_ENTRIES_TABLE_SQL
-from insights.clickhouse.preaggregation.sql import (
+from insights.datastore.materialized_columns import MaterializedColumn
+from insights.datastore.plugin_log_entries import TRUNCATE_PLUGIN_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.preaggregation.sql import (
     DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE_SQL,
     DROP_PREAGGREGATION_RESULTS_TABLE_SQL,
     DROP_SHARDED_PREAGGREGATION_RESULTS_TABLE_SQL,
     SHARDED_PREAGGREGATION_RESULTS_TABLE_SQL,
 )
-from insights.clickhouse.query_log_archive import (
+from insights.datastore.query_log_archive import (
     QUERY_LOG_ARCHIVE_DATA_TABLE,
     QUERY_LOG_ARCHIVE_MV,
     QUERY_LOG_ARCHIVE_NEW_MV_SQL,
@@ -922,7 +922,7 @@ def cleanup_materialized_columns():
 
         data_table = "sharded_events" if table == "events" else table
 
-        # Drop skip indexes first - ClickHouse won't drop a column with a skip index referencing it
+        # Drop skip indexes first - Datastore won't drop a column with a skip index referencing it
         for column in columns_to_drop:
             indexes_to_drop = []
             if column.has_minmax_index:
@@ -1030,9 +1030,9 @@ def also_test_with_materialized_columns(
     is_nullable: Optional[list] = None,
 ):
     """
-    Runs the test twice on clickhouse - once verifying it works normally, once with materialized columns.
+    Runs the test twice on datastore - once verifying it works normally, once with materialized columns.
 
-    Requires a unittest class with ClickhouseTestMixin mixed in
+    Requires a unittest class with DatastoreTestMixin mixed in
     """
 
     if person_properties is None:
@@ -1042,7 +1042,7 @@ def also_test_with_materialized_columns(
     def decorator(fn):
         @pytest.mark.ee
         def fn_with_materialized(self, *args, **kwargs):
-            # Don't run these tests under non-clickhouse classes even if decorated in base classes
+            # Don't run these tests under non-datastore classes even if decorated in base classes
             if not getattr(self, "RUN_MATERIALIZED_COLUMN_TESTS", False):
                 return
 
@@ -1349,10 +1349,10 @@ def _create_action(**kwargs):
     return action
 
 
-class ClickhouseTestMixin(QueryMatchingTest):
+class DatastoreTestMixin(QueryMatchingTest):
     RUN_MATERIALIZED_COLUMN_TESTS = True
     # overrides the basetest in insights/test/base.py
-    # this way the team id will increment so we don't have to destroy all clickhouse tables on each test
+    # this way the team id will increment so we don't have to destroy all datastore tables on each test
     CLASS_DATA_LEVEL_SETUP = False
 
     snapshot: Any
@@ -1379,11 +1379,11 @@ class ClickhouseTestMixin(QueryMatchingTest):
                 queries.append(query)
             return original_client_execute(query, *args, **kwargs)
 
-        with patch_clickhouse_client_execute(execute_wrapper):
+        with patch_datastore_client_execute(execute_wrapper):
             yield queries
 
 
-def run_clickhouse_statement_in_parallel(statements: list[str]):
+def run_datastore_statement_in_parallel(statements: list[str]):
     def _execute_with_retry(stmt: str) -> None:
         max_attempts = 5
         for attempt in range(max_attempts):
@@ -1395,7 +1395,7 @@ def run_clickhouse_statement_in_parallel(statements: list[str]):
                     raise
                 time.sleep(0.1 * (2**attempt))
 
-    with ThreadPoolExecutor(max_workers=settings.CLICKHOUSE_CONN_POOL_MAX) as pool:
+    with ThreadPoolExecutor(max_workers=settings.DATASTORE_CONN_POOL_MAX) as pool:
         futures = [pool.submit(_execute_with_retry, stmt) for stmt in statements]
 
         exceptions: list[BaseException] = []
@@ -1411,8 +1411,8 @@ def run_clickhouse_statement_in_parallel(statements: list[str]):
             raise exceptions[0]
 
 
-def reset_clickhouse_database() -> None:
-    run_clickhouse_statement_in_parallel(
+def reset_datastore_database() -> None:
+    run_datastore_statement_in_parallel(
         [
             DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL(),
             DROP_RAW_SESSION_MATERIALIZED_VIEW_SQL_V3(),
@@ -1427,7 +1427,7 @@ def reset_clickhouse_database() -> None:
             DROP_ADHOC_EVENTS_DELETION_TABLE_SQL(),
         ]
     )
-    run_clickhouse_statement_in_parallel(
+    run_datastore_statement_in_parallel(
         [
             DROP_CHANNEL_DEFINITION_TABLE_SQL,
             DROP_EXCHANGE_RATE_TABLE_SQL(),
@@ -1470,7 +1470,7 @@ def reset_clickhouse_database() -> None:
             TRUNCATE_CUSTOM_METRICS_COUNTER_EVENTS_TABLE,
         ]
     )
-    run_clickhouse_statement_in_parallel(
+    run_datastore_statement_in_parallel(
         [
             CHANNEL_DEFINITION_TABLE_SQL(),
             EXCHANGE_RATE_TABLE_SQL(),
@@ -1497,7 +1497,7 @@ def reset_clickhouse_database() -> None:
             SHARDED_PREAGGREGATION_RESULTS_TABLE_SQL(),
         ]
     )
-    run_clickhouse_statement_in_parallel(
+    run_datastore_statement_in_parallel(
         [
             CHANNEL_DEFINITION_DICTIONARY_SQL(),
             EXCHANGE_RATE_DICTIONARY_SQL(),
@@ -1520,7 +1520,7 @@ def reset_clickhouse_database() -> None:
             KAFKA_PRECALCULATED_EVENTS_TABLE_SQL(),
         ]
     )
-    run_clickhouse_statement_in_parallel(
+    run_datastore_statement_in_parallel(
         [
             CHANNEL_DEFINITION_DATA_SQL(),
             EXCHANGE_RATE_DATA_BACKFILL_SQL(),
@@ -1540,22 +1540,22 @@ def reset_clickhouse_database() -> None:
     )
 
 
-class ClickhouseDestroyTablesMixin(BaseTest):
+class DatastoreDestroyTablesMixin(BaseTest):
     """
-    To speed up tests we normally don't destroy the tables between tests, so clickhouse tables will have data from previous tests.
+    To speed up tests we normally don't destroy the tables between tests, so datastore tables will have data from previous tests.
     Use this mixin to make sure you completely destroy the tables between tests.
     """
 
     def setUp(self):
         super().setUp()
-        reset_clickhouse_database()
+        reset_datastore_database()
 
     def tearDown(self):
         super().tearDown()
-        reset_clickhouse_database()
+        reset_datastore_database()
 
 
-def snapshot_clickhouse_queries(fn_or_class):
+def snapshot_datastore_queries(fn_or_class):
     """
     Captures and snapshots SELECT queries from test using `syrupy` library.
 
@@ -1570,7 +1570,7 @@ def snapshot_clickhouse_queries(fn_or_class):
         # wrap every class method that starts with test_ with this decorator
         for attr in dir(fn_or_class):
             if callable(getattr(fn_or_class, attr)) and attr.startswith("test_"):
-                setattr(fn_or_class, attr, snapshot_clickhouse_queries(getattr(fn_or_class, attr)))
+                setattr(fn_or_class, attr, snapshot_datastore_queries(getattr(fn_or_class, attr)))
         return fn_or_class
 
     @wraps(fn_or_class)
@@ -1586,7 +1586,7 @@ def snapshot_clickhouse_queries(fn_or_class):
     return wrapped
 
 
-def snapshot_clickhouse_alter_queries(fn):
+def snapshot_datastore_alter_queries(fn):
     """
     Captures and snapshots ALTER queries from test using `syrupy` library.
     """
@@ -1603,7 +1603,7 @@ def snapshot_clickhouse_alter_queries(fn):
     return wrapped
 
 
-def snapshot_clickhouse_insert_cohortpeople_queries(fn):
+def snapshot_datastore_insert_cohortpeople_queries(fn):
     """
     Captures and snapshots INSERT queries from test using `syrupy` library.
     """
@@ -1720,7 +1720,7 @@ def snapshot_insightsql_queries(fn_or_class):
             # Format the InsightsQL query for better readability
             formatted_insightsql = insightsql.strip()
 
-            # Use a custom snapshot with .insightsql extension to separate from ClickHouse snapshots
+            # Use a custom snapshot with .insightsql extension to separate from Datastore snapshots
             # This creates a separate file like test_foo.insightsql.ambr instead of test_foo.ambr
             assert formatted_insightsql == self.snapshot(extension_class=InsightsQLSnapshotExtension)
 
@@ -1777,7 +1777,7 @@ def also_test_with_person_on_events_v2(fn):
 
 
 @contextmanager
-def patch_clickhouse_client_execute(execute_wrapper):
+def patch_datastore_client_execute(execute_wrapper):
     @contextmanager
     def get_client(orig_fn, *args, **kwargs):
         with orig_fn(*args, **kwargs) as client:

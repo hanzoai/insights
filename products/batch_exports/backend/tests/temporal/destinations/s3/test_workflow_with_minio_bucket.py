@@ -25,7 +25,7 @@ TEST_DATA_INTERVAL_END = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, se
 @pytest.mark.parametrize("exclude_events", [None], indirect=True)
 @pytest.mark.parametrize("file_format", ["Parquet"], indirect=True)
 async def test_s3_export_workflow_with_minio_bucket_with_various_intervals_and_models(
-    clickhouse_client,
+    datastore_client,
     minio_client,
     ateam,
     s3_batch_export,
@@ -60,7 +60,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_various_intervals_and_m
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
     )
 
@@ -71,7 +71,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_various_intervals_and_m
 @pytest.mark.parametrize("compression", [*COMPRESSION_EXTENSIONS.keys(), None], indirect=True)
 @pytest.mark.parametrize("file_format", FILE_FORMAT_EXTENSIONS.keys(), indirect=True)
 async def test_s3_export_workflow_with_minio_bucket_with_various_compression_and_file_formats(
-    clickhouse_client,
+    datastore_client,
     minio_client,
     ateam,
     s3_batch_export,
@@ -99,7 +99,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_various_compression_and
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
     )
 
@@ -110,7 +110,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_various_compression_and
 @pytest.mark.parametrize("exclude_events", [["test-exclude"]], indirect=True)
 @pytest.mark.parametrize("model", TEST_S3_MODELS)
 async def test_s3_export_workflow_with_minio_bucket_with_exclude_events(
-    clickhouse_client,
+    datastore_client,
     minio_client,
     ateam,
     s3_batch_export,
@@ -137,7 +137,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_exclude_events(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
     )
 
@@ -151,7 +151,7 @@ async def test_s3_export_workflow_with_minio_bucket_with_exclude_events(
 @pytest.mark.parametrize("model", [BatchExportModel(name="persons", schema=None)])
 @pytest.mark.flaky(reruns=2)
 async def test_s3_export_workflow_backfill_earliest_persons_with_minio_bucket(
-    clickhouse_client,
+    datastore_client,
     minio_client,
     ateam,
     s3_batch_export,
@@ -191,7 +191,7 @@ async def test_s3_export_workflow_backfill_earliest_persons_with_minio_bucket(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
         backfill_details=backfill_details,
     )
@@ -203,7 +203,7 @@ async def test_s3_export_workflow_backfill_earliest_persons_with_minio_bucket(
 @pytest.mark.parametrize("file_format", ["JSONLines"], indirect=True)
 @pytest.mark.parametrize("model", TEST_S3_MODELS)
 async def test_s3_export_workflow_with_minio_bucket_without_events(
-    clickhouse_client,
+    datastore_client,
     minio_client,
     ateam,
     s3_batch_export,
@@ -229,7 +229,7 @@ async def test_s3_export_workflow_with_minio_bucket_without_events(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
         expect_no_data=True,
     )
@@ -248,7 +248,7 @@ async def test_s3_export_workflow_with_minio_bucket_without_events(
 )
 @pytest.mark.parametrize("model", [TEST_S3_MODELS[1], TEST_S3_MODELS[3], None])
 async def test_s3_export_workflow_with_minio_bucket_and_custom_key_prefix(
-    clickhouse_client,
+    datastore_client,
     ateam,
     minio_client,
     bucket_name,
@@ -276,6 +276,6 @@ async def test_s3_export_workflow_with_minio_bucket_and_custom_key_prefix(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=minio_client,
     )

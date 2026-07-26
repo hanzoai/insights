@@ -13,7 +13,7 @@ from django.test import override_settings
 import boto3
 from google.cloud import bigquery
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Team
 from insights.temporal.data_imports.workflow_activities.import_data_sync import (
     ImportDataActivityInputs,
@@ -259,10 +259,10 @@ def setup_bigquery(
     incremental_field = next(field for field in bigquery_table.schema if field.name == "incremental")
 
     if incremental_field.field_type == "INTEGER":
-        clickhouse_type = "Nullable(Int64)"
+        datastore_type = "Nullable(Int64)"
         incremental_field_type = IncrementalFieldType.Integer
     elif incremental_field.field_type == "TIMESTAMP":
-        clickhouse_type = "Nullable(DateTime64(6))"
+        datastore_type = "Nullable(DateTime64(6))"
         incremental_field_type = IncrementalFieldType.Timestamp
     else:
         raise ValueError(f"Invalid id field: {incremental_field}")
@@ -276,13 +276,13 @@ def setup_bigquery(
         credential=credentials,
         url_pattern="https://bucket.s3/data/*",
         columns={
-            "id": {"insightsql": "IntegerDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+            "id": {"insightsql": "IntegerDatabaseField", "datastore": "Nullable(String)", "schema_valid": True},
             incremental_field.name: {
                 "insightsql": "IntegerDatabaseField",
-                "clickhouse": clickhouse_type,
+                "datastore": datastore_type,
                 "schema_valid": True,
             },
-            "value": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+            "value": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True},
         },
     )
     schema = ExternalDataSchema.objects.create(
@@ -333,7 +333,7 @@ def test_bigquery_source_full_refresh_table(
     """Test a full-refresh sync job with BigQuery source.
 
     We generate some data and ensure that running `import_data_activity_sync`
-    results in the data loaded in S3, and query-able using ClickHouse table
+    results in the data loaded in S3, and query-able using Datastore table
     function.
 
     Finally, we assert the values correspond to the ones we have inserted in
@@ -362,9 +362,9 @@ def test_bigquery_source_full_refresh_table(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(Int64)"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(Int64)"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -398,7 +398,7 @@ def test_bigquery_source_full_refresh_view(
     """Test a full-refresh sync job with BigQuery source.
 
     We generate some data and ensure that running `import_data_activity_sync`
-    results in the data loaded in S3, and query-able using ClickHouse table
+    results in the data loaded in S3, and query-able using Datastore table
     function.
 
     Finally, we assert the values correspond to the ones we have inserted in
@@ -427,9 +427,9 @@ def test_bigquery_source_full_refresh_view(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(Int64)"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(Int64)"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -463,7 +463,7 @@ def test_bigquery_source_incremental_integer(
     """Test an incremental sync job with BigQuery source.
 
     We generate some data and ensure that running `import_data_activity_sync`
-    results in the data loaded in S3, and query-able using ClickHouse table
+    results in the data loaded in S3, and query-able using Datastore table
     function.
 
     Afterwards, we generate a new incremental value in BigQuery and run
@@ -495,9 +495,9 @@ def test_bigquery_source_incremental_integer(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(Int64)"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(Int64)"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -542,9 +542,9 @@ def test_bigquery_source_incremental_integer(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(Int64)"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(Int64)"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -581,7 +581,7 @@ def test_bigquery_source_incremental_timestamp(
     """Test an incremental sync job with BigQuery source.
 
     We generate some data and ensure that running `import_data_activity_sync`
-    results in the data loaded in S3, and query-able using ClickHouse table
+    results in the data loaded in S3, and query-able using Datastore table
     function.
 
     Afterwards, we generate a new incremental value in BigQuery and run
@@ -613,9 +613,9 @@ def test_bigquery_source_incremental_timestamp(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(DateTime64(6))"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(DateTime64(6))"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -661,9 +661,9 @@ def test_bigquery_source_incremental_timestamp(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(DateTime64(6))"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(DateTime64(6))"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -704,7 +704,7 @@ def test_bigquery_source_incremental_custom_primary_key(
     """Test an incremental sync job with BigQuery source.
 
     We generate some data and ensure that running `import_data_activity_sync`
-    results in the data loaded in S3, and query-able using ClickHouse table
+    results in the data loaded in S3, and query-able using Datastore table
     function.
 
     Afterwards, we generate a new incremental value in BigQuery and run
@@ -736,9 +736,9 @@ def test_bigquery_source_incremental_custom_primary_key(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(DateTime64(6))"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(DateTime64(6))"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"
@@ -784,9 +784,9 @@ def test_bigquery_source_incremental_custom_primary_key(
     assert "incremental" in columns
     assert "value" in columns
 
-    assert columns[bigquery_table_primary_key]["clickhouse"] == "Nullable(String)"  # type: ignore
-    assert columns["incremental"]["clickhouse"] == "Nullable(DateTime64(6))"  # type: ignore
-    assert columns["value"]["clickhouse"] == "Nullable(String)"  # type: ignore
+    assert columns[bigquery_table_primary_key]["datastore"] == "Nullable(String)"  # type: ignore
+    assert columns["incremental"]["datastore"] == "Nullable(DateTime64(6))"  # type: ignore
+    assert columns["value"]["datastore"] == "Nullable(String)"  # type: ignore
 
     function_call, context = table.get_function_call()
     query = f"SELECT * FROM {function_call}"

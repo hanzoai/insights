@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import trim_quotes_expr
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import trim_quotes_expr
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 
 # V1 Sessions table
 TABLE_BASE_NAME = "sessions"
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
     session_id VARCHAR,
     -- part of order by so will aggregate correctly
     team_id Int64,
-    -- ClickHouse will pick any value of distinct_id for the session
+    -- Datastore will pick any value of distinct_id for the session
     -- this is fine since even if the distinct_id changes during a session
     -- it will still (or should still) map to the same person
     distinct_id SimpleAggregateFunction(any, String),
@@ -192,7 +192,7 @@ FROM {database}.sharded_events
 WHERE `$session_id` IS NOT NULL AND `$session_id` != '' AND team_id IN ({allowed_team_ids})
 GROUP BY `$session_id`, team_id
 """.format(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         current_url_property=source_column("$current_url"),
         referring_domain_property=source_column("$referring_domain"),
         utm_source_property=source_column("utm_source"),
@@ -230,7 +230,7 @@ AS
         table_name=f"{TABLE_BASE_NAME}_mv",
         target_table=f"writable_{TABLE_BASE_NAME}",
         on_cluster_clause=ON_CLUSTER_CLAUSE(),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         select_sql=SESSION_TABLE_MV_SELECT_SQL(),
     )
 )
@@ -245,7 +245,7 @@ ALTER TABLE {table_name} MODIFY QUERY
     )
 )
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_sessions based on a sharding key.
 

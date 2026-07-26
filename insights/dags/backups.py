@@ -12,8 +12,8 @@ import pydantic
 from clickhouse_driver import Client
 from dagster_aws.s3 import S3Resource
 
-from insights.clickhouse.client.connection import NodeRole, Workload
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.client.connection import NodeRole, Workload
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, check_for_concurrent_runs
 
 NO_SHARD_PATH = "noshard"
@@ -173,7 +173,7 @@ class Backup:
         }
         if self.base_backup:
             backup_settings["base_backup"] = "S3('{bucket_base_path}/{path}')".format(
-                bucket_base_path=self._bucket_base_path(settings.CLICKHOUSE_BACKUPS_BUCKET),
+                bucket_base_path=self._bucket_base_path(settings.DATASTORE_BACKUPS_BUCKET),
                 path=self.base_backup.path,
             )
 
@@ -182,7 +182,7 @@ class Backup:
         TO S3('{bucket_base_path}/{path}')
         SETTINGS {settings}
         """.format(
-            bucket_base_path=self._bucket_base_path(settings.CLICKHOUSE_BACKUPS_BUCKET),
+            bucket_base_path=self._bucket_base_path(settings.DATASTORE_BACKUPS_BUCKET),
             path=self.path,
             object="TABLE" if self.table else "DATABASE",
             name=self.table if self.table else self.database,
@@ -248,7 +248,7 @@ class BackupConfig(dagster.Config):
         description="If true, the backup will be incremental. If false, the backup will be full.",
     )
     database: str = pydantic.Field(
-        default=settings.CLICKHOUSE_DATABASE,
+        default=settings.DATASTORE_DATABASE,
         description="The database to backup",
     )
     table: str = pydantic.Field(
@@ -272,14 +272,14 @@ def get_most_recent_status(statuses: list[BackupStatus]) -> Optional[BackupStatu
 
 
 @dagster.op(out=dagster.DynamicOut())
-def get_shards(cluster: dagster.ResourceParam[ClickhouseCluster]):
+def get_shards(cluster: dagster.ResourceParam[DatastoreCluster]):
     for shard in cluster.shards:
         yield dagster.DynamicOutput(shard, mapping_key=f"shard_{shard}")
 
 
 @dagster.op
 def check_running_backup_for_table(
-    config: BackupConfig, cluster: dagster.ResourceParam[ClickhouseCluster]
+    config: BackupConfig, cluster: dagster.ResourceParam[DatastoreCluster]
 ) -> Optional[Table]:
     """
     Check if a backup for the requested table is in progress (it shouldn't, so fail if that's the case).
@@ -307,7 +307,7 @@ def get_latest_backups(
     shard: Optional[int] = None,
 ) -> list[Backup]:
     """
-    Get the latest 15 backups metadata for a ClickHouse database / table from S3.
+    Get the latest 15 backups metadata for a Datastore database / table from S3.
 
     They are sorted from most recent to oldest.
     """
@@ -323,7 +323,7 @@ def get_latest_backups(
     base_prefix = f"{base_prefix}{shard_path}/"
 
     backups = s3.get_client().list_objects_v2(
-        Bucket=settings.CLICKHOUSE_BACKUPS_BUCKET, Prefix=base_prefix, Delimiter="/"
+        Bucket=settings.DATASTORE_BACKUPS_BUCKET, Prefix=base_prefix, Delimiter="/"
     )
 
     if "CommonPrefixes" not in backups:
@@ -353,7 +353,7 @@ def get_latest_successful_backup(
     context: dagster.OpExecutionContext,
     config: BackupConfig,
     latest_backups: list[Backup],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> Optional[Backup]:
     """
     Checks the latest succesful backup to use it as a base backup.
@@ -392,7 +392,7 @@ def get_latest_successful_backup(
 def run_backup(
     context: dagster.OpExecutionContext,
     config: BackupConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     latest_backup: Optional[Backup],
     shard: Optional[int] = None,
 ):
@@ -445,7 +445,7 @@ def wait_for_backup(
     context: dagster.OpExecutionContext,
     config: BackupConfig,
     backup: Backup,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ):
     """
     Wait for a backup to finish.
@@ -467,7 +467,7 @@ def wait_for_backup(
             most_recent_status = get_most_recent_status(map_hosts(backup.status).result().values())
             if most_recent_status and most_recent_status.creating() and tries < 3:
                 context.log.warning(
-                    f"Backup {backup.path} is no longer running but status is still creating. Waiting a bit longer in case ClickHouse didn't flush logs yet..."
+                    f"Backup {backup.path} is no longer running but status is still creating. Waiting a bit longer in case Datastore didn't flush logs yet..."
                 )
                 continue
             elif most_recent_status and most_recent_status.created():
@@ -493,9 +493,9 @@ def wait_for_backup(
 )
 def sharded_backup():
     """
-    Backup ClickHouse database / table to S3 once per shard.
+    Backup Datastore database / table to S3 once per shard.
 
-    The job, under the hood, will dynamically launch the same backup for each shard (running the ops once per shard). Shards are dynamically loaded from the ClickHouse cluster.
+    The job, under the hood, will dynamically launch the same backup for each shard (running the ops once per shard). Shards are dynamically loaded from the Datastore cluster.
 
     For each backup, the logic is exactly the same as the described in the `non_sharded_backup` job.
     """
@@ -515,7 +515,7 @@ def sharded_backup():
 )
 def non_sharded_backup():
     """
-    Backup ClickHouse database / table to S3 once (chooses a random shard)
+    Backup Datastore database / table to S3 once (chooses a random shard)
 
     First, it will get the latest backup metadata from S3. This will be useful to check if the requested backup was already done, is in progress or it failed.
     If it failed, it will raise an error. If it is in progress, it will wait for it to finish.
@@ -565,7 +565,7 @@ def run_backup_request(
 
     timestamp = datetime.now(UTC)
     config = BackupConfig(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table=table,
         incremental=incremental,
     )
@@ -576,14 +576,14 @@ def run_backup_request(
         tags={
             "backup_type": "incremental" if incremental else "full",
             "table": table,
-            "owner": JobOwners.TEAM_CLICKHOUSE.value,
+            "owner": JobOwners.TEAM_DATASTORE.value,
         },
     )
 
 
 @dagster.schedule(
     job=sharded_backup,
-    cron_schedule=settings.CLICKHOUSE_FULL_BACKUP_SCHEDULE,
+    cron_schedule=settings.DATASTORE_FULL_BACKUP_SCHEDULE,
     # should_execute=lambda context: 1 <= context.scheduled_execution_time.day <= 7,
     default_status=dagster.DefaultScheduleStatus.RUNNING,
 )
@@ -597,7 +597,7 @@ def full_sharded_backup_schedule(context: dagster.ScheduleEvaluationContext):
 
 @dagster.schedule(
     job=non_sharded_backup,
-    cron_schedule=settings.CLICKHOUSE_FULL_BACKUP_SCHEDULE,
+    cron_schedule=settings.DATASTORE_FULL_BACKUP_SCHEDULE,
     should_execute=lambda context: 1 <= context.scheduled_execution_time.day <= 7,
     default_status=dagster.DefaultScheduleStatus.RUNNING,
 )
@@ -611,7 +611,7 @@ def full_non_sharded_backup_schedule(context: dagster.ScheduleEvaluationContext)
 
 @dagster.schedule(
     job=sharded_backup,
-    cron_schedule=settings.CLICKHOUSE_INCREMENTAL_BACKUP_SCHEDULE,
+    cron_schedule=settings.DATASTORE_INCREMENTAL_BACKUP_SCHEDULE,
     default_status=dagster.DefaultScheduleStatus.RUNNING,
 )
 def incremental_sharded_backup_schedule(context: dagster.ScheduleEvaluationContext):
@@ -624,7 +624,7 @@ def incremental_sharded_backup_schedule(context: dagster.ScheduleEvaluationConte
 
 @dagster.schedule(
     job=non_sharded_backup,
-    cron_schedule=settings.CLICKHOUSE_INCREMENTAL_BACKUP_SCHEDULE,
+    cron_schedule=settings.DATASTORE_INCREMENTAL_BACKUP_SCHEDULE,
     default_status=dagster.DefaultScheduleStatus.RUNNING,
 )
 def incremental_non_sharded_backup_schedule(context: dagster.ScheduleEvaluationContext):

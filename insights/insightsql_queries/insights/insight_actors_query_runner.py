@@ -167,7 +167,7 @@ class InsightActorsQueryRunner(AnalyticsQueryRunner[InsightsQLQueryResponse]):
         settings = None
 
         # Funnel queries require the experimental analyzer to run correctly
-        # Can remove once clickhouse moves to version 24.3 or above
+        # Can remove once datastore moves to version 24.3 or above
         if isinstance(self.source_runner, FunnelsQueryRunner):
             settings = InsightsQLGlobalSettings(allow_experimental_analyzer=True)
 

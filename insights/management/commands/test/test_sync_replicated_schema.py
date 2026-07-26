@@ -1,24 +1,24 @@
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
 from django.conf import settings
 
-from insights.clickhouse.client import sync_execute
-from insights.conftest import create_clickhouse_tables
+from insights.datastore.client import sync_execute
+from insights.conftest import create_datastore_tables
 from insights.management.commands.sync_replicated_schema import Command
 
 
 @pytest.mark.ee
-class TestSyncReplicatedSchema(BaseTest, ClickhouseTestMixin):
+class TestSyncReplicatedSchema(BaseTest, DatastoreTestMixin):
     def tearDown(self):
         self.recreate_database()
         super().tearDown()
 
     def recreate_database(self, create_tables=True):
-        sync_execute(f"DROP DATABASE {settings.CLICKHOUSE_DATABASE} SYNC")
-        sync_execute(f"CREATE DATABASE {settings.CLICKHOUSE_DATABASE}")
+        sync_execute(f"DROP DATABASE {settings.DATASTORE_DATABASE} SYNC")
+        sync_execute(f"CREATE DATABASE {settings.DATASTORE_DATABASE}")
         if create_tables:
-            create_clickhouse_tables()
+            create_datastore_tables()
 
     def test_analyze_test_cluster(self):
         self.recreate_database(create_tables=True)

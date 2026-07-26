@@ -81,7 +81,7 @@ class TestSyncPersonDistinctIdsWorkflow:
             self.ch_only_uuids.append(person_uuid)
             self.created_person_uuids.append(person_uuid)
 
-        # Batch insert all persons to ClickHouse
+        # Batch insert all persons to Datastore
         insert_persons_to_ch_batch(self.team.id, self.created_person_uuids, version=0)
 
         # Create PG data for fixable and truly orphaned
@@ -245,7 +245,7 @@ class TestSyncPersonDistinctIdsWorkflow:
     async def test_workflow_deletes_with_correct_versions(self):
         """Test that workflow correctly increments versions when marking persons as deleted.
 
-        This is important because ClickHouse's ReplacingMergeTree uses the version
+        This is important because Datastore's ReplacingMergeTree uses the version
         column to determine which record to keep. If we use a version lower than
         the current one, the deletion will be ignored.
         """

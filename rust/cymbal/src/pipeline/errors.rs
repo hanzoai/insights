@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use metrics::counter;
 use tracing::{error, warn};
 
@@ -17,7 +17,7 @@ use crate::{
 pub async fn handle_errors(
     buffer: Vec<PipelineResult>,
     context: Arc<AppContext>,
-) -> Vec<ClickHouseEvent> {
+) -> Vec<DatastoreEvent> {
     let mut out = Vec::with_capacity(buffer.len());
 
     for result in buffer {

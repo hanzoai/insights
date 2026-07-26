@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from insights.schema import PersonsOnEventsMode
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.constants import PropertyOperatorType
 from insights.models import Filter, Team
 from insights.models.action import Action

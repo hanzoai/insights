@@ -9,9 +9,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from insights.temporal.import_recording.activities import (
     build_import_context,
     cleanup_import_data,
-    import_event_clickhouse_rows,
+    import_event_datastore_rows,
     import_recording_data,
-    import_replay_clickhouse_rows,
+    import_replay_datastore_rows,
 )
 from insights.temporal.import_recording.types import ImportContext, ImportRecordingInput
 
@@ -22,17 +22,17 @@ async def test_build_import_context_success(tmp_path):
     extract_dir = tmp_path / "extract"
     extract_dir.mkdir()
 
-    clickhouse_dir = extract_dir / "clickhouse"
-    clickhouse_dir.mkdir()
+    datastore_dir = extract_dir / "datastore"
+    datastore_dir.mkdir()
 
     (extract_dir / "s3_prefix.txt").write_text("team/123/session/abc")
-    (clickhouse_dir / "session-replay-events.json").write_text(
+    (datastore_dir / "session-replay-events.json").write_text(
         json.dumps({"data": [{"team_id": 123, "session_id": "abc"}]})
     )
 
     with zipfile.ZipFile(zip_path, "w") as zf:
         zf.write(extract_dir / "s3_prefix.txt", "s3_prefix.txt")
-        zf.write(clickhouse_dir / "session-replay-events.json", "clickhouse/session-replay-events.json")
+        zf.write(datastore_dir / "session-replay-events.json", "datastore/session-replay-events.json")
 
     input = ImportRecordingInput(team_id=123, export_file=str(zip_path))
 
@@ -93,11 +93,11 @@ async def test_import_recording_data_success(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_import_replay_clickhouse_rows_success(tmp_path):
+async def test_import_replay_datastore_rows_success(tmp_path):
     import_id = uuid4()
     import_dir = tmp_path / str(import_id)
-    clickhouse_dir = import_dir / "clickhouse"
-    clickhouse_dir.mkdir(parents=True)
+    datastore_dir = import_dir / "datastore"
+    datastore_dir.mkdir(parents=True)
 
     replay_data = {
         "data": [
@@ -126,7 +126,7 @@ async def test_import_replay_clickhouse_rows_success(tmp_path):
             },
         ]
     }
-    (clickhouse_dir / "session-replay-events.json").write_text(json.dumps(replay_data))
+    (datastore_dir / "session-replay-events.json").write_text(json.dumps(replay_data))
 
     context = ImportContext(
         team_id=123,
@@ -151,17 +151,17 @@ async def test_import_replay_clickhouse_rows_success(tmp_path):
 
         mock_path_cls.side_effect = path_side_effect
 
-        await import_replay_clickhouse_rows(context)
+        await import_replay_datastore_rows(context)
 
     mock_client.execute_query.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_import_event_clickhouse_rows_success(tmp_path):
+async def test_import_event_datastore_rows_success(tmp_path):
     import_id = uuid4()
     import_dir = tmp_path / str(import_id)
-    clickhouse_dir = import_dir / "clickhouse"
-    clickhouse_dir.mkdir(parents=True)
+    datastore_dir = import_dir / "datastore"
+    datastore_dir.mkdir(parents=True)
 
     base_event = {
         "uuid": "uuid1",
@@ -193,7 +193,7 @@ async def test_import_event_clickhouse_rows_success(tmp_path):
             {**base_event, "uuid": "uuid2", "event": "pageview"},
         ]
     }
-    (clickhouse_dir / "events.json").write_text(json.dumps(events_data))
+    (datastore_dir / "events.json").write_text(json.dumps(events_data))
 
     context = ImportContext(
         team_id=123,
@@ -218,13 +218,13 @@ async def test_import_event_clickhouse_rows_success(tmp_path):
 
         mock_path_cls.side_effect = path_side_effect
 
-        await import_event_clickhouse_rows(context)
+        await import_event_datastore_rows(context)
 
     assert mock_client.execute_query.call_count == 2
 
 
 @pytest.mark.asyncio
-async def test_import_event_clickhouse_rows_no_file(tmp_path):
+async def test_import_event_datastore_rows_no_file(tmp_path):
     import_id = uuid4()
     import_dir = tmp_path / str(import_id)
     import_dir.mkdir(parents=True)
@@ -245,7 +245,7 @@ async def test_import_event_clickhouse_rows_no_file(tmp_path):
 
         mock_path_cls.side_effect = path_side_effect
 
-        await import_event_clickhouse_rows(context)
+        await import_event_datastore_rows(context)
 
 
 @pytest.mark.asyncio

@@ -10,13 +10,13 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import reset_query_tags, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import reset_query_tags, tag_queries
 from insights.models.event.sql import EVENTS_DATA_TABLE
 from insights.models.group.sql import GROUPS_TABLE
 from insights.models.person.sql import PERSON_DISTINCT_ID2_TABLE, PERSONS_TABLE
-from insights.settings import CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE
-from insights.settings.data_stores import CLICKHOUSE_PASSWORD
+from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
+from insights.settings.data_stores import DATASTORE_PASSWORD
 
 """
 WARNING: This script is in Alpha! Make sure you know what you're doing before running it with --live-run set.
@@ -52,17 +52,17 @@ GROUPS_DICT_TABLE_NAME = f"{GROUPS_TABLE}_dict"
 PERSONS_DICT_TABLE_NAME = f"{PERSONS_TABLE}_dict"
 PERSON_DISTINCT_IDS_DICT_TABLE_NAME = f"{PERSON_DISTINCT_ID2_TABLE}_dict"
 
-ACCESS_CONFIG = f"DB '{CLICKHOUSE_DATABASE}' USER 'default' PASSWORD '{CLICKHOUSE_PASSWORD}'"
+ACCESS_CONFIG = f"DB '{DATASTORE_DATABASE}' USER 'default' PASSWORD '{DATASTORE_PASSWORD}'"
 
 GROUPS_DICTIONARY_SQL = f"""
 CREATE DICTIONARY IF NOT EXISTS {GROUPS_DICT_TABLE_NAME}
-ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+ON CLUSTER '{DATASTORE_CLUSTER}'
 (
     group_key String,
     group_properties String
 )
 PRIMARY KEY group_key
-SOURCE(CLICKHOUSE(TABLE {GROUPS_TABLE} {ACCESS_CONFIG}))
+SOURCE(DATASTORE(TABLE {GROUPS_TABLE} {ACCESS_CONFIG}))
 LAYOUT(complex_key_cache(size_in_cells 10000))
 Lifetime(60000)
 """
@@ -70,25 +70,25 @@ Lifetime(60000)
 
 PERSON_DISTINCT_IDS_DICTIONARY_SQL = f"""
 CREATE DICTIONARY IF NOT EXISTS {PERSON_DISTINCT_IDS_DICT_TABLE_NAME}
-ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+ON CLUSTER '{DATASTORE_CLUSTER}'
 (
     distinct_id String,
     person_id UUID
 )
 PRIMARY KEY distinct_id
-SOURCE(CLICKHOUSE(TABLE {PERSON_DISTINCT_ID2_TABLE} {ACCESS_CONFIG}))
+SOURCE(DATASTORE(TABLE {PERSON_DISTINCT_ID2_TABLE} {ACCESS_CONFIG}))
 LAYOUT(complex_key_direct())
 """
 
 PERSONS_DICTIONARY_SQL = f"""
 CREATE DICTIONARY IF NOT EXISTS {PERSONS_DICT_TABLE_NAME}
-ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+ON CLUSTER '{DATASTORE_CLUSTER}'
 (
     id UUID,
     properties String
 )
 PRIMARY KEY id
-SOURCE(CLICKHOUSE(TABLE {PERSONS_TABLE} {ACCESS_CONFIG}))
+SOURCE(DATASTORE(TABLE {PERSONS_TABLE} {ACCESS_CONFIG}))
 LAYOUT(complex_key_direct())
 """
 
@@ -96,15 +96,15 @@ backfill_settings = "SETTINGS mutations_sync = 2" if settings.TEST else ""
 
 BACKFILL_SQL = f"""
 ALTER TABLE {EVENTS_DATA_TABLE()}
-ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+ON CLUSTER '{DATASTORE_CLUSTER}'
 UPDATE
-    person_id=toUUID(dictGet('{CLICKHOUSE_DATABASE}.{PERSON_DISTINCT_IDS_DICT_TABLE_NAME}', 'person_id', tuple(distinct_id))),
-    person_properties=dictGetString('{CLICKHOUSE_DATABASE}.{PERSONS_DICT_TABLE_NAME}', 'properties', tuple(toUUID(dictGet('{CLICKHOUSE_DATABASE}.{PERSON_DISTINCT_IDS_DICT_TABLE_NAME}', 'person_id', tuple(distinct_id))))),
-    group0_properties=dictGetString('{CLICKHOUSE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_0)),
-    group1_properties=dictGetString('{CLICKHOUSE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_1)),
-    group2_properties=dictGetString('{CLICKHOUSE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_2)),
-    group3_properties=dictGetString('{CLICKHOUSE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_3)),
-    group4_properties=dictGetString('{CLICKHOUSE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_4))
+    person_id=toUUID(dictGet('{DATASTORE_DATABASE}.{PERSON_DISTINCT_IDS_DICT_TABLE_NAME}', 'person_id', tuple(distinct_id))),
+    person_properties=dictGetString('{DATASTORE_DATABASE}.{PERSONS_DICT_TABLE_NAME}', 'properties', tuple(toUUID(dictGet('{DATASTORE_DATABASE}.{PERSON_DISTINCT_IDS_DICT_TABLE_NAME}', 'person_id', tuple(distinct_id))))),
+    group0_properties=dictGetString('{DATASTORE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_0)),
+    group1_properties=dictGetString('{DATASTORE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_1)),
+    group2_properties=dictGetString('{DATASTORE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_2)),
+    group3_properties=dictGetString('{DATASTORE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_3)),
+    group4_properties=dictGetString('{DATASTORE_DATABASE}.{GROUPS_DICT_TABLE_NAME}', 'group_properties', tuple($group_4))
 WHERE team_id = %(team_id)s
 {backfill_settings}
 """
@@ -181,7 +181,7 @@ def run_backfill(options):
         query_id = query_id_res[0][0]
         print()
         print(
-            f"Backfill running. Cancel backfill by running:\n`KILL QUERY ON CLUSTER {CLICKHOUSE_CLUSTER} WHERE query_id='{query_id}'`"
+            f"Backfill running. Cancel backfill by running:\n`KILL QUERY ON CLUSTER {DATASTORE_CLUSTER} WHERE query_id='{query_id}'`"
         )
 
 

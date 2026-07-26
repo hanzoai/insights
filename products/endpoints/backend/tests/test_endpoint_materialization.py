@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 from unittest import mock
 
 from django.utils import timezone
@@ -26,7 +26,7 @@ from products.endpoints.backend.tests.conftest import create_endpoint_with_versi
 pytestmark = [pytest.mark.django_db]
 
 
-class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
+class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
     """Test suite for materialized endpoints."""
 
     ENDPOINT = "endpoints"

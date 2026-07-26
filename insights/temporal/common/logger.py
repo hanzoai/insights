@@ -11,11 +11,11 @@ must be called at the start of each worker process, as it is done in
 Developers of Temporal workflows should consider the two logging modes offered by this
 module:
 * Write: Logs are written to stdout.
-* Produce: Logs are produced to Kafka/ClickHouse and ingested into `log_entries`.
+* Produce: Logs are produced to Kafka/Datastore and ingested into `log_entries`.
 
 By default, the logger returned by `structlog.get_logger` or this module's `get_logger`
 will execute both modes, meaning logs issued will be written to stdout and produced to
-ClickHouse if requirements are met.
+Datastore if requirements are met.
 
 Loggers (of both modes) can be used in both activity and workflow context. Developers
 are encouraged to call `get_logger` once at the top of their modules, and then `bind()`
@@ -51,7 +51,7 @@ LogQueue = asyncio.Queue[bytes]
 
 
 def get_produce_only_logger(name: str | None = None):
-    """Return a logger configured to only produce logs to Kafka/ClickHouse."""
+    """Return a logger configured to only produce logs to Kafka/Datastore."""
     return structlog.get_logger(name, False, True)
 
 
@@ -357,10 +357,10 @@ class WrapperLogger(structlog.BoundLoggerBase):
         Use write-only to skip production of logs:
 
         >>> logger = structlog.get_logger()
-        >>> logger.info("Hello World", write_only=True) # Not produced to ClickHouse
+        >>> logger.info("Hello World", write_only=True) # Not produced to Datastore
         {"event": "Hello World"}
 
-        Similary, use produce-only to only produce logs to ClickHouse:
+        Similary, use produce-only to only produce logs to Datastore:
 
         >>> logger = structlog.get_logger()
         >>> logger.info("Hello World", produce_only=True) # Nothing is written!
@@ -627,10 +627,10 @@ def create_background_task(
 class KafkaLogProducerFromQueueAsync:
     """Produce log messages to Kafka by getting them from a queue.
 
-    This KafkaLogProducerFromQueueAsync was designed to ingest logs into the ClickHouse log_entries table.
+    This KafkaLogProducerFromQueueAsync was designed to ingest logs into the Datastore log_entries table.
     For this reason, the messages we produce to Kafka are serialized as JSON in the schema expected by
     the log_entries table. Eventually, we could de-couple this producer from the table schema, but
-    schema changes are rare in ClickHouse, and for now we are only using this for logs, so the tight
+    schema changes are rare in Datastore, and for now we are only using this for logs, so the tight
     coupling is preferred over the extra complexity of de-coupling this producer.
 
     Attributes:

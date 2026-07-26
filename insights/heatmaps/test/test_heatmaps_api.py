@@ -1,10 +1,10 @@
 import freezegun
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.http import HttpResponse
@@ -12,10 +12,10 @@ from django.http import HttpResponse
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_DATASTORE_SESSION_REPLAY_EVENTS
 from insights.models import Organization, Team
-from insights.models.event.util import format_clickhouse_timestamp
+from insights.models.event.util import format_datastore_timestamp
 
 INSERT_SINGLE_HEATMAP_EVENT = """
 INSERT INTO sharded_heatmaps (
@@ -48,7 +48,7 @@ SELECT
 """
 
 
-class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest):
+class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     CLASS_DATA_LEVEL_SETUP = False
 
     def _assert_heatmap_no_result_count(
@@ -93,7 +93,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         if team_id is None:
             team_id = self.team.pk
 
-        p = ClickhouseProducer()
+        p = DatastoreProducer()
         # because this is in a test it will write directly using SQL not really with Kafka
         p.produce(
             topic=KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
@@ -102,7 +102,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
                 "session_id": session_id,
                 "team_id": team_id,
                 "distinct_id": distinct_id,
-                "timestamp": format_clickhouse_timestamp(date_from),
+                "timestamp": format_datastore_timestamp(date_from),
                 "x": round(x / 16),
                 "y": round(y / 16),
                 "scale_factor": 16,
@@ -140,14 +140,14 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         )
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_empty_response(self) -> None:
         response = self.client.get("/api/heatmap/?date_from=2024-05-03")
         assert response.status_code == 200
         self.assertEqual(response.json(), {"results": []})
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_all_data_response(self) -> None:
         self._create_heatmap_event("session_1", "click")
         self._create_heatmap_event("session_2", "click")
@@ -167,14 +167,14 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         self._assert_heatmap_single_result_count({"date_from": "2023-03-08"}, 2)
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_filter_by_date_from(self) -> None:
         self._create_heatmap_event("session_1", "click", "2023-03-07T07:00:00")
         self._create_heatmap_event("session_2", "click", "2023-03-08T08:00:00")
 
         self._assert_heatmap_single_result_count({"date_from": "2023-03-08"}, 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freezegun.freeze_time("2023-03-15T09:00:00")
     def test_can_get_filter_by_relative_date(self) -> None:
         self._create_heatmap_event("session_1", "click", "2023-03-07T07:00:00")
@@ -184,7 +184,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         self._assert_heatmap_no_result_count({"date_from": "dStart", "date_to": "dEnd"})
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_filter_by_click(self) -> None:
         self._create_heatmap_event("session_1", "click", "2023-03-08T07:00:00")
         self._create_heatmap_event("session_2", "rageclick", "2023-03-08T08:00:00")
@@ -195,7 +195,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         self._assert_heatmap_single_result_count({"date_from": "2023-03-08", "type": "rageclick"}, 2)
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_by_exact_url(self) -> None:
         self._create_heatmap_event("session_1", "rageclick", "2023-03-08T08:00:00", current_url="http://example.com")
         self._create_heatmap_event(
@@ -230,7 +230,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         )
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_by_url_pattern_where_end_is_anchored(self) -> None:
         # home page with no trailing slash
         self._create_heatmap_event("session_2", "rageclick", "2023-03-08T08:01:00", current_url="http://example.com")
@@ -260,7 +260,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         name_func=lambda f, n, p: f"{f.__name__}_{p.args[0]}",
     )
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_by_url_pattern(self, pattern: str, expected_matches: int) -> None:
         # the home page
         self._create_heatmap_event("session_2", "rageclick", "2023-03-08T08:01:00", current_url="http://example.com/")
@@ -304,7 +304,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         )
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_scrolldepth_counts(self) -> None:
         # to calculate expected scroll depth bucket from y and viewport height
         # ((round(y/16) + round(viewport_height/16)) * 16 // 100) * 100
@@ -362,7 +362,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         }
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_scrolldepth_counts_by_visitor(self) -> None:
         # scroll depth bucket 1000
         self._create_heatmap_event(
@@ -442,7 +442,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         ]
     )
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_by_viewport(self, _name: str, query_params: dict, expected_results: list) -> None:
         # all these xs = round(10/16) = 1
 
@@ -463,7 +463,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         assert sorted(response.json()["results"], key=lambda k: k["pointer_relative_x"]) == expected_results
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_filter_by_test_accounts(self) -> None:
         self.team.test_account_filters = [
             {
@@ -533,7 +533,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         ]
 
     @freezegun.freeze_time("2025-03-31")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_can_get_count_by_aggregation(self) -> None:
         # 3 items but 2 visitors
         self._create_heatmap_event("session_1", "click", distinct_id="12345")

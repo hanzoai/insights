@@ -4,13 +4,13 @@ import dagster
 import pydantic
 from dagster import AssetExecutionContext, MetadataValue, WeeklyPartitionsDefinition, asset
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import tags_context
 from insights.dags.common import JobOwners, dagster_tags
 
 from products.web_analytics.dags.web_preaggregated_utils import (
     TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS,
-    WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS,
+    WEB_PRE_AGGREGATED_DATASTORE_SETTINGS,
 )
 
 
@@ -136,7 +136,7 @@ def web_pre_aggregated_accuracy(context: AssetExecutionContext, config: Accuracy
 
         with tags_context(kind="dagster", dagster=dagster_tags(context)):
             context.log.info("Executing accuracy comparison query")
-            result = sync_execute(query, settings=WEB_PRE_AGGREGATED_CLICKHOUSE_SETTINGS)
+            result = sync_execute(query, settings=WEB_PRE_AGGREGATED_DATASTORE_SETTINGS)
 
         context.log.info(f"Query returned {len(result)} rows")
 

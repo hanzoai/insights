@@ -122,7 +122,7 @@ def export_asset_direct(
         team_id=team.id,
     )
 
-    from insights.clickhouse.query_tagging import tag_queries
+    from insights.datastore.query_tagging import tag_queries
 
     tag_queries(exported_asset_id=exported_asset.id, export_format=exported_asset.export_format)
 

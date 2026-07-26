@@ -4,11 +4,11 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.test import override_settings
@@ -27,7 +27,7 @@ from products.customer_analytics.backend.insightsql_queries.usage_metrics_query_
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestUsageMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
     person_distinct_id = "test-person-id"
     person_id = "cd6bb999-8652-4d98-a937-c49e89a5694d"
     another_person_distinct_id = "another-test-person-id"
@@ -120,7 +120,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             UsageMetricsQueryRunner(team=self.team, query=query)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_metric(self):
         metric = GroupUsageMetric.objects.create(
             id=self.test_metric_id,
@@ -186,7 +186,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[1]["value"], 5.0)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_complex_event_filter(self):
         metric = GroupUsageMetric.objects.create(
             id=self.test_metric_id,
@@ -227,7 +227,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["value"], 3.0)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_metric_interval(self):
         metric = GroupUsageMetric.objects.create(
             id=self.test_metric_id,
@@ -284,7 +284,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["change_from_previous_pct"], 33.33333333333333)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_handles_failed_metric_gracefully(self):
         GroupUsageMetric.objects.create(
             id=self.test_metric_id,
@@ -313,7 +313,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 0)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_no_metrics(self):
         for _ in range(3):
             _create_event(
@@ -330,7 +330,7 @@ class TestUsageMetricsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 0)
 
     @freeze_time("2025-10-09T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_group_metric(self):
         group_key = "test_group"
         self._create_group(group_key=group_key, group_type_index=0)

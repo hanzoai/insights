@@ -2,11 +2,11 @@ from datetime import datetime
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import Mock, patch
 
@@ -39,7 +39,7 @@ from insights.models.person.util import create_person
 
 
 @patch("hanzo_insights.feature_enabled", new=Mock(return_value=True))  # for persons-inner-where-optimization
-class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
+class TestPersonOptimization(DatastoreTestMixin, APIBaseTest):
     """
     Mostly tests for the optimization of pre-filtering before aggregating. See https://github.com/Hanzo Insights/insights/pull/25604
     """
@@ -90,7 +90,7 @@ class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
         # self.modifiers.optimizeJoinedFilters = True
         # self.modifiers.personsArgMaxVersion = PersonsArgMaxVersion.V1
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_simple_filter(self):
         response = execute_insightsql_query(
             parse_select("select id, properties from persons where properties.$some_prop = 'something'"),
@@ -98,11 +98,11 @@ class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
             modifiers=self.modifiers,
         )
         assert len(response.results) == 2
-        assert response.clickhouse
-        self.assertIn("where_optimization", response.clickhouse)
-        self.assertNotIn("in(tuple(person.id, person.version)", response.clickhouse)
+        assert response.datastore
+        self.assertIn("where_optimization", response.datastore)
+        self.assertNotIn("in(tuple(person.id, person.version)", response.datastore)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_joins_are_left_alone_for_now(self):
         response = execute_insightsql_query(
             parse_select("select uuid from events where person.properties.$some_prop = 'something'"),
@@ -110,9 +110,9 @@ class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
             modifiers=self.modifiers,
         )
         assert len(response.results) == 2
-        assert response.clickhouse
-        self.assertIn("in(tuple(person.id, person.version)", response.clickhouse)
-        self.assertNotIn("where_optimization", response.clickhouse)
+        assert response.datastore
+        self.assertIn("in(tuple(person.id, person.version)", response.datastore)
+        self.assertNotIn("where_optimization", response.datastore)
 
     def test_person_modal_not_optimized_yet(self):
         source_query = TrendsQuery(
@@ -139,10 +139,10 @@ class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
         )
         query_runner = ActorsQueryRunner(query=actors_query, team=self.team)
         response = execute_insightsql_query(query_runner.to_query(), self.team, modifiers=self.modifiers)
-        assert response.clickhouse
-        self.assertNotIn("where_optimization", response.clickhouse)
+        assert response.datastore
+        self.assertNotIn("where_optimization", response.datastore)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_order_by_limit_transferred(self):
         response = execute_insightsql_query(
             parse_select(
@@ -152,12 +152,12 @@ class TestPersonOptimization(ClickhouseTestMixin, APIBaseTest):
             modifiers=self.modifiers,
         )
         assert len(response.results) == 2
-        assert response.clickhouse
-        self.assertIn("where_optimization", response.clickhouse)
-        self.assertNotIn("in(tuple(person.id, person.version)", response.clickhouse)
+        assert response.datastore
+        self.assertIn("where_optimization", response.datastore)
+        self.assertNotIn("in(tuple(person.id, person.version)", response.datastore)
 
 
-class TestPersons(ClickhouseTestMixin, APIBaseTest):
+class TestPersons(DatastoreTestMixin, APIBaseTest):
     person_properties = {"$initial_referring_domain": "https://google.com"}
     poe_properties = {"$initial_referring_domain": "https://facebook.com", "$initial_utm_medium": "cpc"}
 

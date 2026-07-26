@@ -8,7 +8,7 @@ from temporalio import activity
 
 from insights.schema import PropertyOperator, RecordingPropertyFilter, RecordingsQuery
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.models.team import Team
 from insights.session_recordings.queries.session_recording_list_from_query import SessionRecordingListFromQuery
 from insights.sync import database_sync_to_async

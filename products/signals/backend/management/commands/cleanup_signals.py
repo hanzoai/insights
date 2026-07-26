@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Team
 
 from products.error_tracking.backend.embedding import PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS
@@ -16,7 +16,7 @@ WHERE product = 'signals'
 
 
 class Command(BaseCommand):
-    help = "Clean up all signals pipeline data from ClickHouse and Postgres. DEBUG only."
+    help = "Clean up all signals pipeline data from Datastore and Postgres. DEBUG only."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         if not options["yes"]:
             self.stdout.write(
                 self.style.WARNING(
-                    f"This will DELETE all signals data for team {team.id} from ClickHouse and Postgres."
+                    f"This will DELETE all signals data for team {team.id} from Datastore and Postgres."
                 )
             )
             confirm = input("Type 'yes' to confirm: ")
@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 self.stdout.write("Aborted.")
                 return
 
-        # 1. Delete from all ClickHouse embedding tables
+        # 1. Delete from all Datastore embedding tables
         tables_to_clean = [PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS] + [t.sharded_table_name() for t in EMBEDDING_TABLES]
 
         for table in tables_to_clean:
@@ -79,6 +79,6 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Done. Cleaned up {report_count} reports, {artefact_count} artefacts, "
-                f"and ClickHouse signals from {len(tables_to_clean)} tables for team {team.id}."
+                f"and Datastore signals from {len(tables_to_clean)} tables for team {team.id}."
             )
         )

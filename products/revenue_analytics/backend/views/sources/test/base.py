@@ -2,11 +2,11 @@
 Base test classes for revenue analytics view sources.
 
 This module provides common test infrastructure for testing revenue analytics
-view source builders, including mixins for ClickHouse queries, snapshots,
+view source builders, including mixins for Datastore queries, snapshots,
 and API testing.
 """
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from insights.insightsql import ast
 
@@ -14,12 +14,12 @@ from products.revenue_analytics.backend.views.core import BuiltQuery
 from products.revenue_analytics.backend.views.schemas import Schema
 
 
-class RevenueAnalyticsViewSourceBaseTest(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
+class RevenueAnalyticsViewSourceBaseTest(DatastoreTestMixin, QueryMatchingTest, APIBaseTest):
     """
     Base test class for revenue analytics view source tests.
 
     Provides:
-    - ClickHouse query testing capabilities
+    - Datastore query testing capabilities
     - Query snapshot testing with assertQueryMatchesSnapshot
     - API testing infrastructure
     - Common test data setup patterns

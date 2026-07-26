@@ -12,8 +12,8 @@ from insights.async_migrations.definition import (
     AsyncMigrationOperationSQL,
 )
 from insights.async_migrations.disk_util import analyze_enough_disk_space_free_for_table
-from insights.async_migrations.utils import execute_op_clickhouse, run_optimize_table, sleep_until_finished
-from insights.clickhouse.client import sync_execute
+from insights.async_migrations.utils import execute_op_datastore, run_optimize_table, sleep_until_finished
+from insights.datastore.client import sync_execute
 from insights.models.event.sql import EVENTS_DATA_TABLE
 from insights.utils import str_to_bool
 
@@ -61,7 +61,7 @@ TEMPORARY_PDI2_TABLE_NAME = "tmp_person_distinct_id2_0007"
 TEMPORARY_GROUPS_TABLE_NAME = "tmp_groups_0007"
 
 # :KLUDGE: On cloud, groups and person tables now have storage_policy sometimes attached
-STORAGE_POLICY_SETTING = lambda: ", storage_policy = 'hot_to_cold'" if settings.CLICKHOUSE_ENABLE_STORAGE_POLICY else ""
+STORAGE_POLICY_SETTING = lambda: ", storage_policy = 'hot_to_cold'" if settings.DATASTORE_ENABLE_STORAGE_POLICY else ""
 
 # we shouldn't set this too low to avoid false positives for data inconsistency given we sample data
 DEFAULT_ACCEPTED_INCONSISTENT_DATA_RATIO = 0.01
@@ -78,17 +78,17 @@ class Migration(AsyncMigrationDefinition):
     parameters = {
         "PERSON_DICT_CACHE_SIZE": (
             5000000,
-            "ClickHouse cache size (in rows) for persons data.",
+            "Datastore cache size (in rows) for persons data.",
             int,
         ),
         "PERSON_DISTINCT_ID_DICT_CACHE_SIZE": (
             5000000,
-            "ClickHouse cache size (in rows) for person distinct id data.",
+            "Datastore cache size (in rows) for person distinct id data.",
             int,
         ),
         "GROUPS_DICT_CACHE_SIZE": (
             1000000,
-            "ClickHouse cache size (in rows) for groups data.",
+            "Datastore cache size (in rows) for groups data.",
             int,
         ),
         "RUN_DATA_VALIDATION_POSTCHECK": (
@@ -147,8 +147,8 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    CREATE TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
-                    AS {settings.CLICKHOUSE_DATABASE}.person
+                    CREATE TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
+                    AS {settings.DATASTORE_DATABASE}.person
                     ENGINE = ReplacingMergeTree(version)
                     ORDER BY (team_id, id)
                     SETTINGS index_granularity = 128 {STORAGE_POLICY_SETTING()}
@@ -158,8 +158,8 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    CREATE TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
-                    AS {settings.CLICKHOUSE_DATABASE}.person_distinct_id2
+                    CREATE TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
+                    AS {settings.DATASTORE_DATABASE}.person_distinct_id2
                     ENGINE = ReplacingMergeTree(version)
                     ORDER BY (team_id, distinct_id)
                     SETTINGS index_granularity = 128
@@ -169,8 +169,8 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    CREATE TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}
-                    AS {settings.CLICKHOUSE_DATABASE}.groups
+                    CREATE TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}
+                    AS {settings.DATASTORE_DATABASE}.groups
                     ENGINE = ReplacingMergeTree(_timestamp)
                     ORDER BY (team_id, group_type_index, group_key)
                     SETTINGS index_granularity = 128 {STORAGE_POLICY_SETTING()}
@@ -180,24 +180,24 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
-                    REPLACE PARTITION tuple() FROM {settings.CLICKHOUSE_DATABASE}.person
+                    ALTER TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
+                    REPLACE PARTITION tuple() FROM {settings.DATASTORE_DATABASE}.person
                 """,
                 rollback=None,
                 per_shard=True,
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
-                    REPLACE PARTITION tuple() FROM {settings.CLICKHOUSE_DATABASE}.person_distinct_id2
+                    ALTER TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
+                    REPLACE PARTITION tuple() FROM {settings.DATASTORE_DATABASE}.person_distinct_id2
                 """,
                 rollback=None,
                 per_shard=True,
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}
-                    REPLACE PARTITION tuple() FROM {settings.CLICKHOUSE_DATABASE}.groups
+                    ALTER TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}
+                    REPLACE PARTITION tuple() FROM {settings.DATASTORE_DATABASE}.groups
                 """,
                 rollback=None,
                 per_shard=True,
@@ -206,7 +206,7 @@ class Migration(AsyncMigrationDefinition):
                 fn=lambda query_id: run_optimize_table(
                     unique_name="0007_persons_and_groups_on_events_backfill_person",
                     query_id=query_id,
-                    table_name=f"{settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME}",
+                    table_name=f"{settings.DATASTORE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME}",
                     final=True,
                     deduplicate=True,
                     per_shard=True,
@@ -216,7 +216,7 @@ class Migration(AsyncMigrationDefinition):
                 fn=lambda query_id: run_optimize_table(
                     unique_name="0007_persons_and_groups_on_events_backfill_pdi2",
                     query_id=query_id,
-                    table_name=f"{settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME}",
+                    table_name=f"{settings.DATASTORE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME}",
                     final=True,
                     deduplicate=True,
                     per_shard=True,
@@ -226,7 +226,7 @@ class Migration(AsyncMigrationDefinition):
                 fn=lambda query_id: run_optimize_table(
                     unique_name="0007_persons_and_groups_on_events_backfill_groups",
                     query_id=query_id,
-                    table_name=f"{settings.CLICKHOUSE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME}",
+                    table_name=f"{settings.DATASTORE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME}",
                     final=True,
                     deduplicate=True,
                     per_shard=True,
@@ -234,7 +234,7 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
+                    ALTER TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}
                     DELETE WHERE is_deleted = 1 OR person_id IN (
                         SELECT id FROM {TEMPORARY_PERSONS_TABLE_NAME} WHERE is_deleted=1
                     )
@@ -245,7 +245,7 @@ class Migration(AsyncMigrationDefinition):
             ),
             AsyncMigrationOperationSQL(
                 sql=f"""
-                    ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
+                    ALTER TABLE {settings.DATASTORE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}
                     DELETE WHERE is_deleted = 1
                 """,
                 sql_settings={"mutations_sync": 2},
@@ -260,11 +260,11 @@ class Migration(AsyncMigrationDefinition):
         ]
 
     def _dictionary_connection_string(self):
-        result = f"DB '{settings.CLICKHOUSE_DATABASE}'"
-        if settings.CLICKHOUSE_USER:
-            result += f" USER '{settings.CLICKHOUSE_USER}'"
-        if settings.CLICKHOUSE_PASSWORD:
-            result += f" PASSWORD '{settings.CLICKHOUSE_PASSWORD}'"
+        result = f"DB '{settings.DATASTORE_DATABASE}'"
+        if settings.DATASTORE_USER:
+            result += f" USER '{settings.DATASTORE_USER}'"
+        if settings.DATASTORE_PASSWORD:
+            result += f" PASSWORD '{settings.DATASTORE_PASSWORD}'"
         return result
 
     def _update_properties_column_compression_codec(self, query_id, codec):
@@ -277,9 +277,9 @@ class Migration(AsyncMigrationDefinition):
             "group4_properties",
         ]
         for column in columns:
-            execute_op_clickhouse(
+            execute_op_datastore(
                 query_id=query_id,
-                sql=f"ALTER TABLE {settings.CLICKHOUSE_DATABASE}.{EVENTS_DATA_TABLE()} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}' MODIFY COLUMN {column} VARCHAR Codec({codec})",
+                sql=f"ALTER TABLE {settings.DATASTORE_DATABASE}.{EVENTS_DATA_TABLE()} ON CLUSTER '{settings.DATASTORE_CLUSTER}' MODIFY COLUMN {column} VARCHAR Codec({codec})",
             )
 
     def _postcheck(self, _: str):
@@ -333,15 +333,15 @@ class Migration(AsyncMigrationDefinition):
             f"""
             SELECT countIf(
                 group0_properties = '' OR
-                group0_created_at != dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 0, $group_0)) OR
+                group0_created_at != dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 0, $group_0)) OR
                 group1_properties = '' OR
-                group1_created_at != dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 1, $group_1)) OR
+                group1_created_at != dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 1, $group_1)) OR
                 group2_properties = '' OR
-                group2_created_at != dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 2, $group_2)) OR
+                group2_created_at != dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 2, $group_2)) OR
                 group3_properties = '' OR
-                group3_created_at != dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 3, $group_3)) OR
+                group3_created_at != dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 3, $group_3)) OR
                 group4_properties = '' OR
-                group4_created_at != dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 4, $group_4))
+                group4_created_at != dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 4, $group_4))
             ) / count() FROM events
             SAMPLE 10000000
             {where_clause}
@@ -362,24 +362,24 @@ class Migration(AsyncMigrationDefinition):
 
         where_clause, where_clause_params = self._where_clause()
 
-        execute_op_clickhouse(
+        execute_op_datastore(
             f"""
                 ALTER TABLE {EVENTS_DATA_TABLE()}
                 {{on_cluster_clause}}
                 UPDATE
                     person_id = if(
                         empty(person_id),
-                        toUUID(dictGet('{settings.CLICKHOUSE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id))),
+                        toUUID(dictGet('{settings.DATASTORE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id))),
                         person_id
                     ),
                     person_properties = if(
                         person_properties = '',
                         dictGetStringOrDefault(
-                            '{settings.CLICKHOUSE_DATABASE}.person_dict',
+                            '{settings.DATASTORE_DATABASE}.person_dict',
                             'properties',
                             tuple(
                                 team_id,
-                                toUUID(dictGet('{settings.CLICKHOUSE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id)))
+                                toUUID(dictGet('{settings.DATASTORE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id)))
                             ),
                             toJSONString(map())
                         ),
@@ -388,63 +388,63 @@ class Migration(AsyncMigrationDefinition):
                     person_created_at = if(
                         person_created_at = toDateTime(0),
                         dictGetDateTime(
-                            '{settings.CLICKHOUSE_DATABASE}.person_dict',
+                            '{settings.DATASTORE_DATABASE}.person_dict',
                             'created_at',
                             tuple(
                                 team_id,
-                                toUUID(dictGet('{settings.CLICKHOUSE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id)))
+                                toUUID(dictGet('{settings.DATASTORE_DATABASE}.person_distinct_id2_dict', 'person_id', tuple(team_id, distinct_id)))
                             )
                         ),
                         person_created_at
                     ),
                     group0_properties = if(
                         group0_properties = '',
-                        dictGetStringOrDefault('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 0, $group_0), toJSONString(map())),
+                        dictGetStringOrDefault('{settings.DATASTORE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 0, $group_0), toJSONString(map())),
                         group0_properties
                     ),
                     group1_properties = if(
                         group1_properties = '',
-                        dictGetStringOrDefault('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 1, $group_1), toJSONString(map())),
+                        dictGetStringOrDefault('{settings.DATASTORE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 1, $group_1), toJSONString(map())),
                         group1_properties
                     ),
                     group2_properties = if(
                         group2_properties = '',
-                        dictGetStringOrDefault('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 2, $group_2), toJSONString(map())),
+                        dictGetStringOrDefault('{settings.DATASTORE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 2, $group_2), toJSONString(map())),
                         group2_properties
                     ),
                     group3_properties = if(
                         group3_properties = '',
-                        dictGetStringOrDefault('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 3, $group_3), toJSONString(map())),
+                        dictGetStringOrDefault('{settings.DATASTORE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 3, $group_3), toJSONString(map())),
                         group3_properties
                     ),
                     group4_properties = if(
                         group4_properties = '',
-                        dictGetStringOrDefault('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 4, $group_4), toJSONString(map())),
+                        dictGetStringOrDefault('{settings.DATASTORE_DATABASE}.groups_dict', 'group_properties', tuple(team_id, 4, $group_4), toJSONString(map())),
                         group4_properties
                     ),
                     group0_created_at = if(
                         group0_created_at = toDateTime(0),
-                        dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 0, $group_0)),
+                        dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 0, $group_0)),
                         group0_created_at
                     ),
                     group1_created_at = if(
                         group1_created_at = toDateTime(0),
-                        dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 1, $group_1)),
+                        dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 1, $group_1)),
                         group1_created_at
                     ),
                     group2_created_at = if(
                         group2_created_at = toDateTime(0),
-                        dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 2, $group_2)),
+                        dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 2, $group_2)),
                         group2_created_at
                     ),
                     group3_created_at = if(
                         group3_created_at = toDateTime(0),
-                        dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 3, $group_3)),
+                        dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 3, $group_3)),
                         group3_created_at
                     ),
                     group4_created_at = if(
                         group4_created_at = toDateTime(0),
-                        dictGetDateTime('{settings.CLICKHOUSE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 4, $group_4)),
+                        dictGetDateTime('{settings.DATASTORE_DATABASE}.groups_dict', 'created_at', tuple(team_id, 4, $group_4)),
                         group4_created_at
                     )
                 {where_clause}
@@ -459,9 +459,9 @@ class Migration(AsyncMigrationDefinition):
 
     def _create_dictionaries(self, query_id):
         (
-            execute_op_clickhouse(
+            execute_op_datastore(
                 f"""
-                CREATE DICTIONARY IF NOT EXISTS {settings.CLICKHOUSE_DATABASE}.person_dict {{on_cluster_clause}}
+                CREATE DICTIONARY IF NOT EXISTS {settings.DATASTORE_DATABASE}.person_dict {{on_cluster_clause}}
                 (
                     team_id Int64,
                     id UUID,
@@ -469,7 +469,7 @@ class Migration(AsyncMigrationDefinition):
                     created_at DateTime
                 )
                 PRIMARY KEY team_id, id
-                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_PERSONS_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(DATASTORE(TABLE {TEMPORARY_PERSONS_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,
@@ -479,16 +479,16 @@ class Migration(AsyncMigrationDefinition):
             ),
         )
         (
-            execute_op_clickhouse(
+            execute_op_datastore(
                 f"""
-                CREATE DICTIONARY IF NOT EXISTS {settings.CLICKHOUSE_DATABASE}.person_distinct_id2_dict {{on_cluster_clause}}
+                CREATE DICTIONARY IF NOT EXISTS {settings.DATASTORE_DATABASE}.person_distinct_id2_dict {{on_cluster_clause}}
                 (
                     team_id Int64,
                     distinct_id String,
                     person_id UUID
                 )
                 PRIMARY KEY team_id, distinct_id
-                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_PDI2_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(DATASTORE(TABLE {TEMPORARY_PDI2_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,
@@ -497,9 +497,9 @@ class Migration(AsyncMigrationDefinition):
                 query_id=query_id,
             ),
         )
-        execute_op_clickhouse(
+        execute_op_datastore(
             f"""
-                CREATE DICTIONARY IF NOT EXISTS {settings.CLICKHOUSE_DATABASE}.groups_dict {{on_cluster_clause}}
+                CREATE DICTIONARY IF NOT EXISTS {settings.DATASTORE_DATABASE}.groups_dict {{on_cluster_clause}}
                 (
                     team_id Int64,
                     group_type_index UInt8,
@@ -508,7 +508,7 @@ class Migration(AsyncMigrationDefinition):
                     created_at DateTime
                 )
                 PRIMARY KEY team_id, group_type_index, group_key
-                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_GROUPS_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(DATASTORE(TABLE {TEMPORARY_GROUPS_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,
@@ -529,27 +529,27 @@ class Migration(AsyncMigrationDefinition):
             WHERE not is_done AND command LIKE %(pattern)s
             """,
             {
-                "cluster": settings.CLICKHOUSE_CLUSTER,
+                "cluster": settings.DATASTORE_CLUSTER,
                 "pattern": "%person_created_at = toDateTime(0)%",
             },
         )[0][0]
 
     def _clear_temporary_tables(self, query_id):
         queries = [
-            f"DROP DICTIONARY IF EXISTS {settings.CLICKHOUSE_DATABASE}.person_dict {{on_cluster_clause}}",
-            f"DROP DICTIONARY IF EXISTS {settings.CLICKHOUSE_DATABASE}.person_distinct_id2_dict {{on_cluster_clause}}",
-            f"DROP DICTIONARY IF EXISTS {settings.CLICKHOUSE_DATABASE}.groups_dict {{on_cluster_clause}}",
-            f"DROP TABLE IF EXISTS {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}",
-            f"DROP TABLE IF EXISTS {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}",
-            f"DROP TABLE IF EXISTS {settings.CLICKHOUSE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}",
+            f"DROP DICTIONARY IF EXISTS {settings.DATASTORE_DATABASE}.person_dict {{on_cluster_clause}}",
+            f"DROP DICTIONARY IF EXISTS {settings.DATASTORE_DATABASE}.person_distinct_id2_dict {{on_cluster_clause}}",
+            f"DROP DICTIONARY IF EXISTS {settings.DATASTORE_DATABASE}.groups_dict {{on_cluster_clause}}",
+            f"DROP TABLE IF EXISTS {settings.DATASTORE_DATABASE}.{TEMPORARY_PERSONS_TABLE_NAME} {{on_cluster_clause}}",
+            f"DROP TABLE IF EXISTS {settings.DATASTORE_DATABASE}.{TEMPORARY_PDI2_TABLE_NAME} {{on_cluster_clause}}",
+            f"DROP TABLE IF EXISTS {settings.DATASTORE_DATABASE}.{TEMPORARY_GROUPS_TABLE_NAME} {{on_cluster_clause}}",
         ]
         for query in queries:
-            execute_op_clickhouse(query_id=query_id, sql=query, per_shard=True)
+            execute_op_datastore(query_id=query_id, sql=query, per_shard=True)
 
     def healthcheck(self):
         result = sync_execute("SELECT free_space FROM system.disks")
         # 100mb or less left
         if int(result[0][0]) < 100000000:
-            return (False, "ClickHouse available storage below 100MB")
+            return (False, "Datastore available storage below 100MB")
 
         return (True, None)

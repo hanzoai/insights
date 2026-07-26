@@ -315,7 +315,7 @@ class TestQueryDateRangeWithIntervals(APIBaseTest):
     def test_get_start_of_interval_insightsql_week_interval(self):
         self.team.week_start_day = WeekStartDay.MONDAY
         query = QueryDateRangeWithIntervals(None, 1, self.team, IntervalType.WEEK, self.now)
-        week_mode = WeekStartDay(self.team.week_start_day or 0).clickhouse_mode
+        week_mode = WeekStartDay(self.team.week_start_day or 0).datastore_mode
         expected_expr = ast.Call(
             name="toStartOfWeek", args=[ast.Constant(value=query.date_from()), ast.Constant(value=int(week_mode))]
         )

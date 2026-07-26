@@ -5,10 +5,10 @@ from typing import Any, Optional
 
 from structlog import get_logger
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import ClickHouseUser, Workload
-from insights.clickhouse.client.execute_async import QueryStatusManager
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import DatastoreUser, Workload
+from insights.datastore.client.execute_async import QueryStatusManager
+from insights.settings import DATASTORE_CLUSTER
 from insights.utils import UUID_REGEX
 
 logger = get_logger(__name__)
@@ -52,7 +52,7 @@ def get_query_results() -> list[Any]:
         """
 
     raw_results = sync_execute(
-        SYSTEM_PROCESSES_SQL, {"cluster": CLICKHOUSE_CLUSTER}, workload=Workload.ONLINE, ch_user=ClickHouseUser.OPS
+        SYSTEM_PROCESSES_SQL, {"cluster": DATASTORE_CLUSTER}, workload=Workload.ONLINE, ch_user=DatastoreUser.OPS
     )
 
     noNaNInt = lambda num: 0 if math.isnan(num) else int(num)
@@ -81,7 +81,7 @@ def poll_query_performance() -> None:
             manager = query_manager_from_initial_query_id(initial_query_id)
             if manager is None:
                 continue
-            manager.update_clickhouse_query_progresses(list(results_group))
+            manager.update_datastore_query_progresses(list(results_group))
 
     except Exception as e:
-        logger.exception("Clickhouse Status Check Failed", error=e)
+        logger.exception("Datastore Status Check Failed", error=e)

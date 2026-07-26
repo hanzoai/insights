@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_person, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_person, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -12,14 +12,14 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestActorsPropertyTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestActorsPropertyTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _run(self, query: ActorsPropertyTaxonomyQuery) -> list[ActorsPropertyTaxonomyResponse]:
         response = ActorsPropertyTaxonomyQueryRunner(team=self.team, query=query).calculate()
         if not isinstance(response.results, list):
             raise ValueError("Response is not an ActorsPropertyTaxonomyQueryResponse")
         return response.results
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_property_taxonomy_query_runner(self):
         _create_person(
             distinct_ids=["person1"],
@@ -58,7 +58,7 @@ class TestActorsPropertyTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         # Ensure the value is a string
         self.assertEqual(results[0].sample_values[0], "30")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_group_property_taxonomy_query_runner(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="Company", group_type_index=0
@@ -100,7 +100,7 @@ class TestActorsPropertyTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         # Ensure the value is a string
         self.assertEqual(results[0].sample_values[0], "30")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_max_value_count(self):
         _create_person(
             distinct_ids=["person1"],

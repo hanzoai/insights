@@ -2,7 +2,7 @@ import math
 from datetime import datetime
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import CompareFilter, DateRange, WebOverviewQuery
 
@@ -13,12 +13,12 @@ from insights.insightsql.transforms.state_aggregations import (
     wrap_state_query_in_merge_query,
 )
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from insights.models.utils import uuid7
 
 
-class TestWebOverviewStateTransform(ClickhouseTestMixin, APIBaseTest):
+class TestWebOverviewStateTransform(DatastoreTestMixin, APIBaseTest):
     """Test that web overview queries work correctly with state transformations."""
 
     QUERY_TIMESTAMP = "2025-01-29"
@@ -78,7 +78,7 @@ class TestWebOverviewStateTransform(ClickhouseTestMixin, APIBaseTest):
 
             # Execute original query
             context_original = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
-            original_sql, _ = prepare_and_print_ast(original_query_ast, context=context_original, dialect="clickhouse")
+            original_sql, _ = prepare_and_print_ast(original_query_ast, context=context_original, dialect="datastore")
             original_result = sync_execute(original_sql, context_original.values)
 
             # Full transformation (agg -> state -> merge)
@@ -88,7 +88,7 @@ class TestWebOverviewStateTransform(ClickhouseTestMixin, APIBaseTest):
             # Execute transformed query
             context_transformed = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
             transformed_sql, _ = prepare_and_print_ast(
-                wrapper_query_ast, context=context_transformed, dialect="clickhouse"
+                wrapper_query_ast, context=context_transformed, dialect="datastore"
             )
             transformed_result = sync_execute(transformed_sql, context_transformed.values)
 

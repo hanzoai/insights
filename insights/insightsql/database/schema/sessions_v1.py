@@ -133,14 +133,14 @@ LAZY_SESSIONS_FIELDS: dict[str, FieldOrTable] = {
 class RawSessionsTableV1(Table):
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "sessions"
 
     def to_printed_insightsql(self):
         return "raw_sessions"
 
     def avoid_asterisk_fields(self) -> list[str]:
-        # our clickhouse driver can't return aggregate states
+        # our datastore driver can't return aggregate states
         return [
             "entry_url",
             "exit_url",
@@ -369,7 +369,7 @@ class SessionsTableV1(LazyTable):
     ):
         return select_from_sessions_table_v1(table_to_add.fields_accessed, node, context)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "sessions"
 
     def to_printed_insightsql(self):

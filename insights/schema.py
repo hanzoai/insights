@@ -236,7 +236,7 @@ class AssistantInsightsQLQuery(BaseModel):
     query: str = Field(
         ...,
         description=(
-            "SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions."
+            "SQL SELECT statement to execute. Mostly standard Datastore SQL with Insights-specific additions."
         ),
     )
 
@@ -4487,7 +4487,7 @@ class AssistantGenericPropertyFilter1(BaseModel):
         ...,
         description=(
             "Only use property values from the plan. If the operator is `regex` or"
-            " `not_regex`, the value must be a valid ClickHouse regex pattern to match"
+            " `not_regex`, the value must be a valid Datastore regex pattern to match"
             " against. Otherwise, the value must be a substring that will be matched"
             " against the property value. Use the string values `true` or `false` for"
             " boolean properties."
@@ -4578,7 +4578,7 @@ class AssistantGroupPropertyFilter1(BaseModel):
         ...,
         description=(
             "Only use property values from the plan. If the operator is `regex` or"
-            " `not_regex`, the value must be a valid ClickHouse regex pattern to match"
+            " `not_regex`, the value must be a valid Datastore regex pattern to match"
             " against. Otherwise, the value must be a substring that will be matched"
             " against the property value. Use the string values `true` or `false` for"
             " boolean properties."
@@ -4746,7 +4746,7 @@ class AssistantStringOrBooleanValuePropertyFilter(BaseModel):
         ...,
         description=(
             "Only use property values from the plan. If the operator is `regex` or"
-            " `not_regex`, the value must be a valid ClickHouse regex pattern to match"
+            " `not_regex`, the value must be a valid Datastore regex pattern to match"
             " against. Otherwise, the value must be a substring that will be matched"
             " against the property value. Use the string values `true` or `false` for"
             " boolean properties."
@@ -4886,7 +4886,7 @@ class ChartSettings(BaseModel):
     )
 
 
-class ClickhouseQueryProgress(BaseModel):
+class DatastoreQueryProgress(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -5446,7 +5446,7 @@ class InsightsQLQueryModifiers(BaseModel):
     customChannelTypeRules: list[CustomChannelRule] | None = None
     dataWarehouseEventsModifiers: list[DataWarehouseEventsModifier] | None = None
     debug: bool | None = None
-    forceClickhouseDataSkippingIndexes: list[str] | None = Field(
+    forceDatastoreDataSkippingIndexes: list[str] | None = Field(
         default=None,
         description=("If these are provided, the query will fail if these skip indexes are not used"),
     )
@@ -5892,7 +5892,7 @@ class QueryStatus(BaseModel):
         description="When was the query execution task picked up by a worker.",
     )
     query_async: Literal[True] = Field(default=True, description="ONLY async queries use QueryStatus.")
-    query_progress: ClickhouseQueryProgress | None = None
+    query_progress: DatastoreQueryProgress | None = None
     results: Any | None = None
     start_time: AwareDatetime | None = Field(default=None, description="When was query execution task enqueued.")
     task_id: str | None = None
@@ -6403,7 +6403,7 @@ class SessionRecordingType(BaseModel):
         default=None,
         description=(
             "whether we have received data for this recording in the last 5 minutes"
-            " (assumes the recording was loaded from ClickHouse)\n*"
+            " (assumes the recording was loaded from Datastore)\n*"
         ),
     )
     person: PersonType | None = None
@@ -11596,7 +11596,7 @@ class InsightsQLQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -11864,7 +11864,7 @@ class NewExperimentQueryResponse(BaseModel):
     )
     baseline: ExperimentStatsBaseValidated
     breakdown_results: list[ExperimentBreakdownResult] | None = None
-    clickhouse_sql: str | None = None
+    datastore_sql: str | None = None
     insightsql: str | None = None
     variant_results: list[ExperimentVariantResultFrequentist] | list[ExperimentVariantResultBayesian]
 
@@ -12169,7 +12169,7 @@ class QueryResponseAlternative8(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -12818,7 +12818,7 @@ class QueryResponseAlternative41(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -14640,7 +14640,7 @@ class WebTrendsQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -14928,7 +14928,7 @@ class CachedInsightsQLQueryResponse(BaseModel):
         default=None,
         description=("What triggered the calculation of the query, leave empty if user/immediate"),
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -15004,7 +15004,7 @@ class CachedNewExperimentQueryResponse(BaseModel):
         default=None,
         description=("What triggered the calculation of the query, leave empty if user/immediate"),
     )
-    clickhouse_sql: str | None = None
+    datastore_sql: str | None = None
     insightsql: str | None = None
     is_cached: bool
     last_refresh: AwareDatetime
@@ -15065,7 +15065,7 @@ class CachedWebTrendsQueryResponse(BaseModel):
         default=None,
         description=("What triggered the calculation of the query, leave empty if user/immediate"),
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -15174,7 +15174,7 @@ class Response3(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    clickhouse: str | None = Field(default=None, description="Executed ClickHouse query")
+    datastore: str | None = Field(default=None, description="Executed Datastore query")
     columns: list | None = Field(default=None, description="Returned columns")
     error: str | None = Field(
         default=None,
@@ -16723,7 +16723,7 @@ class ExperimentQueryResponse(BaseModel):
             "Results grouped by breakdown value. When present, baseline and variant_results contain aggregated data."
         ),
     )
-    clickhouse_sql: str | None = None
+    datastore_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
     insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None
@@ -17243,7 +17243,7 @@ class QueryResponseAlternative20(BaseModel):
             "Results grouped by breakdown value. When present, baseline and variant_results contain aggregated data."
         ),
     )
-    clickhouse_sql: str | None = None
+    datastore_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
     insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None
@@ -17612,7 +17612,7 @@ class CachedExperimentQueryResponse(BaseModel):
         default=None,
         description=("What triggered the calculation of the query, leave empty if user/immediate"),
     )
-    clickhouse_sql: str | None = None
+    datastore_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
     insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None

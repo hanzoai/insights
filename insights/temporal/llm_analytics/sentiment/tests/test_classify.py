@@ -221,7 +221,7 @@ class TestClassifySentimentBatch:
 
         # One classify call with all texts
         mock_classify.assert_called_once_with(["hello from t1", "hello from t2"])
-        # One execute_insightsql_query call (single ClickHouse query)
+        # One execute_insightsql_query call (single Datastore query)
         mock_insightsql.assert_called_once()
 
         assert result["t1"]["label"] == "positive"

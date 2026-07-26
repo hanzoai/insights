@@ -7,7 +7,7 @@ import pytest
 
 from django.test import override_settings
 
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.batch_exports import generate_query_ranges, get_data_interval, iter_records
 
@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.django_db]
 
 
 def assert_records_match_events(records, events):
-    """Compare records returned from ClickHouse to events inserted into ClickHouse.
+    """Compare records returned from Datastore to events inserted into Datastore.
 
     Naturally, they should match, but with some transformations:
     * We set UTC as a timezone for dates.
@@ -45,14 +45,14 @@ def assert_records_match_events(records, events):
                 assert value == expected[key]
 
 
-async def test_iter_records(clickhouse_client):
+async def test_iter_records(datastore_client):
     """Test the rows returned by iter_records."""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -66,7 +66,7 @@ async def test_iter_records(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
@@ -77,14 +77,14 @@ async def test_iter_records(clickhouse_client):
     assert_records_match_events(records, events)
 
 
-async def test_iter_records_handles_duplicates(clickhouse_client):
+async def test_iter_records_handles_duplicates(datastore_client):
     """Test the rows returned by iter_records are de-duplicated."""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -98,7 +98,7 @@ async def test_iter_records_handles_duplicates(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
@@ -109,14 +109,14 @@ async def test_iter_records_handles_duplicates(clickhouse_client):
     assert_records_match_events(records, events)
 
 
-async def test_iter_records_can_exclude_events(clickhouse_client):
+async def test_iter_records_can_exclude_events(datastore_client):
     """Test the rows returned by iter_records can exclude events."""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -132,7 +132,7 @@ async def test_iter_records_can_exclude_events(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
@@ -144,14 +144,14 @@ async def test_iter_records_can_exclude_events(clickhouse_client):
     assert_records_match_events(records, events[:5000])
 
 
-async def test_iter_records_can_include_events(clickhouse_client):
+async def test_iter_records_can_include_events(datastore_client):
     """Test the rows returned by iter_records can include events."""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -167,7 +167,7 @@ async def test_iter_records_can_include_events(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
@@ -179,7 +179,7 @@ async def test_iter_records_can_include_events(clickhouse_client):
     assert_records_match_events(records, events[5000:])
 
 
-async def test_iter_records_ignores_timestamp_predicates(clickhouse_client):
+async def test_iter_records_ignores_timestamp_predicates(datastore_client):
     """Test the rows returned by iter_records ignores timestamp predicates when configured."""
     team_id = randint(1, 1000000)
 
@@ -190,8 +190,8 @@ async def test_iter_records_ignores_timestamp_predicates(clickhouse_client):
     timestamp_start = inserted_at - dt.timedelta(hours=24 * 365 * 2)
     timestamp_end = inserted_at - dt.timedelta(hours=24 * 365)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=timestamp_start,
         end_time=timestamp_end,
@@ -207,7 +207,7 @@ async def test_iter_records_ignores_timestamp_predicates(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             inserted_at.isoformat(),
             data_interval_end.isoformat(),
@@ -221,7 +221,7 @@ async def test_iter_records_ignores_timestamp_predicates(clickhouse_client):
         records = [
             record
             for record_batch in iter_records(
-                clickhouse_client,
+                datastore_client,
                 team_id,
                 inserted_at.isoformat(),
                 data_interval_end.isoformat(),
@@ -232,14 +232,14 @@ async def test_iter_records_ignores_timestamp_predicates(clickhouse_client):
     assert_records_match_events(records, events)
 
 
-async def test_iter_records_can_flatten_properties(clickhouse_client):
+async def test_iter_records_can_flatten_properties(datastore_client):
     """Test iter_records can flatten properties as indicated by a field expression."""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -253,7 +253,7 @@ async def test_iter_records_can_flatten_properties(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
@@ -279,14 +279,14 @@ async def test_iter_records_can_flatten_properties(clickhouse_client):
         assert record["custom_prop"] == expected["properties"]["custom-property"]
 
 
-async def test_iter_records_uses_extra_query_parameters(clickhouse_client):
+async def test_iter_records_uses_extra_query_parameters(datastore_client):
     """Test iter_records can use extra query parameters"""
     team_id = randint(1, 1000000)
     data_interval_end = dt.datetime.now(tz=dt.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     data_interval_start = data_interval_end - dt.timedelta(hours=1)
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -300,7 +300,7 @@ async def test_iter_records_uses_extra_query_parameters(clickhouse_client):
     records = [
         record
         for record_batch in iter_records(
-            clickhouse_client,
+            datastore_client,
             team_id,
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),

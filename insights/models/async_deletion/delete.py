@@ -15,8 +15,8 @@ deletions_counter = Counter("deletions_confirmed", "Total number of deletions ma
 
 
 class AsyncDeletionProcess(ABC):
-    CLICKHOUSE_MUTATION_CHUNK_SIZE = 1_000_000
-    CLICKHOUSE_VERIFY_CHUNK_SIZE = 300
+    DATASTORE_MUTATION_CHUNK_SIZE = 1_000_000
+    DATASTORE_VERIFY_CHUNK_SIZE = 300
     DELETION_TYPES: list[DeletionType] = []
 
     def __init__(self) -> None:
@@ -26,8 +26,8 @@ class AsyncDeletionProcess(ABC):
         queued_deletions = list(
             AsyncDeletion.objects.filter(delete_verified_at__isnull=True, deletion_type__in=self.DELETION_TYPES)
         )
-        for i in range(0, len(queued_deletions), self.CLICKHOUSE_MUTATION_CHUNK_SIZE):
-            chunk = queued_deletions[i : i + self.CLICKHOUSE_MUTATION_CHUNK_SIZE]
+        for i in range(0, len(queued_deletions), self.DATASTORE_MUTATION_CHUNK_SIZE):
+            chunk = queued_deletions[i : i + self.DATASTORE_MUTATION_CHUNK_SIZE]
             self.process(chunk)
 
     def mark_deletions_done(self):
@@ -37,8 +37,8 @@ class AsyncDeletionProcess(ABC):
         unverified = self._fetch_unverified_deletions_grouped()
 
         for (deletion_type, _), async_deletions in unverified.items():
-            for i in range(0, len(async_deletions), self.CLICKHOUSE_VERIFY_CHUNK_SIZE):
-                chunk = async_deletions[i : i + self.CLICKHOUSE_VERIFY_CHUNK_SIZE]
+            for i in range(0, len(async_deletions), self.DATASTORE_VERIFY_CHUNK_SIZE):
+                chunk = async_deletions[i : i + self.DATASTORE_VERIFY_CHUNK_SIZE]
                 to_verify = self._verify_by_group(deletion_type, chunk)
                 count_to_verify = len(to_verify)
                 deletions_counter.labels(deletion_type=deletion_type).inc(count_to_verify)

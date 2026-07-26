@@ -305,7 +305,7 @@ class TestProperty(BaseTest):
                 "ifNull(match(toString(properties.a), 'b'), 0) or ifNull(match(toString(properties.a), 'c'), 0)"
             ),
         )
-        # Want to make sure this returns 0, not false. Clickhouse uses UInt8s primarily for booleans.
+        # Want to make sure this returns 0, not false. Datastore uses UInt8s primarily for booleans.
         self.assertIs(0, a.exprs[1].args[1].value)
         # negative
         self.assertEqual(
@@ -891,9 +891,9 @@ class TestProperty(BaseTest):
             team=self.team,
             name="extended_properties",
             columns={
-                "string_prop": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)"},
-                "int_prop": {"insightsql": "IntegerDatabaseField", "clickhouse": "Nullable(Int64)"},
-                "bool_prop": {"insightsql": "BooleanDatabaseField", "clickhouse": "Nullable(Bool)"},
+                "string_prop": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)"},
+                "int_prop": {"insightsql": "IntegerDatabaseField", "datastore": "Nullable(Int64)"},
+                "bool_prop": {"insightsql": "BooleanDatabaseField", "datastore": "Nullable(Bool)"},
             },
             credential=credential,
             url_pattern="",
@@ -928,8 +928,8 @@ class TestProperty(BaseTest):
             team=self.team,
             name="foobars",
             columns={
-                "event": {"insightsql": "StringDatabaseField", "clickhouse": "String"},
-                "properties": {"insightsql": "JSONField", "clickhouse": "String"},
+                "event": {"insightsql": "StringDatabaseField", "datastore": "String"},
+                "properties": {"insightsql": "JSONField", "datastore": "String"},
             },
             credential=credential,
             url_pattern="",
@@ -1300,7 +1300,7 @@ class TestProperty(BaseTest):
         )
 
         # Prerelease versions (1.2.3-alpha) - Not officially supported yet but sortableSemver handles them
-        # We pass through to ClickHouse's sortableSemver function which should handle the parsing
+        # We pass through to Datastore's sortableSemver function which should handle the parsing
         self.assertEqual(
             self._property_to_expr(
                 {"type": "person", "key": "app_version", "operator": "semver_eq", "value": "1.2.3-alpha"}

@@ -66,7 +66,7 @@ COMPATIBLE_TYPES: TypeTupleToCastMapping = {
         functools.partial(pa.compute.seconds_between, EPOCH_SECONDS)
     ),
     (pa.string(), JsonType()): _make_ensure_array(functools.partial(pa.compute.cast, target_type=JsonType())),
-    # We assume this is a destination field created from a ClickHouse `DateTime` that
+    # We assume this is a destination field created from a Datastore `DateTime` that
     # has  been updated to `DateTime64(3)`.
     # This would mean the field would have been created as a BigQuery 'INT64', but we
     # are now receiving a `pa.timestamp("ms", tz="UTC")`.

@@ -17,7 +17,7 @@ pub struct ReleaseRecord {
     pub metadata: Option<Value>,
 }
 
-// The info, as written to clickhouse at the exception level.
+// The info, as written to datastore at the exception level.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReleaseInfo {
     version: String,

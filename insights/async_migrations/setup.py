@@ -2,7 +2,7 @@ from typing import Optional
 
 from django.core.exceptions import ImproperlyConfigured
 
-from infi.clickhouse_orm.utils import import_submodules
+from datastore_orm.utils import import_submodules
 from semantic_version.base import Version
 
 from insights.async_migrations.definition import AsyncMigrationDefinition

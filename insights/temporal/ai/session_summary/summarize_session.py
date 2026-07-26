@@ -703,7 +703,7 @@ async def ensure_llm_single_session_summary(inputs: SingleSessionSummaryInputs):
             retry_policy=retry_policy,
         )
 
-        # Activity 5: Generate embeddings for all segments and store in ClickHouse via Kafka
+        # Activity 5: Generate embeddings for all segments and store in Datastore via Kafka
         await temporalio.workflow.execute_activity(
             embed_and_store_segments_activity,
             args=(video_inputs, consolidated_analysis.segments),

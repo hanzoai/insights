@@ -1,6 +1,6 @@
 from typing import Optional
 
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 from unittest.mock import Mock, patch
 
 from insights.schema import BaseMathType, DateRange, MarketingAnalyticsAggregatedQuery, NodeKind
@@ -12,7 +12,7 @@ from products.marketing_analytics.backend.insightsql_queries.marketing_analytics
 )
 
 
-class TestMarketingAnalyticsAggregatedQueryRunner(ClickhouseTestMixin, BaseTest):
+class TestMarketingAnalyticsAggregatedQueryRunner(DatastoreTestMixin, BaseTest):
     """Test suite for MarketingAnalyticsAggregatedQueryRunner."""
 
     maxDiff = None
@@ -34,7 +34,7 @@ class TestMarketingAnalyticsAggregatedQueryRunner(ClickhouseTestMixin, BaseTest)
         return MarketingAnalyticsAggregatedQueryRunner(query=query, team=self.team)
 
     def test_join_uses_match_key_not_or_condition(self):
-        """Verify the JOIN uses match_key instead of OR condition (ClickHouse doesn't support OR in JOIN ON)."""
+        """Verify the JOIN uses match_key instead of OR condition (Datastore doesn't support OR in JOIN ON)."""
         # Set up a conversion goal so the JOIN is generated
         self.team.marketing_analytics_config.conversion_goals = [
             {

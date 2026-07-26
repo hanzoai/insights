@@ -7,8 +7,8 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.schema import CREATE_TABLE_QUERIES, get_table_name
+from insights.datastore.client import sync_execute
+from insights.datastore.schema import CREATE_TABLE_QUERIES, get_table_name
 from insights.cloud_utils import is_cloud
 
 logger = structlog.get_logger(__name__)
@@ -20,7 +20,7 @@ HostName = str
 
 
 class Command(BaseCommand):
-    help = "Synchronize schema across clickhouse cluster, creating missing tables on new nodes"
+    help = "Synchronize schema across datastore cluster, creating missing tables on new nodes"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         if len(out_of_sync_hosts) > 0:
             logger.info(
-                "Schema out of sync on some clickhouse nodes!",
+                "Schema out of sync on some datastore nodes!",
                 out_of_sync_hosts=out_of_sync_hosts,
             )
 
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             else:
                 self.create_missing_tables(out_of_sync_hosts, create_table_queries)
 
-        logger.info("✅ All ClickHouse nodes schema in sync")
+        logger.info("✅ All Datastore nodes schema in sync")
 
     def analyze_cluster_tables(self):
         table_names = list(map(get_table_name, CREATE_TABLE_QUERIES))
@@ -63,8 +63,8 @@ class Command(BaseCommand):
               AND name IN %(table_names)s
         """,
             {
-                "cluster": settings.CLICKHOUSE_CLUSTER,
-                "database": settings.CLICKHOUSE_DATABASE,
+                "cluster": settings.DATASTORE_CLUSTER,
+                "database": settings.DATASTORE_DATABASE,
                 "table_names": table_names,
             },
         )
@@ -109,7 +109,7 @@ class Command(BaseCommand):
     def run_on_cluster(self, create_table_query: Query) -> Query:
         return re.sub(
             r"^CREATE TABLE (\S+)",
-            f"CREATE TABLE IF NOT EXISTS \\1 ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'",
+            f"CREATE TABLE IF NOT EXISTS \\1 ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
             create_table_query,
             count=1,
         )

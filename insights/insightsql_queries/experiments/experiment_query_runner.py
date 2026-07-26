@@ -25,7 +25,7 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.printer import to_printed_insightsql
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.insightsql_queries.experiments import MULTIPLE_VARIANT_KEY
 from insights.insightsql_queries.experiments.base_query_utils import get_experiment_date_range
 from insights.insightsql_queries.experiments.error_handling import experiment_error_handler
@@ -135,7 +135,7 @@ class ExperimentQueryRunner(QueryRunner):
         # Just to simplify access
         self.metric = self.query.metric
 
-        self.clickhouse_sql: str | None = None
+        self.datastore_sql: str | None = None
         self.insightsql: str | None = None
 
     def _get_breakdowns_for_builder(self) -> list | None:
@@ -237,7 +237,7 @@ class ExperimentQueryRunner(QueryRunner):
 
         experiment_query_ast = self._get_experiment_query()
         self.insightsql = to_printed_insightsql(experiment_query_ast, self.team)
-        self.clickhouse_sql = get_experiment_query_sql(experiment_query_ast, self.team)
+        self.datastore_sql = get_experiment_query_sql(experiment_query_ast, self.team)
 
         response = execute_insightsql_query(
             query_type="ExperimentQuery",
@@ -280,7 +280,7 @@ class ExperimentQueryRunner(QueryRunner):
         if breakdown_results is not None:
             result.breakdown_results = breakdown_results
 
-        result.clickhouse_sql = self.clickhouse_sql
+        result.datastore_sql = self.datastore_sql
         result.insightsql = self.insightsql
 
         return result

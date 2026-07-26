@@ -2,7 +2,7 @@
 PERSON_BATCH_WRITING_DB_WRITE_MODE=ASSERT_VERSION caused updatePersonAssertVersion()
 to not properly merge properties.
 
-This job reads events from ClickHouse to find property updates ($set, $set_once, $unset)
+This job reads events from Datastore to find property updates ($set, $set_once, $unset)
 within a bug window, compares timestamps with properties_last_updated_at in Postgres,
 and applies any missed updates.
 
@@ -27,9 +27,9 @@ import dagster
 import psycopg2
 from dagster_k8s import k8s_job_executor
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import ClickhouseCluster
-from insights.clickhouse.custom_metrics import MetricsClient
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import DatastoreCluster
+from insights.datastore.custom_metrics import MetricsClient
 from insights.dags.common import JobOwners
 from insights.kafka_client.client import _KafkaProducer
 from insights.kafka_client.topics import KAFKA_PERSON
@@ -41,7 +41,7 @@ executor_def = dagster.in_process_executor if settings.DEBUG else k8s_job_execut
 class PersonPropertyReconciliationConfig(dagster.Config):
     """Configuration for the person property reconciliation job."""
 
-    bug_window_start: str  # ClickHouse format: "YYYY-MM-DD HH:MM:SS" (assumed UTC)
+    bug_window_start: str  # Datastore format: "YYYY-MM-DD HH:MM:SS" (assumed UTC)
     team_ids: list[int] | None = None  # Optional: filter to specific teams
     bug_window_end: str | None = None  # Optional: required if team_ids not supplied
     min_team_id: int | None = None  # Optional: only process teams with id >= this value
@@ -149,17 +149,17 @@ def ensure_utc_datetime(ts: datetime) -> datetime:
     return ts
 
 
-def get_person_property_updates_from_clickhouse(
+def get_person_property_updates_from_datastore(
     team_id: int,
     bug_window_start: str,
 ) -> list[PersonPropertyDiffs]:
     """
-    Query ClickHouse to get property updates per person that differ from current state.
+    Query Datastore to get property updates per person that differ from current state.
 
     This query:
     1. Joins events with person_distinct_id_overrides to resolve merged persons
     2. Extracts $set (argMax for latest), $set_once (argMin for first), and $unset properties
-    3. Compares with current person properties in ClickHouse
+    3. Compares with current person properties in Datastore
     4. Returns only persons where properties differ, are missing, or need removal
 
     Returns:
@@ -347,14 +347,14 @@ def get_person_property_updates_from_clickhouse(
     return results
 
 
-def get_raw_person_property_updates_from_clickhouse(
+def get_raw_person_property_updates_from_datastore(
     team_id: int,
     bug_window_start: str,
     bug_window_end: str,
     person_ids: tuple[str, ...],
 ) -> list[RawPersonPropertyUpdates]:
     """
-    Query ClickHouse to get raw property updates from events WITHOUT comparing to person state.
+    Query Datastore to get raw property updates from events WITHOUT comparing to person state.
 
     This is used for windowed queries where we need to aggregate events across multiple
     time windows before doing a single comparison against person properties.
@@ -366,8 +366,8 @@ def get_raw_person_property_updates_from_clickhouse(
 
     Args:
         team_id: Team ID to query
-        bug_window_start: Start of time window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
-        bug_window_end: End of time window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_start: Start of time window (Datastore format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_end: End of time window (Datastore format: "YYYY-MM-DD HH:MM:SS")
         person_ids: Tuple of person_ids to filter to (required for batched processing)
 
     Returns:
@@ -511,17 +511,17 @@ def get_raw_person_property_updates_from_clickhouse(
     return results
 
 
-def get_affected_person_ids_from_clickhouse(
+def get_affected_person_ids_from_datastore(
     team_id: int,
     bug_window_start: str,
     bug_window_end: str,
 ) -> list[str]:
     """
-    Query ClickHouse for person_ids whose events in the bug window produce property
+    Query Datastore for person_ids whose events in the bug window produce property
     diffs when compared against current person state.
 
     Uses the same aggregation + person-state comparison structure as the
-    non-windowed query (get_person_property_updates_from_clickhouse) but:
+    non-windowed query (get_person_property_updates_from_datastore) but:
     - Bounded by bug_window_end (not now()) to keep the scan lightweight
     - Returns only person_ids (no full diff data)
 
@@ -535,8 +535,8 @@ def get_affected_person_ids_from_clickhouse(
 
     Args:
         team_id: Team ID to query
-        bug_window_start: Start of bug window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
-        bug_window_end: End of bug window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_start: Start of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_end: End of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS")
 
     Returns:
         List of person_id strings (UUIDs) affected in the bug window
@@ -677,7 +677,7 @@ def get_affected_person_ids_from_clickhouse(
 
 
 # Default batch size for processing persons in windowed mode.
-# Keeps IN clauses under ClickHouse's max_query_size limit.
+# Keeps IN clauses under Datastore's max_query_size limit.
 # 10K UUIDs × ~40 chars ≈ 400KB query text.
 WINDOWED_PERSON_BATCH_SIZE = 10000
 
@@ -754,10 +754,10 @@ def compare_raw_updates_with_person_state(
     raw_updates: list[RawPersonPropertyUpdates],
 ) -> list[PersonPropertyDiffs]:
     """
-    Compare merged raw event updates against current person state in ClickHouse.
+    Compare merged raw event updates against current person state in Datastore.
 
     This is the second step of the windowed query flow:
-    1. get_raw_person_property_updates_from_clickhouse() per window
+    1. get_raw_person_property_updates_from_datastore() per window
     2. merge_raw_person_property_updates() to combine windows
     3. compare_raw_updates_with_person_state() to filter to actual diffs
 
@@ -769,7 +769,7 @@ def compare_raw_updates_with_person_state(
     Note on comparison semantics:
         This function uses Python object comparison, so semantically equal values
         like 123 (int) and 123.0 (float) are considered equal. This differs from
-        the non-windowed SQL path (get_person_property_updates_from_clickhouse)
+        the non-windowed SQL path (get_person_property_updates_from_datastore)
         which compares raw JSON string representations. The Python approach is
         preferable for reconciliation as it avoids unnecessary updates when
         values are semantically equivalent.
@@ -869,12 +869,12 @@ def compare_raw_updates_with_person_state(
 
 
 def parse_ch_timestamp(ts: str) -> datetime:
-    """Parse a ClickHouse timestamp string to a UTC datetime."""
+    """Parse a Datastore timestamp string to a UTC datetime."""
     return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)
 
 
 def format_ch_timestamp(dt: datetime) -> str:
-    """Format a datetime to ClickHouse timestamp string (UTC)."""
+    """Format a datetime to Datastore timestamp string (UTC)."""
     if dt.tzinfo is None:
         # Assume naive datetimes are already UTC
         return dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -903,7 +903,7 @@ def get_person_property_updates_windowed(
 
     Args:
         team_id: Team ID to query
-        bug_window_start: Start of time window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_start: Start of time window (Datastore format: "YYYY-MM-DD HH:MM:SS")
         window_seconds: Size of each query window in seconds. If <= 0, single query is used.
         bug_window_end: End of time window (defaults to now if not provided)
         logger: Optional logger for progress tracking
@@ -914,13 +914,13 @@ def get_person_property_updates_windowed(
     if window_seconds <= 0:
         if logger:
             logger.info(f"Using single-query mode for team_id={team_id}")
-        return get_person_property_updates_from_clickhouse(team_id, bug_window_start)
+        return get_person_property_updates_from_datastore(team_id, bug_window_start)
 
     now = datetime.now(UTC)
     effective_end = bug_window_end or format_ch_timestamp(now)
 
     # Step 1: Get affected person_ids first (early exit if none)
-    affected_person_ids = get_affected_person_ids_from_clickhouse(
+    affected_person_ids = get_affected_person_ids_from_datastore(
         team_id=team_id,
         bug_window_start=bug_window_start,
         bug_window_end=effective_end,
@@ -945,7 +945,7 @@ def get_person_property_updates_windowed(
 
     while current_start < now:
         current_end = min(current_start + timedelta(seconds=window_seconds), now)
-        window_updates = get_raw_person_property_updates_from_clickhouse(
+        window_updates = get_raw_person_property_updates_from_datastore(
             team_id,
             format_ch_timestamp(current_start),
             format_ch_timestamp(current_end),
@@ -999,7 +999,7 @@ def get_person_property_updates_windowed_batched(
 
     Args:
         team_id: Team ID to query
-        bug_window_start: Start of bug window (ClickHouse format: "YYYY-MM-DD HH:MM:SS")
+        bug_window_start: Start of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS")
         bug_window_end: End of bug window - used to bound affected persons
         window_seconds: Size of each query window in seconds
         person_batch_size: Number of persons per batch (default 10K)
@@ -1013,7 +1013,7 @@ def get_person_property_updates_windowed_batched(
         logger.info(f"Querying affected persons: team_id={team_id}, bug_window=[{bug_window_start}, {bug_window_end}]")
 
     try:
-        affected_person_ids = get_affected_person_ids_from_clickhouse(
+        affected_person_ids = get_affected_person_ids_from_datastore(
             team_id=team_id,
             bug_window_start=bug_window_start,
             bug_window_end=bug_window_end,
@@ -1064,7 +1064,7 @@ def get_person_property_updates_windowed_batched(
             while current_start < now:
                 current_end = min(current_start + timedelta(seconds=window_seconds), now)
                 try:
-                    window_updates = get_raw_person_property_updates_from_clickhouse(
+                    window_updates = get_raw_person_property_updates_from_datastore(
                         team_id,
                         format_ch_timestamp(current_start),
                         format_ch_timestamp(current_end),
@@ -1201,7 +1201,7 @@ def reconcile_person_properties(
     person_property_diffs: PersonPropertyDiffs,
 ) -> dict | None:
     """
-    Compute updated properties by comparing ClickHouse updates with current Postgres state.
+    Compute updated properties by comparing Datastore updates with current Postgres state.
 
     The CH query pre-filters to only return:
     - $set properties where the CH value differs from current person state
@@ -1210,7 +1210,7 @@ def reconcile_person_properties(
 
     Args:
         person: From Postgres with uuid, properties, properties_last_updated_at, properties_last_operation
-        person_property_diffs: Property diffs from ClickHouse
+        person_property_diffs: Property diffs from Datastore
 
     Returns:
         Dict with updated properties/metadata if changes needed, None otherwise.
@@ -1255,9 +1255,9 @@ def reconcile_person_properties(
     return None
 
 
-def fetch_person_properties_from_clickhouse(team_id: int, person_uuid: str, min_version: int) -> dict | None:
+def fetch_person_properties_from_datastore(team_id: int, person_uuid: str, min_version: int) -> dict | None:
     """
-    Fetch person properties from ClickHouse for conflict resolution.
+    Fetch person properties from Datastore for conflict resolution.
 
     Fetches the oldest available version >= min_version. This handles the case where
     the exact version we computed diffs against may have been merged away by
@@ -1347,7 +1347,7 @@ def reconcile_with_concurrent_changes(
 
 def publish_person_to_kafka(person_data: dict, producer: _KafkaProducer) -> None:
     """
-    Publish a person update to the Kafka topic for ClickHouse ingestion.
+    Publish a person update to the Kafka topic for Datastore ingestion.
 
     Args:
         person_data: Dict with id, team_id, properties, is_identified, is_deleted, created_at, version
@@ -1355,7 +1355,7 @@ def publish_person_to_kafka(person_data: dict, producer: _KafkaProducer) -> None
     """
     from django.utils.timezone import now
 
-    # Format data for Kafka/ClickHouse
+    # Format data for Kafka/Datastore
     created_at = person_data.get("created_at")
     if created_at is not None and hasattr(created_at, "strftime"):
         created_at_str = created_at.strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -1518,7 +1518,7 @@ def update_person_with_version_check(
         job_id: Dagster run ID for backup tracking
         team_id: Team ID
         person_uuid: Person UUID
-        person_property_diffs: Property diffs from ClickHouse (includes person_version)
+        person_property_diffs: Property diffs from Datastore (includes person_version)
         dry_run: If True, don't actually write the UPDATE
         backup_enabled: If True, store before/after state in backup table
         max_retries: Maximum retry attempts on version mismatch
@@ -1547,7 +1547,7 @@ def update_person_with_version_check(
         else:
             # Conflict: Postgres has different version than CH
             # Fetch CH properties at the version we computed diffs against for 3-way merge
-            ch_properties = fetch_person_properties_from_clickhouse(team_id, person_uuid, ch_version)
+            ch_properties = fetch_person_properties_from_datastore(team_id, person_uuid, ch_version)
             if ch_properties is None:
                 # Person version doesn't exist in CH anymore, skip
                 return False, None, False, SkipReason.NOT_FOUND
@@ -1747,7 +1747,7 @@ def process_persons_in_batches(
     )
 
 
-def query_team_ids_from_clickhouse(
+def query_team_ids_from_datastore(
     bug_window_start: str,
     bug_window_end: str,
     min_team_id: int | None = None,
@@ -1756,7 +1756,7 @@ def query_team_ids_from_clickhouse(
     include_team_ids: list[int] | None = None,
 ) -> list[int]:
     """
-    Query ClickHouse for distinct team_ids with property-setting events in the bug window.
+    Query Datastore for distinct team_ids with property-setting events in the bug window.
 
     Args:
         bug_window_start: Start of bug window (CH format: "YYYY-MM-DD HH:MM:SS")
@@ -1822,10 +1822,10 @@ def query_team_ids_from_clickhouse(
 def get_team_ids_to_reconcile(
     context: dagster.OpExecutionContext,
     config: PersonPropertyReconciliationConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> list[int]:
     """
-    Query ClickHouse for distinct team_ids with property-setting events in the bug window.
+    Query Datastore for distinct team_ids with property-setting events in the bug window.
     """
     if not config.bug_window_end:
         raise dagster.Failure(
@@ -1848,7 +1848,7 @@ def get_team_ids_to_reconcile(
         f"Querying for team_ids with property events between {config.bug_window_start} and {config.bug_window_end}{filter_info}"
     )
 
-    team_ids = query_team_ids_from_clickhouse(
+    team_ids = query_team_ids_from_datastore(
         bug_window_start=config.bug_window_start,
         bug_window_end=config.bug_window_end,
         min_team_id=config.min_team_id,
@@ -1926,7 +1926,7 @@ def reconcile_single_team(
     Reconcile person properties for all affected persons in a single team.
 
     This function supports two modes:
-    - Non-windowed (team_ch_props_fetch_window_seconds <= 0): Single query to ClickHouse
+    - Non-windowed (team_ch_props_fetch_window_seconds <= 0): Single query to Datastore
     - Windowed batched (team_ch_props_fetch_window_seconds > 0): Process persons in batches,
       each batch iterating through time windows. This prevents OOM on large teams.
 
@@ -2024,7 +2024,7 @@ def reconcile_single_team(
 
     # Non-windowed mode (original behavior)
     logger.info(f"Using non-windowed mode: team_id={team_id}, bug_window_start={bug_window_start}")
-    person_property_diffs = get_person_property_updates_from_clickhouse(team_id, bug_window_start)
+    person_property_diffs = get_person_property_updates_from_datastore(team_id, bug_window_start)
     logger.info(f"Found {len(person_property_diffs)} persons with property diffs for team_id={team_id}")
 
     # Filter conflicting set/unset operations
@@ -2080,7 +2080,7 @@ def reconcile_team_chunk(
     config: PersonPropertyReconciliationConfig,
     chunk: list[int],
     persons_database: dagster.ResourceParam[psycopg2.extensions.connection],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     kafka_producer: dagster.ResourceParam[_KafkaProducer],
 ) -> dict[str, Any]:
     """
@@ -2280,8 +2280,8 @@ class ReconciliationSchedulerConfig(dagster.Config):
     max_concurrent_tasks: int = 10  # Max k8s pods per job (executor concurrency)
 
     # Base job configuration (applied to all runs)
-    bug_window_start: str  # ClickHouse format: "YYYY-MM-DD HH:MM:SS"
-    bug_window_end: str  # ClickHouse format: "YYYY-MM-DD HH:MM:SS"
+    bug_window_start: str  # Datastore format: "YYYY-MM-DD HH:MM:SS"
+    bug_window_end: str  # Datastore format: "YYYY-MM-DD HH:MM:SS"
     dry_run: bool = False
     backup_enabled: bool = True
     batch_size: int = 100

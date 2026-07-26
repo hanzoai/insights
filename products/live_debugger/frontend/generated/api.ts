@@ -122,7 +122,7 @@ export const liveDebuggerBreakpointsActiveRetrieve = async (
 }
 
 /**
- * Retrieve breakpoint hit events from ClickHouse with optional filtering and pagination. Returns hit events containing stack traces, local variables, and execution context from your application's runtime. 
+ * Retrieve breakpoint hit events from Datastore with optional filtering and pagination. Returns hit events containing stack traces, local variables, and execution context from your application's runtime. 
 
 Security: Breakpoint IDs are filtered to only include those belonging to the current team.
  * @summary Get breakpoint hits

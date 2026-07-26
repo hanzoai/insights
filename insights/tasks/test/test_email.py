@@ -2,7 +2,7 @@ import datetime as dt
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, run_clickhouse_statement_in_parallel
+from insights.test.base import APIBaseTest, DatastoreTestMixin, run_datastore_statement_in_parallel
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -54,7 +54,7 @@ def create_org_team_and_user(creation_date: str, email: str, ingested_event: boo
 
 
 @patch("insights.tasks.email.EmailMessage")
-class TestEmail(APIBaseTest, ClickhouseTestMixin):
+class TestEmail(APIBaseTest, DatastoreTestMixin):
     """
     NOTE: Every task in the "email" tasks should have at least one test.
     using the `mock_email_messages` helper writes the email output to `tasks/test/__emails__`
@@ -595,7 +595,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         from insights.test.fixtures import create_app_metric2
 
         # Clean up app_metrics2 table before test
-        run_clickhouse_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
+        run_datastore_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
 
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
@@ -897,7 +897,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         from insights.test.fixtures import create_app_metric2
 
         # Clean up app_metrics2 table before test
-        run_clickhouse_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
+        run_datastore_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
 
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 

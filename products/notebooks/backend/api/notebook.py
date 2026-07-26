@@ -259,7 +259,7 @@ def _format_insightsql_response_payload(response: Any) -> dict[str, Any]:
         response_payload = response.model_dump(exclude_none=True)
     else:
         response_payload = response.dict(exclude_none=True)
-    for key in ("clickhouse", "insightsql", "timings", "modifiers"):
+    for key in ("datastore", "insightsql", "timings", "modifiers"):
         response_payload.pop(key, None)
     return response_payload
 

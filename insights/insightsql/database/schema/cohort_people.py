@@ -66,7 +66,7 @@ class RawCohortPeople(Table):
         "version": IntegerDatabaseField(name="version", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "cohortpeople"
 
     def to_printed_insightsql(self):
@@ -79,7 +79,7 @@ class CohortPeople(LazyTable):
     def lazy_select(self, table_to_add: LazyTableToAdd, context, node):
         return select_from_cohort_people_table(table_to_add.fields_accessed, context.project_id)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "cohortpeople"
 
     def to_printed_insightsql(self):

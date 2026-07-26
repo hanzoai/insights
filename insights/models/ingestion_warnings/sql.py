@@ -1,11 +1,11 @@
 from django.conf import settings
 
-from insights.clickhouse.kafka_engine import (
+from insights.datastore.kafka_engine import (
     CONSUMER_GROUP_INGESTION_WARNINGS,
     KAFKA_COLUMNS_WITH_PARTITION,
     kafka_engine,
 )
-from insights.clickhouse.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
+from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_INGESTION_WARNINGS
 
 DROP_INGESTION_WARNINGS_TABLE_MV_SQL = f"DROP TABLE IF EXISTS ingestion_warnings_mv"
@@ -68,7 +68,7 @@ _partition
 FROM {database}.kafka_ingestion_warnings
 """.format(
         target_table=target_table,
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 
 

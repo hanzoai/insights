@@ -503,7 +503,7 @@ DEV_DISABLE_NAVIGATION_HOOKS = get_from_env("DEV_DISABLE_NAVIGATION_HOOKS", Fals
 
 # temporary flag to control new UUID version setting in insights-js
 # is set to v7 to test new generation but can be set to "og" to revert
-INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", os.getenv("INSIGHTS_JS_UUID_VERSION", "v7"))
+INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", "v7")
 
 # Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest

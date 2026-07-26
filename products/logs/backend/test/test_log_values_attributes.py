@@ -1,14 +1,14 @@
 import os
 import json
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from rest_framework import status
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 
-class TestLogValuesAttributesTimezones(ClickhouseTestMixin, APIBaseTest):
+class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod

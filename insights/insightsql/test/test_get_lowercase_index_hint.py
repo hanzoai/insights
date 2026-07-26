@@ -2,7 +2,7 @@ import os
 import json
 from typing import cast
 
-from insights.test.base import APIBaseTest, BaseTest, ClickhouseTestMixin, get_index_from_explain
+from insights.test.base import APIBaseTest, BaseTest, DatastoreTestMixin, get_index_from_explain
 
 from insights.schema import (
     DateRange,
@@ -23,8 +23,8 @@ from insights.insightsql.property import _LowercaseIndexRewriter, get_lowercase_
 from insights.insightsql.query import InsightsQLQueryExecutor
 from insights.insightsql.visitor import clear_locations
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
 
 from products.logs.backend.logs_query_runner import LogsQueryRunner
 
@@ -187,7 +187,7 @@ class TestGetLowercaseIndexHint(BaseTest):
         assert [cast(ast.Constant, e).value for e in needles.exprs] == ["err"]
 
 
-class TestGetLowercaseIndexHintClickhouse(ClickhouseTestMixin, APIBaseTest):
+class TestGetLowercaseIndexHintDatastore(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod
@@ -210,7 +210,7 @@ class TestGetLowercaseIndexHintClickhouse(ClickhouseTestMixin, APIBaseTest):
             sync_execute(f"INSERT INTO logs FORMAT JSONEachRow\n{json.dumps(log_item)}")
 
     def test_index_hint_uses_ngram_index(self):
-        """The index hint on a message ICONTAINS filter should cause ClickHouse to use the idx_body_ngram3 index."""
+        """The index hint on a message ICONTAINS filter should cause Datastore to use the idx_body_ngram3 index."""
         query = LogsQuery(
             kind="LogsQuery",
             dateRange=DateRange(date_from="2025-12-16T09:00:00Z", date_to="2025-12-16T10:00:00Z"),
@@ -245,14 +245,14 @@ class TestGetLowercaseIndexHintClickhouse(ClickhouseTestMixin, APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        clickhouse_sql, _ = executor.generate_clickhouse_sql()
-        index_info = get_index_from_explain(clickhouse_sql, "idx_body_ngram3")
+        datastore_sql, _ = executor.generate_datastore_sql()
+        index_info = get_index_from_explain(datastore_sql, "idx_body_ngram3")
         assert index_info is not None, (
-            f"Expected idx_body_ngram3 to be used in EXPLAIN output for query:\n{clickhouse_sql}"
+            f"Expected idx_body_ngram3 to be used in EXPLAIN output for query:\n{datastore_sql}"
         )
 
     def test_index_hint_prints_without_ifnull(self):
-        """The printed ClickHouse SQL inside indexHint must not contain ifNull — it defeats index usage."""
+        """The printed Datastore SQL inside indexHint must not contain ifNull — it defeats index usage."""
         hint_node = get_lowercase_index_hint(
             LogPropertyFilter(
                 key="message",
@@ -269,9 +269,9 @@ class TestGetLowercaseIndexHintClickhouse(ClickhouseTestMixin, APIBaseTest):
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
         prepared = cast(
             ast.SelectQuery,
-            prepare_ast_for_printing(select, context=context, dialect="clickhouse"),
+            prepare_ast_for_printing(select, context=context, dialect="datastore"),
         )
-        sql = print_prepared_ast(prepared.select[0], context=context, dialect="clickhouse", stack=[prepared])
+        sql = print_prepared_ast(prepared.select[0], context=context, dialect="datastore", stack=[prepared])
         assert "ifNull" not in sql, f"indexHint should not contain ifNull, got: {sql}"
         assert "indexHint" in sql
         assert "lower" in sql

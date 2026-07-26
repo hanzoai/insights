@@ -2,8 +2,8 @@ from typing import Optional
 
 from rest_framework.exceptions import ValidationError
 
-from insights.clickhouse.client import query_with_columns, sync_execute
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.client import query_with_columns, sync_execute
+from insights.datastore.query_tagging import tag_queries
 from insights.errors import ExposedCHQueryError
 from insights.types import FilterType
 

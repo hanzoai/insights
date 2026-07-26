@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Any, Union
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.test.test_journeys import journeys_for
 
 
-class ClickhouseTestFunnelTypes(ClickhouseTestMixin, APIBaseTest):
+class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
     def test_funnel_unordered_basic_post(self):
         journeys_for(
             {
@@ -215,7 +215,7 @@ class ClickhouseTestFunnelTypes(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response["result"][0]["count"], 7)
         self.assertEqual(response["result"][0]["data"], [100, 50, 0, 0, 0, 0, 0])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_time_to_convert_auto_bins(self):
         journeys_for(
             {
@@ -274,7 +274,7 @@ class ClickhouseTestFunnelTypes(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_time_to_convert_auto_bins_strict(self):
         journeys_for(
             {
@@ -333,7 +333,7 @@ class ClickhouseTestFunnelTypes(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_time_to_convert_auto_bins_unordered(self):
         journeys_for(
             {

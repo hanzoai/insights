@@ -11,18 +11,18 @@ class TestSlackAlertsRouting:
     def test_regular_job_uses_owner_tag(self):
         mock_run = mock.MagicMock(spec=dagster.DagsterRun)
         mock_run.job_name = "some_regular_job"
-        mock_run.tags = {"owner": JobOwners.TEAM_CLICKHOUSE.value}
+        mock_run.tags = {"owner": JobOwners.TEAM_DATASTORE.value}
 
         error_message = "Some regular error message"
 
         result = get_job_owner_for_alert(mock_run, error_message)
 
-        assert result == JobOwners.TEAM_CLICKHOUSE.value
+        assert result == JobOwners.TEAM_DATASTORE.value
 
     def test_asset_job_with_web_steps_routes_to_web_analytics(self):
         mock_run = mock.MagicMock(spec=dagster.DagsterRun)
         mock_run.job_name = "__ASSET_JOB"
-        mock_run.tags = {"owner": JobOwners.TEAM_CLICKHOUSE.value}  # Original owner is different
+        mock_run.tags = {"owner": JobOwners.TEAM_DATASTORE.value}  # Original owner is different
 
         error_message = "Execution of run for \"__ASSET_JOB\" failed. Steps failed: ['web_pre_aggregated_bounces', 'web_pre_aggregated_stats']."
 
@@ -35,7 +35,7 @@ class TestSlackAlertsRouting:
         mock_run.job_name = "__ASSET_JOB"
         mock_run.tags = {"owner": JobOwners.TEAM_REVENUE_ANALYTICS.value}
 
-        error_message = "Execution of run for \"__ASSET_JOB\" failed. Steps failed: ['some_other_asset', 'web_pre_aggregated_bounces', 'clickhouse_asset']."
+        error_message = "Execution of run for \"__ASSET_JOB\" failed. Steps failed: ['some_other_asset', 'web_pre_aggregated_bounces', 'datastore_asset']."
 
         result = get_job_owner_for_alert(mock_run, error_message)
 
@@ -55,13 +55,13 @@ class TestSlackAlertsRouting:
     def test_asset_job_no_failed_steps_uses_original_owner(self):
         mock_run = mock.MagicMock(spec=dagster.DagsterRun)
         mock_run.job_name = "__ASSET_JOB"
-        mock_run.tags = {"owner": JobOwners.TEAM_CLICKHOUSE.value}
+        mock_run.tags = {"owner": JobOwners.TEAM_DATASTORE.value}
 
         error_message = "Some generic asset job error message"
 
         result = get_job_owner_for_alert(mock_run, error_message)
 
-        assert result == JobOwners.TEAM_CLICKHOUSE.value
+        assert result == JobOwners.TEAM_DATASTORE.value
 
     def test_asset_job_no_owner_tag_defaults_to_unknown(self):
         mock_run = mock.MagicMock(spec=dagster.DagsterRun)

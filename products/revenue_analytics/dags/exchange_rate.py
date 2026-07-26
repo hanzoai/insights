@@ -6,7 +6,7 @@ import dagster
 import requests
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, settings_with_log_comment
 from insights.models.exchange_rate.currencies import SUPPORTED_CURRENCY_CODES
 from insights.models.exchange_rate.sql import EXCHANGE_RATE_DATA_BACKFILL_SQL, EXCHANGE_RATE_DICTIONARY_NAME
@@ -144,16 +144,16 @@ def hourly_exchange_rates(
     )
 
 
-def store_exchange_rates_in_clickhouse(
+def store_exchange_rates_in_datastore(
     context: dagster.OpExecutionContext,
     date_str: str,
     exchange_rates: dict[str, Any],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str, Any]]]:
     """
-    Stores exchange rates data in ClickHouse.
+    Stores exchange rates data in Datastore.
     """
-    # Transform data into rows for ClickHouse
+    # Transform data into rows for Datastore
     rows = [
         {"date": date_str, "currency": currency, "rate": rate}
         for currency, rate in exchange_rates.items()
@@ -161,10 +161,10 @@ def store_exchange_rates_in_clickhouse(
     ]
 
     # Log information about the data being stored
-    context.log.info(f"Storing {len(rows)} exchange rates for {date_str} in ClickHouse")
+    context.log.info(f"Storing {len(rows)} exchange rates for {date_str} in Datastore")
 
     # Prepare values for batch insert
-    # Use toDate() to cast the string date to a ClickHouse Date type
+    # Use toDate() to cast the string date to a Datastore Date type
     values = [(row["date"], row["currency"], row["rate"]) for row in rows]
 
     # Execute the insert if there are values to insert
@@ -214,20 +214,20 @@ def store_exchange_rates_in_clickhouse(
     partitions_def=DAILY_PARTITION_DEFINITION,
     ins={"exchange_rates": dagster.AssetIn(key=daily_exchange_rates.key)},
 )
-def daily_exchange_rates_in_clickhouse(
+def daily_exchange_rates_in_datastore(
     context: dagster.AssetExecutionContext,
     exchange_rates: dict[str, Any],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dagster.MaterializeResult:
     """
-    Stores exchange rates data in ClickHouse.
+    Stores exchange rates data in Datastore.
     The base currency is always USD as per the table design.
     """
     # Extract data from the input
     date_str = context.partition_key
 
-    # Store the rates in ClickHouse
-    rows, values = store_exchange_rates_in_clickhouse(
+    # Store the rates in Datastore
+    rows, values = store_exchange_rates_in_datastore(
         context=context, date_str=date_str, exchange_rates=exchange_rates, cluster=cluster
     )
 
@@ -255,20 +255,20 @@ def daily_exchange_rates_in_clickhouse(
     partitions_def=HOURLY_PARTITION_DEFINITION,
     ins={"exchange_rates": dagster.AssetIn(key=hourly_exchange_rates.key)},
 )
-def hourly_exchange_rates_in_clickhouse(
+def hourly_exchange_rates_in_datastore(
     context: dagster.AssetExecutionContext,
     exchange_rates: dict[str, Any],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> dagster.MaterializeResult:
     """
-    Stores exchange rates data in ClickHouse.
+    Stores exchange rates data in Datastore.
     The base currency is always USD as per the table design.
     """
     # Extract data from the input
     date_str = get_date_partition_from_hourly_partition(context.partition_key)
 
-    # Store the rates in ClickHouse
-    rows, values = store_exchange_rates_in_clickhouse(
+    # Store the rates in Datastore
+    rows, values = store_exchange_rates_in_datastore(
         context=context, date_str=date_str, exchange_rates=exchange_rates, cluster=cluster
     )
 
@@ -295,13 +295,13 @@ def hourly_exchange_rates_in_clickhouse(
 # Create jobs from the assets
 daily_exchange_rates_job = dagster.define_asset_job(
     name="daily_exchange_rates_job",
-    selection=[daily_exchange_rates.key, daily_exchange_rates_in_clickhouse.key],
+    selection=[daily_exchange_rates.key, daily_exchange_rates_in_datastore.key],
     tags={"owner": JobOwners.TEAM_REVENUE_ANALYTICS.value},
 )
 
 hourly_exchange_rates_job = dagster.define_asset_job(
     name="hourly_exchange_rates_job",
-    selection=[hourly_exchange_rates.key, hourly_exchange_rates_in_clickhouse.key],
+    selection=[hourly_exchange_rates.key, hourly_exchange_rates_in_datastore.key],
     tags={"owner": JobOwners.TEAM_REVENUE_ANALYTICS.value},
 )
 

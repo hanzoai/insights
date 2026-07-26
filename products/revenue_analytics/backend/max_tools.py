@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from insights.schema import RevenueAnalyticsAssistantFilters
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.models import Team, User
 from insights.sync import database_sync_to_async
 from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
@@ -77,7 +77,7 @@ class RevenueAnalyticsFilterOptionsToolkit(TaxonomyAgentToolkit):
 
     async def _retrieve_revenue_analytics_property_values(self, property_name: str) -> str:
         """
-        Revenue analytics properties come from Clickhouse so let's run a separate query here.
+        Revenue analytics properties come from Datastore so let's run a separate query here.
         """
         if property_name not in CORE_FILTER_DEFINITIONS_BY_GROUP["revenue_analytics_properties"]:
             return TaxonomyErrorMessages.property_not_found(property_name, "revenue_analytics")

@@ -1,6 +1,6 @@
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_APP_METRICS, KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import CONSUMER_GROUP_APP_METRICS, KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_APP_METRICS
 
 APP_METRICS_TABLE = "app_metrics"
@@ -97,7 +97,7 @@ ENGINE={kafka_engine(topic=KAFKA_APP_METRICS, group=CONSUMER_GROUP_APP_METRICS)}
 def APP_METRICS_MV_TABLE_SQL(target_table: str = APP_METRICS_WRITABLE_TABLE) -> str:
     """
     Create materialized view SQL for app_metrics.
-    This must be a function to ensure CLICKHOUSE_DATABASE is evaluated at runtime.
+    This must be a function to ensure DATASTORE_DATABASE is evaluated at runtime.
     """
     return f"""
 CREATE MATERIALIZED VIEW IF NOT EXISTS {APP_METRICS_MV_TABLE}

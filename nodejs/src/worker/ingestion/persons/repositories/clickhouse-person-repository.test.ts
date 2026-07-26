@@ -1,13 +1,13 @@
 import { DateTime, Settings } from 'luxon'
 
-import { Clickhouse } from '../../../../../tests/helpers/clickhouse'
+import { Datastore } from '../../../../../tests/helpers/datastore'
 import { resetTestDatabase } from '../../../../../tests/helpers/sql'
 import { Hub, PropertyOperator, Team } from '../../../../types'
-import { DatastoreRouter } from '../../../../utils/db/clickhouse'
+import { DatastoreRouter } from '../../../../utils/db/datastore'
 import { closeHub, createHub } from '../../../../utils/db/hub'
 import { PostgresUse } from '../../../../utils/db/postgres'
 import { UUIDT } from '../../../../utils/utils'
-import { DatastorePersonRepository } from './clickhouse-person-repository'
+import { DatastorePersonRepository } from './datastore-person-repository'
 
 jest.mock('../../../../utils/logger')
 
@@ -15,20 +15,20 @@ describe('DatastorePersonRepository', () => {
     let hub: Hub
     let datastoreRouter: DatastoreRouter
     let repository: DatastorePersonRepository
-    let clickhouse: Clickhouse
+    let datastore: Datastore
 
-    async function executeClickHouseTestQuery(query: string): Promise<void> {
-        await clickhouse.exec(query)
+    async function executeDatastoreTestQuery(query: string): Promise<void> {
+        await datastore.exec(query)
     }
 
     beforeAll(() => {
-        clickhouse = Clickhouse.create()
+        datastore = Datastore.create()
     })
 
     beforeEach(async () => {
         hub = await createHub()
         await resetTestDatabase()
-        await clickhouse.resetTestDatabase()
+        await datastore.resetTestDatabase()
         datastoreRouter = new DatastoreRouter(hub)
         datastoreRouter.initialize()
         repository = new DatastorePersonRepository(datastoreRouter)
@@ -41,12 +41,12 @@ describe('DatastorePersonRepository', () => {
     })
 
     afterAll(() => {
-        clickhouse.close()
+        datastore.close()
     })
 
     const TIMESTAMP = DateTime.fromISO('2024-01-15T10:30:00.000Z').toUTC()
 
-    async function insertPersonIntoClickHouse(
+    async function insertPersonIntoDatastore(
         teamId: number,
         personId: string,
         properties: Record<string, any> = {},
@@ -56,12 +56,12 @@ describe('DatastorePersonRepository', () => {
         const timestamp = TIMESTAMP.toFormat('yyyy-MM-dd HH:mm:ss')
         const propertiesJson = JSON.stringify(properties)
 
-        await executeClickHouseTestQuery(
+        await executeDatastoreTestQuery(
             `INSERT INTO person (id, team_id, properties, is_identified, is_deleted, created_at, _timestamp, _offset, version) VALUES ('${personId}', ${teamId}, '${propertiesJson}', ${isIdentified}, 0, '${timestamp}', '${timestamp}', 0, 0)`
         )
 
         if (distinctId) {
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person_distinct_id2 (team_id, distinct_id, person_id, is_deleted, version, _timestamp, _offset) VALUES (${teamId}, '${distinctId}', '${personId}', 0, 0, '${timestamp}', 0)`
             )
         }
@@ -89,8 +89,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'user1@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user2@example.com' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'user1@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user2@example.com' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -105,9 +105,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' })
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' })
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' })
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'admin' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -122,9 +122,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' })
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' })
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'moderator' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' })
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'moderator' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -141,9 +141,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' })
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' })
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'user' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' })
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'user' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -159,10 +159,10 @@ describe('DatastorePersonRepository', () => {
             const personId3 = new UUIDT().toString()
             const personId4 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' })
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' })
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'moderator' })
-            await insertPersonIntoClickHouse(team.id, personId4, { role: 'guest' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' })
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'moderator' })
+            await insertPersonIntoDatastore(team.id, personId4, { role: 'guest' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -179,9 +179,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'user1@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'User 2' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'user3@example.com' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'user1@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'User 2' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'user3@example.com' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -196,9 +196,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'user1@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'User 2' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'user3@example.com' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'user1@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'User 2' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'user3@example.com' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -213,9 +213,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'moderator@Example.com' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'moderator@Example.com' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -230,9 +230,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'moderator@Example.com' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'moderator@Example.com' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -249,9 +249,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'admin@test.org' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'admin@test.org' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -268,9 +268,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' })
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' })
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'admin@test.org' })
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' })
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' })
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'admin@test.org' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -287,9 +287,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { age: '25' })
-            await insertPersonIntoClickHouse(team.id, personId2, { age: '35' })
-            await insertPersonIntoClickHouse(team.id, personId3, { age: '45' })
+            await insertPersonIntoDatastore(team.id, personId1, { age: '25' })
+            await insertPersonIntoDatastore(team.id, personId2, { age: '35' })
+            await insertPersonIntoDatastore(team.id, personId3, { age: '45' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -304,9 +304,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { age: '25' })
-            await insertPersonIntoClickHouse(team.id, personId2, { age: '35' })
-            await insertPersonIntoClickHouse(team.id, personId3, { age: '45' })
+            await insertPersonIntoDatastore(team.id, personId1, { age: '25' })
+            await insertPersonIntoDatastore(team.id, personId2, { age: '35' })
+            await insertPersonIntoDatastore(team.id, personId3, { age: '45' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -321,9 +321,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-01-01 00:00:00' })
-            await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-01 00:00:00' })
-            await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-12-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-01-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-12-01 00:00:00' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -345,9 +345,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-01-01 00:00:00' })
-            await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-01 00:00:00' })
-            await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-12-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-01-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-01 00:00:00' })
+            await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-12-01 00:00:00' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -373,9 +373,9 @@ describe('DatastorePersonRepository', () => {
                 const personId2 = new UUIDT().toString()
                 const personId3 = new UUIDT().toString()
 
-                await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-06-29 00:00:00' })
-                await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-30 00:00:00' })
-                await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-07-01 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-06-29 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-30 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-07-01 00:00:00' })
 
                 const count = await repository.countPersonsByProperties({
                     teamId: team.id,
@@ -404,9 +404,9 @@ describe('DatastorePersonRepository', () => {
                 const personId2 = new UUIDT().toString()
                 const personId3 = new UUIDT().toString()
 
-                await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-06-29 00:00:00' })
-                await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-30 00:00:00' })
-                await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-07-01 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-06-29 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-30 00:00:00' })
+                await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-07-01 00:00:00' })
 
                 const count = await repository.countPersonsByProperties({
                     teamId: team.id,
@@ -431,9 +431,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin', active: 'true' })
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user', active: 'true' })
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'admin', active: 'false' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin', active: 'true' })
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user', active: 'true' })
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'admin', active: 'false' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -450,8 +450,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { name: null })
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'John' })
+            await insertPersonIntoDatastore(team.id, personId1, { name: null })
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'John' })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -466,8 +466,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { count: 42 })
-            await insertPersonIntoClickHouse(team.id, personId2, { count: 100 })
+            await insertPersonIntoDatastore(team.id, personId1, { count: 42 })
+            await insertPersonIntoDatastore(team.id, personId2, { count: 100 })
 
             const count = await repository.countPersonsByProperties({
                 teamId: team.id,
@@ -481,11 +481,11 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' })
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' })
 
             // Insert deleted person
             const timestamp = TIMESTAMP.toFormat('yyyy-MM-dd HH:mm:ss')
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person (id, team_id, properties, is_identified, is_deleted, created_at, _timestamp, _offset, version) VALUES ('${personId2}', ${team.id}, '${JSON.stringify({ role: 'admin' })}', 1, 1, '${timestamp}', '${timestamp}', 0, 0)`
             )
 
@@ -525,8 +525,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -548,9 +548,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'moderator' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'moderator' }, 1, 'distinct3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -568,8 +568,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -586,10 +586,10 @@ describe('DatastorePersonRepository', () => {
             const personId3 = new UUIDT().toString()
             const personId4 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'moderator' }, 1, 'distinct3')
-            await insertPersonIntoClickHouse(team.id, personId4, { role: 'guest' }, 1, 'distinct4')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'moderator' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId4, { role: 'guest' }, 1, 'distinct4')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -607,8 +607,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'user@example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'User' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'user@example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'User' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -623,8 +623,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'user@example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'User' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'user@example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'User' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -639,8 +639,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@Example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@Example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -656,9 +656,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'moderator@Example.com' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'moderator@Example.com' }, 1, 'distinct3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -676,9 +676,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'admin@test.org' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'admin@test.org' }, 1, 'distinct3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -696,9 +696,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { email: 'admin@test.org' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { email: 'admin@example.com' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { email: 'user@test.com' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { email: 'admin@test.org' }, 1, 'distinct3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -721,8 +721,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { age: '25' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { age: '45' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { age: '25' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { age: '45' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -737,8 +737,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { age: '25' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { age: '45' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { age: '25' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { age: '45' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -754,9 +754,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-01-01 00:00:00' }, 1, 'd1')
-            await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-01 00:00:00' }, 1, 'd2')
-            await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-12-01 00:00:00' }, 1, 'd3')
+            await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-01-01 00:00:00' }, 1, 'd1')
+            await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-01 00:00:00' }, 1, 'd2')
+            await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-12-01 00:00:00' }, 1, 'd3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -780,9 +780,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-01-01 00:00:00' }, 1, 'd1')
-            await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-01 00:00:00' }, 1, 'd2')
-            await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-12-01 00:00:00' }, 1, 'd3')
+            await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-01-01 00:00:00' }, 1, 'd1')
+            await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-01 00:00:00' }, 1, 'd2')
+            await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-12-01 00:00:00' }, 1, 'd3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -810,9 +810,9 @@ describe('DatastorePersonRepository', () => {
                 const personId2 = new UUIDT().toString()
                 const personId3 = new UUIDT().toString()
 
-                await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-06-29 00:00:00' }, 1, 'd1')
-                await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-30 00:00:00' }, 1, 'd2')
-                await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-07-01 00:00:00' }, 1, 'd3')
+                await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-06-29 00:00:00' }, 1, 'd1')
+                await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-30 00:00:00' }, 1, 'd2')
+                await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-07-01 00:00:00' }, 1, 'd3')
 
                 const persons = await repository.fetchPersonsByProperties({
                     teamId: team.id,
@@ -842,9 +842,9 @@ describe('DatastorePersonRepository', () => {
                 const personId2 = new UUIDT().toString()
                 const personId3 = new UUIDT().toString()
 
-                await insertPersonIntoClickHouse(team.id, personId1, { signup_date: '2024-06-29 00:00:00' }, 1, 'd1')
-                await insertPersonIntoClickHouse(team.id, personId2, { signup_date: '2024-06-30 00:00:00' }, 1, 'd2')
-                await insertPersonIntoClickHouse(team.id, personId3, { signup_date: '2024-07-01 00:00:00' }, 1, 'd3')
+                await insertPersonIntoDatastore(team.id, personId1, { signup_date: '2024-06-29 00:00:00' }, 1, 'd1')
+                await insertPersonIntoDatastore(team.id, personId2, { signup_date: '2024-06-30 00:00:00' }, 1, 'd2')
+                await insertPersonIntoDatastore(team.id, personId3, { signup_date: '2024-07-01 00:00:00' }, 1, 'd3')
 
                 const persons = await repository.fetchPersonsByProperties({
                     teamId: team.id,
@@ -869,8 +869,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { name: null }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { name: 'John' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { name: null }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { name: 'John' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -885,8 +885,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { count: 42 }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { count: 100 }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { count: 42 }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { count: 100 }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -902,9 +902,9 @@ describe('DatastorePersonRepository', () => {
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'user' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'user' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'user' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'user' }, 1, 'distinct3')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -921,9 +921,9 @@ describe('DatastorePersonRepository', () => {
             const personId3 = new UUIDT().toString()
             const allPersonIds = [personId1, personId2, personId3]
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'user' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'user' }, 1, 'distinct3')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'user' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'user' }, 1, 'distinct3')
 
             // First page
             const firstPage = await repository.fetchPersonsByProperties({
@@ -961,8 +961,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin', active: 'true' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'admin', active: 'false' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin', active: 'true' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'admin', active: 'false' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -980,8 +980,8 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -996,7 +996,7 @@ describe('DatastorePersonRepository', () => {
             const personId = new UUIDT().toString()
             const properties = { email: 'test@example.com', name: 'Test User' }
 
-            await insertPersonIntoClickHouse(team.id, personId, properties, 1, 'test-distinct-id')
+            await insertPersonIntoDatastore(team.id, personId, properties, 1, 'test-distinct-id')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -1028,11 +1028,11 @@ describe('DatastorePersonRepository', () => {
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'admin' }, 1, 'distinct1')
 
             // Insert deleted person
             const timestamp = TIMESTAMP.toFormat('yyyy-MM-dd HH:mm:ss')
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person (id, team_id, properties, is_identified, is_deleted, created_at, _timestamp, _offset, version) VALUES ('${personId2}', ${team.id}, '${JSON.stringify({ role: 'admin' })}', 1, 1, '${timestamp}', '${timestamp}', 0, 0)`
             )
 
@@ -1051,19 +1051,19 @@ describe('DatastorePersonRepository', () => {
             const timestamp = TIMESTAMP.toFormat('yyyy-MM-dd HH:mm:ss')
 
             // Insert person 1 with a distinct_id that will be deleted
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person (id, team_id, properties, is_identified, is_deleted, created_at, _timestamp, _offset, version) VALUES ('${personId1}', ${team.id}, '${JSON.stringify({ role: 'admin' })}', 1, 0, '${timestamp}', '${timestamp}', 0, 0)`
             )
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person_distinct_id2 (team_id, distinct_id, person_id, is_deleted, version, _timestamp, _offset) VALUES (${team.id}, 'distinct1', '${personId1}', 0, 0, '${timestamp}', 0)`
             )
             // Mark the distinct_id as deleted with a higher version
-            await executeClickHouseTestQuery(
+            await executeDatastoreTestQuery(
                 `INSERT INTO person_distinct_id2 (team_id, distinct_id, person_id, is_deleted, version, _timestamp, _offset) VALUES (${team.id}, 'distinct1', '${personId1}', 1, 1, '${timestamp}', 0)`
             )
 
             // Insert person 2 with a non-deleted distinct_id for comparison
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'admin' }, 1, 'distinct2')
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'admin' }, 1, 'distinct2')
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,
@@ -1077,14 +1077,14 @@ describe('DatastorePersonRepository', () => {
         })
 
         it('should return persons ordered by id for consistent pagination', async () => {
-            // Create 3 persons - don't pre-sort the IDs, let ClickHouse order them
+            // Create 3 persons - don't pre-sort the IDs, let Datastore order them
             const personId1 = new UUIDT().toString()
             const personId2 = new UUIDT().toString()
             const personId3 = new UUIDT().toString()
 
-            await insertPersonIntoClickHouse(team.id, personId1, { role: 'user' }, 1, `distinct-${personId1}`)
-            await insertPersonIntoClickHouse(team.id, personId2, { role: 'user' }, 1, `distinct-${personId2}`)
-            await insertPersonIntoClickHouse(team.id, personId3, { role: 'user' }, 1, `distinct-${personId3}`)
+            await insertPersonIntoDatastore(team.id, personId1, { role: 'user' }, 1, `distinct-${personId1}`)
+            await insertPersonIntoDatastore(team.id, personId2, { role: 'user' }, 1, `distinct-${personId2}`)
+            await insertPersonIntoDatastore(team.id, personId3, { role: 'user' }, 1, `distinct-${personId3}`)
 
             const persons = await repository.fetchPersonsByProperties({
                 teamId: team.id,

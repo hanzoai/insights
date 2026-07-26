@@ -1,6 +1,6 @@
 # Person Property Reconciliation Query Explanation
 
-This document explains the ClickHouse query in `get_person_property_updates_from_clickhouse` (person_property_reconciliation.py:98-211).
+This document explains the Datastore query in `get_person_property_updates_from_datastore` (person_property_reconciliation.py:98-211).
 
 The query finds person properties that need reconciliation by comparing event-derived properties with current person state.
 
@@ -11,7 +11,7 @@ The query has 5 nested levels:
 1. **Core Event Extraction** - Extract properties from events, resolve merged persons, aggregate per property
 2. **Group into Arrays** - Collect all properties per person into one array
 3. **Split by Operation Type** - Separate `$set` and `$set_once` into parallel arrays
-4. **Join with Person State** - Get current person properties from ClickHouse
+4. **Join with Person State** - Get current person properties from Datastore
 5. **Compute Diff** - Find properties that differ or are missing
 
 ---
@@ -190,7 +190,7 @@ GROUP BY person_id
 | abc       | [('email', '"a@b.com"', 2024-01-05, 'set'), ('plan', '"pro"', 2024-01-03, 'set'), ('created', '"2024-01-01"', 2024-01-01, 'set_once')] |
 | xyz       | [('email', '"x@y.com"', 2024-01-04, 'set')]                                                                                            |
 
-`groupArray()` is ClickHouse's aggregation function that collects all values in the group into an array.
+`groupArray()` is Datastore's aggregation function that collects all values in the group into an array.
 
 ---
 
@@ -229,7 +229,7 @@ INNER JOIN (
 ) AS p ON p.id = merged.person_id
 ```
 
-Gets the current person properties from ClickHouse's `person` table (using `argMax` to get the latest version).
+Gets the current person properties from Datastore's `person` table (using `argMax` to get the latest version).
 
 ---
 
@@ -269,7 +269,7 @@ The query flows like this:
 1. **Extract** `$set`/`$set_once` from events, resolving merged persons
 2. **Aggregate** to find the winning value per property (latest for `$set`, first for `$set_once`)
 3. **Group** all properties per person into arrays
-4. **Join** with current person state from ClickHouse
+4. **Join** with current person state from Datastore
 5. **Diff** to find properties that need updating (different values for `$set`, missing keys for `$set_once`)
 
 ---

@@ -168,12 +168,12 @@ func checkDockerVolumes() CheckResult {
 	}
 
 	logger.WriteString("Checking for named Docker volumes...\n")
-	hasPostgres, hasClickhouse := CheckDockerVolumes()
-	logger.Debug("Docker volumes: postgres=%v, clickhouse=%v", hasPostgres, hasClickhouse)
+	hasPostgres, hasDatastore := CheckDockerVolumes()
+	logger.Debug("Docker volumes: postgres=%v, datastore=%v", hasPostgres, hasDatastore)
 
-	if hasPostgres && hasClickhouse {
+	if hasPostgres && hasDatastore {
 		logger.WriteString("✓ Named volumes found\n")
-		return CheckResult{Passed: true, Detail: "postgres-data, clickhouse-data"}
+		return CheckResult{Passed: true, Detail: "postgres-data, datastore-data"}
 	}
 
 	warning := GetVolumeWarning()

@@ -1,12 +1,12 @@
 from django.conf import settings
 
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import (
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import (
     CONSUMER_GROUP_DOCUMENT_EMBEDDINGS,
     KAFKA_COLUMNS_WITH_PARTITION,
     kafka_engine,
 )
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
 
 DOCUMENT_EMBEDDINGS = "insights_document_embeddings"
@@ -21,7 +21,7 @@ DOCUMENT_EMBEDDINGS_TABLE_BASE_SQL = """
 CREATE TABLE IF NOT EXISTS {table_name}
 (
     team_id Int64,
-    product LowCardinality(String), -- Like "error tracking" or "session replay" - basically a bucket, you'd use this to ask clickhouse "what kind of documents do I have embeddings for, related to session replay"
+    product LowCardinality(String), -- Like "error tracking" or "session replay" - basically a bucket, you'd use this to ask datastore "what kind of documents do I have embeddings for, related to session replay"
     document_type LowCardinality(String), -- The type of document this is an embedding for, e.g. "issue_fingerprint", "session_summary", "task_update" etc.
     model_name LowCardinality(String), -- The name of the model used to generate this embedding. Includes embedding dimensionality, appended as e.g. "text-embedding-3-small-1024"
     rendering LowCardinality(String), -- How the document was rendered to text, e.g. "with_error_message", "as_html" etc. Use "plain" if it was already text.
@@ -134,13 +134,13 @@ FROM {database}.{kafka_table}
         mv_name=DOCUMENT_EMBEDDINGS_MV,
         target_table=target_table,
         kafka_table=KAFKA_DOCUMENT_EMBEDDINGS,
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 
 
 def TRUNCATE_DOCUMENT_EMBEDDINGS_TABLE_SQL():
     return (
-        f"TRUNCATE TABLE IF EXISTS {PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+        f"TRUNCATE TABLE IF EXISTS {PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
     )
 
 

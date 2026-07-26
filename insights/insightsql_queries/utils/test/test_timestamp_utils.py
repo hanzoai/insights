@@ -1,6 +1,6 @@
 import datetime
 
-from insights.test.base import APIBaseTest, ClickhouseDestroyTablesMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreDestroyTablesMixin, _create_event, flush_persons_and_events
 
 from django.core.cache import cache
 from django.test import override_settings
@@ -16,7 +16,7 @@ from insights.models.team import WeekStartDay
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestTimestampUtils(APIBaseTest, ClickhouseDestroyTablesMixin):
+class TestTimestampUtils(APIBaseTest, DatastoreDestroyTablesMixin):
     def tearDown(self):
         super().tearDown()
         # Clear the cache after each test to avoid interference

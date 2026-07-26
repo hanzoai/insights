@@ -109,15 +109,15 @@ rules:
               - '**/tests/**'
               - '**/.semgrep/**'
 
-    # Rule 3: Taint tracking for user input interpolated into ClickHouse queries
+    # Rule 3: Taint tracking for user input interpolated into Datastore queries
     # Only flags when user data is INSIDE an f-string that flows to sync_execute/async_execute.
-    - id: clickhouse-injection-taint
+    - id: datastore-injection-taint
       mode: taint
       languages: [python]
       severity: WARNING
       message: |
-          User-controlled data interpolated into ClickHouse query.
-          Use escape_clickhouse_identifier() for identifiers or %(name)s placeholders for values.
+          User-controlled data interpolated into Datastore query.
+          Use escape_datastore_identifier() for identifiers or %(name)s placeholders for values.
       options:
           taint_assume_safe_numbers: true
           taint_assume_safe_booleans: true
@@ -132,7 +132,7 @@ rules:
           - pattern: sync_execute(...)
           - pattern: async_execute(...)
       pattern-sanitizers:
-          - pattern: escape_clickhouse_identifier(...)
+          - pattern: escape_datastore_identifier(...)
           - pattern: escape_insightsql_identifier(...)
           - pattern: int(...)
       metadata:

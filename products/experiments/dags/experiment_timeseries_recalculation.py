@@ -15,8 +15,8 @@ from dagster import AssetExecutionContext, RetryPolicy, RunRequest, SkipReason
 
 from insights.schema import ExperimentFunnelMetric, ExperimentMeanMetric, ExperimentQuery, ExperimentRatioMetric
 
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.client.connection import Workload
+from insights.datastore.query_tagging import tags_context
 from insights.dags.common import JobOwners, dagster_tags
 from insights.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
 from insights.models.experiment import ExperimentMetricResult, ExperimentTimeseriesRecalculation

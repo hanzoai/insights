@@ -10,11 +10,11 @@ from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
     BaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
     snapshot_postgres_queries,
 )
 from unittest.mock import ANY, patch
@@ -3845,8 +3845,8 @@ class TestSurveyAPITokens(PersonalAPIKeysBaseTest, APIBaseTest):
         self.assertEqual(data, survey_counts)
 
 
-class TestResponsesCount(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     @freeze_time("2024-05-01 14:40:09")
     def test_responses_count(self):
         survey_counts = {
@@ -3875,7 +3875,7 @@ class TestResponsesCount(ClickhouseTestMixin, APIBaseTest):
         data = response.json()
         self.assertEqual(data, survey_counts)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2024-05-01 14:40:09")
     def test_responses_count_only_after_first_survey_started(self):
         survey_counts = {
@@ -3916,7 +3916,7 @@ class TestResponsesCount(ClickhouseTestMixin, APIBaseTest):
         data = response.json()
         self.assertEqual(data, {})
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2024-06-11 11:00:00")
     def test_responses_count_with_partial_responses(self):
         survey1_id = str(uuid.uuid4())
@@ -4106,7 +4106,7 @@ class TestResponsesCount(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(data), 3)
 
 
-class TestSurveyStats(ClickhouseTestMixin, APIBaseTest):
+class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
     def test_survey_stats_nonexistent_survey(self):
         response = self.client.get(f"/api/projects/{self.team.id}/surveys/12345/stats/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -5080,7 +5080,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         assert duplicated_question_ids != source_question_ids
 
 
-class TestSurveyResponseArchive(ClickhouseTestMixin, APIBaseTest):
+class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         self.survey = Survey.objects.create(

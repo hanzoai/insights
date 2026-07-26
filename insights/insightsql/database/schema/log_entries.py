@@ -23,7 +23,7 @@ LOG_ENTRIES_FIELDS: dict[str, FieldOrTable] = {
 class LogEntriesTable(Table):
     fields: dict[str, FieldOrTable] = LOG_ENTRIES_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "log_entries"
 
     def to_printed_insightsql(self):
@@ -48,7 +48,7 @@ class ReplayConsoleLogsLogEntriesTable(LazyTable):
             ),
         )
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "console_logs_log_entries"
 
     def to_printed_insightsql(self):
@@ -73,7 +73,7 @@ class BatchExportLogEntriesTable(LazyTable):
             ),
         )
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "batch_export_log_entries"
 
     def to_printed_insightsql(self):

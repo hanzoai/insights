@@ -15,8 +15,8 @@ Prerequisite: `hanzo.events` must exist. Cloud owns that table; this module
 only reads it, and deliberately does not declare it.
 """
 
-from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
-from insights.settings.data_stores import CLICKHOUSE_DATABASE
+from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
 
@@ -90,7 +90,7 @@ PERSON_SQL = f"reinterpretAsUUID(MD5(if(person_id != '', person_id, {DISTINCT_SQ
 # Both arrays come from the identical subquery, so they are ordered alike and
 # element i of one names element i of the other. An empty table yields empty
 # arrays and `transform` returns the default, so the lookup cannot throw.
-TENANT_TEAM_SQL = f"SELECT tenant, team FROM `{CLICKHOUSE_DATABASE}`.`{TENANT_TEAM_TABLE}` FINAL ORDER BY tenant"
+TENANT_TEAM_SQL = f"SELECT tenant, team FROM `{DATASTORE_DATABASE}`.`{TENANT_TEAM_TABLE}` FINAL ORDER BY tenant"
 TEAM_SQL = (
     "transform(tenant_id"
     f", (SELECT groupArray(tenant) FROM ({TENANT_TEAM_SQL}))"
@@ -124,7 +124,7 @@ def CLOUD_EVENTS_SELECT_SQL(historical: bool) -> str:
 
 def TENANT_TEAM_TABLE_SQL() -> str:
     return f"""
-CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`{TENANT_TEAM_TABLE}` (
+CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`{TENANT_TEAM_TABLE}` (
     tenant String,
     team Int64,
     version UInt32 DEFAULT toUnixTimestamp(now())
@@ -135,25 +135,25 @@ ORDER BY tenant
 
 def TENANT_TEAM_DATA_SQL(rows: list[tuple[str, int]] = TENANT_TEAM) -> str:
     values = ", ".join(f"('{tenant}', {team})" for tenant, team in rows)
-    return f"INSERT INTO `{CLICKHOUSE_DATABASE}`.`{TENANT_TEAM_TABLE}` (tenant, team) VALUES {values}"
+    return f"INSERT INTO `{DATASTORE_DATABASE}`.`{TENANT_TEAM_TABLE}` (tenant, team) VALUES {values}"
 
 
 def CLOUD_EVENTS_MV_SQL() -> str:
     return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`{CLOUD_EVENTS_MV}`
-TO `{CLICKHOUSE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}`
+CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{CLOUD_EVENTS_MV}`
+TO `{DATASTORE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}`
 AS {CLOUD_EVENTS_SELECT_SQL(historical=False)}
 """
 
 
 def DROP_CLOUD_EVENTS_MV_SQL() -> str:
-    return f"DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.`{CLOUD_EVENTS_MV}`"
+    return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{CLOUD_EVENTS_MV}`"
 
 
 def CLOUD_EVENTS_BACKFILL_SQL() -> str:
     # INSERT ... SELECT binds by position, so the column list is explicit.
     names = ", ".join(name for name, _ in CLOUD_EVENTS_COLUMNS(historical=True))
     return f"""
-INSERT INTO `{CLICKHOUSE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}` ({names})
+INSERT INTO `{DATASTORE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}` ({names})
 {CLOUD_EVENTS_SELECT_SQL(historical=True)}
 """

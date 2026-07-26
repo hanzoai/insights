@@ -181,7 +181,7 @@ pub struct Frame {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_variables: Option<Value>,
     // The lines of code surrounding the frame ptr, if known. We skip serialising this because
-    // it should never go in clickhouse / be queried over, but we do store it in PG for
+    // it should never go in datastore / be queried over, but we do store it in PG for
     // use in the frontend
     #[serde(skip)]
     pub context: Option<Context>,

@@ -29,12 +29,12 @@ MAX_TEXT_REPR_LENGTH = 2_000_000
 MAX_RAW_TRACE_SIZE = 5_000_000
 
 # Max events per trace for sampling. Traces with more events than this are
-# excluded at the ClickHouse query level during sampling, preventing them
+# excluded at the Datastore query level during sampling, preventing them
 # from ever reaching the CPU-intensive formatting activity.
 MAX_TRACE_EVENTS_LIMIT = 50
 
 # Max total estimated properties size (in characters) per trace for sampling.
-# Estimated at the ClickHouse level as sum(length(properties)) across all events
+# Estimated at the Datastore level as sum(length(properties)) across all events
 # in a trace. Traces exceeding this are excluded during sampling, preventing
 # oversized traces from reaching the CPU-intensive formatting activity — even if
 # they have few events. Complements MAX_TRACE_EVENTS_LIMIT which only filters
@@ -64,7 +64,7 @@ SCHEDULE_INTERVAL_HOURS = 1  # How often the coordinator runs
 DEFAULT_MAX_CONCURRENT_TEAMS = 20  # Max teams to process in parallel
 
 # Timeout configuration (in seconds)
-SAMPLE_TIMEOUT_SECONDS = 900  # 15 minutes for sampling query (buffer above QUERY_ASYNC 600s ClickHouse timeout)
+SAMPLE_TIMEOUT_SECONDS = 900  # 15 minutes for sampling query (buffer above QUERY_ASYNC 600s Datastore timeout)
 
 # Heartbeat timeouts - allows Temporal to detect dead workers faster than
 # waiting for the full start_to_close_timeout to expire. Activities must
@@ -77,7 +77,7 @@ SAMPLE_HEARTBEAT_TIMEOUT = timedelta(seconds=120)  # 2 minutes - sampling has lo
 # the workflow indefinitely when something is fundamentally broken.
 SAMPLE_SCHEDULE_TO_CLOSE_TIMEOUT = timedelta(seconds=1200)  # 20 min total for sampling (2 attempts * 900s + backoff)
 
-# Activity 1: Fetch + format + store in Redis (fast, ClickHouse-bound)
+# Activity 1: Fetch + format + store in Redis (fast, Datastore-bound)
 FETCH_AND_FORMAT_START_TO_CLOSE_TIMEOUT = timedelta(seconds=120)
 FETCH_AND_FORMAT_SCHEDULE_TO_CLOSE_TIMEOUT = timedelta(
     seconds=360

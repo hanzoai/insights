@@ -41,7 +41,7 @@ class VideoSegmentClusteringWorkflow(InsightsWorkflow):
 
     This workflow orchestrates 6 activities:
     0. Prime: Run session summarization on recently-ended sessions to populate embeddings
-    1. Fetch: Query recent video segments from ClickHouse
+    1. Fetch: Query recent video segments from Datastore
     2. Cluster: Clustering segments into groups, i.e. potential reports
     3. Match: Match clusters to existing SignalReports (deduplication)
     4. Label: Generate LLM-based labels for new clusters

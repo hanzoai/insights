@@ -3,9 +3,9 @@ from enum import auto
 from typing import Optional
 from zoneinfo import ZoneInfo
 
-from insights.test.base import ClickhouseDestroyTablesMixin
+from insights.test.base import DatastoreDestroyTablesMixin
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.demo.matrix.manager import MatrixManager
 from insights.demo.matrix.matrix import Cluster, Matrix
 from insights.demo.matrix.models import SimPerson, SimSessionIntent
@@ -46,7 +46,7 @@ class DummyMatrix(Matrix):
         return super().set_project_up(team, user)
 
 
-class TestMatrixManager(ClickhouseDestroyTablesMixin):
+class TestMatrixManager(DatastoreDestroyTablesMixin):
     CLASS_DATA_LEVEL_SETUP = False
 
     matrix: DummyMatrix

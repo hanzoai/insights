@@ -3,10 +3,10 @@ import re
 import csv
 import datetime
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import ReplacingMergeTree
-from insights.settings import CLICKHOUSE_PASSWORD, CLICKHOUSE_USER
-from insights.settings.data_stores import CLICKHOUSE_DATABASE
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import ReplacingMergeTree
+from insights.settings import DATASTORE_PASSWORD, DATASTORE_USER
+from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .currencies import SUPPORTED_CURRENCY_CODES
 
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause} (
 ) ENGINE = {engine}
 ORDER BY (date, currency);
 """.format(
-        table_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
+        table_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
         decimal_precision=EXCHANGE_RATE_DECIMAL_PRECISION,
         engine=ReplacingMergeTree("exchange_rate", ver="version"),
@@ -126,14 +126,14 @@ ORDER BY (date, currency);
 
 def DROP_EXCHANGE_RATE_TABLE_SQL(on_cluster=False):
     return "DROP TABLE IF EXISTS {table_name} {on_cluster_clause}".format(
-        table_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
+        table_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
     )
 
 
 def TRUNCATE_EXCHANGE_RATE_TABLE_SQL(on_cluster=False):
     return "TRUNCATE TABLE IF EXISTS {table_name} {on_cluster_clause}".format(
-        table_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
+        table_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
     )
 
@@ -145,7 +145,7 @@ def EXCHANGE_RATE_DATA_BACKFILL_SQL(exchange_rates=None):
     values = ",\n".join(f"(toDate('{date}'), '{currency}', {rate})" for date, currency, rate in exchange_rates)
 
     return f"""
-INSERT INTO `{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}` (date, currency, rate) VALUES
+INSERT INTO `{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}` (date, currency, rate) VALUES
   {values};"""
 
 
@@ -166,7 +166,7 @@ INSERT INTO `{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}` (date, currency
 #
 # NOTE: You need to use currency, start_date and end_date in this specific order
 # in the outer query or else the dictionary will not work.
-# This is for legacy reasons - from the time when Clickhouse
+# This is for legacy reasons - from the time when Datastore
 # config was based on an XML file.
 EXCHANGE_RATE_DICTIONARY_QUERY = (
     """
@@ -186,7 +186,7 @@ WINDOW w AS (
         ORDER BY date ASC
         ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING
 )
-""".format(table_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`")
+""".format(table_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_TABLE_NAME}`")
     .replace("\n", " ")
     .strip()
 )
@@ -199,7 +199,7 @@ EXCHANGE_RATE_DICTIONARY_QUERY = re.sub(r"\s\s+", " ", EXCHANGE_RATE_DICTIONARY_
 # we'll create the concept of a "range" for each currency, which will be the date range
 # that a specific rate is valid for.
 #
-# Ideally, we'd set the `end_date` but we don't need that because Clickhouse has good
+# Ideally, we'd set the `end_date` but we don't need that because Datastore has good
 # support for open-ended ranges, and therefore we always set it to NULL.
 # The `range_lookup_strategy 'max'` declaration will ensure that
 # we always get the latest rate for a given date and currency.
@@ -216,21 +216,21 @@ CREATE DICTIONARY IF NOT EXISTS {exchange_rate_dictionary_name} {on_cluster_clau
     rate Decimal64({decimal_precision})
 )
 PRIMARY KEY currency
-SOURCE(CLICKHOUSE(QUERY '{query}' USER '{clickhouse_user}' PASSWORD '{clickhouse_password}'))
+SOURCE(DATASTORE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(RANGE_HASHED(range_lookup_strategy 'max'))
 RANGE(MIN start_date MAX end_date)""".format(
-        exchange_rate_dictionary_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`",
+        exchange_rate_dictionary_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
         decimal_precision=EXCHANGE_RATE_DECIMAL_PRECISION,
         query=EXCHANGE_RATE_DICTIONARY_QUERY,
-        clickhouse_user=CLICKHOUSE_USER,
-        clickhouse_password=CLICKHOUSE_PASSWORD,
+        datastore_user=DATASTORE_USER,
+        datastore_password=DATASTORE_PASSWORD,
     )
 
 
 def DROP_EXCHANGE_RATE_DICTIONARY_SQL(on_cluster=False):
     return "DROP DICTIONARY IF EXISTS {dictionary_name} {on_cluster_clause}".format(
-        dictionary_name=f"`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`",
+        dictionary_name=f"`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
     ).strip()

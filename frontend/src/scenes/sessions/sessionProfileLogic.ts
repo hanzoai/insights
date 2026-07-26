@@ -147,7 +147,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                     `
                             : (() => {
                                   // Extract timestamp from UUIDv7 and use simple date constants
-                                  // This allows ClickHouse to push predicates down for partition pruning
+                                  // This allows Datastore to push predicates down for partition pruning
                                   const { startDate } = getTimestampFromUUIDv7(props.sessionId)
                                   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // +1 hour
                                   return insightsql`

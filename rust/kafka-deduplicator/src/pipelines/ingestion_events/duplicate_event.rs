@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::pipelines::{DeduplicationResult, DuplicateReason};
 
-/// Helper function to serialize bool as u8 (0 or 1) for ClickHouse UInt8
+/// Helper function to serialize bool as u8 (0 or 1) for Datastore UInt8
 fn serialize_bool_as_u8<S>(value: &bool, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -184,7 +184,7 @@ impl DuplicateEvent {
         let source_message = serde_json::to_value(source_event).ok()?;
         let duplicate_message = serde_json::to_value(original_event).ok()?;
 
-        // Generate current timestamp in ISO8601 format for ClickHouse DateTime64
+        // Generate current timestamp in ISO8601 format for Datastore DateTime64
         let inserted_at = chrono::Utc::now()
             .format("%Y-%m-%d %H:%M:%S%.3f")
             .to_string();

@@ -22,13 +22,13 @@ def get_start_of_interval_insightsql(interval: str, *, team: Team, source: Optio
     trunc_func = get_trunc_func_ch(interval)
     trunc_func_args: list[ast.Expr] = [source] if source else [ast.Field(chain=["timestamp"])]
     if trunc_func == "toStartOfWeek":
-        trunc_func_args.append(ast.Constant(value=int((WeekStartDay(team.week_start_day or 0)).clickhouse_mode)))
+        trunc_func_args.append(ast.Constant(value=int((WeekStartDay(team.week_start_day or 0)).datastore_mode)))
     return ast.Call(name=trunc_func, args=trunc_func_args)
 
 
 def get_start_of_interval_insightsql_str(interval: str, *, team: Team, source: str) -> str:
     trunc_func = get_trunc_func_ch(interval)
-    return f"{trunc_func}({source}{f', {int((WeekStartDay(team.week_start_day or 0)).clickhouse_mode)}' if trunc_func == 'toStartOfWeek' else ''})"
+    return f"{trunc_func}({source}{f', {int((WeekStartDay(team.week_start_day or 0)).datastore_mode)}' if trunc_func == 'toStartOfWeek' else ''})"
 
 
 def series_should_be_set_to_dau(

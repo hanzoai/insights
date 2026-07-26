@@ -12,8 +12,8 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.preaggregation.sql import SHARDED_PREAGGREGATION_RESULTS_TABLE
+from insights.datastore.client import sync_execute
+from insights.datastore.preaggregation.sql import SHARDED_PREAGGREGATION_RESULTS_TABLE
 
 from products.analytics_platform.backend.lazy_computation.lazy_computation_transformer import (
     PREAGGREGATED_DAILY_UNIQUE_PERSONS_PAGEVIEWS_TABLE_NAME,

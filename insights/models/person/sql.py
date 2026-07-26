@@ -1,10 +1,10 @@
 from django.conf import settings
 
-from insights.clickhouse.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS, KAFKA_COLUMNS_WITH_PARTITION, STORAGE_POLICY, kafka_engine
-from insights.clickhouse.table_engines import CollapsingMergeTree, Distributed, ReplacingMergeTree
+from insights.datastore.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import KAFKA_COLUMNS, KAFKA_COLUMNS_WITH_PARTITION, STORAGE_POLICY, kafka_engine
+from insights.datastore.table_engines import CollapsingMergeTree, Distributed, ReplacingMergeTree
 from insights.kafka_client.topics import KAFKA_PERSON, KAFKA_PERSON_DISTINCT_ID, KAFKA_PERSON_UNIQUE_ID
 
 TRUNCATE_PERSON_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS person {ON_CLUSTER_CLAUSE()}"
@@ -97,7 +97,7 @@ def PERSONS_WRITABLE_TABLE_SQL():
     return PERSONS_TABLE_BASE_SQL.format(
         table_name=PERSONS_WRITABLE_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(False),
-        engine=Distributed(data_table=PERSONS_TABLE, cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER),
+        engine=Distributed(data_table=PERSONS_TABLE, cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER),
         extra_fields=KAFKA_COLUMNS,
     )
 
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
 )
 
 
-# You must include the database here because of a bug in clickhouse
+# You must include the database here because of a bug in datastore
 # related to https://github.com/hanzoai/datastore/issues/10471
 def PERSONS_DISTINCT_ID_TABLE_MV_SQL():
     return """
@@ -191,8 +191,8 @@ _offset
 FROM {database}.kafka_{table_name}
 """.format(
         table_name=PERSONS_DISTINCT_ID_TABLE,
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        database=settings.CLICKHOUSE_DATABASE,
+        cluster=settings.DATASTORE_CLUSTER,
+        database=settings.DATASTORE_DATABASE,
     )
 
 
@@ -281,7 +281,7 @@ def PERSON_DISTINCT_ID2_WRITABLE_TABLE_SQL():
     return PERSON_DISTINCT_ID2_TABLE_BASE_SQL.format(
         table_name=PERSON_DISTINCT_ID2_WRITABLE_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(False),
-        engine=Distributed(data_table=PERSON_DISTINCT_ID2_TABLE, cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER),
+        engine=Distributed(data_table=PERSON_DISTINCT_ID2_TABLE, cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER),
         extra_fields=f"""
     {KAFKA_COLUMNS_WITH_PARTITION}
     """,
@@ -332,7 +332,7 @@ KAFKA_PERSON_DISTINCT_ID_OVERRIDES_TABLE_SQL = (
     lambda on_cluster=True: PERSON_DISTINCT_ID_OVERRIDES_TABLE_BASE_SQL.format(
         table_name=KAFKA_PERSON_DISTINCT_ID_OVERRIDES_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster),
-        engine=kafka_engine(KAFKA_PERSON_DISTINCT_ID, group="clickhouse-person-distinct-id-overrides"),
+        engine=kafka_engine(KAFKA_PERSON_DISTINCT_ID, group="datastore-person-distinct-id-overrides"),
         extra_fields="",
     )
 )
@@ -367,7 +367,7 @@ def PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE_SQL():
         table_name=PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(False),
         engine=Distributed(
-            data_table=PERSON_DISTINCT_ID_OVERRIDES_TABLE, cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER
+            data_table=PERSON_DISTINCT_ID_OVERRIDES_TABLE, cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER
         ),
         extra_fields=f"""
     {KAFKA_COLUMNS_WITH_PARTITION}
@@ -376,7 +376,7 @@ def PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE_SQL():
 
 
 def TRUNCATE_PERSON_DISTINCT_ID_OVERRIDES_TABLE_SQL():
-    return f"TRUNCATE TABLE IF EXISTS {PERSON_DISTINCT_ID_OVERRIDES_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"TRUNCATE TABLE IF EXISTS {PERSON_DISTINCT_ID_OVERRIDES_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 #
@@ -416,7 +416,7 @@ def PERSON_STATIC_COHORT_TABLE_SQL(on_cluster=True):
 
 
 def TRUNCATE_PERSON_STATIC_COHORT_TABLE_SQL():
-    return f"TRUNCATE TABLE IF EXISTS {PERSON_STATIC_COHORT_TABLE} ON CLUSTER '{settings.CLICKHOUSE_CLUSTER}'"
+    return f"TRUNCATE TABLE IF EXISTS {PERSON_STATIC_COHORT_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
 
 
 INSERT_PERSON_STATIC_COHORT = (
@@ -556,7 +556,7 @@ COMMENT_DISTINCT_ID_COLUMN_SQL = (
 )
 
 
-# Tricky: the person table uses a ReplacingMergeTree, but it is not guaranteed by Clickhouse that the replacement has
+# Tricky: the person table uses a ReplacingMergeTree, but it is not guaranteed by Datastore that the replacement has
 # actually happened. This means we can have multiple rows for a particular person ID. This can happen if a property has
 # changed, or if the user was deleted.
 # The following query will make an attempt to hide values that come from deleted users, however it will only hide the
@@ -616,7 +616,7 @@ GET_PERSON_DISTINCT_ID2_COUNT_FOR_TEAM = "SELECT count() AS count FROM person_di
 def CREATE_PERSON_DISTINCT_ID_OVERRIDES_DICTIONARY():
     """
     Create dictionary SQL for person_distinct_id_overrides.
-    This must be a function to ensure CLICKHOUSE_DATABASE is evaluated at runtime,
+    This must be a function to ensure DATASTORE_DATABASE is evaluated at runtime,
     not at module import time (which causes issues in E2E tests where env vars aren't loaded yet).
     """
     return """
@@ -627,13 +627,13 @@ CREATE OR REPLACE DICTIONARY {database}.person_distinct_id_overrides_dict ON CLU
 )
 PRIMARY KEY team_id, distinct_id
 -- For our own sanity, we explicitly write out the group by query.
-SOURCE(CLICKHOUSE(
+SOURCE(DATASTORE(
     query 'SELECT team_id, distinct_id, argMax(person_id, version) AS person_id FROM {database}.person_distinct_id_overrides GROUP BY team_id, distinct_id'
 ))
 LAYOUT(complex_key_hashed())
--- ClickHouse will choose a time uniformly within 1 to 5 hours to reload the dictionary (update if necessary to meet SLAs).
+-- Datastore will choose a time uniformly within 1 to 5 hours to reload the dictionary (update if necessary to meet SLAs).
 LIFETIME(MIN 3600 MAX 18000)
 """.format(
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        database=settings.CLICKHOUSE_DATABASE,
+        cluster=settings.DATASTORE_CLUSTER,
+        database=settings.DATASTORE_DATABASE,
     )

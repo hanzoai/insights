@@ -2,7 +2,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 from unittest.mock import patch
 
 from insights.schema import (
@@ -29,8 +29,8 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
 TEST_BUCKET = "test_storage_bucket-insights.revenue.stripe_invoices"
 
 
-@snapshot_clickhouse_queries
-class TestRevenueExampleDataWarehouseTablesQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestRevenueExampleDataWarehouseTablesQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-04-21"
 
     def _create_managed_viewsets(self):

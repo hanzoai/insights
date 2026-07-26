@@ -123,7 +123,7 @@ def _get_llma_workflow_config() -> LLMAWorkflowConfig:
         )
 
 
-# Activity timeout for team discovery. Must exceed the underlying ClickHouse
+# Activity timeout for team discovery. Must exceed the underlying Datastore
 # query's max_execution_time (5 min in CH_LLM_ANALYTICS_SETTINGS) plus retry
 # overhead so the activity doesn't get killed before the fallback path runs.
 DISCOVERY_ACTIVITY_TIMEOUT = timedelta(minutes=5)

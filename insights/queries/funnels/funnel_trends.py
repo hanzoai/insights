@@ -5,7 +5,7 @@ from typing import Optional
 from insights.models.cohort import Cohort
 from insights.models.filters.filter import Filter
 from insights.models.team import Team
-from insights.queries.funnels.base import ClickhouseFunnelBase
+from insights.queries.funnels.base import DatastoreFunnelBase
 from insights.queries.funnels.utils import get_funnel_order_class
 from insights.queries.util import (
     correct_result_for_sampling,
@@ -18,7 +18,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
 HUMAN_READABLE_TIMESTAMP_FORMAT = "%-d-%b-%Y"
 
 
-class ClickhouseFunnelTrends(ClickhouseFunnelBase):
+class DatastoreFunnelTrends(DatastoreFunnelBase):
     """
     ## Funnel trends assumptions
 
@@ -186,7 +186,7 @@ class ClickhouseFunnelTrends(ClickhouseFunnelBase):
                 ):
                     serialized_result.update({"breakdown_value": (period_row[-1])})
                 else:
-                    # nosemgrep: idor-lookup-without-team (ID from team-scoped ClickHouse result)
+                    # nosemgrep: idor-lookup-without-team (ID from team-scoped Datastore result)
                     serialized_result.update({"breakdown_value": Cohort.objects.get(pk=period_row[-1]).name})
 
             summary.append(serialized_result)

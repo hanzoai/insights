@@ -10,7 +10,7 @@ from insights.schema import (
     WebStatsTableQuery,
 )
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
 from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from insights.models import Action

@@ -12,15 +12,15 @@ This documentation is deprecated, and likely not up to date. Please use the [Flo
 
 In this step we will start all the external services needed by Insights to work.
 
-First, append line `127.0.0.1 kafka clickhouse clickhouse-coordinator objectstorage` and line `::1 kafka clickhouse clickhouse-coordinator objectstorage` to `/etc/hosts`. Our ClickHouse and Kafka data services won't be able to talk to each other without these mapped hosts.
+First, append line `127.0.0.1 kafka datastore datastore-coordinator objectstorage` and line `::1 kafka datastore datastore-coordinator objectstorage` to `/etc/hosts`. Our Datastore and Kafka data services won't be able to talk to each other without these mapped hosts.
 You can do this with:
 
 ```bash
-echo '127.0.0.1 kafka clickhouse clickhouse-coordinator objectstorage' | sudo tee -a /etc/hosts
-echo '::1 kafka clickhouse clickhouse-coordinator objectstorage' | sudo tee -a /etc/hosts
+echo '127.0.0.1 kafka datastore datastore-coordinator objectstorage' | sudo tee -a /etc/hosts
+echo '::1 kafka datastore datastore-coordinator objectstorage' | sudo tee -a /etc/hosts
 ```
 
-> If you are using a newer (>=4.1) version of Podman instead of Docker, the host machine's `/etc/hosts` is used as the base hosts file for containers by default, instead of container's `/etc/hosts` like in Docker. This can make hostname resolution fail in the ClickHouse container, and can be mended by setting `base_hosts_file="none"` in [`containers.conf`](https://github.com/containers/common/blob/main/docs/containers.conf.5.md#containers-table).
+> If you are using a newer (>=4.1) version of Podman instead of Docker, the host machine's `/etc/hosts` is used as the base hosts file for containers by default, instead of container's `/etc/hosts` like in Docker. This can make hostname resolution fail in the Datastore container, and can be mended by setting `base_hosts_file="none"` in [`containers.conf`](https://github.com/containers/common/blob/main/docs/containers.conf.5.md#containers-table).
 
 Now, start the Docker Compose stack:
 
@@ -47,7 +47,7 @@ Second, verify via `docker ps` and `docker logs` (or via the OrbStack dashboard)
 CONTAINER ID   IMAGE                                      COMMAND                  CREATED          STATUS                    PORTS                                                                                            NAMES
 5a38d4e55447   temporalio/ui:2.10.3                       "./start-ui-server.sh"   51 seconds ago   Up 44 seconds             0.0.0.0:8081->8080/tcp                                                                           insights-temporal-ui-1
 89b969801426   temporalio/admin-tools:1.20.0              "tail -f /dev/null"      51 seconds ago   Up 44 seconds                                                                                                              insights-temporal-admin-tools-1
-81fd1b6d7b1b   clickhouse/clickhouse-server:23.6.1.1524   "/entrypoint.sh"         51 seconds ago   Up 50 seconds             0.0.0.0:8123->8123/tcp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9009->9009/tcp, 0.0.0.0:9440->9440/tcp   insights-clickhouse-1
+81fd1b6d7b1b   datastore/clickhouse-server:23.6.1.1524   "/entrypoint.sh"         51 seconds ago   Up 50 seconds             0.0.0.0:8123->8123/tcp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9009->9009/tcp, 0.0.0.0:9440->9440/tcp   insights-datastore-1
 f876f8bff35f   bitnami/kafka:2.8.1-debian-10-r99          "/opt/bitnami/script…"   51 seconds ago   Up 50 seconds             0.0.0.0:9092->9092/tcp                                                                           insights-kafka-1
 d22559261575   temporalio/auto-setup:1.20.0               "/etc/temporal/entry…"   51 seconds ago   Up 45 seconds             6933-6935/tcp, 6939/tcp, 7234-7235/tcp, 7239/tcp, 0.0.0.0:7233->7233/tcp                         insights-temporal-1
 5313fc278a70   postgres:12-alpine                         "docker-entrypoint.s…"   51 seconds ago   Up 50 seconds (healthy)   0.0.0.0:5432->5432/tcp                                                                           insights-db-1
@@ -63,28 +63,28 @@ a478cadf6911   minio/minio:RELEASE.2022-06-25T15-50-16Z   "sh -c 'mkdir -p /da�
 # docker logs insights-redis-1 -n 1
 1:M 06 Dec 2021 13:47:08.435 * Ready to accept connections
 
-# docker logs insights-clickhouse-1 -n 1
-Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/users.xml'.
+# docker logs insights-datastore-1 -n 1
+Saved preprocessed configuration to '/var/lib/datastore/preprocessed_configs/users.xml'.
 
-# ClickHouse writes logs to `/var/log/clickhouse-server/clickhouse-server.log` and error logs to `/var/log/clickhouse-server/clickhouse-server.err.log` instead of stdout/stsderr. It can be useful to `cat` these files if there are any issues:
-# docker exec insights-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.log
-# docker exec insights-clickhouse-1 cat /var/log/clickhouse-server/clickhouse-server.err.log
+# Datastore writes logs to `/var/log/clickhouse-server/clickhouse-server.log` and error logs to `/var/log/clickhouse-server/clickhouse-server.err.log` instead of stdout/stsderr. It can be useful to `cat` these files if there are any issues:
+# docker exec insights-datastore-1 cat /var/log/clickhouse-server/clickhouse-server.log
+# docker exec insights-datastore-1 cat /var/log/clickhouse-server/clickhouse-server.err.log
 
 # docker logs insights-kafka-1
 [2021-12-06 13:47:23,814] INFO [KafkaServer id=1001] started (kafka.server.KafkaServer)
 
 # docker logs insights-zookeeper-1
-# Because ClickHouse and Kafka connect to Zookeeper, there will be a lot of noise here. That's good.
+# Because Datastore and Kafka connect to Zookeeper, there will be a lot of noise here. That's good.
 ```
 
 > **Friendly tip 1:** Kafka is currently the only x86 container used, and might segfault randomly when running on ARM. Restart it when that happens.
 
-> **Friendly tip 2:** Checking the last Clickhouse log could show a `get_mempolicy: Operation not permitted` message. However, it shouldn't affect the app startup - checking the whole log should clarify that Clickhouse started properly. To double-check you can get into the container and run a basic query.
+> **Friendly tip 2:** Checking the last Datastore log could show a `get_mempolicy: Operation not permitted` message. However, it shouldn't affect the app startup - checking the whole log should clarify that Datastore started properly. To double-check you can get into the container and run a basic query.
 >
 > ```bash
-> # docker logs insights-clickhouse-1
-> # docker exec -it insights-clickhouse-1 bash
-> # clickhouse-client --query "SELECT 1"
+> # docker logs insights-datastore-1
+> # docker exec -it insights-datastore-1 bash
+> # datastore-client --query "SELECT 1"
 > ```
 
 Finally, install Postgres locally. Even if you are planning to run Postgres inside Docker, we need a local copy of Postgres (version 11+) for its CLI tools and development libraries/headers. These are required by `pip` to install `psycopg2`.
@@ -252,7 +252,7 @@ You can also use [pyenv](https://github.com/pyenv/pyenv) if you wish to manage m
 
 ## 5. Prepare databases
 
-We now have the backend ready, and Postgres and ClickHouse running – these databases are blank slates at the moment however, so we need to run _migrations_ to e.g. create all the tables:
+We now have the backend ready, and Postgres and Datastore running – these databases are blank slates at the moment however, so we need to run _migrations_ to e.g. create all the tables:
 
 ```bash
 cargo install sqlx-cli # If you haven't already

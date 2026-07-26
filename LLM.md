@@ -8,7 +8,7 @@ The served **Django** monolith is **RESTORED** and published to
 startup), IAM-OIDC login is wired, and the surface is Hanzo-branded. It runs on
 Hanzo SQL (`insights-sql`), Hanzo KV (`KV_URL`, RESP wire — never `REDIS_URL`;
 `data_stores.py` normalizes kv://→RESP at the driver boundary), the
-`hanzoai/stream` Kafka-shim over NATS, and Hanzo Datastore (ClickHouse).
+`hanzoai/stream` Kafka-shim over NATS, and Hanzo Datastore (Datastore).
 
 Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
 
@@ -17,11 +17,11 @@ Alongside it, the native-Go `hanzoai/cloud` binary serves the observability API:
   LIVE: `GET https://api.hanzo.ai/v1/evals/health` → `200`; unauth
   `/v1/evals/datasets` → `403` (org-gated). Source: `hanzoai/cloud/clients/eval`.
 - **`/v1/analytics/*`** — the LLM/product analytics lens (overview, timeseries,
-  realtime, top/*, llm/*). Read-only per-org ClickHouse warehouse. Consumed by
+  realtime, top/*, llm/*). Read-only per-org Datastore warehouse. Consumed by
   `console2` `AnalyticsModule`. Backend `cloud/clients/analytics` — see GAP below.
 
 LLM telemetry (traces / observations / scores) is written by the **AI gateway**
-(`hanzoai/ai` → `object/observability.go`) into the ClickHouse warehouse
+(`hanzoai/ai` → `object/observability.go`) into the Datastore warehouse
 (`hanzo.traces`, `hanzo.observations`, `hanzo.scores`) and read
 back through `/v1/evals` + `/v1/analytics`.
 
@@ -42,7 +42,7 @@ restored so CI builds the monolith `Dockerfile` and pushes to
 | Trace/observation query | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`) | **LIVE** |
 | Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends | `/v1/analytics/{overview,timeseries,realtime,top/*}` | **GAP** — backend not shipped (below) |
 | Org / user / project / `personal_api_keys` / `login` | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects` | covered by IAM (auth/tenancy, not observability) |
-| Data warehouse / data_modeling / batch_exports | ClickHouse warehouse (`hanzoai/datastore`) direct | substrate retained |
+| Data warehouse / data_modeling / batch_exports | Datastore warehouse (`hanzoai/datastore`) direct | substrate retained |
 | Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
 
 ### Honest GAPs (must port before claiming full parity)
@@ -60,9 +60,9 @@ restored so CI builds the monolith `Dockerfile` and pushes to
 
 Event **ingestion** substrate is LIVE and proven end-to-end (it is not the
 Django app): `insights-capture` (Rust), `insights-plugin` (Node),
-`insights-kafka`, `insights-kv`, `insights-sql`, `datastore` (ClickHouse).
+`insights-kafka`, `insights-kv`, `insights-sql`, `datastore` (Datastore).
 Proven path: `POST https://insights.hanzo.ai/v1/e` → `200` → capture → kafka →
-plugin → ClickHouse `events`.
+plugin → Datastore `events`.
 
 ### Ingest is clean `/v1/*`
 
@@ -138,8 +138,8 @@ verbatim from the live DB so a fresh migrate hits EXACT schema parity):
 
 Helper modules inside migration dirs (`insights/rbac/migrations/rbac_*_migration.py`)
 are imported by app code — they are NOT migrations; never delete them in a squash
-(the delete filter must match `class Migration` only). ClickHouse
-(`insights/clickhouse/migrations/`, 225 files) and async migrations
+(the delete filter must match `class Migration` only). Datastore
+(`insights/datastore/migrations/`, 225 files) and async migrations
 (`insights/async_migrations/migrations/`, 11) are SEPARATE systems — untouched by
 the squash.
 

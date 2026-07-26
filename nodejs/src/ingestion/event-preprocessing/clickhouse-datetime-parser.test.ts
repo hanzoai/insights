@@ -1,12 +1,12 @@
 /**
- * Tests for ClickHouse DateTime Best Effort Parser
+ * Tests for Datastore DateTime Best Effort Parser
  *
  * MAINTENANCE GUIDE:
- * This test file is organized to mirror ClickHouse's test files for easy maintenance.
- * When ClickHouse updates their parsing logic, compare against these source files:
+ * This test file is organized to mirror Datastore's test files for easy maintenance.
+ * When Datastore updates their parsing logic, compare against these source files:
  *
- * Source code: ClickHouse/src/IO/parseDateTimeBestEffort.cpp
- * Wrapper:     ClickHouse/src/Functions/FunctionsConversion.h (isAllRead check at ~line 1464)
+ * Source code: Datastore/src/IO/parseDateTimeBestEffort.cpp
+ * Wrapper:     Datastore/src/Functions/FunctionsConversion.h (isAllRead check at ~line 1464)
  *
  * To check for new test cases:
  *   1. Find all test files: find tests/queries/0_stateless -name "*.sql" | xargs grep -l "parseDateTimeBestEffort"
@@ -16,27 +16,27 @@
  * Note: parseDateTimeBestEffortUS tests (01351, 02381) use a DIFFERENT function
  * that interprets MM-DD-YYYY instead of DD-MM-YYYY. Those are NOT tested here.
  */
-import { isValidClickHouseDateTime, parseDateTimeBestEffort } from './clickhouse-datetime-parser'
+import { isValidDatastoreDateTime, parseDateTimeBestEffort } from './datastore-datetime-parser'
 
-describe('isValidClickHouseDateTime', () => {
+describe('isValidDatastoreDateTime', () => {
     /**
-     * Non-string input handling (not from ClickHouse tests - JavaScript-specific)
+     * Non-string input handling (not from Datastore tests - JavaScript-specific)
      */
     describe('non-string values', () => {
         it('should accept numbers (unix timestamps)', () => {
-            expect(isValidClickHouseDateTime(1609459200)).toBe(true)
-            expect(isValidClickHouseDateTime(0)).toBe(true)
-            expect(isValidClickHouseDateTime(-1000)).toBe(true)
-            expect(isValidClickHouseDateTime(1.5)).toBe(true)
+            expect(isValidDatastoreDateTime(1609459200)).toBe(true)
+            expect(isValidDatastoreDateTime(0)).toBe(true)
+            expect(isValidDatastoreDateTime(-1000)).toBe(true)
+            expect(isValidDatastoreDateTime(1.5)).toBe(true)
         })
 
         it('should reject non-string, non-number values', () => {
-            expect(isValidClickHouseDateTime(null)).toBe(false)
-            expect(isValidClickHouseDateTime(undefined)).toBe(false)
-            expect(isValidClickHouseDateTime({})).toBe(false)
-            expect(isValidClickHouseDateTime([])).toBe(false)
-            expect(isValidClickHouseDateTime(true)).toBe(false)
-            expect(isValidClickHouseDateTime(false)).toBe(false)
+            expect(isValidDatastoreDateTime(null)).toBe(false)
+            expect(isValidDatastoreDateTime(undefined)).toBe(false)
+            expect(isValidDatastoreDateTime({})).toBe(false)
+            expect(isValidDatastoreDateTime([])).toBe(false)
+            expect(isValidDatastoreDateTime(true)).toBe(false)
+            expect(isValidDatastoreDateTime(false)).toBe(false)
         })
     })
 
@@ -45,7 +45,7 @@ describe('isValidClickHouseDateTime', () => {
      * Main test file with comprehensive date/time parsing cases
      */
     describe('00569_parse_date_time_best_effort.sql', () => {
-        // Invalid cases (return NULL in ClickHouse)
+        // Invalid cases (return NULL in Datastore)
         describe('invalid', () => {
             it.each([
                 '0',
@@ -63,7 +63,7 @@ describe('isValidClickHouseDateTime', () => {
                 'Jun, 11 Feb 2018 06:40:50 +0300',
                 '2017 Apr 02 01/02/03 UTC+0300',
             ])('should reject: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(false)
+                expect(isValidDatastoreDateTime(value)).toBe(false)
             })
         })
 
@@ -161,7 +161,7 @@ describe('isValidClickHouseDateTime', () => {
                 'Sun 11 Feb 2018 06:40:50 +0300',
                 'Sun, 11 Feb 2018 06:40:50 +0300',
             ])('should accept: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(true)
+                expect(isValidDatastoreDateTime(value)).toBe(true)
             })
         })
     })
@@ -185,7 +185,7 @@ describe('isValidClickHouseDateTime', () => {
             '24.DEC.18T01:02:03.000+0300',
             '01-September-2018 11:22',
         ])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -195,7 +195,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('01123_parse_date_time_best_effort_even_more.sql', () => {
         it.each(['Thu, 18 Aug 2018 07:22:16 GMT', 'Tue, 16 Aug 2018 07:22:16 GMT'])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -210,7 +210,7 @@ describe('isValidClickHouseDateTime', () => {
                 'bar',
                 '2020-05-14T03:37:03.253184012345678910111213141516171819Z', // too many fractional digits
             ])('should reject: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(false)
+                expect(isValidDatastoreDateTime(value)).toBe(false)
             })
         })
 
@@ -222,7 +222,7 @@ describe('isValidClickHouseDateTime', () => {
                 '2020-05-14 03:37:03',
                 '1640649600123',
             ])('should accept: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(true)
+                expect(isValidDatastoreDateTime(value)).toBe(true)
             })
         })
     })
@@ -233,7 +233,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('01424_parse_date_time_bad_date.sql', () => {
         it('should reject decimal number: "2.55"', () => {
-            expect(isValidClickHouseDateTime('2.55')).toBe(false)
+            expect(isValidDatastoreDateTime('2.55')).toBe(false)
         })
     })
 
@@ -243,7 +243,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('01432_parse_date_time_best_effort_timestamp.sql', () => {
         it.each(['1596752940', '100000000', '20200807'])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -264,7 +264,7 @@ describe('isValidClickHouseDateTime', () => {
             '1640649600123',
             'Dec 15, 2021',
         ])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -275,7 +275,7 @@ describe('isValidClickHouseDateTime', () => {
     describe('01543_parse_datetime_besteffort_or_null_empty_string.sql', () => {
         describe('invalid', () => {
             it.each(['', '       ', 'x', '20100', '0100:0100:0000'])('should reject: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(false)
+                expect(isValidDatastoreDateTime(value)).toBe(false)
             })
         })
 
@@ -289,7 +289,7 @@ describe('isValidClickHouseDateTime', () => {
                 '2020-01-01 12:01:01 pm',
                 '2000-01-01 01:01:01',
             ])('should accept: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(true)
+                expect(isValidDatastoreDateTime(value)).toBe(true)
             })
         })
     })
@@ -300,7 +300,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('02155_parse_date_lowcard_default_throw.sql', () => {
         it('should accept: "15-JUL-16"', () => {
-            expect(isValidClickHouseDateTime('15-JUL-16')).toBe(true)
+            expect(isValidDatastoreDateTime('15-JUL-16')).toBe(true)
         })
     })
 
@@ -321,7 +321,7 @@ describe('isValidClickHouseDateTime', () => {
             '20220101-010203+0100',
             '20220101-010203-01:00',
         ])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -339,7 +339,7 @@ describe('isValidClickHouseDateTime', () => {
                 '01/12/2017, ,,,18:31:44',
                 '18:31:44  ,,,,, 31/12/2015',
             ])('should reject: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(false)
+                expect(isValidDatastoreDateTime(value)).toBe(false)
             })
         })
 
@@ -352,7 +352,7 @@ describe('isValidClickHouseDateTime', () => {
                 '18:31:44, 31/12/2015',
                 '18:31:44  , 31/12/2015',
             ])('should accept: "%s"', (value) => {
-                expect(isValidClickHouseDateTime(value)).toBe(true)
+                expect(isValidDatastoreDateTime(value)).toBe(true)
             })
         })
     })
@@ -363,7 +363,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('02504_parse_datetime_best_effort_calebeaires.sql', () => {
         it.each(['1969-01-01', '1969-01-01 10:42:00'])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -373,7 +373,7 @@ describe('isValidClickHouseDateTime', () => {
      */
     describe('03014_msan_parse_date_time.sql', () => {
         it('should reject trailing comma: "01/12/2017,"', () => {
-            expect(isValidClickHouseDateTime('01/12/2017,')).toBe(false)
+            expect(isValidDatastoreDateTime('01/12/2017,')).toBe(false)
         })
     })
 
@@ -394,7 +394,7 @@ describe('isValidClickHouseDateTime', () => {
             '1744042005.12345678',
             '1744042005.123456789',
         ])('should accept 10-digit with fraction: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
 
         // 9-digit timestamps with fractions
@@ -409,7 +409,7 @@ describe('isValidClickHouseDateTime', () => {
             '174404200.12345678',
             '174404200.123456789',
         ])('should accept 9-digit with fraction: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 
@@ -425,7 +425,7 @@ describe('isValidClickHouseDateTime', () => {
             '1969-12-31 23:59:59.999',
             '1970-01-01 00:00:00.000',
         ])('should accept: "%s"', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 })
@@ -662,7 +662,7 @@ describe('parseDateTimeBestEffort', () => {
  * Comparison with JavaScript's Date parser
  */
 describe('comparison with new Date()', () => {
-    describe('formats ClickHouse accepts but new Date() rejects', () => {
+    describe('formats Datastore accepts but new Date() rejects', () => {
         it.each([
             '1640649600',
             '1640649600123',
@@ -672,7 +672,7 @@ describe('comparison with new Date()', () => {
             '15-01-2024',
             '24/DEC/2018',
         ])('should accept "%s" (which new Date() rejects)', (value) => {
-            expect(isValidClickHouseDateTime(value)).toBe(true)
+            expect(isValidDatastoreDateTime(value)).toBe(true)
         })
     })
 })

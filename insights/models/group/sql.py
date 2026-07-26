@@ -1,21 +1,21 @@
 from insights import settings
-from insights.clickhouse.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS, STORAGE_POLICY, kafka_engine
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree
+from insights.datastore.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import KAFKA_COLUMNS, STORAGE_POLICY, kafka_engine
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree
 from insights.kafka_client.topics import KAFKA_GROUPS
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.settings import DATASTORE_CLUSTER
 
 GROUPS_TABLE = "groups"
 GROUPS_TABLE_MV = f"{GROUPS_TABLE}_mv"
 GROUPS_WRITABLE_TABLE = f"writable_{GROUPS_TABLE}"
 KAFKA_GROUPS_TABLE = f"kafka_{GROUPS_TABLE}"
 
-DROP_GROUPS_TABLE_SQL = f"DROP TABLE {GROUPS_TABLE} ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+DROP_GROUPS_TABLE_SQL = f"DROP TABLE {GROUPS_TABLE} ON CLUSTER '{DATASTORE_CLUSTER}'"
 DROP_GROUPS_TABLE_MV_SQL = f"DROP TABLE IF EXISTS {GROUPS_TABLE_MV}"
 DROP_KAFKA_GROUPS_TABLE_SQL = f"DROP TABLE IF EXISTS {KAFKA_GROUPS_TABLE}"
 
-TRUNCATE_GROUPS_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {GROUPS_TABLE} ON CLUSTER '{CLICKHOUSE_CLUSTER}'"
+TRUNCATE_GROUPS_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {GROUPS_TABLE} ON CLUSTER '{DATASTORE_CLUSTER}'"
 
 GROUPS_TABLE_BASE_SQL = """
 CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
@@ -63,7 +63,7 @@ def GROUPS_WRITABLE_TABLE_SQL():
     return GROUPS_TABLE_BASE_SQL.format(
         table_name="writable_" + GROUPS_TABLE,
         on_cluster_clause=ON_CLUSTER_CLAUSE(False),
-        engine=Distributed(data_table=GROUPS_TABLE, cluster=settings.CLICKHOUSE_SINGLE_SHARD_CLUSTER),
+        engine=Distributed(data_table=GROUPS_TABLE, cluster=settings.DATASTORE_SINGLE_SHARD_CLUSTER),
         extra_fields=KAFKA_COLUMNS,
     )
 

@@ -4,24 +4,24 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_unordered_persons import ClickhouseFunnelUnorderedActors
+from insights.queries.funnels.funnel_unordered_persons import DatastoreFunnelUnorderedActors
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.test.test_journeys import journeys_for
 
 FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
-class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelUnorderedStepsPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         events_by_person = {}
         for i in range(5):
@@ -58,11 +58,11 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
         }
         filter = Filter(data=data)
         with self.assertRaises(ValueError):
-            ClickhouseFunnelUnorderedActors(filter, self.team).run()
+            DatastoreFunnelUnorderedActors(filter, self.team).run()
 
         filter = filter.shallow_clone({"funnel_step": -1})
         with pytest.raises(ValueError):
-            _, _, _ = ClickhouseFunnelUnorderedActors(filter, self.team).run()
+            _, _, _ = DatastoreFunnelUnorderedActors(filter, self.team).run()
 
     def test_first_step(self):
         self._create_sample_data_multiple_dropoffs()
@@ -80,7 +80,7 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelUnorderedActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelUnorderedActors(filter, self.team).get_actors()
         self.assertEqual(35, len(serialized_results))
 
     def test_last_step(self):
@@ -99,7 +99,7 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelUnorderedActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelUnorderedActors(filter, self.team).get_actors()
         self.assertEqual(5, len(serialized_results))
 
     def test_second_step_dropoff(self):
@@ -118,7 +118,7 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelUnorderedActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelUnorderedActors(filter, self.team).get_actors()
         self.assertEqual(20, len(serialized_results))
 
     def test_last_step_dropoff(self):
@@ -137,10 +137,10 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, serialized_results, _ = ClickhouseFunnelUnorderedActors(filter, self.team).get_actors()
+        _, serialized_results, _ = DatastoreFunnelUnorderedActors(filter, self.team).get_actors()
         self.assertEqual(10, len(serialized_results))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_unordered_funnel_does_not_return_recordings(self):
         p1 = _create_person(distinct_ids=[f"user_1"], team=self.team)
@@ -186,6 +186,6 @@ class TestFunnelUnorderedStepsPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",  # <- The important line
             }
         )
-        _, results, _ = ClickhouseFunnelUnorderedActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelUnorderedActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0]["matched_recordings"], [])

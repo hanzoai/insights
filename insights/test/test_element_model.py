@@ -1,9 +1,9 @@
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
 from insights.models.element import Element, chain_to_elements, elements_to_string
 
 
-class TestElement(ClickhouseTestMixin, BaseTest):
+class TestElement(DatastoreTestMixin, BaseTest):
     def test_elements_to_string(self) -> None:
         self.maxDiff = None
         elements_string = elements_to_string(

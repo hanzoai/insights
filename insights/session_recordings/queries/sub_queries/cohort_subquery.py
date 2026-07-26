@@ -12,11 +12,11 @@ class CohortPropertyGroupsSubQuery(SessionRecordingsListingBaseQuery):
     Builds a subquery that filters distinct_ids based on cohort membership.
 
     Uses LEFT JOIN instead of IN/NOT IN subqueries for better performance with large datasets.
-    The IN/NOT IN pattern causes ClickHouse to load all cohort member IDs into RAM,
+    The IN/NOT IN pattern causes Datastore to load all cohort member IDs into RAM,
     which can cause OOM errors for large cohorts or when filtering "NOT IN" a small cohort
     against a large user base.
 
-    The JOIN-based approach allows ClickHouse to use more efficient join algorithms
+    The JOIN-based approach allows Datastore to use more efficient join algorithms
     (hash join, merge join) and doesn't require loading all IDs into memory upfront.
     """
 

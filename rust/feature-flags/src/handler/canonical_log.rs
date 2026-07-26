@@ -67,7 +67,7 @@ fn truncate_chars(s: &str, max_chars: usize) -> &str {
 /// Accumulates data throughout a /flags request lifecycle for canonical logging.
 ///
 /// A canonical log line is a single comprehensive log entry emitted at request
-/// completion containing all key telemetry. This enables simple ClickHouse queries
+/// completion containing all key telemetry. This enables simple Datastore queries
 /// for debugging without needing to join multiple log entries.
 ///
 /// Access and modify via `with_canonical_log()` from anywhere in the async task.

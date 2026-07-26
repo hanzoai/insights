@@ -80,7 +80,7 @@ GroupTypeName = str
 PropertyIdentifier = tuple[PropertyName, PropertyType, Optional[GroupTypeIndex]]
 
 NEGATED_OPERATORS = ["is_not", "not_icontains", "not_regex", "is_not_set"]
-CLICKHOUSE_ONLY_PROPERTY_TYPES = [
+DATASTORE_ONLY_PROPERTY_TYPES = [
     "static-cohort",
     "dynamic-cohort",
     "precalculated-cohort",

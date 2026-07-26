@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from insights.clickhouse.kafka_engine import kafka_engine
-from insights.clickhouse.table_engines import ReplacingMergeTree
-from insights.settings import CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE
+from insights.datastore.kafka_engine import kafka_engine
+from insights.datastore.table_engines import ReplacingMergeTree
+from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
 
 
 @dataclass
@@ -17,7 +17,7 @@ class PartitionStatsKafkaTable:
 
     def get_create_table_sql(self) -> str:
         return f"""
-            CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+            CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}'
             (
                 `uuid` String,
                 `distinct_id` String,
@@ -35,7 +35,7 @@ class PartitionStatsKafkaTable:
 
     def get_drop_table_sql(self) -> str:
         return f"""
-            DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+            DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}'
         """
 
 
@@ -45,7 +45,7 @@ class PartitionStatsV2Table:
     def get_create_table_sql(self) -> str:
         engine = ReplacingMergeTree(self.table_name, ver="timestamp")
         return f"""
-            CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' (
+            CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}' (
                 topic LowCardinality(String),
                 partition UInt64,
                 offset UInt64,
@@ -64,7 +64,7 @@ class PartitionStatsV2Table:
 
     def get_drop_table_sql(self) -> str:
         return f"""
-            DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' SYNC
+            DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}' SYNC
         """
 
 
@@ -79,8 +79,8 @@ class PartitionStatsV2MaterializedView:
 
     def get_create_table_sql(self) -> str:
         return f"""
-            CREATE MATERIALIZED VIEW IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}'
-            TO `{CLICKHOUSE_DATABASE}`.{self.to_table.table_name}
+            CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}'
+            TO `{DATASTORE_DATABASE}`.{self.to_table.table_name}
             AS SELECT
                 _topic AS topic,
                 _partition AS partition,
@@ -91,10 +91,10 @@ class PartitionStatsV2MaterializedView:
                 JSONExtractString(data, 'event') AS event,
                 length(data) AS data_length,
                 _timestamp AS timestamp
-            FROM {CLICKHOUSE_DATABASE}.{self.from_table.table_name} AS kafka_table
+            FROM {DATASTORE_DATABASE}.{self.from_table.table_name} AS kafka_table
         """
 
     def get_drop_table_sql(self) -> str:
         return f"""
-            DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' SYNC
+            DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}' SYNC
         """

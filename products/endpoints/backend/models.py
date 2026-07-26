@@ -35,8 +35,8 @@ _TRANSPARENT_WRAPPER_RE = re.compile(r"^(?:Nullable|LowCardinality)\((.+)\)$")
 _AGG_FUNC_RE = re.compile(r"^(?:Simple)?AggregateFunction\(.+?,\s*(.+)\)$")
 
 
-def _clickhouse_type_to_serialized_type(ch_type: str) -> str:
-    """Map a ClickHouse type string to a serialized endpoint column type."""
+def _datastore_type_to_serialized_type(ch_type: str) -> str:
+    """Map a Datastore type string to a serialized endpoint column type."""
     t = ch_type
     while True:
         if m := _TRANSPARENT_WRAPPER_RE.match(t):
@@ -64,7 +64,7 @@ def _clickhouse_type_to_serialized_type(ch_type: str) -> str:
         return "array"
     if t.startswith(("Tuple", "Map")):
         return "json"
-    logger.warning("Unhandled ClickHouse type: %s", ch_type)
+    logger.warning("Unhandled Datastore type: %s", ch_type)
     return "unknown"
 
 
@@ -151,7 +151,7 @@ class EndpointVersion(models.Model):
         return f"{self.endpoint.name} v{self.version}"
 
     def get_columns(self) -> list[dict]:
-        """Return columns, lazily populating from ClickHouse if not yet computed."""
+        """Return columns, lazily populating from Datastore if not yet computed."""
         if self.columns is None:
             columns = EndpointVersion.extract_columns(self.query, self.endpoint.team_id)
             # Refresh from DB to check if another request already populated it
@@ -209,7 +209,7 @@ class EndpointVersion(models.Model):
 
     @staticmethod
     def extract_columns(query: dict, team_id: int) -> list[dict]:
-        """Extract SELECT column names and types by describing the query against ClickHouse."""
+        """Extract SELECT column names and types by describing the query against Datastore."""
         if query.get("kind") != "InsightsQLQuery":
             return []
         insightsql_string = query.get("query", "")
@@ -218,27 +218,27 @@ class EndpointVersion(models.Model):
         try:
             from insights.insightsql.query import InsightsQLQueryExecutor
 
-            from insights.clickhouse.client import sync_execute
+            from insights.datastore.client import sync_execute
 
             parsed = parse_select(insightsql_string)
             cleaned = _PLACEHOLDER_REPLACER.visit(parsed)
 
             team = Team.objects.get(pk=team_id)
             executor = InsightsQLQueryExecutor(query=cleaned, team=team, limit_context=None)
-            clickhouse_sql, clickhouse_context = executor.generate_clickhouse_sql()
+            datastore_sql, datastore_context = executor.generate_datastore_sql()
 
-            if not clickhouse_sql:
+            if not datastore_sql:
                 return []
 
-            # nosemgrep: clickhouse-fstring-param-audit (clickhouse_sql is compiler output from InsightsQLQueryExecutor, not user input)
+            # nosemgrep: datastore-fstring-param-audit (datastore_sql is compiler output from InsightsQLQueryExecutor, not user input)
             rows = sync_execute(
-                f"DESCRIBE TABLE ({clickhouse_sql})",
-                clickhouse_context.values,
+                f"DESCRIBE TABLE ({datastore_sql})",
+                datastore_context.values,
                 team_id=team_id,
                 readonly=True,
             )
 
-            return [{"name": row[0], "type": _clickhouse_type_to_serialized_type(row[1])} for row in rows]
+            return [{"name": row[0], "type": _datastore_type_to_serialized_type(row[1])} for row in rows]
         except Exception as e:
             capture_exception(e)
             return []

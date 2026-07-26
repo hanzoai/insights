@@ -52,7 +52,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         super().tearDown()
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_no_events_updates_checkpoint(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """When there are no events, checkpoint should still be updated"""
@@ -71,7 +71,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert self.flag1.last_called_at is None
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_existing_checkpoint_used(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """Task should use existing checkpoint if available"""
@@ -91,7 +91,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert params["last_sync_timestamp"] == checkpoint_time
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_updates_null_timestamps(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """Flags with null last_called_at should be updated"""
@@ -109,7 +109,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert self.flag1.last_called_at == latest_timestamp
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_updates_only_more_recent_timestamps(
         self, mock_get_client: MagicMock, mock_sync_execute: MagicMock
@@ -139,7 +139,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert self.flag3.last_called_at == newer_timestamp
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_handles_nonexistent_flags(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """Should gracefully handle flags that don't exist in database"""
@@ -159,7 +159,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert self.flag1.last_called_at is not None
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     @override_settings(FEATURE_FLAG_LAST_CALLED_AT_SYNC_BATCH_SIZE=2)
     def test_bulk_update_respects_batch_size(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
@@ -206,7 +206,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert flag5.last_called_at == timestamp
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_redis_error_falls_back_to_lookback_days(
         self, mock_get_client: MagicMock, mock_sync_execute: MagicMock
@@ -238,14 +238,14 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         # Set lock to prevent execution
         cache.set(lock_key, "locked", timeout=600)
 
-        with patch("insights.clickhouse.client.sync_execute") as mock_sync_execute:
+        with patch("insights.datastore.client.sync_execute") as mock_sync_execute:
             sync_feature_flag_last_called()
 
             # Task should exit early without executing query
             mock_sync_execute.assert_not_called()
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_lock_released_after_execution(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """Lock should be released after successful execution"""
@@ -260,7 +260,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert cache.get(lock_key) is None
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_lock_released_after_exception(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
         """Lock should be released even if task raises exception"""
@@ -279,10 +279,10 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert cache.get(lock_key) is None
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_handles_invalid_timestamps(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
-        """Should handle None or invalid timestamps from ClickHouse"""
+        """Should handle None or invalid timestamps from Datastore"""
         redis_mock = mock_redis_client()
         mock_get_client.return_value = redis_mock
 
@@ -302,7 +302,7 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert self.flag2.last_called_at is not None
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
     def test_checkpoint_updated_to_latest_timestamp(
         self, mock_get_client: MagicMock, mock_sync_execute: MagicMock
@@ -329,11 +329,11 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert latest_timestamp.isoformat() in stored_timestamp
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
-    @override_settings(FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT=2)
-    def test_respects_clickhouse_limit(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
-        """Query should respect FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT setting"""
+    @override_settings(FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT=2)
+    def test_respects_datastore_limit(self, mock_get_client: MagicMock, mock_sync_execute: MagicMock) -> None:
+        """Query should respect FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT setting"""
         redis_mock = mock_redis_client()
         mock_get_client.return_value = redis_mock
         mock_sync_execute.return_value = []
@@ -346,16 +346,16 @@ class TestSyncFeatureFlagLastCalled(BaseTest):
         assert params["limit"] == 2
 
     @freeze_time("2024-06-15 12:00:00")
-    @patch("insights.clickhouse.client.sync_execute")
+    @patch("insights.datastore.client.sync_execute")
     @patch("insights.tasks.tasks.get_client")
-    def test_handles_naive_datetimes_from_clickhouse(
+    def test_handles_naive_datetimes_from_datastore(
         self, mock_get_client: MagicMock, mock_sync_execute: MagicMock
     ) -> None:
-        """ClickHouse returns naive datetimes - verify they're converted to timezone-aware"""
+        """Datastore returns naive datetimes - verify they're converted to timezone-aware"""
         redis_mock = mock_redis_client()
         mock_get_client.return_value = redis_mock
 
-        # ClickHouse returns naive datetimes (no timezone info) - this is what really happens
+        # Datastore returns naive datetimes (no timezone info) - this is what really happens
         naive_timestamp = datetime(2024, 6, 15, 11, 0, 0)  # No tz.make_aware!
 
         # flag3 has a timezone-aware last_called_at from Django

@@ -10,7 +10,7 @@ import structlog
 from django_deprecate_fields import deprecate_field
 from rest_framework.exceptions import ValidationError
 
-from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT
 from insights.models.integration import Integration
 from insights.models.utils import UUIDTModel
@@ -127,7 +127,7 @@ class ErrorTrackingIssueFingerprintV2(UUIDTModel):
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     issue = models.ForeignKey(ErrorTrackingIssue, on_delete=models.CASCADE, related_name="fingerprints")
     fingerprint = models.TextField(null=False, blank=False)
-    # current version of the id, used to sync with ClickHouse and collapse rows correctly for overrides ClickHouse table
+    # current version of the id, used to sync with Datastore and collapse rows correctly for overrides Datastore table
     version = models.BigIntegerField(blank=True, default=0)
     first_seen = models.DateTimeField(null=True, auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -434,7 +434,7 @@ class ErrorTrackingIssueFingerprint(models.Model):
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, db_index=False)
     issue = models.ForeignKey(ErrorTrackingGroup, on_delete=models.CASCADE)
     fingerprint = models.TextField(null=False, blank=False)
-    # current version of the id, used to sync with ClickHouse and collapse rows correctly for overrides ClickHouse table
+    # current version of the id, used to sync with Datastore and collapse rows correctly for overrides Datastore table
     version = models.BigIntegerField(blank=True, default=0)
 
     class Meta:
@@ -484,7 +484,7 @@ def override_error_tracking_issue_fingerprint(
     is_deleted: bool = False,
     sync: bool = False,
 ) -> None:
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(
         topic=KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT,
         sql=INSERT_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES,

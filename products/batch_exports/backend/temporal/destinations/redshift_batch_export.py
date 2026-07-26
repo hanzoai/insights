@@ -512,7 +512,7 @@ def redshift_default_fields() -> list[BatchExportField]:
     batch_export_fields.append({"expression": "''", "alias": "elements"})
     batch_export_fields.append({"expression": "''", "alias": "site_url"})
     batch_export_fields.pop(batch_export_fields.index({"expression": "created_at", "alias": "created_at"}))
-    # Team ID is (for historical reasons) an INTEGER (4 bytes) in PostgreSQL, but in ClickHouse is stored as Int64.
+    # Team ID is (for historical reasons) an INTEGER (4 bytes) in PostgreSQL, but in Datastore is stored as Int64.
     # We can't encode it as an Int64, as this includes 4 extra bytes, and PostgreSQL will reject the data with a
     # 'incorrect binary data format' error on the column, so we cast it to Int32.
     team_id_field = batch_export_fields.pop(
@@ -815,7 +815,7 @@ def _get_merge_settings(
 @activity.defn
 @handle_non_retryable_errors(NON_RETRYABLE_ERROR_TYPES)
 async def insert_into_redshift_activity_from_stage(inputs: RedshiftInsertInputs) -> BatchExportResult:
-    """Activity to insert data from ClickHouse to Redshift.
+    """Activity to insert data from Datastore to Redshift.
 
     This activity executes the following steps:
     1. Check if anything is to be exported.
@@ -1355,7 +1355,7 @@ async def copy_into_redshift_activity_from_stage(inputs: RedshiftCopyActivityInp
 
 @workflow.defn(name="redshift-export", failure_exception_types=[workflow.NondeterminismError])
 class RedshiftBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into Postgres.
+    """A Temporal Workflow to export Datastore data into Postgres.
 
     This Workflow is intended to be executed both manually and by a Temporal
     Schedule. When ran by a schedule, `data_interval_end` should be set to

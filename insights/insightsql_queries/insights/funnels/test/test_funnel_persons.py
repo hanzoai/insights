@@ -5,11 +5,11 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
@@ -87,7 +87,7 @@ def get_actors(
     return response.results
 
 
-class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         for i in range(35):
             bulk_create_persons([{"distinct_ids": [f"user_{i}"], "team_id": self.team.pk}])
@@ -440,7 +440,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
         results = get_actors_legacy_filters(filters, self.team, funnel_step=1)
         self.assertEqual(results[0][0], person.uuid)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_funnel_person_recordings(self):
         p1 = _create_person(distinct_ids=[f"user_1"], team=self.team)

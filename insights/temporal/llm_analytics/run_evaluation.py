@@ -481,7 +481,7 @@ async def emit_evaluation_event_activity(
     result: dict[str, Any],
     start_time: datetime,
 ) -> None:
-    """Emit $ai_evaluation event to ClickHouse"""
+    """Emit $ai_evaluation event to Datastore"""
 
     def _emit():
         try:

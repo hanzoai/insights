@@ -136,7 +136,7 @@ def join_with_events_table(
 def _clamp_to_ttl(chain: list[str | int]):
     from insights.insightsql import ast
 
-    # TRICKY: tests can freeze time, if we use `now()` in the ClickHouse queries then the tests will fail
+    # TRICKY: tests can freeze time, if we use `now()` in the Datastore queries then the tests will fail
     # because the time in the query will be different from the time in the test
     # so we generate now in Python and pass it in
     now = datetime.now()
@@ -249,7 +249,7 @@ class RawSessionReplayEventsTable(Table):
     def avoid_asterisk_fields(self) -> list[str]:
         return ["first_url"]
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "session_replay_events"
 
     def to_printed_insightsql(self):
@@ -313,7 +313,7 @@ class SessionReplayEventsTable(LazyTable):
     def lazy_select(self, table_to_add: LazyTableToAdd, context, node):
         return select_from_session_replay_events_table(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "session_replay_events"
 
     def to_printed_insightsql(self):

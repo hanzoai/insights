@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import MagicMock, patch
 
 from django.test import override_settings
@@ -196,7 +196,7 @@ class TestExperimentSummaryToolHelpers(APIBaseTest):
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestExperimentSummaryDataService(ClickhouseTestMixin, APIBaseTest):
+class TestExperimentSummaryDataService(DatastoreTestMixin, APIBaseTest):
     async def acreate_feature_flag(self, key="test-experiment"):
         return await FeatureFlag.objects.acreate(
             name=f"Test experiment flag: {key}",

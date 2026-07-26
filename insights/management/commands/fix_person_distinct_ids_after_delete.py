@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 
 class Command(BaseCommand):
-    help = "Fix state for person distinct IDs in ClickHouse after person deletion and id re-use for a single team"
+    help = "Fix state for person distinct IDs in Datastore after person deletion and id re-use for a single team"
 
     def add_arguments(self, parser):
         parser.add_argument("--team-id", default=None, type=int, help="Specify a team to fix data for.")

@@ -4,7 +4,7 @@ from insights.test.base import BaseTest
 
 from django.utils import timezone
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Plugin, PluginConfig
 from insights.models.plugin import PluginLogEntrySource, PluginLogEntryType, fetch_plugin_log_entries
 from insights.models.utils import UUIDT
@@ -20,7 +20,7 @@ def create_plugin_log_entry(
     message: str,
     instance_id: str,
 ):
-    from insights.clickhouse.plugin_log_entries import INSERT_PLUGIN_LOG_ENTRY_SQL
+    from insights.datastore.plugin_log_entries import INSERT_PLUGIN_LOG_ENTRY_SQL
 
     sync_execute(
         INSERT_PLUGIN_LOG_ENTRY_SQL,

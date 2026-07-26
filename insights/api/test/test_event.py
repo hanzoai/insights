@@ -6,13 +6,13 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
     override_settings,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import patch
 
@@ -29,7 +29,7 @@ from insights.models.event.query_event_list import insight_query_with_columns
 from insights.test.test_journeys import journeys_for
 
 
-class TestEvents(ClickhouseTestMixin, APIBaseTest):
+class TestEvents(DatastoreTestMixin, APIBaseTest):
     ENDPOINT = "event"
 
     def test_filter_events(self):
@@ -304,7 +304,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
         assert sorted(events) == sorted(event["name"] for event in response)
 
     @also_test_with_materialized_columns(["random_prop"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_property_values(self):
         with freeze_time("2020-01-10"):
             _create_event(
@@ -428,7 +428,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(["test_prop"])
     @freeze_time("2020-01-20 20:00:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_property_values_without_hidden_properties(self):
         # Create events with properties first
         _create_event(
@@ -461,7 +461,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(["hidden_prop", "visible_prop"])
     @freeze_time("2020-01-20 20:00:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_property_values_with_hidden_properties(self):
         # Create events with both hidden and visible properties
         _create_event(
@@ -670,7 +670,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
             page2 = self.client.get(response["next"]).json()
 
-            from insights.clickhouse.client import sync_execute
+            from insights.datastore.client import sync_execute
 
             assert (
                 sync_execute(
@@ -720,7 +720,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
             page2 = self.client.get(response["next"]).json()
 
-            from insights.clickhouse.client import sync_execute
+            from insights.datastore.client import sync_execute
 
             assert (
                 sync_execute(
@@ -1180,7 +1180,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
         assert [r["event"] for r in response["results"]] == ["should_be_included"]
 
 
-class TestEventListTimeWindowOptimization(ClickhouseTestMixin, APIBaseTest):
+class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
     def test_cache_key_generation(self):
         from insights.api.event import _get_event_list_cache_key, _get_limit_size_category
 

@@ -20,4 +20,4 @@ if is_cloud() or is_ci():
     from insights.udf_versioner import augment_function_name
 
     for v in UDFS.values():
-        v.clickhouse_name = augment_function_name(v.clickhouse_name)
+        v.datastore_name = augment_function_name(v.datastore_name)

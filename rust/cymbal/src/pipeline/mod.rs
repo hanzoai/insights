@@ -6,7 +6,7 @@ use common_kafka::{
     kafka_consumer::Offset, kafka_messages::ingest_warning::IngestionWarning,
     kafka_producer::send_iter_to_kafka,
 };
-use common_types::{CapturedEvent, ClickHouseEvent};
+use common_types::{CapturedEvent, DatastoreEvent};
 
 use exception::do_exception_handling;
 use geoip::add_geoip;
@@ -36,14 +36,14 @@ pub mod group;
 pub mod person;
 pub mod prep;
 
-// We can receive either ClickhouseEvents or CaptureEvents
+// We can receive either DatastoreEvents or CaptureEvents
 #[derive(Debug, Clone, Deserialize)]
-// ClickhouseEvent is hefty compared to CapturedEvent (496 vs 160 bytes), but we mostly pass
+// DatastoreEvent is hefty compared to CapturedEvent (496 vs 160 bytes), but we mostly pass
 // around vecs of these and I'd rather skip the pointer chase
 #[allow(clippy::large_enum_variant)]
 #[serde(untagged)]
 pub enum IncomingEvent {
-    ClickhouseReady(ClickHouseEvent),
+    DatastoreReady(DatastoreEvent),
     Captured(CapturedEvent),
 }
 
@@ -167,7 +167,7 @@ pub async fn emit_ingestion_warnings(
 #[cfg(test)]
 mod test {
 
-    use common_types::{format::parse_datetime_assuming_utc, ClickHouseEvent, PersonMode};
+    use common_types::{format::parse_datetime_assuming_utc, DatastoreEvent, PersonMode};
     use uuid::Uuid;
 
     use crate::app_context::FilterMode;
@@ -176,7 +176,7 @@ mod test {
 
     #[test]
     pub fn test_timestamp_parsing() {
-        let mut event = ClickHouseEvent {
+        let mut event = DatastoreEvent {
             uuid: Uuid::now_v7(),
             team_id: 1,
             project_id: Some(1),
@@ -215,7 +215,7 @@ mod test {
 
     #[test]
     pub fn test_team_filtering() {
-        let event = ClickHouseEvent {
+        let event = DatastoreEvent {
             uuid: Uuid::now_v7(),
             team_id: 1,
             project_id: Some(1),

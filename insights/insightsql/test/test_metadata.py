@@ -1,6 +1,6 @@
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from django.test import override_settings
 
@@ -20,7 +20,7 @@ from insights.models import Cohort, PropertyDefinition
 from products.data_warehouse.backend.models import ExternalDataSource, ExternalDataSourceType
 
 
-class TestMetadata(ClickhouseTestMixin, APIBaseTest):
+class TestMetadata(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _expr(self, query: str, table: str = "events", debug=True) -> InsightsQLMetadataResponse:

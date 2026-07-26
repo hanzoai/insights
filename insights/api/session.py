@@ -18,7 +18,7 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
-from insights.rate_limit import ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle
+from insights.rate_limit import DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle
 from insights.utils import convert_property_value, flatten
 
 tracer = trace.get_tracer(__name__)
@@ -29,7 +29,7 @@ class SessionViewSet(
     viewsets.ViewSet,
 ):
     scope_object = "query"
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     scope_object_read_actions = ["property_definitions", "values"]
 
     @action(methods=["GET"], detail=False)

@@ -186,7 +186,7 @@ class PersonalApiKeyRateThrottle(SimpleRateThrottle):
                 )
                 RATE_LIMIT_BYPASSED_COUNTER.labels(team_id=team_id, path=route, route=route).inc()
 
-                from insights.clickhouse.query_tagging import tag_queries
+                from insights.datastore.query_tagging import tag_queries
 
                 tag_queries(rate_limit_bypass=1)
                 return True
@@ -349,17 +349,17 @@ class SustainedRateThrottle(PersonalApiKeyRateThrottle):
     rate = "4800/hour"
 
 
-class ClickHouseBurstRateThrottle(PersonalApiKeyRateThrottle):
-    # Throttle class that's a bit more aggressive and is used specifically on endpoints that hit ClickHouse
+class DatastoreBurstRateThrottle(PersonalApiKeyRateThrottle):
+    # Throttle class that's a bit more aggressive and is used specifically on endpoints that hit Datastore
     # Intended to block quick bursts of requests, per project
-    scope = "clickhouse_burst"
+    scope = "datastore_burst"
     rate = "240/minute"
 
 
-class ClickHouseSustainedRateThrottle(PersonalApiKeyRateThrottle):
-    # Throttle class that's a bit more aggressive and is used specifically on endpoints that hit ClickHouse
+class DatastoreSustainedRateThrottle(PersonalApiKeyRateThrottle):
+    # Throttle class that's a bit more aggressive and is used specifically on endpoints that hit Datastore
     # Intended to block slower but sustained bursts of requests, per project
-    scope = "clickhouse_sustained"
+    scope = "datastore_sustained"
     rate = "1200/hour"
 
 

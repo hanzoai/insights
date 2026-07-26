@@ -5,10 +5,10 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import skip
 
@@ -71,7 +71,7 @@ def get_actors(
     return response.results
 
 
-class TestFunnelCorrelationActors(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelCorrelationActors(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _setup_basic_test(self):
@@ -258,7 +258,7 @@ class TestFunnelCorrelationActors(ClickhouseTestMixin, APIBaseTest):
 
         self.assertCountEqual([str(val[1]["id"]) for val in serialized_actors], [str(people["user_1"].uuid)])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_funnel_correlation_on_event_with_recordings(self):
         p1 = _create_person(distinct_ids=["user_1"], team=self.team, properties={"foo": "bar"})
@@ -367,7 +367,7 @@ class TestFunnelCorrelationActors(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_funnel_correlation_on_properties_with_recordings(self):
         p1 = _create_person(distinct_ids=["user_1"], team=self.team, properties={"foo": "bar"})
@@ -439,7 +439,7 @@ class TestFunnelCorrelationActors(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     @skip("Works locally and works after you tmate onto github actions and run it, but fails in CI")
     def test_strict_funnel_correlation_with_recordings(self):

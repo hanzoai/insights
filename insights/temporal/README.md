@@ -305,7 +305,7 @@ class HelloWorldWorkflow:
 Like the rest of Insights, logging in Temporal is configured to use [structlog](https://www.structlog.org/en/stable/). In contrast to the rest of Insights, the structlog configuration defined in `insights/temporal/common/logger.py` is more complex as it supports two logging modes:
 
 - Write: Logs are written to stdout. These are logs meant to be ingested by internal logging parsers and monitoring systems.
-- Produce: Logs are produced to Kafka and later consumed by ClickHouse in the `log_entries` table. This enables querying of logs in Insights to, for example, communicate to users directly from a Temporal activity or workflow. As an example of this, check how the batch exports logs tab is used to offer debug information to users to allow them to fix configuration errors.
+- Produce: Logs are produced to Kafka and later consumed by Datastore in the `log_entries` table. This enables querying of logs in Insights to, for example, communicate to users directly from a Temporal activity or workflow. As an example of this, check how the batch exports logs tab is used to offer debug information to users to allow them to fix configuration errors.
 
 By default, the logger you get from `structlog.get_logger` is configured to do both writing and producing.
 

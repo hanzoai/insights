@@ -9,7 +9,7 @@ Regression test for: https://github.com/Hanzo Insights/insights/issues/40577
 """
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from django.test import override_settings
 
@@ -29,7 +29,7 @@ from insights.insightsql_queries.insights.trends.trends_query_runner import Tren
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestTrendsBreakdownEmptyNullProperties(ClickhouseTestMixin, APIBaseTest):
+class TestTrendsBreakdownEmptyNullProperties(DatastoreTestMixin, APIBaseTest):
     """Test breakdown behavior with null, empty string, and missing properties."""
 
     @freeze_time("2024-01-15T12:00:00Z")

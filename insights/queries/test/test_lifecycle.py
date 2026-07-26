@@ -3,10 +3,10 @@ import json
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.constants import FILTER_TEST_ACCOUNTS, TRENDS_LIFECYCLE
@@ -24,7 +24,7 @@ def create_action(**kwargs):
     return action
 
 
-class TestLifecycleBase(ClickhouseTestMixin, APIBaseTest):
+class TestLifecycleBase(DatastoreTestMixin, APIBaseTest):
     def assertLifecycleResults(self, results, expected):
         sorted_results = [
             {"status": r["status"], "data": r["data"]} for r in sorted(results, key=lambda r: r["status"])
@@ -843,7 +843,7 @@ class TestLifecycle(TestLifecycleBase):
             self.team,
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timezones(self):
         self._create_events(
             data=[
@@ -906,7 +906,7 @@ class TestLifecycle(TestLifecycleBase):
         )
 
     # Ensure running the query with sampling works + generate a snapshot that shows sampling in the query
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sampling(self):
         self._create_events(
             data=[

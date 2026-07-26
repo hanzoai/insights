@@ -11,7 +11,7 @@ import temporalio.activity
 import temporalio.workflow
 
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_logger
 from insights.temporal.messaging.backfill_precalculated_person_properties_workflow import (
     BackfillPrecalculatedPersonPropertiesInputs,
@@ -84,7 +84,7 @@ async def get_person_count_activity(
 
     query_params = {"team_id": inputs.team_id}
 
-    # Execute query using async ClickHouse client
+    # Execute query using async Datastore client
     async with get_client(team_id=inputs.team_id) as client:
         response = await client.read_query(query, query_parameters=query_params)
         for line in response.decode("utf-8").splitlines():

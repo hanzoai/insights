@@ -4,14 +4,14 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.models.team import Team
 
 MAX_SEGMENTS_RETURNED = 50_000
 
 
 def count_distinct_persons(team: Team, distinct_ids: list[str]) -> int:
-    """Count unique persons from a list of distinct_ids, using ClickHouse as the source of truth.
+    """Count unique persons from a list of distinct_ids, using Datastore as the source of truth.
 
     (This util should probably be more general than video_segment_clustering, but really unsure what the right place is.)
     """
@@ -33,7 +33,7 @@ def count_distinct_persons(team: Team, distinct_ids: list[str]) -> int:
 
 @sync_to_async
 def fetch_video_segment_metadata_rows(team: Team, lookback_hours: int):
-    """Fetch recent video segment metadata from ClickHouse - just metadata, without embedding vectors."""
+    """Fetch recent video segment metadata from Datastore - just metadata, without embedding vectors."""
     with tags_context(product=Product.SESSION_SUMMARY):
         result = execute_insightsql_query(
             query_type="VideoSegmentMetadataForClustering",
@@ -68,7 +68,7 @@ def fetch_video_segment_metadata_rows(team: Team, lookback_hours: int):
 
 @sync_to_async
 def fetch_video_segment_embedding_rows(team: Team, document_ids: list[str]):
-    """Fetch video segment embeddings from ClickHouse - specific segments, with embedding vectors included."""
+    """Fetch video segment embeddings from Datastore - specific segments, with embedding vectors included."""
     with tags_context(product=Product.SESSION_SUMMARY):
         result = execute_insightsql_query(
             query_type="VideoSegmentEmbeddingsForClustering",

@@ -1404,7 +1404,7 @@ importers:
       '@babel/standalone':
         specifier: ^7.23.2
         version: 7.26.7
-      '@clickhouse/client':
+      '@datastore/client':
         specifier: ^1.12.0
         version: 1.12.0
       '@google-cloud/pubsub':
@@ -4346,10 +4346,10 @@ packages:
   '@cfworker/json-schema@4.1.1':
     resolution: {integrity: sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==}
 
-  '@clickhouse/client-common@1.12.0':
+  '@datastore/client-common@1.12.0':
     resolution: {integrity: sha512-cyI4n7u9jK30d9q1q0ceQ7IwJ/MtTs5HxoQfc8yHpN+ok5wqaU2jAtq5hpa1z7C7sS1pDy/ZOFmOzg1v1F683g==}
 
-  '@clickhouse/client@1.12.0':
+  '@datastore/client@1.12.0':
     resolution: {integrity: sha512-vJUSX8THhTzlVn0WxPukVjOgNRaSoY02ubQkB0LpqNoHFxXuF5jQZZAYvGZWpBGbYQ/4gfPrqu8g4TX5UKeNxA==}
     engines: {node: '>=16'}
 
@@ -24450,11 +24450,11 @@ snapshots:
 
   '@cfworker/json-schema@4.1.1': {}
 
-  '@clickhouse/client-common@1.12.0': {}
+  '@datastore/client-common@1.12.0': {}
 
-  '@clickhouse/client@1.12.0':
+  '@datastore/client@1.12.0':
     dependencies:
-      '@clickhouse/client-common': 1.12.0
+      '@datastore/client-common': 1.12.0
 
   '@cloudflare/ai-chat@0.0.6(agents@0.3.10)(ai@6.0.77(zod@3.25.76))(react@18.3.1)(zod@3.25.76)':
     dependencies:

@@ -20,7 +20,7 @@ from kafka import KafkaConsumer as KC
 from statshog.defaults.django import statsd
 from structlog import get_logger
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.kafka_client import helper
 from insights.utils import SingletonDecorator
 
@@ -527,7 +527,7 @@ def build_kafka_consumer(
     return consumer
 
 
-class ClickhouseProducer:
+class DatastoreProducer:
     producer: Optional[_KafkaProducer]
 
     def __init__(self):

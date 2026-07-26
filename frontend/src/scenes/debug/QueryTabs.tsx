@@ -51,7 +51,7 @@ export function QueryTabs<Q extends Node>({
     onLoadQuery,
 }: QueryTabsProps<Q>): JSX.Element {
     const [tab, setTab] = useState<string | null>(null)
-    const clickHouseTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './clickhouse_execute')?.t ?? 0
+    const clickHouseTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './datastore_execute')?.t ?? 0
     const explainTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './explain')?.t ?? 0
     const totalTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === '.')?.t ?? 0
     const insightsQLTime = totalTime - explainTime - clickHouseTime
@@ -137,11 +137,11 @@ export function QueryTabs<Q extends Node>({
                       />
                   ),
               },
-              response?.clickhouse && {
-                  key: 'clickhouse',
+              response?.datastore && {
+                  key: 'datastore',
                   label: (
                       <>
-                          Clickhouse
+                          Datastore
                           {clickHouseTime && (
                               <LemonTag className="ml-2">{Math.floor(clickHouseTime * 10) / 10}s</LemonTag>
                           )}
@@ -151,7 +151,7 @@ export function QueryTabs<Q extends Node>({
                       <CodeEditor
                           className="border"
                           language="sql"
-                          value={String(response.clickhouse)}
+                          value={String(response.datastore)}
                           height={500}
                           path={`debug/${queryKey}/insightsql.sql`}
                       />

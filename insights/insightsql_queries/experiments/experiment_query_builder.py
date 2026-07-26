@@ -195,7 +195,7 @@ class ExperimentQueryBuilder:
         # For unordered funnels, the UDF does _not_ filter out funnel steps that occur _before_ the
         # exposure event. Thus, we need to filter them out with a left join. An attempt to do this with
         # a window function has been tried, but it failed with a "column not found" issue due to how
-        # InsightsQL rewrites the query and hitting a bug with the ClickHouse analyzer
+        # InsightsQL rewrites the query and hitting a bug with the Datastore analyzer
         if is_unordered_funnel:
             ctes_sql = f"""
                 exposures AS (
@@ -1540,7 +1540,7 @@ class ExperimentQueryBuilder:
 
     def _build_retention_window_interval(self, window_value: int) -> ast.Expr:
         """
-        Converts retention window value to ClickHouse interval expression.
+        Converts retention window value to Datastore interval expression.
         """
         assert isinstance(self.metric, ExperimentRetentionMetric)
 
@@ -1680,7 +1680,7 @@ class ExperimentQueryBuilder:
 
 def _optimize_and_chain(expr: ast.Expr) -> ast.Expr:
     """
-    Remove True constants from AND chains to preserve ClickHouse index optimizations.
+    Remove True constants from AND chains to preserve Datastore index optimizations.
     Keeps SQL templates readable while avoiding unnecessary conditions.
     """
     if not isinstance(expr, ast.And):

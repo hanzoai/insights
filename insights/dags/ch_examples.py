@@ -1,14 +1,14 @@
 import dagster
 
-from insights.clickhouse.client import sync_execute  # noqa
+from insights.datastore.client import sync_execute  # noqa
 
 
-class ClickHouseConfig(dagster.Config):
-    result_path: str = "/tmp/clickhouse_version.txt"
+class DatastoreConfig(dagster.Config):
+    result_path: str = "/tmp/datastore_version.txt"
 
 
 @dagster.asset
-def get_clickhouse_version(config: ClickHouseConfig) -> dagster.MaterializeResult:
+def get_datastore_version(config: DatastoreConfig) -> dagster.MaterializeResult:
     version = sync_execute("SELECT version()")[0][0]
     with open(config.result_path, "w") as f:
         f.write(version)
@@ -16,8 +16,8 @@ def get_clickhouse_version(config: ClickHouseConfig) -> dagster.MaterializeResul
     return dagster.MaterializeResult(metadata={"version": version})
 
 
-@dagster.asset(deps=[get_clickhouse_version])
-def print_clickhouse_version(config: ClickHouseConfig):
+@dagster.asset(deps=[get_datastore_version])
+def print_datastore_version(config: DatastoreConfig):
     with open(config.result_path) as f:
         print(f.read())  # noqa
 

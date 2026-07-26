@@ -12,7 +12,7 @@ type ConstantSupportedData = (
     ConstantSupportedPrimitive | list[ConstantSupportedPrimitive] | tuple[ConstantSupportedPrimitive, ...]
 )
 
-# Keywords passed to ClickHouse without transformation
+# Keywords passed to Datastore without transformation
 KEYWORDS = ["true", "false", "null"]
 
 # Keywords you can't alias to
@@ -46,7 +46,7 @@ BREAKDOWN_VALUES_LIMIT = 25
 BREAKDOWN_VALUES_LIMIT_FOR_COUNTRIES = 300
 BREAKDOWN_VALUE_MAX_LENGTH = 400
 
-type InsightsQLDialect = Literal["insightsql", "clickhouse", "postgres"]
+type InsightsQLDialect = Literal["insightsql", "datastore", "postgres"]
 
 type InsightsQLParserBackend = Literal["python", "cpp-json"]
 

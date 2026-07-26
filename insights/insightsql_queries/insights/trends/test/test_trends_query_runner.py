@@ -10,7 +10,7 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
@@ -59,7 +59,7 @@ from insights.insightsql.constants import MAX_SELECT_RETURNED_ROWS, LimitContext
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.insights.trends.breakdown import (
     BREAKDOWN_NULL_DISPLAY,
     BREAKDOWN_NULL_STRING_LABEL,
@@ -99,7 +99,7 @@ class SeriesTestData:
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestTrendsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     default_date_from = "2020-01-09"

@@ -21,7 +21,7 @@ APP_METRICS2_FIELDS: dict[str, FieldOrTable] = {
 class AppMetrics2Table(Table):
     fields: dict[str, FieldOrTable] = APP_METRICS2_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "app_metrics2"
 
     def to_printed_insightsql(self):

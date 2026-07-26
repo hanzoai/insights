@@ -3,17 +3,17 @@ import os
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 
-MIGRATION_PATH = "ee/clickhouse/migrations"
+MIGRATION_PATH = "ee/datastore/migrations"
 
 FILE_DEFAULT = """
-from infi.clickhouse_orm import migrations # type: ignore
+from datastore_orm import migrations # type: ignore
 operations = []
 """
 
 
 # ex: python manage.py create_ch_migration <name of migration>
 class Command(BaseCommand):
-    help = "Create blank clickhouse migration"
+    help = "Create blank datastore migration"
 
     def add_arguments(self, parser):
         parser.add_argument("--name", type=str)

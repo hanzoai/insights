@@ -4,7 +4,7 @@ from unittest import mock
 
 import dagster
 
-from insights.clickhouse.cluster import ClickhouseCluster, Query
+from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.distinct_id_usage import (
     BurstEvent,
     DistinctIdUsageMonitoringConfig,
@@ -189,7 +189,7 @@ class TestSendAlerts:
         mock_slack.get_client.assert_not_called()
 
 
-def test_query_distinct_id_usage(cluster: ClickhouseCluster) -> None:
+def test_query_distinct_id_usage(cluster: DatastoreCluster) -> None:
     """Integration test for the query_distinct_id_usage op."""
     now = datetime.now(tz=UTC).replace(second=0, microsecond=0)
 

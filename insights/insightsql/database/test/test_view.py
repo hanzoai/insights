@@ -61,7 +61,7 @@ class TestView(BaseTest):
             modifiers=create_default_modifiers_for_team(self.team),
         )
 
-    def _select(self, query: str, dialect: Literal["clickhouse", "insightsql"] = "clickhouse") -> str:
+    def _select(self, query: str, dialect: Literal["datastore", "insightsql"] = "datastore") -> str:
         return prepare_and_print_ast(parse_select(query), self.context, dialect=dialect)[0]
 
     def test_view_table_select(self):
@@ -75,10 +75,10 @@ class TestView(BaseTest):
                 "SELECT Date, Open, High, Low, Close, Volume, OpenInt FROM aapl_stock LIMIT 10",
             )
 
-            clickhouse = self._select(query="SELECT * FROM aapl_stock_view LIMIT 10", dialect="clickhouse")
+            datastore = self._select(query="SELECT * FROM aapl_stock_view LIMIT 10", dialect="datastore")
 
             self.assertEqual(
-                clickhouse,
+                datastore,
                 "SELECT aapl_stock_view.Date AS Date, aapl_stock_view.Open AS Open, aapl_stock_view.High AS High, "
                 "aapl_stock_view.Low AS Low, aapl_stock_view.Close AS Close, aapl_stock_view.Volume AS Volume, "
                 "aapl_stock_view.OpenInt AS OpenInt FROM (SELECT aapl_stock.Date AS Date, aapl_stock.Open AS Open, "
@@ -98,12 +98,12 @@ class TestView(BaseTest):
                 "SELECT Date, Open, High, Low, Close, Volume, OpenInt FROM aapl_stock LIMIT 10",
             )
 
-            clickhouse = self._select(
+            datastore = self._select(
                 query="SELECT * FROM aapl_stock_view AS some_alias LIMIT 10",
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
             self.assertEqual(
-                clickhouse,
+                datastore,
                 "SELECT some_alias.Date AS Date, some_alias.Open AS Open, some_alias.High AS High, some_alias.Low AS Low, some_alias.Close AS Close, some_alias.Volume AS Volume, some_alias.OpenInt AS OpenInt FROM (SELECT aapl_stock.Date AS Date, aapl_stock.Open AS Open, aapl_stock.High AS High, aapl_stock.Low AS Low, aapl_stock.Close AS Close, aapl_stock.Volume AS Volume, aapl_stock.OpenInt AS OpenInt FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s) AS aapl_stock) AS some_alias LIMIT 10",
             )

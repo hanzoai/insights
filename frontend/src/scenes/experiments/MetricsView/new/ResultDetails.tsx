@@ -102,14 +102,14 @@ function convertExperimentResultToFunnelSteps(
 
 function SqlCollapsible({
     insightsql,
-    clickhouseSql,
-    showClickhouseSql,
+    datastoreSql,
+    showDatastoreSql,
 }: {
     insightsql?: string
-    clickhouseSql?: string
-    showClickhouseSql: boolean
+    datastoreSql?: string
+    showDatastoreSql: boolean
 }): JSX.Element {
-    const [activeTab, setActiveTab] = useState<'insightsql' | 'clickhouse'>('insightsql')
+    const [activeTab, setActiveTab] = useState<'insightsql' | 'datastore'>('insightsql')
 
     return (
         <LemonCollapse
@@ -117,7 +117,7 @@ function SqlCollapsible({
                 {
                     key: 'sql',
                     header: 'SQL',
-                    content: showClickhouseSql ? (
+                    content: showDatastoreSql ? (
                         <LemonTabs
                             activeKey={activeTab}
                             onChange={setActiveTab}
@@ -134,11 +134,11 @@ function SqlCollapsible({
                                     ),
                                 },
                                 {
-                                    key: 'clickhouse',
-                                    label: 'ClickHouse',
-                                    content: clickhouseSql ? (
+                                    key: 'datastore',
+                                    label: 'Datastore',
+                                    content: datastoreSql ? (
                                         <CodeSnippet language={Language.SQL} thing="query" className="text-sm">
-                                            {clickhouseSql}
+                                            {datastoreSql}
                                         </CodeSnippet>
                                     ) : (
                                         <div className="text-muted">No SQL available</div>
@@ -304,8 +304,8 @@ export function ResultDetails({
             )}
             <SqlCollapsible
                 insightsql={result.insightsql}
-                clickhouseSql={result.clickhouse_sql}
-                showClickhouseSql={!!featureFlags[FEATURE_FLAGS.EXPERIMENTS_SHOW_SQL]}
+                datastoreSql={result.datastore_sql}
+                showDatastoreSql={!!featureFlags[FEATURE_FLAGS.EXPERIMENTS_SHOW_SQL]}
             />
         </div>
     )
