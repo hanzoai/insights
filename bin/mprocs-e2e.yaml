@@ -9,7 +9,7 @@ procs:
         shell: 'uv sync --active && bin/wait-for-docker && ./bin/start-backend'
         env:
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights_e2e_test'
-            CLICKHOUSE_DATABASE: 'insights_test'
+            DATASTORE_DATABASE: 'insights_test'
             CLOUD_DEPLOYMENT: 'E2E'
             SECRET_KEY: 'e2e_test'
             SECURE_COOKIES: '0'
@@ -21,7 +21,7 @@ procs:
         shell: 'uv sync --active && bin/wait-for-docker && ./bin/start-celery worker'
         env:
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights_e2e_test'
-            CLICKHOUSE_DATABASE: 'insights_test'
+            DATASTORE_DATABASE: 'insights_test'
             CLOUD_DEPLOYMENT: 'E2E'
             SECRET_KEY: 'e2e_test'
             SECURE_COOKIES: '0'
@@ -60,7 +60,7 @@ procs:
             PGUSER: 'insights'
             PGPASSWORD: 'insights'
             DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights_e2e_test'
-            CLICKHOUSE_DATABASE: 'insights_test'
+            DATASTORE_DATABASE: 'insights_test'
             CLOUD_DEPLOYMENT: 'E2E'
             SECRET_KEY: 'e2e_test'
             DEBUG: '1'
