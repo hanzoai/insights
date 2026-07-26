@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, Mock, patch
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from opentelemetry.trace import Status, StatusCode
 
 from insights.datastore.client.connection import DatastoreUser, Workload

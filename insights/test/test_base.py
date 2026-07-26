@@ -1,7 +1,7 @@
 import pytest
 from insights.test.base import run_datastore_statement_in_parallel
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 
 
 def test_run_datastore_statement_in_parallel_propagates_errors():

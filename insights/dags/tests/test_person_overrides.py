@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 import dagster
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.person_overrides import (

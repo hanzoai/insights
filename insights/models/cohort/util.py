@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils import timezone
 
 import structlog
-from clickhouse_driver.errors import SocketTimeoutError
+from datastore_driver.errors import SocketTimeoutError
 from dateutil import parser
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework.exceptions import ValidationError

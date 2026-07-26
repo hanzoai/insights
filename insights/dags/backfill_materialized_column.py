@@ -6,7 +6,7 @@ from typing import ClassVar, TypeVar, cast
 
 import dagster
 import pydantic
-from clickhouse_driver import Client
+from datastore_driver import Client
 from dateutil.relativedelta import relativedelta
 
 from insights import settings

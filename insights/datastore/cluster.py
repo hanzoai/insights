@@ -12,8 +12,8 @@ from dataclasses import dataclass, field
 from typing import Any, Generic, Literal, NamedTuple, Optional, TypeVar
 
 import dagster
-from clickhouse_driver import Client
-from clickhouse_pool import ChPool
+from datastore_driver import Client
+from datastore_pool import ChPool
 
 from insights import settings
 from insights.datastore.client.connection import NodeRole, Workload, _make_ch_pool, default_client

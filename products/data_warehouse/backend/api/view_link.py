@@ -1,6 +1,6 @@
 from typing import Optional
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from rest_framework import filters, response, serializers, status, viewsets
 
 from insights.insightsql import ast

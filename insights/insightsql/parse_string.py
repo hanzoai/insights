@@ -4,7 +4,7 @@ from insights.insightsql.errors import SyntaxError
 
 
 def replace_common_escape_characters(text):
-    # copied from clickhouse_driver/util/escape.py
+    # copied from datastore_driver/util/escape.py
     text = text.replace("\\b", "\b")
     text = text.replace("\\f", "\f")
     text = text.replace("\\r", "\r")
