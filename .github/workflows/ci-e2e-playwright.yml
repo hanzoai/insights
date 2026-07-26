@@ -36,10 +36,10 @@ env:
     GITHUB_ACTION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     CELERY_METRICS_PORT: 8999
     CLOUD_DEPLOYMENT: E2E
-    CLICKHOUSE_HOST: 'localhost'
-    CLICKHOUSE_SECURE: 'False'
-    CLICKHOUSE_VERIFY: 'False'
-    CLICKHOUSE_DATABASE: insights_test
+    DATASTORE_HOST: 'localhost'
+    DATASTORE_SECURE: 'False'
+    DATASTORE_VERIFY: 'False'
+    DATASTORE_DATABASE: insights_test
     PGHOST: localhost
     PGUSER: insights
     PGPASSWORD: insights
