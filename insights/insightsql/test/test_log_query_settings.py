@@ -1,7 +1,7 @@
 import pytest
 from insights.test.base import APIBaseTest, DatastoreTestMixin
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 
 from insights.insightsql.constants import InsightsQLGlobalSettings
 from insights.insightsql.errors import QueryError

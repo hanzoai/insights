@@ -11,7 +11,7 @@ from django.utils import timezone
 
 import dagster
 import pydantic
-from clickhouse_driver.client import Client
+from datastore_driver.client import Client
 from more_itertools import chunked
 
 from insights.datastore.adhoc_events_deletion import ADHOC_EVENTS_DELETION_TABLE

@@ -2,7 +2,7 @@ import logging
 from functools import cache
 from typing import Optional
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from datastore_orm import migrations
 
 from insights import settings

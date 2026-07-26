@@ -15,7 +15,7 @@ from django.utils import timezone as django_timezone
 
 import redis as redis_lib
 import structlog
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 
 from insights.insightsql import ast
 from insights.insightsql.constants import InsightsQLQuerySettings

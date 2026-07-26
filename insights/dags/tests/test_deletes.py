@@ -5,7 +5,7 @@ from uuid import UUID
 import pytest
 from freezegun import freeze_time
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.deletes import (

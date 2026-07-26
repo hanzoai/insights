@@ -9,7 +9,7 @@ from django.conf import settings
 
 import dagster
 import pydantic
-from clickhouse_driver import Client
+from datastore_driver import Client
 from dagster_aws.s3 import S3Resource
 
 from insights.datastore.client.connection import NodeRole, Workload

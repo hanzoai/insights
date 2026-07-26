@@ -23,9 +23,9 @@
 
 from typing import Any
 
-from clickhouse_driver.connection import ServerInfo
-from clickhouse_driver.context import Context
-from clickhouse_driver.util.escape import escape_param
+from datastore_driver.connection import ServerInfo
+from datastore_driver.context import Context
+from datastore_driver.util.escape import escape_param
 
 
 def substitute_params(query, params):
@@ -41,7 +41,7 @@ def substitute_params(query, params):
     and remove that dependency.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/clickhouse_driver/client.py#L593
+    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/client.py#L593
     for the original function.
     """
     if not isinstance(params, dict):
@@ -58,7 +58,7 @@ def escape_params(params):
     params.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/clickhouse_driver/util/escape.py#L60
+    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L60
     for the original function.
     """
     escaped = {}
@@ -78,7 +78,7 @@ def escape_param_for_datastore(param: Any) -> str:
     is UTC.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/clickhouse_driver/util/escape.py#L31
+    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L31
     for the wrapped function.
     """
     context = Context()

@@ -8,7 +8,7 @@ from unittest.mock import patch
 from django.db import IntegrityError
 from django.utils import timezone as django_timezone
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 from parameterized import parameterized
 
 from insights.schema import BaseMathType, DateRange, EventsNode, InsightsQLQueryModifiers, TrendsQuery
