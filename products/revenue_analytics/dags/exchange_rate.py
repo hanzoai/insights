@@ -4,7 +4,7 @@ from typing import Any
 
 import dagster
 import requests
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, settings_with_log_comment

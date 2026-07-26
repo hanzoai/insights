@@ -1,6 +1,6 @@
 from typing import Any
 
-from clickhouse_driver.errors import SocketTimeoutError
+from datastore_driver.errors import SocketTimeoutError
 from prometheus_client import Counter
 
 from insights.datastore.client import sync_execute

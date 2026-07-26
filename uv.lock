@@ -889,69 +889,6 @@ wheels = [
 ]
 
 [[package]]
-name = "clickhouse-connect"
-version = "0.8.17"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "certifi" },
-    { name = "lz4" },
-    { name = "pytz" },
-    { name = "urllib3" },
-    { name = "zstandard" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/c2/e46db00486e02007551ff9ba8880ebee9f6d564b26b9323bc9f83f961849/clickhouse_connect-0.8.17.tar.gz", hash = "sha256:16405a37f8229a83956fbc372598d03b876537ee3acf2a5ad2f660336879b3fa", size = 91247, upload-time = "2025-04-12T22:56:10.889Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/18/da233967602118f985088ae29ed7fa8b24a6893178ccce35ff6b09261606/clickhouse_connect-0.8.17-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:ca0a9d39af57c269f2c26a3142ca31812bde82a5a176d89c2ee1b9500d1e471d", size = 262090, upload-time = "2025-04-12T22:54:53.689Z" },
-    { url = "https://files.pythonhosted.org/packages/61/cf/9a2efb2cc72bb2312bc3ca5464239b31388c537aef60278cbfbf8a0134ff/clickhouse_connect-0.8.17-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:cac30623ed9ca51c3619751b23567901e8a85025e8c4fde11dc64292f68a3dee", size = 253789, upload-time = "2025-04-12T22:54:54.798Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/75/7b083fcbc9e5b4e92a56c08a5eb943412d1a6e5c01b137bd62e06d56525d/clickhouse_connect-0.8.17-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6e0f7f3dde0c9ffae210a402574bb3ea30a9fef1b6d1fbc81d95e67a8ac7799d", size = 1058039, upload-time = "2025-04-12T22:54:56.062Z" },
-    { url = "https://files.pythonhosted.org/packages/1a/58/339bd60c3d0a16eb793badd6a67bfdcbc13c10b0232ea7e6feae2390ba10/clickhouse_connect-0.8.17-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3a85d11ff8d115a707ee91c86b96ef1d8e92e2c34ab3f3ce41241ec0ebae78d5", size = 1076405, upload-time = "2025-04-12T22:54:57.33Z" },
-    { url = "https://files.pythonhosted.org/packages/dd/e8/26dac5044f197f985c52263861f6771c39449e642fcad83374dbce1c70b0/clickhouse_connect-0.8.17-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:32cfe3a81b8b3d58af62948c0cdfd3fe0aaab6e35299ddfe6a556c9c3c00c37d", size = 1031665, upload-time = "2025-04-12T22:54:58.675Z" },
-    { url = "https://files.pythonhosted.org/packages/81/39/dd7977f111e77f16a4d7e7249104ef9a4a7c86c0569a3b792352c560a15e/clickhouse_connect-0.8.17-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:ba1e360fa7a28f6dcfa584c82e0a03db26a71e91e14c115a2d70603eea43cbac", size = 1057311, upload-time = "2025-04-12T22:55:00.028Z" },
-    { url = "https://files.pythonhosted.org/packages/3d/68/a46278e295658cc508ffc33b008491a8e14d85ebd60873167aaf0f8c9cc1/clickhouse_connect-0.8.17-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:4ea849c2dcb1712fd209d8b58fe3fcf016b65b30ff6aadae444194f470bbd800", size = 1073995, upload-time = "2025-04-12T22:55:01.798Z" },
-    { url = "https://files.pythonhosted.org/packages/12/9e/095de494d63ebf0f90369b4f3ef9c50de0488a0e2771e84aa767ee99f743/clickhouse_connect-0.8.17-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:d0a34eb004e0dcbc1583d4fc31918e665794cdcc242150f1e699c75a7aa46b7d", size = 1099316, upload-time = "2025-04-12T22:55:03.566Z" },
-    { url = "https://files.pythonhosted.org/packages/87/35/3c1335dab9184985b5e73b6f31dda60ba56ab7d05b6c43bf89339eda031b/clickhouse_connect-0.8.17-cp312-cp312-win32.whl", hash = "sha256:b77f5c8aca4d7ed87649afbda1eea62cd16406c74029e85f28512b24c2165106", size = 229349, upload-time = "2025-04-12T22:55:04.837Z" },
-    { url = "https://files.pythonhosted.org/packages/10/3c/e507a6bd392c6618c90deb634a7447a9e11af41dc66e9f141c117d8de232/clickhouse_connect-0.8.17-cp312-cp312-win_amd64.whl", hash = "sha256:01903b8989afc3cf60f959695d56e38c20033a3dbb88aae42af857eb16e028b0", size = 247420, upload-time = "2025-04-12T22:55:06.022Z" },
-]
-
-[[package]]
-name = "clickhouse-driver"
-version = "0.2.9"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pytz" },
-    { name = "tzlocal" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/bf/0b/3790274f7591fc55b1f91bcc8e576338859cc632b1b17288b5bab79b769d/clickhouse-driver-0.2.9.tar.gz", hash = "sha256:050ea4870ead993910b39e7fae965dc1c347b2e8191dcd977cd4b385f9e19f87", size = 357752, upload-time = "2024-08-16T18:08:28.116Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/58/acc74be412330aa4d681df2d13e013e84e27cc767dea73a507cb71c74cff/clickhouse_driver-0.2.9-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:fcb2fd00e58650ae206a6d5dbc83117240e622471aa5124733fbf2805eb8bda0", size = 221487, upload-time = "2024-08-16T18:04:25.61Z" },
-    { url = "https://files.pythonhosted.org/packages/f5/bc/09b69a1be0155e02a0df9ecafb63c9a2f7d9e412c865dd3c711e07967e85/clickhouse_driver-0.2.9-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b7a3e6b0a1eb218e3d870a94c76daaf65da46dca8f6888ea6542f94905c24d88", size = 217362, upload-time = "2024-08-16T18:04:27.565Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/58/79eadc238d6ee0d7920ae36f0ea3a6479a8310bffb6c97ea6aa060a98434/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4a8d8e2888a857d8db3d98765a5ad23ab561241feaef68bbffc5a0bd9c142342", size = 1018173, upload-time = "2024-08-16T18:04:31.052Z" },
-    { url = "https://files.pythonhosted.org/packages/44/61/1647a0d8aae2c4a3d8c3093d1799f943ff38a0cb81d5e4050be18993f3fa/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:85d50c011467f5ff6772c4059345968b854b72e07a0219030b7c3f68419eb7f7", size = 1046542, upload-time = "2024-08-16T18:04:34.75Z" },
-    { url = "https://files.pythonhosted.org/packages/77/23/32bab0efeec64d56313b90c73d067440829630f9a5980de73cb52350a4c9/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:93b395c1370629ccce8fb3e14cd5be2646d227bd32018c21f753c543e9a7e96b", size = 1057508, upload-time = "2024-08-16T18:04:38.81Z" },
-    { url = "https://files.pythonhosted.org/packages/07/8e/9b79fd85d28a9e83b87a8722a8e736d69ef5edde8cee5d1dde6950aa512f/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6dbcee870c60d9835e5dce1456ab6b9d807e6669246357f4b321ef747b90fa43", size = 1032860, upload-time = "2024-08-16T18:04:43.152Z" },
-    { url = "https://files.pythonhosted.org/packages/bd/ca/208358dd8d80a25633b5f19a9acadb1fb23b55be7f2123e5e70d132de204/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fffa5a5f317b1ec92e406a30a008929054cf3164d2324a3c465d0a0330273bf8", size = 984133, upload-time = "2024-08-16T18:04:47.357Z" },
-    { url = "https://files.pythonhosted.org/packages/19/e1/9767cea5bfc9451b7a2680d5b0d4bd3261c56db92002f90ce716209f59c1/clickhouse_driver-0.2.9-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:476702740a279744badbd177ae1c4a2d089ec128bd676861219d1f92078e4530", size = 1020897, upload-time = "2024-08-16T18:04:50.27Z" },
-    { url = "https://files.pythonhosted.org/packages/f5/bc/62511b61fbee97c8ab1c64ab4bf33045bcc132d236e61a65831c0de32b82/clickhouse_driver-0.2.9-cp312-cp312-musllinux_1_1_i686.whl", hash = "sha256:5cd6d95fab5ff80e9dc9baedc9a926f62f74072d42d5804388d63b63bec0bb63", size = 989911, upload-time = "2024-08-16T18:04:53.191Z" },
-    { url = "https://files.pythonhosted.org/packages/a0/a8/e3ff5cbc24dbc087acf0733c47fe7a6a6a2f3225e9c168af2414fb803f3c/clickhouse_driver-0.2.9-cp312-cp312-musllinux_1_1_ppc64le.whl", hash = "sha256:05027d32d7cf3e46cb8d04f8c984745ae01bd1bc7b3579f9dadf9b3cca735697", size = 1045389, upload-time = "2024-08-16T18:04:56.183Z" },
-    { url = "https://files.pythonhosted.org/packages/d6/58/29f56e340094cfec72080773e3d94c7963c2e69f70edff83f2a139965d38/clickhouse_driver-0.2.9-cp312-cp312-musllinux_1_1_s390x.whl", hash = "sha256:3d11831842250b4c1b26503a6e9c511fc03db096608b7c6af743818c421a3032", size = 1063242, upload-time = "2024-08-16T18:04:59.452Z" },
-    { url = "https://files.pythonhosted.org/packages/ff/0f/161626812ad2bd9480ff390a96489983709d94b33da68f028ace9d1367be/clickhouse_driver-0.2.9-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:81b4b671b785ebb0b8aeabf2432e47072413d81db959eb8cfd8b6ab58c5799c6", size = 1039703, upload-time = "2024-08-16T18:05:03.04Z" },
-    { url = "https://files.pythonhosted.org/packages/4a/29/e353c4e835d722b4f6b259d668c2ac47f35bf6a0053414a80522df649ff5/clickhouse_driver-0.2.9-cp312-cp312-win32.whl", hash = "sha256:e893bd4e014877174a59e032b0e99809c95ec61328a0e6bd9352c74a2f6111a8", size = 198390, upload-time = "2024-08-16T18:05:05.175Z" },
-    { url = "https://files.pythonhosted.org/packages/5b/09/ff81e99e9ecbb85f2ada57a690b1d0cfee6f2e1eff59ee08609a160d5644/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl", hash = "sha256:de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18", size = 213585, upload-time = "2024-08-16T18:05:06.981Z" },
-]
-
-[[package]]
-name = "clickhouse-pool"
-version = "0.5.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "clickhouse-driver" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/64/f6/35d4a54bb59a43b676db6bdfd0293b09f6651d03f1a44e8e51192875ac14/clickhouse-pool-0.5.3.tar.gz", hash = "sha256:a20387abc009b74ae11abcc367c94082d9e4c28bf03a09528502347c8603013a", size = 3377, upload-time = "2021-06-11T17:52:58.275Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/00/ec/5acf32a8fc329adc3bd94f32aa2480ea97ac0058e94d2c262ece3782dfa7/clickhouse_pool-0.5.3-py3-none-any.whl", hash = "sha256:a4cdfb2e0a338672086e3ff7694d7ca40020e29a3f1ed9a5bb18c71719e2f561", size = 3939, upload-time = "2021-06-11T17:52:59.522Z" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1457,6 +1394,27 @@ wheels = [
 ]
 
 [[package]]
+name = "datastore-connect"
+version = "0.8.17"
+source = { git = "https://github.com/hanzo-ds/connect?rev=ccbd4b5#ccbd4b59243f3e2b67f62d3c454320ba653ffded" }
+dependencies = [
+    { name = "certifi" },
+    { name = "lz4" },
+    { name = "pytz" },
+    { name = "urllib3" },
+    { name = "zstandard" },
+]
+
+[[package]]
+name = "datastore-driver"
+version = "0.2.9"
+source = { git = "https://github.com/hanzo-ds/driver?rev=119df3f#119df3f1fac4dca3560ea90a85f7365aa0fa7fd4" }
+dependencies = [
+    { name = "pytz" },
+    { name = "tzlocal" },
+]
+
+[[package]]
 name = "datastore-orm"
 version = "2.1.0.post20"
 source = { git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=1f0e0070a7a99a43875ff2176ef8968da974fd0e#1f0e0070a7a99a43875ff2176ef8968da974fd0e" }
@@ -1465,6 +1423,14 @@ dependencies = [
     { name = "pytz" },
     { name = "requests" },
     { name = "setuptools" },
+]
+
+[[package]]
+name = "datastore-pool"
+version = "0.5.3"
+source = { git = "https://github.com/hanzo-ds/pool?rev=7260d56#7260d56928f1ca8588010e829615f9cfe5ed521c" }
+dependencies = [
+    { name = "datastore-driver" },
 ]
 
 [[package]]
@@ -3004,9 +2970,6 @@ dependencies = [
     { name = "chdb" },
     { name = "claude-code-sdk" },
     { name = "click" },
-    { name = "clickhouse-connect" },
-    { name = "clickhouse-driver" },
-    { name = "clickhouse-pool" },
     { name = "conditional-cache" },
     { name = "confluent-kafka" },
     { name = "cryptography" },
@@ -3023,7 +2986,10 @@ dependencies = [
     { name = "dagster-webserver" },
     { name = "databricks-sdk" },
     { name = "databricks-sql-connector" },
+    { name = "datastore-connect" },
+    { name = "datastore-driver" },
     { name = "datastore-orm" },
+    { name = "datastore-pool" },
     { name = "defusedxml" },
     { name = "deltalake", extra = ["pyarrow"] },
     { name = "disposable-email-domains" },
@@ -3269,9 +3235,6 @@ requires-dist = [
     { name = "chdb", specifier = "==3.3.0" },
     { name = "claude-code-sdk", specifier = "~=0.0.14" },
     { name = "click", specifier = "~=8.0" },
-    { name = "clickhouse-connect", specifier = "==0.8.17" },
-    { name = "clickhouse-driver", specifier = "==0.2.9" },
-    { name = "clickhouse-pool", specifier = "==0.5.3" },
     { name = "conditional-cache", specifier = "==1.2" },
     { name = "confluent-kafka", specifier = ">=2.13.0" },
     { name = "cryptography", specifier = "==46.0.5" },
@@ -3288,7 +3251,10 @@ requires-dist = [
     { name = "dagster-webserver", specifier = "==1.10.18" },
     { name = "databricks-sdk", specifier = "~=0.67.0" },
     { name = "databricks-sql-connector", specifier = "~=4.1.3" },
+    { name = "datastore-connect", git = "https://github.com/hanzo-ds/connect?rev=ccbd4b5" },
+    { name = "datastore-driver", git = "https://github.com/hanzo-ds/driver?rev=119df3f" },
     { name = "datastore-orm", git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=1f0e0070a7a99a43875ff2176ef8968da974fd0e" },
+    { name = "datastore-pool", git = "https://github.com/hanzo-ds/pool?rev=7260d56" },
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "deltalake", extras = ["pyarrow"], specifier = "==1.4.0" },
     { name = "disposable-email-domains", specifier = "~=0.0.140" },

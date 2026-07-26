@@ -22,9 +22,9 @@ dependencies = [
     "celery==5.3.6",
     "celery-redbeat==2.1.1",
     "certifi==2026.1.4",
-    "clickhouse-connect==0.8.17",
-    "clickhouse-driver==0.2.9",
-    "clickhouse-pool==0.5.3",
+    "datastore-connect",
+    "datastore-driver",
+    "datastore-pool",
     "conditional-cache==1.2",
     "cryptography==46.0.5",
     "dagster==1.10.18",
@@ -280,6 +280,9 @@ required-version = "~=0.10.2"
 
 [tool.uv.sources]
 datastore-orm = { git = "https://github.com/hanzoai/infi.clickhouse_orm", rev = "1f0e0070a7a99a43875ff2176ef8968da974fd0e" }
+datastore-driver = { git = "https://github.com/hanzo-ds/driver", rev = "119df3f" }
+datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b5" }
+datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
 insightsql-parser = { path = "common/insightsql_parser" }
 hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }
 

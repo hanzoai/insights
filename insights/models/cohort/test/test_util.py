@@ -1,7 +1,7 @@
 from insights.test.base import BaseTest, _create_person, flush_persons_and_events
 from unittest.mock import MagicMock, patch
 
-from clickhouse_driver.errors import SocketTimeoutError
+from datastore_driver.errors import SocketTimeoutError
 from parameterized import parameterized
 from pydantic import (
     BaseModel,

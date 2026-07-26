@@ -1,7 +1,7 @@
 import os
 
 import dagster
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.client import sync_execute
 from insights.datastore.cluster import DatastoreCluster

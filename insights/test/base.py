@@ -29,7 +29,7 @@ from django.test.utils import CaptureQueriesContext
 # freezegun.FakeDateTime and pendulum don't play nicely otherwise
 import pendulum  # noqa F401
 import sqlparse
-from clickhouse_pool.pool import TooManyConnections
+from datastore_pool.pool import TooManyConnections
 from rest_framework.test import APITestCase as DRFTestCase
 from syrupy.extensions.amber import AmberSnapshotExtension
 
