@@ -11,7 +11,7 @@ from typing import Any, Optional, Union
 from django.conf import settings as app_settings
 
 import sqlparse
-from clickhouse_driver import Client as SyncClient
+from datastore_driver import Client as SyncClient
 from opentelemetry import trace
 from prometheus_client import Counter
 
@@ -373,7 +373,7 @@ def _prepare_query(
     do it manually.
 
     We only want to try to substitue for SELECT queries, which
-    clickhouse_driver at this moment in time decides based on the
+    datastore_driver at this moment in time decides based on the
     below predicate.
     """
     prepared_args: Optional[QueryArgs] = None

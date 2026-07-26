@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights import settings
 from insights.datastore.cluster import AlterTableMutationRunner, LightweightDeleteMutationRunner

@@ -1,7 +1,7 @@
 from typing import Literal
 
 import dagster
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners

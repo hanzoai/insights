@@ -40,8 +40,8 @@ from django.utils import timezone
 
 import duckdb
 import structlog
-from clickhouse_driver import Client
-from clickhouse_driver.errors import Error as DatastoreError
+from datastore_driver import Client
+from datastore_driver.errors import Error as DatastoreError
 from dagster import (
     AssetExecutionContext,
     Config,

@@ -12,7 +12,7 @@ import requests
 import tenacity
 import psycopg2.extras
 import hanzo_insights
-from clickhouse_driver.errors import Error, ErrorCodes
+from datastore_driver.errors import Error, ErrorCodes
 
 from insights.datastore.cluster import DatastoreCluster, ExponentialBackoff, RetryPolicy, get_cluster
 from insights.kafka_client.client import _KafkaProducer

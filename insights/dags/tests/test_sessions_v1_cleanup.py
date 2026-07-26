@@ -4,7 +4,7 @@ from functools import partial
 
 import pytest
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.sessions_v1_cleanup import sessions_v1_cleanup_job

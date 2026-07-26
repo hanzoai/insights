@@ -9,7 +9,7 @@ from insights.insightsql.errors import QueryError, ResolutionError
 
 from insights.models.utils import UUIDT
 
-# Copied from clickhouse_driver.util.escape, adapted only from single quotes to backquotes.
+# Copied from datastore_driver.util.escape, adapted only from single quotes to backquotes.
 escape_chars_map = {
     "\b": "\\b",
     "\f": "\\f",
@@ -32,12 +32,12 @@ def safe_identifier(identifier: str) -> str:
     return identifier
 
 
-# Copied from clickhouse_driver.util.escape_param
+# Copied from datastore_driver.util.escape_param
 def escape_param_datastore(value: str) -> str:
     return "'{}'".format("".join(singlequote_escape_chars_map.get(c, c) for c in str(value)))
 
 
-# Copied from clickhouse_driver.util.escape, adapted from single quotes to backquotes. Added a $.
+# Copied from datastore_driver.util.escape, adapted from single quotes to backquotes. Added a $.
 def escape_insightsql_identifier(identifier: str | int) -> str:
     if isinstance(identifier, int):  # In InsightsQL we allow integers as identifiers to access array elements
         return str(identifier)
@@ -170,7 +170,7 @@ def escape_postgres_identifier(v: str) -> str:
     return '"' + v.replace('"', '""') + '"'
 
 
-# Copied from clickhouse_driver.util.escape, adapted from single quotes to backquotes.
+# Copied from datastore_driver.util.escape, adapted from single quotes to backquotes.
 def escape_datastore_identifier(identifier: str) -> str:
     if "%" in identifier:
         raise QueryError(f'The InsightsQL identifier "{identifier}" is not permitted as it contains the "%" character')
