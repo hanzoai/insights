@@ -579,19 +579,23 @@
 
     // Non-color vars
     //
-    // RADIUS IS THE HANZO SCALE. 9px is the corner every other Hanzo surface
-    // rounds to — measured off the live console's primary and secondary buttons,
-    // which are the reference. The upstream 6px (0.375rem) is what made this app
-    // read blocky next to the rest of the product: same monochrome palette, same
-    // type, but squarer corners on every button, input, card and menu.
+    // RADIUS IS THE @hanzo/brand v2 REGISTER: card 8 / control 10 / panel 12.
+    // The upstream 6px (0.375rem) is what made this app read blocky next to the
+    // rest of the product — same monochrome palette, same type, squarer corners
+    // on every button, input, card and menu.
     //
-    // One token decides it. `--lemon-button-radius` already resolves to `--radius`
-    // (LemonButton.scss), so buttons follow from here rather than from a rule of
-    // their own — and nothing needs a per-component override.
-    --radius: 0.5625rem; // 9px — the Hanzo corner
+    // These are the DECLARED brand values, not corners measured off a screenshot:
+    // a design system is only one system if every surface reads the same register.
+    // (This supersedes the hand-measured 9px, which matched no declared token.)
+    //
+    // One token decides each tier. `--lemon-button-radius` resolves to `--radius`
+    // (LemonButton.scss), so pointing that at the control radius rounds every
+    // button from here — nothing needs a per-component override.
     --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
+    --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
     --radius-base: var(--radius);
-    --radius-lg: 0.75rem; // 12px — modals, large cards, one step up
+    --radius-card: 0.5rem; // 8px — cards and surfaces
+    --radius-lg: 0.75rem; // 12px — panels, modals, popovers
     --radius-full: 9999px;
     --modal-shadow-elevation: 0px 16px 16px -16px rgb(0 0 0 / 35%);
     --opacity-disabled: 0.65;

@@ -12,7 +12,7 @@ export interface VMState {
     bytecodes: Record<string, BytecodeEntry>;
     bytecode?: any[];
     stack: any[];
-    upvalues: HogUpValue[];
+    upvalues: IQLUpValue[];
     callStack: CallFrame[];
     throwStack: ThrowFrame[];
     declaredFunctions: Record<string, [number, number]>;
@@ -59,7 +59,7 @@ export interface ExecResult {
     telemetry?: Telemetry[];
 }
 export interface CallFrame {
-    closure: HogClosure;
+    closure: IQLClosure;
     ip: number;
     chunk: string;
     stackStart: number;
@@ -70,45 +70,45 @@ export interface ThrowFrame {
     stackLen: number;
     catchIp: number;
 }
-export interface HogDate {
-    __hogDate__: true;
+export interface IQLDate {
+    __iqlDate__: true;
     year: number;
     month: number;
     day: number;
 }
-export interface HogDateTime {
-    __hogDateTime__: true;
+export interface IQLDateTime {
+    __iqlDateTime__: true;
     dt: number;
     zone: string;
 }
-export interface HogError {
-    __hogError__: true;
+export interface IQLError {
+    __iqlError__: true;
     type: string;
     message: string;
     payload?: Record<string, any>;
 }
-export interface HogCallable {
-    __hogCallable__: 'local' | 'stl' | 'async';
+export interface IQLCallable {
+    __iqlCallable__: 'local' | 'stl' | 'async';
     name?: string;
     argCount: number;
     upvalueCount: number;
     ip: number;
     chunk: string;
 }
-export interface HogUpValue {
-    __hogUpValue__: true;
+export interface IQLUpValue {
+    __iqlUpValue__: true;
     id: number;
     location: number;
     closed: boolean;
     value: any;
 }
-export interface HogClosure {
-    __hogClosure__: true;
-    callable: HogCallable;
+export interface IQLClosure {
+    __iqlClosure__: true;
+    callable: IQLCallable;
     upvalues: number[];
 }
-export interface HogInterval {
-    __hogInterval__: true;
+export interface IQLInterval {
+    __iqlInterval__: true;
     value: number;
     unit: string;
 }
@@ -124,22 +124,22 @@ export interface AsyncSTLFunction {
     minArgs?: number;
     maxArgs?: number;
 }
-export function isHogDate(obj: any): obj is HogDate;
-export function isHogDateTime(obj: any): obj is HogDateTime;
-export function isHogError(obj: any): obj is HogError;
-export function newHogError(type: string, message: string, payload?: Record<string, any>): HogError;
-export function isHogCallable(obj: any): obj is HogCallable;
-export function isHogClosure(obj: any): obj is HogClosure;
-export function newHogClosure(callable: HogCallable, upvalues?: number[]): HogClosure;
-export function newHogCallable(type: HogCallable['__hogCallable__'], { name, chunk, argCount, upvalueCount, ip, }: {
+export function isIQLDate(obj: any): obj is IQLDate;
+export function isIQLDateTime(obj: any): obj is IQLDateTime;
+export function isIQLError(obj: any): obj is IQLError;
+export function newIQLError(type: string, message: string, payload?: Record<string, any>): IQLError;
+export function isIQLCallable(obj: any): obj is IQLCallable;
+export function isIQLClosure(obj: any): obj is IQLClosure;
+export function newIQLClosure(callable: IQLCallable, upvalues?: number[]): IQLClosure;
+export function newIQLCallable(type: IQLCallable['__iqlCallable__'], { name, chunk, argCount, upvalueCount, ip, }: {
     name: string;
     chunk: string;
     argCount: number;
     upvalueCount: number;
     ip: number;
-}): HogCallable;
-export function isHogUpValue(obj: any): obj is HogUpValue;
-export function isHogAST(obj: any): boolean;
+}): IQLCallable;
+export function isIQLUpValue(obj: any): obj is IQLUpValue;
+export function isIQLAST(obj: any): boolean;
 export const enum Operation {
     GET_GLOBAL = 1,
     CALL_GLOBAL = 2,
@@ -213,13 +213,15 @@ export function like(string: string, pattern: string, caseInsensitive?: boolean,
 export function getNestedValue(obj: any, chain: any[], nullish?: boolean): any;
 export function setNestedValue(obj: any, chain: any[], value: any): void;
 export function convertJSToHog(x: any, found?: Map<any, any>): any;
-export function convertHogToJS(x: any, found?: Map<any, any>): any;
+export function convertScriptToJS(x: any, found?: Map<any, any>): any;
+export const convertJSToIQL: typeof convertJSToHog;
+export const convertIQLToJS: typeof convertScriptToJS;
 export function calculateCost(object: any, marked?: Set<any> | undefined): any;
 export function unifyComparisonTypes(left: any, right: any): [any, any];
 export function escapeString(value: string): string;
 export function escapeIdentifier(identifier: string | number): string;
-export function printHogValue(obj: any, marked?: Set<any> | undefined): string;
-export function printHogStringOutput(obj: any): string;
+export function printIQLValue(obj: any, marked?: Set<any> | undefined): string;
+export function printIQLStringOutput(obj: any): string;
 type ASTNode = Map<string, any> | null;
 export class InsightsQLPrinter {
     constructor(pretty?: boolean, marked?: Set<any> | undefined);
