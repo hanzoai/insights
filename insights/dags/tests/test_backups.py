@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import boto3
 import dagster
-from clickhouse_driver import Client
+from datastore_driver import Client
 from dagster_aws.s3 import S3Resource
 
 from insights import settings

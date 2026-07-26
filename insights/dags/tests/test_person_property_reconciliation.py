@@ -13,7 +13,7 @@ from uuid import UUID
 import pytest
 from unittest.mock import MagicMock, patch
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster
 from insights.dags.person_property_reconciliation import (

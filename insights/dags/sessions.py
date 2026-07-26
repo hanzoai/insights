@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from django.conf import settings
 
-from clickhouse_driver import Client
+from datastore_driver import Client
 from dagster import (
     AssetExecutionContext,
     BackfillPolicy,

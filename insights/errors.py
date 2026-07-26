@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
-from clickhouse_driver.errors import ServerException
+from datastore_driver.errors import ServerException
 
 from insights.exceptions import (
     DatastoreAtCapacity,
@@ -67,7 +67,7 @@ def wrap_datastore_query_error(err: Exception) -> Exception:
     # Naming convention:
     # - Exceptions starting with Datastore inherit from APIException and are not sent to error reporting.
     # - Exceptions starting with CH inherit from InternalCHQueryError or ExposedCHQueryError.
-    #   These ultimately extend clickhouse_driver.errors.ServerException and are sent to error reporting.
+    #   These ultimately extend datastore_driver.errors.ServerException and are sent to error reporting.
 
     # infrastructure errors - custom messages to hide internals
     if name in ("TOO_MANY_SIMULTANEOUS_QUERIES", "CANNOT_SCHEDULE_TASK"):

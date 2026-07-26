@@ -9,7 +9,7 @@ from insights.test.base import materialized
 
 import dagster
 import pydantic
-from clickhouse_driver import Client
+from datastore_driver import Client
 
 from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.backfill_materialized_column import (

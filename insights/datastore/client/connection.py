@@ -7,13 +7,13 @@ from functools import cache
 
 from django.conf import settings
 
-from clickhouse_connect import get_client
-from clickhouse_connect.driver import (
+from datastore_connect import get_client
+from datastore_connect.driver import (
     Client as HttpClient,
     httputil,
 )
-from clickhouse_driver import Client as SyncClient
-from clickhouse_pool import ChPool
+from datastore_driver import Client as SyncClient
+from datastore_pool import ChPool
 
 from insights.datastore.workload import Workload
 from insights.settings import data_stores
@@ -136,7 +136,7 @@ class ProxyClient:
             return result.result_set, column_types_driver_format
         return result.result_set
 
-    # Implement methods for session managment: https://peps.python.org/pep-0343/ so ProxyClient can be used in all places a clickhouse_driver.Client is.
+    # Implement methods for session managment: https://peps.python.org/pep-0343/ so ProxyClient can be used in all places a datastore_driver.Client is.
     def __enter__(self):
         return self
 
@@ -256,7 +256,7 @@ def default_client(host=settings.DATASTORE_HOST):
     return SyncClient(
         host=host,
         # We set "system" here as we don't necessarily have a "default" database,
-        # which is what the clickhouse_driver would use by default. We are
+        # which is what the datastore_driver would use by default. We are
         # assuming that this exists and we have permissions to access it. This
         # feels like a reasonably safe assumption as e.g. we already reference
         # `system.numbers` in multiple places within queries. We also assume
