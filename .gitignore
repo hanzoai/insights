@@ -186,3 +186,6 @@ services/mcp/ui-apps-dist
 # Downloaded GitHub issues for signals
 products/signals/backend/github_issues/
 CLAUDE.md
+
+# build output — never committed
+common/plugin-scaffold/dist/
