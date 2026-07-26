@@ -7,8 +7,8 @@ from functools import cache
 
 from django.conf import settings
 
-from datastore_connect import get_client
-from datastore_connect.driver import (
+from clickhouse_connect import get_client
+from clickhouse_connect.driver import (
     Client as HttpClient,
     httputil,
 )
